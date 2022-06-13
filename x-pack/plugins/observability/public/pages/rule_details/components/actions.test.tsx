@@ -5,7 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import { mount } from 'enzyme';
+import { nextTick } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { Actions } from './actions';
 import { observabilityPublicPluginsStartMock } from '../../../observability_public_plugins_start.mock';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
@@ -17,14 +19,11 @@ jest.mock('../../../utils/kibana_react', () => ({
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 
-jest.mock('../../../hooks/use_fetch_rule_actions', () => ({
-  useFetchRuleActions: jest.fn(),
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  loadAllActions: jest.fn(),
 }));
 
-const { useFetchRuleActions } = jest.requireMock('../../../hooks/use_fetch_rule_actions');
-
 describe('Actions', () => {
-  let wrapper: ReactWrapper<any>;
   async function setup() {
     const ruleActions = [
       {
@@ -38,26 +37,28 @@ describe('Actions', () => {
         actionTypeId: '.slack',
       },
     ];
-    const allActions = [
+    const { loadAllActions } = jest.requireMock(
+      '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+    );
+    loadAllActions.mockResolvedValueOnce([
       {
-        id: 1,
-        name: 'Server log',
+        id: 'a0d2f6c0-e682-11ec-843b-213c67313f8c',
+        name: 'Email',
+        config: {},
+        actionTypeId: '.email',
+      },
+      {
+        id: 'f57cabc0-e660-11ec-8241-7deb55b17f15',
+        name: 'logs',
+        config: {},
         actionTypeId: '.server-log',
       },
       {
-        id: 2,
+        id: '05b7ab30-e683-11ec-843b-213c67313f8c',
         name: 'Slack',
         actionTypeId: '.slack',
       },
-      {
-        id: 3,
-        name: 'Email',
-        actionTypeId: '.email',
-      },
-    ];
-    useFetchRuleActions.mockReturnValue({
-      allActions,
-    });
+    ]);
 
     const actionTypeRegistryMock =
       observabilityPublicPluginsStartMock.createStart().triggersActionsUi.actionTypeRegistry;
@@ -67,13 +68,18 @@ describe('Actions', () => {
       { id: '.email', iconClass: 'email' },
       { id: '.index', iconClass: 'indexOpen' },
     ]);
-    wrapper = mount(
+    const wrapper = mount(
       <Actions ruleActions={ruleActions} actionTypeRegistry={actionTypeRegistryMock} />
     );
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    return wrapper;
   }
 
   it("renders action connector icons for user's selected rule actions", async () => {
-    await setup();
+    const wrapper = await setup();
     wrapper.debug();
     expect(wrapper.find('[data-euiicon-type]').length).toBe(2);
     expect(wrapper.find('[data-euiicon-type="logsApp"]').length).toBe(1);

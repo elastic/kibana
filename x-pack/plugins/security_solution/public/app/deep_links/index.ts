@@ -139,6 +139,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         defaultMessage: 'Detection & Response',
       }),
     ],
+    searchable: true,
   },
   {
     id: SecurityPageName.detections,
@@ -224,14 +225,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         ],
         order: 9002,
         deepLinks: [
-          {
-            id: SecurityPageName.hostsAuthentications,
-            title: i18n.translate('xpack.securitySolution.search.hosts.authentications', {
-              defaultMessage: 'Authentications',
-            }),
-            path: `${HOSTS_PATH}/authentications`,
-            hideWhenExperimentalKey: 'usersEnabled',
-          },
           {
             id: SecurityPageName.uncommonProcesses,
             title: i18n.translate('xpack.securitySolution.search.hosts.uncommonProcesses', {
@@ -333,7 +326,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         title: USERS,
         path: USERS_PATH,
         navLinkStatus: AppNavLinkStatus.visible,
-        experimentalKey: 'usersEnabled',
         keywords: [
           i18n.translate('xpack.securitySolution.search.users', {
             defaultMessage: 'Users',
