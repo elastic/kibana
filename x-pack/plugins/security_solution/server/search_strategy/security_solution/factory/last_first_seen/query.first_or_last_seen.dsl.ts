@@ -25,7 +25,13 @@ export const buildFirstOrLastSeenQuery = ({
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       query: { bool: { filter } },
-      _source: ['@timestamp'],
+      _source: false,
+      fields: [
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 1,
       sort: [
         {
