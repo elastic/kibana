@@ -41,7 +41,12 @@ interface FormProps {
 }
 
 export function DevToolsVariablesModal({ onClose, onSaveVariables, variablesService }: Props) {
-  const { control, handleSubmit, setValue, formState: { errors } } = useForm<FormProps>({
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<FormProps>({
     defaultValues: {
       variables: variablesService.toJSON(),
     },
