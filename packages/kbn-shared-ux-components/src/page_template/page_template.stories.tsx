@@ -24,7 +24,9 @@ export default {
   },
 };
 
-type Params = Pick<KibanaPageTemplateProps, 'isEmptyState' | 'pageHeader' | 'solutionNav'>;
+type Params = Pick<KibanaPageTemplateProps, 'isEmptyState' | 'pageHeader' | 'solutionNav'> & {
+  canBeCollapsed: boolean;
+};
 
 const noDataConfig = {
   solution: 'Kibana',
@@ -108,7 +110,11 @@ export const PureComponent = (params: Params) => {
     <KibanaPageTemplate
       {...params}
       pageHeader={params.pageHeader ? header : undefined}
-      solutionNav={params.solutionNav ? solutionNavBar : undefined}
+      solutionNav={
+        params.solutionNav
+          ? { ...solutionNavBar, canBeCollapsed: params.canBeCollapsed }
+          : undefined
+      }
     >
       {content}
     </KibanaPageTemplate>
@@ -125,6 +131,10 @@ PureComponent.argTypes = {
     defaultValue: true,
   },
   solutionNav: {
+    control: 'boolean',
+    defaultValue: true,
+  },
+  canBeCollapsed: {
     control: 'boolean',
     defaultValue: true,
   },

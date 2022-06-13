@@ -23,14 +23,17 @@ export interface ConsoleDataState {
    */
   commandHistory: CommandHistoryItem[];
 
+  sidePanel: {
+    show: null | 'help'; // will have other values in the future
+  };
+
   /** Component defined on input to the Console that will handle the `help` command */
   HelpComponent?: CommandExecutionComponent;
 
   dataTestSubj?: string;
 
-  sidePanel: {
-    show: null | 'help'; // will have other values in the future
-  };
+  /** The key for the console when it is under ConsoleManager control */
+  managedKey?: symbol;
 }
 
 export interface CommandHistoryItem {

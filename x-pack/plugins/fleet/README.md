@@ -40,7 +40,7 @@ One common development workflow is:
   ```
 - Start Kibana in another shell
   ```
-  yarn start --xpack.fleet.enabled=true --no-base-path
+  yarn start --no-base-path
   ```
 
 This plugin follows the `common`, `server`, `public` structure from the [Architecture Style Guide
