@@ -58,7 +58,7 @@ describe('test security telemetry task', () => {
       mockTelemetryTaskConfig,
       mockTelemetryEventsSender,
       mockTelemetryReceiver,
-    } = await testTelemetryTaskRun(true);
+    } = await testTelemetryTaskRun(true, true);
 
     expect(mockTelemetryTaskConfig.runTask).toHaveBeenCalledWith(
       telemetryTask.getTaskId(),
@@ -72,19 +72,25 @@ describe('test security telemetry task', () => {
     );
   });
 
-  test('telemetry task should not run if opted out', async () => {
-    const { mockTelemetryTaskConfig } = await testTelemetryTaskRun(false);
+  test('security telemetry task should not run if opted out', async () => {
+    const { mockTelemetryTaskConfig } = await testTelemetryTaskRun(false, true);
 
     expect(mockTelemetryTaskConfig.runTask).not.toHaveBeenCalled();
   });
 
-  async function testTelemetryTaskRun(optedIn: boolean) {
+  test('security telemetry tasks should not run if opted in but cannot phone home', async () => {
+    const { mockTelemetryTaskConfig } = await testTelemetryTaskRun(true, false);
+
+    expect(mockTelemetryTaskConfig.runTask).not.toHaveBeenCalled();
+  });
+
+  async function testTelemetryTaskRun(optedIn: boolean, canConnect: boolean) {
     const now = new Date();
     const testType = 'security:test-task';
     const testLastTimestamp = now.toISOString();
     const mockTaskManagerSetup = taskManagerMock.createSetup();
     const mockTelemetryTaskConfig = createMockSecurityTelemetryTask(testType, testLastTimestamp);
-    const mockTelemetryEventsSender = createMockTelemetryEventsSender(optedIn);
+    const mockTelemetryEventsSender = createMockTelemetryEventsSender(optedIn, canConnect);
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const telemetryTask = new SecurityTelemetryTask(
       mockTelemetryTaskConfig,
