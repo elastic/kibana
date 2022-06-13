@@ -137,6 +137,35 @@ export class MapEmbeddable
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
     this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
+    this.setEventHandlers({
+      onDataLoad: _ => {
+        this.updateOutput({
+          ...this.getOutput(),
+          loading: true,
+          error: undefined,
+        });
+
+      },
+      onDataLoadEnd: _ => {
+        this.updateOutput({
+          ...this.getOutput(),
+          loading: false,
+          error: undefined,
+        });
+
+      },
+      onDataLoadError: e => {
+        this.updateOutput({
+          ...this.getOutput(),
+          loading: false,
+          error: {
+            name: 'EmbeddableError',
+            message: e.errorMessage,
+          },
+        });
+
+      }
+    });
     this._controlledBy = `mapEmbeddablePanel${this.id}`;
     this._prevFilterByMapExtent =
       this.input.filterByMapExtent === undefined ? false : this.input.filterByMapExtent;

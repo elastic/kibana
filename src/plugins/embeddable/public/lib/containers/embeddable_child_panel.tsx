@@ -15,6 +15,14 @@ import { distinct, filter, map } from 'rxjs/operators';
 import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
 import { IContainer } from './i_container';
 import { EmbeddableStart } from '../../plugin';
+import { EmbeddableError } from '../embeddables/i_embeddable';
+
+export interface EmbeddableLoadedEvent {
+  id: string,
+  status: string,
+  error?: EmbeddableError,
+  timeTookMs: number,
+}
 
 export interface EmbeddableChildPanelProps {
   embeddableId: string;
@@ -22,9 +30,8 @@ export interface EmbeddableChildPanelProps {
   className?: string;
   container: IContainer;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
-  onPanelStatusChange?: (info: any) => void;
+  onPanelStatusChange?: (info: EmbeddableLoadedEvent) => void;
 }
-
 interface State {
   firstTimeLoading: boolean;
 }
@@ -59,23 +66,28 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
     this.embeddable
       .getOutput$()
       .pipe(
+        /**
+        * Record start time if loading === true
+        * Forward events only if loading === false 
+        */
         filter((output) => {
           if (output.loading === true) {
-            startTime = new Date().getTime();
+            // Record start time
+            startTime = performance.now();
           }
           return output.loading === false;
         }),
+        // Map loaded event properties
         map((output) => {
           const endTime = new Date().getTime();
           return {
             id: this.embeddable.id,
             status: output.error ? 'error' : 'loaded',
             error: output.error,
-            startTime,
-            endTime,
-            timeTookMs: endTime - startTime,
+            timeTookMs: endTime - performance.now(),
           };
         }),
+        // Dedupe
         distinct()
       )
       .subscribe((statusOutput) => {
