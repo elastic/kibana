@@ -6,6 +6,7 @@
  */
 
 // From https://github.com/open-telemetry/opentelemetry-js/blob/97bc6321c0fe4da7414afb83038279b735a5ba65/experimental/packages/opentelemetry-exporter-prometheus/src/PrometheusSerializer.ts
+// Can be removed once https://github.com/open-telemetry/opentelemetry-js/issues/3033 is merged/released
 
 /*
  * Copyright The OpenTelemetry Authors
