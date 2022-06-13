@@ -29,12 +29,6 @@ export const exporters = {
 };
 
 /*
- * Field Formats:
- */
-
-export { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
-
-/*
  * Index patterns:
  */
 
@@ -45,8 +39,7 @@ export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   UI_SETTINGS,
-  IndexPatternsService,
-  IndexPatternsService as IndexPatternsCommonService,
+  DataViewsService as DataViewsCommonService,
   DataView,
 } from '../common';
 

@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { useQueryClient } from 'react-query';
-import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
+import { CASE_TAGS_CACHE_KEY, CASE_VIEW_CACHE_KEY } from '../../containers/constants';
 
 /**
  * Using react-query queryClient to invalidate all the
@@ -21,5 +21,6 @@ export const useRefreshCaseViewPage = () => {
   const queryClient = useQueryClient();
   return useCallback(() => {
     queryClient.invalidateQueries(CASE_VIEW_CACHE_KEY);
+    queryClient.invalidateQueries(CASE_TAGS_CACHE_KEY);
   }, [queryClient]);
 };

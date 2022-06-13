@@ -32,6 +32,7 @@ import {
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   ENABLE_CCS_READ_WARNING_SETTING,
+  SHOW_RELATED_INTEGRATIONS_SETTING,
 } from '../common/constants';
 import { ExperimentalFeatures } from '../common/experimental_features';
 
@@ -186,7 +187,7 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.rulesTableRefreshDescription',
         {
           defaultMessage:
-            '<p>Enables auto refresh on the all rules and monitoring tables, in milliseconds</p>',
+            '<p>Enables auto refresh on the rules and monitoring tables, in milliseconds</p>',
         }
       ),
       type: 'json',
@@ -248,6 +249,22 @@ export const initUiSettings = (
       type: 'boolean',
       category: [APP_ID],
       requiresPageReload: false,
+      schema: schema.boolean(),
+    },
+    [SHOW_RELATED_INTEGRATIONS_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
+        defaultMessage: 'Related integrations',
+      }),
+      value: true,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.showRelatedIntegrationsDescription',
+        {
+          defaultMessage: '<p>Shows related integrations on the rules and monitoring tables</p>',
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
       schema: schema.boolean(),
     },
   };

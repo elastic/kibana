@@ -71,7 +71,7 @@ export const mapToCard = (
   let release: 'ga' | 'beta' | 'experimental' | undefined;
   if ('release' in item) {
     release = item.release;
-  } else if (item.isBeta === true) {
+  } else if ((item as CustomIntegration).isBeta === true) {
     release = 'beta';
   }
 

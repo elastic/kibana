@@ -2190,7 +2190,7 @@
           "\r\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
+          "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
