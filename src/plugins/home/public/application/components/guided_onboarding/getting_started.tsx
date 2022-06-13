@@ -8,11 +8,11 @@
 
 import React from 'react';
 import {
+  EuiAvatar,
   EuiCard,
-  EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -28,7 +28,7 @@ export const GettingStarted = () => {
   return (
     <KibanaPageTemplate template="empty">
       <EuiPanel className="gettingStarted__panel">
-        <EuiTitle>
+        <EuiTitle size="l" className="eui-textCenter">
           <h1>
             <FormattedMessage
               id="guidedOnboarding.gettingStarted.useCaseSelectionTitle"
@@ -36,7 +36,8 @@ export const GettingStarted = () => {
             />
           </h1>
         </EuiTitle>
-        <EuiText color="subdued" size="s">
+        <EuiSpacer size="s" />
+        <EuiText color="subdued" size="s" textAlign="center">
           <p>
             <FormattedMessage
               id="guidedOnboarding.gettingStarted.useCaseSelectionSubtitle"
@@ -44,63 +45,130 @@ export const GettingStarted = () => {
             />
           </p>
         </EuiText>
-        <EuiSpacer />
-        <EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiSpacer size="xxl" />
+        <EuiFlexGrid columns={3} gutterSize="xl">
           <EuiFlexItem>
             <EuiCard
-              icon={<EuiIcon size="xxl" type="inspect" />}
-              title={
-                <FormattedMessage
-                  id="guidedOnboarding.gettingStarted.search.cardTitle"
-                  defaultMessage="Search my data"
+              display="subdued"
+              textAlign="left"
+              icon={
+                <EuiAvatar
+                  iconSize="xl"
+                  iconType="inspect"
+                  name="Search icon"
+                  color="plain"
+                  size="xl"
+                  className="gettingStarted__icon"
                 />
               }
+              image={<div className="gettingStarted__card gettingStarted__search" />}
+              title={
+                <EuiTitle size="xs">
+                  <h4>
+                    <strong>
+                      <FormattedMessage
+                        id="guidedOnboarding.gettingStarted.search.cardTitle"
+                        defaultMessage="Search my data"
+                      />
+                    </strong>
+                  </h4>
+                </EuiTitle>
+              }
               description={
-                <FormattedMessage
-                  id="guidedOnboarding.gettingStarted.search.cardDescription"
-                  defaultMessage="Create a search experience for your websites, applications, workplace content, or anything in between."
-                />
+                <EuiText color="subdued" size="xs">
+                  <p>
+                    <FormattedMessage
+                      id="guidedOnboarding.gettingStarted.search.cardDescription"
+                      defaultMessage="Create a search experience for your websites, applications, workplace content, or anything in between."
+                    />
+                  </p>
+                </EuiText>
               }
               onClick={() => {}}
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCard
-              icon={<EuiIcon size="xxl" type="eye" />}
-              title={
-                <FormattedMessage
-                  id="guidedOnboarding.gettingStarted.observability.cardTitle"
-                  defaultMessage="Monitor my infrastructure"
+              display="subdued"
+              textAlign="left"
+              icon={
+                <EuiAvatar
+                  iconSize="xl"
+                  iconType="eye"
+                  name="Observability icon"
+                  color="plain"
+                  size="xl"
+                  className="gettingStarted__icon"
                 />
               }
+              image={<div className="gettingStarted__card gettingStarted__observability" />}
+              title={
+                <EuiTitle size="xs">
+                  <h4>
+                    <strong>
+                      <FormattedMessage
+                        id="guidedOnboarding.gettingStarted.observability.cardTitle"
+                        defaultMessage="Monitor my infrastructure"
+                      />
+                    </strong>
+                  </h4>
+                </EuiTitle>
+              }
               description={
-                <FormattedMessage
-                  id="guidedOnboarding.gettingStarted.observability.cardDescription"
-                  defaultMessage="Monitor your infrastructure by consolidating your logs, metrics, and traces for end‑to‑end observability."
-                />
+                <EuiText color="subdued" size="xs">
+                  <p>
+                    <FormattedMessage
+                      id="guidedOnboarding.gettingStarted.observability.cardDescription"
+                      defaultMessage="Monitor your infrastructure by consolidating your logs, metrics, and traces for end‑to‑end observability."
+                    />
+                  </p>
+                </EuiText>
               }
               onClick={() => {}}
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCard
-              icon={<EuiIcon size="xxl" type="securitySignal" />}
-              title={
-                <FormattedMessage
-                  id="guidedOnboarding.gettingStarted.security.cardTitle"
-                  defaultMessage="Protect my environment"
+              display="subdued"
+              textAlign="left"
+              icon={
+                <EuiAvatar
+                  iconSize="xl"
+                  iconType="securitySignal"
+                  name="Security icon"
+                  color="plain"
+                  size="xl"
+                  className="gettingStarted__icon"
                 />
               }
+              image={<div className="gettingStarted__card gettingStarted__security" />}
+              title={
+                <EuiTitle size="xs">
+                  <h4>
+                    <strong>
+                      <FormattedMessage
+                        id="guidedOnboarding.gettingStarted.security.cardTitle"
+                        defaultMessage="Protect my environment"
+                      />
+                    </strong>
+                  </h4>
+                </EuiTitle>
+              }
               description={
-                <FormattedMessage
-                  id="guidedOnboarding.gettingStarted.security.cardDescription"
-                  defaultMessage="Protect your environment by unifying SIEM, endpoint security, and cloud security to protect against threats."
-                />
+                <EuiText color="subdued" size="xs">
+                  <p>
+                    <FormattedMessage
+                      id="guidedOnboarding.gettingStarted.security.cardDescription"
+                      defaultMessage="Protect your environment by unifying SIEM, endpoint security, and cloud security to protect against threats."
+                    />
+                  </p>
+                </EuiText>
               }
               onClick={() => {}}
             />
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </EuiFlexGrid>
         <EuiSpacer />
         <EuiHorizontalRule />
         <EuiSpacer />

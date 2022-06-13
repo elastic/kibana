@@ -1,3 +1,32 @@
 .gettingStarted__panel {
   padding: $euiSize*3 $euiSize*4;
 }
+
+.gettingStarted__card {
+
+  // on smaller screens make top image taller
+  @include euiBreakpoint('xs','s') {
+    min-height: 250px;
+  }
+  // on medium screens make it lower
+  // euiBreakpoint m
+  min-height: 150px;
+  // on larger screens taller but not too tall
+  @include euiBreakpoint('l','xl') {
+    min-height: 200px;
+  }
+}
+.gettingStarted__search {
+  background-color: $euiColorWarning;
+}
+
+.gettingStarted__security {
+  background-color: $euiColorAccent;
+}
+
+.gettingStarted__observability {
+  background-color: $euiColorSuccess;
+}
+.gettingStarted__icon {
+  @include euiBottomShadow;
+}
