@@ -14,7 +14,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
         class="euiEmptyPrompt__contentInner"
       >
         <h2
-          class="euiTitle euiTitle--medium"
+          class="euiTitle css-1w464ad-euiTitle-m"
         >
           No data available
         </h2>
@@ -22,7 +22,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
           class="euiTextColor euiTextColor--subdued"
         >
           <div
-            class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+            class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
           />
           <div
             class="euiText euiText--medium"
@@ -210,7 +210,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />,
   <div
     class="euiBasicTable insDataTableFormat__table"
@@ -338,7 +338,7 @@ Array [
     </div>
     <div>
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
@@ -474,7 +474,7 @@ Array [
         </p>
       </div>
       <div
-        class="euiSpacer euiSpacer--xs css-h21dd6-euiSpacer-xs"
+        class="euiSpacer euiSpacer--xs css-1wffcmx-euiSpacer-xs"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -555,7 +555,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />,
   <div
     class="euiBasicTable insDataTableFormat__table"
@@ -684,7 +684,7 @@ Array [
     </div>
     <div>
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
