@@ -221,15 +221,13 @@ export class VisualizeEmbeddable
         // Turn this off or the uiStateChangeHandler will fire for every modification.
         this.vis.uiState.off('change', this.uiStateChangeHandler);
         this.vis.uiState.clearAllKeys();
-        if (visCustomizations.vis) {
-          this.vis.uiState.set('vis', visCustomizations.vis);
-          getKeys(visCustomizations).forEach((key) => {
+
+        getKeys(visCustomizations).forEach((key) => {
+          if (visCustomizations[key]) {
             this.vis.uiState.set(key, visCustomizations[key]);
-          });
-        }
-        if (visCustomizations.table) {
-          this.vis.uiState.set('table', visCustomizations.table);
-        }
+          }
+        });
+
         this.vis.uiState.on('change', this.uiStateChangeHandler);
       }
     } else if (this.parent) {
