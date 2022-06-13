@@ -79,13 +79,12 @@ export function DiscoverMainRoute(props: Props) {
         const hasUserDataViewValue = await data.dataViews.hasData
           .hasUserDataView()
           .catch(() => false);
-
         const hasESDataValue =
           isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
         setHasUserDataView(hasUserDataViewValue);
         setHasESData(hasESDataValue);
 
-        if (!hasUserDataViewValue || !hasESDataValue) {
+        if (!hasUserDataViewValue) {
           setShowNoDataPage(true);
           return;
         }
