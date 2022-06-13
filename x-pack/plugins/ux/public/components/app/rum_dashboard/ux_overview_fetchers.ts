@@ -5,35 +5,91 @@
  * 2.0.
  */
 
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import {
+  DataPublicPluginStart,
+  isCompleteResponse,
+} from '@kbn/data-plugin/public';
 import {
   FetchDataParams,
   HasDataParams,
   UxFetchDataResponse,
   UXHasDataResponse,
+  UXMetrics,
 } from '@kbn/observability-plugin/public';
+import {
+  coreWebVitalsQuery,
+  transformCoreWebVitalsResponse,
+  DEFAULT_RANKS,
+} from '../../../services/data/core_web_vitals_query';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
 export { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
-export const fetchUxOverviewDate = async ({
-  absoluteTime,
-  relativeTime,
-  serviceName,
-}: FetchDataParams): Promise<UxFetchDataResponse> => {
-  const data = await callApmApi('GET /internal/apm/ux/web-core-vitals', {
-    signal: null,
-    params: {
-      query: {
-        start: new Date(absoluteTime.start).toISOString(),
-        end: new Date(absoluteTime.end).toISOString(),
-        uiFilters: `{"serviceName":["${serviceName}"]}`,
-      },
-    },
-  });
+type FetchUxOverviewDateParams = FetchDataParams & {
+  dataStartPlugin: DataPublicPluginStart;
+};
 
+async function getCoreWebVitalsResponse({
+  absoluteTime,
+  serviceName,
+  dataStartPlugin,
+}: FetchUxOverviewDateParams) {
+  const dataView = await callApmApi('GET /internal/apm/data_view/dynamic', {
+    signal: null,
+  });
+  return new Promise<
+    ESSearchResponse<{}, ReturnType<typeof coreWebVitalsQuery>>
+  >((resolve) => {
+    const search$ = dataStartPlugin.search
+      .search(
+        {
+          params: {
+            index: dataView.dynamicDataView?.title,
+            ...coreWebVitalsQuery(
+              absoluteTime.start,
+              absoluteTime.end,
+              undefined,
+              {
+                serviceName: serviceName ? [serviceName] : undefined,
+              }
+            ),
+          },
+        },
+        {}
+      )
+      .subscribe({
+        next: (result) => {
+          if (isCompleteResponse(result)) {
+            resolve(result.rawResponse as any);
+            search$.unsubscribe();
+          }
+        },
+      });
+  });
+}
+
+const CORE_WEB_VITALS_DEFAULTS: UXMetrics = {
+  coreVitalPages: 0,
+  cls: 0,
+  fid: 0,
+  lcp: 0,
+  tbt: 0,
+  fcp: 0,
+  lcpRanks: DEFAULT_RANKS,
+  fidRanks: DEFAULT_RANKS,
+  clsRanks: DEFAULT_RANKS,
+};
+
+export const fetchUxOverviewDate = async (
+  params: FetchUxOverviewDateParams
+): Promise<UxFetchDataResponse> => {
+  const coreWebVitalsResponse = await getCoreWebVitalsResponse(params);
   return {
-    coreWebVitals: data,
-    appLink: `/app/ux?rangeFrom=${relativeTime.start}&rangeTo=${relativeTime.end}`,
+    coreWebVitals:
+      transformCoreWebVitalsResponse(coreWebVitalsResponse) ??
+      CORE_WEB_VITALS_DEFAULTS,
+    appLink: `/app/ux?rangeFrom=${params.relativeTime.start}&rangeTo=${params.relativeTime.end}`,
   };
 };
 

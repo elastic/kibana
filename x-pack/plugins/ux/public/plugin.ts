@@ -79,8 +79,14 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
           return await dataHelper.hasRumData(params!);
         },
         fetchData: async (params: FetchDataParams) => {
+          const [_, startPlugins] = await core.getStartServices();
+
+          const { data: dataStartPlugin } = startPlugins as ApmPluginStartDeps;
           const dataHelper = await getUxDataHelper();
-          return await dataHelper.fetchUxOverviewDate(params);
+          return await dataHelper.fetchUxOverviewDate({
+            ...params,
+            dataStartPlugin,
+          });
         },
       });
     }
