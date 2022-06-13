@@ -36,7 +36,9 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
   const config = getService('config');
   const esArchiver = getService('esArchiver');
 
-  // await esArchiver.load('x-pack/test/threat_intelligence_cypress/es_archives/auditbeat');
+  await esArchiver.load('x-pack/test/threat_intelligence_cypress/es_archives/threat_intelligence', {
+    docsOnly: true,
+  });
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
