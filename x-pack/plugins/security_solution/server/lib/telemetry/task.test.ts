@@ -58,7 +58,7 @@ describe('test security telemetry task', () => {
       mockTelemetryTaskConfig,
       mockTelemetryEventsSender,
       mockTelemetryReceiver,
-    } = await testTelemetryTaskRun(true);
+    } = await testTelemetryTaskRun(true, true);
 
     expect(mockTelemetryTaskConfig.runTask).toHaveBeenCalledWith(
       telemetryTask.getTaskId(),
