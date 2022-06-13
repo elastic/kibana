@@ -277,7 +277,7 @@ For detailed information about the sharing options, refer to <<reporting-getting
 [[alert-from-Discover]]
 === Create alert rules
 
-To create an alert rule from *Discover*,
+To create a rule from *Discover*,
 click *Alerts* in the toolbar. Then build the data view, query,
 and filters that match the data for which you want the alert notification.
 For detailed information, refer to <<alerting-getting-started, Alerting>>.
