@@ -45,7 +45,6 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     this.initializerContext = initializerContext;
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get();
-    this.configureOpentelemetryMetrics();
   }
 
   async getMetric(type: string) {
@@ -59,6 +58,11 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
   setup(core: CoreSetup) {
     const router = core.http.createRouter();
     const kibanaIndex = core.savedObjects.getKibanaIndex();
+    const server = core.http.getServerInfo();
+    const uuid = this.initializerContext.env.instanceUuid;
+    const kibanaVersion = this.initializerContext.env.packageInfo.version;
+
+    this.configureOpentelemetryMetrics(server.name, uuid, kibanaVersion);
 
     let status: ServiceStatus<unknown>;
     core.status.overall$.subscribe((newStatus) => {
@@ -73,9 +77,9 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       router,
       config: {
         kibanaIndex,
-        kibanaVersion: this.initializerContext.env.packageInfo.version,
-        server: core.http.getServerInfo(),
-        uuid: this.initializerContext.env.instanceUuid,
+        kibanaVersion,
+        server,
+        uuid,
       },
       getStatus: () => status,
       getMetric: async (type: string) => {
@@ -102,10 +106,16 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     };
   }
 
-  private configureOpentelemetryMetrics() {
+  private configureOpentelemetryMetrics(
+    serviceName?: string,
+    serviceInstanceId?: string,
+    serviceVersion?: string
+  ) {
     const meterProvider = new MeterProvider({
       resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: 'kibana',
+        [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+        [SemanticResourceAttributes.SERVICE_INSTANCE_ID]: serviceInstanceId,
+        [SemanticResourceAttributes.SERVICE_VERSION]: serviceVersion,
       }),
     });
 
