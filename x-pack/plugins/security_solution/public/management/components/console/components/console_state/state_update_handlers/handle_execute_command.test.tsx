@@ -120,7 +120,7 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd1 --foo');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'Command does not support any arguments'
       );
     });
@@ -131,7 +131,7 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd2 --file test --foo');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'The following cmd2 argument is not support by this command: --foo'
       );
     });
@@ -142,7 +142,7 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd2 --file test --foo --bar');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'The following cmd2 arguments are not support by this command: --foo, --bar'
       );
     });
@@ -153,7 +153,7 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd2 --ext one');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'Missing required argument: --file'
       );
     });
@@ -164,7 +164,7 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd2 --file one --file two');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'Argument can only be used once: --file'
       );
     });
@@ -175,7 +175,7 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd2 --file one --bad foo');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'Invalid argument value: --bad. This is a bad value'
       );
     });
@@ -186,7 +186,7 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd2');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'Missing required arguments: --file'
       );
     });
@@ -197,7 +197,7 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd4');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'At least one argument must be used'
       );
     });
@@ -216,7 +216,7 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd1');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'command is invalid'
       );
     });
