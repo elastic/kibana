@@ -192,7 +192,7 @@ describe('GroupSelection', () => {
         showExperimental={true}
       />
     );
-    const aggBasedGroupCard = wrapper.find('[data-test-subj="visGroupAggBasedExploreLink"]').at(0);
+    const aggBasedGroupCard = wrapper.find('[data-test-subj="visGroupAggBasedExploreLink"]').last();
     aggBasedGroupCard.simulate('click');
     expect(toggleGroups).toHaveBeenCalled();
   });

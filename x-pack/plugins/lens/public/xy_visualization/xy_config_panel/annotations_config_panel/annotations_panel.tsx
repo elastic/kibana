@@ -346,6 +346,7 @@ export const AnnotationsPanel = (
 
         <ColorPicker
           {...props}
+          overwriteColor={currentAnnotation?.color}
           defaultColor={isRange ? defaultAnnotationRangeColor : defaultAnnotationColor}
           showAlpha={isRange}
           setConfig={setAnnotations}
