@@ -68,6 +68,7 @@ export const getActionList = async ({
     pageSize,
     startDate,
     endDate,
+    elasticAgentIds,
     userIds,
     commands,
     data,

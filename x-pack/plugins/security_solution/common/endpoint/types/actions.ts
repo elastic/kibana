@@ -225,6 +225,7 @@ export interface ActionListApiResponse {
   page: number | undefined;
   pageSize: number | undefined;
   startDate: string | undefined;
+  elasticAgentIds: string[] | undefined;
   endDate: string | undefined;
   userIds: string[] | undefined; // users that requested the actions
   commands: string[] | undefined; // type of actions
