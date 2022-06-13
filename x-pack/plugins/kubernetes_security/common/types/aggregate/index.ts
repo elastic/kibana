@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface AggregateResults {
+export interface AggregateResult {
   key: string | number;
   key_as_string?: string;
   doc_count: number;

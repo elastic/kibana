@@ -24,4 +24,5 @@ export const DEFAULT_QUERY = '{"bool":{"must":[],"filter":[],"should":[],"must_n
 
 // ECS fields
 export const ENTRY_LEADER_INTERACTIVE = 'process.entry_leader.interactive';
+export const ENTRY_LEADER_USER_ID = 'process.entry_leader.user.id';
 export const ENTRY_LEADER_ENTITY_ID = 'process.entry_leader.entity_id';

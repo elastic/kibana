@@ -55,6 +55,11 @@ export const useStyles = () => {
       borderRadius: '2px',
     };
 
+    const loadingSpinner: CSSObject = {
+      alignItems: 'center',
+      margin: `${size.xs} auto ${size.xl} auto`,
+    };
+
     return {
       container,
       title,
@@ -63,6 +68,7 @@ export const useStyles = () => {
       filters,
       percentageBackground,
       percentageBar,
+      loadingSpinner,
     };
   }, [euiTheme]);
 

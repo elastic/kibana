@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import {
   EuiBadge,
@@ -22,11 +22,13 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import {
   KUBERNETES_PATH,
   ENTRY_LEADER_INTERACTIVE,
+  ENTRY_LEADER_USER_ID,
   ENTRY_LEADER_ENTITY_ID,
 } from '../../../common/constants';
 import { KubernetesWidget } from '../kubernetes_widget';
 import { PercentWidget } from '../percent_widget';
 import { KubernetesSecurityDeps } from '../../types';
+import { AggregateResult } from '../../../common/types/aggregate';
 import { useStyles } from './styles';
 
 const KubernetesSecurityRoutesComponent = ({
@@ -35,6 +37,30 @@ const KubernetesSecurityRoutesComponent = ({
   globalFilter,
 }: KubernetesSecurityDeps) => {
   const styles = useStyles();
+
+  const onReduceInteractiveAggs = useCallback(
+    (result: AggregateResult[]): Record<string, number> =>
+      result.reduce((groupedByKeyValue, aggregate) => {
+        groupedByKeyValue[aggregate.key_as_string || (aggregate.key.toString() as string)] =
+          aggregate.count_by_aggs.value;
+        return groupedByKeyValue;
+      }, {} as Record<string, number>),
+    []
+  );
+
+  const onReduceRootAggs = useCallback(
+    (result: AggregateResult[]): Record<string, number> =>
+      result.reduce((groupedByKeyValue, aggregate) => {
+        if (aggregate.key === '0') {
+          groupedByKeyValue[aggregate.key] = aggregate.count_by_aggs.value;
+        } else {
+          groupedByKeyValue.nonRoot =
+            (groupedByKeyValue.nonRoot || 0) + aggregate.count_by_aggs.value;
+        }
+        return groupedByKeyValue;
+      }, {} as Record<string, number>),
+    []
+  );
 
   return (
     <Switch>
@@ -116,6 +142,7 @@ const KubernetesSecurityRoutesComponent = ({
               }}
               groupedBy={ENTRY_LEADER_INTERACTIVE}
               countBy={ENTRY_LEADER_ENTITY_ID}
+              onReduce={onReduceInteractiveAggs}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -125,29 +152,31 @@ const KubernetesSecurityRoutesComponent = ({
                   <EuiText size="xs" css={styles.percentageChartTitle}>
                     <FormattedMessage
                       id="xpack.kubernetesSecurity.userLoginChart.title"
-                      defaultMessage="Sessions with login root users"
+                      defaultMessage="Sessions with entry root users"
                     />
                   </EuiText>
-                  <EuiIconTip content="Sessions login root icon tip placeholder" />
+                  <EuiIconTip content="Sessions with entry root users icon tip placeholder" />
                 </>
               }
               widgetKey="rootLoginPercentage"
               dataValueMap={{
-                true: {
+                '0': {
                   name: 'Root',
-                  fieldName: ENTRY_LEADER_INTERACTIVE,
+                  fieldName: ENTRY_LEADER_USER_ID,
                   color: euiThemeVars.euiColorVis2,
                 },
-                false: {
+                nonRoot: {
                   name: 'Non-root',
-                  fieldName: ENTRY_LEADER_INTERACTIVE,
+                  fieldName: ENTRY_LEADER_USER_ID,
                   color: euiThemeVars.euiColorVis3,
+                  shouldHideFilter: true,
                 },
               }}
               indexPattern={indexPattern}
               globalFilter={globalFilter}
-              groupedBy={ENTRY_LEADER_INTERACTIVE}
+              groupedBy={ENTRY_LEADER_USER_ID}
               countBy={ENTRY_LEADER_ENTITY_ID}
+              onReduce={onReduceRootAggs}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
