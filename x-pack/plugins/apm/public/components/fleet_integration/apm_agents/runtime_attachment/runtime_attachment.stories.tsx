@@ -7,18 +7,38 @@
 
 import { Meta, Story } from '@storybook/react';
 import React, { useState } from 'react';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { RuntimeAttachment } from '.';
 import { JavaRuntimeAttachment } from './supported_agents/java_runtime_attachment';
+import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
+
+const coreMock = {
+  http: {
+    get: async () => ({
+      versions: ['1.1.0', '1.1.2', '2.0.1'],
+      latest: '2.0.1',
+    }),
+  },
+  notifications: { toasts: { add: () => {} } },
+  uiSettings: { get: () => {} },
+} as unknown as CoreStart;
+
+const KibanaReactContext = createKibanaReactContext(coreMock);
 
 const stories: Meta<{}> = {
   title: 'fleet/Runtime agent attachment',
   component: RuntimeAttachment,
   decorators: [
     (StoryComponent) => {
+      createCallApmApi(coreMock);
+
       return (
-        <div style={{ width: 700 }}>
-          <StoryComponent />
-        </div>
+        <KibanaReactContext.Provider>
+          <div style={{ width: 700 }}>
+            <StoryComponent />
+          </div>
+        </KibanaReactContext.Provider>
       );
     },
   ],

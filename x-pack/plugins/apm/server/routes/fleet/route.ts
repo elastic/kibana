@@ -26,6 +26,7 @@ import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_sa
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getLatestApmPackage } from './get_latest_apm_package';
+import { getApmJavaAgentVersionsFromRegistry } from './apm_java_agent_versions';
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/has_apm_policies',
@@ -260,6 +261,15 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   },
 });
 
+const apmJavaAgentVersions = createApmServerRoute({
+  endpoint: 'GET /internal/apm/fleet/apm_java_agent_versions',
+  options: { tags: [] },
+  handler: async (): Promise<{ versions: string[]; latest: string }> => {
+    const versionsMetadata = await getApmJavaAgentVersionsFromRegistry();
+    return versionsMetadata;
+  },
+});
+
 export const apmFleetRouteRepository = {
   ...hasFleetDataRoute,
   ...fleetAgentsRoute,
@@ -267,6 +277,7 @@ export const apmFleetRouteRepository = {
   ...getUnsupportedApmServerSchemaRoute,
   ...getMigrationCheckRoute,
   ...createCloudApmPackagePolicyRoute,
+  ...apmJavaAgentVersions,
 };
 
 const FLEET_SECURITY_REQUIRED_MESSAGE = i18n.translate(
