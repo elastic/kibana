@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useInfiniteQuery, useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
@@ -86,6 +86,57 @@ export const useAllActions = ({
     {
       keepPreviousData: true,
       enabled: !skip,
+      onSuccess: () => setErrorToast(),
+      onError: (error: Error) =>
+        setErrorToast(error, {
+          title: i18n.translate('xpack.osquery.all_actions.fetchError', {
+            defaultMessage: 'Error while fetching actions',
+          }),
+        }),
+    }
+  );
+};
+
+// TODO think how we can unify this and above function
+export const useInfiniteAllActions = ({
+  activePage,
+  direction,
+  limit,
+  sortField,
+  filterQuery,
+}: UseAllActions) => {
+  const { data } = useKibana().services;
+  const setErrorToast = useErrorToast();
+
+  return useInfiniteQuery(
+    ['actions', { activePage, direction, limit, sortField }],
+    async ({ pageParam = activePage }) => {
+      const responseData = await lastValueFrom(
+        data.search.search<ActionsRequestOptions, ActionsStrategyResponse>(
+          {
+            factoryQueryType: OsqueryQueries.actions,
+            filterQuery: createFilter(filterQuery),
+            pagination: generateTablePaginationOptions(pageParam, limit),
+            sort: {
+              direction,
+              field: sortField,
+            },
+          },
+          {
+            strategy: 'osquerySearchStrategy',
+          }
+        )
+      );
+
+      return {
+        ...responseData,
+        actions: responseData.edges,
+        inspect: getInspectResponse(responseData, {} as InspectResponse),
+      };
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.pageInfo.activePage + 1 ?? undefined,
+      keepPreviousData: true,
       onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {

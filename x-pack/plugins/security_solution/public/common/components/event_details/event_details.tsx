@@ -335,34 +335,37 @@ const EventDetailsComponent: React.FC<Props> = ({
   );
 
   const osqueryTab = useMemo(
-    () => ({
-      id: EventsViewType.osqueryView,
-      'data-test-subj': 'osqueryViewTab',
-      name: (
-        <EuiFlexGroup
-          direction="row"
-          alignItems={'center'}
-          justifyContent={'spaceAround'}
-          gutterSize="xs"
-        >
-          <EuiFlexItem>
-            <span>{i18n.OSQUERY_VIEW}</span>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiNotificationBadge data-test-subj="osquery-actions-notification">
-              {rawEventData?.fields['kibana.alert.rule.actions.id'].length}
-            </EuiNotificationBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      content: (
-        <>
-          <TabContentWrapper data-test-subj="jsonViewWrapper">
-            <OsqueryView rawEventData={rawEventData} />
-          </TabContentWrapper>
-        </>
-      ),
-    }),
+    () =>
+      rawEventData?.fields['kibana.alert.rule.actions.id']?.length
+        ? {
+            id: EventsViewType.osqueryView,
+            'data-test-subj': 'osqueryViewTab',
+            name: (
+              <EuiFlexGroup
+                direction="row"
+                alignItems={'center'}
+                justifyContent={'spaceAround'}
+                gutterSize="xs"
+              >
+                <EuiFlexItem>
+                  <span>{i18n.OSQUERY_VIEW}</span>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiNotificationBadge data-test-subj="osquery-actions-notification">
+                    {rawEventData?.fields['kibana.alert.rule.actions.id']?.length}
+                  </EuiNotificationBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+            content: (
+              <>
+                <TabContentWrapper data-test-subj="jsonViewWrapper">
+                  <OsqueryView rawEventData={rawEventData} />
+                </TabContentWrapper>
+              </>
+            ),
+          }
+        : undefined,
     [rawEventData]
   );
 

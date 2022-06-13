@@ -24063,6 +24063,11 @@ react-inspector@^5.1.0:
     is-dom "^1.0.0"
     prop-types "^15.0.0"
 
+react-intersection-observer@^9.2.2:
+  version "9.2.2"
+  resolved "https://registry.yarnpkg.com/react-intersection-observer/-/react-intersection-observer-9.2.2.tgz#4f72487e2e9c62b6a6f55f38c5b0b6b7dc6c196d"
+  integrity sha512-xrFOWo5DbDzayAuDn6WpLrXfw73mvfx4WjuAjjy7dY7jWeTTle5+18nGtvMlR7q0npJanmmh6/CaSaSg4JxTJQ==
+
 react-intl@^2.8.0:
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/react-intl/-/react-intl-2.8.0.tgz#20b0c1f01d1292427768aa8ec9e51ab7e36503ba"

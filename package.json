@@ -388,6 +388,7 @@
     "react-fast-compare": "^2.0.4",
     "react-grid-layout": "^0.16.2",
     "react-hook-form": "^7.30.0",
+    "react-intersection-observer": "^9.2.2",
     "react-intl": "^2.8.0",
     "react-is": "^16.13.1",
     "react-markdown": "^4.3.1",
