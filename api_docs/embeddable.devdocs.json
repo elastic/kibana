@@ -3887,7 +3887,7 @@
               "\nA wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId\nwith {@link EmbeddableEditorState | embeddable editor state}"
             ],
             "signature": [
-              "(appId: string, options?: { path?: string | undefined; openInNewTab?: boolean | undefined; state: ",
+              "(appId: string, options?: { path?: string | undefined; openInNewTab?: boolean | undefined; skipAppLeave?: boolean | undefined; state: ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -3943,6 +3943,19 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "openInNewTab",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "embeddable",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.skipAppLeave",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "skipAppLeave",
                     "description": [],
                     "signature": [
                       "boolean | undefined"

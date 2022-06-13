@@ -860,14 +860,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Returns the current index pattern of the data panel
      */
     async getDataPanelIndexPattern() {
-      return await (await testSubjects.find('lns-dataView-switch-link')).getAttribute('title');
+      return await PageObjects.unifiedSearch.getSelectedDataView('lns-dataView-switch-link');
     },
 
     /**
      * Returns the current index pattern of the first layer
      */
     async getFirstLayerIndexPattern() {
-      return await (await testSubjects.find('lns_layerIndexPatternLabel')).getAttribute('title');
+      return await PageObjects.unifiedSearch.getSelectedDataView('lns_layerIndexPatternLabel');
     },
 
     async linkedToOriginatingApp() {

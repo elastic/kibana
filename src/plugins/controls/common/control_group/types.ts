@@ -7,6 +7,7 @@
  */
 
 import { EmbeddableInput, PanelState } from '@kbn/embeddable-plugin/common/types';
+import { SerializableRecord } from '@kbn/utility-types';
 import { ControlInput, ControlStyle, ControlWidth } from '../types';
 
 export const CONTROL_GROUP_TYPE = 'control_group';
@@ -32,11 +33,24 @@ export interface ControlGroupInput extends EmbeddableInput, ControlInput {
   panels: ControlsPanels;
 }
 
-// only parts of the Control Group Input should be persisted
+/**
+ * Only parts of the Control Group Input should be persisted
+ */
 export type PersistableControlGroupInput = Pick<
   ControlGroupInput,
   'panels' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettings'
 >;
+
+/**
+ * Some use cases need the Persistable Control Group Input to conform to the SerializableRecord format which requires string index signatures in any objects
+ */
+export type SerializableControlGroupInput = Omit<
+  PersistableControlGroupInput,
+  'panels' | 'ignoreParentSettings'
+> & {
+  panels: ControlsPanels & SerializableRecord;
+  ignoreParentSettings: PersistableControlGroupInput['ignoreParentSettings'] & SerializableRecord;
+};
 
 // panels are json stringified for storage in a saved object.
 export type RawControlGroupAttributes = Omit<
@@ -46,6 +60,7 @@ export type RawControlGroupAttributes = Omit<
   ignoreParentSettingsJSON: string;
   panelsJSON: string;
 };
+
 export interface ControlGroupTelemetry {
   total: number;
   chaining_system: {
