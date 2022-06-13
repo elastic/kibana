@@ -11,6 +11,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { pipeline as _pipeline, Readable } from 'stream';
 import { promisify } from 'util';
 import type { BlobAttributes, BlobStorage, BlobAttributesResponse } from '../../types';
+import type { ReadableContentStream } from './content_stream';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';
 import { FileChunkDocument, mappings } from './mappings';
 
@@ -97,7 +98,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     }
   }
 
-  public async download({ id, size }: { id: string; size?: number }): Promise<Readable> {
+  private getReadableContentStream(id: string, size?: number): ReadableContentStream {
     return getReadableContentStream({
       id,
       client: this.esClient,
@@ -110,10 +111,14 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     });
   }
 
+  public async download({ id, size }: { id: string; size?: number }): Promise<Readable> {
+    return this.getReadableContentStream(id, size);
+  }
+
   public async getAttributes(id: string): Promise<BlobAttributesResponse> {
     const doc = await this.esClient.getSource<FileChunkDocument>({
       index: this.index,
-      id: `0.${id}`, // Attributes should all live on the head chunk
+      id: this.getReadableContentStream(id).getAttributesChunkId(),
       _source_includes: ['app_search_data', 'app_meta_data'],
       refresh: true,
     });

@@ -334,6 +334,13 @@ export class ContentStream extends Duplex {
   public getBytesWritten(): number {
     return this.bytesWritten;
   }
+
+  /**
+   * Get the ID of the document containing all attributes for the current file id.
+   */
+  public getAttributesChunkId(): string {
+    return this.getHeadChunkId();
+  }
 }
 
 export interface ContentStreamArgs {
@@ -368,14 +375,14 @@ function getContentStream({
   return new ContentStream(client, id, index, logger, parameters, attributes);
 }
 
-type WritableContentStream = Writable &
+export type WritableContentStream = Writable &
   Pick<ContentStream, 'getContentReferenceId' | 'getBytesWritten'>;
 
 export function getWritableContentStream(args: ContentStreamArgs): WritableContentStream {
   return getContentStream(args);
 }
 
-type ReadableContentStream = Readable;
+export type ReadableContentStream = Readable & Pick<ContentStream, 'getAttributesChunkId'>;
 
 export function getReadableContentStream(
   args: Omit<ContentStreamArgs, 'id' | 'attributes'> & { id: string }
