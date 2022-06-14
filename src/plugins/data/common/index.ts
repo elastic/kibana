@@ -46,7 +46,6 @@ export {
   getEsQueryConfig,
   luceneStringToDsl,
   nodeBuilder,
-  nodeTypes,
   onlyDisabledFiltersChanged,
   pinFilter,
   toElasticsearchQuery,

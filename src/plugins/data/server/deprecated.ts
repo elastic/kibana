@@ -16,7 +16,6 @@ import {
   buildPhrasesFilter,
   buildRangeFilter,
   isFilterDisabled,
-  nodeTypes,
   fromKueryExpression,
   toElasticsearchQuery,
   buildEsQuery,
@@ -51,7 +50,6 @@ import { getEsQueryConfig } from '../common';
  * @removeBy 8.1
  */
 export const esKuery = {
-  nodeTypes,
   fromKueryExpression,
   toElasticsearchQuery,
 };
