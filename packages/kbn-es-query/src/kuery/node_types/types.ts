@@ -18,8 +18,3 @@ export interface FunctionTypeBuildNode {
   // TODO -> Need to define a better type for DSL query
   arguments: any[];
 }
-
-export interface WildcardTypeBuildNode {
-  type: 'wildcard';
-  value: string;
-}

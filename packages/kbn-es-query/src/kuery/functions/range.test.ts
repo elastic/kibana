@@ -12,6 +12,7 @@ import { DataViewBase } from '../..';
 
 import * as range from './range';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
 
 jest.mock('../grammar');
 
@@ -33,7 +34,7 @@ describe('kuery functions', () => {
           arguments: [fieldName],
         } = result;
 
-        expect(fieldName).toHaveProperty('type', 'literal');
+        expect(fieldName).toHaveProperty('type', KQL_NODE_TYPE_LITERAL);
         expect(fieldName).toHaveProperty('value', 'bytes');
       });
 
@@ -43,7 +44,7 @@ describe('kuery functions', () => {
           arguments: [, , valueArg],
         } = result;
 
-        expect(valueArg).toHaveProperty('type', 'literal');
+        expect(valueArg).toHaveProperty('type', KQL_NODE_TYPE_LITERAL);
         expect(valueArg).toHaveProperty('value', 1000);
       });
     });

@@ -189,7 +189,7 @@ Value "value"
   / value:UnquotedLiteral {
     if (value.type === 'cursor') return value;
 
-    if (!allowLeadingWildcards && value.type === 'wildcard' && nodeTypes.wildcard.hasLeadingWildcard(value)) {
+    if (!allowLeadingWildcards && nodeTypes.wildcard.isNode(value) && nodeTypes.wildcard.hasLeadingWildcard(value)) {
       error('Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.');
     }
 
