@@ -453,6 +453,9 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
+  useActionsColumn?: () => {
+    actionsColumn: JSX.Element | null | undefined;
+  };
 }
 
 export interface AlertsTableFlyoutBaseProps {

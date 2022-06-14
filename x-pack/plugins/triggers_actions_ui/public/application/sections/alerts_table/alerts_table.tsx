@@ -70,13 +70,25 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     [onColumnsChange, props.columns]
   );
 
+  const {
+    useActionsColumn = () => ({
+      actionsColumn: <></>, // preferred to be null
+    }),
+  } = props.alertsTableConfiguration;
+  const { actionsColumn } = useActionsColumn();
   const leadingControlColumns = useMemo(() => {
+    const MIN_ACTION_COLUMN_WIDTH = 75;
+    const ITEM_SIZE = 32;
+    const BORDER_SIZE = 1;
+    const PADDING_SIZE = 6 * 2;
+    const width =
+      ITEM_SIZE * (actionsColumn.props.children.length + 1) + PADDING_SIZE + BORDER_SIZE;
     return [
-      ...(props.showExpandToDetails
+      ...(props.showExpandToDetails // prop to show the expand action
         ? [
             {
               id: 'expandColumn',
-              width: 75,
+              width: width > MIN_ACTION_COLUMN_WIDTH ? width : MIN_ACTION_COLUMN_WIDTH,
               headerCellRender: () => {
                 return (
                   <span data-test-subj="expandColumnHeaderLabel">
@@ -95,7 +107,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                         <EuiButtonIcon
                           size="s"
                           iconType="expand"
-                          color="text"
+                          color="primary"
                           onClick={() => {
                             setFlyoutAlertIndex(visibleRowIndex);
                           }}
@@ -104,6 +116,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                         />
                       </EuiToolTip>
                     </EuiFlexItem>
+                    {actionsColumn &&
+                      React.Children.map(actionsColumn.props.children, function (child) {
+                        return <EuiFlexItem grow={false}>{child}</EuiFlexItem>;
+                      })}
                   </EuiFlexGroup>
                 );
               },
@@ -112,7 +128,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         : []),
       ...props.leadingControlColumns,
     ];
-  }, [props.leadingControlColumns, props.showExpandToDetails, setFlyoutAlertIndex]);
+  }, [props.leadingControlColumns, props.showExpandToDetails, setFlyoutAlertIndex, actionsColumn]);
 
   useEffect(() => {
     // Row classes do not deal with visible row indices so we need to handle page offset

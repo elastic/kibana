@@ -10,7 +10,9 @@ import type {
   AlertsTableConfigurationRegistryContract,
   GetRenderCellValue,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import React from 'react';
 
+import { EuiButtonIcon } from '@elastic/eui';
 import { APP_ID } from '../../../../common/constants';
 import { getTimelinesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { TimelineId } from '../../../../common/types';
@@ -36,6 +38,18 @@ const registerAlertsTableConfiguration = (
     useInternalFlyout: () => {
       const { header, body, footer } = useToGetInternalFlyout();
       return { header, body, footer };
+    },
+    useActionsColumn: () => {
+      return {
+        actionsColumn: (
+          <>
+            <EuiButtonIcon size="s" iconType="analyzeEvent" color="primary" onClick={() => {}} />
+            <EuiButtonIcon size="s" iconType="invert" color="primary" onClick={() => {}} />
+            <EuiButtonIcon size="s" iconType="invert" color="primary" onClick={() => {}} />
+            <EuiButtonIcon size="s" iconType="invert" color="primary" onClick={() => {}} />
+          </>
+        ),
+      };
     },
   });
 };
