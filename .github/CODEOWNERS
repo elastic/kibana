@@ -255,6 +255,10 @@
 #CC# /packages/kbn-expect/ @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 
+# Scalability testing
+/packages/kbn-performance-testing-dataset-extractor/  @elastic/kibana-scalability-testing
+/packages/kbn-scalability-simulation-generator/  @elastic/kibana-scalability-testing
+
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
 /vars/*Coverage.groovy @elastic/kibana-qa
