@@ -200,7 +200,9 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
 
         modelSnapshotResultsLine.push({
           dataValue: timestamp,
-          details: `${modelSnapshot.description}. ${(canCreateJob && canStartStopDatafeed) ? revertSnapshotMessage : ''}`,
+          details: `${modelSnapshot.description}. ${
+            canCreateJob && canStartStopDatafeed ? revertSnapshotMessage : ''
+          }`,
           modelSnapshot,
         });
       });
