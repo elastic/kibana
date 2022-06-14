@@ -8,9 +8,13 @@
 
 import { PriorityCollection } from './priority_collection';
 import { SavedObjectsClientContract } from '../../types';
-import { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
+import {
+  ENCRYPTION_EXTENSION_ID,
+  SavedObjectsRepositoryFactory,
+} from '../../saved_objects_service';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { KibanaRequest } from '../../../http';
+import type { ISavedObjectsEncryptionExtension, SavedObjectsExtensions } from './extensions';
 
 /**
  * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.
@@ -34,13 +38,16 @@ export type SavedObjectsClientWrapperFactory = (
  * Describes the factory used to create instances of the Saved Objects Client.
  * @public
  */
-export type SavedObjectsClientFactory = ({
-  request,
-  includedHiddenTypes,
-}: {
+export type SavedObjectsClientFactory = (params: {
+  extensions: SavedObjectsExtensions;
   request: KibanaRequest;
   includedHiddenTypes?: string[];
 }) => SavedObjectsClientContract;
+
+export type SavedObjectsEncryptionExtensionFactory = (params: {
+  typeRegistry: ISavedObjectTypeRegistry;
+  request: KibanaRequest;
+}) => ISavedObjectsEncryptionExtension;
 
 /**
  * Provider to invoke to retrieve a {@link SavedObjectsClientFactory}.
@@ -68,6 +75,17 @@ export type ISavedObjectsClientProvider = Pick<
 >;
 
 /**
+ * Only exported for unit testing
+ *
+ * @internal
+ */
+export interface Params {
+  defaultClientFactory: SavedObjectsClientFactory;
+  typeRegistry: ISavedObjectTypeRegistry;
+  encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory | undefined;
+}
+
+/**
  * Provider for the Scoped Saved Objects Client.
  *
  * @internal
@@ -79,16 +97,12 @@ export class SavedObjectsClientProvider {
   }>();
   private _clientFactory: SavedObjectsClientFactory;
   private readonly _originalClientFactory: SavedObjectsClientFactory;
+  private readonly encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory | undefined;
   private readonly _typeRegistry: ISavedObjectTypeRegistry;
 
-  constructor({
-    defaultClientFactory,
-    typeRegistry,
-  }: {
-    defaultClientFactory: SavedObjectsClientFactory;
-    typeRegistry: ISavedObjectTypeRegistry;
-  }) {
+  constructor({ defaultClientFactory, encryptionExtensionFactory, typeRegistry }: Params) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
+    this.encryptionExtensionFactory = encryptionExtensionFactory;
     this._typeRegistry = typeRegistry;
   }
 
@@ -117,6 +131,7 @@ export class SavedObjectsClientProvider {
     { includedHiddenTypes, excludedWrappers = [] }: SavedObjectsClientProviderOptions = {}
   ): SavedObjectsClientContract {
     const client = this._clientFactory({
+      extensions: this.getExtensions(request, excludedWrappers),
       request,
       includedHiddenTypes,
     });
@@ -134,5 +149,20 @@ export class SavedObjectsClientProvider {
           typeRegistry: this._typeRegistry,
         });
       }, client);
+  }
+
+  private getExtensions(
+    request: KibanaRequest,
+    excludedWrappers: string[]
+  ): SavedObjectsExtensions {
+    const isEncryptionExtensionIncluded =
+      !excludedWrappers.includes(ENCRYPTION_EXTENSION_ID) && !!this.encryptionExtensionFactory;
+    const encryptionExtension = isEncryptionExtensionIncluded
+      ? this.encryptionExtensionFactory?.({ typeRegistry: this._typeRegistry, request })
+      : undefined;
+
+    return {
+      encryptionExtension,
+    };
   }
 }

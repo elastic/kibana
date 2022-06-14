@@ -36,10 +36,12 @@ import {
   SavedObjectStatusMeta,
   SavedObjectAttributes,
 } from './types';
+import type { SavedObjectsExtensions } from './service';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
-import {
+import type {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClientWrapperFactory,
+  SavedObjectsEncryptionExtensionFactory,
 } from './service/lib/scoped_client_provider';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
@@ -50,6 +52,8 @@ import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
+
+export const ENCRYPTION_EXTENSION_ID = 'encryptedSavedObjects' as const;
 
 const kibanaIndex = '.kibana';
 
@@ -105,6 +109,8 @@ export interface SavedObjectsServiceSetup {
     id: string,
     factory: SavedObjectsClientWrapperFactory
   ) => void;
+
+  addEncryptionExtension: (factory: SavedObjectsEncryptionExtensionFactory) => void;
 
   /**
    * Register a {@link SavedObjectsType | savedObjects type} definition.
@@ -202,6 +208,7 @@ export interface SavedObjectsServiceStart {
    *
    * @param req - The request to create the scoped repository from.
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
+   * @param extensions - Extensions that the repository should use (for encryption, security, and spaces).
    *
    * @remarks
    * Prefer using `getScopedClient`. This should only be used when using methods
@@ -209,15 +216,20 @@ export interface SavedObjectsServiceStart {
    */
   createScopedRepository: (
     req: KibanaRequest,
-    includedHiddenTypes?: string[]
+    includedHiddenTypes?: string[],
+    extensions?: SavedObjectsExtensions
   ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the internal Kibana user for authenticating with Elasticsearch.
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
+   * @param extensions - Extensions that the repository should use (for encryption, security, and spaces).
    */
-  createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
+  createInternalRepository: (
+    includedHiddenTypes?: string[],
+    extensions?: SavedObjectsExtensions
+  ) => ISavedObjectsRepository;
   /**
    * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
    */
@@ -252,18 +264,24 @@ export interface SavedObjectsRepositoryFactory {
    * Elasticsearch.
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
+   * @param extensions - Extensions that the repository should use (for encryption, security, and spaces).
    */
   createScopedRepository: (
     req: KibanaRequest,
-    includedHiddenTypes?: string[]
+    includedHiddenTypes?: string[],
+    extensions?: SavedObjectsExtensions
   ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the internal Kibana user for authenticating with Elasticsearch.
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
+   * @param extensions - Extensions that the repository should use (for encryption, security, and spaces).
    */
-  createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
+  createInternalRepository: (
+    includedHiddenTypes?: string[],
+    extensions?: SavedObjectsExtensions
+  ) => ISavedObjectsRepository;
 }
 
 /** @internal */
@@ -297,6 +315,7 @@ export class SavedObjectsService
   private config?: SavedObjectConfig;
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
+  private encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
@@ -369,6 +388,15 @@ export class SavedObjectsService
           id,
           factory,
         });
+      },
+      addEncryptionExtension: (factory) => {
+        if (this.started) {
+          throw new Error('cannot call `addEncryptionExtension` after service startup.');
+        }
+        if (this.encryptionExtensionFactory) {
+          throw new Error('encryption extension is already set, and can only be set once');
+        }
+        this.encryptionExtensionFactory = factory;
       },
       registerType: (type) => {
         if (this.started) {
@@ -450,7 +478,8 @@ export class SavedObjectsService
 
     const createRepository = (
       esClient: ElasticsearchClient,
-      includedHiddenTypes: string[] = []
+      includedHiddenTypes: string[] = [],
+      extensions: SavedObjectsExtensions | undefined
     ) => {
       return SavedObjectsRepository.createRepository(
         migrator,
@@ -458,23 +487,29 @@ export class SavedObjectsService
         kibanaIndex,
         esClient,
         this.logger.get('repository'),
-        includedHiddenTypes
+        includedHiddenTypes,
+        extensions
       );
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
-      createInternalRepository: (includedHiddenTypes?: string[]) =>
-        createRepository(client.asInternalUser, includedHiddenTypes),
-      createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) =>
-        createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes),
+      createInternalRepository: (includedHiddenTypes, extensions) =>
+        createRepository(client.asInternalUser, includedHiddenTypes, extensions),
+      createScopedRepository: (req, includedHiddenTypes, extensions) =>
+        createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes, extensions),
     };
 
     const clientProvider = new SavedObjectsClientProvider({
-      defaultClientFactory({ request, includedHiddenTypes }) {
-        const repository = repositoryFactory.createScopedRepository(request, includedHiddenTypes);
+      defaultClientFactory({ request, includedHiddenTypes, extensions }) {
+        const repository = repositoryFactory.createScopedRepository(
+          request,
+          includedHiddenTypes,
+          extensions
+        );
         return new SavedObjectsClient(repository);
       },
       typeRegistry: this.typeRegistry,
+      encryptionExtensionFactory: this.encryptionExtensionFactory,
     });
     if (this.clientFactoryProvider) {
       const clientFactory = this.clientFactoryProvider(repositoryFactory);

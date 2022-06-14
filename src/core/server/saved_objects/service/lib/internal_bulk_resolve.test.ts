@@ -59,6 +59,7 @@ describe('internalBulkResolve', () => {
       serializer,
       getIndexForType: (type: string) => `index-for-${type}`,
       incrementCounterInternal,
+      encryptionExtension: undefined,
       objects,
       options,
     };
@@ -339,4 +340,6 @@ describe('internalBulkResolve', () => {
       ]);
     });
   }
+
+  test.todo('with encryption extension');
 });

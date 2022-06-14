@@ -1220,6 +1220,8 @@ describe('SavedObjectsRepository', () => {
         expect(result.saved_objects[1].id).toEqual(obj2.id);
       });
     });
+
+    test.todo('with encryption extension');
   });
 
   describe('#bulkGet', () => {
@@ -1522,6 +1524,8 @@ describe('SavedObjectsRepository', () => {
         });
       });
     });
+
+    test.todo('with encryption extension');
   });
 
   describe('#bulkResolve', () => {
@@ -2049,6 +2053,8 @@ describe('SavedObjectsRepository', () => {
         });
       });
     });
+
+    test.todo('with encryption extension');
   });
 
   describe('#checkConflicts', () => {
@@ -2794,6 +2800,8 @@ describe('SavedObjectsRepository', () => {
         });
       });
     });
+
+    test.todo('with encryption extension');
   });
 
   describe('#delete', () => {
@@ -3870,6 +3878,8 @@ describe('SavedObjectsRepository', () => {
         );
       });
     });
+
+    test.todo('with encryption extension');
   });
 
   describe('#get', () => {
@@ -4050,6 +4060,8 @@ describe('SavedObjectsRepository', () => {
         expect(result).toMatchObject({ originId });
       });
     });
+
+    test.todo('with encryption extension');
   });
 
   describe('#resolve', () => {
@@ -4988,6 +5000,8 @@ describe('SavedObjectsRepository', () => {
         expect(result).toMatchObject({ originId });
       });
     });
+
+    test.todo('with encryption extension');
   });
 
   describe('#openPointInTimeForType', () => {

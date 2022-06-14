@@ -59,6 +59,7 @@ const createSetupContractMock = () => {
   const setupContract: jest.Mocked<SavedObjectsServiceSetup> = {
     setClientFactoryProvider: jest.fn(),
     addClientWrapper: jest.fn(),
+    addEncryptionExtension: jest.fn(),
     registerType: jest.fn(),
     getKibanaIndex: jest.fn(),
   };

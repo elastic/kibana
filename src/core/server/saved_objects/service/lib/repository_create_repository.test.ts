@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { ElasticsearchClient } from '../../../elasticsearch';
+import type * as SavedObjectsRepositoryType from './repository';
 import { SavedObjectsRepository } from './repository';
 import { mockKibanaMigrator } from '../../migrations/kibana_migrator.mock';
 import { KibanaMigrator } from '../../migrations';
@@ -14,11 +16,12 @@ import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 
 jest.mock('./repository');
 
-const { SavedObjectsRepository: originalRepository } = jest.requireActual('./repository');
+const { SavedObjectsRepository: originalRepository } =
+  jest.requireActual<typeof SavedObjectsRepositoryType>('./repository');
 
 describe('SavedObjectsRepository#createRepository', () => {
   let logger: MockedLogger;
-  const callAdminCluster = jest.fn();
+  const callAdminCluster = jest.fn() as unknown as ElasticsearchClient;
 
   const typeRegistry = new SavedObjectTypeRegistry();
   typeRegistry.registerType({
@@ -91,6 +94,7 @@ describe('SavedObjectsRepository#createRepository', () => {
       callAdminCluster,
       logger,
       [],
+      { encryptionExtension: undefined },
       SavedObjectsRepository
     );
     expect(repository).toBeDefined();
@@ -110,6 +114,7 @@ describe('SavedObjectsRepository#createRepository', () => {
       callAdminCluster,
       logger,
       ['hiddenType', 'hiddenType', 'hiddenType'],
+      { encryptionExtension: undefined },
       SavedObjectsRepository
     );
     expect(repository).toBeDefined();

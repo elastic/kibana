@@ -9,6 +9,8 @@
 export type { ISavedObjectsRepository, SavedObjectsRepository } from './repository';
 export { SavedObjectsClientProvider } from './scoped_client_provider';
 
+export type { ISavedObjectsEncryptionExtension, SavedObjectsExtensions } from './extensions';
+
 export type {
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderOptions,
@@ -22,6 +24,7 @@ export type {
   SavedObjectsClientProviderOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
+  SavedObjectsEncryptionExtensionFactory,
 } from './scoped_client_provider';
 
 export { SavedObjectsErrorHelpers } from './errors';

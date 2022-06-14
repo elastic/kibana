@@ -6,16 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientProvider } from './scoped_client_provider';
+import type { Optional } from '@kbn/utility-types';
+import { Params, SavedObjectsClientProvider } from './scoped_client_provider';
 import { httpServerMock } from '../../../http/http_server.mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 
+function createClientProvider(params: Optional<Params, 'encryptionExtensionFactory'>) {
+  return new SavedObjectsClientProvider({
+    encryptionExtensionFactory: undefined,
+    ...params,
+  });
+}
 test(`uses default client factory when one isn't set`, () => {
   const returnValue = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(returnValue);
   const request = httpServerMock.createKibanaRequest();
 
-  const clientProvider = new SavedObjectsClientProvider({
+  const clientProvider = createClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
     typeRegistry: typeRegistryMock.create(),
   });
@@ -24,6 +31,7 @@ test(`uses default client factory when one isn't set`, () => {
   expect(result).toBe(returnValue);
   expect(defaultClientFactoryMock).toHaveBeenCalledTimes(1);
   expect(defaultClientFactoryMock).toHaveBeenCalledWith({
+    extensions: expect.any(Object),
     request,
   });
 });
@@ -34,7 +42,7 @@ test(`uses custom client factory when one is set`, () => {
   const returnValue = Symbol();
   const customClientFactoryMock = jest.fn().mockReturnValue(returnValue);
 
-  const clientProvider = new SavedObjectsClientProvider({
+  const clientProvider = createClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
     typeRegistry: typeRegistryMock.create(),
   });
@@ -45,6 +53,7 @@ test(`uses custom client factory when one is set`, () => {
   expect(defaultClientFactoryMock).not.toHaveBeenCalled();
   expect(customClientFactoryMock).toHaveBeenCalledTimes(1);
   expect(customClientFactoryMock).toHaveBeenCalledWith({
+    extensions: expect.any(Object),
     request,
   });
 });
@@ -53,7 +62,7 @@ test(`throws error when more than one scoped saved objects client factory is set
   const defaultClientFactory = jest.fn();
   const clientFactory = jest.fn();
 
-  const clientProvider = new SavedObjectsClientProvider({
+  const clientProvider = createClientProvider({
     defaultClientFactory,
     typeRegistry: typeRegistryMock.create(),
   });
@@ -68,7 +77,7 @@ test(`throws error when more than one scoped saved objects client factory is set
 
 test(`throws error when registering a wrapper with a duplicate id`, () => {
   const defaultClientFactoryMock = jest.fn();
-  const clientProvider = new SavedObjectsClientProvider({
+  const clientProvider = createClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
     typeRegistry: typeRegistryMock.create(),
   });
@@ -85,7 +94,7 @@ test(`invokes and uses wrappers in specified order`, () => {
   const defaultClient = Symbol();
   const typeRegistry = typeRegistryMock.create();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
-  const clientProvider = new SavedObjectsClientProvider({
+  const clientProvider = createClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
     typeRegistry,
   });
@@ -116,7 +125,7 @@ test(`does not invoke or use excluded wrappers`, () => {
   const defaultClient = Symbol();
   const typeRegistry = typeRegistryMock.create();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
-  const clientProvider = new SavedObjectsClientProvider({
+  const clientProvider = createClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
     typeRegistry,
   });
@@ -145,7 +154,7 @@ test(`does not invoke or use excluded wrappers`, () => {
 test(`allows all wrappers to be excluded`, () => {
   const defaultClient = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
-  const clientProvider = new SavedObjectsClientProvider({
+  const clientProvider = createClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
     typeRegistry: typeRegistryMock.create(),
   });
@@ -170,7 +179,7 @@ test(`allows all wrappers to be excluded`, () => {
 test(`allows hidden typed to be included`, () => {
   const defaultClient = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
-  const clientProvider = new SavedObjectsClientProvider({
+  const clientProvider = createClientProvider({
     defaultClientFactory: defaultClientFactoryMock,
     typeRegistry: typeRegistryMock.create(),
   });
@@ -182,6 +191,7 @@ test(`allows hidden typed to be included`, () => {
 
   expect(actualClient).toBe(defaultClient);
   expect(defaultClientFactoryMock).toHaveBeenCalledWith({
+    extensions: expect.any(Object),
     request,
     includedHiddenTypes: ['task'],
   });
