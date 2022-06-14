@@ -40,8 +40,12 @@ export interface ConsoleDataState {
 
   /** state for the command input area */
   input: {
+    /** The text the user is typing into the console input area */
+    textEntered: string;
+
     /** A history of commands entered by the user */
     history: InputHistoryItem[];
+
     /** Show the input area popover */
     showPopover: 'input-history' | undefined; // Other values will exist in the future
   };
@@ -82,6 +86,12 @@ export type ConsoleDataAction =
   | {
       type: 'updateCommandStatusState';
       payload: { id: string; value: CommandExecutionState['status'] };
+    }
+  | {
+      type: 'updateInputTextEnteredState';
+      payload: {
+        textEntered: string;
+      };
     }
   | {
       type: 'updateInputPopoverState';

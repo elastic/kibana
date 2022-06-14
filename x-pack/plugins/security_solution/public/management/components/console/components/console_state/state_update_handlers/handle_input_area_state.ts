@@ -9,7 +9,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { ConsoleDataAction, ConsoleStoreReducer } from '../types';
 
 type InputAreaStateAction = ConsoleDataAction & {
-  type: 'updateInputPopoverState' | 'updateInputHistoryState';
+  type: 'updateInputPopoverState' | 'updateInputHistoryState' | 'updateInputTextEnteredState';
 };
 
 export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
@@ -37,6 +37,17 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           history: [{ id: uuidV4(), input: payload.command }, ...state.input.history],
         },
       };
+
+    case 'updateInputTextEnteredState':
+      if (state.input.textEntered !== payload.textEntered) {
+        return {
+          ...state,
+          input: {
+            ...state.input,
+            textEntered: payload.textEntered,
+          },
+        };
+      }
   }
 
   return state;

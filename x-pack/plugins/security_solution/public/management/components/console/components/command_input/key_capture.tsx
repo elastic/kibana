@@ -75,16 +75,23 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
   const [, setLastInput] = useState('');
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const keyCaptureContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const handleBlurAndFocus = useCallback<FormEventHandler>(
+  const [isCapturing, setIsCapturing] = useState(false);
+
+  const handleInputOnBlur = useCallback(() => {
+    setIsCapturing(false);
+
+    if (onStateChange) {
+      onStateChange(false);
+    }
+  }, [onStateChange]);
+
+  const handleInputOnFocus = useCallback<FormEventHandler>(
     (ev) => {
-      if (ev.type === 'blur') {
-        keyCaptureContainerRef.current?.focus();
-      }
+      setIsCapturing(true);
 
       if (onStateChange) {
-        onStateChange(ev.type === 'focus');
+        onStateChange(true);
       }
     },
     [onStateChange]
@@ -92,6 +99,10 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
 
   const handleOnKeyUp = useCallback<KeyboardEventHandler<HTMLInputElement>>(
     (ev) => {
+      if (!isCapturing) {
+        return;
+      }
+
       ev.stopPropagation();
 
       const eventDetails = pick(ev, [
@@ -113,7 +124,7 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
         return '';
       });
     },
-    [onCapture]
+    [isCapturing, onCapture]
   );
 
   const handleOnInput = useCallback<FormEventHandler<HTMLInputElement>>((ev) => {
@@ -142,7 +153,7 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
       data-test-subj={getTestId('keyCapture')}
       aria-hidden="true"
       tabIndex={-1}
-      ref={keyCaptureContainerRef}
+      className="key-capture-container-test"
     >
       <input
         className="invisible-input"
@@ -151,8 +162,8 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
         value=""
         onInput={handleOnInput}
         onKeyUp={handleOnKeyUp}
-        onBlur={handleBlurAndFocus}
-        onFocus={handleBlurAndFocus}
+        onBlur={handleInputOnBlur}
+        onFocus={handleInputOnFocus}
         onChange={NOOP} // this just silences Jest output warnings
         ref={inputRef}
       />

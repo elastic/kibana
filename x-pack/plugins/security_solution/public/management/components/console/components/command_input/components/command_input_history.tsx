@@ -45,12 +45,12 @@ export const CommandInputHistory = memo(() => {
     (items) => {
       const selected = items.find((item) => item.checked === 'on');
 
-      if (selected) {
-        dispatch({ type: 'executeCommand', payload: { input: selected.label } });
-      }
-
       dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
       dispatch({ type: 'focusOnInputArea' });
+
+      if (selected) {
+        dispatch({ type: 'updateInputTextEnteredState', payload: { textEntered: selected.label } });
+      }
     },
     [dispatch]
   );

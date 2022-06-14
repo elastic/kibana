@@ -44,6 +44,7 @@ export const initiateState = (
     commandHistory: [],
     sidePanel: { show: null },
     input: {
+      textEntered: '',
       showPopover: undefined,
       history: [],
     },
@@ -84,6 +85,7 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
 
     case 'updateInputPopoverState':
     case 'updateInputHistoryState':
+    case 'updateInputTextEnteredState':
       return handleInputAreaState(state, action);
 
     case 'clear':

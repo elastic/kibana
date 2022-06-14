@@ -9,6 +9,7 @@ import React, { memo, MouseEventHandler, useCallback, useMemo, useRef, useState 
 import { CommonProps, EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { useWithInputTextEntered } from '../../hooks/state_selectors/use_with_input_text_entered';
 import { InputAreaPopover } from './components/input_area_popover';
 import { KeyCapture, KeyCaptureProps } from './key_capture';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
@@ -62,7 +63,7 @@ export interface CommandInputProps extends CommonProps {
 export const CommandInput = memo<CommandInputProps>(
   ({ prompt = '>', focusRef, ...commonProps }) => {
     const dispatch = useConsoleStateDispatch();
-    const [textEntered, setTextEntered] = useState<string>('');
+    const textEntered = useWithInputTextEntered();
     const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
     const getTestId = useTestIdGenerator(useDataTestSubj());
 
@@ -102,34 +103,36 @@ export const CommandInput = memo<CommandInputProps>(
 
     const handleKeyCapture = useCallback<KeyCaptureProps['onCapture']>(
       ({ value, eventDetails }) => {
-        setTextEntered((prevTextEnteredState) => {
-          let updatedTextEnteredState = prevTextEnteredState + value;
+        let updatedTextEnteredState = textEntered + value;
 
-          switch (eventDetails.keyCode) {
-            // BACKSPACE
-            // remove the last character from the text entered
-            case 8:
-              if (updatedTextEnteredState.length) {
-                updatedTextEnteredState = updatedTextEnteredState.replace(/.$/, '');
-              }
-              break;
+        switch (eventDetails.keyCode) {
+          // BACKSPACE
+          // remove the last character from the text entered
+          case 8:
+            if (updatedTextEnteredState.length) {
+              updatedTextEnteredState = updatedTextEnteredState.replace(/.$/, '');
+            }
+            break;
 
-            // ENTER
-            // Execute command and blank out the input area
-            case 13:
-              dispatch({ type: 'executeCommand', payload: { input: updatedTextEnteredState } });
-              return '';
+          // ENTER
+          // Execute command and blank out the input area
+          case 13:
+            dispatch({ type: 'executeCommand', payload: { input: updatedTextEnteredState } });
+            updatedTextEnteredState = '';
+            break;
 
-            // ARROW UP
-            case 38:
-              dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
-              break;
-          }
+          // ARROW UP
+          case 38:
+            dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
+            break;
+        }
 
-          return updatedTextEnteredState;
+        dispatch({
+          type: 'updateInputTextEnteredState',
+          payload: { textEntered: updatedTextEnteredState },
         });
       },
-      [dispatch]
+      [dispatch, textEntered]
     );
 
     return (
