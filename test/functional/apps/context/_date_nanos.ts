@@ -56,8 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qjisd');
       await PageObjects.context.clickPredecessorLoadMoreButton();
       await PageObjects.context.clickSuccessorLoadMoreButton();
-      await testSubjects.click('dataGridFullScreenButton');
-      const actualRowsText = await dataGrid.getRowsText();
+      const actualRowsText = await dataGrid.getRowsText(true);
       const expectedRowsText = [
         'Sep 22, 2019 @ 23:50:13.2531233455',
         'Sep 18, 2019 @ 06:50:13.0000001044',

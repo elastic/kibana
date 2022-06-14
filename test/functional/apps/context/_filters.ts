@@ -40,8 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('inclusive filter should be addable via expanded data grid rows', async function () {
       await retry.waitFor(`filter ${TEST_ANCHOR_FILTER_FIELD} in filterbar`, async () => {
-        await testSubjects.click('dataGridFullScreenButton');
-        await dataGrid.clickRowToggle({ isAnchorRow: true });
+        await dataGrid.clickRowToggle({ isAnchorRow: true, renderMoreRows: true });
         await testSubjects.click(`openFieldActionsButton-${TEST_ANCHOR_FILTER_FIELD}`);
         await testSubjects.click(`addFilterForValueButton-${TEST_ANCHOR_FILTER_FIELD}`);
         await PageObjects.context.waitUntilContextLoadingHasFinished();
@@ -78,8 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('filter for presence should be addable via expanded data grid rows', async function () {
       await retry.waitFor('an exists filter in the filterbar', async () => {
-        await testSubjects.click('dataGridFullScreenButton');
-        await dataGrid.clickRowToggle({ isAnchorRow: true });
+        await dataGrid.clickRowToggle({ isAnchorRow: true, renderMoreRows: true });
         await testSubjects.click(`openFieldActionsButton-${TEST_ANCHOR_FILTER_FIELD}`);
         await testSubjects.click(`addExistsFilterButton-${TEST_ANCHOR_FILTER_FIELD}`);
         await PageObjects.context.waitUntilContextLoadingHasFinished();

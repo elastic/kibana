@@ -17,6 +17,7 @@ export interface TabbedGridData {
 interface SelectOptions {
   isAnchorRow?: boolean;
   rowIndex?: number;
+  renderMoreRows?: boolean;
 }
 
 export class DataGridService extends FtrService {
@@ -124,8 +125,15 @@ export class DataGridService extends FtrService {
     return this.getDocTableRows(options);
   }
 
-  public async getRowsText() {
-    const table = await this.getTable();
+  public async getRowsText(renderMoreRows?: boolean) {
+    let table: WebElementWrapper;
+    if (renderMoreRows) {
+      await this.testSubjects.click('dataGridFullScreenButton');
+      table = await this.getTable();
+      await this.testSubjects.click('dataGridFullScreenButton');
+    } else {
+      table = await this.getTable();
+    }
     const rows = await table.findAllByCssSelector('.euiDataGridRow');
 
     const rowsText = [];
@@ -139,7 +147,15 @@ export class DataGridService extends FtrService {
    * Returns an array of rows (which are array of cells)
    */
   public async getDocTableRows(options?: SelectOptions) {
-    const table = await this.getTable();
+    let table: WebElementWrapper;
+    if (options?.renderMoreRows) {
+      await this.testSubjects.click('dataGridFullScreenButton');
+      table = await this.getTable();
+      await this.testSubjects.click('dataGridFullScreenButton');
+    } else {
+      table = await this.getTable();
+    }
+
     if (!table) {
       return [];
     }

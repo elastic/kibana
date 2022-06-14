@@ -54,26 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('inclusive filter should be toggleable via the filter bar', async function () {
-      await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
-      await PageObjects.context.waitUntilContextLoadingHasFinished();
-      // disable filter
-      await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
-      await PageObjects.context.waitUntilContextLoadingHasFinished();
-
-      await retry.waitFor(`a disabled filter in filterbar`, async () => {
-        return await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false);
-      });
-
-      await retry.waitFor('filters are disabled', async () => {
-        const fields = await docTable.getFields();
-        const hasOnlyFilteredRows = fields
-          .map((row) => row[2])
-          .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
-        return hasOnlyFilteredRows === false;
-      });
-    });
-
     it('filter for presence should be addable via expanded doc table rows', async function () {
       await docTable.toggleRowExpanded({ isAnchorRow: true });
 

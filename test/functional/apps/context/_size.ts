@@ -59,11 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor(
         `number of rows displayed after clicking load more predecessors is ${expectedRowLength}`,
         async function () {
-          // open full screen mode
-          await testSubjects.click('dataGridFullScreenButton');
-          const rows = await dataGrid.getRowsText();
-          // close full screen mode
-          await testSubjects.click('dataGridFullScreenButton');
+          const rows = await dataGrid.getRowsText(true);
           return rows.length === expectedRowLength;
         }
       );
@@ -76,11 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor(
         `number of rows displayed after clicking load more successors is ${expectedRowLength}`,
         async function () {
-          // open full screen mode
-          await testSubjects.click('dataGridFullScreenButton');
-          const rows = await dataGrid.getRowsText();
-          // close full screen mode
-          await testSubjects.click('dataGridFullScreenButton');
+          const rows = await dataGrid.getRowsText(true);
           return rows.length === expectedRowLength;
         }
       );
