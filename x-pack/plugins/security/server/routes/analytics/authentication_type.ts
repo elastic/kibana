@@ -1,0 +1,90 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createHash } from 'crypto';
+
+import { schema } from '@kbn/config-schema';
+
+import type { RouteDefinitionParams } from '..';
+import type { AuthenticationTypeAnalyticsEvent } from '../../analytics';
+import { HTTPAuthenticationProvider, HTTPAuthorizationHeader } from '../../authentication';
+import { getDetailedErrorMessage, wrapIntoCustomErrorResponse } from '../../errors';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
+
+/**
+ * A minimum interval between usage collection of the authentication type for
+ * the Kibana interactive user.
+ */
+const MINIMUM_ELAPSED_TIME_HOURS = 12;
+
+export function defineRecordAnalyticsOnAuthTypeRoutes({
+  getAuthenticationService,
+  router,
+  analyticsService,
+  logger,
+}: RouteDefinitionParams) {
+  router.post(
+    {
+      path: '/internal/security/analytics/_record_auth_type',
+      validate: {
+        body: schema.nullable(
+          schema.object({ signature: schema.string(), timestamp: schema.number() })
+        ),
+      },
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      try {
+        const authUser = getAuthenticationService().getCurrentUser(request);
+        if (!authUser) {
+          logger.warn('Cannot record authentication type: current user could not be retrieved.');
+          return response.noContent();
+        }
+
+        let timestamp = new Date().getTime();
+        const {
+          signature: previouslyRegisteredSignature,
+          timestamp: previousRegistrationTimestamp,
+        } = request.body || { authTypeHash: '', timestamp };
+
+        const authTypeEventToReport: AuthenticationTypeAnalyticsEvent = {
+          authenticationProviderType: authUser.authentication_provider.type,
+          authenticationRealmType: authUser.authentication_realm.type,
+          httpAuthenticationScheme:
+            authUser.authentication_provider.type === HTTPAuthenticationProvider.type
+              ? HTTPAuthorizationHeader.parseFromRequest(request)?.scheme
+              : undefined,
+        };
+
+        // We calculate the "signature" of the authentication type event to avoid reporting the
+        // same events too frequently.
+        const signature = createHash('sha3-256')
+          .update(authUser.username)
+          .update(authTypeEventToReport.authenticationProviderType)
+          .update(authTypeEventToReport.authenticationRealmType)
+          .update(authTypeEventToReport.httpAuthenticationScheme ?? '')
+          .digest('hex');
+
+        const elapsedTimeInHrs = (timestamp - previousRegistrationTimestamp) / (1000 * 60 * 60);
+        if (
+          elapsedTimeInHrs >= MINIMUM_ELAPSED_TIME_HOURS ||
+          previouslyRegisteredSignature !== signature
+        ) {
+          analyticsService.reportAuthenticationTypeEvent(authTypeEventToReport);
+        } else {
+          timestamp = previousRegistrationTimestamp;
+        }
+
+        return response.ok({ body: { signature, timestamp } });
+      } catch (err) {
+        logger.error(
+          `Failed to record authentication type for the user: ${getDetailedErrorMessage(err)}`
+        );
+        return response.customError(wrapIntoCustomErrorResponse(err));
+      }
+    })
+  );
+}

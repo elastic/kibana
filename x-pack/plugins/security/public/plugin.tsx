@@ -21,9 +21,10 @@ import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/pu
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-import { SecurityLicenseService } from '../common/licensing';
 import type { SecurityLicense } from '../common/licensing';
+import { SecurityLicenseService } from '../common/licensing';
 import { accountManagementApp, UserProfileAPIClient } from './account_management';
+import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
@@ -68,6 +69,7 @@ export class SecurityPlugin
   private readonly managementService = new ManagementService();
   private readonly securityCheckupService: SecurityCheckupService;
   private readonly anonymousAccessService = new AnonymousAccessService();
+  private readonly analyticsService = new AnalyticsService();
   private authc!: AuthenticationServiceSetup;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -101,6 +103,8 @@ export class SecurityPlugin
       logoutUrl: getLogoutUrl(core.http),
       securityApiClients,
     });
+
+    this.analyticsService.setup({ securityLicense: license });
 
     accountManagementApp.create({
       authc: this.authc,
@@ -171,6 +175,8 @@ export class SecurityPlugin
       this.anonymousAccessService.start({ http });
     }
 
+    this.analyticsService.start({ http: core.http });
+
     return {
       uiApi: getUiApi({ core }),
       navControlService: this.navControlService.start({ core, authc: this.authc }),
@@ -183,6 +189,7 @@ export class SecurityPlugin
     this.navControlService.stop();
     this.securityLicenseService.stop();
     this.managementService.stop();
+    this.analyticsService.stop();
   }
 }
 
