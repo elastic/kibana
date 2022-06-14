@@ -84,48 +84,48 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     const width =
       ITEM_SIZE * (actionsColumn.props.children.length + 1) + PADDING_SIZE + BORDER_SIZE;
     return [
-      ...(props.showExpandToDetails // prop to show the expand action
-        ? [
-            {
-              id: 'expandColumn',
-              width: width > MIN_ACTION_COLUMN_WIDTH ? width : MIN_ACTION_COLUMN_WIDTH,
-              headerCellRender: () => {
-                return (
-                  <span data-test-subj="expandColumnHeaderLabel">
-                    {ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL}
-                  </span>
-                );
-              },
-              rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
-                const { visibleRowIndex } = cveProps as EuiDataGridCellValueElementProps & {
-                  visibleRowIndex: number;
-                };
-                return (
-                  <EuiFlexGroup gutterSize="none" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip content={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}>
-                        <EuiButtonIcon
-                          size="s"
-                          iconType="expand"
-                          color="primary"
-                          onClick={() => {
-                            setFlyoutAlertIndex(visibleRowIndex);
-                          }}
-                          data-test-subj={`expandColumnCellOpenFlyoutButton-${visibleRowIndex}`}
-                          aria-label={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    {actionsColumn &&
-                      React.Children.map(actionsColumn.props.children, function (child) {
-                        return <EuiFlexItem grow={false}>{child}</EuiFlexItem>;
-                      })}
-                  </EuiFlexGroup>
-                );
-              },
-            },
-          ]
-        : []),
+      [
+        {
+          id: 'expandColumn',
+          width: width > MIN_ACTION_COLUMN_WIDTH ? width : MIN_ACTION_COLUMN_WIDTH,
+          headerCellRender: () => {
+            return (
+              <span data-test-subj="expandColumnHeaderLabel">
+                {ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL}
+              </span>
+            );
+          },
+          rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
+            const { visibleRowIndex } = cveProps as EuiDataGridCellValueElementProps & {
+              visibleRowIndex: number;
+            };
+            return (
+              <EuiFlexGroup gutterSize="none" responsive={false}>
+                {props.showExpandToDetails && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}>
+                      <EuiButtonIcon
+                        size="s"
+                        iconType="expand"
+                        color="primary"
+                        onClick={() => {
+                          setFlyoutAlertIndex(visibleRowIndex);
+                        }}
+                        data-test-subj={`expandColumnCellOpenFlyoutButton-${visibleRowIndex}`}
+                        aria-label={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+                {actionsColumn &&
+                  React.Children.map(actionsColumn.props.children, function (child) {
+                    return <EuiFlexItem grow={false}>{child}</EuiFlexItem>;
+                  })}
+              </EuiFlexGroup>
+            );
+          },
+        },
+      ],
       ...props.leadingControlColumns,
     ];
   }, [props.leadingControlColumns, props.showExpandToDetails, setFlyoutAlertIndex, actionsColumn]);
