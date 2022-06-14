@@ -10,6 +10,8 @@ import { ActionStatusRequestSchema, HostIsolationRequestSchema } from '../schema
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
+export type ResponseActions = ISOLATION_ACTIONS;
+
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -70,9 +72,24 @@ export interface LogsEndpointActionResponse {
   error?: EcsError;
 }
 
-export interface EndpointActionData {
-  command: ISOLATION_ACTIONS;
+interface KillProcessWithPid {
+  pid: number;
+  entity_id?: never;
+}
+
+interface KillProcessWithEntityId {
+  pid?: never;
+  entity_id: number;
+}
+
+export type KillProcessParameters = KillProcessWithPid | KillProcessWithEntityId;
+
+export type EndpointActionDataParameterTypes = undefined | KillProcessParameters;
+
+export interface EndpointActionData<T extends EndpointActionDataParameterTypes = undefined> {
+  command: ResponseActions;
   comment?: string;
+  parameters?: T;
 }
 
 export interface FleetActionResponseData {
@@ -171,6 +188,11 @@ export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.
 
 export interface HostIsolationResponse {
   action: string;
+}
+
+export interface ResponseActionApiResponse {
+  action?: string;
+  data: ActionDetails;
 }
 
 export interface EndpointPendingActions {

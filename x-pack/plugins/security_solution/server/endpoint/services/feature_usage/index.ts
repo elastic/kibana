@@ -6,6 +6,7 @@
  */
 
 import { FeatureUsageService } from './service';
+export type { FeatureKeys } from './service';
 export { createFeatureUsageServiceMock, createMockPolicyData } from './mocks';
 
 export const featureUsageService = new FeatureUsageService();
