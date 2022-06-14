@@ -10,6 +10,7 @@ import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent, EuiProvider } fro
 import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/alert';
 // @ts-expect-error no definitions in component folder
 import { appendIconComponentCache } from '@elastic/eui/lib/components/icon/icon';
+import createCache from '@emotion/cache';
 import type { ReactNode } from 'react';
 import React from 'react';
 
@@ -54,10 +55,16 @@ export function PromptPage({
     `${basePath.serverBasePath}/ui/legacy_light_theme.css`,
   ];
 
+  const emotionCache = createCache({
+    key: 'eui',
+    container: document.querySelector(`meta[name="eui-styles"]`) as HTMLElement,
+  });
+
   return (
     <html lang={i18n.getLocale()}>
       <head>
         <title>Elastic</title>
+        <meta name="eui-styles" />
         {styleSheetPaths.map((path) => (
           <link href={path} rel="stylesheet" key={path} />
         ))}
@@ -73,7 +80,7 @@ export function PromptPage({
       </head>
       <body>
         <I18nProvider>
-          <EuiProvider colorMode="light">
+          <EuiProvider colorMode="light" cache={{ eui: emotionCache }}>
             <EuiPage paddingSize="none" style={{ minHeight: '100vh' }} data-test-subj="promptPage">
               <EuiPageBody>
                 <EuiPageContent verticalPosition="center" horizontalPosition="center">

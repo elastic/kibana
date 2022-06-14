@@ -7,7 +7,7 @@
  */
 
 import { EuiContextMenu } from '@elastic/eui';
-import { ButtonContentIconSide } from '@elastic/eui/src/components/button/button_content';
+import { ButtonContentIconSide } from '@elastic/eui/src/components/button/_button_content_deprecated';
 import { Story } from '@storybook/react';
 import React from 'react';
 import { ToolbarPopover } from './popover';

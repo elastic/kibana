@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiThemeProvider } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
+import createCache from '@emotion/cache';
 import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
-
+import { Observable } from 'rxjs';
+import { EuiProvider } from '@elastic/eui';
 import type { CoreTheme } from '@kbn/core/public';
 import { getColorMode } from './utils';
 
@@ -23,11 +22,25 @@ const defaultTheme: CoreTheme = {
   darkMode: false,
 };
 
+const emotionCache = createCache({
+  key: 'eui',
+  container: document.querySelector(`meta[name="eui-styles"]`) as HTMLElement,
+});
+
 /**
  * Copied from the `kibana_react` plugin, to avoid cyclical dependency
  */
 export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, children }) => {
   const theme = useObservable(theme$, defaultTheme);
   const colorMode = useMemo(() => getColorMode(theme), [theme]);
-  return <EuiThemeProvider colorMode={colorMode}>{children}</EuiThemeProvider>;
+  return (
+    <EuiProvider
+      colorMode={colorMode}
+      cache={{ eui: emotionCache }}
+      globalStyles={false}
+      utilityClasses={false}
+    >
+      {children}
+    </EuiProvider>
+  );
 };

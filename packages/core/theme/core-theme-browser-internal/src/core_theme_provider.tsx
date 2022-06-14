@@ -25,7 +25,7 @@ interface CoreThemeProviderProps {
 }
 
 const emotionCache = createCache({
-  key: 'eui-styles',
+  key: 'eui',
   container: document.querySelector(`meta[name="${EUI_STYLES_GLOBAL}"]`) as HTMLElement,
 });
 
@@ -45,7 +45,7 @@ export const CoreThemeProvider: FC<CoreThemeProviderProps> = ({
       globalStyles={globalStyles}
       colorMode={euiTheme.colorMode}
       theme={euiTheme.euiThemeSystem}
-      cache={emotionCache}
+      cache={{ eui: emotionCache }}
     >
       {children}
     </EuiProvider>

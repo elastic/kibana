@@ -20,12 +20,12 @@ import 'core_styles';
 const EuiProviderDecorator: DecoratorFn = (storyFn, { globals }) => {
   const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
   const emotionCache = createCache({
-    key: 'eui-styles',
-    container: document.querySelector(`meta[name="eui-styles-global"]`) as HTMLElement,
+    key: 'eui',
+    container: document.querySelector(`meta[name="eui-styles"]`) as HTMLElement,
   });
 
   return (
-    <EuiProvider colorMode={colorMode} cache={emotionCache}>
+    <EuiProvider colorMode={colorMode} cache={{ eui: emotionCache }}>
       {storyFn()}
     </EuiProvider>
   );
