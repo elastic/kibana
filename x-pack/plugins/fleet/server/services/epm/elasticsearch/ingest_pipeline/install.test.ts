@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getArchiveEntry } from '../../archive/cache';
