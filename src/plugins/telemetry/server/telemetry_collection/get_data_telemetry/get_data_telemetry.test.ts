@@ -75,6 +75,9 @@ describe('get_data_telemetry', () => {
           { name: 'ml_host_risk_score_latest_default', docCount: 0 },
           { name: 'ml_host_risk_score_latest', docCount: 0 }, // This should not match,
           { name: 'ml_host_risk_score', docCount: 0 }, // This should not match
+          { name: 'ml_user_risk_score_latest_default', docCount: 0 },
+          { name: 'ml_user_risk_score_latest', docCount: 0 }, // This should not match,
+          { name: 'ml_user_risk_score', docCount: 0 }, // This should not match
           // New Indexing strategy: everything can be inferred from the constant_keyword values
           {
             name: '.ds-logs-nginx.access-default-000001',
