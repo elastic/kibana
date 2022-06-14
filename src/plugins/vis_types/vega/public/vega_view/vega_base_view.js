@@ -20,6 +20,7 @@ import { TooltipHandler } from './vega_tooltip';
 
 import { getEnableExternalUrls, getDataViews } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { normalizeDate, normalizeString, normalizeObject } from './utils';
 
 scheme('elastic', euiPaletteColorBlind());
 
@@ -350,8 +351,11 @@ export class VegaBaseView {
    * @param {string} Elastic Query DSL's Custom label for kibanaAddFilter, as used in '+ Add Filter'
    */
   async addFilterHandler(query, index, alias) {
-    const indexId = await this.findIndex(index);
-    const filter = buildQueryFilter(query, indexId, alias);
+    const normalizedQuery = normalizeObject(query);
+    const normalizedIndex = normalizeString(index);
+    const normalizedAlias = normalizeString(alias);
+    const indexId = await this.findIndex(normalizedIndex);
+    const filter = buildQueryFilter(normalizedQuery, indexId, normalizedAlias);
 
     this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
   }
@@ -361,8 +365,10 @@ export class VegaBaseView {
    * @param {string} [index] as defined in Kibana, or default if missing
    */
   async removeFilterHandler(query, index) {
-    const indexId = await this.findIndex(index);
-    const filterToRemove = buildQueryFilter(query, indexId);
+    const normalizedQuery = normalizeObject(query);
+    const normalizedIndex = normalizeString(index);
+    const indexId = await this.findIndex(normalizedIndex);
+    const filterToRemove = buildQueryFilter(normalizedQuery, indexId);
 
     const currentFilters = this._filterManager.getFilters();
     const existingFilter = currentFilters.find((filter) => compareFilters(filter, filterToRemove));
@@ -386,7 +392,9 @@ export class VegaBaseView {
    * @param {number|string|Date} end
    */
   setTimeFilterHandler(start, end) {
-    const { from, to, mode } = VegaBaseView._parseTimeRange(start, end);
+    const normalizedStart = normalizeDate(start);
+    const normalizedEnd = normalizeDate(end);
+    const { from, to, mode } = VegaBaseView._parseTimeRange(normalizedStart, normalizedEnd);
 
     this._fireEvent({
       name: 'applyFilter',

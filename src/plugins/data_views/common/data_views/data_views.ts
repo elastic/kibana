@@ -37,11 +37,14 @@ import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../erro
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
-export type DataViewSavedObjectAttrs = Pick<DataViewAttributes, 'title' | 'type' | 'typeMeta'>;
+export type DataViewSavedObjectAttrs = Pick<
+  DataViewAttributes,
+  'title' | 'type' | 'typeMeta' | 'name'
+>;
 
 export type IndexPatternListSavedObjectAttrs = Pick<
   DataViewAttributes,
-  'title' | 'type' | 'typeMeta'
+  'title' | 'type' | 'typeMeta' | 'name'
 >;
 
 /**
@@ -68,6 +71,7 @@ export interface DataViewListItem {
    * Data view type meta
    */
   typeMeta?: TypeMeta;
+  name?: string;
 }
 
 /**
@@ -244,7 +248,7 @@ export interface DataViewsServicePublicMethods {
     indexPattern: DataView,
     saveAttempts?: number,
     ignoreErrors?: boolean
-  ) => Promise<void | Error>;
+  ) => Promise<DataView | void | Error>;
 }
 
 /**
@@ -306,7 +310,7 @@ export class DataViewsService {
   private async refreshSavedObjectsCache() {
     const so = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
-      fields: ['title', 'type', 'typeMeta'],
+      fields: ['title', 'type', 'typeMeta', 'name'],
       perPage: 10000,
     });
     this.savedObjectsCache = so;
@@ -377,6 +381,7 @@ export class DataViewsService {
       title: obj?.attributes?.title,
       type: obj?.attributes?.type,
       typeMeta: obj?.attributes?.typeMeta && JSON.parse(obj?.attributes?.typeMeta),
+      name: obj?.attributes?.name,
     }));
   };
 
@@ -602,6 +607,7 @@ export class DataViewsService {
         type,
         fieldAttrs,
         allowNoIndex,
+        name,
       },
     } = savedObject;
 
@@ -628,6 +634,7 @@ export class DataViewsService {
       fieldAttrs: parsedFieldAttrs,
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
+      name,
     };
   };
 
@@ -833,7 +840,7 @@ export class DataViewsService {
     indexPattern: DataView,
     saveAttempts: number = 0,
     ignoreErrors: boolean = false
-  ): Promise<void | Error> {
+  ): Promise<DataView | void | Error> {
     if (!indexPattern.id) return;
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError(indexPattern.id);
@@ -858,6 +865,7 @@ export class DataViewsService {
       .then((resp) => {
         indexPattern.id = resp.id;
         indexPattern.version = resp.version;
+        return indexPattern;
       })
       .catch(async (err) => {
         if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
