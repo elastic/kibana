@@ -12,7 +12,7 @@
   const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
   const buildLiteralNode = nodeTypes.literal.buildNode;
   const buildWildcardNode = nodeTypes.wildcard.buildNode;
-  const { wildcardSymbol } = nodeTypes.wildcard;
+  const { KQL_WILDCARD_SYMBOL } = nodeTypes.wildcard;
 }
 
 start
@@ -248,7 +248,7 @@ UnquotedLiteral
     if (sequence === 'null') return buildLiteralNode(null);
     if (sequence === 'true') return buildLiteralNode(true);
     if (sequence === 'false') return buildLiteralNode(false);
-    if (chars.includes(wildcardSymbol)) return buildWildcardNode(sequence);
+    if (chars.includes(KQL_WILDCARD_SYMBOL)) return buildWildcardNode(sequence);
     return buildLiteralNode(sequence);
   }
 
@@ -261,7 +261,7 @@ UnquotedCharacter
   / !SpecialCharacter !Keyword !Cursor char:. { return char; }
 
 Wildcard
-  = '*' { return wildcardSymbol; }
+  = '*' { return KQL_WILDCARD_SYMBOL; }
 
 OptionalSpace
   = &{ return parseCursor; } prefix:Space* cursor:Cursor suffix:Space* {
