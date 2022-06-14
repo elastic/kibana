@@ -114,9 +114,12 @@ describe('migration v2', () => {
     });
 
     await expect(root.start()).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 1 corrupt saved object documents were found: index-pattern:test_index*
-      To allow migrations to proceed, please delete or fix these documents."
-    `);
+            "Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 1 corrupt saved object documents were found: index-pattern:test_index*
+
+            To allow migrations to proceed, please delete or fix these documents.
+            Note that you can configure Kibana to automatically discard corrupt documents and transform errors for this migration.
+            Please refer to https://www.elastic.co/guide/en/kibana/master/resolve-migrations-failures.html for more information."
+          `);
 
     const logFileContent = await asyncReadFile(logFilePath, 'utf-8');
     const records = logFileContent

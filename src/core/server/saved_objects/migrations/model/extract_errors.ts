@@ -13,6 +13,7 @@ import type { DocumentIdAndType } from '../actions';
  * Constructs migration failure message strings from corrupt document ids and document transformation errors
  */
 export function extractTransformFailuresReason(
+  resolveMigrationFailuresUrl: string,
   corruptDocumentIds: string[],
   transformErrors: TransformErrorObjects[]
 ): string {
@@ -20,19 +21,21 @@ export function extractTransformFailuresReason(
     corruptDocumentIds.length > 0
       ? ` ${
           corruptDocumentIds.length
-        } corrupt saved object documents were found: ${corruptDocumentIds.join(',')}`
+        } corrupt saved object documents were found: ${corruptDocumentIds.join(', ')}\n`
       : '';
   // we have both the saved object Id and the stack trace in each `transformErrors` item.
   const transformErrorsReason =
     transformErrors.length > 0
-      ? ` ${transformErrors.length} transformation errors were encountered:\n ` +
+      ? ` ${transformErrors.length} transformation errors were encountered:\n` +
         transformErrors
           .map((errObj) => `- ${errObj.rawId}: ${errObj.err.stack ?? errObj.err.message}\n`)
           .join('')
       : '';
   return (
     `Migrations failed. Reason:${corruptDocumentIdReason}${transformErrorsReason}\n` +
-    `To allow migrations to proceed, please delete or fix these documents.`
+    `To allow migrations to proceed, please delete or fix these documents.\n` +
+    `Note that you can configure Kibana to automatically discard corrupt documents and transform errors for this migration.\n` +
+    `Please refer to ${resolveMigrationFailuresUrl} for more information.`
   );
 }
 
@@ -53,6 +56,18 @@ export function extractUnknownDocFailureReason(
     unknownDocs.map((doc) => `- "${doc.id}" (type: "${doc.type}")\n`).join('') +
     `\nTo proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.\n` +
     `Please refer to ${resolveMigrationFailuresUrl} for more information.`
+  );
+}
+
+export function extractDiscardedCorruptDocs(
+  corruptDocumentIds: string[],
+  transformErrors: TransformErrorObjects[]
+): string {
+  return (
+    `Kibana has been configured to discard corrupt documents and documents that cause transform errors for this migration.\n` +
+    `Therefore, the following documents will not be taken into account and they will not be available after the migration:\n` +
+    corruptDocumentIds.map((id) => `- "${id}" (corrupt)\n`).join('') +
+    transformErrors.map((error) => `- "${error.rawId}" (${error.err.message})\n`).join('')
   );
 }
 
