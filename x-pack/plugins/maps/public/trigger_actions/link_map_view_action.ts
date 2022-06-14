@@ -49,7 +49,7 @@ export const linkMapViewAction = createAction<LinkMapViewActionContext>({
     const { synchronizeMaps } = await import('../embeddable/synchronize_maps');
     return (
       synchronizeMaps.hasMultipleMaps() &&
-      embeddable.type === MAP_SAVED_OBJECT_TYPE && 
+      embeddable.type === MAP_SAVED_OBJECT_TYPE &&
       embeddable.getInput().viewMode === ViewMode.EDIT
     );
   },
