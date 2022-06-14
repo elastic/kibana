@@ -243,13 +243,13 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     });
 
     const panelIds = [];
-    const startTime = new Date().getTime();
+    const startTime = performance.now();
 
     const onPanelStatusChange = (info: any) => {
       console.log(info);
       panelIds.push(info);
       if (panelIds.length === panelsInOrder.length) {
-        console.log(`Took ${new Date().getTime() - startTime} in total`);
+        console.log(`Took ${new Date().getTime() - performance.now()} in total`);
       }
     };
 
