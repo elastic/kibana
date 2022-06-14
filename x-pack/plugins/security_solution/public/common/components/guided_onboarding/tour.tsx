@@ -20,8 +20,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import './tour.scss';
 
-const SECURITY_TOUR_ACTIVE_KEY = 'securityTourActiveKey';
-const SECURITY_TOUR_STEP_KEY = 'securityTourStepKey';
+const SECURITY_TOUR_ACTIVE_KEY = 'guidedOnboarding.security.tourActive';
+const SECURITY_TOUR_STEP_KEY = 'guidedOnboarding.security.tourStep';
 const getIsTourActiveFromLocalStorage = (): boolean => {
   return Boolean(JSON.parse(String(localStorage.getItem(SECURITY_TOUR_ACTIVE_KEY))));
 };
@@ -123,6 +123,7 @@ const getSteps = (
   );
   return tourConfig.map((stepConfig) => {
     return (
+      // @ts-expect-error
       <EuiTourStep
         {...stepConfig}
         minWidth={minWidth}

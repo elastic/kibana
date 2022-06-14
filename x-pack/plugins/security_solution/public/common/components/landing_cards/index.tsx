@@ -6,7 +6,14 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeader,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from './translations';
 import endpointSvg from '../../images/endpoint1.svg';
