@@ -15907,6 +15907,11 @@ graphql@^16.5.0:
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.5.0.tgz#41b5c1182eaac7f3d47164fb247f61e4dfb69c85"
   integrity sha512-qbHgh8Ix+j/qY+a/ZcJnFQ+j8ezakqPiHwPiZhV/3PgGlgf96QMBB5/f2rkiC9sgLoy/xvT6TSiaf2nTHJh5iA==
 
+gridstack@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/gridstack/-/gridstack-5.1.0.tgz#5c9c30dd8ae6c5cd5a2f880efe30b750e0903e97"
+  integrity sha512-qNLAXC4weAqOvzf7gYi+ScRR3j5FYFh1Tdp5ec1q74d2M/0PHAZJWftU/LdYXKniOydnVdr48GYNDxFxE13SFw==
+
 growl@1.10.5:
   version "1.10.5"
   resolved "https://registry.yarnpkg.com/growl/-/growl-1.10.5.tgz#f2735dc2283674fa67478b10181059355c369e5e"

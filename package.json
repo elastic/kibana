@@ -297,6 +297,7 @@
     "glob": "^7.1.2",
     "glob-all": "^3.2.1",
     "globby": "^11.0.3",
+    "gridstack": "^5.1.0",
     "handlebars": "4.7.7",
     "he": "^1.2.0",
     "history": "^4.9.0",
