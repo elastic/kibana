@@ -9,16 +9,10 @@ import expect from '@kbn/expect';
 import { createPdfV2Params, createPngV2Params } from '..';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const getUsageCount = (checkUsage: any, counterName: string): number => {
-  return (
-    checkUsage.usage_counters.daily_events.find((item: any) => item.counter_name === counterName)
-      ?.total || 0
-  );
-};
-
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestUnauth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const usageAPI = getService('usageAPI');
   const reportingAPI = getService('reportingAPI');
@@ -87,12 +81,39 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getUsageCount(initialStats, `get ${paths.INFO}`)).to.be(0);
         expect(getUsageCount(stats, `get ${paths.INFO}`)).to.be(CALL_COUNT);
       });
+    });
 
-      // TODO
-      it('deleting reports', async () => {});
+    describe('downloading and deleting', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
+      });
 
-      // TODO
-      it('downloading reports', async () => {});
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
+      });
+
+      it('downloading', async () => {});
+
+      it('deleting', async () => {
+        await supertestUnauth
+          .delete('/api/reporting/jobs/delete/krazcyw4156m0763b503j7f9')
+          .auth('test_user', 'changeme')
+          .set('kbn-xsrf', 'xxx');
+
+        await supertestUnauth
+          .delete('/api/reporting/jobs/delete/krazaxch156m0763b5bf81ov')
+          .auth('test_user', 'changeme')
+          .set('kbn-xsrf', 'xxx');
+        // wait for events to aggregate into the usage stats
+        await new Promise((resolve) => {
+          setTimeout(resolve, 8000);
+        });
+
+        // determine the result usage count
+        expect(
+          getUsageCount(await usageAPI.getUsageStats(), `delete /api/reporting/jobs/delete/{docId}`)
+        ).to.be(2);
+      });
     });
 
     describe('API counters: job generation', () => {
@@ -140,6 +161,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // helpers
+    const getUsageCount = (checkUsage: any, counterName: string): number => {
+      return (
+        checkUsage.usage_counters.daily_events.find(
+          (item: any) => item.counter_name === counterName
+        )?.total || 0
+      );
+    };
+
     const postCsv = () =>
       reportingAPI.postJobJSON(`/api/reporting/generate/csv_searchsource`, {
         jobParams:
