@@ -42,7 +42,7 @@ function getCompProps(): DiscoverSidebarProps {
   const fieldCounts: Record<string, number> = {};
 
   for (const hit of hits) {
-    for (const key of Object.keys(flattenHit(hit, indexPattern))) {
+    for (const key of Object.keys(hit.flattened)) {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
