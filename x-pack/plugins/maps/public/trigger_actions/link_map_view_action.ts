@@ -46,8 +46,11 @@ export const linkMapViewAction = createAction<LinkMapViewActionContext>({
     return 'crosshairs';
   },
   isCompatible: async ({ embeddable }: LinkMapViewActionContext) => {
+    const { synchronizeMaps } = await import('../embeddable/synchronize_maps');
     return (
-      embeddable.type === MAP_SAVED_OBJECT_TYPE && embeddable.getInput().viewMode === ViewMode.EDIT
+      synchronizeMaps.hasMultipleMaps() &&
+      embeddable.type === MAP_SAVED_OBJECT_TYPE && 
+      embeddable.getInput().viewMode === ViewMode.EDIT
     );
   },
   execute: async ({ embeddable }: LinkMapViewActionContext) => {

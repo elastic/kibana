@@ -11,6 +11,9 @@ const registry: Record<string, (lat: number, lon: number, zoom: number) => void>
 let location: MapCenterAndZoom | undefined;
 
 export const synchronizeMaps = {
+  hasMultipleMaps() {
+    return Object.keys(registry).length > 1;
+  },
   getLocation() {
     return location;
   },
