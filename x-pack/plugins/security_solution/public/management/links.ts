@@ -76,7 +76,8 @@ export const links: LinkItem = {
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
-  globalNavEnabled: false,
+  globalNavEnabled: true,
+  globalNavOrder: 6,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
@@ -95,7 +96,6 @@ export const links: LinkItem = {
 
       landingIcon: IconSiemRules,
       path: RULES_PATH,
-      globalNavEnabled: false,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.rules', {
           defaultMessage: 'Rules',
@@ -106,7 +106,6 @@ export const links: LinkItem = {
           id: SecurityPageName.rulesCreate,
           title: CREATE_NEW_RULE,
           path: RULES_CREATE_PATH,
-          globalNavEnabled: false,
           skipUrlState: true,
           hideTimeline: true,
         },
@@ -120,7 +119,6 @@ export const links: LinkItem = {
       }),
       landingIcon: IconExceptionLists,
       path: EXCEPTIONS_PATH,
-      globalNavEnabled: false,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.exceptions', {
           defaultMessage: 'Exception lists',
@@ -133,9 +131,7 @@ export const links: LinkItem = {
         defaultMessage: 'Hosts running endpoint security.',
       }),
       landingIcon: IconEndpoints,
-      globalNavEnabled: true,
       title: ENDPOINTS,
-      globalNavOrder: 9008,
       path: ENDPOINTS_PATH,
       skipUrlState: true,
       hideTimeline: true,

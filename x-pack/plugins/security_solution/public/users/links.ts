@@ -20,13 +20,11 @@ export const links: LinkItem = {
       'A comprehensive overview of user data that enables understanding of authentication and user behavior within your environment.',
   }),
   path: USERS_PATH,
-  globalNavEnabled: true,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.users', {
       defaultMessage: 'Users',
     }),
   ],
-  globalNavOrder: 9004,
   links: [
     {
       id: SecurityPageName.usersAuthentications,
