@@ -4,7 +4,6 @@
 
 ## CoreStart.theme property
 
-[ThemeServiceStart](./kibana-plugin-core-public.themeservicestart.md)
 
 <b>Signature:</b>
 

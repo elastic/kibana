@@ -30,6 +30,8 @@ import type {
   InjectedMetadataSetup,
   InjectedMetadataStart,
 } from '@kbn/core-injected-metadata-browser';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -60,10 +62,8 @@ import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
-import type { ThemeServiceSetup, ThemeServiceStart } from './theme';
 import { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from './analytics';
 
@@ -204,7 +204,7 @@ export type {
   ErrorToastOptions,
 } from './notifications';
 
-export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from './theme';
+export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
 
 export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
 
