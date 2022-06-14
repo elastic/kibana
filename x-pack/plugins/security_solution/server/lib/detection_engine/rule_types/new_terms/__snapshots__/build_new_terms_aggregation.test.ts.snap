@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`buildNewTermsAggregation builds a correct aggregation with @timestamp 1`] = `
+exports[`aggregations buildDocFetchAgg builds a correct top hits aggregation 1`] = `
 Object {
   "new_terms": Object {
     "aggs": Object {
@@ -14,6 +14,22 @@ Object {
           ],
         },
       },
+    },
+    "terms": Object {
+      "field": "host.name",
+      "include": Array [
+        "myHost",
+      ],
+      "size": 10000,
+    },
+  },
+}
+`;
+
+exports[`aggregations buildNewTermsAggregation builds a correct aggregation with @timestamp 1`] = `
+Object {
+  "new_terms": Object {
+    "aggs": Object {
       "filtering_agg": Object {
         "bucket_selector": Object {
           "buckets_path": Object {
@@ -35,29 +51,19 @@ Object {
     },
     "terms": Object {
       "field": "host.ip",
-      "order": Object {
-        "first_seen": "desc",
-      },
-      "size": 200,
+      "include": Array [
+        "myHost",
+      ],
+      "size": 10000,
     },
   },
 }
 `;
 
-exports[`buildNewTermsAggregation builds a correct aggregation with event.ingested 1`] = `
+exports[`aggregations buildNewTermsAggregation builds a correct aggregation with event.ingested 1`] = `
 Object {
   "new_terms": Object {
     "aggs": Object {
-      "docs": Object {
-        "top_hits": Object {
-          "size": 1,
-          "sort": Array [
-            Object {
-              "event.ingested": "asc",
-            },
-          ],
-        },
-      },
       "filtering_agg": Object {
         "bucket_selector": Object {
           "buckets_path": Object {
@@ -79,10 +85,52 @@ Object {
     },
     "terms": Object {
       "field": "host.name",
-      "order": Object {
-        "first_seen": "desc",
+      "include": Array [
+        "myHost",
+      ],
+      "size": 10000,
+    },
+  },
+}
+`;
+
+exports[`aggregations buildRecentTermsAgg builds a correct composite agg without \`after\` 1`] = `
+Object {
+  "new_terms": Object {
+    "composite": Object {
+      "after": undefined,
+      "size": 10000,
+      "sources": Array [
+        Object {
+          "host.name": Object {
+            "terms": Object {
+              "field": "host.name",
+            },
+          },
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`aggregations buildRecentTermsAgg builds a correct composite aggregation with \`after\` 1`] = `
+Object {
+  "new_terms": Object {
+    "composite": Object {
+      "after": Object {
+        "host.name": "myHost",
       },
-      "size": 50,
+      "size": 10000,
+      "sources": Array [
+        Object {
+          "host.name": Object {
+            "terms": Object {
+              "field": "host.name",
+            },
+          },
+        },
+      ],
     },
   },
 }
