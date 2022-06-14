@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IntegrationDetails } from './utils';
 import {
   InstalledIntegrationArray,
   RelatedIntegrationArray,
@@ -62,39 +61,3 @@ export const installedIntegrationsAWSCloudwatch: InstalledIntegrationArray = [
     is_enabled: true,
   },
 ];
-
-export const integrationDetailsUninstalled: IntegrationDetails = {
-  package_name: 'test',
-  package_title: 'Test',
-  package_version: '1.2.3',
-  integration_name: 'integration',
-  integration_title: 'Integration',
-  is_enabled: false,
-  is_installed: false,
-  target_version: '1.2.3',
-  version_satisfied: false,
-};
-
-export const integrationDetailsInstalled: IntegrationDetails = {
-  package_name: 'test',
-  package_title: 'Test',
-  package_version: '1.2.3',
-  integration_name: 'integration',
-  integration_title: 'Integration',
-  is_enabled: false,
-  is_installed: true,
-  target_version: '1.2.3',
-  version_satisfied: true,
-};
-
-export const integrationDetailsEnabled: IntegrationDetails = {
-  package_name: 'test',
-  package_title: 'Test',
-  package_version: '1.1.3',
-  integration_name: 'integration',
-  integration_title: 'Integration',
-  is_enabled: true,
-  is_installed: true,
-  target_version: '1.3.3',
-  version_satisfied: false,
-};

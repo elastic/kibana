@@ -7,63 +7,28 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiBadge, EuiIconTip, EuiToolTip } from '@elastic/eui';
-import { useInstalledIntegrations } from '../use_installed_integrations';
-import { getInstalledRelatedIntegrations, getIntegrationLink, IntegrationDetails } from '../utils';
 
 import { RelatedIntegrationArray } from '../../../../../../common/detection_engine/schemas/common';
-import { useBasePath } from '../../../../../common/lib/kibana';
 import { ListItems } from '../../description_step/types';
-import * as i18n from '../translations';
+import { IntegrationDetails } from '../integration_details';
+import { useRelatedIntegrations } from '../use_related_integrations';
+
+import { IntegrationLink } from './integration_link';
+import { IntegrationStatusBadge } from './integration_status_badge';
+import { IntegrationVersionMismatchIcon } from './integration_version_mismatch_icon';
 
 const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-const PaddedBadge = styled(EuiBadge)`
-  margin-left: 5px;
-`;
-
-const VersionWarningIconContainer = styled.span`
-  margin-left: 5px;
-`;
-
 export const IntegrationDescriptionComponent: React.FC<{ integration: IntegrationDetails }> = ({
   integration,
 }) => {
-  const basePath = useBasePath();
-  const badgeInstalledColor = 'success';
-  const badgeUninstalledColor = '#E0E5EE';
-  const badgeColor = integration.is_installed ? badgeInstalledColor : badgeUninstalledColor;
-  const badgeTooltip = integration.is_installed
-    ? integration.is_enabled
-      ? i18n.INTEGRATIONS_ENABLED_TOOLTIP
-      : i18n.INTEGRATIONS_INSTALLED_TOOLTIP
-    : i18n.INTEGRATIONS_UNINSTALLED_TOOLTIP;
-  const badgeText = integration.is_installed
-    ? integration.is_enabled
-      ? i18n.INTEGRATIONS_ENABLED
-      : i18n.INTEGRATIONS_INSTALLED
-    : i18n.INTEGRATIONS_UNINSTALLED;
-
   return (
     <Wrapper>
-      {getIntegrationLink(integration, basePath)}{' '}
-      <EuiToolTip content={badgeTooltip}>
-        <PaddedBadge color={badgeColor}>{badgeText}</PaddedBadge>
-      </EuiToolTip>
-      {integration.is_installed && !integration.version_satisfied && (
-        <VersionWarningIconContainer>
-          <EuiIconTip
-            type={'alert'}
-            color={'warning'}
-            content={i18n.INTEGRATIONS_INSTALLED_VERSION_TOOLTIP(
-              integration.package_version,
-              integration.target_version
-            )}
-          />
-        </VersionWarningIconContainer>
-      )}
+      <IntegrationLink integration={integration} />{' '}
+      <IntegrationStatusBadge integration={integration} />
+      <IntegrationVersionMismatchIcon integration={integration} />
     </Wrapper>
   );
 };
@@ -71,20 +36,15 @@ export const IntegrationDescriptionComponent: React.FC<{ integration: Integratio
 export const IntegrationDescription = React.memo(IntegrationDescriptionComponent);
 
 export const RelatedIntegrationsDescription: React.FC<{
-  integrations: RelatedIntegrationArray;
-}> = ({ integrations }) => {
-  const { data: allInstalledIntegrations } = useInstalledIntegrations({ packages: [] });
-
-  const integrationDetails = getInstalledRelatedIntegrations(
-    integrations,
-    allInstalledIntegrations
-  );
+  relatedIntegrations: RelatedIntegrationArray;
+}> = ({ relatedIntegrations }) => {
+  const { integrations } = useRelatedIntegrations(relatedIntegrations);
 
   return (
     <>
-      {integrationDetails.map((integration, index) => (
+      {integrations.map((integration, index) => (
         <IntegrationDescription
-          key={`${integration.package_name}-${index}`}
+          key={`${integration.packageName}-${index}`}
           integration={integration}
         />
       ))}
@@ -103,7 +63,7 @@ export const buildRelatedIntegrationsDescription = (
   return [
     {
       title: label,
-      description: <RelatedIntegrationsDescription integrations={relatedIntegrations} />,
+      description: <RelatedIntegrationsDescription relatedIntegrations={relatedIntegrations} />,
     },
   ];
 };
