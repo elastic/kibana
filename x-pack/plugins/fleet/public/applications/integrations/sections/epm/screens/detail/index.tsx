@@ -10,7 +10,6 @@ import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'rea
 import styled from 'styled-components';
 import {
   EuiBadge,
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiCallOut,
   EuiDescriptionList,
@@ -45,11 +44,11 @@ import { InstallStatus } from '../../../../types';
 import { Error, Loading } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
-import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
+
+import { HeaderReleaseBadge } from '../../components/release_badge';
 
 import { useIsFirstTimeAgentUser } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
-
 import {
   IntegrationAgentPolicyCount,
   UpdateIcon,
@@ -253,10 +252,7 @@ export function Detail() {
                     </EuiFlexItem>
                     {packageInfo?.release && packageInfo.release !== 'ga' ? (
                       <EuiFlexItem grow={false}>
-                        <EuiBetaBadge
-                          label={RELEASE_BADGE_LABEL[packageInfo.release]}
-                          tooltipContent={RELEASE_BADGE_DESCRIPTION[packageInfo.release]}
-                        />
+                        <HeaderReleaseBadge release={packageInfo.release} />
                       </EuiFlexItem>
                     ) : null}
                   </EuiFlexGroup>
