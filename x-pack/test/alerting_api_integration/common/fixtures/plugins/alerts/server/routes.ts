@@ -333,7 +333,7 @@ export function defineRoutes(
 
   router.post(
     {
-      path: `/api/alerting_actions_telemetry/run_now`,
+      path: `/api/alerting_actions_telemetry/run_soon`,
       validate: {
         body: schema.object({
           taskId: schema.string({

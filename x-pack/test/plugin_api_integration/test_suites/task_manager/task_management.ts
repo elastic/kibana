@@ -171,7 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     function runTaskSoon(task: { id: string }) {
       return supertest
-        .post('/api/sample_tasks/run_now')
+        .post('/api/sample_tasks/run_soon')
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
@@ -676,7 +676,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(task.state.count).to.eql(1);
         expect(task.status).to.eql('idle');
 
-        // ensure this task shouldnt run for another half hour
+        // ensure this task shouldn't run for another half hour
         expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
       });
 
@@ -686,28 +686,16 @@ export default function ({ getService }: FtrProviderContext) {
       const successfulRunSoonResult = await runTaskSoon({
         id: originalTask.id,
       });
+
       expect(successfulRunSoonResult).to.eql({ id: originalTask.id });
 
       await retry.try(async () => {
         const task = await currentTask<{ count: number }>(originalTask.id);
-        expect(task.state.count).to.eql(2);
         expect(task.status).to.eql('idle');
+        expect(task.state.count).to.eql(2);
       });
 
       await ensureTasksIndexRefreshed();
-
-      // flaky: runTaskNow() sometimes fails with the following error, so retrying
-      // error: Failed to run task "<id>" as it is currently running
-      await retry.try(async () => {
-        const failedRunSoonResult = await runTaskSoon({
-          id: originalTask.id,
-        });
-
-        expect(failedRunSoonResult).to.eql({
-          id: originalTask.id,
-          error: `Error: Failed to run task \"${originalTask.id}\": Error: this task was meant to fail!`,
-        });
-      });
 
       await retry.try(async () => {
         expect(

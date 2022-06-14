@@ -218,7 +218,7 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
 
       // request telemetry task to run
       await supertest
-        .post('/api/alerting_actions_telemetry/run_now')
+        .post('/api/alerting_actions_telemetry/run_soon')
         .set('kbn-xsrf', 'xxx')
         .send({ taskId: 'Alerting-alerting_telemetry' })
         .expect(200);

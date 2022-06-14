@@ -85,7 +85,7 @@ export function initRoutes(
 
   router.post(
     {
-      path: `/api/sample_tasks/run_now`,
+      path: `/api/sample_tasks/run_soon`,
       validate: {
         body: schema.object({
           task: schema.object({
