@@ -79,12 +79,11 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
         }),
         // Map loaded event properties
         map((output) => {
-          const endTime = new Date().getTime();
           return {
             id: this.embeddable.id,
             status: output.error ? 'error' : 'loaded',
             error: output.error,
-            timeTookMs: endTime - performance.now(),
+            timeTookMs: performance.now() - startTime,
           };
         }),
         // Dedupe
