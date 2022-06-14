@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/shared-ux-solution-toolbar",
+  "name": "@kbn/shared-ux-button-toolbar",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",

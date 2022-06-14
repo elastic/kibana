@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/packages/shared-ux/solution_toolbar'],
+  roots: ['<rootDir>/packages/shared-ux/button_toolbar'],
 };
