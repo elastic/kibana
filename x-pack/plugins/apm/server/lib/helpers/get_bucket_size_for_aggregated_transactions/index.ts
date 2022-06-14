@@ -18,6 +18,6 @@ export function getBucketSizeForAggregatedTransactions({
   numBuckets?: number;
   searchAggregatedTransactions?: boolean;
 }) {
-  const minBucketSize = searchAggregatedTransactions ? 60 * 5 : undefined;
+  const minBucketSize = searchAggregatedTransactions ? 60 : undefined;
   return getBucketSize({ start, end, numBuckets, minBucketSize });
 }
