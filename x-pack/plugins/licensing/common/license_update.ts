@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { ConnectableObservable, type Observable, Subject, from, merge, firstValueFrom } from 'rxjs';
-
 import {
-  filter,
-  map,
-  pairwise,
-  exhaustMap,
-  publishReplay,
-  share,
-  takeUntil,
-  tap,
-} from 'rxjs/operators';
+  type Observable,
+  Subject,
+  from,
+  merge,
+  firstValueFrom,
+  connectable,
+  ReplaySubject,
+} from 'rxjs';
+
+import { filter, map, pairwise, exhaustMap, share, takeUntil, finalize } from 'rxjs/operators';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 import type { ILicense } from './types';
 
@@ -27,20 +26,25 @@ export function createLicenseUpdate(
   initialValues?: ILicense
 ) {
   const manuallyRefresh$ = new Subject<void>();
-  const fetched$ = merge(
-    triggerRefresh$.pipe(takeUntil(stop$.pipe(tap(() => manuallyRefresh$.complete())))),
-    manuallyRefresh$
-  ).pipe(exhaustMap(fetcher), share());
 
-  const cached$ = fetched$.pipe(
+  const fetched$ = merge(triggerRefresh$, manuallyRefresh$).pipe(
     takeUntil(stop$),
-    publishReplay(1)
-    // have to cast manually as pipe operator cannot return ConnectableObservable
-    // https://github.com/ReactiveX/rxjs/issues/2972
-  ) as ConnectableObservable<ILicense>;
+    exhaustMap(fetcher),
+    share()
+  );
 
-  const cachedSubscription = cached$.connect();
-  stop$.subscribe({ complete: () => cachedSubscription.unsubscribe() });
+  const cached$ = connectable(fetched$, { connector: () => new ReplaySubject(1) });
+
+  const cachedSubscription = cached$.connect(); // start periodic license fetch right away
+
+  stop$
+    .pipe(
+      finalize(() => {
+        manuallyRefresh$.complete();
+        cachedSubscription.unsubscribe();
+      })
+    )
+    .subscribe();
 
   const initialValues$ = initialValues ? from([undefined, initialValues]) : from([undefined]);
 
