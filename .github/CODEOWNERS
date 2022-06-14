@@ -648,7 +648,7 @@ x-pack/plugins/security_solution/public/kubernetes @elastic/awp-platform
 /src/plugins/home/public @elastic/shared-ux
 /src/plugins/home/server/*.ts @elastic/shared-ux
 /src/plugins/home/server/services/ @elastic/shared-ux
-#CC# /src/plugins/home/public @elastic/kibana-core
-#CC# /src/plugins/home/server/services/ @elastic/kibana-core
-#CC# /src/plugins/home/ @elastic/kibana-core
+#CC# /src/plugins/home/public @elastic/shared-ux
+#CC# /src/plugins/home/server/services/ @elastic/shared-ux
+#CC# /src/plugins/home/ @elastic/shared-ux
 /src/plugins/kibana_overview/ @elastic/shared-ux
