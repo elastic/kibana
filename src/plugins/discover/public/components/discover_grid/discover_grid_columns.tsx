@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridColumn, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiDataGridColumn, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
@@ -123,15 +123,13 @@ export function buildEuiGridColumn({
     );
 
     column.display = (
-      <Fragment>
-        {indexPatternField?.customLabel ?? indexPattern.timeFieldName}{' '}
-        <EuiIconTip
-          iconProps={{ tabIndex: -1 }}
-          type="clock"
-          aria-label={primaryTimeAriaLabel}
-          content={primaryTimeTooltip}
-        />
-      </Fragment>
+      <div aria-label={primaryTimeAriaLabel}>
+        <EuiToolTip position="bottom" content={primaryTimeTooltip}>
+          <>
+            {indexPatternField?.customLabel ?? indexPattern.timeFieldName} <EuiIcon type="clock" />
+          </>
+        </EuiToolTip>
+      </div>
     );
     column.initialWidth = defaultTimeColumnWidth;
   }
