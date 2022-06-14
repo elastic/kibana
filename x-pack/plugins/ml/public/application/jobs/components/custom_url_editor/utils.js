@@ -169,20 +169,6 @@ async function buildDashboardUrlFromSettings(settings) {
     useHash: false,
   });
 
-  const urlValue = await dashboard.locator.getUrl({
-    dashboardId,
-    timeRange: {
-      from: '$earliest$',
-      to: '$latest$',
-      mode: 'absolute',
-    },
-    filters,
-    query,
-    // Don't hash the URL since this string will be 1. shown to the user and 2. used as a
-    // template to inject the time parameters.
-    useHash: false,
-  });
-
   // Temp workaround
   const state = location.state;
   const resultPath = setStateToKbnUrl(
@@ -193,7 +179,7 @@ async function buildDashboardUrlFromSettings(settings) {
       savedQuery: state.savedQuery,
     }),
     { useHash: false, storeInHashQuery: true },
-    urlValue
+    location.path
   );
 
   const urlToAdd = {
