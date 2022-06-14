@@ -23,7 +23,7 @@ import {
   TimelineId,
   TimelineTabs,
 } from '../../../../common/types/timeline';
-import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
 import { useKibana } from '../../../common/lib/kibana';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
@@ -66,7 +66,7 @@ describe('Details Panel Component', () => {
       panelView: 'networkDetail',
       params: {
         ip: 'woohoo!',
-        flowTarget: FlowTarget.source,
+        flowTarget: FlowTargetSourceDest.source,
       },
     },
   };
