@@ -13,6 +13,7 @@ export const configSchema = schema.object({
     metrics: schema.object({
       otlp: schema.object({
         url: schema.maybe(schema.string()),
+        headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
         exportIntervalMillis: schema.number({ defaultValue: 10000 }),
       }),
       prometheus: schema.object({

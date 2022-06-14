@@ -126,6 +126,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       const url = otlpConfig.url;
       this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
 
+      // Enable SSL when otlp url starts with https
       // NOTE: We can remove the explicit credentials once https://github.com/open-telemetry/opentelemetry-js/pull/3019 is released
       let credentials: grpc.ChannelCredentials;
       if (url.startsWith('https://')) {
@@ -134,15 +135,25 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         credentials = grpc.credentials.createInsecure();
       }
 
+      // Set Authorization headers
+      const metadata = new grpc.Metadata();
+      if (otlpConfig.headers) {
+        for (const [key, value] of Object.entries(otlpConfig.headers)) {
+          metadata.add(key, value);
+        }
+      }
+
+      // Add OTLP exporter
       meterProvider.addMetricReader(
         new PeriodicExportingMetricReader({
-          exporter: new OTLPMetricExporter({ url, credentials }),
+          exporter: new OTLPMetricExporter({ url, credentials, metadata }),
           exportIntervalMillis: otlpConfig.exportIntervalMillis,
         })
       );
     }
 
     if (this.config.opentelemetry?.metrics.prometheus.enabled) {
+      // Add Prometheus exporter
       this.logger.debug(`Starting prometheus exporter at ${PROMETHEUS_ROUTE}`);
       this.prometheusExporter = new PrometheusExporter(this.logger);
       meterProvider.addMetricReader(this.prometheusExporter);
