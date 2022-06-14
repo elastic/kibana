@@ -13,7 +13,7 @@ import { useFormContext } from 'react-hook-form';
 import { useFetcher, FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { SyntheticsMonitor } from '../types';
 import { format } from './formatter';
-import { createMonitorAPI } from '../../../state/monitor_management/api';
+import { createMonitorAPI, updateMonitorAPI } from '../../../state/monitor_management/api';
 import { kibanaService } from '../../../../../utils/kibana_service';
 
 import { MONITORS_ROUTE, MONITOR_EDIT_ROUTE } from '../../../../../../common/constants';
@@ -28,7 +28,15 @@ export const ActionBar = () => {
   const [monitorData, setMonitorData] = useState<SyntheticsMonitor | undefined>(undefined);
 
   const { data, status } = useFetcher(() => {
-    if (monitorData) {
+    if (!monitorData) {
+      return null;
+    }
+    if (isEdit) {
+      return updateMonitorAPI({
+        id: monitorId,
+        monitor: monitorData,
+      });
+    } else {
       return createMonitorAPI({
         monitor: monitorData,
       });
