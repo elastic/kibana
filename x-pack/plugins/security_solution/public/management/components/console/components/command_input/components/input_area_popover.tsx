@@ -37,6 +37,7 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
 
   const handlePopoverOnClose = useCallback(() => {
     dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
+    dispatch({ type: 'focusOnInputArea' });
   }, [dispatch]);
 
   return (

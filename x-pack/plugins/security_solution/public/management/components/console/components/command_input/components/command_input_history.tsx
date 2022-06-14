@@ -23,12 +23,10 @@ export const CommandInputHistory = memo(() => {
   const inputHistory = useWithInputHistory();
 
   const selectableHistoryOptions = useMemo<EuiSelectableProps<InputHistoryItem>['options']>(() => {
-    const lastIndex = inputHistory.length - 1;
     return inputHistory.map((inputItem, index) => {
       return {
         label: inputItem.input,
         key: inputItem.id,
-        className: index === lastIndex ? 'console_input_popover_initial_focus_item' : undefined,
       };
     });
   }, [inputHistory]);
@@ -52,6 +50,7 @@ export const CommandInputHistory = memo(() => {
       }
 
       dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
+      dispatch({ type: 'focusOnInputArea' });
     },
     [dispatch]
   );

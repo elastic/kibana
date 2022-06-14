@@ -78,6 +78,13 @@ export const CommandInput = memo<CommandInputProps>(
       return dimensions.width ? `${dimensions.width}px` : '92vw';
     }, [dimensions.width]);
 
+    const cursorClassName = useMemo(() => {
+      return classNames({
+        cursor: true,
+        inactive: !isKeyInputBeingCaptured,
+      });
+    }, [isKeyInputBeingCaptured]);
+
     const handleKeyCaptureOnStateChange = useCallback<
       NonNullable<KeyCaptureProps['onStateChange']>
     >((isCapturing) => {
@@ -147,7 +154,7 @@ export const CommandInput = memo<CommandInputProps>(
               {textEntered}
             </EuiFlexItem>
             <EuiFlexItem grow>
-              <span className={classNames({ cursor: true, inactive: !isKeyInputBeingCaptured })} />
+              <span className={cursorClassName} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <KeyCapture

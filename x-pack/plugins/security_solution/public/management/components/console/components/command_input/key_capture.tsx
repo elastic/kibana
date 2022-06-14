@@ -26,8 +26,8 @@ const KeyCaptureContainer = styled.span`
   position: absolute;
   width: 1px;
   height: 1em;
-  left: -5px;
-  top: -5px;
+  left: -110vw;
+  top: -110vh;
   overflow: hidden;
 
   .invisible-input {
@@ -42,8 +42,6 @@ const KeyCaptureContainer = styled.span`
       animation: none !important;
       width: 1ch !important;
       position: absolute;
-      left: -100px;
-      top: -100px;
     }
   }
 `;
@@ -76,14 +74,18 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
   //       call `onCapture()` with it and then set the lastInput state back to an empty string
   const [, setLastInput] = useState('');
   const getTestId = useTestIdGenerator(useDataTestSubj());
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const keyCaptureContainerRef = useRef<HTMLDivElement | null>(null);
 
   const handleBlurAndFocus = useCallback<FormEventHandler>(
     (ev) => {
-      if (!onStateChange) {
-        return;
+      if (ev.type === 'blur') {
+        keyCaptureContainerRef.current?.focus();
       }
 
-      onStateChange(ev.type === 'focus');
+      if (onStateChange) {
+        onStateChange(ev.type === 'focus');
+      }
     },
     [onStateChange]
   );
@@ -122,8 +124,6 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
     });
   }, []);
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
   const setFocus = useCallback((force: boolean = false) => {
     // If user selected text and `force` is not true, then don't focus (else they lose selection)
     if (!force && (window.getSelection()?.toString() ?? '').length > 0) {
@@ -137,9 +137,13 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
     focusRef.current = setFocus;
   }
 
-  // FIXME:PT probably need to add `aria-` type properties to the input?
   return (
-    <KeyCaptureContainer data-test-subj={getTestId('keyCapture')}>
+    <KeyCaptureContainer
+      data-test-subj={getTestId('keyCapture')}
+      aria-hidden="true"
+      tabIndex={-1}
+      ref={keyCaptureContainerRef}
+    >
       <input
         className="invisible-input"
         data-test-subj={getTestId('keyCapture-input')}

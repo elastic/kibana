@@ -14,13 +14,19 @@ import { getBuiltinCommands } from '../../service/builtin_commands';
 
 export type InitialStateInterface = Pick<
   ConsoleDataState,
-  'commands' | 'scrollToBottom' | 'dataTestSubj' | 'HelpComponent' | 'managedKey'
+  | 'commands'
+  | 'scrollToBottom'
+  | 'dataTestSubj'
+  | 'HelpComponent'
+  | 'managedKey'
+  | 'focusOnInputArea'
 >;
 
 export const initiateState = (
   {
     commands: commandList,
     scrollToBottom,
+    focusOnInputArea,
     dataTestSubj,
     HelpComponent,
     managedKey,
@@ -31,6 +37,7 @@ export const initiateState = (
   const state = managedConsolePriorState ?? {
     commands,
     scrollToBottom,
+    focusOnInputArea,
     HelpComponent,
     dataTestSubj,
     managedKey,
@@ -59,6 +66,10 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
   switch (action.type) {
     case 'scrollDown':
       state.scrollToBottom();
+      return state;
+
+    case 'focusOnInputArea':
+      state.focusOnInputArea();
       return state;
 
     case 'executeCommand':

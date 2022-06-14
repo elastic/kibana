@@ -18,6 +18,9 @@ export interface ConsoleDataState {
   /** UI function that scrolls the console down to the bottom */
   scrollToBottom: () => void;
 
+  /** UI function that places focus on the Input area of the console (show cursor blinking) */
+  focusOnInputArea: () => void;
+
   /**
    * List of commands entered by the user and being shown in the UI
    */
@@ -62,6 +65,7 @@ export interface CommandExecutionState {
 
 export type ConsoleDataAction =
   | { type: 'scrollDown' }
+  | { type: 'focusOnInputArea' }
   | { type: 'executeCommand'; payload: { input: string } }
   | { type: 'clear' }
   | {
