@@ -11,6 +11,7 @@ import { EndpointAppContext } from '../../types';
 import { registerHostIsolationRoutes } from './isolation';
 import { registerActionStatusRoutes } from './status';
 import { registerActionAuditLogRoutes } from './audit_log';
+import { registerResponseActionRoutes } from './response_actions';
 
 export * from './isolation';
 
@@ -24,4 +25,5 @@ export function registerActionRoutes(
   registerActionStatusRoutes(router, endpointContext);
   registerActionAuditLogRoutes(router, endpointContext);
   registerActionDetailsRoutes(router, endpointContext);
+  registerResponseActionRoutes(router, endpointContext);
 }
