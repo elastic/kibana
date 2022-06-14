@@ -13,10 +13,10 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import { UrlOverflowUi } from './url_overflow_ui';
 import { IBasePath } from '../../http';
 import { AppMountParameters } from '../../application';
-import { CoreThemeProvider } from '../../theme';
 
 interface Props {
   title?: string;

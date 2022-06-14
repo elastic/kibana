@@ -12,8 +12,8 @@ import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { I18nStart } from '../i18n';
-import { ThemeServiceSetup } from '../theme';
 import { CoreContextProvider } from '../utils';
 import { FatalErrorsScreen } from './fatal_errors_screen';
 import { FatalErrorInfo, getErrorInfo } from './get_error_info';

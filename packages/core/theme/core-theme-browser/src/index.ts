@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { ThemeService } from './theme_service';
 export type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from './types';
-export { CoreThemeProvider } from './core_theme_provider';

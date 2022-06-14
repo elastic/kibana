@@ -8,6 +8,7 @@
 
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
@@ -20,7 +21,6 @@ import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { renderingServiceMock } from './rendering/rendering_service.mock';
 import { integrationsServiceMock } from './integrations/integrations_service.mock';
 import { coreAppMock } from './core_app/core_app.mock';
-import { themeServiceMock } from './theme/theme_service.mock';
 import { analyticsServiceMock } from './analytics/analytics_service.mock';
 
 export const analyticsServiceStartMock = analyticsServiceMock.createAnalyticsServiceStart();
@@ -134,6 +134,6 @@ jest.doMock('./core_app', () => ({
 
 export const MockThemeService = themeServiceMock.create();
 export const ThemeServiceConstructor = jest.fn().mockImplementation(() => MockThemeService);
-jest.doMock('./theme', () => ({
+jest.doMock('@kbn/core-theme-browser-internal', () => ({
   ThemeService: ThemeServiceConstructor,
 }));

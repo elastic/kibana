@@ -4,7 +4,7 @@
 
 ## AppMountParameters.theme$ property
 
-An observable emitting [Core's theme](./kibana-plugin-core-public.coretheme.md)<!-- -->. Should be used when mounting the application to include theme information.
+An observable emitting . Should be used when mounting the application to include theme information.
 
 <b>Signature:</b>
 

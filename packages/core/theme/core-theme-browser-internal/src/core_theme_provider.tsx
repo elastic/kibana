@@ -11,8 +11,8 @@ import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
 import { EuiProvider, EuiProviderProps } from '@elastic/eui';
-import { EUI_STYLES_GLOBAL } from '../../utils';
-import { CoreTheme } from './types';
+import { EUI_STYLES_GLOBAL } from '@kbn/core-base-common';
+import type { CoreTheme } from '@kbn/core-theme-browser';
 import { convertCoreTheme } from './convert_core_theme';
 
 const defaultTheme: CoreTheme = {

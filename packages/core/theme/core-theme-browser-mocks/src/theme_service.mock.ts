@@ -8,8 +8,8 @@
 
 import { of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from './types';
-import type { ThemeService } from './theme_service';
+import type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
+import type { ThemeService } from '@kbn/core-theme-browser-internal';
 
 const mockTheme: CoreTheme = {
   darkMode: false,
