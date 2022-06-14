@@ -81,7 +81,7 @@ export const checkAggregatableFieldsExistRequest = (
 
   return {
     index,
-    track_total_hits: true,
+    track_total_hits: false,
     size,
     body: searchBody,
   };
@@ -101,10 +101,10 @@ export const processAggregatableFieldsExistResponse = (
   responses: AggregatableFieldOverallStats[] | undefined,
   aggregatableFields: string[],
   samplerShardSize: number,
+  totalCount: number,
   datafeedConfig?: estypes.MlDatafeed
 ) => {
   const stats = {
-    totalCount: 0,
     aggregatableExistsFields: [] as AggregatableField[],
     aggregatableNotExistsFields: [] as AggregatableField[],
   };
@@ -113,8 +113,6 @@ export const processAggregatableFieldsExistResponse = (
 
   responses.forEach(({ rawResponse: body, aggregatableFields: aggregatableFieldsChunk }) => {
     const aggregations = body.aggregations;
-    const totalCount = (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total;
-    stats.totalCount = totalCount as number;
 
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
     const sampleCount =
@@ -168,7 +166,6 @@ export const processAggregatableFieldsExistResponse = (
   });
 
   return stats as {
-    totalCount: number;
     aggregatableExistsFields: AggregatableField[];
     aggregatableNotExistsFields: AggregatableField[];
   };
