@@ -33,16 +33,11 @@ import {
   ThresholdAlertState,
   WrapHits,
 } from '../types';
-import {
-  createSearchAfterReturnType,
-  createSearchAfterReturnTypeFromResponse,
-  mergeReturns,
-} from '../utils';
+import { createSearchAfterReturnType } from '../utils';
 import { BuildRuleMessage } from '../rule_messages';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
-import { ThresholdBucket } from '../threshold/types';
 
 export const thresholdExecutor = async ({
   completeRule,
@@ -134,11 +129,7 @@ export const thresholdExecutor = async ({
     });
 
     // Look for new events over threshold
-    const {
-      searchResult: thresholdResults,
-      searchErrors,
-      searchDuration: thresholdSearchDuration,
-    } = await findThresholdSignals({
+    const { buckets, searchErrors, searchDurations } = await findThresholdSignals({
       inputIndexPattern: inputIndex,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
@@ -154,7 +145,7 @@ export const thresholdExecutor = async ({
     // Build and index new alerts
     const { success, bulkCreateDuration, createdItemsCount, createdItems, errors } =
       await bulkCreateThresholdSignals({
-        buckets: (thresholdResults.aggregations?.thresholdTerms.buckets as ThresholdBucket[]) ?? [],
+        buckets,
         completeRule,
         filter: esFilter,
         services,
@@ -168,21 +159,15 @@ export const thresholdExecutor = async ({
         wrapHits,
       });
 
-    result = mergeReturns([
-      result,
-      createSearchAfterReturnTypeFromResponse({
-        searchResult: thresholdResults,
-        timestampOverride: ruleParams.timestampOverride,
-      }),
-      createSearchAfterReturnType({
-        success,
-        errors: [...errors, ...previousSearchErrors, ...searchErrors],
-        createdSignalsCount: createdItemsCount,
-        createdSignals: createdItems,
-        bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
-        searchAfterTimes: [thresholdSearchDuration],
-      }),
-    ]);
+    result = {
+      ...result,
+      success,
+      errors: [...errors, ...previousSearchErrors, ...searchErrors],
+      createdSignalsCount: createdItemsCount,
+      createdSignals: createdItems,
+      bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
+      searchAfterTimes: searchDurations,
+    };
 
     const createdAlerts = createdItems.map((alert) => {
       const { _id, _index, ...source } = alert as { _id: string; _index: string };

@@ -6,7 +6,6 @@
  */
 
 import {
-  AggregateName,
   AggregationsCompositeAggregate,
   AggregationsMultiBucketAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -25,20 +24,11 @@ import {
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
-import type { SignalSearchResponse } from '../types';
 import {
-  createSearchAfterReturnType,
-  createSearchAfterReturnTypeFromResponse,
-  createSearchResultReturnType,
-  mergeReturns,
-  mergeSearchResults,
-} from '../utils';
-import {
-  ThresholdAggregate,
-  ThresholdAggregateContainer,
-  ThresholdAggregationContainer,
-  ThresholdBucket,
-} from './types';
+  buildThresholdMultiBucketAggregation,
+  // buildThresholdSingleBucketAggregation,
+} from './build_threshold_aggregation';
+import { ThresholdAggregationResult, ThresholdBucket } from './types';
 
 interface FindThresholdSignalsParams {
   from: string;
@@ -53,15 +43,21 @@ interface FindThresholdSignalsParams {
   timestampOverride: TimestampOverrideOrUndefined;
 }
 
-const shouldFilterByCardinality = (
-  threshold: ThresholdNormalized
-): threshold is ThresholdWithCardinality => !!threshold.cardinality?.length;
-
 const hasThresholdFields = (threshold: ThresholdNormalized) => !!threshold.field.length;
 
 const isCompositeAggregate = (
   aggregate: AggregationsMultiBucketAggregateBase | undefined
 ): aggregate is AggregationsCompositeAggregate => aggregate != null && 'after_key' in aggregate;
+
+// TODO: this is a dupe
+const shouldFilterByCardinality = (
+  threshold: ThresholdNormalized
+): threshold is ThresholdWithCardinality => !!threshold.cardinality?.length;
+
+interface SearchAfterResults {
+  searchDurations: string[];
+  searchErrors: string[];
+}
 
 export const findThresholdSignals = async ({
   from,
@@ -75,94 +71,33 @@ export const findThresholdSignals = async ({
   buildRuleMessage,
   timestampOverride,
 }: FindThresholdSignalsParams): Promise<{
-  searchResult: SignalSearchResponse<ThresholdAggregateContainer>;
-  searchDuration: string;
+  buckets: ThresholdBucket[];
+  searchDurations: string[];
   searchErrors: string[];
 }> => {
   // Leaf aggregations used below
-  const leafAggs = {
-    max_timestamp: {
-      max: {
-        field: timestampOverride != null ? timestampOverride : TIMESTAMP,
-      },
-    },
-    min_timestamp: {
-      min: {
-        field: timestampOverride != null ? timestampOverride : TIMESTAMP,
-      },
-    },
-    ...(shouldFilterByCardinality(threshold)
-      ? {
-          cardinality_count: {
-            cardinality: {
-              field: threshold.cardinality[0].field,
-            },
-          },
-          cardinality_check: {
-            bucket_selector: {
-              buckets_path: {
-                cardinalityCount: 'cardinality_count',
-              },
-              script: `params.cardinalityCount >= ${threshold.cardinality[0].value}`, // TODO: select cardinality operator?
-            },
-          },
-        }
-      : {}),
+  let sortKeys;
+  const buckets: ThresholdBucket[] = [];
+  const searchAfterResults: SearchAfterResults = {
+    searchDurations: [],
+    searchErrors: [],
   };
 
-  let sortKeys;
-  let result = createSearchAfterReturnType<Record<AggregateName, ThresholdAggregate>>();
-  let mergedSearchResults = createSearchResultReturnType<ThresholdAggregateContainer>();
+  const compareBuckets = (bucket1: ThresholdBucket, bucket2: ThresholdBucket) =>
+    shouldFilterByCardinality(threshold)
+      ? // cardinality - descending
+        (bucket2.cardinality_count?.value ?? 0) - (bucket1.cardinality_count?.value ?? 0)
+      : // max_timestamp - ascending
+        (bucket1.max_timestamp.value ?? 0) - (bucket2.max_timestamp.value ?? 0);
 
-  do {
-    // Generate a composite aggregation considering each threshold grouping field provided, appending leaf
-    // aggregations to 1) filter out buckets that don't meet the cardinality threshold, if provided, and
-    // 2) return the first and last hit for each bucket in order to eliminate dupes and reconstruct an accurate
-    // timeline.
-    const aggregations: ThresholdAggregationContainer = {
-      thresholdTerms: hasThresholdFields(threshold)
-        ? {
-            composite: {
-              sources: threshold.field.map((term, i) => ({
-                [term]: {
-                  terms: {
-                    field: term,
-                  },
-                },
-              })),
-              after: sortKeys,
-              size: 10000,
-            },
-            aggs: {
-              ...leafAggs,
-              count_check: {
-                bucket_selector: {
-                  buckets_path: {
-                    docCount: '_count',
-                  },
-                  script: `params.docCount >= ${threshold.value}`,
-                },
-              },
-            },
-          }
-        : {
-            terms: {
-              script: {
-                source: '""', // Group everything in the same bucket
-                lang: 'painless',
-              },
-              min_doc_count: threshold.value,
-              ...(shouldFilterByCardinality(threshold)
-                ? { order: { cardinality_count: 'desc' } }
-                : {}),
-            },
-            aggs: leafAggs,
-          },
-    };
-
-    const { searchResult, searchDuration, searchErrors } =
-      await singleSearchAfter<ThresholdAggregateContainer>({
-        aggregations,
+  if (hasThresholdFields(threshold)) {
+    do {
+      const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+        aggregations: buildThresholdMultiBucketAggregation({
+          threshold,
+          timestampField: timestampOverride != null ? timestampOverride : TIMESTAMP,
+          sortKeys,
+        }),
         searchAfterSortId: undefined,
         timestampOverride,
         index: inputIndexPattern,
@@ -176,66 +111,29 @@ export const findThresholdSignals = async ({
         sortOrder: 'desc',
         buildRuleMessage,
       });
+      const searchResultWithAggs = searchResult as ThresholdAggregationResult;
+      if (!searchResultWithAggs.aggregations) {
+        throw new Error('expected to find aggregations on search result');
+      }
 
-    const thresholdTerms = searchResult.aggregations?.thresholdTerms;
-    const prevThresholdTerms = mergedSearchResults.aggregations?.thresholdTerms;
+      searchAfterResults.searchDurations.push(searchDuration);
+      searchAfterResults.searchErrors.push(...searchErrors);
 
-    sortKeys = isCompositeAggregate(thresholdTerms) ? thresholdTerms.after_key : undefined;
-    mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
+      const thresholdTerms = searchResultWithAggs.aggregations?.thresholdTerms;
 
-    if (prevThresholdTerms) {
-      const prevBuckets = Array.isArray(prevThresholdTerms.buckets)
-        ? prevThresholdTerms.buckets
-        : []; // TODO: convert object keys to array?
-      const nextBuckets = Array.isArray(thresholdTerms?.buckets)
-        ? thresholdTerms?.buckets ?? []
-        : []; // TODO: convert object keys to array?
-
-      mergedSearchResults.aggregations = {
-        thresholdTerms: {
-          buckets: [...prevBuckets, ...nextBuckets],
-        },
-      };
-      mergedSearchResults.hits.total = prevBuckets.length + nextBuckets.length;
-    }
-
-    result = mergeReturns([
-      result,
-      createSearchAfterReturnTypeFromResponse({
-        searchResult: mergedSearchResults,
-        timestampOverride,
-      }),
-      createSearchAfterReturnType<ThresholdAggregateContainer>({
-        searchAfterTimes: [searchDuration],
-        errors: searchErrors,
-      }),
-    ]);
-  } while (sortKeys); // we have to iterate over everything in order to sort
-
-  const compareBuckets = (bucket1: ThresholdBucket, bucket2: ThresholdBucket) =>
-    shouldFilterByCardinality(threshold)
-      ? // cardinality - descending
-        (bucket2.cardinality_count?.value ?? 0) - (bucket1.cardinality_count?.value ?? 0)
-      : // max_timestamp - ascending
-        (bucket1.max_timestamp.value ?? 0) - (bucket2.max_timestamp.value ?? 0);
-
-  // and then truncate to `maxSignals`
-  if ((mergedSearchResults.hits.total ?? 0) > maxSignals) {
-    mergedSearchResults.aggregations = {
-      thresholdTerms: {
-        buckets: (
-          (mergedSearchResults.aggregations?.thresholdTerms.buckets as ThresholdBucket[]).sort(
-            compareBuckets
-          ) ?? []
-        ).slice(0, maxSignals),
-      },
-    };
-    mergedSearchResults.hits.total = maxSignals;
+      sortKeys = isCompositeAggregate(thresholdTerms) ? thresholdTerms.after_key : undefined;
+      buckets.push(
+        ...(searchResultWithAggs.aggregations.thresholdTerms.buckets as ThresholdBucket[])
+      );
+    } while (sortKeys); // we have to iterate over everything in order to sort
+  } else {
+    // TODO: handle the single-bucket case
   }
 
+  buckets.sort(compareBuckets);
+
   return {
-    searchResult: mergedSearchResults,
-    searchDuration: result.searchAfterTimes.reduce((a, b) => Number(a) + Number(b), 0).toFixed(2),
-    searchErrors: result.errors,
+    buckets: buckets.slice(0, maxSignals),
+    ...searchAfterResults,
   };
 };

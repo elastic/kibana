@@ -16,6 +16,9 @@ import {
   AggregationsStringTermsBucket,
   AggregationsTermsAggregation,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import { SignalSource } from '../types';
+import { buildThresholdMultiBucketAggregation } from './build_threshold_aggregation';
 
 export interface ThresholdLeafAggregates {
   max_timestamp: AggregationsMaxAggregate;
@@ -44,4 +47,13 @@ export type ThresholdAggregationContainer = Record<
       terms: AggregationsTermsAggregation;
       aggs?: Record<string, AggregationsAggregationContainer>;
     }
+>;
+
+export type ThresholdAggregationResult = ESSearchResponse<
+  SignalSource,
+  {
+    body: {
+      aggregations: ReturnType<typeof buildThresholdMultiBucketAggregation>;
+    };
+  }
 >;
