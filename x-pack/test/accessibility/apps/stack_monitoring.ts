@@ -56,8 +56,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Kibana Instances Page', async function () {
-      await kibanaOverview.clickOnInstancesTab();
-      await kibanaInstances.isOnInstances();
+      await kibanaOverview.isOnOverview();
+      await kibanaOverview.clickInstanceTab();
       await a11y.testAppSnapshot();
     });
   });
