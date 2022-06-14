@@ -9,6 +9,7 @@ import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { DataViewsService } from '@kbn/data-views-plugin/public';
+import { extractTimeRange } from '@kbn/data-plugin/public';
 import type { Embeddable } from '../embeddable';
 import { DOC_TYPE } from '../../common';
 
@@ -53,7 +54,6 @@ export async function execute({
   let timeRangeToApply = args.timeRange;
   // if the target data view is time based, attempt to split out a time range from the provided filters
   if (dataView.isTimeBased() && dataView.timeFieldName === timeFieldName) {
-    const { extractTimeRange } = await import('@kbn/es-query');
     const { restOfFilters, timeRange } = extractTimeRange(filters || [], timeFieldName);
     filtersToApply = restOfFilters;
     if (timeRange) {
