@@ -8,6 +8,8 @@
 import type { CoreSetup, HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import { AnalyticsService } from '../../analytics';
+
 interface CreateDeps {
   application: CoreSetup['application'];
   http: HttpSetup;
@@ -24,6 +26,7 @@ export const logoutApp = Object.freeze({
       appRoute: '/logout',
       async mount() {
         window.sessionStorage.clear();
+        window.localStorage.removeItem(AnalyticsService.AuthTypeInfoStorageKey);
 
         // Redirect user to the server logout endpoint to complete logout.
         window.location.href = http.basePath.prepend(
