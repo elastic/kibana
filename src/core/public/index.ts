@@ -32,6 +32,7 @@ import type {
 } from '@kbn/core-injected-metadata-browser';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -65,7 +66,6 @@ import { ApplicationSetup, Capabilities, ApplicationStart } from './application'
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
 import { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
-import type { AnalyticsServiceSetup, AnalyticsServiceStart } from './analytics';
 
 export type {
   PackageInfo,
