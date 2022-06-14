@@ -36,8 +36,9 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "//packages/kbn-dev-utils",
-  "//packages/kbn-utils",
+  "//packages/kbn-dev-cli-errors",
+  "//packages/kbn-dev-cli-runner",
+  "//packages/kbn-test",
   "//packages/kbn-tooling-log",
   "@npm//@elastic/elasticsearch",
 ]
@@ -52,8 +53,9 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "//packages/kbn-dev-utils:npm_module_types",
-  "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-dev-cli-errors:npm_module_types",
+  "//packages/kbn-dev-cli-runner:npm_module_types",
+  "//packages/kbn-test:npm_module_types",
   "//packages/kbn-tooling-log:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//@types/node",

@@ -14,7 +14,13 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import { extractor } from './extractor';
+import { EsVersion, readConfigFile } from '@kbn/test';
+import path from 'path';
+import { extractor, ScalabilitySetup } from './extractor';
+
+interface Vars {
+  [key: string]: string;
+}
 
 export async function runExtractor() {
   run(
@@ -43,13 +49,46 @@ export async function runExtractor() {
         throw createFlagError('--es-password must be defined');
       }
 
-      const journeyName = flags.journeyName;
-      if (journeyName && typeof journeyName !== 'string') {
-        throw createFlagError('--journeyName must be a string');
+      const configPath = flags.config;
+      if (typeof configPath !== 'string') {
+        throw createFlagError('--config must be a string');
       }
-      if (!journeyName) {
-        throw createFlagError('--journeyName must be defined');
+      const config = await readConfigFile(log, EsVersion.getDefault(), path.resolve(configPath));
+
+      const scalabilitySetup: ScalabilitySetup = config.get('scalabilitySetup');
+
+      if (!scalabilitySetup) {
+        log.error(`'scalabilitySetup' must be defined in config file!`);
+        return;
       }
+
+      const env = config.get(`kbnTestServer.env`);
+      if (
+        typeof env !== 'object' ||
+        typeof env.ELASTIC_APM_GLOBAL_LABELS !== 'string' ||
+        !env.ELASTIC_APM_GLOBAL_LABELS.includes('journeyName=')
+      ) {
+        log.error(
+          `'journeyName' must be defined in config file:
+
+      env: {
+        ...config.kbnTestServer.env,
+        ELASTIC_APM_GLOBAL_LABELS: Object.entries({
+          journeyName: <journey name>,
+        })
+      },`
+        );
+        return;
+      }
+
+      const envVars: Vars = env.ELASTIC_APM_GLOBAL_LABELS.split(',').reduce(
+        (acc: Vars, pair: string) => {
+          const [key, value] = pair.split('=');
+          return { ...acc, [key]: value };
+        },
+        {}
+      );
+      const journeyName = envVars.journeyName;
 
       const buildId = flags.buildId;
       if (buildId && typeof buildId !== 'string') {
@@ -60,7 +99,7 @@ export async function runExtractor() {
       }
 
       return extractor({
-        param: { journeyName, buildId },
+        param: { journeyName, scalabilitySetup, buildId },
         client: { baseURL, username, password },
         log,
       });
@@ -68,9 +107,9 @@ export async function runExtractor() {
     {
       description: `CLI to fetch and normalize APM traces for journey scalability testing`,
       flags: {
-        string: ['journeyName', 'buildId', 'es-url', 'es-username', 'es-password'],
+        string: ['config', 'buildId', 'es-url', 'es-username', 'es-password'],
         help: `
-          --journeyName      Single user performance journey name, stored in APM-based document as label: 'labels.journeyName'
+          --config           path to an FTR config file that sets scalabilitySetup and journeyName (stored as 'labels.journeyName' in APM-based document)
           --buildId          BUILDKITE_JOB_ID or uuid generated locally, stored in APM-based document as label: 'labels.testBuildId'
           --es-url           url for Elasticsearch (APM cluster)
           --es-username      username for Elasticsearch (APM cluster)
