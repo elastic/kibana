@@ -20,12 +20,16 @@ interface LinkMapViewActionContext {
   embeddable: Embeddable<LinkMapViewInput>;
 }
 
+export function getLinkMapView(input: { linkMapView?: boolean }) {
+  return input.linkMapView === undefined ? true : input.linkMapView;
+}
+
 export const linkMapViewAction = createAction<LinkMapViewActionContext>({
   id: LINK_MAP_VIEW,
   type: LINK_MAP_VIEW,
   order: 21,
   getDisplayName: ({ embeddable }: LinkMapViewActionContext) => {
-    return embeddable.getInput().linkMapView
+    return getLinkMapView(embeddable.getInput())
       ? i18n.translate('xpack.maps.linkMapView.disableDisplayName', {
           defaultMessage: 'Unlink map view',
         })
@@ -43,7 +47,7 @@ export const linkMapViewAction = createAction<LinkMapViewActionContext>({
   },
   execute: async ({ embeddable }: LinkMapViewActionContext) => {
     embeddable.updateInput({
-      linkMapView: !embeddable.getInput().linkMapView,
+      linkMapView: !getLinkMapView(embeddable.getInput()),
     });
   },
 });

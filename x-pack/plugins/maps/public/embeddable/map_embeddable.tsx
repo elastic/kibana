@@ -81,6 +81,8 @@ import { getMapAttributeService } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 import { synchronizeMaps } from './synchronize_maps';
+import { getLinkMapView } from '../trigger_actions/link_map_view_action';
+import { getFilterByMapExtent } from '../trigger_actions/filter_by_map_extent_action';
 
 import {
   MapByValueInput,
@@ -128,12 +130,7 @@ export class MapEmbeddable
 
   constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
-      {
-        ...initialInput,
-        filterByMapExtent:
-          initialInput.filterByMapExtent === undefined ? false : initialInput.filterByMapExtent,
-        linkMapView: initialInput.linkMapView === undefined ? true : initialInput.linkMapView,
-      },
+      initialInput,
       {
         editApp: APP_ID,
         editable: config.editable,
@@ -143,12 +140,12 @@ export class MapEmbeddable
     );
 
     this._isActive = true;
-    this._savedMap = new SavedMap({ mapEmbeddableInput: this.input });
+    this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
     this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
     this._controlledBy = `mapEmbeddablePanel${this.id}`;
-    this._prevFilterByMapExtent = this.input.filterByMapExtent;
-    this._prevLinkMapView = this.input.linkMapView;
+    this._prevFilterByMapExtent = getFilterByMapExtent(this.input);
+    this._prevLinkMapView = getLinkMapView(this.input);
   }
 
   private async _initializeSaveMap() {
@@ -275,25 +272,25 @@ export class MapEmbeddable
   }
 
   onUpdate() {
-    if (
-      this.input.filterByMapExtent !== undefined &&
-      this._prevFilterByMapExtent !== this.input.filterByMapExtent
+    const filterByMapExtent = getFilterByMapExtent(this.input);
+    if (this._prevFilterByMapExtent !== filterByMapExtent
     ) {
-      this._prevFilterByMapExtent = this.input.filterByMapExtent;
-      if (this.input.filterByMapExtent) {
+      this._prevFilterByMapExtent = filterByMapExtent;
+      if (filterByMapExtent) {
         this.setMapExtentFilter();
       } else {
         this.clearMapExtentFilter();
       }
     }
 
-    if (this._prevLinkMapView !== this.input.linkMapView) {
-      this._prevLinkMapView = this.input.linkMapView;
+    const linkMapView = getLinkMapView(this.input);
+    if (this._prevLinkMapView !== linkMapView) {
+      this._prevLinkMapView = linkMapView;
       // work around for multiple embebeddable instances for same panel
       if (!this._domNode) {
         return;
       }
-      if (this.input.linkMapView) {
+      if (linkMapView) {
         this._linkMapView();
       } else {
         this._unlinkMapView();
@@ -424,7 +421,7 @@ export class MapEmbeddable
       return;
     }
 
-    if (this.input.linkMapView) {
+    if (getLinkMapView(this.input)) {
       this._linkMapView();
     }
 
@@ -639,7 +636,7 @@ export class MapEmbeddable
     }
 
     const mapExtent = getMapExtent(this._savedMap.getStore().getState());
-    if (this.input.filterByMapExtent && !_.isEqual(this._prevMapExtent, mapExtent)) {
+    if (getFilterByMapExtent(this.input) && !_.isEqual(this._prevMapExtent, mapExtent)) {
       this.setMapExtentFilter();
     }
 
@@ -653,7 +650,7 @@ export class MapEmbeddable
       mapCenter.lon !== center.lon ||
       mapCenter.zoom !== zoom
     ) {
-      if (this.input.linkMapView) {
+      if (getLinkMapView(this.input)) {
         synchronizeMaps.setLocation(this.input.id, center.lat, center.lon, zoom);
       }
       this.updateInput({
