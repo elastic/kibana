@@ -29,6 +29,12 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
     };
   }, [width]);
 
+  const focusTrapProps = useMemo(() => {
+    return {
+      clickOutsideDisables: true,
+    };
+  }, []);
+
   const handlePopoverOnClose = useCallback(() => {
     dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
   }, [dispatch]);
@@ -43,6 +49,8 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
       hasArrow={false}
       display="block"
       attachToAnchor={true}
+      focusTrapProps={focusTrapProps}
+      ownFocus={false}
     >
       {show === 'input-history' && <CommandInputHistory />}
     </EuiPopover>

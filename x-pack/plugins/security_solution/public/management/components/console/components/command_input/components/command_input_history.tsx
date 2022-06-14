@@ -6,28 +6,37 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiSelectable, EuiSelectableProps } from '@elastic/eui';
+import { EuiFocusTrap, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { InputHistoryItem } from '../../console_state/types';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputHistory } from '../../../hooks/state_selectors/use_with_input_history';
+
+const NO_HISTORY_EMPTY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.commandInputHistory.noHistoryEmptyMessage',
+  { defaultMessage: 'No commands have been entered' }
+);
 
 export const CommandInputHistory = memo(() => {
   const dispatch = useConsoleStateDispatch();
   const inputHistory = useWithInputHistory();
 
-  const selectableHistoryOptions = useMemo<EuiSelectableProps['options']>(() => {
-    return inputHistory.map((inputItem) => {
+  const selectableHistoryOptions = useMemo<EuiSelectableProps<InputHistoryItem>['options']>(() => {
+    const lastIndex = inputHistory.length - 1;
+    return inputHistory.map((inputItem, index) => {
       return {
         label: inputItem.input,
         key: inputItem.id,
+        className: index === lastIndex ? 'console_input_popover_initial_focus_item' : undefined,
       };
     });
   }, [inputHistory]);
 
-  const renderAsIs: EuiSelectableProps['children'] = useCallback((list) => {
+  const renderAsIs: EuiSelectableProps<InputHistoryItem>['children'] = useCallback((list) => {
     return list;
   }, []);
 
-  const handleSelectableOnChange: EuiSelectableProps['onChange'] = useCallback(
+  const handleSelectableOnChange: EuiSelectableProps<InputHistoryItem>['onChange'] = useCallback(
     (items) => {
       const selected = items.find((item) => item.checked === 'on');
 
@@ -40,15 +49,22 @@ export const CommandInputHistory = memo(() => {
     [dispatch]
   );
 
+  const handleRenderOption = useCallback((option) => {
+    // Fomat item
+  }, []);
+
   return (
     <div>
-      <EuiSelectable
-        options={selectableHistoryOptions}
-        onChange={handleSelectableOnChange}
-        singleSelection={true}
-      >
-        {renderAsIs}
-      </EuiSelectable>
+      <EuiFocusTrap clickOutsideDisables={true}>
+        <EuiSelectable<InputHistoryItem>
+          options={selectableHistoryOptions}
+          onChange={handleSelectableOnChange}
+          singleSelection={true}
+          emptyMessage={NO_HISTORY_EMPTY_MESSAGE}
+        >
+          {renderAsIs}
+        </EuiSelectable>
+      </EuiFocusTrap>
     </div>
   );
 });

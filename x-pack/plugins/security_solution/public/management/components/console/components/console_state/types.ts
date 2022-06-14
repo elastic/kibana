@@ -38,10 +38,15 @@ export interface ConsoleDataState {
   /** state for the command input area */
   input: {
     /** A history of commands entered by the user */
-    history: Array<{ id: string; input: string }>;
+    history: InputHistoryItem[];
     /** Show the input area popover */
     showPopover: 'input-history' | undefined; // Other values will exist in the future
   };
+}
+
+export interface InputHistoryItem {
+  id: string;
+  input: string;
 }
 
 export interface CommandHistoryItem {

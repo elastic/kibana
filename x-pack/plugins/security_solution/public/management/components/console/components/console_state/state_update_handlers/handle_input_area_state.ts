@@ -34,7 +34,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         ...state,
         input: {
           ...state.input,
-          history: [...state.input.history, { id: uuidV4(), input: payload.command }],
+          history: [{ id: uuidV4(), input: payload.command }, ...state.input.history],
         },
       };
   }
