@@ -664,7 +664,7 @@
     "@types/kbn__config-schema": "link:bazel-bin/packages/kbn-config-schema/npm_module_types",
     "@types/kbn__core-analytics-browser": "link:bazel-bin/packages/core/analytics/core-analytics-browser/npm_module_types",
     "@types/kbn__core-analytics-browser-internal": "link:bazel-bin/packages/core/analytics/core-analytics-browser-internal/npm_module_types",
-    "@types/kbn__core-analytics-browser-mocks": "link:bazel-bin/packages/core/base/core-base-browser-mocks/npm_module_types",
+    "@types/kbn__core-analytics-browser-mocks": "link:bazel-bin/packages/core/analytics/core-analytics-browser-mocks/npm_module_types",
     "@types/kbn__core-base-browser": "link:bazel-bin/packages/core/base/core-base-browser/npm_module_types",
     "@types/kbn__core-base-browser-internal": "link:bazel-bin/packages/core/base/core-base-browser-internal/npm_module_types",
     "@types/kbn__core-base-browser-mocks": "link:bazel-bin/packages/core/base/core-base-browser-mocks/npm_module_types",

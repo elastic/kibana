@@ -78,9 +78,8 @@ export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
 
+export type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 export type {
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
   AnalyticsClient,
   Event,
   EventContext,
@@ -91,8 +90,8 @@ export type {
   OptInConfig,
   ContextProviderOpts,
   TelemetryCounter,
-} from './analytics';
-export { TelemetryCounterType } from './analytics';
+} from '@kbn/analytics-client';
+export { TelemetryCounterType } from '@kbn/analytics-client';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {

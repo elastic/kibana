@@ -3031,6 +3031,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-base-browser-mocks@link:bazel-bin/packages/core/base/core-base-browser-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-base-common-internal@link:bazel-bin/packages/core/base/core-base-common-internal":
   version "0.0.0"
   uid ""
@@ -6379,6 +6383,10 @@
   uid ""
 
 "@types/kbn__core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-browser-mocks@link:bazel-bin/packages/core/base/core-base-browser-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
