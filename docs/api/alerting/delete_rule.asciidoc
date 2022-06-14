@@ -1,5 +1,5 @@
 [[delete-rule-api]]
-=== Delete rule API
+== Delete rule API
 ++++
 <titleabbrev>Delete rule</titleabbrev>
 ++++
@@ -9,14 +9,25 @@ Permanently remove a rule.
 WARNING: Once you delete a rule, you cannot recover it.
 
 [[delete-rule-api-request]]
-==== Request
+=== {api-request-title}
 
 `DELETE <kibana host>:<port>/api/alerting/rule/<id>`
 
 `DELETE <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
 
+////
+=== {api-prereq-title}
+
+You must have `all` privileges for the *Management* > *Stack Rules* feature or
+for the *{ml-app}*, *{observability}*, or *Security* features, depending on the
+`consumer` and `rule_type_id` of the rule you're creating. If the rule has
+`actions`, you must also have `read` privileges for the *Management* >
+*Actions and Connectors* feature. For more details, refer to
+<<kibana-feature-privileges>>.
+////
+
 [[delete-rule-api-path-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `id`::
   (Required, string) The ID of the rule that you want to remove.
@@ -25,17 +36,17 @@ WARNING: Once you delete a rule, you cannot recover it.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[delete-rule-api-response-codes]]
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
   Indicates a successful call.
 
-==== Example
+=== {api-examples-title}
 
 Delete a rule with ID:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X DELETE api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35
+DELETE api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35
 --------------------------------------------------
 // KIBANA
