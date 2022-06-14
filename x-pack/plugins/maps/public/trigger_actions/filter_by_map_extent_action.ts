@@ -38,7 +38,9 @@ export const filterByMapExtentAction = createAction<FilterByMapExtentActionConte
   },
   isCompatible: async ({ embeddable }: FilterByMapExtentActionContext) => {
     return (
-      embeddable.type === MAP_SAVED_OBJECT_TYPE && embeddable.getInput().viewMode === ViewMode.EDIT
+      embeddable.type === MAP_SAVED_OBJECT_TYPE &&
+      embeddable.getInput().viewMode === ViewMode.EDIT &&
+      !embeddable.getInput().disableTriggers
     );
   },
   execute: async ({ embeddable }: FilterByMapExtentActionContext) => {

@@ -24,6 +24,7 @@ exports[`Should render cancel button when drawing 1`] = `
         </EuiPanel>
       }
       closePopover={[Function]}
+      data-test-subj="mapToolsControlPopover"
       display="inlineBlock"
       hasArrow={true}
       id="toolsControlPopover"
@@ -124,6 +125,7 @@ exports[`renders 1`] = `
     </EuiPanel>
   }
   closePopover={[Function]}
+  data-test-subj="mapToolsControlPopover"
   display="inlineBlock"
   hasArrow={true}
   id="toolsControlPopover"
