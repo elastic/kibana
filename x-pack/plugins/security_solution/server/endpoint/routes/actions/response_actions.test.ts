@@ -38,14 +38,15 @@ import {
   RELEASE_HOST_ROUTE,
   metadataTransformPrefix,
   ENDPOINT_ACTIONS_INDEX,
+  KILL_PROCESS_ROUTE,
 } from '../../../../common/endpoint/constants';
 import {
   ActionDetails,
   EndpointAction,
-  HostIsolationRequestBody,
   ResponseActionApiResponse,
   HostMetadata,
   LogsEndpointAction,
+  ResponseActionRequestBodies,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { EndpointAuthz } from '../../../../common/endpoint/types/authz';
@@ -62,7 +63,7 @@ import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
 
 interface CallRouteInterface {
-  body?: HostIsolationRequestBody;
+  body?: ResponseActionRequestBodies;
   idxResponse?: any;
   searchResponse?: HostMetadata;
   mockUser?: any;
@@ -357,6 +358,17 @@ describe('Response actions', () => {
       expect(actionDoc.data.command).toEqual('unisolate');
     });
 
+    it('sends the kill-process command payload from the kill process route', async () => {
+      const ctx = await callRoute(KILL_PROCESS_ROUTE, {
+        body: { endpoint_ids: ['XYZ'] },
+      });
+      const actionDoc: EndpointAction = (
+        ctx.core.elasticsearch.client.asInternalUser.index.mock
+          .calls[0][0] as estypes.IndexRequest<EndpointAction>
+      ).body!;
+      expect(actionDoc.data.command).toEqual('kill-process');
+    });
+
     describe('With endpoint data streams', () => {
       it('handles unisolation', async () => {
         const ctx = await callRoute(
@@ -411,6 +423,35 @@ describe('Response actions', () => {
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
         expect(responseBody.action).toBeTruthy();
+      });
+
+      it('handles kill-process', async () => {
+        const parameters = { entity_id: 1234 };
+        const ctx = await callRoute(
+          KILL_PROCESS_ROUTE,
+          {
+            body: { endpoint_ids: ['XYZ'], parameters },
+          },
+          { endpointDsExists: true }
+        );
+        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
+        const actionDocs: [
+          { index: string; body?: LogsEndpointAction },
+          { index: string; body?: EndpointAction }
+        ] = [
+          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
+          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
+        ];
+
+        expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
+        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
+        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('kill-process');
+        expect(actionDocs[1].body!.data.command).toEqual('kill-process');
+        expect(actionDocs[1].body!.data.parameters).toEqual(parameters);
+
+        expect(mockResponse.ok).toBeCalled();
+        const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
+        expect(responseBody.action).toBeUndefined();
       });
 
       it('handles errors', async () => {

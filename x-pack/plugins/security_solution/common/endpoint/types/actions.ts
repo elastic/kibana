@@ -6,11 +6,15 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { ActionStatusRequestSchema, HostIsolationRequestSchema } from '../schema/actions';
+import {
+  ActionStatusRequestSchema,
+  HostIsolationRequestSchema,
+  responseActionBodySchemas,
+} from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
-export type ResponseActions = ISOLATION_ACTIONS;
+export type ResponseActions = ISOLATION_ACTIONS | 'kill-process';
 
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
@@ -182,6 +186,8 @@ export interface ActivityLog {
 }
 
 export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
+
+export type ResponseActionRequestBodies = TypeOf<typeof responseActionBodySchemas>;
 
 export interface HostIsolationResponse {
   action: string;
