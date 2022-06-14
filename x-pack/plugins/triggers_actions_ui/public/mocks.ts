@@ -30,6 +30,7 @@ import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRulesListLazy } from './common/get_rules_list';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
+import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
 import { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
@@ -92,6 +93,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getRuleEventLogList: (props) => {
       return getRuleEventLogListLazy(props);
+    },
+    getRulesListNotifyBadge: (props) => {
+      return getRulesListNotifyBadgeLazy(props);
     },
     getRulesList: () => {
       return getRulesListLazy();
