@@ -15,12 +15,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
-    const testSubjects = getService('testSubjects');
 
     // FLAKY: https://github.com/elastic/kibana/issues/101984
     describe('overview page alert flyout controls', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
+      const ruleName = 'uptime-test';
       let alerts: any;
       let common: any;
 
@@ -89,7 +89,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can save alert', async () => {
-        await alerts.clickSaveRuleButton();
+        await alerts.clickSaveRuleButton(ruleName);
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });
@@ -178,7 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can save alert', async () => {
-        await alerts.clickSaveRuleButton();
+        await alerts.clickSaveRuleButton(alertId);
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });
