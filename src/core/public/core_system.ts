@@ -14,6 +14,7 @@ import {
   InternalInjectedMetadataStart,
 } from '@kbn/core-injected-metadata-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
+import { ThemeService } from '@kbn/core-theme-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
@@ -28,7 +29,6 @@ import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { IntegrationsService } from './integrations';
 import { DeprecationsService } from './deprecations';
-import { ThemeService } from './theme';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import { ExecutionContextService } from './execution_context';
