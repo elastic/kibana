@@ -110,6 +110,7 @@ export { useInspectorContext } from './context/inspector/use_inspector_context';
 export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_view/types';
 export {
   ReportTypes,
+  ENVIRONMENT_ALL,
   FILTER_RECORDS,
   REPORT_METRIC_FIELD,
   USE_BREAK_DOWN_COLUMN,

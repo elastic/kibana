@@ -84,7 +84,7 @@ export function PageViewsTrend() {
         )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <PageViewsChart breakdown={breakdown} />
+      <PageViewsChart breakdown={breakdown} uiFilters={uxUiFilters} />
     </div>
   );
 }
