@@ -109,7 +109,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
        * While this field is set in previous step, it is possible that component rerendering could be
        * clearing out the value after it's filled in. To prevent this particular issue with flakiness,
        * we should attempt to set the name again before saving the alert */
-      await testSubjects.setValue('alertNameInput', name);
+      await testSubjects.setValue('ruleNameInput', name);
       await testSubjects.click('saveRuleButton');
     },
     async clickSaveAlertsConfirmButton() {
