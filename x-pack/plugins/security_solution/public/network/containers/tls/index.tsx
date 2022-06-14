@@ -51,14 +51,14 @@ interface UseNetworkTls {
   endDate: string;
   startDate: string;
   skip: boolean;
-  id?: string;
+  id: string;
 }
 
 export const useNetworkTls = ({
   endDate,
   filterQuery,
   flowTarget,
-  id = ID,
+  id,
   indexNames,
   ip,
   skip,
