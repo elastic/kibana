@@ -183,7 +183,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       await ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
     });
 
-    it('should eventually have error reason "unknown" when appropriate', async () => {
+    it('should eventually have error reason "validate" when appropriate', async () => {
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -214,7 +214,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
       executionStatus = await waitForStatus(alertId, new Set(['error']));
       expect(executionStatus.error).to.be.ok();
-      expect(executionStatus.error.reason).to.be('unknown');
+      expect(executionStatus.error.reason).to.be('validate');
       await ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
 
       const message = 'params invalid: [param1]: expected value of type [string] but got [number]';

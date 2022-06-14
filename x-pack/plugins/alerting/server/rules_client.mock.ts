@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RulesClient } from './rules_client';
+import { RulesClientApi } from './types';
 
-type Schema = PublicMethodsOf<RulesClient>;
+type Schema = RulesClientApi;
 export type RulesClientMock = jest.Mocked<Schema>;
 
 const createRulesClientMock = () => {
