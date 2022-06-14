@@ -59,9 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         // wait for events to aggregate into the usage stats
-        await new Promise((resolve) => {
-          setTimeout(resolve, 8000);
-        });
+        await waitOnAggregation();
 
         // determine the result usage count
         stats = await usageAPI.getUsageStats();
@@ -92,7 +90,23 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
       });
 
-      it('downloading', async () => {});
+      it('downloading', async () => {
+        await supertestUnauth
+          .get('/api/reporting/jobs/download/kraz0qle154g0763b569zz83')
+          .auth('test_user', 'changeme');
+        await supertestUnauth
+          .get('/api/reporting/jobs/download/kraz0vj4154g0763b5curq51')
+          .auth('test_user', 'changeme');
+        await supertestUnauth
+          .get('/api/reporting/jobs/download/k9a9rq1i0gpe1457b17s7yc6')
+          .auth('test_user', 'changeme');
+
+        await waitOnAggregation();
+
+        expect(
+          getUsageCount(await usageAPI.getUsageStats(), `get /api/reporting/jobs/download/{docId}`)
+        ).to.be(3);
+      });
 
       it('deleting', async () => {
         await supertestUnauth
@@ -104,12 +118,9 @@ export default function ({ getService }: FtrProviderContext) {
           .delete('/api/reporting/jobs/delete/krazaxch156m0763b5bf81ov')
           .auth('test_user', 'changeme')
           .set('kbn-xsrf', 'xxx');
-        // wait for events to aggregate into the usage stats
-        await new Promise((resolve) => {
-          setTimeout(resolve, 8000);
-        });
 
-        // determine the result usage count
+        await waitOnAggregation();
+
         expect(
           getUsageCount(await usageAPI.getUsageStats(), `delete /api/reporting/jobs/delete/{docId}`)
         ).to.be(2);
@@ -132,12 +143,8 @@ export default function ({ getService }: FtrProviderContext) {
           downloadCsv(),
         ]);
 
-        // wait for events to aggregate into the usage stats
-        await new Promise((resolve) => {
-          setTimeout(resolve, 8000);
-        });
+        await waitOnAggregation();
 
-        // determine the result usage count
         stats = await usageAPI.getUsageStats();
       });
 
@@ -161,6 +168,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // helpers
+    const waitOnAggregation = async () => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 8000);
+      });
+    };
+
     const getUsageCount = (checkUsage: any, counterName: string): number => {
       return (
         checkUsage.usage_counters.daily_events.find(
