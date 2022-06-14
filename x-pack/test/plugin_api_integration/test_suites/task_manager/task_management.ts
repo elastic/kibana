@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { random, times } from 'lodash';
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import TaskManagerMapping from '@kbn/task-manager-plugin/server/saved_objects/mappings.json';
 import { DEFAULT_MAX_WORKERS, DEFAULT_POLL_INTERVAL } from '@kbn/task-manager-plugin/server/config';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, BulkUpdateSchedulesResult } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const {
@@ -175,6 +176,15 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ task })
         .expect(200)
         .then((response) => response.body);
+    }
+
+    function bulkUpdateSchedules(taskIds: string[], schedule: { interval: string }) {
+      return supertest
+        .post('/api/sample_tasks/bulk_update_schedules')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskIds, schedule })
+        .expect(200)
+        .then((response: { body: BulkUpdateSchedulesResult }) => response.body);
     }
 
     // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
@@ -899,6 +909,101 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should bulk update schedules for multiple tasks', async () => {
+      const initialTime = Date.now();
+      const tasks = await Promise.all([
+        scheduleTask({
+          taskType: 'sampleTask',
+          schedule: { interval: '1h' },
+          params: {},
+        }),
+
+        scheduleTask({
+          taskType: 'sampleTask',
+          schedule: { interval: '5m' },
+          params: {},
+        }),
+      ]);
+
+      const taskIds = tasks.map(({ id }) => id);
+
+      await retry.try(async () => {
+        // ensure each task has ran at least once and been rescheduled for future run
+        for (const task of tasks) {
+          const { state } = await currentTask<{ count: number }>(task.id);
+          expect(state.count).to.be(1);
+        }
+
+        // first task to be scheduled in 1h
+        expect(Date.parse((await currentTask(tasks[0].id)).runAt) - initialTime).to.be.greaterThan(
+          moment.duration(1, 'hour').asMilliseconds()
+        );
+
+        // second task to be scheduled in 5m
+        expect(Date.parse((await currentTask(tasks[1].id)).runAt) - initialTime).to.be.greaterThan(
+          moment.duration(5, 'minutes').asMilliseconds()
+        );
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedules(taskIds, { interval: '3h' });
+
+        expect(updates.tasks.length).to.be(2);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      await retry.try(async () => {
+        const updatedTasks = (await currentTasks()).docs;
+
+        updatedTasks.forEach((task) => {
+          expect(task.schedule).to.eql({ interval: '3h' });
+          // should be scheduled to run in 3 hours
+          expect(Date.parse(task.runAt) - initialTime).to.be.greaterThan(
+            moment.duration(3, 'hours').asMilliseconds()
+          );
+        });
+      });
+    });
+
+    it('should not bulk update schedules for task in running status', async () => {
+      // this task should be in running status for 60s until it will be time outed
+      const longRunningTask = await scheduleTask({
+        taskType: 'sampleRecurringTaskWhichHangs',
+        schedule: { interval: '1h' },
+        params: {},
+      });
+
+      runTaskNow({ id: longRunningTask.id });
+
+      let scheduledRunAt: string;
+      // ensure task is running and store scheduled runAt
+      await retry.try(async () => {
+        const task = await currentTask(longRunningTask.id);
+
+        expect(task.status).to.be('running');
+
+        scheduledRunAt = task.runAt;
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedules([longRunningTask.id], { interval: '3h' });
+
+        // length should be 0, as task in running status won't be updated
+        expect(updates.tasks.length).to.be(0);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      // ensure task wasn't updated
+      await retry.try(async () => {
+        const task = await currentTask(longRunningTask.id);
+
+        // interval shouldn't be changed
+        expect(task.schedule).to.eql({ interval: '1h' });
+
+        // scheduledRunAt shouldn't be changed
+        expect(task.runAt).to.eql(scheduledRunAt);
+      });
+    });
     // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
     // it('should return the resulting task state when asked to run an ephemeral task now', async () => {
     //   const ephemeralTask = await runEphemeralTaskNow({

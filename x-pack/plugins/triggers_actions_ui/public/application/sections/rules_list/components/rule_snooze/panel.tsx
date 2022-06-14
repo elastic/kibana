@@ -32,6 +32,12 @@ import type { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
 import { RuleSnoozeScheduler } from './scheduler';
 import { recurrenceSummary } from './recurrence_scheduler/helpers';
 
+/*
+ * TODO
+ * 1 -Make sure user who does not have access to the rule can not create a schedule
+ *
+ */
+
 export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const COMMON_SNOOZE_TIMES: Array<[number, SnoozeUnit]> = [
   [1, 'h'],
