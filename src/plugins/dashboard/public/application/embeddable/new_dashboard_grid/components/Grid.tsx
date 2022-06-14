@@ -9,6 +9,7 @@ import React from 'react';
 import { GridItemHTMLElement, GridStack, GridStackNode } from 'gridstack';
 import 'gridstack/dist/h5/gridstack-dd-native';
 import { EuiButton } from '@elastic/eui';
+import { tutorialSchema } from '@kbn/home-plugin/server/services/tutorials/lib/tutorial_schema';
 
 interface Props {
   test: number;
@@ -39,11 +40,13 @@ export class Grid extends React.Component<Props, State> {
     this.grid = GridStack.init({
       float: false,
       cellHeight: '70px',
-      minRow: 1,
+      acceptWidgets: true,
+      minRow: 10,
       column: 12,
     });
 
     this.grid.on('dragstop', (event, element) => {
+      console.log('grid drag stop');
       const node = (element as GridItemHTMLElement)?.gridstackNode;
       if (!node) return;
       const newItems = [...this.state.items];
@@ -58,7 +61,7 @@ export class Grid extends React.Component<Props, State> {
 
   addNewWidget = () => {
     const id = String(this.state.count);
-    const node = {
+    const node: GridStackNode = {
       x: Math.round(12 * Math.random()),
       y: 1,
       w: Math.round(1 + 3 * Math.random()),
@@ -74,24 +77,40 @@ export class Grid extends React.Component<Props, State> {
     this.grid?.addWidget(node);
   };
 
-  // addNewGrid = () => {
-  //   const id = String(this.state.count);
-  //   this.grid?.addWidget({
-  //     x: 0,
-  //     y: 0,
-  //     w: 3,
-  //     h: 3,
-  //     content: 'nested add',
-  //     subGrid: { dragOut: true, class: 'nested1', children: [] },
-  //   });
-  // };
+  addNewGrid = () => {
+    const id = String(this.state.count);
+    const subGrid = this.grid?.addWidget({
+      autoPosition: true,
+      w: 12,
+      h: 4,
+      noResize: true,
+      content: '<h1>title</h1>',
+      subGrid: {
+        minRow: 4,
+        auto: true,
+        acceptWidgets: true,
+        class: 'nested1',
+        dragInOptions: {
+          helper: (event) => {
+            console.log(event);
+            return event.target as HTMLElement;
+          },
+        },
+        column: 12,
+        children: [],
+      },
+    });
+
+    // subGrid.on('drag', (event, element) => {
+    //   console.log('dragging in subgrid');
+    // });
+  };
 
   render() {
     return (
       <div>
-        <EuiButton onClick={this.addNewWidget}>Add Panel</EuiButton>
-        {/* <EuiButton onClick={this.addNewGrid}>Add Grid</EuiButton> */}
-
+        <EuiButton onClick={this.addNewWidget}>Add Panel</EuiButton>{' '}
+        <EuiButton onClick={this.addNewGrid}>Add Grid</EuiButton>
         <div>{JSON.stringify(this.state)}</div>
         <section className="grid-stack">
           <></>

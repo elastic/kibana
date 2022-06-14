@@ -23,6 +23,10 @@ a {
   text-decoration: none;
 }
 
+.nested1 {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
 h1 {
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
