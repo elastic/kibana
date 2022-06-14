@@ -55,6 +55,7 @@ const configSchema = schema.object({
     sourcemap: schema.string({ defaultValue: 'apm-*' }),
     onboarding: schema.string({ defaultValue: 'apm-*' }),
   }),
+  serviceVersionPerServiceNode: schema.boolean({ defaultValue: false }),
 });
 
 // plugin config
