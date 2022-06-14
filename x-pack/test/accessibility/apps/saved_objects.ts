@@ -45,7 +45,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.removeSampleDataSet('flights');
-
     });
 
     it('saved objects management page a11y validations', async () => {
@@ -142,11 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-
-
-
     // inspecting a different saved object than data views because the inspect screen is different
-
     it('inspect action from actions menu meets a11y requirements', async () => {
       await testSubjects.click('cts-cancel-button');
       await (await find.byCssSelector('[title="Type"]')).click();
