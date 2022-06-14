@@ -430,6 +430,7 @@ export class TaskRunner<
         `rule execution failure: ${ruleLabel}`,
         err.message
       );
+      this.logger.error(err);
 
       throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
     }
@@ -833,7 +834,6 @@ export class TaskRunner<
           if (isAlertSavedObjectNotFoundError(err, ruleId)) {
             this.logger.debug(message);
           } else {
-            this.logger.error(err);
             this.logger.error(message);
           }
           return originalState;
