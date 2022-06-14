@@ -57,11 +57,6 @@ export const generateNthByweekday = (startDate: Moment) => {
   ];
 };
 
-export const I18N_WEEKDAY_OPTIONS = ISO_WEEKDAYS.map((n) => ({
-  id: String(n),
-  label: moment().isoWeekday(n).format('dd'),
-}));
-
 export const recurrenceSummary = ({
   freq,
   interval,

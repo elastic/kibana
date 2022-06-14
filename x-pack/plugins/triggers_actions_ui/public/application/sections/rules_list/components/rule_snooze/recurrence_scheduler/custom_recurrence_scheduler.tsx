@@ -18,13 +18,12 @@ import { Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { RRuleFrequency } from '../../../../../../types';
-import { ISO_WEEKDAYS_TO_RRULE } from './constants';
+import { ISO_WEEKDAYS_TO_RRULE, I18N_WEEKDAY_OPTIONS } from './constants';
 import {
   CustomFrequencyState,
   generateNthByweekday,
   getInitialByweekday,
   getWeekdayInfo,
-  I18N_WEEKDAY_OPTIONS,
 } from './helpers';
 import { i18nNthWeekdayShort } from './translations';
 
