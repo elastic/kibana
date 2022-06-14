@@ -62,7 +62,7 @@ export const usePrimaryNavigation = ({
   });
 
   return {
-    isForceOpenOnDesktop: isTourActive,
+    canBeCollapsed: !isTourActive,
     name: translatedNavTitle,
     icon: 'logoSecurity',
     ...(isGroupedNavigationEnabled
