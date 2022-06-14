@@ -23,7 +23,8 @@ export const dashboardsLandingLinks: LinkItem = {
   id: SecurityPageName.dashboardsLanding,
   title: DASHBOARDS,
   path: DASHBOARDS_PATH,
-  globalNavEnabled: false,
+  globalNavEnabled: true,
+  globalNavOrder: 1,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.dashboards', {
@@ -39,7 +40,8 @@ export const threatHuntingLandingLinks: LinkItem = {
   id: SecurityPageName.exploreLanding,
   title: EXPLORE,
   path: EXPLORE_PATH,
-  globalNavEnabled: false,
+  globalNavEnabled: true,
+  globalNavOrder: 5,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.explore', {

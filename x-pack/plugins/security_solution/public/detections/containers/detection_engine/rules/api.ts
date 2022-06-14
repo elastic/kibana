@@ -23,7 +23,6 @@ import {
 import {
   AggregateRuleExecutionEvent,
   BulkAction,
-  RelatedIntegrationArray,
   RuleExecutionStatus,
 } from '../../../../../common/detection_engine/schemas/common';
 import {
@@ -33,6 +32,7 @@ import {
 import {
   RulesSchema,
   GetAggregateRuleExecutionEventsResponse,
+  GetInstalledIntegrationsResponse,
 } from '../../../../../common/detection_engine/schemas/response';
 
 import {
@@ -425,8 +425,8 @@ export const fetchInstalledIntegrations = async ({
 }: {
   packages?: string[];
   signal?: AbortSignal;
-}): Promise<RelatedIntegrationArray> =>
-  KibanaServices.get().http.fetch<RelatedIntegrationArray>(
+}): Promise<GetInstalledIntegrationsResponse> =>
+  KibanaServices.get().http.fetch<GetInstalledIntegrationsResponse>(
     DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
     {
       method: 'GET',
