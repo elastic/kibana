@@ -26,7 +26,7 @@ export const UseCaseCard = ({ useCase }: { useCase: UseCase }) => {
     // TODO telemetry for guided onboarding
     trackUiMetric(METRIC_TYPE.CLICK, `guided_onboarding__use_case__${useCase}`);
 
-    localStorage.setItem(`guidedOnboarding.activeTour`, useCase);
+    localStorage.setItem(`guidedOnboarding.${useCase}.tourActive`, JSON.stringify(true));
     application.navigateToApp(navigateOptions[useCase].appId, {
       path: navigateOptions[useCase].path,
     });
