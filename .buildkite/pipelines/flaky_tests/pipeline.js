@@ -178,7 +178,7 @@ for (const testSuite of testSuites) {
           // disable split of test cases between parallel jobs when running them in flaky test runner,
           // by setting chunks to value 1, which means all test will run in one job
           CLI_NUMBER: 1,
-          CLI_COUNT: 1
+          CLI_COUNT: 1,
         },
       });
       break;
