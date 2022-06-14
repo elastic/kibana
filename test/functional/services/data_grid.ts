@@ -117,8 +117,16 @@ export class DataGridService extends FtrService {
     return rows;
   }
 
-  public async getTable(selector: string = 'docTable') {
-    return await this.testSubjects.find(selector);
+  public async getTable(selector: string = 'docTable', renderMoreRows?: boolean) {
+    let table: WebElementWrapper;
+    if (renderMoreRows) {
+      await this.testSubjects.click('dataGridFullScreenButton');
+      table = await this.testSubjects.find(selector);
+      await this.testSubjects.click('dataGridFullScreenButton');
+    } else {
+      table = await this.testSubjects.find(selector);
+    }
+    return table;
   }
 
   public async getBodyRows(options?: SelectOptions): Promise<WebElementWrapper[][]> {
@@ -126,14 +134,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getRowsText(renderMoreRows?: boolean) {
-    let table: WebElementWrapper;
-    if (renderMoreRows) {
-      await this.testSubjects.click('dataGridFullScreenButton');
-      table = await this.getTable();
-      await this.testSubjects.click('dataGridFullScreenButton');
-    } else {
-      table = await this.getTable();
-    }
+    const table = await this.getTable('docTable', true);
     const rows = await table.findAllByCssSelector('.euiDataGridRow');
 
     const rowsText = [];
@@ -147,14 +148,7 @@ export class DataGridService extends FtrService {
    * Returns an array of rows (which are array of cells)
    */
   public async getDocTableRows(options?: SelectOptions) {
-    let table: WebElementWrapper;
-    if (options?.renderMoreRows) {
-      await this.testSubjects.click('dataGridFullScreenButton');
-      table = await this.getTable();
-      await this.testSubjects.click('dataGridFullScreenButton');
-    } else {
-      table = await this.getTable();
-    }
+    const table = await this.getTable('docTable', true);
 
     if (!table) {
       return [];
