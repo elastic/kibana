@@ -8,14 +8,15 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { registerUrlParam, updateUrlParam } from './actions';
 
-export type GlobalUrlState = Record<string, string | null>;
+export type GlobalUrlParam = Record<string, string | null>;
 
-export const initialGlobalUrlState: GlobalUrlState = {};
+export const initialGlobalUrlParam: GlobalUrlParam = {};
 
-export const globalUrlStateReducer = reducerWithInitialState(initialGlobalUrlState)
+export const globalUrlParamReducer = reducerWithInitialState(initialGlobalUrlParam)
   .case(registerUrlParam, (state, { key, initialValue }) => {
+    // It doesn't allow 2 places using the same query param
     if (state[key] !== undefined) {
-      throw new Error(`Query string '${key}' is already being used.`);
+      throw new Error(`Url param string '${key}' is already being used.`);
     }
 
     return {
@@ -24,6 +25,7 @@ export const globalUrlStateReducer = reducerWithInitialState(initialGlobalUrlSta
     };
   })
   .case(updateUrlParam, (state, { key, value }) => {
+    // Only update the URL after the query param is registered and if the current value is different than the previous value
     if (state[key] === undefined || state[key] === value) {
       return state;
     }

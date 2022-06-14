@@ -7,7 +7,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-const actionCreator = actionCreatorFactory('x-pack/security_solution/local/global_url_state');
+const actionCreator = actionCreatorFactory('x-pack/security_solution/local/global_url_param');
 
 export const registerUrlParam = actionCreator<{ key: string; initialValue: string | null }>(
   'REGISTER_URL_PARAM'

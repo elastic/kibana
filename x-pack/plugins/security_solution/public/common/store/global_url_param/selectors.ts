@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { GlobalUrlState } from '.';
+import { GlobalUrlParam } from '.';
 import { State } from '../types';
 
-export const selectGlobalUrlState = (state: State): GlobalUrlState => state.globalUrlState;
+export const selectGlobalUrlParam = (state: State): GlobalUrlParam => state.globalUrlParam;
 
 export const selectIsRegister = (state: State, key: string): boolean =>
-  state.globalUrlState[key] !== undefined;
+  state.globalUrlParam[key] !== undefined;

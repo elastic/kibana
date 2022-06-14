@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import * as globalUrlStateActions from './actions';
-import * as globalUrlStateSelectors from './selectors';
+import * as globalUrlParamActions from './actions';
+import * as globalUrlParamSelectors from './selectors';
 
-export { globalUrlStateActions, globalUrlStateSelectors };
+export { globalUrlParamActions, globalUrlParamSelectors };
 
 export * from './reducer';

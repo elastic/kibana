@@ -24,7 +24,7 @@ import { AppAction } from './actions';
 import { initDataView, SourcererModel, SourcererScopeName } from './sourcerer/model';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
-import { globalUrlStateReducer, initialGlobalUrlState } from './global_url_state';
+import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   UsersPluginReducer &
@@ -101,7 +101,7 @@ export const createInitialState = (
       kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
       signalIndexName,
     },
-    globalUrlState: initialGlobalUrlState,
+    globalUrlState: initialGlobalUrlParam,
   };
 
   return preloadedState;
@@ -118,6 +118,6 @@ export const createReducer: (
     dragAndDrop: dragAndDropReducer,
     inputs: inputsReducer,
     sourcerer: sourcererReducer,
-    globalUrlState: globalUrlStateReducer,
+    globalUrlState: globalUrlParamReducer,
     ...pluginsReducer,
   });

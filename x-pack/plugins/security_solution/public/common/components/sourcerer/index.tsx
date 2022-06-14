@@ -30,7 +30,7 @@ import { useUpdateDataView } from './use_update_data_view';
 import { Trigger } from './trigger';
 import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
-import { updateUrlParam } from '../../utils/global_query_string_manager';
+import { updateUrlParam } from '../../utils/global_query_string';
 import { CONSTANTS } from '../url_state/constants';
 
 export interface SourcererComponentProps {
@@ -152,7 +152,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
       if (isDefaultSourcerer) {
         updateUrlParam<SourcererUrlState>({
-          urlStateKey: CONSTANTS.sourcerer,
+          urlParamKey: CONSTANTS.sourcerer,
           value: {
             [SourcererScopeName.default]: {
               id: newSelectedDataView,

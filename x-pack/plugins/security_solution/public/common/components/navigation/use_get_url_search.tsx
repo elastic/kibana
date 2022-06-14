@@ -8,7 +8,7 @@
 import { useCallback, useMemo } from 'react';
 
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { useGlobalQueryString } from '../../utils/global_query_string_manager';
+import { useGlobalQueryString } from '../../utils/global_query_string';
 import { makeMapStateToProps } from '../url_state/helpers';
 import { getSearch, getUrlStateSearch } from './helpers';
 import { SearchNavTab } from './types';

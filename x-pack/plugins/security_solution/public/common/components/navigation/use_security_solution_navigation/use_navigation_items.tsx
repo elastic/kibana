@@ -18,7 +18,7 @@ import { NavTab, SecurityNavGroupKey } from '../types';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
-import { useGlobalQueryString } from '../../../utils/global_query_string_manager';
+import { useGlobalQueryString } from '../../../utils/global_query_string';
 
 export const usePrimaryNavigationItems = ({
   navTabs,

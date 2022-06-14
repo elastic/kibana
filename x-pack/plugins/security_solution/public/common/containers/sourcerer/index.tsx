@@ -38,7 +38,7 @@ import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
 import { useFetchIndex } from '../source';
 import { isDetectionPage } from '../../utils/route/helpers';
-import { registerUrlParam, updateUrlParam } from '../../utils/global_query_string_manager';
+import { registerUrlParam, updateUrlParam } from '../../utils/global_query_string';
 import { CONSTANTS } from '../../components/url_state/constants';
 
 export const useInitSourcerer = (
@@ -94,7 +94,7 @@ export const useInitSourcerer = (
 
   useEffect(() => {
     const sourcererInitialState = registerUrlParam<SourcererUrlState>({
-      urlStateKey: CONSTANTS.sourcerer,
+      urlParamKey: CONSTANTS.sourcerer,
     });
 
     // Initialize the store with value from UrlParam.
@@ -116,7 +116,7 @@ export const useInitSourcerer = (
       // It isn't strictly necessary but I am keeping it for compatibility with the previous implementation.
       if (scopeDataViewId) {
         updateUrlParam<SourcererUrlState>({
-          urlStateKey: CONSTANTS.sourcerer,
+          urlParamKey: CONSTANTS.sourcerer,
           value: {
             [SourcererScopeName.default]: {
               id: scopeDataViewId,
