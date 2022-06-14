@@ -220,13 +220,14 @@ describe('when on the policy response', () => {
     expect(component.getByText('A New Unknown Action')).not.toBeNull();
   });
 
-  it('should not display error callout if status success', () => {
+  it('should not display error callout if status success', async () => {
     const policyResponse = createPolicyResponse();
     policyResponse.Endpoint.policy.applied.actions.forEach(
       (action) => (action.status = HostPolicyResponseActionStatus.success)
     );
     runMock(policyResponse);
-    expect(render().queryAllByTestId('endpointPolicyResponseErrorCallOut')).toHaveLength(0);
+    const component = await renderOpenedTree();
+    expect(component.queryAllByTestId('endpointPolicyResponseErrorCallOut')).toHaveLength(0);
   });
 
   describe('error callout', () => {
