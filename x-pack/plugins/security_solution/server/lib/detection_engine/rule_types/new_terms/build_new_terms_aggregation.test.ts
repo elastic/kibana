@@ -6,30 +6,68 @@
  */
 
 import moment from 'moment';
-import { buildNewTermsAggregation } from './build_new_terms_aggregation';
+import {
+  buildDocFetchAgg,
+  buildNewTermsAgg,
+  buildRecentTermsAgg,
+} from './build_new_terms_aggregation';
 
-describe('buildNewTermsAggregation', () => {
-  test('builds a correct aggregation with event.ingested', () => {
-    const newValueWindowStart = moment(1650935705);
-    const aggregation = buildNewTermsAggregation({
-      newValueWindowStart,
-      field: 'host.name',
-      maxSignals: 50,
-      timestampField: 'event.ingested',
+describe('aggregations', () => {
+  describe('buildRecentTermsAgg', () => {
+    test('builds a correct composite agg without `after`', () => {
+      const aggregation = buildRecentTermsAgg({
+        field: 'host.name',
+        after: undefined,
+      });
+
+      expect(aggregation).toMatchSnapshot();
     });
 
-    expect(aggregation).toMatchSnapshot();
+    test('builds a correct composite aggregation with `after`', () => {
+      const aggregation = buildRecentTermsAgg({
+        field: 'host.name',
+        after: { 'host.name': 'myHost' },
+      });
+
+      expect(aggregation).toMatchSnapshot();
+    });
   });
 
-  test('builds a correct aggregation with @timestamp', () => {
-    const newValueWindowStart = moment(1650000000);
-    const aggregation = buildNewTermsAggregation({
-      newValueWindowStart,
-      field: 'host.ip',
-      maxSignals: 200,
-      timestampField: '@timestamp',
+  describe('buildNewTermsAggregation', () => {
+    test('builds a correct aggregation with event.ingested', () => {
+      const newValueWindowStart = moment(1650935705);
+      const aggregation = buildNewTermsAgg({
+        newValueWindowStart,
+        field: 'host.name',
+        timestampField: 'event.ingested',
+        include: ['myHost'],
+      });
+
+      expect(aggregation).toMatchSnapshot();
     });
 
-    expect(aggregation).toMatchSnapshot();
+    test('builds a correct aggregation with @timestamp', () => {
+      const newValueWindowStart = moment(1650000000);
+      const aggregation = buildNewTermsAgg({
+        newValueWindowStart,
+        field: 'host.ip',
+        timestampField: '@timestamp',
+        include: ['myHost'],
+      });
+
+      expect(aggregation).toMatchSnapshot();
+    });
+  });
+
+  describe('buildDocFetchAgg', () => {
+    test('builds a correct top hits aggregation', () => {
+      const aggregation = buildDocFetchAgg({
+        field: 'host.name',
+        timestampField: '@timestamp',
+        include: ['myHost'],
+      });
+
+      expect(aggregation).toMatchSnapshot();
+    });
   });
 });

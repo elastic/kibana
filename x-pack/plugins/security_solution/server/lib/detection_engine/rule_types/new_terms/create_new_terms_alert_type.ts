@@ -6,8 +6,6 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { chunk } from 'lodash';
-import { performance } from 'perf_hooks';
 import dateMath from '@elastic/datemath';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
@@ -18,18 +16,17 @@ import { CreateRuleOptions, SecurityAlertType } from '../types';
 import { getInputIndex } from '../../signals/get_input_output_index';
 import { singleSearchAfter } from '../../signals/single_search_after';
 import { getFilter } from '../../signals/get_filter';
-import { buildReasonMessageForNewTermsAlert } from '../../signals/reason_formatters';
 import { GenericBulkCreateResponse } from '../factories';
 import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
-import { EventsAndTerms, wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
+import { wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
 import {
-  buildInitialNewTermsAggregation,
-  buildNewTermsAggregation,
-  InitialNewTermsAggregationResult,
-  NewTermsAggregationResult,
+  buildDocFetchAgg,
+  buildRecentTermsAgg,
+  buildNewTermsAgg,
+  DocFetchAggResult,
+  RecentTermsAggResult,
+  NewTermsAggResult,
 } from './build_new_terms_aggregation';
-import { buildTimeRangeFilter } from '../../signals/build_events_query';
-import { makeFloatString } from '../../signals/utils';
 import {
   buildTimestampRuntimeMapping,
   TIMESTAMP_RUNTIME_FIELD,
@@ -169,13 +166,17 @@ export const createNewTermsAlertType = (
         !bulkCreateResults.truncatedAlertsArray &&
         bulkCreateResults.createdSignalsCount < params.maxSignals
       ) {
+        // PHASE 1: Fetch a page of terms using a composite aggregation. This will collect a page from
+        // all of the terms seen over the last rule interval. In the next phase we'll determine which
+        // ones are new.
         const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
-          aggregations: buildInitialNewTermsAggregation({
+          aggregations: buildRecentTermsAgg({
             field: params.newTermsFields[0],
             after: afterKey,
           }),
           searchAfterSortIds: undefined,
           index: inputIndex,
+          // The time range for the initial composite aggregation is the rule interval, `from` and `to`
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           services,
@@ -185,7 +186,7 @@ export const createNewTermsAlertType = (
           timestampOverride: params.timestampOverride,
           buildRuleMessage,
         });
-        const searchResultWithAggs = searchResult as InitialNewTermsAggregationResult;
+        const searchResultWithAggs = searchResult as RecentTermsAggResult;
         if (!searchResultWithAggs.aggregations) {
           throw new Error('expected to find aggregations on search result');
         }
@@ -202,23 +203,29 @@ export const createNewTermsAlertType = (
           break;
         }
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
-        // TODO: fix this up - handle multiple fields, deal with null values
-        const includeValues = bucketsForField.map((bucket) => Object.values(bucket.key)[0]);
+        const includeValues = bucketsForField
+          .map((bucket) => Object.values(bucket.key)[0])
+          .filter((value): value is string | number => value != null);
 
+        // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
+        // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
+        // response correspond to each new term.
         const {
           searchResult: pageSearchResult,
           searchDuration: pageSearchDuration,
           searchErrors: pageSearchErrors,
         } = await singleSearchAfter({
-          aggregations: buildNewTermsAggregation({
+          aggregations: buildNewTermsAgg({
             newValueWindowStart: tuple.from,
             timestampField,
             field: params.newTermsFields[0],
-            include: includeValues as string[],
+            include: includeValues,
           }),
           runtimeMappings,
           searchAfterSortIds: undefined,
           index: inputIndex,
+          // For Phase 2, we expand the time range to aggregate over the history window
+          // in addition to the rule interval
           from: parsedHistoryWindowSize.toISOString(),
           to: tuple.to.toISOString(),
           services,
@@ -228,41 +235,79 @@ export const createNewTermsAlertType = (
           timestampOverride: params.timestampOverride,
           buildRuleMessage,
         });
+        searchAfterResults.searchDurations.push(pageSearchDuration);
+        searchAfterResults.searchErrors.push(...pageSearchErrors);
 
         logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
-        logger.debug(`Reported time on phase 2: ${pageSearchResult.took}`);
 
-        const pageSearchResultWithAggs = pageSearchResult as NewTermsAggregationResult;
+        const pageSearchResultWithAggs = pageSearchResult as NewTermsAggResult;
         if (!pageSearchResultWithAggs.aggregations) {
           throw new Error('expected to find aggregations on page search result');
         }
 
-        /* const eventsAndTerms: Array<{
-          event: estypes.SearchHit<SignalSource>;
-          newTerms: Array<string | number | null>;
-        }> = [];
-        const bucketsForFieldInPage = pageSearchResultWithAggs.aggregations.new_terms.buckets;
-        bucketsForFieldInPage.forEach((bucket) => {
-          eventsAndTerms.push({
+        // PHASE 3: For each term that is not in the history window, fetch the oldest document in
+        // the rule interval for that term. This is the first document to contain the new term, and will
+        // become the basis of the resulting alert.
+        // One document could become multiple alerts if the document contains an array with multiple new terms.
+        if (pageSearchResultWithAggs.aggregations.new_terms.buckets.length > 0) {
+          const actualNewTerms = pageSearchResultWithAggs.aggregations.new_terms.buckets.map(
+            (bucket) => bucket.key
+          );
+
+          const {
+            searchResult: docFetchSearchResult,
+            searchDuration: docFetchSearchDuration,
+            searchErrors: docFetchSearchErrors,
+          } = await singleSearchAfter({
+            aggregations: buildDocFetchAgg({
+              timestampField,
+              field: params.newTermsFields[0],
+              include: actualNewTerms,
+            }),
+            runtimeMappings,
+            searchAfterSortIds: undefined,
+            index: inputIndex,
+            // For phase 3, we go back to aggregating only over the rule interval - excluding the history window
+            from: tuple.from.toISOString(),
+            to: tuple.to.toISOString(),
+            services,
+            filter,
+            logger,
+            pageSize: 0,
+            timestampOverride: params.timestampOverride,
+            buildRuleMessage,
+          });
+          searchAfterResults.searchDurations.push(docFetchSearchDuration);
+          searchAfterResults.searchErrors.push(...docFetchSearchErrors);
+
+          const docFetchResultWithAggs = docFetchSearchResult as DocFetchAggResult;
+
+          if (!docFetchResultWithAggs.aggregations) {
+            throw new Error('expected to find aggregations on page search result');
+          }
+
+          const eventsAndTerms: Array<{
+            event: estypes.SearchHit<SignalSource>;
+            newTerms: Array<string | number | null>;
+          }> = docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => ({
             event: bucket.docs.hits.hits[0],
             newTerms: [bucket.key],
+          }));
+
+          const wrappedAlerts = wrapNewTermsAlerts({
+            eventsAndTerms,
+            spaceId,
+            completeRule,
+            mergeStrategy,
           });
-        });
 
-        const wrappedAlerts = wrapNewTermsAlerts({
-          eventsAndTerms,
-          spaceId,
-          completeRule,
-          mergeStrategy,
-          buildReasonMessage: buildReasonMessageForNewTermsAlert,
-        });
+          const bulkCreateResult = await bulkCreate(
+            wrappedAlerts,
+            params.maxSignals - bulkCreateResults.createdSignalsCount
+          );
 
-        const bulkCreateResult = await bulkCreate(
-          wrappedAlerts,
-          params.maxSignals - bulkCreateResults.createdSignalsCount
-        );
-
-        bulkCreateResults = addBulkCreateResults(bulkCreateResults, bulkCreateResult);*/
+          bulkCreateResults = addBulkCreateResults(bulkCreateResults, bulkCreateResult);
+        }
       }
 
       return {

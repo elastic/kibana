@@ -16,7 +16,7 @@ import {
 import { ALERT_NEW_TERMS } from '../../../../../../common/field_maps/field_names';
 import { ConfigType } from '../../../../../config';
 import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
-import { BuildReasonMessage } from '../../../signals/reason_formatters';
+import { buildReasonMessageForNewTermsAlert } from '../../../signals/reason_formatters';
 import { SignalSource } from '../../../signals/types';
 import { buildBulkBody } from './build_bulk_body';
 
@@ -30,13 +30,11 @@ export const wrapNewTermsAlerts = ({
   spaceId,
   completeRule,
   mergeStrategy,
-  buildReasonMessage,
 }: {
   eventsAndTerms: EventsAndTerms[];
   spaceId: string | null | undefined;
   completeRule: CompleteRule<RuleParams>;
   mergeStrategy: ConfigType['alertMergeStrategy'];
-  buildReasonMessage: BuildReasonMessage;
 }): Array<WrappedFieldsLatest<NewTermsFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const id = objectHash([
@@ -53,7 +51,7 @@ export const wrapNewTermsAlerts = ({
       mergeStrategy,
       [],
       true,
-      buildReasonMessage
+      buildReasonMessageForNewTermsAlert
     );
     return {
       _id: id,
