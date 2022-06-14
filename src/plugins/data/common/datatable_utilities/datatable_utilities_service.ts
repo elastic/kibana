@@ -13,6 +13,7 @@ import type {
   AggsCommonStart,
   AggConfig,
   AggParamsDateHistogram,
+  AggParamsHistogram,
   CreateAggConfigParams,
   IAggType,
 } from '../search';
@@ -122,6 +123,29 @@ export class DatatableUtilitiesService {
     const params = column.meta.sourceParams?.params as { interval: string } | undefined;
 
     return params?.interval;
+  }
+
+  /**
+   * Helper function returning the used interval for data table column created by the histogramm agg type.
+   * "auto" will get expanded to the actually used interval.
+   * If the column is not a column created by a histogram aggregation of the esaggs data source,
+   * this function will return undefined.
+   */
+  getNumberHistogramInterval(column: DatatableColumn): number | undefined {
+    if (column.meta.source !== 'esaggs') {
+      return;
+    }
+    if (column.meta.sourceParams?.type !== BUCKET_TYPES.HISTOGRAM) {
+      return;
+    }
+
+    const params = column.meta.sourceParams.params as unknown as AggParamsHistogram;
+
+    if (!params.used_interval || typeof params.used_interval === 'string') {
+      return;
+    }
+
+    return params.used_interval;
   }
 
   getTotalCount(table: Datatable): number | undefined {

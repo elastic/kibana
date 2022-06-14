@@ -31,7 +31,7 @@ export function calculateMinInterval(
     return search.aggs.parseInterval(minTimeBarInterval)?.as('milliseconds');
   }
   if (!isTimeViz) {
-    const histogramInterval = search.aggs.getNumberHistogramIntervalByDatatableColumn(xColumn);
+    const histogramInterval = datatableUtilities.getNumberHistogramInterval(xColumn);
     if (typeof histogramInterval === 'number') {
       return histogramInterval;
     } else {

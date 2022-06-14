@@ -17,6 +17,9 @@ export function createDatatableUtilitiesMock(): jest.Mocked<DatatableUtilitiesSe
     getDateHistogramMeta: jest.fn(DatatableUtilitiesService.prototype.getDateHistogramMeta),
     getField: jest.fn(),
     getFieldFormat: jest.fn(),
+    getNumberHistogramInterval: jest.fn(
+      DatatableUtilitiesService.prototype.getNumberHistogramInterval
+    ),
     isFilterable: jest.fn(),
     setFieldFormat: jest.fn(),
   } as unknown as jest.Mocked<DatatableUtilitiesService>;

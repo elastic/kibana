@@ -115,7 +115,6 @@ import {
   parseInterval,
   toAbsoluteDates,
   boundsDescendingRaw,
-  getNumberHistogramIntervalByDatatableColumn,
   getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
@@ -224,7 +223,6 @@ export const search = {
     termsAggFilter,
     toAbsoluteDates,
     boundsDescendingRaw,
-    getNumberHistogramIntervalByDatatableColumn,
   },
   getResponseInspectorStats,
   tabifyAggResponse,
