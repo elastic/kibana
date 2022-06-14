@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { Spaces, Superuser } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -220,6 +222,22 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
         .set('kbn-xsrf', 'xxx')
         .send({ taskId: 'Alerting-alerting_telemetry' })
         .expect(200);
+
+      // await the task to be done
+      await retry.try(async () => {
+        const resp = await es.search<TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>>({
+          index: '.kibana_task_manager',
+          body: {
+            query: {
+              term: {
+                _id: `task:Alerting-alerting_telemetry`,
+              },
+            },
+          },
+        });
+        const task = resp.hits.hits[0]?._source?.task;
+        expect(task?.status).to.be('idle');
+      });
 
       // get telemetry task doc
       const telemetryTask = await es.get<TaskManagerDoc>({

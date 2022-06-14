@@ -652,7 +652,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(failedRunSoonResult).to.eql({
         id: firstWithSingleConcurrency.id,
-        error: `Error: Failed to run task "${firstWithSingleConcurrency.id}" as we would exceed the max concurrency of "Sample Task With Single Concurrency" which is 1. Rescheduled the task to ensure it is picked up as soon as possible.`,
+        error: `Error: Failed to claim task "${firstWithSingleConcurrency.id}" as we would exceed the max concurrency of "Sample Task With Single Concurrency" which is 1. Rescheduled the task to ensure it is picked up as soon as possible.`,
       });
 
       // release the second task
