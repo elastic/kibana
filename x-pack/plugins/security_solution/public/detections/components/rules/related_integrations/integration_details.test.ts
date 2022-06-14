@@ -5,59 +5,25 @@
  * 2.0.
  */
 
-import {
-  integrationDetailsEnabled,
-  integrationDetailsInstalled,
-  integrationDetailsUninstalled,
-} from './mock';
-import { render } from '@testing-library/react';
-import { getInstalledRelatedIntegrations, getIntegrationLink } from './utils';
+import { calculateIntegrationDetails } from './integration_details';
+import { IntegrationPrivileges } from './integration_privileges';
 
-describe('Related Integrations Utilities', () => {
-  describe('#getIntegrationLink', () => {
-    describe('it returns a correctly formatted integrations link', () => {
-      test('given an uninstalled integrationDetails', () => {
-        const link = getIntegrationLink(integrationDetailsUninstalled, 'http://localhost');
-        const { container } = render(link);
+describe('Integration Details', () => {
+  describe('calculateIntegrationDetails', () => {
+    const stubPrivileges: IntegrationPrivileges = {
+      canReadInstalledIntegrations: true,
+    };
 
-        expect(container.firstChild).toHaveProperty(
-          'href',
-          'http://localhost/app/integrations/detail/test-1.2.3/overview?integration=integration'
-        );
-      });
-
-      test('given an installed integrationDetails', () => {
-        const link = getIntegrationLink(integrationDetailsInstalled, 'http://localhost');
-        const { container } = render(link);
-
-        expect(container.firstChild).toHaveProperty(
-          'href',
-          'http://localhost/app/integrations/detail/test-1.2.3/overview?integration=integration'
-        );
-      });
-
-      test('given an enabled integrationDetails with an unsatisfied version', () => {
-        const link = getIntegrationLink(integrationDetailsEnabled, 'http://localhost');
-        const { container } = render(link);
-
-        expect(container.firstChild).toHaveProperty(
-          'href',
-          'http://localhost/app/integrations/detail/test-1.3.3/overview?integration=integration'
-        );
-      });
-    });
-  });
-
-  describe('#getInstalledRelatedIntegrations', () => {
     test('it returns a the correct integrationDetails', () => {
-      const integrationDetails = getInstalledRelatedIntegrations([], []);
+      const integrationDetails = calculateIntegrationDetails(stubPrivileges, [], []);
 
       expect(integrationDetails.length).toEqual(0);
     });
 
     describe('version is correctly computed', () => {
       test('Unknown integration that does not exist', () => {
-        const integrationDetails = getInstalledRelatedIntegrations(
+        const integrationDetails = calculateIntegrationDetails(
+          stubPrivileges,
           [
             {
               package: 'foo1',
@@ -75,13 +41,14 @@ describe('Related Integrations Utilities', () => {
           []
         );
 
-        expect(integrationDetails[0].target_version).toEqual('1.2.3');
-        expect(integrationDetails[1].target_version).toEqual('1.2.3');
-        expect(integrationDetails[2].target_version).toEqual('1.2.0');
+        expect(integrationDetails[0].targetVersion).toEqual('1.2.3');
+        expect(integrationDetails[1].targetVersion).toEqual('1.2.3');
+        expect(integrationDetails[2].targetVersion).toEqual('1.2.0');
       });
 
       test('Integration that is not installed', () => {
-        const integrationDetails = getInstalledRelatedIntegrations(
+        const integrationDetails = calculateIntegrationDetails(
+          stubPrivileges,
           [
             {
               package: 'aws',
@@ -96,12 +63,13 @@ describe('Related Integrations Utilities', () => {
           []
         );
 
-        expect(integrationDetails[0].target_version).toEqual('1.2.3');
-        expect(integrationDetails[1].target_version).toEqual('1.2.3');
+        expect(integrationDetails[0].targetVersion).toEqual('1.2.3');
+        expect(integrationDetails[1].targetVersion).toEqual('1.2.3');
       });
 
       test('Integration that is installed, and its version matches required version', () => {
-        const integrationDetails = getInstalledRelatedIntegrations(
+        const integrationDetails = calculateIntegrationDetails(
+          stubPrivileges,
           [
             {
               package: 'aws',
@@ -131,15 +99,22 @@ describe('Related Integrations Utilities', () => {
           ]
         );
 
-        // Since version is satisfied, we check `package_version`
-        expect(integrationDetails[0].version_satisfied).toEqual(true);
-        expect(integrationDetails[0].package_version).toEqual('1.3.0');
-        expect(integrationDetails[1].version_satisfied).toEqual(true);
-        expect(integrationDetails[1].package_version).toEqual('1.2.5');
+        expect(integrationDetails[0].installationStatus.isKnown).toEqual(true);
+        if (integrationDetails[0].installationStatus.isKnown) {
+          expect(integrationDetails[0].installationStatus.isVersionMismatch).toEqual(false);
+          expect(integrationDetails[0].installationStatus.installedVersion).toEqual('1.3.0');
+        }
+
+        expect(integrationDetails[1].installationStatus.isKnown).toEqual(true);
+        if (integrationDetails[1].installationStatus.isKnown) {
+          expect(integrationDetails[1].installationStatus.isVersionMismatch).toEqual(false);
+          expect(integrationDetails[1].installationStatus.installedVersion).toEqual('1.2.5');
+        }
       });
 
       test('Integration that is installed, and its version is less than required version', () => {
-        const integrationDetails = getInstalledRelatedIntegrations(
+        const integrationDetails = calculateIntegrationDetails(
+          stubPrivileges,
           [
             {
               package: 'aws',
@@ -169,12 +144,13 @@ describe('Related Integrations Utilities', () => {
           ]
         );
 
-        expect(integrationDetails[0].target_version).toEqual('1.2.3');
-        expect(integrationDetails[1].target_version).toEqual('1.2.3');
+        expect(integrationDetails[0].targetVersion).toEqual('1.2.3');
+        expect(integrationDetails[1].targetVersion).toEqual('1.2.3');
       });
 
       test('Integration that is installed, and its version is greater than required version', () => {
-        const integrationDetails = getInstalledRelatedIntegrations(
+        const integrationDetails = calculateIntegrationDetails(
+          stubPrivileges,
           [
             {
               package: 'aws',
@@ -204,8 +180,8 @@ describe('Related Integrations Utilities', () => {
           ]
         );
 
-        expect(integrationDetails[0].target_version).toEqual('1.2.3');
-        expect(integrationDetails[1].target_version).toEqual('1.2.3');
+        expect(integrationDetails[0].targetVersion).toEqual('1.2.3');
+        expect(integrationDetails[1].targetVersion).toEqual('1.2.3');
       });
     });
   });
