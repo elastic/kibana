@@ -785,6 +785,7 @@ export class TaskRunner<
     if (null != duration) {
       executionStatus.lastDuration = nanosToMillis(duration);
       monitoringHistory.duration = executionStatus.lastDuration;
+      this.metrics.ruleDuration.record(executionStatus.lastDuration);
     }
 
     // if executionStatus indicates an error, fill in fields in
@@ -802,9 +803,11 @@ export class TaskRunner<
     if (!this.cancelled) {
       this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
       // NOTE: Using the typesafe opentelemetry counter here directly
-      this.metrics.ruleExecutions.add(1);
+      this.metrics.ruleExecutionsTotal.add(1);
+      this.metrics.ruleExecutions.add(1, { ruleType: this.ruleType.id });
       if (executionStatus.error) {
         this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
+        this.metrics.ruleFailures.add(1);
       }
       this.logger.debug(
         `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(

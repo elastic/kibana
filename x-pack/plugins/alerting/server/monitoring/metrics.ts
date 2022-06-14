@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { Counter, Meter } from '@opentelemetry/api-metrics';
+import { Counter, Histogram, Meter } from '@opentelemetry/api-metrics';
 
 export class Metrics {
+  ruleExecutionsTotal: Counter;
   ruleExecutions: Counter;
+  ruleFailures: Counter;
+  ruleDuration: Histogram;
 
   constructor(meter: Meter) {
+    this.ruleExecutionsTotal = meter.createCounter('ruleExecutionsTotal');
     this.ruleExecutions = meter.createCounter('ruleExecutions');
+    this.ruleFailures = meter.createCounter('ruleFailures');
+    this.ruleDuration = meter.createHistogram('ruleDuration');
   }
 }
