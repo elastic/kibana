@@ -3075,6 +3075,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-theme-browser-mocks@link:bazel-bin/packages/core/theme/core-theme-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/crypto@link:bazel-bin/packages/kbn-crypto":
   version "0.0.0"
   uid ""
@@ -3316,6 +3328,10 @@
   uid ""
 
 "@kbn/shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data":
   version "0.0.0"
   uid ""
 
@@ -6418,6 +6434,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-theme-browser-mocks@link:bazel-bin/packages/core/theme/core-theme-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__crypto@link:bazel-bin/packages/kbn-crypto/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6635,6 +6663,10 @@
   uid ""
 
 "@types/kbn__shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data/npm_module_types":
   version "0.0.0"
   uid ""
 
