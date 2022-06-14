@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const noData = getService('monitoringNoData');
   const kibanaOverview = getService('monitoringKibanaOverview');
-  const kibanaInstances = getService('monitoringKibanaInstances');
   const clusterOverview = getService('monitoringClusterOverview');
 
   describe('Kibana Stack Monitoring', () => {
