@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ConnectableObservable, Observable, Subject, from, merge, firstValueFrom } from 'rxjs';
+import { ConnectableObservable, type Observable, Subject, from, merge, firstValueFrom } from 'rxjs';
 
 import { filter, map, pairwise, exhaustMap, publishReplay, share, takeUntil } from 'rxjs/operators';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
-import { ILicense } from './types';
+import type { ILicense } from './types';
 
 export function createLicenseUpdate(
   triggerRefresh$: Observable<unknown>,
@@ -18,7 +18,10 @@ export function createLicenseUpdate(
   initialValues?: ILicense
 ) {
   const manuallyRefresh$ = new Subject<void>();
-  const fetched$ = merge(triggerRefresh$, manuallyRefresh$).pipe(exhaustMap(fetcher), share());
+  const fetched$ = merge(triggerRefresh$.pipe(takeUntil(stop$)), manuallyRefresh$).pipe(
+    exhaustMap(fetcher),
+    share()
+  );
 
   const cached$ = fetched$.pipe(
     takeUntil(stop$),
