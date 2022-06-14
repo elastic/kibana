@@ -104,7 +104,7 @@ export function initRoutes(
       } = req.body;
       try {
         const taskManager = await taskManagerStart;
-        return res.ok({ body: await taskManager.runNow(id) });
+        return res.ok({ body: await taskManager.runSoon(id) });
       } catch (err) {
         return res.ok({ body: { id, error: `${err}` } });
       }

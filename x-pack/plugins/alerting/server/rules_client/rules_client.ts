@@ -1248,7 +1248,7 @@ export class RulesClient {
           !isEqual(alertSavedObject.attributes.schedule, updateResult.schedule)
         ) {
           this.taskManager
-            .runNow(updateResult.scheduledTaskId)
+            .runSoon(updateResult.scheduledTaskId)
             .then(() => {
               this.logger.debug(
                 `Alert update has rescheduled the underlying task: ${updateResult.scheduledTaskId}`

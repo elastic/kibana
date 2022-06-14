@@ -85,7 +85,7 @@ export class DashboardPlugin
     if (plugins.taskManager) {
       scheduleDashboardTelemetry(this.logger, plugins.taskManager);
 
-      plugins.taskManager.runNow(TASK_ID);
+      plugins.taskManager.runSoon(TASK_ID);
     }
 
     return {};
