@@ -11,6 +11,7 @@ import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizat
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { inter } from '@kbn/expressions-plugin/common';
 
+import { ColorMode } from '@kbn/charts-plugin/public';
 import { VisParams } from './types';
 import { getStopsWithColorsFromRanges } from './utils';
 
@@ -49,9 +50,11 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     });
   }
 
+  const hasColorRanges = colorsRange && colorsRange.length > 1;
+
   const metricVis = buildExpressionFunction('metricVis', {
     percentageMode,
-    colorMode: metricColorMode,
+    colorMode: hasColorRanges ? metricColorMode : ColorMode.None,
     showLabels: labels?.show ?? false,
   });
 
@@ -70,7 +73,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
 
   metricVis.addArgument('labelFont', buildExpression(`font size="14" align="center"`));
 
-  if (colorsRange && colorsRange.length > 1) {
+  if (colorsRange && colorsRange.length) {
     const stopsWithColors = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);
     const palette = buildExpressionFunction('palette', {
       ...stopsWithColors,
