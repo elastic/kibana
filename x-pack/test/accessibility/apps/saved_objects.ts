@@ -92,14 +92,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // noop
         }
       }
-    }
+    };
     const clickOneOf = async (x: string) => {
-      const xs = await testSubjects.findAll(x)
-      await xs[2].click()
-    }
+      const xs = await testSubjects.findAll(x);
+      await xs[2].click();
+    };
     it('share to space panel from actions meets a11y requirements ', async () => {
-      await clickIfExists('euiFlyoutCloseButton')
-      await clickOneOf('euiCollapsedItemActionsButton')
+      await clickIfExists('euiFlyoutCloseButton');
+      await clickOneOf('euiCollapsedItemActionsButton');
       await testSubjects.click('savedObjectsTableAction-copy_saved_objects_to_space');
       await retry.try(async () => {
         await a11y.testAppSnapshot();
