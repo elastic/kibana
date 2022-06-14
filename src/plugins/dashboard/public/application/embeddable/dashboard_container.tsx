@@ -64,7 +64,7 @@ export interface DashboardContainerServices {
   uiActions: UiActionsStart;
   theme: CoreStart['theme'];
   http: CoreStart['http'];
-  analytics: CoreStart['analytics'];
+  analytics?: CoreStart['analytics'];
 }
 
 interface IndexSignature {
@@ -158,7 +158,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   private onDataLoaded(data: DashboardDataLoadedEvent) {
     // console.log(`${this.id} took ${data.timeTookMs} in total`);
-    this.services.analytics.reportEvent('dashboard-data-loaded', {
+    this.services.analytics?.reportEvent('dashboard-data-loaded', {
       ...data,
       id: this.id,
     });
