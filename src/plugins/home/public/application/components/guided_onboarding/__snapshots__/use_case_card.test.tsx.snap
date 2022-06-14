@@ -1,0 +1,133 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`use case card should render use case card component for observability 1`] = `
+<EuiCard
+  description={
+    <EuiText
+      color="subdued"
+      size="xs"
+    >
+      <p>
+        Monitor your infrastructure by consolidating your logs, metrics, and traces for end‑to‑end observability.
+      </p>
+    </EuiText>
+  }
+  display="subdued"
+  icon={
+    <EuiAvatar
+      className="gettingStarted__useCaseIcon"
+      color="plain"
+      iconSize="xl"
+      iconType="eye"
+      name="observability icon"
+      size="xl"
+    />
+  }
+  image={
+    <div
+      className="gettingStarted__useCaseCard gettingStarted__observability"
+    />
+  }
+  onClick={[Function]}
+  textAlign="left"
+  title={
+    <EuiTitle
+      size="xs"
+    >
+      <h4>
+        <strong>
+          Monitor my infrastructure
+        </strong>
+      </h4>
+    </EuiTitle>
+  }
+/>
+`;
+
+exports[`use case card should render use case card component for search 1`] = `
+<EuiCard
+  description={
+    <EuiText
+      color="subdued"
+      size="xs"
+    >
+      <p>
+        Create a search experience for your websites, applications, workplace content, or anything in between.
+      </p>
+    </EuiText>
+  }
+  display="subdued"
+  icon={
+    <EuiAvatar
+      className="gettingStarted__useCaseIcon"
+      color="plain"
+      iconSize="xl"
+      iconType="inspect"
+      name="search icon"
+      size="xl"
+    />
+  }
+  image={
+    <div
+      className="gettingStarted__useCaseCard gettingStarted__search"
+    />
+  }
+  onClick={[Function]}
+  textAlign="left"
+  title={
+    <EuiTitle
+      size="xs"
+    >
+      <h4>
+        <strong>
+          Search my data
+        </strong>
+      </h4>
+    </EuiTitle>
+  }
+/>
+`;
+
+exports[`use case card should render use case card component for security 1`] = `
+<EuiCard
+  description={
+    <EuiText
+      color="subdued"
+      size="xs"
+    >
+      <p>
+        Protect your environment by unifying SIEM, endpoint security, and cloud security to protect against threats.
+      </p>
+    </EuiText>
+  }
+  display="subdued"
+  icon={
+    <EuiAvatar
+      className="gettingStarted__useCaseIcon"
+      color="plain"
+      iconSize="xl"
+      iconType="securitySignal"
+      name="security icon"
+      size="xl"
+    />
+  }
+  image={
+    <div
+      className="gettingStarted__useCaseCard gettingStarted__security"
+    />
+  }
+  onClick={[Function]}
+  textAlign="left"
+  title={
+    <EuiTitle
+      size="xs"
+    >
+      <h4>
+        <strong>
+          Protect my environment
+        </strong>
+      </h4>
+    </EuiTitle>
+  }
+/>
+`;

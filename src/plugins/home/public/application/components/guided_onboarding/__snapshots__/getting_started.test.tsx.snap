@@ -1,0 +1,82 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getting started should render getting started component 1`] = `
+<KibanaPageTemplate
+  template="empty"
+>
+  <EuiPanel
+    className="gettingStarted__panel"
+  >
+    <EuiTitle
+      className="eui-textCenter"
+      size="l"
+    >
+      <h1>
+        <FormattedMessage
+          defaultMessage="What would you like to do first?"
+          id="home.guidedOnboarding.gettingStarted.useCaseSelectionTitle"
+          values={Object {}}
+        />
+      </h1>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiText
+      color="subdued"
+      size="s"
+      textAlign="center"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="Select an option below to get a quick tour of the most valuable features based on your preferences."
+          id="home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle"
+          values={Object {}}
+        />
+      </p>
+    </EuiText>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiSpacer
+      size="xxl"
+    />
+    <EuiFlexGrid
+      columns={3}
+      gutterSize="xl"
+    >
+      <EuiFlexItem>
+        <UseCaseCard
+          useCase="search"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <UseCaseCard
+          useCase="observability"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <UseCaseCard
+          useCase="security"
+        />
+      </EuiFlexItem>
+    </EuiFlexGrid>
+    <EuiSpacer />
+    <EuiHorizontalRule />
+    <EuiSpacer />
+    <div
+      className="eui-textCenter"
+    >
+      <EuiLink
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="I'd like to do something else (Skip)"
+          id="home.guidedOnboarding.gettingStarted.skip.buttonLabel"
+          values={Object {}}
+        />
+      </EuiLink>
+    </div>
+  </EuiPanel>
+</KibanaPageTemplate>
+`;
