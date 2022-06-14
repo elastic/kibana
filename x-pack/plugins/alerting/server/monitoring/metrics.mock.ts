@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-function createInMemoryMetricsMock() {
-  return jest.fn().mockImplementation(() => {
-    return {
-      ruleExecutions: { add: jest.fn() },
-    };
-  });
-}
+import { metrics } from '@opentelemetry/api-metrics';
+import { Metrics } from './metrics';
 
 export const metricsMock = {
-  create: createInMemoryMetricsMock(),
+  create: () => new Metrics(metrics.getMeter('kibana.alerting.metrics.mock')),
 };
