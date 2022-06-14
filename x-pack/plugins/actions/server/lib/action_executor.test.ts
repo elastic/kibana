@@ -516,15 +516,16 @@ test('logs a warning when alert executor has an error', async () => {
   );
 });
 
-test('logs a warning when alert executor throws an error', async () => {
+test('logs a warning and error when alert executor throws an error', async () => {
   const executorMock = setupActionExecutorMock();
   const err = new Error('this action execution is intended to fail');
   err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
   executorMock.mockRejectedValue(err);
   await actionExecutor.execute(executeParams);
   expect(loggerMock.warn).toBeCalledWith(
-    'action execution failure: test:1: action-1: an error occurred while running the action: this action execution is intended to fail -\nStack trace: foo error\n  stack 1\n  stack 2\n  stack 3'
+    'action execution failure: test:1: action-1: an error occurred while running the action: this action execution is intended to fail'
   );
+  expect(loggerMock.error).toBeCalledWith(err);
 });
 
 test('logs a warning when alert executor returns invalid status', async () => {

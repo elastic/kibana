@@ -232,7 +232,7 @@ export class ActionExecutor {
               status: 'error',
               message: 'an error occurred while running the action',
               serviceMessage: err.message,
-              stack: err?.stack ?? err,
+              error: err,
               retry: false,
             };
           }
@@ -258,6 +258,9 @@ export class ActionExecutor {
           event.message = `action execution failure: ${actionLabel}`;
           event.error = event.error || {};
           event.error.message = actionErrorToMessage(result);
+          if (result.error) {
+            logger.error(result.error);
+          }
           logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
         } else {
           span?.setOutcome('failure');
@@ -271,8 +274,8 @@ export class ActionExecutor {
         }
 
         eventLogger.logEvent(event);
-        const { stack, ...resultWithoutStackTrace } = result;
-        return resultWithoutStackTrace;
+        const { error, ...resultWithoutError } = result;
+        return resultWithoutError;
       }
     );
   }
@@ -407,10 +410,6 @@ function actionErrorToMessage(result: ActionTypeExecutorRawResult<unknown>): str
     message = `${message}; retry at ${result.retry.toISOString()}`;
   } else if (result.retry) {
     message = `${message}; retry: ${JSON.stringify(result.retry)}`;
-  }
-
-  if (result.stack) {
-    message = `${message} -\nStack trace: ${result.stack}`;
   }
 
   return message;

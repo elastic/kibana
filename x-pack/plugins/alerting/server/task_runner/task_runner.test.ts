@@ -1447,12 +1447,14 @@ describe('Task Runner', () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0 }));
-    const loggerCall = logger.error.mock.calls[0][0];
-    expect(
-      (loggerCall as string).startsWith(
-        `Executing Rule foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined] -\nStack trace:`
-      )
-    ).toBeTruthy();
+    const loggerCall0 = logger.error.mock.calls[0][0];
+    expect(loggerCall0 as string).toMatchInlineSnapshot(
+      `[Error: params invalid: [param1]: expected value of type [string] but got [undefined]]`
+    );
+    const loggerCall1 = logger.error.mock.calls[1][0];
+    expect(loggerCall1 as string).toMatchInlineSnapshot(
+      `"Executing Rule foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]"`
+    );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
@@ -1787,11 +1789,10 @@ describe('Task Runner', () => {
     return taskRunner.run().catch((ex) => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
       const executeRuleDebugLogger = logger.debug.mock.calls[3][0];
-      expect(
-        (executeRuleDebugLogger as string).startsWith(
-          `Executing Rule foo:test:1 has resulted in Error: Saved object [alert/1] not found -\nStack trace:`
-        )
-      ).toBeTruthy();
+      expect(executeRuleDebugLogger as string).toMatchInlineSnapshot(
+        `"Executing Rule foo:test:1 has resulted in Error: Saved object [alert/1] not found"`
+      );
+      expect(logger.error).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
         1,
@@ -1870,11 +1871,10 @@ describe('Task Runner', () => {
     return taskRunner.run().catch((ex) => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
       const ruleExecuteDebugLog = logger.debug.mock.calls[3][0];
-      expect(
-        (ruleExecuteDebugLog as string).startsWith(
-          `Executing Rule test space:test:1 has resulted in Error: Saved object [alert/1] not found -\nStack trace:`
-        )
-      ).toBeTruthy();
+      expect(ruleExecuteDebugLog as string).toMatchInlineSnapshot(
+        `"Executing Rule test space:test:1 has resulted in Error: Saved object [alert/1] not found"`
+      );
+      expect(logger.error).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
         1,

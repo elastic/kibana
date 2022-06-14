@@ -51,7 +51,7 @@ export interface ActionTypeExecutorResult<Data> {
 }
 
 export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {
-  stack?: unknown;
+  error?: Error;
 };
 
 export function isActionTypeExecutorResult(
