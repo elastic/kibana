@@ -15,6 +15,7 @@ import {
 } from '../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { getActionList } from './action_list';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import {
   applyActionListEsSearchMock,
   createActionRequestsEsSearchResultsMock,
@@ -265,5 +266,19 @@ describe('When using `getActionList()', () => {
         isCompleted: true,
       })
     );
+  });
+
+  it('should throw custom errors', async () => {
+    const error = new Error('Some odd error!');
+
+    esClient.search.mockImplementation(async () => {
+      return Promise.reject(error);
+    });
+    const getActionListPromise = getActionList({ esClient, logger });
+
+    await expect(getActionListPromise).rejects.toThrowError(
+      'Unknown error while fetching action requests'
+    );
+    await expect(getActionListPromise).rejects.toBeInstanceOf(CustomHttpRequestError);
   });
 });
