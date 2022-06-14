@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { API_URLS } from '../../../../../common/constants';
-import { StatesIndexStatus, StatesIndexStatusType } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
+import { Ping } from '../../../../../common/runtime_types';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
-export const fetchIndexStatus = async (): Promise<StatesIndexStatus> => {
-  return await apiService.get(API_URLS.INDEX_STATUS, undefined, StatesIndexStatusType);
+export interface QueryParams {
+  monitorId: string;
+  dateStart: string;
+  dateEnd: string;
+}
+
+export const fetchMonitorStatus = async (params: QueryParams): Promise<Ping> => {
+  return await apiService.get(SYNTHETICS_API_URLS.MONITOR_STATUS, params);
 };

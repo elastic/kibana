@@ -8,5 +8,5 @@
 import { createSelector } from 'reselect';
 import type { SyntheticsAppState } from '../root_reducer';
 
-const getState = (appState: SyntheticsAppState) => appState.indexStatus;
-export const selectIndexState = createSelector(getState, (state) => state);
+const getState = (appState: SyntheticsAppState) => appState.monitorStatus;
+export const selectMonitorStatus = createSelector(getState, (state) => state);

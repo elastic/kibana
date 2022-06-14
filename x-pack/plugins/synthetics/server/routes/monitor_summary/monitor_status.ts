@@ -5,25 +5,29 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { UMRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 
+const queryParams = schema.object({
+  monitorId: schema.string(),
+  dateStart: schema.string(),
+  dateEnd: schema.string(),
+});
+
+type QueryParams = TypeOf<typeof queryParams>;
+
 export const createGetMonitorStatusRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.MONITOR_STATUS,
   validate: {
-    query: schema.object({
-      monitorId: schema.string(),
-      dateStart: schema.string(),
-      dateEnd: schema.string(),
-    }),
+    query: queryParams,
   },
   handler: async ({ uptimeEsClient, request, server, savedObjectsClient }): Promise<any> => {
-    const { monitorId, dateStart, dateEnd } = request.query;
+    const { monitorId, dateStart, dateEnd } = request.query as QueryParams;
 
     const latestMonitor = await libs.requests.getLatestMonitor({
       uptimeEsClient,

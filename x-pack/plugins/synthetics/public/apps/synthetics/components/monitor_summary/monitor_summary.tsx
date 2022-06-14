@@ -6,6 +6,11 @@
  */
 
 import React from 'react';
+import { MonitorSummaryTabs } from './monitor_summary_tabs';
 export const MonitorSummaryPage = () => {
-  return <>Monitor name</>;
+  return (
+    <>
+      <MonitorSummaryTabs />
+    </>
+  );
 };

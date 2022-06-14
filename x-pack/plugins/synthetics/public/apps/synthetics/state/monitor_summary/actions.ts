@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Ping } from '../../../../../common/runtime_types';
+import { QueryParams } from './api';
 import { createAsyncAction } from '../utils/actions';
 
-export const getMonitorDetailsAction = createAsyncAction<void, void>('[MONITOR DETAIL] GET');
+export const getMonitorStatusAction = createAsyncAction<QueryParams, Ping>('[MONITOR STATUS] GET');

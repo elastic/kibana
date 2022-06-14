@@ -7,10 +7,11 @@
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { createReducer } from '@reduxjs/toolkit';
-import { StatesIndexStatus } from '../../../../../common/runtime_types';
+import { getMonitorStatusAction } from './actions';
+import { Ping } from '../../../../../common/runtime_types';
 
 export interface IndexStatusState {
-  data: StatesIndexStatus | null;
+  data: Ping | null;
   loading: boolean;
   error: IHttpFetchError<ResponseErrorBody> | null;
 }
@@ -21,16 +22,16 @@ const initialState: IndexStatusState = {
   error: null,
 };
 
-export const monitorDetailsReducer = createReducer(initialState, (builder) => {
+export const monitorStatusReducer = createReducer(initialState, (builder) => {
   builder
-    .addCase(getIndexStatus, (state) => {
+    .addCase(getMonitorStatusAction.get, (state) => {
       state.loading = true;
     })
-    .addCase(getIndexStatusSuccess, (state, action) => {
+    .addCase(getMonitorStatusAction.success, (state, action) => {
       state.data = action.payload;
       state.loading = false;
     })
-    .addCase(getIndexStatusFail, (state, action) => {
+    .addCase(getMonitorStatusAction.fail, (state, action) => {
       state.error = action.payload as IHttpFetchError<ResponseErrorBody>;
       state.loading = false;
     });

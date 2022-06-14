@@ -6,13 +6,17 @@
  */
 
 import { takeLeading } from 'redux-saga/effects';
-import { getIndexStatus, getIndexStatusSuccess, getIndexStatusFail } from './actions';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { fetchIndexStatus } from './api';
+import { getMonitorStatusAction } from './actions';
+import { fetchMonitorStatus } from './api';
 
-export function* fetchIndexStatusEffect() {
+export function* fetchMonitorStatusEffect() {
   yield takeLeading(
-    getIndexStatus,
-    fetchEffectFactory(fetchIndexStatus, getIndexStatusSuccess, getIndexStatusFail)
+    getMonitorStatusAction.get,
+    fetchEffectFactory(
+      fetchMonitorStatus,
+      getMonitorStatusAction.success,
+      getMonitorStatusAction.fail
+    )
   );
 }

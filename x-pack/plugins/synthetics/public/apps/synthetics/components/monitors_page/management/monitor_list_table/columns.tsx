@@ -61,7 +61,7 @@ export function getMonitorListColumns({
       }),
       sortable: true,
       render: (name: string, { id }: EncryptedSyntheticsSavedMonitor) => (
-        <EuiLink href={`${basePath}/app/uptime/monitor/${btoa(id)}`}>{name}</EuiLink>
+        <EuiLink href={`${basePath}/app/synthetics/monitor/${id}`}>{name}</EuiLink>
       ),
     },
     {
