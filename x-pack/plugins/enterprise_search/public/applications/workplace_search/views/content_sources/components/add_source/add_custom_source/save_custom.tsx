@@ -50,7 +50,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({ sourceData }) => {
     <>
       <AddSourceHeader
         name={name}
-        serviceType={baseServiceType || serviceType}
+        serviceType={baseServiceType ?? serviceType}
         categories={categories}
       />
       <EuiSpacer size="xxl" />
