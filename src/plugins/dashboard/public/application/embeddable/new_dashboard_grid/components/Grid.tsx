@@ -9,7 +9,6 @@ import React from 'react';
 import { GridItemHTMLElement, GridStack, GridStackNode } from 'gridstack';
 import 'gridstack/dist/h5/gridstack-dd-native';
 import { EuiButton } from '@elastic/eui';
-import { tutorialSchema } from '@kbn/home-plugin/server/services/tutorials/lib/tutorial_schema';
 
 interface Props {
   test: number;
@@ -42,7 +41,8 @@ export class Grid extends React.Component<Props, State> {
       cellHeight: '70px',
       acceptWidgets: true,
       minRow: 10,
-      column: 12,
+      column: 48,
+      margin: 5, // 5 pixels around each panel - so 10 pixels **between** two panels
     });
 
     this.grid.on('dragstop', (event, element) => {

@@ -8,3 +8,4 @@
 
 import '../../../../node_modules/gridstack/dist/gridstack.min.css';
 import './demo.css';
+import './extra-columns.scss';

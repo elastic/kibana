@@ -1,0 +1,11 @@
+.grid-stack > .grid-stack-item {
+  $gridstack-columns: 48;
+   min-width: (100% / $gridstack-columns);
+
+  @for $i from 0 through $gridstack-columns {
+    &[gs-w='#{$i}'] { width: (100% / $gridstack-columns) * $i; }
+    &[gs-x='#{$i}'] { left: (100% / $gridstack-columns) * $i; }
+    &[gs-min-w='#{$i}'] { min-width: (100% / $gridstack-columns) * $i; }
+    &[gs-max-w='#{$i}'] { max-width: (100% / $gridstack-columns) * $i; }
+  }
+}
