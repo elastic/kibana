@@ -31,11 +31,16 @@ export const linkMapViewAction = createAction<LinkMapViewActionContext>({
   getDisplayName: ({ embeddable }: LinkMapViewActionContext) => {
     return getLinkMapView(embeddable.getInput())
       ? i18n.translate('xpack.maps.linkMapView.disableDisplayName', {
-          defaultMessage: 'Unlink map view',
+          defaultMessage: 'Desynchronize map view',
         })
       : i18n.translate('xpack.maps.linkMapView.enableDisplayName', {
-          defaultMessage: 'Link map view',
+          defaultMessage: 'Synchronize map view',
         });
+  },
+  getDisplayNameTooltip: () => {
+    return i18n.translate('xpack.maps.linkMapView.tooltipContent', {
+      defaultMessage: 'Movement in one map panel moves all other maps panels',
+    });
   },
   getIconType: () => {
     return 'crosshairs';
