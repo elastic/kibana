@@ -65,7 +65,11 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
 
   const noItemsMessage =
     data.state === 'error' ? (
-      <MetricsTableErrorContent />
+      <>
+        {data.errors.map((error) => (
+          <MetricsTableErrorContent error={error} />
+        ))}
+      </>
     ) : isLoading ? (
       <MetricsTableLoadingContent />
     ) : data.state === 'no-indices' ? (

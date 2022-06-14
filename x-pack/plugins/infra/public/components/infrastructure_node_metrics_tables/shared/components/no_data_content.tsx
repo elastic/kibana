@@ -8,27 +8,6 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { MetricsIndicesStatus } from '../types';
-
-export const MetricsTableNoDataContent = ({
-  indicesStatus,
-  isLoading,
-}: {
-  indicesStatus: MetricsIndicesStatus;
-  isLoading: boolean;
-}) => {
-  if (isLoading) {
-    return <MetricsTableLoadingContent />;
-  } else if (indicesStatus === 'missing') {
-    return <MetricsTableNoIndicesContent />;
-  } else if (indicesStatus === 'empty' || indicesStatus === 'available') {
-    return <MetricsTableEmptyIndicesContent />;
-  } else if (indicesStatus === 'unknown') {
-    return <>unknown</>;
-  }
-
-  return null;
-};
 
 export const MetricsTableLoadingContent = () => (
   <EuiEmptyPrompt

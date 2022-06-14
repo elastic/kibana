@@ -10,7 +10,6 @@ export { metricsToApiOptions, useInfrastructureNodeMetrics } from './hooks';
 export type { MetricsMap, SortState } from './hooks';
 export type {
   IntegratedNodeMetricsTableProps,
-  MetricsIndicesStatus,
   NodeMetricsTableData,
   SourceProviderProps,
   UseNodeMetricsTableOptions,

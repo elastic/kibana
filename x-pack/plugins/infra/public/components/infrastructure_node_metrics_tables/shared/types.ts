@@ -22,8 +22,6 @@ export type IntegratedNodeMetricsTableProps = UseNodeMetricsTableOptions &
   SourceProviderProps &
   CoreProvidersProps;
 
-export type MetricsIndicesStatus = 'available' | 'empty' | 'missing' | 'unknown';
-
 export type NodeMetricsTableData<NodeMetricsRow> =
   | {
       state: 'unknown';
