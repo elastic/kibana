@@ -7,7 +7,6 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { capitalize } from 'lodash';
 import { ServiceLocations } from '../../../common/runtime_types';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
@@ -53,8 +52,8 @@ const querySchema = schema.object({
   perPage: schema.maybe(schema.number()),
   sortField: schema.maybe(schema.string()),
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-  search: schema.maybe(schema.string()),
   query: schema.maybe(schema.string()),
+  filter: schema.maybe(schema.string()),
   tags: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   monitorType: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
@@ -79,6 +78,7 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       tags,
       monitorType,
       locations,
+      filter = '',
     } = request.query as MonitorsQuery;
 
     const locationFilter = parseLocationFilter(server.syntheticsService.locations, locations);
@@ -95,8 +95,8 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       sortField,
       sortOrder,
       searchFields: ['name', 'tags.text', 'locations.id.text', 'urls'],
-      search: query ? `${query}* | ${capitalize(query)}*` : undefined,
-      filter: filters,
+      search: query ? `${query}*` : undefined,
+      filter: filters + filter,
     });
 
     if (filters || query) {
