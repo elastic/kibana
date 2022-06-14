@@ -263,8 +263,7 @@ export async function mountApp(
       useEffect(() => {
         (async () => {
           const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
-          const hasEsData = await data.dataViews.hasData.hasESData().catch(() => true);
-          if (!hasUserDataView || !hasEsData) {
+          if (!hasUserDataView) {
             setEditorState('no_data');
             return;
           }
