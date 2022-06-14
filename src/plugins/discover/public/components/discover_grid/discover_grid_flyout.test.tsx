@@ -19,7 +19,7 @@ import { setDocViewsRegistry } from '../../kibana_services';
 import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ElasticSearchHit } from '../../types';
+import type { DataTableRecord, ElasticSearchHit } from '../../types';
 import { buildDataRecord } from '../../application/main/utils/fetch_all';
 
 describe('Discover flyout', function () {
@@ -31,7 +31,7 @@ describe('Discover flyout', function () {
     hitIndex,
   }: {
     indexPattern?: DataView;
-    hits?: ElasticSearchHit[];
+    hits?: DataTableRecord[];
     hitIndex?: number;
   }) => {
     const onClose = jest.fn();
@@ -50,9 +50,11 @@ describe('Discover flyout', function () {
       columns: ['date'],
       indexPattern: indexPattern || indexPatternMock,
       hit,
-      hits: (hits || esHits).map((entry: ElasticSearchHit) =>
-        buildDataRecord(entry, indexPattern || indexPatternMock)
-      ),
+      hits:
+        hits ||
+        esHits.map((entry: ElasticSearchHit) =>
+          buildDataRecord(entry, indexPattern || indexPatternMock)
+        ),
       onAddColumn: jest.fn(),
       onClose,
       onFilter: jest.fn(),
@@ -124,7 +126,7 @@ describe('Discover flyout', function () {
         _type: '_doc',
         _source: { date: '2020-20-01T12:12:12.124', name: 'test2', extension: 'jpg' },
       },
-    ];
+    ].map((hit) => buildDataRecord(hit, indexPatternMock));
     const { component } = mountComponent({ hits });
     const docNav = findTestSubject(component, 'dscDocNavigation');
     expect(docNav.length).toBeFalsy();
@@ -135,7 +137,7 @@ describe('Discover flyout', function () {
     const { component, props } = mountComponent({});
     findTestSubject(component, 'pagination-button-next').simulate('click');
     // we selected 1, so we'd expect 2
-    expect(props.setExpandedDoc.mock.calls[0][0]._id).toBe('2');
+    expect(props.setExpandedDoc.mock.calls[0][0].raw._id).toBe('2');
   });
 
   it('doesnt allow you to navigate to the previous doc, if expanded doc is the first', async () => {
@@ -157,16 +159,16 @@ describe('Discover flyout', function () {
     const { component, props } = mountComponent({ hitIndex: esHits.length - 1 });
     findTestSubject(component, 'pagination-button-previous').simulate('click');
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(1);
-    expect(props.setExpandedDoc.mock.calls[0][0]._id).toBe('4');
+    expect(props.setExpandedDoc.mock.calls[0][0].raw._id).toBe('4');
   });
 
   it('allows navigating with arrow keys through documents', () => {
     const { component, props } = mountComponent({});
     findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowRight' });
-    expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ _id: '2' }));
+    expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::2::' }));
     component.setProps({ ...props, hit: props.hits[1] });
     findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowLeft' });
-    expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ _id: '1' }));
+    expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::1::' }));
   });
 
   it('should not navigate with keypresses when already at the border of documents', () => {
