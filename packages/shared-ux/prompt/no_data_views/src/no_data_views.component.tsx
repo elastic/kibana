@@ -17,9 +17,13 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { DocumentationLink } from './documentation_link';
 
 export interface Props {
+  /** True if the user has permission to create a data view, false otherwise. */
   canCreateNewDataView: boolean;
+  /** Click handler for create button. **/
   onClickCreate?: () => void;
+  /** Link to documentation on data views. */
   dataViewsDocLink?: string;
+  /** The background color of the prompt; defaults to `plain`. */
   emptyPromptColor?: EuiEmptyPromptProps['color'];
 }
 
