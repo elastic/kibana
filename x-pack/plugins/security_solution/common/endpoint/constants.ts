@@ -58,7 +58,7 @@ export const UNISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/unisolate`;
 export const ENDPOINT_ACTION_LOG_ROUTE = `/api/endpoint/action_log/{agent_id}`;
 export const ACTION_STATUS_ROUTE = `/api/endpoint/action_status`;
 export const ACTION_DETAILS_ROUTE = `/api/endpoint/action/{action_id}`;
-export const ENDPOINTS_ACTION_LIST_ROUTE = `/api/endpoint/action`;
+export const ENDPOINTS_ACTION_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/action`;
 
 export const failedFleetActionErrorCode = '424';
 
