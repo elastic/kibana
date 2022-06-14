@@ -13,7 +13,7 @@ steps:
           limit: 1
   - wait
 
-  - label: 'Triggering pipelines'
+  - label: 'Triggering changes-based pipelines'
     branches: main
     agents:
       queue: kibana-default
