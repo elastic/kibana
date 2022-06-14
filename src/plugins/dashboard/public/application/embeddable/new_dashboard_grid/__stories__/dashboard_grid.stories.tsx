@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useRef, useState } from 'react';
-import { EuiButton, EuiPanel } from '@elastic/eui';
-import { GridStack } from 'gridstack';
+import React from 'react';
+import { EuiPanel } from '@elastic/eui';
 import 'gridstack/dist/h5/gridstack-dd-native';
 import { Grid } from '../components/Grid';
 
