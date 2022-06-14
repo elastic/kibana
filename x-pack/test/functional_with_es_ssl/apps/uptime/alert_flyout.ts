@@ -15,9 +15,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
+    const testSubjects = getService('testSubjects');
 
     // FLAKY: https://github.com/elastic/kibana/issues/101984
-    describe.skip('overview page alert flyout controls', function () {
+    describe('overview page alert flyout controls', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
       let alerts: any;
