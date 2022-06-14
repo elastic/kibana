@@ -152,6 +152,10 @@ export class DatatableUtilitiesService {
     return table.meta?.statistics?.totalCount;
   }
 
+  hasPrecisionError(column: DatatableColumn) {
+    return column.meta.sourceParams?.hasPrecisionError;
+  }
+
   isFilterable(column: DatatableColumn): boolean {
     if (column.meta.source !== 'esaggs') {
       return false;

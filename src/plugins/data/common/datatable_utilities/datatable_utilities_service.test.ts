@@ -205,6 +205,40 @@ describe('DatatableUtilitiesService', () => {
     });
   });
 
+  describe('hasPrecisionError', () => {
+    test('should return true if there is a precision error in the column', () => {
+      expect(
+        datatableUtilitiesService.hasPrecisionError({
+          meta: {
+            sourceParams: {
+              hasPrecisionError: true,
+            },
+          },
+        } as unknown as DatatableColumn)
+      ).toBeTruthy();
+    });
+    test('should return false if there is no precision error in the column', () => {
+      expect(
+        datatableUtilitiesService.hasPrecisionError({
+          meta: {
+            sourceParams: {
+              hasPrecisionError: false,
+            },
+          },
+        } as unknown as DatatableColumn)
+      ).toBeFalsy();
+    });
+    test('should return false if precision error is not defined', () => {
+      expect(
+        datatableUtilitiesService.hasPrecisionError({
+          meta: {
+            sourceParams: {},
+          },
+        } as unknown as DatatableColumn)
+      ).toBeFalsy();
+    });
+  });
+
   describe('setFieldFormat', () => {
     it('should set new field format', () => {
       const column = { meta: {} } as DatatableColumn;

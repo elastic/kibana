@@ -619,7 +619,13 @@ export function getIndexPatternDatasource({
     getWarningMessages: (state, frame, setState) => {
       return [
         ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frame) || []),
-        ...getPrecisionErrorWarningMessages(state, frame, core.docLinks, setState),
+        ...getPrecisionErrorWarningMessages(
+          data.datatableUtilities,
+          state,
+          frame,
+          core.docLinks,
+          setState
+        ),
       ];
     },
     checkIntegrity: (state) => {

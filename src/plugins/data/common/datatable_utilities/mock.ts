@@ -20,6 +20,7 @@ export function createDatatableUtilitiesMock(): jest.Mocked<DatatableUtilitiesSe
     getNumberHistogramInterval: jest.fn(
       DatatableUtilitiesService.prototype.getNumberHistogramInterval
     ),
+    hasPrecisionError: jest.fn(DatatableUtilitiesService.prototype.hasPrecisionError),
     isFilterable: jest.fn(),
     setFieldFormat: jest.fn(),
   } as unknown as jest.Mocked<DatatableUtilitiesService>;
