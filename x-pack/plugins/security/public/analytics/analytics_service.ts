@@ -6,6 +6,8 @@
  */
 
 import type { Subscription } from 'rxjs';
+import { filter } from 'rxjs';
+import { throttleTime } from 'rxjs/operators';
 
 import type { HttpStart } from '@kbn/core/public';
 
@@ -38,18 +40,20 @@ export class AnalyticsService {
   }
 
   public start({ http }: AnalyticsServiceStartParams) {
-    // Wait for the license info before recording authentication type.
-    this.securityFeaturesSubscription = this.securityLicense.features$.subscribe(
-      async ({ allowLogin }) => {
-        if (allowLogin) {
-          try {
-            await AnalyticsService.recordAuthTypeAnalytics(http);
-          } catch {
-            // do nothing
-          }
+    // Wait for the license info before recording authentication type. License
+    // change events are throttled with 5s interval.
+    this.securityFeaturesSubscription = this.securityLicense.features$
+      .pipe(
+        filter(({ allowLogin }) => allowLogin),
+        throttleTime(5000)
+      )
+      .subscribe(async () => {
+        try {
+          await AnalyticsService.recordAuthTypeAnalytics(http);
+        } catch {
+          // do nothing
         }
-      }
-    );
+      });
   }
 
   public stop() {
@@ -63,7 +67,7 @@ export class AnalyticsService {
     localStorage.setItem(
       AnalyticsService.AuthTypeInfoStorageKey,
       JSON.stringify(
-        await http.post<AuthTypeInfo>('/internal/security/analytics/record_auth_type', {
+        await http.post<AuthTypeInfo>('/internal/security/analytics/_record_auth_type', {
           body: localStorage.getItem(AnalyticsService.AuthTypeInfoStorageKey),
         })
       )

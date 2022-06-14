@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
@@ -34,12 +36,57 @@ describe('AnalyticsService', () => {
 
     expect(mockCore.http.post).toHaveBeenCalledTimes(1);
     expect(mockCore.http.post).toHaveBeenCalledWith(
-      '/internal/security/analytics/record_auth_type',
+      '/internal/security/analytics/_record_auth_type',
       { body: null }
     );
     expect(localStorage.getItem(AnalyticsService.AuthTypeInfoStorageKey)).toMatchInlineSnapshot(
       `"{\\"signature\\":\\"some-signature\\",\\"timestamp\\":1234}"`
     );
+  });
+
+  it('throttle reporting of the authentication type events', async () => {
+    jest.useFakeTimers();
+
+    const mockCore = coreMock.createStart();
+    mockCore.http.post.mockResolvedValue({ signature: 'some-signature', timestamp: 1234 });
+
+    const licenseFeatures$ = new BehaviorSubject({ allowLogin: true });
+    analyticsService.setup({
+      securityLicense: licenseMock.create(licenseFeatures$.asObservable()),
+    });
+    analyticsService.start({ http: mockCore.http });
+
+    await nextTick();
+
+    expect(mockCore.http.post).toHaveBeenCalledTimes(1);
+    expect(mockCore.http.post).toHaveBeenCalledWith(
+      '/internal/security/analytics/_record_auth_type',
+      { body: null }
+    );
+    mockCore.http.post.mockClear();
+
+    // Changes that lead to disabled login should be ignored.
+    licenseFeatures$.next({ allowLogin: false });
+    jest.runAllTimers();
+    expect(mockCore.http.post).not.toHaveBeenCalled();
+
+    // The "leading" event indicating enabled login should be reported immediately.
+    licenseFeatures$.next({ allowLogin: true });
+    jest.advanceTimersByTime(1000);
+    licenseFeatures$.next({ allowLogin: true });
+    jest.advanceTimersByTime(1000);
+    licenseFeatures$.next({ allowLogin: true });
+    jest.advanceTimersByTime(1000);
+
+    expect(mockCore.http.post).toHaveBeenCalledTimes(1);
+    expect(mockCore.http.post).toHaveBeenCalledWith(
+      '/internal/security/analytics/_record_auth_type',
+      { body: JSON.stringify({ signature: 'some-signature', timestamp: 1234 }) }
+    );
+
+    // The rest of the events should be throttled away.
+    jest.runAllTimers();
+    expect(mockCore.http.post).toHaveBeenCalledTimes(1);
   });
 
   it('sends existing authentication type info if available', async () => {
@@ -59,7 +106,7 @@ describe('AnalyticsService', () => {
 
     expect(mockCore.http.post).toHaveBeenCalledTimes(1);
     expect(mockCore.http.post).toHaveBeenCalledWith(
-      '/internal/security/analytics/record_auth_type',
+      '/internal/security/analytics/_record_auth_type',
       { body: mockCurrentAuthTypeInfo }
     );
     expect(localStorage.getItem(AnalyticsService.AuthTypeInfoStorageKey)).toMatchInlineSnapshot(
@@ -96,7 +143,7 @@ describe('AnalyticsService', () => {
 
     expect(mockCore.http.post).toHaveBeenCalledTimes(1);
     expect(mockCore.http.post).toHaveBeenCalledWith(
-      '/internal/security/analytics/record_auth_type',
+      '/internal/security/analytics/_record_auth_type',
       { body: mockCurrentAuthTypeInfo }
     );
     expect(localStorage.getItem(AnalyticsService.AuthTypeInfoStorageKey)).toBe(

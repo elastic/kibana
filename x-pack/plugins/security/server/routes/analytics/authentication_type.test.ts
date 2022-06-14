@@ -27,7 +27,7 @@ function getMockContext(
   } as unknown as SecurityRequestHandlerContext;
 }
 
-describe('POST /internal/security/analytics/record_auth_type', () => {
+describe('POST /internal/security/analytics/_record_auth_type', () => {
   beforeAll(() => {
     jest.useFakeTimers('modern').setSystemTime(FAKE_TIMESTAMP);
   });
@@ -39,7 +39,7 @@ describe('POST /internal/security/analytics/record_auth_type', () => {
     defineRecordAnalyticsOnAuthTypeRoutes(routeParamsMock);
 
     const [, recordAnalyticsOnAuthTypeRouteHandler] = routeParamsMock.router.post.mock.calls.find(
-      ([{ path }]) => path === '/internal/security/analytics/record_auth_type'
+      ([{ path }]) => path === '/internal/security/analytics/_record_auth_type'
     )!;
     routeHandler = recordAnalyticsOnAuthTypeRouteHandler;
   });

@@ -29,7 +29,7 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
 }: RouteDefinitionParams) {
   router.post(
     {
-      path: '/internal/security/analytics/record_auth_type',
+      path: '/internal/security/analytics/_record_auth_type',
       validate: {
         body: schema.nullable(
           schema.object({ signature: schema.string(), timestamp: schema.number() })
@@ -38,11 +38,9 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const authUser = await getAuthenticationService().getCurrentUser(request);
+        const authUser = getAuthenticationService().getCurrentUser(request);
         if (!authUser) {
-          logger.warn(
-            'Cannot record authentication type for the user since cannot retrieve user information.'
-          );
+          logger.warn('Cannot record authentication type: current user could not be retrieved.');
           return response.noContent();
         }
 
