@@ -35,7 +35,7 @@ describe('RiskScore', () => {
 
     expect(container).toHaveTextContent(RiskSeverity.critical);
 
-    expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
+    expect(EuiHealth as unknown as jest.Mock).toHaveBeenLastCalledWith(
       expect.objectContaining({ color: euiThemeVars.euiColorDanger }),
       context
     );
@@ -50,7 +50,7 @@ describe('RiskScore', () => {
 
     expect(container).toHaveTextContent(RiskSeverity.high);
 
-    expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
+    expect(EuiHealth as unknown as jest.Mock).toHaveBeenLastCalledWith(
       expect.objectContaining({ color: euiThemeVars.euiColorVis9_behindText }),
       context
     );
@@ -65,7 +65,7 @@ describe('RiskScore', () => {
 
     expect(container).toHaveTextContent(RiskSeverity.moderate);
 
-    expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
+    expect(EuiHealth as unknown as jest.Mock).toHaveBeenLastCalledWith(
       expect.objectContaining({ color: euiThemeVars.euiColorWarning }),
       context
     );
@@ -80,7 +80,7 @@ describe('RiskScore', () => {
 
     expect(container).toHaveTextContent(RiskSeverity.low);
 
-    expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
+    expect(EuiHealth as unknown as jest.Mock).toHaveBeenLastCalledWith(
       expect.objectContaining({ color: euiThemeVars.euiColorVis0 }),
       context
     );
@@ -95,7 +95,7 @@ describe('RiskScore', () => {
 
     expect(container).toHaveTextContent(RiskSeverity.unknown);
 
-    expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
+    expect(EuiHealth as unknown as jest.Mock).toHaveBeenLastCalledWith(
       expect.objectContaining({ color: euiThemeVars.euiColorMediumShade }),
       context
     );
