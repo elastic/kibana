@@ -72,26 +72,33 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   useEffect(() => setSavedQuery(initialSavedQuery), [initialSavedQuery]);
 
-  const [{ index: dataView, query, filter: filters, threshold, timeWindowSize, size }, dispatch] =
-    useReducer<LocalStateReducer>(
-      (currentState, action) => {
-        if (isSearchSourceParam(action)) {
-          searchSource.setParent(undefined).setField(action.type, action.payload);
-          setParam('searchConfiguration', searchSource.getSerializedFields());
-        } else {
-          setParam(action.type, action.payload);
-        }
-        return { ...currentState, [action.type]: action.payload };
-      },
-      {
-        index: searchSource.getField('index')!,
-        query: searchSource.getField('query')!,
-        filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
-        threshold: ruleParams.threshold,
-        timeWindowSize: ruleParams.timeWindowSize,
-        size: ruleParams.size,
+  const [ruleConfiguration, dispatch] = useReducer<LocalStateReducer>(
+    (currentState, action) => {
+      if (isSearchSourceParam(action)) {
+        searchSource.setParent(undefined).setField(action.type, action.payload);
+        setParam('searchConfiguration', searchSource.getSerializedFields());
+      } else {
+        setParam(action.type, action.payload);
       }
-    );
+      return { ...currentState, [action.type]: action.payload };
+    },
+    {
+      index: searchSource.getField('index')!,
+      query: searchSource.getField('query')!,
+      filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
+      threshold: ruleParams.threshold,
+      timeWindowSize: ruleParams.timeWindowSize,
+      size: ruleParams.size,
+    }
+  );
+  const {
+    index: dataView,
+    query,
+    filter: filters,
+    threshold,
+    timeWindowSize,
+    size,
+  } = ruleConfiguration;
   const dataViews = useMemo(() => [dataView], [dataView]);
 
   const onSelectDataView = useCallback(
@@ -172,10 +179,13 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       from: `now-${timeWindow}`,
       to: 'now',
     });
-    testSearchSource.setField('filter', timeFilter);
+    testSearchSource.setField(
+      'filter',
+      timeFilter ? [timeFilter, ...ruleConfiguration.filter] : ruleConfiguration.filter
+    );
     const { rawResponse } = await firstValueFrom(testSearchSource.fetch$());
     return { nrOfDocs: totalHitsToNumber(rawResponse.hits.total), timeWindow };
-  }, [searchSource, timeWindowSize, timeWindowUnit]);
+  }, [searchSource, timeWindowSize, timeWindowUnit, ruleConfiguration]);
 
   return (
     <Fragment>
