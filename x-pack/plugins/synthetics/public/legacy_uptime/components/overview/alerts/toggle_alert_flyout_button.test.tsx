@@ -35,7 +35,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
       );
       userEvent.click(getByText('Alerts and rules'));
       userEvent.hover(getByText(ToggleFlyoutTranslations.openAlertContextPanelLabel));
-      await new Promise((r) => setTimeout(r, 250)); // wait for the default time for timeouts to show up
+      await new Promise((r) => setTimeout(r, 250)); // wait for the default time for tooltips to show up
       await expect(
         queryByText('You need read-write access to Uptime to create alerts in this app.')
       ).not.toBeInTheDocument();
