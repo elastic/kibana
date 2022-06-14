@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "core-analytics-browser"
-PKG_REQUIRE_NAME = "@kbn/core-analytics-browser"
+PKG_DIRNAME = "core-base-browser-mocks"
+PKG_REQUIRE_NAME = "@kbn/core-base-browser-mocks"
 
 SOURCE_FILES = glob(
   [
@@ -32,7 +32,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "//packages/analytics/client:npm_module_types",
+   "//packages/core/base/core-base-browser-internal:npm_module_types",
 ]
 
 jsts_transpiler(

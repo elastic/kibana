@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { AnalyticsServiceSetup, AnalyticsServiceStart } from './types';
+export { coreContextMock } from './core_context.mock';

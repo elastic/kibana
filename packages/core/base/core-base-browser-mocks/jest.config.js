@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { AnalyticsServiceSetup, AnalyticsServiceStart } from './types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/base/core-base-browser-mocks'],
+};
