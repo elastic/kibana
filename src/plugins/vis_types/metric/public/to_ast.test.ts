@@ -71,7 +71,7 @@ describe('metric vis toExpressionAst function', () => {
     const actual = await toExpressionAst(vis, {
       timefilter: {} as TimefilterContract,
     });
-    expect(actual.chain[0].arguments.colorMode).toEqual([ColorMode.Background]);
+    expect(actual.chain[1].arguments.colorMode).toEqual([ColorMode.Background]);
   });
 
   it('should not pass color mode if there is just a single range, but still pass palette for percentage mode', async () => {
@@ -91,7 +91,7 @@ describe('metric vis toExpressionAst function', () => {
     const actual = await toExpressionAst(vis, {
       timefilter: {} as TimefilterContract,
     });
-    expect(actual.chain[0].arguments.colorMode).toEqual([ColorMode.None]);
-    expect(actual.chain[0].arguments.palette.length).toEqual(1);
+    expect(actual.chain[1].arguments.colorMode).toEqual([ColorMode.None]);
+    expect(actual.chain[1].arguments.palette.length).toEqual(1);
   });
 });
