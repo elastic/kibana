@@ -7,18 +7,12 @@
 
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingContent,
-  EuiSpacer,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTextColor } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 import { KUBERNETES_PATH } from '../../../common/constants';
 import { KubernetesWidget } from '../kubernetes_widget';
 import { KubernetesSecurityDeps } from '../../types';
+import { TreeView } from '../tree_view';
 
 const widgetBadge: CSSObject = {
   position: 'absolute',
@@ -29,14 +23,6 @@ const widgetBadge: CSSObject = {
   lineHeight: '18px',
   padding: '4px 8px',
   display: 'flex',
-};
-
-const treeViewContainer: CSSObject = {
-  position: 'relative',
-  border: '1px solid #D3DAE6',
-  borderRadius: '6px',
-  padding: '16px',
-  height: '500px',
 };
 
 const KubernetesSecurityRoutesComponent = ({ filter }: KubernetesSecurityDeps) => {
@@ -89,10 +75,7 @@ const KubernetesSecurityRoutesComponent = ({ filter }: KubernetesSecurityDeps) =
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <div css={treeViewContainer}>
-          <EuiLoadingContent lines={3} />
-          <EuiLoadingContent lines={3} />
-        </div>
+        <TreeView />
       </Route>
     </Switch>
   );
