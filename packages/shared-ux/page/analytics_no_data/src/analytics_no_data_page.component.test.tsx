@@ -7,21 +7,31 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
+
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { KibanaNoDataPage } from '@kbn/shared-ux-components';
+import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
+
 import { AnalyticsNoDataPage } from './analytics_no_data_page.component';
+import { AnalyticsNoDataPageProvider } from './services';
+import { getMockServices } from './mocks';
 
 describe('AnalyticsNoDataPageComponent', () => {
+  const services = getMockServices();
   const onDataViewCreated = jest.fn();
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     const component = mountWithIntl(
-      <AnalyticsNoDataPage
-        onDataViewCreated={onDataViewCreated}
-        kibanaGuideDocLink={'http://www.test.com'}
-      />
+      // Include context so composed components will have access to their services.
+      <AnalyticsNoDataPageProvider {...services}>
+        <AnalyticsNoDataPage
+          onDataViewCreated={onDataViewCreated}
+          kibanaGuideDocLink={'http://www.test.com'}
+        />
+      </AnalyticsNoDataPageProvider>
     );
-    expect(component).toMatchSnapshot();
+
+    await act(() => new Promise(setImmediate));
 
     expect(component.find(KibanaNoDataPage).length).toBe(1);
 
