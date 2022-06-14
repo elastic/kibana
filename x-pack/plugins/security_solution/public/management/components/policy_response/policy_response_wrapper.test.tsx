@@ -229,8 +229,7 @@ describe('when on the policy response', () => {
     expect(render().queryAllByTestId('endpointPolicyResponseErrorCallOut')).toHaveLength(0);
   });
 
-  // FIXME: pending to be enabled when errors are bubbling up correctly
-  describe.skip('error callout', () => {
+  describe('error callout', () => {
     let policyResponse: HostPolicyResponse;
 
     beforeEach(() => {
@@ -238,30 +237,27 @@ describe('when on the policy response', () => {
       runMock(policyResponse);
     });
 
-    it('should display if status failure', () => {
-      const callouts = render().queryAllByTestId('endpointPolicyResponseErrorCallOut');
-      expect(callouts.length).toBeGreaterThanOrEqual(2);
-      expect(callouts.length % 2).toEqual(0); // there are exactly 2 error callouts per failure, nested + bubbled up
-    });
-
-    it('should not display link if type is NOT mapped', () => {
-      const calloutLink = render().queryByTestId('endpointPolicyResponseErrorCallOutLink');
+    it('should not display link if type is NOT mapped', async () => {
+      const component = await renderOpenedTree();
+      const calloutLink = component.queryByTestId('endpointPolicyResponseErrorCallOutLink');
       expect(calloutLink).toBeNull();
     });
 
-    it('should display link if type is mapped', () => {
+    it('should display link if type is mapped', async () => {
       const action = {
         name: 'full_disk_access',
         message:
           'You must enable full disk access for Elastic Endpoint on your machine. See our troubleshooting documentation for more information',
         status: HostPolicyResponseActionStatus.failure,
       };
+
       policyResponse.Endpoint.policy.applied.actions.push(action);
       policyResponse.Endpoint.policy.applied.response.configurations.malware.concerned_actions.push(
         'full_disk_access'
       );
 
-      const calloutLinks = render().queryAllByTestId('endpointPolicyResponseErrorCallOutLink');
+      const component = await renderOpenedTree();
+      const calloutLinks = component.queryAllByTestId('endpointPolicyResponseErrorCallOutLink');
       expect(calloutLinks.length).toEqual(2);
     });
   });

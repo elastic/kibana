@@ -383,18 +383,15 @@ const linkTexts = Object.freeze(
   ])
 );
 
-const linkUrls = Object.freeze(
-  new Map<Partial<PolicyResponseAction> | string, string>([
-    [
-      'full_disk_access',
-      'https://www.elastic.co/guide/en/security/current/deploy-elastic-endpoint.html#enable-fda-endpoint',
-    ],
-  ])
-);
+/**
+ * An array with errors we want to bubble up in policy response
+ */
+const GENERIC_ACTION_ERRORS: readonly string[] = Object.freeze(['full_disk_access']);
 
 export class PolicyResponseActionFormatter {
-  public name: string;
+  public key: string;
   public title: string;
+  public description: string;
   public hasError: boolean;
   public errorTitle: string;
   public errorDescription?: string;
@@ -402,16 +399,26 @@ export class PolicyResponseActionFormatter {
   public linkText?: string;
   public linkUrl?: string;
 
-  constructor(policyResponseAppliedAction: ImmutableObject<HostPolicyResponseAppliedAction>) {
-    this.name = policyResponseAppliedAction.name;
+  constructor(
+    policyResponseAppliedAction: ImmutableObject<HostPolicyResponseAppliedAction>,
+    link?: string
+  ) {
+    this.key = policyResponseAppliedAction.name;
     this.title =
-      policyResponseTitles.get(this.name) ??
-      this.name.replace(/_/g, ' ').replace(/\b(\w)/g, (m) => m.toUpperCase());
-    this.hasError = policyResponseAppliedAction.status === 'failure';
-    this.errorDescription = descriptions.get(this.name);
-    this.errorTitle = this.errorDescription ? this.title : policyResponseAppliedAction.message;
+      policyResponseTitles.get(this.key) ??
+      this.key.replace(/_/g, ' ').replace(/\b(\w)/g, (m) => m.toUpperCase());
+    this.hasError =
+      policyResponseAppliedAction.status === 'failure' ||
+      policyResponseAppliedAction.status === 'warning';
+    this.description = descriptions.get(this.key) || policyResponseAppliedAction.message;
+    this.errorDescription = descriptions.get(this.key) || policyResponseAppliedAction.message;
+    this.errorTitle = this.errorDescription ? this.title : policyResponseAppliedAction.name;
     this.status = policyResponseStatuses.get(policyResponseAppliedAction.status);
-    this.linkText = linkTexts.get(this.name);
-    this.linkUrl = linkUrls.get(this.name);
+    this.linkText = linkTexts.get(this.key);
+    this.linkUrl = link;
+  }
+
+  public isGeneric(): boolean {
+    return GENERIC_ACTION_ERRORS.includes(this.key);
   }
 }
