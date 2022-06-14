@@ -407,7 +407,7 @@ export class Plugin {
 
   public start(core: CoreStart, plugins: { taskManager }) {
     try {
-      const taskRunResult = await taskManager.runNow('91760f10-ba42-de9799');
+      const taskRunResult = await taskManager.runSoon('91760f10-ba42-de9799');
       // If no error is thrown, the task has completed successfully.
     } catch(err: Error) {
       // If running the task has failed, we throw an error with an appropriate message.

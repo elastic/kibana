@@ -1256,7 +1256,7 @@ export class RulesClient {
             })
             .catch((err: Error) => {
               this.logger.error(
-                `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
+                `Alert update failed to run its underlying task. TaskManager runSoon failed with Error: ${err.message}`
               );
             });
         }

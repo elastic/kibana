@@ -73,6 +73,10 @@ export interface BulkUpdateSchedulesResult {
    */
   errors: Array<{ task: ConcreteTaskInstance; error: Error }>;
 }
+export interface RunSoonResult {
+  id: ConcreteTaskInstance['id'];
+}
+
 export interface RunNowResult {
   id: ConcreteTaskInstance['id'];
   state?: ConcreteTaskInstance['state'];
@@ -203,7 +207,7 @@ export class TaskScheduling {
    * @param taskId - The task being scheduled.
    * @returns {Promise<ConcreteTaskInstance>}
    */
-  public async runSoon(taskId: string): Promise<RunNowResult> {
+  public async runSoon(taskId: string): Promise<RunSoonResult> {
     return new Promise(async (resolve, reject) => {
       try {
         this.awaitTaskClaim(taskId) // don't expose state on runSoon
@@ -296,7 +300,7 @@ export class TaskScheduling {
     }
   }
 
-  private awaitTaskClaim(taskId: string): Promise<RunNowResult> {
+  private awaitTaskClaim(taskId: string): Promise<RunSoonResult> {
     return new Promise((resolve, reject) => {
       // listen for all events related to the current task
       const subscription = merge(

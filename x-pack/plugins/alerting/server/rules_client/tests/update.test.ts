@@ -1582,7 +1582,7 @@ describe('update()', () => {
         ],
       });
 
-      taskManager.runNow.mockReturnValueOnce(Promise.resolve({ id: alertId }));
+      taskManager.runSoon.mockReturnValueOnce(Promise.resolve({ id: alertId }));
     }
 
     test('updating the alert schedule should rerun the task immediately', async () => {
@@ -1614,7 +1614,7 @@ describe('update()', () => {
         },
       });
 
-      expect(taskManager.runNow).toHaveBeenCalledWith(taskId);
+      expect(taskManager.runSoon).toHaveBeenCalledWith(taskId);
     });
 
     test('updating the alert without changing the schedule should not rerun the task', async () => {
@@ -1646,7 +1646,7 @@ describe('update()', () => {
         },
       });
 
-      expect(taskManager.runNow).not.toHaveBeenCalled();
+      expect(taskManager.runSoon).not.toHaveBeenCalled();
     });
 
     test('updating the alert should not wait for the rerun the task to complete', async () => {
@@ -1657,8 +1657,8 @@ describe('update()', () => {
 
       const resolveAfterAlertUpdatedCompletes = resolvable<{ id: string }>();
 
-      taskManager.runNow.mockReset();
-      taskManager.runNow.mockReturnValue(resolveAfterAlertUpdatedCompletes);
+      taskManager.runSoon.mockReset();
+      taskManager.runSoon.mockReturnValue(resolveAfterAlertUpdatedCompletes);
 
       await rulesClient.update({
         id: alertId,
@@ -1683,7 +1683,7 @@ describe('update()', () => {
         },
       });
 
-      expect(taskManager.runNow).toHaveBeenCalled();
+      expect(taskManager.runSoon).toHaveBeenCalled();
       resolveAfterAlertUpdatedCompletes.resolve({ id: alertId });
     });
 
@@ -1693,8 +1693,8 @@ describe('update()', () => {
 
       mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '30s' });
 
-      taskManager.runNow.mockReset();
-      taskManager.runNow.mockRejectedValue(new Error('Failed to run alert'));
+      taskManager.runSoon.mockReset();
+      taskManager.runSoon.mockRejectedValue(new Error('Failed to run alert'));
 
       await rulesClient.update({
         id: alertId,
@@ -1719,10 +1719,10 @@ describe('update()', () => {
         },
       });
 
-      expect(taskManager.runNow).toHaveBeenCalled();
+      expect(taskManager.runSoon).toHaveBeenCalled();
 
       expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
-        `Alert update failed to run its underlying task. TaskManager runNow failed with Error: Failed to run alert`
+        `Alert update failed to run its underlying task. TaskManager runSoon failed with Error: Failed to run alert`
       );
     });
   });

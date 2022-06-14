@@ -267,7 +267,7 @@ describe('TaskScheduling', () => {
       expect(bulkUpdatePayload[0].runAt.getTime()).toBeLessThanOrEqual(Date.now());
     });
   });
-  describe('runNow', () => {
+  describe('runSoon', () => {
     test('resolves when the task claim succeeds', () => {
       const events$ = new Subject<TaskLifecycleEvent>();
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
@@ -474,7 +474,9 @@ describe('TaskScheduling', () => {
 
       expect(mockTaskStore.getLifecycle).toHaveBeenCalledWith(id);
     });
+  });
 
+  describe('ephemeralRunNow', () => {
     test('runs a task ephemerally', async () => {
       const ephemeralEvents$ = new Subject<TaskLifecycleEvent>();
       const ephemeralTask = mockTask({

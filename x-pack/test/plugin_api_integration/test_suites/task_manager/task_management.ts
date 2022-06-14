@@ -169,7 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
     }
 
-    function runTaskNow(task: { id: string }) {
+    function runTaskSoon(task: { id: string }) {
       return supertest
         .post('/api/sample_tasks/run_now')
         .set('kbn-xsrf', 'xxx')
@@ -434,11 +434,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       const now = Date.now();
-      const runNowResult = await runTaskNow({
+      const runSoonResult = await runTaskSoon({
         id: originalTask.id,
       });
 
-      expect(runNowResult).to.eql({ id: originalTask.id });
+      expect(runSoonResult).to.eql({ id: originalTask.id });
 
       await retry.try(async () => {
         expect(
@@ -456,7 +456,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should prioritize tasks which are called using runNow', async () => {
+    it('should prioritize tasks which are called using runSoon', async () => {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
         schedule: { interval: `30m` },
@@ -502,19 +502,19 @@ export default function ({ getService }: FtrProviderContext) {
       // we need to ensure that TM has a chance to fill its queue with the stalling tasks
       await delay(DEFAULT_POLL_INTERVAL);
 
-      // call runNow for our task
-      const runNowResult = runTaskNow({
+      // call runSoon for our task
+      const runSoonResult = runTaskSoon({
         id: originalTask.id,
       });
 
-      // we need to ensure that TM has a chance to push the runNow task into the queue
+      // we need to ensure that TM has a chance to push the runSoon task into the queue
       // before we release the stalled task, so lets give it a chance
       await delay(DEFAULT_POLL_INTERVAL);
 
       // and release only one slot in our worker queue
       await releaseTasksWaitingForEventToComplete('releaseSingleTask');
 
-      expect(await runNowResult).to.eql({ id: originalTask.id });
+      expect(await runSoonResult).to.eql({ id: originalTask.id });
 
       await retry.try(async () => {
         const task = await currentTask<{ count: number }>(originalTask.id);
@@ -614,7 +614,7 @@ export default function ({ getService }: FtrProviderContext) {
       await releaseTasksWaitingForEventToComplete('releaseSecondWaveOfTasks');
     });
 
-    it('should return a task run error result when RunNow is called at a time that would cause the task to exceed its maxConcurrency', async () => {
+    it('should return a task run error result when RunSoon is called at a time that would cause the task to exceed its maxConcurrency', async () => {
       // should run as there's only one and maxConcurrency on this TaskType is 1
       const firstWithSingleConcurrency = await scheduleTask({
         taskType: 'sampleTaskWithSingleConcurrency',
@@ -634,7 +634,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // run the first tasks once just so that we can be sure it runs in response to our
-      // runNow callm, rather than the initial execution
+      // runSoon call, rather than the initial execution
       await retry.try(async () => {
         expect((await historyDocs(firstWithSingleConcurrency.id)).length).to.eql(1);
       });
@@ -645,12 +645,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect((await historyDocs(secondWithSingleConcurrency.id)).length).to.eql(1);
       });
 
-      // run the first task again using runNow - should fail due to concurrency concerns
-      const failedRunNowResult = await runTaskNow({
+      // run the first task again using runSoon - should fail due to concurrency concerns
+      const failedRunSoonResult = await runTaskSoon({
         id: firstWithSingleConcurrency.id,
       });
 
-      expect(failedRunNowResult).to.eql({
+      expect(failedRunSoonResult).to.eql({
         id: firstWithSingleConcurrency.id,
         error: `Error: Failed to run task "${firstWithSingleConcurrency.id}" as we would exceed the max concurrency of "Sample Task With Single Concurrency" which is 1. Rescheduled the task to ensure it is picked up as soon as possible.`,
       });
@@ -683,10 +683,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ensureTasksIndexRefreshed();
 
       // second run should still be successful
-      const successfulRunNowResult = await runTaskNow({
+      const successfulRunSoonResult = await runTaskSoon({
         id: originalTask.id,
       });
-      expect(successfulRunNowResult).to.eql({ id: originalTask.id });
+      expect(successfulRunSoonResult).to.eql({ id: originalTask.id });
 
       await retry.try(async () => {
         const task = await currentTask<{ count: number }>(originalTask.id);
@@ -699,11 +699,11 @@ export default function ({ getService }: FtrProviderContext) {
       // flaky: runTaskNow() sometimes fails with the following error, so retrying
       // error: Failed to run task "<id>" as it is currently running
       await retry.try(async () => {
-        const failedRunNowResult = await runTaskNow({
+        const failedRunSoonResult = await runTaskSoon({
           id: originalTask.id,
         });
 
-        expect(failedRunNowResult).to.eql({
+        expect(failedRunSoonResult).to.eql({
           id: originalTask.id,
           error: `Error: Failed to run task \"${originalTask.id}\": Error: this task was meant to fail!`,
         });
@@ -736,11 +736,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return a task run error result when trying to run a non-existent task', async () => {
-      // runNow should fail
-      const failedRunNowResult = await runTaskNow({
+      // runSoon should fail
+      const failedRunSoonResult = await runTaskSoon({
         id: 'i-dont-exist',
       });
-      expect(failedRunNowResult).to.eql({
+      expect(failedRunSoonResult).to.eql({
         error: `Error: Failed to run task "i-dont-exist" as it does not exist`,
         id: 'i-dont-exist',
       });
@@ -755,9 +755,9 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      // tell the task to wait for the 'runNowHasBeenAttempted' event
+      // tell the task to wait for the 'runSoonHasBeenAttempted' event
       await provideParamsToTasksWaitingForParams(longRunningTask.id, {
-        waitForEvent: 'runNowHasBeenAttempted',
+        waitForEvent: 'runSoonHasBeenAttempted',
       });
 
       await retry.try(async () => {
@@ -772,18 +772,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ensureTasksIndexRefreshed();
 
-      // first runNow should fail
-      const failedRunNowResult = await runTaskNow({
+      // first runSoon should fail
+      const failedRunSoonResult = await runTaskSoon({
         id: longRunningTask.id,
       });
 
-      expect(failedRunNowResult).to.eql({
+      expect(failedRunSoonResult).to.eql({
         error: `Error: Failed to run task "${longRunningTask.id}" as it is currently running`,
         id: longRunningTask.id,
       });
 
-      // finish first run by emitting 'runNowHasBeenAttempted' event
-      await releaseTasksWaitingForEventToComplete('runNowHasBeenAttempted');
+      // finish first run by emitting 'runSoonHasBeenAttempted' event
+      await releaseTasksWaitingForEventToComplete('runSoonHasBeenAttempted');
       await retry.try(async () => {
         const tasks = (await currentTasks<{ count: number }>()).docs;
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
@@ -794,18 +794,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ensureTasksIndexRefreshed();
 
-      // second runNow should be successful
-      const successfulRunNowResult = runTaskNow({
+      // second runSoon should be successful
+      const successfulRunSoonResult = runTaskSoon({
         id: longRunningTask.id,
       });
 
       await provideParamsToTasksWaitingForParams(longRunningTask.id);
 
-      expect(await successfulRunNowResult).to.eql({ id: longRunningTask.id });
+      expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id });
     });
 
-    it('should allow a failed task to be rerun using runNow', async () => {
-      const taskThatFailsBeforeRunNow = await scheduleTask({
+    it('should allow a failed task to be rerun using runSoon', async () => {
+      const taskThatFailsBeforeRunSoon = await scheduleTask({
         taskType: 'singleAttemptSampleTask',
         params: {
           waitForParams: true,
@@ -813,25 +813,25 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // tell the task to fail on its next run
-      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id, {
+      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunSoon.id, {
         failWith: 'error on first run',
       });
 
       // wait for task to fail
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
-        expect(getTaskById(tasks, taskThatFailsBeforeRunNow.id).status).to.eql('failed');
+        expect(getTaskById(tasks, taskThatFailsBeforeRunSoon.id).status).to.eql('failed');
       });
 
-      // runNow should be successfully run the failing task
-      const runNowResultWithExpectedFailure = runTaskNow({
-        id: taskThatFailsBeforeRunNow.id,
+      // runSoonHasBeenAttempted should be successfully run the failing task
+      const runSoonResultWithExpectedFailure = runTaskSoon({
+        id: taskThatFailsBeforeRunSoon.id,
       });
 
       // release the task without failing this time
-      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id);
+      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunSoon.id);
 
-      expect(await runNowResultWithExpectedFailure).to.eql({ id: taskThatFailsBeforeRunNow.id });
+      expect(await runSoonResultWithExpectedFailure).to.eql({ id: taskThatFailsBeforeRunSoon.id });
     });
 
     function expectReschedule(
@@ -973,7 +973,7 @@ export default function ({ getService }: FtrProviderContext) {
         params: {},
       });
 
-      runTaskNow({ id: longRunningTask.id });
+      runTaskSoon({ id: longRunningTask.id });
 
       let scheduledRunAt: string;
       // ensure task is running and store scheduled runAt
