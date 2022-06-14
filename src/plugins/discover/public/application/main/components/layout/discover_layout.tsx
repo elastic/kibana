@@ -220,6 +220,24 @@ export function DiscoverLayout({
 
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
+      <h1
+        id="savedSearchTitle"
+        className="euiScreenReaderOnly"
+        data-test-subj="discoverSavedSearchTitle"
+        tabIndex={-1}
+        ref={savedSearchTitle}
+      >
+        {savedSearch.title
+          ? i18n.translate('discover.pageTitleWithSavedSearch', {
+              defaultMessage: 'Discover - {savedSearchTitle}',
+              values: {
+                savedSearchTitle: savedSearch.title,
+              },
+            })
+          : i18n.translate('discover.pageTitleWithoutSavedSearch', {
+              defaultMessage: 'Discover - Search not yet saved',
+            })}
+      </h1>
       <TopNavMemoized
         indexPattern={indexPattern}
         onOpenInspector={onOpenInspector}
@@ -241,24 +259,6 @@ export function DiscoverLayout({
           spaces={spaces}
           history={history}
         />
-        <h1
-          id="savedSearchTitle"
-          className="euiScreenReaderOnly"
-          data-test-subj="discoverSavedSearchTitle"
-          tabIndex={-1}
-          ref={savedSearchTitle}
-        >
-          {savedSearch.title
-            ? i18n.translate('discover.pageTitleWithSavedSearch', {
-                defaultMessage: 'Discover - {savedSearchTitle}',
-                values: {
-                  savedSearchTitle: savedSearch.title,
-                },
-              })
-            : i18n.translate('discover.pageTitleWithoutSavedSearch', {
-                defaultMessage: 'Discover - Search not yet saved',
-              })}
-        </h1>
         <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
           <EuiFlexItem grow={false}>
             <SidebarMemoized
