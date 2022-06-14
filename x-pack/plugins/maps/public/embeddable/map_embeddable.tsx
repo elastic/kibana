@@ -273,8 +273,7 @@ export class MapEmbeddable
 
   onUpdate() {
     const filterByMapExtent = getFilterByMapExtent(this.input);
-    if (this._prevFilterByMapExtent !== filterByMapExtent
-    ) {
+    if (this._prevFilterByMapExtent !== filterByMapExtent) {
       this._prevFilterByMapExtent = filterByMapExtent;
       if (filterByMapExtent) {
         this.setMapExtentFilter();
