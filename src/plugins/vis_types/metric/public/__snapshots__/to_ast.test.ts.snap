@@ -34,6 +34,9 @@ Object {
     },
     Object {
       "arguments": Object {
+        "colorMode": Array [
+          "None",
+        ],
         "font": Array [
           Object {
             "chain": Array [
@@ -127,6 +130,9 @@ Object {
     },
     Object {
       "arguments": Object {
+        "colorMode": Array [
+          "None",
+        ],
         "font": Array [
           Object {
             "chain": Array [
