@@ -541,7 +541,7 @@ export const RulesList: React.FunctionComponent = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="baseline" gutterSize="none">
+          <EuiFlexGroup alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued" data-test-subj="totalRulesCount">
                 <FormattedMessage
@@ -681,10 +681,11 @@ export const RulesList: React.FunctionComponent = () => {
         onEnableRule={onEnableRule}
         onSnoozeRule={onSnoozeRule}
         onUnsnoozeRule={onUnsnoozeRule}
-        renderCollapsedItemActions={(rule) => (
+        renderCollapsedItemActions={(rule, onLoading) => (
           <CollapsedItemActions
             key={rule.id}
             item={rule}
+            onLoading={onLoading}
             onRuleChanged={() => loadData()}
             setRulesToDelete={setRulesToDelete}
             onEditRule={() => onRuleEdit(rule)}
