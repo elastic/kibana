@@ -944,16 +944,19 @@ export class DataViewsService {
    * If no default is found, or it is missing
    * another data view is selected as default and returned.
    * If no possible data view found to become a default returns null.
+   * @param update: update uiSettings if necessary (no/invalid defaultIndex set)
    *
    * @returns default data view
    */
-  async getDefaultDataView(update: true): Promise<DataView | null> {
+  async getDefaultDataView(update = true): Promise<DataView | null> {
     const patterns = await this.getIdsWithTitle();
     let defaultId: string | undefined = await this.config.get('defaultIndex');
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
 
     if (defaultId && !exists) {
-      await this.config.remove('defaultIndex');
+      if (update) {
+        await this.config.remove('defaultIndex');
+      }
       defaultId = undefined;
     }
 
