@@ -33,6 +33,7 @@ import {
   FormulaIndexPatternColumn,
   RangeIndexPatternColumn,
   FiltersIndexPatternColumn,
+  PercentileIndexPatternColumn,
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { cloneDeep } from 'lodash';
@@ -946,6 +947,66 @@ describe('IndexPattern Data Source', () => {
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp']);
       expect(ast.chain[1].arguments.timeFields).not.toContain('timefield');
+    });
+
+    it('should call optimizeEsAggs once per operation for which it is available', () => {
+      const queryBaseState: DataViewBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columns: {
+              col1: {
+                label: 'timestamp',
+                dataType: 'date',
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                isBucketed: true,
+                scale: 'interval',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                  dropPartials: false,
+                },
+              } as DateHistogramIndexPatternColumn,
+              col2: {
+                label: '95th percentile of bytes',
+                dataType: 'number',
+                operationType: 'percentile',
+                sourceField: 'bytes',
+                isBucketed: false,
+                scale: 'ratio',
+                params: {
+                  percentile: 95,
+                },
+              } as PercentileIndexPatternColumn,
+              col3: {
+                label: '95th percentile of bytes',
+                dataType: 'number',
+                operationType: 'percentile',
+                sourceField: 'bytes',
+                isBucketed: false,
+                scale: 'ratio',
+                params: {
+                  percentile: 95,
+                },
+              } as PercentileIndexPatternColumn,
+            },
+            columnOrder: ['col1', 'col2', 'col3'],
+            incompleteColumns: {},
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const optimizeMock = jest.spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs');
+
+      indexPatternDatasource.toExpression(state, 'first');
+
+      expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
+
+      optimizeMock.mockRestore();
     });
 
     describe('references', () => {
