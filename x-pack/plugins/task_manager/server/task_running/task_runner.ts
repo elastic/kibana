@@ -313,7 +313,8 @@ export class TaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('success');
       return processedResult;
     } catch (err) {
-      this.logger.error(`Task ${this} failed: ${err} - \nStack trace: ${err?.stack ?? err}`);
+      this.logger.error(err);
+      this.logger.error(`Task ${this} failed: ${err}`);
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>

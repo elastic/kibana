@@ -719,7 +719,7 @@ describe('TaskManagerRunner', () => {
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
     });
-    test('makes calls to APM as expected when task fails', async () => {
+    test('makes calls to APM and logs errors as expected when task fails', async () => {
       const { runner, logger } = await readyToRunStageSetup({
         instance: {
           params: { a: 'b' },
@@ -741,10 +741,12 @@ describe('TaskManagerRunner', () => {
         childOf: 'apmTraceparent',
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
-      const loggerCall = logger.error.mock.calls[0][0];
-      expect(
-        (loggerCall as string).startsWith(`Task bar "foo" failed: Error: rar - \nStack trace:`)
-      ).toBeTruthy();
+      const loggerCall0 = logger.error.mock.calls[0][0];
+      expect(loggerCall0 as string).toMatchInlineSnapshot(`[Error: rar]`);
+      const loggerCall1 = logger.error.mock.calls[1][0];
+      expect(loggerCall1 as string).toMatchInlineSnapshot(
+        `"Task bar \\"foo\\" failed: Error: rar"`
+      );
     });
     test('provides execution context on run', async () => {
       const { runner } = await readyToRunStageSetup({
