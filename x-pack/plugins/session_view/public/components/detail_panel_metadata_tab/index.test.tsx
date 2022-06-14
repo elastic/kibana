@@ -102,13 +102,11 @@ describe('DetailPanelMetadataTab component', () => {
     it('renders DetailPanelMetadataTab correctly (non cloud environment)', async () => {
       renderResult = mockedContext.render(<DetailPanelMetadataTab processHost={TEST_HOST} />);
 
-      expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('hostname')).toBeVisible();
       expect(renderResult.queryAllByText('id').length).toBe(1);
       expect(renderResult.queryByText('ip')).toBeVisible();
       expect(renderResult.queryByText('mac')).toBeVisible();
       expect(renderResult.queryAllByText('name').length).toBe(1);
-      expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
       expect(renderResult.queryByText(TEST_HOSTNAME)).toBeVisible();
       expect(renderResult.queryByText(TEST_ID)).toBeVisible();
       expect(renderResult.queryByText(TEST_IP.join(', '))).toBeVisible();
@@ -117,12 +115,14 @@ describe('DetailPanelMetadataTab component', () => {
 
       // expand host os accordion
       renderResult.queryByText('Host OS')?.querySelector('button')?.click();
+      expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('os.family')).toBeVisible();
       expect(renderResult.queryByText('os.full')).toBeVisible();
       expect(renderResult.queryByText('os.kernel')).toBeVisible();
       expect(renderResult.queryByText('os.name')).toBeVisible();
       expect(renderResult.queryByText('os.platform')).toBeVisible();
       expect(renderResult.queryByText('os.version')).toBeVisible();
+      expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_FAMILY)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_FULL)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_KERNEL)).toBeVisible();
@@ -144,11 +144,9 @@ describe('DetailPanelMetadataTab component', () => {
         />
       );
 
-      expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('hostname')).toBeVisible();
       expect(renderResult.queryByText('ip')).toBeVisible();
       expect(renderResult.queryByText('mac')).toBeVisible();
-      expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
       expect(renderResult.queryByText(TEST_HOSTNAME)).toBeVisible();
       expect(renderResult.queryByText(TEST_ID)).toBeVisible();
       expect(renderResult.queryByText(TEST_IP.join(', '))).toBeVisible();
@@ -161,12 +159,14 @@ describe('DetailPanelMetadataTab component', () => {
 
       // expand host os accordion
       renderResult.queryByText('Host OS')?.querySelector('button')?.click();
+      expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('os.family')).toBeVisible();
       expect(renderResult.queryByText('os.full')).toBeVisible();
       expect(renderResult.queryByText('os.kernel')).toBeVisible();
       expect(renderResult.queryByText('os.name')).toBeVisible();
       expect(renderResult.queryByText('os.platform')).toBeVisible();
       expect(renderResult.queryByText('os.version')).toBeVisible();
+      expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_FAMILY)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_FULL)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_KERNEL)).toBeVisible();

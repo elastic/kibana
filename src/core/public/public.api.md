@@ -11,6 +11,7 @@ import { AnalyticsClient } from '@kbn/analytics-client';
 import type { ButtonColor } from '@elastic/eui';
 import { ContextProviderOpts } from '@kbn/analytics-client';
 import { CoreContext } from '@kbn/core-base-browser-internal';
+import { CoreTheme } from '@kbn/core-theme-browser';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { EnvironmentMode } from '@kbn/config';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -45,6 +46,8 @@ import * as Rx from 'rxjs';
 import { ShipperClassConstructor } from '@kbn/analytics-client';
 import { TelemetryCounter } from '@kbn/analytics-client';
 import { TelemetryCounterType } from '@kbn/analytics-client';
+import { ThemeServiceSetup } from '@kbn/core-theme-browser';
+import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { TransitionPromptHook } from 'history';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import { Type } from '@kbn/config-schema';
@@ -186,6 +189,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
     // @deprecated
     onAppLeave: (handler: AppLeaveHandler) => void;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
     theme$: Observable<CoreTheme>;
 }
 
@@ -414,6 +418,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     injectedMetadata: InjectedMetadataSetup;
     // (undocumented)
     notifications: NotificationsSetup;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     theme: ThemeServiceSetup;
     // (undocumented)
@@ -452,6 +458,8 @@ export interface CoreStart {
     overlays: OverlayStart;
     // (undocumented)
     savedObjects: SavedObjectsStart;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     theme: ThemeServiceStart;
     // (undocumented)
@@ -475,10 +483,7 @@ export class CoreSystem {
     stop(): void;
 }
 
-// @public
-export interface CoreTheme {
-    readonly darkMode: boolean;
-}
+export { CoreTheme }
 
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
@@ -1454,17 +1459,9 @@ export { TelemetryCounter }
 
 export { TelemetryCounterType }
 
-// @public (undocumented)
-export interface ThemeServiceSetup {
-    // (undocumented)
-    theme$: Observable<CoreTheme>;
-}
+export { ThemeServiceSetup }
 
-// @public (undocumented)
-export interface ThemeServiceStart {
-    // (undocumented)
-    theme$: Observable<CoreTheme>;
-}
+export { ThemeServiceStart }
 
 // Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
