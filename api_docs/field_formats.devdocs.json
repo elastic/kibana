@@ -79,7 +79,11 @@
             "label": "getParamDefaults",
             "description": [],
             "signature": [
-              "() => { pattern: unknown; timezone: unknown; }"
+              "() => { pattern: ",
+              "Serializable",
+              "; timezone: ",
+              "Serializable",
+              "; }"
             ],
             "path": "src/plugins/field_formats/public/lib/converters/date.ts",
             "deprecated": false,
@@ -223,7 +227,13 @@
             "label": "getParamDefaults",
             "description": [],
             "signature": [
-              "() => { pattern: unknown; fallbackPattern: unknown; timezone: unknown; }"
+              "() => { pattern: ",
+              "Serializable",
+              "; fallbackPattern: ",
+              "Serializable",
+              "; timezone: ",
+              "Serializable",
+              "; }"
             ],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
             "deprecated": false,
@@ -417,13 +427,7 @@
                 "description": [],
                 "signature": [
                   "(",
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatParams",
-                    "text": "FieldFormatParams"
-                  },
+                  "SerializableRecord",
                   " & ",
                   {
                     "pluginId": "fieldFormats",
@@ -453,7 +457,9 @@
                     "section": "def-common.FieldFormatsGetConfigFn",
                     "text": "FieldFormatsGetConfigFn"
                   },
-                  "<unknown> | undefined"
+                  "<",
+                  "Serializable",
+                  "> | undefined"
                 ],
                 "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
                 "deprecated": false,
@@ -470,7 +476,11 @@
             "label": "getParamDefaults",
             "description": [],
             "signature": [
-              "() => { pattern: unknown; timezone: unknown; }"
+              "() => { pattern: ",
+              "Serializable",
+              "; timezone: ",
+              "Serializable",
+              "; }"
             ],
             "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
             "deprecated": false,
@@ -1521,13 +1531,7 @@
             "label": "_params",
             "description": [],
             "signature": [
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               " & ",
               {
                 "pluginId": "fieldFormats",
@@ -1555,7 +1559,9 @@
                 "section": "def-common.FieldFormatsGetConfigFn",
                 "text": "FieldFormatsGetConfigFn"
               },
-              "<unknown> | undefined"
+              "<",
+              "Serializable",
+              "> | undefined"
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false
@@ -1581,13 +1587,7 @@
                 "label": "_params",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatParams",
-                    "text": "FieldFormatParams"
-                  },
+                  "SerializableRecord",
                   " & ",
                   {
                     "pluginId": "fieldFormats",
@@ -1616,7 +1616,9 @@
                     "section": "def-common.FieldFormatsGetConfigFn",
                     "text": "FieldFormatsGetConfigFn"
                   },
-                  "<unknown> | undefined"
+                  "<",
+                  "Serializable",
+                  "> | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_format.ts",
                 "deprecated": false,
@@ -1806,13 +1808,7 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              }
+              "SerializableRecord"
             ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
@@ -1872,13 +1868,7 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               " & ",
               {
                 "pluginId": "fieldFormats",
@@ -1906,13 +1896,7 @@
             ],
             "signature": [
               "() => { id: string; params: (",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               " & ",
               {
                 "pluginId": "fieldFormats",
@@ -2109,7 +2093,9 @@
                 "section": "def-common.FieldFormatsGetConfigFn",
                 "text": "FieldFormatsGetConfigFn"
               },
-              "<unknown> | undefined"
+              "<",
+              "Serializable",
+              "> | undefined"
             ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false
@@ -2131,13 +2117,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               "> | undefined) => ",
               {
                 "pluginId": "fieldFormats",
@@ -2166,13 +2146,7 @@
                     "text": "SerializedFieldFormat"
                   },
                   "<",
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatParams",
-                    "text": "FieldFormatParams"
-                  },
+                  "SerializableRecord",
                   "> | undefined"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
@@ -2198,7 +2172,9 @@
                 "section": "def-common.FieldFormatsGetConfigFn",
                 "text": "FieldFormatsGetConfigFn"
               },
-              "<unknown>, metaParamsOptions?: ",
+              "<",
+              "Serializable",
+              ">, metaParamsOptions?: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -2234,7 +2210,9 @@
                     "section": "def-common.FieldFormatsGetConfigFn",
                     "text": "FieldFormatsGetConfigFn"
                   },
-                  "<unknown>"
+                  "<",
+                  "Serializable",
+                  ">"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
@@ -2603,13 +2581,7 @@
             ],
             "signature": [
               "(formatId: string, params?: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -2644,13 +2616,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatParams",
-                    "text": "FieldFormatParams"
-                  }
+                  "SerializableRecord"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
@@ -2676,13 +2642,7 @@
               ", esTypes?: ",
               "ES_FIELD_TYPES",
               "[] | undefined, params?: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -2732,13 +2692,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatParams",
-                    "text": "FieldFormatParams"
-                  }
+                  "SerializableRecord"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
@@ -2861,13 +2815,7 @@
               ", esTypes?: ",
               "ES_FIELD_TYPES",
               "[] | undefined, params?: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               ") => ",
               {
                 "pluginId": "fieldFormats",
@@ -2917,13 +2865,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatParams",
-                    "text": "FieldFormatParams"
-                  }
+                  "SerializableRecord"
                 ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
@@ -3694,7 +3636,9 @@
             "label": "getParamDefaults",
             "description": [],
             "signature": [
-              "() => { pattern: unknown; fractional: boolean; }"
+              "() => { pattern: ",
+              "Serializable",
+              "; fractional: boolean; }"
             ],
             "path": "src/plugins/field_formats/common/converters/percent.ts",
             "deprecated": false,
@@ -4379,13 +4323,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatParams",
-                    "text": "FieldFormatParams"
-                  },
+                  "SerializableRecord",
                   " & ",
                   {
                     "pluginId": "fieldFormats",
@@ -4546,61 +4484,6 @@
     "interfaces": [
       {
         "parentPluginId": "fieldFormats",
-        "id": "def-common.FieldFormatConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldFormatConfig",
-        "description": [],
-        "path": "src/plugins/field_formats/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.FieldFormatConfig.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.FieldFormatConfig.params",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              }
-            ],
-            "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.FieldFormatConfig.es",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "es",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fieldFormats",
         "id": "def-common.FieldFormatConvert",
         "type": "Interface",
         "tags": [],
@@ -4756,34 +4639,6 @@
       },
       {
         "parentPluginId": "fieldFormats",
-        "id": "def-common.FieldFormatParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldFormatParams",
-        "description": [
-          "\nParams provided when creating a formatter.\nParams are vary per formatter\n\nTODO: support strict typing for params depending on format type\nhttps://github.com/elastic/kibana/issues/108158"
-        ],
-        "path": "src/plugins/field_formats/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.FieldFormatParams.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[param: string]: any",
-            "description": [],
-            "signature": [
-              "[param: string]:  any"
-            ],
-            "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fieldFormats",
         "id": "def-common.HtmlContextTypeOptions",
         "type": "Interface",
         "tags": [],
@@ -4829,57 +4684,6 @@
             "description": [],
             "signature": [
               "boolean | undefined"
-            ],
-            "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fieldFormats",
-        "id": "def-common.SerializedFieldFormat",
-        "type": "Interface",
-        "tags": [],
-        "label": "SerializedFieldFormat",
-        "description": [
-          "\nJSON representation of a field formatter configuration.\nIs used to carry information about how to format data in\na data table as part of the column definition.\n"
-        ],
-        "signature": [
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.SerializedFieldFormat",
-            "text": "SerializedFieldFormat"
-          },
-          "<TParams>"
-        ],
-        "path": "src/plugins/field_formats/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.SerializedFieldFormat.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.SerializedFieldFormat.params",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "TParams | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false
@@ -4966,6 +4770,22 @@
       },
       {
         "parentPluginId": "fieldFormats",
+        "id": "def-common.FieldFormatConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldFormatConfig",
+        "description": [],
+        "signature": [
+          "{ id: string; params: ",
+          "SerializableRecord",
+          "; es?: boolean | undefined; }"
+        ],
+        "path": "src/plugins/field_formats/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldFormats",
         "id": "def-common.FieldFormatConvertFunction",
         "type": "Type",
         "tags": [],
@@ -5023,13 +4843,7 @@
         ],
         "signature": [
           "(new (params?: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           " | undefined, getConfig?: ",
           {
             "pluginId": "fieldFormats",
@@ -5038,7 +4852,9 @@
             "section": "def-common.FieldFormatsGetConfigFn",
             "text": "FieldFormatsGetConfigFn"
           },
-          "<unknown> | undefined) => ",
+          "<",
+          "Serializable",
+          "> | undefined) => ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -5047,6 +4863,22 @@
             "text": "FieldFormat"
           },
           ") & { id: string; title: string; hidden?: boolean | undefined; fieldType: string | string[]; }"
+        ],
+        "path": "src/plugins/field_formats/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldFormats",
+        "id": "def-common.FieldFormatParams",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldFormatParams",
+        "description": [
+          "\nParams provided when creating a formatter.\nParams are vary per formatter\n\nTODO: support strict typing for params depending on format type\nhttps://github.com/elastic/kibana/issues/108158"
+        ],
+        "signature": [
+          "SerializableRecord"
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
@@ -5177,13 +5009,7 @@
           " | ",
           "KBN_FIELD_TYPES",
           "; getInstance: (formatId: string, params?: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5197,13 +5023,7 @@
           ", esTypes?: ",
           "ES_FIELD_TYPES",
           "[] | undefined, params?: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5231,13 +5051,7 @@
           ", esTypes?: ",
           "ES_FIELD_TYPES",
           "[] | undefined, params?: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5277,13 +5091,7 @@
             "text": "SerializedFieldFormat"
           },
           "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           "> | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -5313,13 +5121,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               "> | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
@@ -5438,7 +5240,9 @@
             "section": "def-common.FieldFormatsGetConfigFn",
             "text": "FieldFormatsGetConfigFn"
           },
-          "<unknown>, metaParamsOptions?: ",
+          "<",
+          "Serializable",
+          ">, metaParamsOptions?: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -5523,13 +5327,7 @@
           " | ",
           "KBN_FIELD_TYPES",
           "; getInstance: (formatId: string, params?: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5543,13 +5341,7 @@
           ", esTypes?: ",
           "ES_FIELD_TYPES",
           "[] | undefined, params?: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5577,13 +5369,7 @@
           ", esTypes?: ",
           "ES_FIELD_TYPES",
           "[] | undefined, params?: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           ") => ",
           {
             "pluginId": "fieldFormats",
@@ -5603,6 +5389,22 @@
           ">) => void; has: (id: string) => boolean; }"
         ],
         "path": "src/plugins/field_formats/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldFormats",
+        "id": "def-common.SerializedFieldFormat",
+        "type": "Type",
+        "tags": [],
+        "label": "SerializedFieldFormat",
+        "description": [
+          "\nJSON representation of a field formatter configuration.\nIs used to carry information about how to format data in\na data table as part of the column definition.\n"
+        ],
+        "signature": [
+          "{ id?: string | undefined; params?: TParams | undefined; }"
+        ],
+        "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

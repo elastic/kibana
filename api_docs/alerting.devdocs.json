@@ -2770,7 +2770,15 @@
         "label": "BulkEditOperation",
         "description": [],
         "signature": [
-          "{ operation: \"delete\" | \"set\" | \"add\"; field: \"tags\"; value: string[]; } | { operation: \"set\" | \"add\"; field: \"actions\"; value: NormalizedAlertAction[]; }"
+          "{ operation: \"delete\" | \"set\" | \"add\"; field: \"tags\"; value: string[]; } | { operation: \"set\" | \"add\"; field: \"actions\"; value: NormalizedAlertAction[]; } | { operation: \"set\"; field: \"schedule\"; value: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.IntervalSchedule",
+            "text": "IntervalSchedule"
+          },
+          "; } | { operation: \"set\"; field: \"throttle\"; value: string | null; } | { operation: \"set\"; field: \"notifyWhen\"; value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; }"
         ],
         "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
         "deprecated": false,

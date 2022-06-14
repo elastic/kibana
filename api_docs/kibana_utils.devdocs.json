@@ -3384,13 +3384,7 @@
             "text": "SavedObjectNotFound"
           },
           ") => void) | undefined; theme: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.ThemeServiceStart",
-            "text": "ThemeServiceStart"
-          },
+          "ThemeServiceStart",
           "; }) => (error: ",
           {
             "pluginId": "kibanaUtils",
@@ -3731,13 +3725,7 @@
                 "label": "theme",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ThemeServiceStart",
-                    "text": "ThemeServiceStart"
-                  }
+                  "ThemeServiceStart"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                 "deprecated": false
@@ -10335,9 +10323,7 @@
                 "section": "def-common.VersionedState",
                 "text": "VersionedState"
               },
-              "<",
-              "Serializable",
-              ">) => P) | undefined"
+              "<P>) => P) | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
@@ -10359,9 +10345,7 @@
                     "section": "def-common.VersionedState",
                     "text": "VersionedState"
                   },
-                  "<",
-                  "Serializable",
-                  ">"
+                  "<P>"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,

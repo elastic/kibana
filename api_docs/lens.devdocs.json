@@ -9865,13 +9865,7 @@
             "text": "SerializedFieldFormat"
           },
           "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           "> | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -9901,13 +9895,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               "> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
