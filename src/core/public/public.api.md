@@ -46,6 +46,7 @@ import { ShipperClassConstructor } from '@kbn/analytics-client';
 import { TelemetryCounter } from '@kbn/analytics-client';
 import { TelemetryCounterType } from '@kbn/analytics-client';
 import { TransitionPromptHook } from 'history';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import { Type } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
@@ -1076,6 +1077,8 @@ export interface SavedObjectReferenceWithContext {
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
     namespace?: string;
+    // (undocumented)
+    requestOptions?: TransportRequestOptions;
 }
 
 // @public (undocumented)
