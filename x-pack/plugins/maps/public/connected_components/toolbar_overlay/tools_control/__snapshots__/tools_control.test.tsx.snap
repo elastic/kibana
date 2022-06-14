@@ -58,7 +58,6 @@ exports[`Should render cancel button when drawing 1`] = `
                 buttonLabel="Draw shape"
                 className="mapDrawControl__geometryFilterForm"
                 intitialGeometryLabel="shape"
-                isFilterGeometryClosed={true}
                 onSubmit={[Function]}
               />,
               "id": 1,
@@ -69,7 +68,6 @@ exports[`Should render cancel button when drawing 1`] = `
                 buttonLabel="Draw bounds"
                 className="mapDrawControl__geometryFilterForm"
                 intitialGeometryLabel="bounds"
-                isFilterGeometryClosed={true}
                 onSubmit={[Function]}
               />,
               "id": 2,
@@ -160,7 +158,6 @@ exports[`renders 1`] = `
             buttonLabel="Draw shape"
             className="mapDrawControl__geometryFilterForm"
             intitialGeometryLabel="shape"
-            isFilterGeometryClosed={true}
             onSubmit={[Function]}
           />,
           "id": 1,
@@ -171,7 +168,6 @@ exports[`renders 1`] = `
             buttonLabel="Draw bounds"
             className="mapDrawControl__geometryFilterForm"
             intitialGeometryLabel="bounds"
-            isFilterGeometryClosed={true}
             onSubmit={[Function]}
           />,
           "id": 2,

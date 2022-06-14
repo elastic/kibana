@@ -82,6 +82,7 @@ filegroup(
     "//packages/kbn-logging:build",
     "//packages/kbn-mapbox-gl:build",
     "//packages/kbn-monaco:build",
+    "//packages/kbn-optimizer-webpack-helpers:build",
     "//packages/kbn-optimizer:build",
     "//packages/kbn-performance-testing-dataset-extractor:build",
     "//packages/kbn-plugin-discovery:build",
@@ -135,6 +136,7 @@ filegroup(
     "//packages/shared-ux/button/exit_full_screen:build",
     "//packages/shared-ux/link/redirect_app:build",
     "//packages/shared-ux/page/analytics_no_data:build",
+    "//packages/shared-ux/page/kibana_no_data:build",
     "//packages/shared-ux/prompt/no_data_views:build",
   ],
 )
@@ -207,6 +209,7 @@ filegroup(
     "//packages/kbn-logging:build_types",
     "//packages/kbn-mapbox-gl:build_types",
     "//packages/kbn-monaco:build_types",
+    "//packages/kbn-optimizer-webpack-helpers:build_types",
     "//packages/kbn-optimizer:build_types",
     "//packages/kbn-performance-testing-dataset-extractor:build_types",
     "//packages/kbn-plugin-discovery:build_types",
@@ -254,6 +257,7 @@ filegroup(
     "//packages/shared-ux/button/exit_full_screen:build_types",
     "//packages/shared-ux/link/redirect_app:build_types",
     "//packages/shared-ux/page/analytics_no_data:build_types",
+    "//packages/shared-ux/page/kibana_no_data:build_types",
     "//packages/shared-ux/prompt/no_data_views:build_types",
   ],
 )
