@@ -216,6 +216,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(spanNames).to.eql(['without transaction']);
 
           expect(omit(spans[0], 'traceId')).to.eql({
+            '@timestamp': 1609459200000,
             agentName: 'java',
             duration: 200000,
             serviceName: 'java',
