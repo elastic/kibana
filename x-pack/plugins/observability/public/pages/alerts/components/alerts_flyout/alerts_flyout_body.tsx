@@ -36,7 +36,7 @@ export default function AlertsFlyoutBody(props: FlyoutProps) {
   const { observabilityRuleTypeRegistry } = usePluginContext();
   const alert = props.alert.start
     ? props.alert
-    : parseAlert(observabilityRuleTypeRegistry)(props.alert);
+    : parseAlert(observabilityRuleTypeRegistry)(props.alert as unknown as Record<string, unknown>);
   const { services } = useKibana();
   const { http } = services;
   const dateFormat = useUiSetting<string>('dateFormat');
