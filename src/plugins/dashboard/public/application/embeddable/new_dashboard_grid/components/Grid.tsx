@@ -20,6 +20,15 @@ interface State {
   items: GridStackNode[];
 }
 
+const NUM_COLUMNS = 48;
+
+const SHARED_GRID_PARMS = {
+  margin: 5, // 5 pixels around each panel - so 10 pixels **between** two panels
+  column: NUM_COLUMNS,
+  cellHeight: '70px',
+  float: false,
+};
+
 export class Grid extends React.Component<Props, State> {
   private grid: GridStack | undefined;
 
@@ -37,12 +46,9 @@ export class Grid extends React.Component<Props, State> {
   componentDidMount() {
     // Provides access to the GridStack instance across the React component.
     this.grid = GridStack.init({
-      float: false,
-      cellHeight: '70px',
+      ...SHARED_GRID_PARMS,
       acceptWidgets: true,
       minRow: 10,
-      column: 48,
-      margin: 5, // 5 pixels around each panel - so 10 pixels **between** two panels
     });
 
     this.grid.on('dragstop', (event, element) => {
@@ -62,7 +68,7 @@ export class Grid extends React.Component<Props, State> {
   addNewWidget = () => {
     const id = String(this.state.count);
     const node: GridStackNode = {
-      x: Math.round(12 * Math.random()),
+      x: Math.round(NUM_COLUMNS * Math.random()),
       y: 1,
       w: Math.round(1 + 3 * Math.random()),
       h: Math.round(1 + 3 * Math.random()),
@@ -81,11 +87,12 @@ export class Grid extends React.Component<Props, State> {
     const id = String(this.state.count);
     const subGrid = this.grid?.addWidget({
       autoPosition: true,
-      w: 12,
+      w: NUM_COLUMNS,
       h: 4,
       noResize: true,
       content: '<h1>title</h1>',
       subGrid: {
+        ...SHARED_GRID_PARMS,
         minRow: 4,
         auto: true,
         acceptWidgets: true,
@@ -96,7 +103,6 @@ export class Grid extends React.Component<Props, State> {
             return event.target as HTMLElement;
           },
         },
-        column: 12,
         children: [],
       },
     });
