@@ -414,4 +414,42 @@ export class LegacyCoreEditor implements CoreEditor {
   destroy() {
     this.editor.destroy();
   }
+
+  autoIndent(reqRange: Range) {
+    const session = this.editor.getSession();
+    const mode = session.getMode();
+    const startRow = reqRange.start.lineNumber;
+    const endRow = reqRange.end.lineNumber;
+
+    let prevLineState = '';
+    let prevLine = '';
+    let lineIndent = '';
+    let line;
+    let currIndent;
+    let range;
+    const tab = session.getTabString();
+
+    for (let row = startRow; row <= endRow; row++) {
+      if (row > 0) {
+        prevLineState = session.getState(row - 1);
+        prevLine = session.getLine(row - 1);
+        lineIndent = mode.getNextLineIndent(prevLineState, prevLine, tab);
+      }
+
+      line = session.getLine(row);
+      // @ts-ignore we have access to $getMode
+      currIndent = mode.$getIndent(line);
+      if (lineIndent !== currIndent) {
+        if (currIndent.length > 0) {
+          range = new _AceRange(row, 0, row, currIndent.length);
+          session.remove(range);
+        }
+        if (lineIndent.length > 0) {
+          session.insert({ row, column: 0 }, lineIndent);
+        }
+      }
+
+      mode.autoOutdent(prevLineState, session, row);
+    }
+  }
 }

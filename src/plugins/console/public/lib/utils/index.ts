@@ -7,7 +7,6 @@
  */
 
 import _ from 'lodash';
-import { parse, stringify } from 'hjson';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
@@ -29,13 +28,8 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
   const formattedData = [];
   for (let i = 0; i < data.length; i++) {
     const curDoc = data[i];
-    let newDoc: string;
     try {
-      if (hasComments(curDoc)) {
-        newDoc = stringifyWithComments(parse(collapseLiteralStrings(curDoc), { keepWsc: true }));
-      } else {
-        newDoc = jsonToString(JSON.parse(collapseLiteralStrings(curDoc)), indent);
-      }
+      let newDoc = jsonToString(JSON.parse(collapseLiteralStrings(curDoc)), indent);
       if (indent) {
         newDoc = expandLiteralStrings(newDoc);
       }
@@ -54,20 +48,10 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
   };
 }
 
-function hasComments(data: string) {
+export function hasComments(data: string) {
   // matches single line and multiline comments
   const re = /(\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)|(\/\/.*)|(#.*)/;
   return re.test(data);
-}
-
-function stringifyWithComments(data: string) {
-  return stringify(data, {
-    keepWsc: true,
-    quotes: 'keys',
-    bracesSameLine: true,
-    space: 2,
-    separator: true,
-  });
 }
 
 export function extractWarningMessages(warnings: string) {

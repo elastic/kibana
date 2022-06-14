@@ -105,16 +105,6 @@ describe('Utils class', () => {
         indent: true,
         assert: ['{\n  "test": """a\n  b"""\n}'],
       },
-      {
-        source: ['{ /* "test": {} */ "f1": 1,"f2": 2,"f3": 3}'],
-        indent: true,
-        assert: ['{\n /* "test": {} */\n  "f1": 1,\n  "f2": 2,\n  "f3": 3\n}'],
-      },
-      {
-        source: ['{\n  // "test": {}\n  "f1": 1,"f2": 2 }'],
-        indent: true,
-        assert: ['{\n  // "test": {}\n  "f1": 1,\n  "f2": 2\n}'],
-      },
     ];
 
     tests.forEach(({ source, indent, assert }, id) => {

@@ -96,6 +96,11 @@ export class SenseEditor {
       return;
     }
 
+    if (parsedReq.data.some((doc) => utils.hasComments(doc))) {
+      this.coreEditor.autoIndent(parsedReq.range);
+      return;
+    }
+
     if (parsedReq.data && parsedReq.data.length > 0) {
       let indent = parsedReq.data.length === 1; // unindent multi docs by default
       let formattedData = utils.formatRequestBodyDoc(parsedReq.data, indent);
