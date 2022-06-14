@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
 
-  describe.only('Kibana saved objects management page a11y tests', () => {
+  describe('Kibana saved objects management page a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const xs = await testSubjects.findAll(x)
       await xs[2].click()
     }
-    it.only('share to space panel from actions meets a11y requirements ', async () => {
+    it('share to space panel from actions meets a11y requirements ', async () => {
       await clickIfExists('euiFlyoutCloseButton')
       await clickOneOf('euiCollapsedItemActionsButton')
       await testSubjects.click('savedObjectsTableAction-copy_saved_objects_to_space');
