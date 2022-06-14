@@ -3075,6 +3075,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-theme-browser-mocks@link:bazel-bin/packages/core/theme/core-theme-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/crypto@link:bazel-bin/packages/kbn-crypto":
   version "0.0.0"
   uid ""
@@ -3232,6 +3244,10 @@
   uid ""
 
 "@kbn/rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/scalability-simulation-generator@link:bazel-bin/packages/kbn-scalability-simulation-generator":
   version "0.0.0"
   uid ""
 
@@ -6422,6 +6438,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-theme-browser-mocks@link:bazel-bin/packages/core/theme/core-theme-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__crypto@link:bazel-bin/packages/kbn-crypto/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6555,6 +6583,10 @@
   uid ""
 
 "@types/kbn__rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__scalability-simulation-generator@link:bazel-bin/packages/kbn-scalability-simulation-generator/npm_module_types":
   version "0.0.0"
   uid ""
 
