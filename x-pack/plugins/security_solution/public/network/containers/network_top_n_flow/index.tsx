@@ -46,6 +46,7 @@ export interface NetworkTopNFlowArgs {
 
 interface UseNetworkTopNFlow {
   flowTarget: FlowTargetSourceDest;
+  id: string;
   ip?: string;
   indexNames: string[];
   type: networkModel.NetworkType;
@@ -59,6 +60,7 @@ export const useNetworkTopNFlow = ({
   endDate,
   filterQuery,
   flowTarget,
+  id,
   indexNames,
   ip,
   skip,
@@ -96,7 +98,7 @@ export const useNetworkTopNFlow = ({
 
   const [networkTopNFlowResponse, setNetworkTopNFlowResponse] = useState<NetworkTopNFlowArgs>({
     networkTopNFlow: [],
-    id: `${ID}-${flowTarget}`,
+    id,
     inspect: {
       dsl: [],
       response: [],
