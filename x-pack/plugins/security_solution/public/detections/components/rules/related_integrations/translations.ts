@@ -75,14 +75,14 @@ export const INTEGRATIONS_POPOVER_DESCRIPTION = (integrationsCount: number) =>
 
 export const INTEGRATIONS_INSTALLED_VERSION_TOOLTIP = (
   installedVersion: string,
-  targetVersion: string
+  requiredVersion: string
 ) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.relatedIntegrations.popoverDescriptionInstalledVersionTooltip',
     {
-      values: { installedVersion, targetVersion },
+      values: { installedVersion, requiredVersion },
       defaultMessage:
-        'Version mismatch -- please resolve! Installed version `{installedVersion}` when target version `{targetVersion}`',
+        'Version mismatch -- please resolve! Installed version `{installedVersion}` when required version `{requiredVersion}`',
     }
   );
 
