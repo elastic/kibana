@@ -132,7 +132,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                     />
                   </>
                 ),
-                // sets the content here
                 content: <CaseViewAlerts caseData={caseData} />,
               },
             ]
@@ -148,7 +147,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       ]
     );
     const selectedTabContent = useMemo(() => {
-      // tabs = [activity, alerts] and each one has its content
       return tabs.find((obj) => obj.id === activeTabId)?.content;
     }, [activeTabId, tabs]);
 

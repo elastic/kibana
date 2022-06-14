@@ -42,7 +42,6 @@ export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
           />
         </Suspense>
       )}
-      {/* calls the cases plugin so it renders the content */}
       {cases.ui.getCases({
         basePath: CASES_PATH,
         userCanCrud,

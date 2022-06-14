@@ -188,7 +188,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     },
     [alerts, pagination.pageIndex, pagination.pageSize, renderCellValue]
   );
-  console.log('drawing an alerts table');
   return (
     <section
       className="alertsTableResponseOps"
