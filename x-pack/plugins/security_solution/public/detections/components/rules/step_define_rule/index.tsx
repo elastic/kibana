@@ -530,9 +530,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </EuiFlexItem>
 
           <EuiFlexItem>
-            {dataSourceRadioIdSelected === DATA_VIEW_SELECT_ID ? (
-              DataViewSelectorMemo
-            ) : (
+            <RuleTypeEuiFormRow $isVisible={dataSourceRadioIdSelected === DATA_VIEW_SELECT_ID}>
+              {DataViewSelectorMemo}
+            </RuleTypeEuiFormRow>
+            <RuleTypeEuiFormRow
+              $isVisible={dataSourceRadioIdSelected === INDEX_PATTERN_SELECT_ID}
+              fullWidth
+            >
               <CommonUseField
                 path="index"
                 config={{
@@ -552,7 +556,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   },
                 }}
               />
-            )}
+            </RuleTypeEuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
       </RuleTypeEuiFormRow>
