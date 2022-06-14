@@ -41,7 +41,6 @@ import {
   FeatureCatalogueSolution,
   FeatureCatalogueCategory,
 } from '@kbn/home-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
 import { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';
@@ -56,16 +55,16 @@ interface Props {
   newsFetchResult: FetchResult | null | void;
   solutions: FeatureCatalogueSolution[];
   features: FeatureCatalogueEntry[];
-  dataViewEditor: DataViewEditorStart;
 }
 
-export const Overview: FC<Props> = ({ newsFetchResult, solutions, features, dataViewEditor }) => {
+export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) => {
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
   const [hasESData, setHasESData] = useState(false);
   const [hasDataView, setHasDataView] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { services } = useKibana<CoreStart & AppPluginStartDependencies>();
-  const { http, docLinks, dataViews, share, uiSettings, application, chrome } = services;
+  const { http, docLinks, dataViews, share, uiSettings, application, chrome, dataViewEditor } =
+    services;
   const addBasePath = http.basePath.prepend;
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 

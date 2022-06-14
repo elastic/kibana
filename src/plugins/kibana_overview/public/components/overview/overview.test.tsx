@@ -16,7 +16,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import { AnalyticsNoDataPage } from '@kbn/shared-ux-page-analytics-no-data';
-import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { hasESData, hasUserDataView } from './overview.test.mocks';
 import { Overview } from './overview';
 
@@ -40,8 +39,6 @@ jest.mock('@kbn/shared-ux-page-analytics-no-data', () => {
     },
   };
 });
-
-const mockDataViewEditor = indexPatternEditorPluginMock.createStartContract();
 
 const mockNewsFetchResult = {
   error: null,
@@ -175,7 +172,6 @@ describe('Overview', () => {
         newsFetchResult={mockNewsFetchResult}
         solutions={mockSolutions}
         features={mockFeatures}
-        dataViewEditor={mockDataViewEditor}
       />
     );
 
@@ -187,12 +183,7 @@ describe('Overview', () => {
 
   test('without solutions', async () => {
     const component = mountWithIntl(
-      <Overview
-        newsFetchResult={mockNewsFetchResult}
-        solutions={[]}
-        features={mockFeatures}
-        dataViewEditor={mockDataViewEditor}
-      />
+      <Overview newsFetchResult={mockNewsFetchResult} solutions={[]} features={mockFeatures} />
     );
 
     await updateComponent(component);
@@ -202,12 +193,7 @@ describe('Overview', () => {
 
   test('without features', async () => {
     const component = mountWithIntl(
-      <Overview
-        newsFetchResult={mockNewsFetchResult}
-        solutions={mockSolutions}
-        features={[]}
-        dataViewEditor={mockDataViewEditor}
-      />
+      <Overview newsFetchResult={mockNewsFetchResult} solutions={mockSolutions} features={[]} />
     );
 
     await updateComponent(component);
@@ -224,7 +210,6 @@ describe('Overview', () => {
         newsFetchResult={mockNewsFetchResult}
         solutions={mockSolutions}
         features={mockFeatures}
-        dataViewEditor={mockDataViewEditor}
       />
     );
 
@@ -245,7 +230,6 @@ describe('Overview', () => {
         newsFetchResult={mockNewsFetchResult}
         solutions={mockSolutions}
         features={mockFeatures}
-        dataViewEditor={mockDataViewEditor}
       />
     );
 

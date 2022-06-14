@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { Observable } from 'rxjs';
+import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 
 export const hasUserDataView = jest.fn();
 export const hasESData = jest.fn();
@@ -34,6 +35,7 @@ jest.doMock('@kbn/kibana-react-plugin/public', () => ({
           hasUserDataView,
         },
       },
+      dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
       share: { url: { locators: { get: () => ({ useUrl: () => '' }) } } },
       uiSettings: { get: jest.fn() },
       docLinks: {

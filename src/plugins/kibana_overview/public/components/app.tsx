@@ -14,7 +14,6 @@ import { CoreStart } from '@kbn/core/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { FetchResult } from '@kbn/newsfeed-plugin/public';
 import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '@kbn/home-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Overview } from './overview';
 
 interface KibanaOverviewAppDeps {
@@ -25,7 +24,6 @@ interface KibanaOverviewAppDeps {
   newsfeed$?: Observable<FetchResult | null | void>;
   solutions: FeatureCatalogueSolution[];
   features: FeatureCatalogueEntry[];
-  dataViewEditor: DataViewEditorStart;
 }
 
 export const KibanaOverviewApp = ({
@@ -33,7 +31,6 @@ export const KibanaOverviewApp = ({
   newsfeed$,
   solutions,
   features,
-  dataViewEditor,
 }: KibanaOverviewAppDeps) => {
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
 
@@ -52,12 +49,7 @@ export const KibanaOverviewApp = ({
       <I18nProvider>
         <Switch>
           <Route exact path="/">
-            <Overview
-              newsFetchResult={newsFetchResult}
-              solutions={solutions}
-              features={features}
-              dataViewEditor={dataViewEditor}
-            />
+            <Overview newsFetchResult={newsFetchResult} solutions={solutions} features={features} />
           </Route>
         </Switch>
       </I18nProvider>
