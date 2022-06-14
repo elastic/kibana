@@ -2022,10 +2022,6 @@ ace.define(
         if (ch === '$') {
           next('$');
           next('{');
-          if (ch === '}') {
-            next('}');
-            return variable;
-          }
           while (ch) {
             variable += ch;
             if (ch === '}') {

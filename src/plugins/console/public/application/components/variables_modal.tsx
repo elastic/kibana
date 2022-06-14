@@ -149,7 +149,7 @@ export function DevToolsVariablesModal({ onClose, onSaveVariables, variablesServ
         <EuiForm id={formId} component="form" onSubmit={handleSubmit(onSubmit)}>
           <EuiBasicTable items={variables} columns={columns} />
           <EuiButtonEmpty iconType="plus" onClick={addNewVariable}>
-            Add field
+            <FormattedMessage id="console.variablesPage.addButtonLabel" defaultMessage="Add" />
           </EuiButtonEmpty>
         </EuiForm>
       </EuiModalBody>

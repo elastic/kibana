@@ -31,7 +31,7 @@ export class Variables {
   constructor(private readonly storage: Storage) {}
 
   get(): DevToolsVariable[] {
-    return this.storage.get(Keys.VARIABLES, [generateDefaultVariable()]);
+    return this.storage.get(Keys.VARIABLES, []);
   }
 
   set(v: DevToolsVariable[]) {

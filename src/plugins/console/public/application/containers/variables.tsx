@@ -9,7 +9,7 @@
 import React from 'react';
 import { DevToolsVariablesModal } from '../components';
 import { useServicesContext } from '../contexts';
-import type { DevToolsVariables } from '../../services';
+import type { DevToolsVariable } from '../../services';
 
 interface Props {
   onClose: () => void;
@@ -20,7 +20,7 @@ export function Variables({ onClose }: Props) {
     services: { variables },
   } = useServicesContext();
 
-  const onSaveVariables = (newVariables: DevToolsVariables) => {
+  const onSaveVariables = (newVariables: DevToolsVariable[]) => {
     variables.update(newVariables);
   };
   return (
