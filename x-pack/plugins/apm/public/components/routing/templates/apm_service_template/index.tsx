@@ -47,7 +47,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'infrastructure'
     | 'service-map'
     | 'logs'
-    | 'profiling';
+    | 'profiling'
+    | 'alerts';
   hidden?: boolean;
 };
 
@@ -315,6 +316,16 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
+    },
+    {
+      key: 'alerts',
+      href: router.link('/services/{serviceName}/alerts', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.alertsTabLabel', {
+        defaultMessage: 'Alerts',
+      }),
     },
   ];
 
