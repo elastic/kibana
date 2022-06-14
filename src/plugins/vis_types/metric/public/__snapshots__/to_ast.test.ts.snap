@@ -5,6 +5,9 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "colorMode": Array [
+          "None",
+        ],
         "font": Array [
           Object {
             "chain": Array [
@@ -69,6 +72,9 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "colorMode": Array [
+          "None",
+        ],
         "font": Array [
           Object {
             "chain": Array [
