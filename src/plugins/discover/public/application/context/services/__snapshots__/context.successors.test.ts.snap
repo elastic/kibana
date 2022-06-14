@@ -1,0 +1,177 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`context successors function fetchSuccessors should perform exactly one query when enough hits are returned 1`] = `
+Array [
+  Object {
+    "flattened": Object {},
+    "id": "::::",
+    "isAnchor": undefined,
+    "raw": Object {
+      "@timestamp": 259200000000,
+      "sort": Array [
+        259200000000,
+        0,
+      ],
+    },
+  },
+  Object {
+    "flattened": Object {},
+    "id": "::::",
+    "isAnchor": undefined,
+    "raw": Object {
+      "@timestamp": 259199999999,
+      "sort": Array [
+        259199999999,
+        0,
+      ],
+    },
+  },
+  Object {
+    "flattened": Object {},
+    "id": "::::",
+    "isAnchor": undefined,
+    "raw": Object {
+      "@timestamp": 259199999998,
+      "sort": Array [
+        259199999998,
+        0,
+      ],
+    },
+  },
+]
+`;
+
+exports[`context successors function fetchSuccessors should perform multiple queries until the expected hit count is returned 1`] = `
+Array [
+  Object {
+    "flattened": Object {},
+    "id": "::::",
+    "isAnchor": undefined,
+    "raw": Object {
+      "@timestamp": 259200000000,
+      "sort": Array [
+        259200000000,
+        0,
+      ],
+    },
+  },
+  Object {
+    "flattened": Object {},
+    "id": "::::",
+    "isAnchor": undefined,
+    "raw": Object {
+      "@timestamp": 259199999999,
+      "sort": Array [
+        259199999999,
+        0,
+      ],
+    },
+  },
+  Object {
+    "flattened": Object {},
+    "id": "::::",
+    "isAnchor": undefined,
+    "raw": Object {
+      "@timestamp": 259199999998,
+      "sort": Array [
+        259199999998,
+        0,
+      ],
+    },
+  },
+  Object {
+    "flattened": Object {},
+    "id": "::::",
+    "isAnchor": undefined,
+    "raw": Object {
+      "@timestamp": 241920000000,
+      "sort": Array [
+        241920000000,
+        0,
+      ],
+    },
+  },
+]
+`;
+
+exports[`context successors function fetchSuccessors should perform multiple queries with the last being unrestricted when too few hits are returned 1`] = `
+Array [
+  Object {
+    "flattened": Object {},
+    "id": "::::",
+    "isAnchor": undefined,
+    "raw": Object {
+      "@timestamp": 259200000000,
+      "sort": Array [
+        259200000000,
+        0,
+      ],
+    },
+  },
+  Object {
+    "flattened": Object {},
+    "id": "::::",
+    "isAnchor": undefined,
+    "raw": Object {
+      "@timestamp": 259027200000,
+      "sort": Array [
+        259027200000,
+        0,
+      ],
+    },
+  },
+  Object {
+    "flattened": Object {},
+    "id": "::::",
+    "isAnchor": undefined,
+    "raw": Object {
+      "@timestamp": 258336000000,
+      "sort": Array [
+        258336000000,
+        0,
+      ],
+    },
+  },
+]
+`;
+
+exports[`context successors function fetchSuccessors with useNewFieldsApi set should perform exactly one query when enough hits are returned 1`] = `
+Array [
+  Object {
+    "flattened": Object {},
+    "id": "::::",
+    "isAnchor": undefined,
+    "raw": Object {
+      "@timestamp": 259200000000,
+      "sort": Array [
+        259200000000,
+        0,
+      ],
+    },
+  },
+  Object {
+    "flattened": Object {},
+    "id": "::::",
+    "isAnchor": undefined,
+    "raw": Object {
+      "@timestamp": 259199999999,
+      "sort": Array [
+        259199999999,
+        0,
+      ],
+    },
+  },
+  Object {
+    "flattened": Object {},
+    "id": "::::",
+    "isAnchor": undefined,
+    "raw": Object {
+      "@timestamp": 259199999998,
+      "sort": Array [
+        259199999998,
+        0,
+      ],
+    },
+  },
+]
+`;

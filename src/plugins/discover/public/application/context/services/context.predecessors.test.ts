@@ -46,7 +46,9 @@ describe('context predecessors', function () {
     timeFieldName: '@timestamp',
     isTimeNanosBased: () => false,
     popularizeField: () => {},
-    getByName: jest.fn(),
+    fields: {
+      getByName: jest.fn(),
+    },
   } as unknown as DataView;
 
   describe('function fetchPredecessors', function () {
@@ -96,7 +98,7 @@ describe('context predecessors', function () {
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
+          expect(hits).toMatchSnapshot();
         }
       );
     });
@@ -126,8 +128,7 @@ describe('context predecessors', function () {
           // should have ended with a half-open interval
           expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'gte']);
           expect(intervals.length).toBeGreaterThan(1);
-
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
+          expect(hits).toMatchSnapshot();
         }
       );
     });
@@ -160,7 +161,7 @@ describe('context predecessors', function () {
           // should have stopped before reaching MS_PER_DAY * 1700
           expect(moment(last(intervals)?.lte).valueOf()).toBeLessThan(MS_PER_DAY * 1700);
           expect(intervals.length).toBeGreaterThan(1);
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
+          expect(hits).toMatchSnapshot();
         }
       );
     });
@@ -244,7 +245,7 @@ describe('context predecessors', function () {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(removeFieldsSpy.calledOnce).toBe(true);
           expect(setFieldsSpy.calledOnce).toBe(true);
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
+          expect(hits).toMatchSnapshot();
         }
       );
     });

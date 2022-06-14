@@ -44,6 +44,9 @@ describe('context successors', function () {
     timeFieldName: '@timestamp',
     isTimeNanosBased: () => false,
     popularizeField: () => {},
+    fields: {
+      getByName: jest.fn(),
+    },
   } as unknown as DataView;
 
   describe('function fetchSuccessors', function () {
@@ -94,7 +97,7 @@ describe('context successors', function () {
       return fetchSuccessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
+          expect(hits).toMatchSnapshot();
         }
       );
     });
@@ -125,7 +128,7 @@ describe('context successors', function () {
           expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'lte']);
           expect(intervals.length).toBeGreaterThan(1);
 
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
+          expect(hits).toMatchSnapshot();
         }
       );
     });
@@ -154,7 +157,7 @@ describe('context successors', function () {
           expect(moment(last(intervals)?.gte).valueOf()).toBeGreaterThan(MS_PER_DAY * 2200);
           expect(intervals.length).toBeGreaterThan(1);
 
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 4));
+          expect(hits).toMatchSnapshot();
         }
       );
     });
@@ -234,7 +237,7 @@ describe('context successors', function () {
       return fetchSuccessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
+          expect(hits).toMatchSnapshot();
           const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
           expect(removeFieldsSpy.calledOnce).toBe(true);

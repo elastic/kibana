@@ -35,6 +35,12 @@ export const convertValueToString = ({
   };
 }): ConvertedResult => {
   const { fieldFormats } = services;
+  if (!rows[rowIndex]) {
+    return {
+      formattedString: '',
+      withFormula: false,
+    };
+  }
   const rowFlattened = rows[rowIndex].flattened;
   const value = rowFlattened?.[columnId];
   const field = dataView.fields.getByName(columnId);
