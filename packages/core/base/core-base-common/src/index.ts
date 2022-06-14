@@ -8,3 +8,4 @@
 
 export type { PluginOpaqueId, PluginName, DiscoveredPlugin } from './plugins';
 export { PluginType } from './plugins';
+export { EUI_STYLES_GLOBAL } from './eui';
