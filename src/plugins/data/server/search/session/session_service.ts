@@ -18,6 +18,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
   SavedObjectsFindOptions,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
@@ -33,9 +34,11 @@ import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
 import { ConfigSchema, SearchSessionsConfigSchema } from '../../../config';
 import { SearchStatus } from './types';
+import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
+  elasticsearchClient: ElasticsearchClient;
 }
 interface SetupDependencies {
   security?: SecurityPluginSetup;
@@ -264,8 +267,8 @@ export class SearchSessionService
     return session;
   };
 
-  public find = (
-    { savedObjectsClient }: SearchSessionDependencies,
+  public find = async (
+    { savedObjectsClient, elasticsearchClient }: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     options: Omit<SavedObjectsFindOptions, 'type'>
   ) => {
@@ -286,11 +289,24 @@ export class SearchSessionService
     const filterKueryNode =
       typeof options.filter === 'string' ? fromKueryExpression(options.filter) : options.filter;
     const filter = nodeBuilder.and(userFilters.concat(filterKueryNode ?? []));
-    return savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
+    const findResponse = await savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
       ...options,
       filter,
       type: SEARCH_SESSION_TYPE,
     });
+    findResponse.saved_objects = await Promise.all(
+      findResponse.saved_objects.map(async (so) => {
+        const sessionStatus = await getSessionStatus(
+          { client: elasticsearchClient },
+          so.attributes,
+          this.sessionConfig
+        );
+        so.attributes.status = sessionStatus;
+        return so;
+      })
+    );
+
+    return findResponse;
   };
 
   public update = async (
@@ -361,11 +377,11 @@ export class SearchSessionService
 
     let isIdTracked = false;
     try {
-      const id = await this.getId(deps, user, searchRequest, options);
-      isIdTracked = !!id;
+      const hasId = await this.checkId(deps, user, searchRequest, options);
+      isIdTracked = hasId;
     } catch (e) {
-      this.logger.error(
-        `Error while checking if search id already track in a session: ${e?.message}. Skipping assuming not tracked`
+      this.logger.warn(
+        `trackId | Error while checking if search is already tracked by a session object: "${e?.message}". Continue assuming not tracked.`
       );
     }
 
@@ -432,13 +448,38 @@ export class SearchSessionService
     return session.attributes.idMapping[requestHash].id;
   };
 
-  public asScopedProvider = ({ savedObjects }: CoreStart) => {
+  /**
+   * Look up an existing search ID that matches the given request in the given session
+   * @internal
+   */
+  public checkId = async (
+    deps: SearchSessionDependencies,
+    user: AuthenticatedUser | null,
+    searchRequest: IKibanaSearchRequest,
+    { sessionId, isStored }: ISearchOptions
+  ): Promise<boolean> => {
+    if (!this.sessionConfig.enabled) {
+      throw new Error('Search sessions are disabled');
+    } else if (!sessionId) {
+      throw new Error('Session ID is required');
+    } else if (!isStored) {
+      throw new Error('Cannot check search ID from a session that is not stored');
+    }
+
+    const session = await this.get(deps, user, sessionId);
+    const requestHash = createRequestHash(searchRequest.params);
+
+    return session.attributes.idMapping.hasOwnProperty(requestHash);
+  };
+
+  public asScopedProvider = ({ savedObjects, elasticsearch }: CoreStart) => {
     return (request: KibanaRequest) => {
       const user = this.security?.authc.getCurrentUser(request) ?? null;
       const savedObjectsClient = savedObjects.getScopedClient(request, {
         includedHiddenTypes: [SEARCH_SESSION_TYPE],
       });
-      const deps = { savedObjectsClient };
+      const elasticsearchClient = elasticsearch.client.asScoped(request).asCurrentUser;
+      const deps = { savedObjectsClient, elasticsearchClient };
       return {
         getId: this.getId.bind(this, deps, user),
         trackId: this.trackId.bind(this, deps, user),
