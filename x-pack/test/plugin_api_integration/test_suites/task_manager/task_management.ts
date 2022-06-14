@@ -704,6 +704,7 @@ export default function ({ getService }: FtrProviderContext) {
         ).to.eql(2);
 
         const task = await currentTask(originalTask.id);
+        expect(task.status).to.eql('idle');
         expect(task.attempts).to.eql(1);
       });
     });
