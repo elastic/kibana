@@ -97,7 +97,7 @@ describe('Alerts by category', () => {
 
     test('it renders the expected title', async () => {
       await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="header-section-title"]').text()).toEqual(
+        expect(wrapper.find('[data-test-subj="header-section-title"]').first().text()).toEqual(
           'External alert trend'
         );
       });

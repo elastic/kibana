@@ -51,8 +51,14 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
   children,
   ...services
 }) => {
+  // Typescript types are widened to accept more than what is needed.  Take only what is necessary
+  // so the context remains clean.
+  const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor } = services;
+
   return (
-    <NoDataViewsPromptContext.Provider value={services}>
+    <NoDataViewsPromptContext.Provider
+      value={{ canCreateNewDataView, dataViewsDocLink, openDataViewEditor }}
+    >
       {children}
     </NoDataViewsPromptContext.Provider>
   );

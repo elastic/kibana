@@ -7,6 +7,7 @@
  */
 
 import * as Option from 'fp-ts/Option';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { Logger } from '@kbn/logging';
 import type { IndexMapping } from '../mappings';
 import type { SavedObjectsMigrationVersion } from '../../../types';
@@ -14,7 +15,6 @@ import type { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
-import type { DocLinksServiceStart } from '../../doc_links';
 
 /**
  * Construct the initial state for the model
@@ -78,7 +78,16 @@ export const createInitialState = ({
     migrationsConfig.discardUnknownObjects !== kibanaVersion
   ) {
     logger.warn(
-      'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be ignored.'
+      'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be discarded.'
+    );
+  }
+
+  if (
+    migrationsConfig.discardCorruptObjects &&
+    migrationsConfig.discardCorruptObjects !== kibanaVersion
+  ) {
+    logger.warn(
+      'The flag `migrations.discardCorruptObjects` is defined but does not match the current kibana version; corrupt objects will NOT be discarded.'
     );
   }
 
@@ -101,6 +110,7 @@ export const createInitialState = ({
     batchSize: migrationsConfig.batchSize,
     maxBatchSizeBytes: migrationsConfig.maxBatchSizeBytes.getValueInBytes(),
     discardUnknownObjects: migrationsConfig.discardUnknownObjects === kibanaVersion,
+    discardCorruptObjects: migrationsConfig.discardCorruptObjects === kibanaVersion,
     logs: [],
     excludeOnUpgradeQuery: excludeUnusedTypesQuery,
     knownTypes,
