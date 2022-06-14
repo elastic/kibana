@@ -17,10 +17,11 @@ import {
 import React, { ChangeEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useHistory } from 'react-router-dom';
 import * as i18n from './translations';
 import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
 import { FormRow, PopoverContent, StyledButton, StyledFormRow } from './helpers';
 import { TemporarySourcerer } from './temporary';
@@ -29,6 +30,8 @@ import { useUpdateDataView } from './use_update_data_view';
 import { Trigger } from './trigger';
 import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
+import { updateUrlParam } from '../../utils/global_query_string_manager';
+import { CONSTANTS } from '../url_state/constants';
 
 export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
@@ -38,6 +41,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const dispatch = useDispatch();
   const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
+  const isDefaultSourcerer = scopeId === SourcererScopeName.default;
 
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
@@ -130,6 +134,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setPopoverIsOpen((prevState) => !prevState);
     setExpandAdvancedOptions(false); // we always want setExpandAdvancedOptions collapsed by default when popover opened
   }, []);
+  const history = useHistory();
   const dispatchChangeDataView = useCallback(
     (
       newSelectedDataView: string,
@@ -144,8 +149,21 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           shouldValidateSelectedPatterns,
         })
       );
+
+      if (isDefaultSourcerer) {
+        updateUrlParam<SourcererUrlState>({
+          urlStateKey: CONSTANTS.sourcerer,
+          value: {
+            [SourcererScopeName.default]: {
+              id: newSelectedDataView,
+              selectedPatterns: newSelectedPatterns,
+            },
+          },
+          history,
+        });
+      }
     },
-    [dispatch, scopeId]
+    [dispatch, scopeId, isDefaultSourcerer, history]
   );
 
   const onChangeDataView = useCallback(

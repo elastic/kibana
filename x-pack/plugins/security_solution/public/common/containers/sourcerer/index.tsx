@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { matchPath } from 'react-router-dom';
+import { matchPath, useHistory } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import {
   SelectedDataView,
@@ -38,7 +38,7 @@ import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
 import { useFetchIndex } from '../source';
 import { isDetectionPage } from '../../utils/route/helpers';
-import { registerUrlParam } from '../../utils/global_query_string_manager';
+import { registerUrlParam, updateUrlParam } from '../../utils/global_query_string_manager';
 import { CONSTANTS } from '../../components/url_state/constants';
 
 export const useInitSourcerer = (
@@ -90,13 +90,14 @@ export const useInitSourcerer = (
     missingPatterns: timelineMissingPatterns,
   } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
   const { indexFieldsSearch } = useDataView();
+  const history = useHistory();
 
-  // Register Soucerer url param and intilize store
   useEffect(() => {
     const sourcererInitialState = registerUrlParam<SourcererUrlState>({
       urlStateKey: CONSTANTS.sourcerer,
     });
 
+    // Initialize the store with value from UrlParam.
     if (sourcererInitialState != null) {
       const activeScopes: SourcererScopeName[] = Object.keys(sourcererInitialState).filter(
         (key) => !(key === SourcererScopeName.default && scopeId === SourcererScopeName.detections)
@@ -110,9 +111,24 @@ export const useInitSourcerer = (
           })
         )
       );
+    } else {
+      // Initialize the UrlParam with values from the store.
+      // It isn't strictly necessary but I am keeping it for compatibility with the previous implementation.
+      if (scopeDataViewId) {
+        updateUrlParam<SourcererUrlState>({
+          urlStateKey: CONSTANTS.sourcerer,
+          value: {
+            [SourcererScopeName.default]: {
+              id: scopeDataViewId,
+              selectedPatterns,
+            },
+          },
+          history,
+        });
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- It must run only once when the application is initializing.
+  }, []);
 
   /*
    * Note for future engineer:

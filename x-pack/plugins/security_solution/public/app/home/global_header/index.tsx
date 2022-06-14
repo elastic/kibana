@@ -11,13 +11,12 @@ import {
   EuiHeaderSectionItem,
 } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
 import { AppMountParameters } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { isEmpty } from 'lodash/fp';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH } from '../../../../common/constants';
@@ -28,10 +27,6 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
-import { SourcererScopeName, SourcererUrlState } from '../../../common/store/sourcerer/model';
-import { sourcererSelectors } from '../../../common/store';
-import { CONSTANTS } from '../../../common/components/url_state/constants';
-import { updateUrlParam } from '../../../common/utils/global_query_string_manager';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -59,36 +54,6 @@ export const GlobalHeader = React.memo(
 
     const sourcererScope = getScopeFromPath(pathname);
     const showSourcerer = showSourcererByPath(pathname);
-
-    const history = useHistory();
-
-    const sourcerer = useShallowEqualSelector(sourcererSelectors.scopesSelector());
-    const sourcererDefault = sourcerer[SourcererScopeName.default];
-
-    const selectedPatterns = useMemo(() => {
-      if (
-        sourcererDefault &&
-        sourcererDefault.selectedDataViewId &&
-        !isEmpty(sourcererDefault.selectedPatterns)
-      ) {
-        return {
-          [SourcererScopeName.default]: {
-            id: sourcererDefault.selectedDataViewId,
-            selectedPatterns: sourcererDefault.selectedPatterns,
-          },
-        };
-      } else {
-        return null;
-      }
-    }, [sourcererDefault]);
-
-    useEffect(() => {
-      updateUrlParam<SourcererUrlState>({
-        urlStateKey: CONSTANTS.sourcerer,
-        value: selectedPatterns,
-        history,
-      });
-    }, [selectedPatterns, history]);
 
     const href = useMemo(() => prepend(ADD_DATA_PATH), [prepend]);
 

@@ -57,10 +57,10 @@ export const useUrlStateHooks = ({
   navTabs,
   pageName,
   urlState,
-  search,
   pathName,
   history,
 }: UrlStateContainerPropTypes) => {
+  const { search } = useLocation();
   const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
   const { filterManager, savedQueries } = useKibana().services.data.query;
   const { pathname: browserPathName } = useLocation();
