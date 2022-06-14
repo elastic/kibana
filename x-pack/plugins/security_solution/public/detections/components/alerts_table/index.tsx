@@ -69,6 +69,7 @@ interface OwnProps {
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
+
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   clearSelected,
   defaultFilters,
