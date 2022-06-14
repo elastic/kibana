@@ -59,7 +59,7 @@ export const GettingStarted = () => {
         <EuiTitle size="l" className="eui-textCenter">
           <h1>
             <FormattedMessage
-              id="guidedOnboarding.gettingStarted.useCaseSelectionTitle"
+              id="home.guidedOnboarding.gettingStarted.useCaseSelectionTitle"
               defaultMessage="What would you like to do first?"
             />
           </h1>
@@ -68,7 +68,7 @@ export const GettingStarted = () => {
         <EuiText color="subdued" size="s" textAlign="center">
           <p>
             <FormattedMessage
-              id="guidedOnboarding.gettingStarted.useCaseSelectionSubtitle"
+              id="home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle"
               defaultMessage="Select an option below to get a quick tour of the most valuable features based on your preferences."
             />
           </p>
@@ -92,7 +92,7 @@ export const GettingStarted = () => {
         <div className="eui-textCenter">
           <EuiLink onClick={onSkip}>
             <FormattedMessage
-              id="guidedOnboarding.gettingStarted.skip.buttonLabel"
+              id="home.guidedOnboarding.gettingStarted.skip.buttonLabel"
               defaultMessage="I'd like to do something else (Skip)"
             />
           </EuiLink>
