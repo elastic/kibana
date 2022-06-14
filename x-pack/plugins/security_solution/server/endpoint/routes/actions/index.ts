@@ -12,6 +12,7 @@ import { registerHostIsolationRoutes } from './isolation';
 import { registerActionStatusRoutes } from './status';
 import { registerActionAuditLogRoutes } from './audit_log';
 import { registerActionListRoutes } from './list';
+import { registerResponseActionRoutes } from './response_actions';
 
 export * from './isolation';
 
@@ -26,4 +27,5 @@ export function registerActionRoutes(
   registerActionAuditLogRoutes(router, endpointContext);
   registerActionListRoutes(router, endpointContext);
   registerActionDetailsRoutes(router, endpointContext);
+  registerResponseActionRoutes(router, endpointContext);
 }
