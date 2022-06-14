@@ -41,10 +41,6 @@ jest.mock('../../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => mockUseRouteSpy(),
 }));
 
-const mockedUseCanSeeHostIsolationExceptionsMenu = jest.fn();
-jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks', () => ({
-  useCanSeeHostIsolationExceptionsMenu: () => mockedUseCanSeeHostIsolationExceptionsMenu(),
-}));
 jest.mock('../../../links', () => ({
   getAncestorLinksInfo: (id: string) => [{ id }],
 }));
@@ -144,77 +140,6 @@ describe('SecuritySideNav', () => {
             disabled: true,
           },
         ],
-      },
-    ]);
-    renderNav();
-    expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        items: [],
-        selectedId: SecurityPageName.alerts,
-        footerItems: [
-          {
-            id: SecurityPageName.administration,
-            label: 'manage',
-            href: '/administration',
-            categories: manageNavLink.categories,
-            items: [],
-          },
-        ],
-      })
-    );
-  });
-
-  it('should render hostIsolationExceptionsLink when useCanSeeHostIsolationExceptionsMenu is true', () => {
-    mockedUseCanSeeHostIsolationExceptionsMenu.mockReturnValue(true);
-    const hostIsolationExceptionsLink = {
-      id: SecurityPageName.hostIsolationExceptions,
-      title: 'test hostIsolationExceptions',
-      description: 'test description hostIsolationExceptions',
-    };
-
-    mockUseAppNavLinks.mockReturnValueOnce([
-      {
-        ...manageNavLink,
-        links: [hostIsolationExceptionsLink],
-      },
-    ]);
-    renderNav();
-    expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        items: [],
-        selectedId: SecurityPageName.alerts,
-        footerItems: [
-          {
-            id: SecurityPageName.administration,
-            label: 'manage',
-            href: '/administration',
-            categories: manageNavLink.categories,
-            items: [
-              {
-                id: hostIsolationExceptionsLink.id,
-                label: hostIsolationExceptionsLink.title,
-                description: hostIsolationExceptionsLink.description,
-                href: '/host_isolation_exceptions',
-              },
-            ],
-          },
-        ],
-      })
-    );
-  });
-
-  it('should not render hostIsolationExceptionsLink when useCanSeeHostIsolationExceptionsMenu is false', () => {
-    mockedUseCanSeeHostIsolationExceptionsMenu.mockReturnValue(false);
-    const hostIsolationExceptionsLink = {
-      id: SecurityPageName.hostIsolationExceptions,
-      title: 'test hostIsolationExceptions',
-      description: 'test description hostIsolationExceptions',
-    };
-
-    mockUseAppNavLinks.mockReturnValueOnce([
-      {
-        ...manageNavLink,
-        links: [hostIsolationExceptionsLink],
       },
     ]);
     renderNav();

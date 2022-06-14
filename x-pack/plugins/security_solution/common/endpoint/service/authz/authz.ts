@@ -20,7 +20,7 @@ import { MaybeImmutable } from '../../types';
  */
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
-  fleetAuthz: FleetAuthz,
+  fleetAuthz: FleetAuthz | undefined, // TODO: Remove `undefined` type when `fleetAuthz` is needed and used.
   userRoles: MaybeImmutable<string[]>
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
