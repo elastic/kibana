@@ -27,7 +27,7 @@ import {
 import { fetchDocuments } from './fetch_documents';
 import { fetchChart } from './fetch_chart';
 import { fetchTotalHits } from './fetch_total_hits';
-import { indexPatternMock } from '@kbn/discover-plugin/public/__mocks__/index_pattern';
+import { indexPatternMock } from '../../../__mocks__/index_pattern';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
