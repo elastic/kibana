@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker']);
 
   const createDataView = async (dataViewName: string) => {
-    await testSubjects.setValue('createIndexPatternNameInput', dataViewName, {
+    await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
       clearWithKeyboard: true,
       typeCharByChar: true,
     });
