@@ -175,7 +175,8 @@ for (const testSuite of testSuites) {
         concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
         env: {
-          SKIP_TEST_CASES_SPLITTING: true,
+          // disable split of test cases between parallel jobs when running them in flaky test runner
+          DISABLE_TEST_CASES_SPLITTING: true,
         },
       });
       break;
