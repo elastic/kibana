@@ -187,7 +187,7 @@ export interface DataViewsServicePublicMethods {
   /**
    * Get default data view, if it doesn't exist, choose and save new default data view and return it.
    */
-  getDefaultDataView: (update: boolean) => Promise<DataView | null>;
+  getDefaultDataView: (update?: boolean) => Promise<DataView | null>;
   /**
    * Get fields for data view
    * @param dataView - Data view instance or spec
