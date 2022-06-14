@@ -43,14 +43,9 @@ journey('Core Web Vitals', async ({ page, params }) => {
     expect(await page.$('text=First input delay'));
     expect(await page.$('text=Cumulative layout shift'));
     expect(
-      await page.innerText('text=1.93 s', {
-        strict: true,
+      await page.innerText('text=86% of the traffic represented', {
         timeout: 29000,
       })
-    ).toEqual('1.93 s');
-    expect(await page.innerText('text=5 ms', { strict: true })).toEqual('5 ms');
-    expect(await page.innerText('text=0.003', { strict: true })).toEqual(
-      '0.003'
     );
   });
 });
