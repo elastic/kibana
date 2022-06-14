@@ -24,7 +24,7 @@ import type {
 } from '../../../../types';
 
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
-import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
+import { getPipelineNameForDatastream } from '../ingest_pipeline';
 import { getAsset, getPathParts } from '../../archive';
 import {
   FLEET_COMPONENT_TEMPLATES,
@@ -365,15 +365,8 @@ export function prepareTemplate({
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
 
-  let pipelineName;
-  if (dataStream.ingest_pipeline) {
-    pipelineName = getPipelineNameForInstallation({
-      pipelineName: dataStream.ingest_pipeline,
-      dataStream,
-      packageVersion,
-    });
-  }
-
+  const pipelineName = getPipelineNameForDatastream({ dataStream, packageVersion });
+ 
   const defaultSettings = buildDefaultSettings({
     templateName,
     packageName,

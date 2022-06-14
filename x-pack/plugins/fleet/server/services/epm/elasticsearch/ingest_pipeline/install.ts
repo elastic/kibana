@@ -21,11 +21,17 @@ import {
 import { appendMetadataToIngestPipeline } from '../meta';
 
 import { retryTransientEsErrors } from '../retry';
+import {
+  getPipelineNameForDatastream,
+  getPipelineNameForInstallation,
+  rewriteIngestPipeline,
+} from './helpers';
+import type { RewriteSubstitution } from './helpers';
 
-interface RewriteSubstitution {
-  source: string;
-  target: string;
-  templateFunction: string;
+interface PipelineInstall {
+  nameForInstallation: string;
+  contentForInstallation: string;
+  extension: string;
 }
 
 export const isTopLevelPipeline = (path: string) => {
@@ -59,8 +65,12 @@ export const prepareToInstallPipelines = (
         const filteredPaths = pipelinePaths.filter((path) =>
           isDataStreamPipeline(path, dataStream.path)
         );
+        let createdDatastreamPipeline = false;
         const pipelineObjectRefs = filteredPaths.map((path) => {
           const { name } = getNameAndExtension(path);
+          if (name === dataStream.dataset) {
+            createdDatastreamPipeline = true;
+          }
           const nameForInstallation = getPipelineNameForInstallation({
             pipelineName: name,
             dataStream,
@@ -68,6 +78,13 @@ export const prepareToInstallPipelines = (
           });
           return { id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
         });
+        if (!createdDatastreamPipeline) {
+          const nameForInstallation = getPipelineNameForDatastream({
+            dataStream,
+            packageVersion: pkgVersion,
+          });
+          acc.push({ id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline });
+        }
         acc.push(...pipelineObjectRefs);
         return acc;
       }, [])
@@ -75,6 +92,7 @@ export const prepareToInstallPipelines = (
 
   const topLevelPipelineRefs = topLevelPipelinePaths.map((path) => {
     const { name } = getNameAndExtension(path);
+
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
       packageVersion: pkgVersion,
@@ -89,17 +107,16 @@ export const prepareToInstallPipelines = (
     install: async (esClient, logger) => {
       const pipelines = dataStreams
         ? dataStreams.reduce<Array<Promise<EsAssetReference[]>>>((acc, dataStream) => {
-            if (dataStream.ingest_pipeline) {
-              acc.push(
-                installAllPipelines({
-                  dataStream,
-                  esClient,
-                  logger,
-                  paths: pipelinePaths,
-                  installablePackage,
-                })
-              );
-            }
+            acc.push(
+              installAllPipelines({
+                dataStream,
+                esClient,
+                logger,
+                paths: pipelinePaths,
+                installablePackage,
+              })
+            );
+
             return acc;
           }, [])
         : [];
@@ -121,27 +138,6 @@ export const prepareToInstallPipelines = (
   };
 };
 
-export function rewriteIngestPipeline(
-  pipeline: string,
-  substitutions: RewriteSubstitution[]
-): string {
-  substitutions.forEach((sub) => {
-    const { source, target, templateFunction } = sub;
-    // This fakes the use of the golang text/template expression {{SomeTemplateFunction 'some-param'}}
-    // cf. https://github.com/elastic/beats/blob/master/filebeat/fileset/fileset.go#L294
-
-    // "Standard style" uses '{{' and '}}' as delimiters
-    const matchStandardStyle = `{{\\s?${templateFunction}\\s+['"]${source}['"]\\s?}}`;
-    // "Beats style" uses '{<' and '>}' as delimiters because this is current practice in the beats project
-    const matchBeatsStyle = `{<\\s?${templateFunction}\\s+['"]${source}['"]\\s?>}`;
-
-    const regexStandardStyle = new RegExp(matchStandardStyle);
-    const regexBeatsStyle = new RegExp(matchBeatsStyle);
-    pipeline = pipeline.replace(regexStandardStyle, target).replace(regexBeatsStyle, target);
-  });
-  return pipeline;
-}
-
 export async function installAllPipelines({
   esClient,
   logger,
@@ -158,18 +154,27 @@ export async function installAllPipelines({
   const pipelinePaths = dataStream
     ? paths.filter((path) => isDataStreamPipeline(path, dataStream.path))
     : paths;
-  let pipelines: any[] = [];
+  const pipelinesInfos: Array<{
+    name: string;
+    nameForInstallation: string;
+    content: string;
+    extension: string;
+  }> = [];
   const substitutions: RewriteSubstitution[] = [];
 
+  let datastreamPipelineCreated = false;
   pipelinePaths.forEach((path) => {
     const { name, extension } = getNameAndExtension(path);
+    if (name === dataStream?.ingest_pipeline) {
+      datastreamPipelineCreated = true;
+    }
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
       dataStream,
       packageVersion: installablePackage.version,
     });
     const content = getAsset(path).toString('utf-8');
-    pipelines.push({
+    pipelinesInfos.push({
       name,
       nameForInstallation,
       content,
@@ -182,14 +187,27 @@ export async function installAllPipelines({
     });
   });
 
-  pipelines = pipelines.map((pipeline) => {
+  const pipelinesToInstall: PipelineInstall[] = pipelinesInfos.map((pipeline) => {
     return {
       ...pipeline,
       contentForInstallation: rewriteIngestPipeline(pipeline.content, substitutions),
     };
   });
 
-  const installationPromises = pipelines.map(async (pipeline) => {
+  if (!datastreamPipelineCreated && dataStream) {
+    const nameForInstallation = getPipelineNameForDatastream({
+      dataStream,
+      packageVersion: installablePackage.version,
+    });
+
+    pipelinesToInstall.push({
+      nameForInstallation,
+      contentForInstallation: 'processors: []',
+      extension: 'yml',
+    });
+  }
+
+  const installationPromises = pipelinesToInstall.map(async (pipeline) => {
     return installPipeline({ esClient, pipeline, installablePackage, logger });
   });
 
@@ -204,7 +222,7 @@ async function installPipeline({
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-  pipeline: any;
+  pipeline: PipelineInstall;
   installablePackage?: InstallablePackage;
 }): Promise<EsAssetReference> {
   const pipelineWithMetadata = appendMetadataToIngestPipeline({
@@ -303,23 +321,4 @@ const getNameAndExtension = (
     name: filename.split('.')[0],
     extension: filename.split('.')[1],
   };
-};
-
-export const getPipelineNameForInstallation = ({
-  pipelineName,
-  dataStream,
-  packageVersion,
-}: {
-  pipelineName: string;
-  dataStream?: RegistryDataStream;
-  packageVersion: string;
-}): string => {
-  if (dataStream !== undefined) {
-    const isPipelineEntry = pipelineName === dataStream.ingest_pipeline;
-    const suffix = isPipelineEntry ? '' : `-${pipelineName}`;
-    // if this is the pipeline entry, don't add a suffix
-    return `${dataStream.type}-${dataStream.dataset}-${packageVersion}${suffix}`;
-  }
-  // It's a top-level pipeline
-  return `${packageVersion}-${pipelineName}`;
 };
