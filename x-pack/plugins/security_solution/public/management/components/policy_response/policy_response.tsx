@@ -17,7 +17,7 @@ import {
   ImmutableArray,
   ImmutableObject,
 } from '../../../../common/endpoint/types';
-import { formatResponse } from './policy_response_friendly_names';
+import { formatResponse, PolicyResponseActionFormatter } from './policy_response_friendly_names';
 import { PolicyResponseActionItem } from './policy_response_action_item';
 
 // Most of them are needed in order to display large react nodes (PolicyResponseActionItem) in child levels.
@@ -41,6 +41,10 @@ const StyledEuiTreeView = styled(EuiTreeView)`
         padding-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
       }
     }
+  }
+
+  .euiCallOut.policyResponseErrorCallOut {
+    margin-left: ${(props) => props.theme.eui.paddingSizes.l};
   }
 `;
 
@@ -88,6 +92,7 @@ export const PolicyResponse = memo(
             (currentAction) => currentAction.name === actionKey
           ) as ImmutableObject<HostPolicyResponseAppliedAction>;
 
+          const policyResponseActionFormatter = new PolicyResponseActionFormatter(action);
           return {
             label: (
               <EuiText
@@ -99,7 +104,7 @@ export const PolicyResponse = memo(
                 }
                 data-test-subj="endpointPolicyResponseAction"
               >
-                {formatResponse(actionKey)}
+                {policyResponseActionFormatter.title}
               </EuiText>
             ),
             id: actionKey,
