@@ -13,6 +13,7 @@ import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  TRANSACTION_DURATION,
 } from '../../../../../common/elasticsearch_fieldnames';
 
 interface Props {
@@ -35,7 +36,7 @@ export function PageLoadDistChart({
   const kibana = useKibanaServices();
   const { ExploratoryViewEmbeddable } = kibana.observability!;
 
-  const onBrushEnd = ({ range }: any) => {
+  const onBrushEnd = ({ range }: { range: number[] }) => {
     if (!range) {
       return;
     }
@@ -47,7 +48,7 @@ export function PageLoadDistChart({
     {
       dataType: 'ux',
       name: 'page-load-distribution',
-      selectedMetricField: 'transaction.duration.us',
+      selectedMetricField: TRANSACTION_DURATION,
       reportDefinitions: {
         [SERVICE_ENVIRONMENT]: uiFilters?.environment
           ? [uiFilters.environment]

@@ -22,43 +22,6 @@ export interface PercentileRange {
   max?: number | null;
 }
 
-export const MICRO_TO_SEC = 1000000;
-
-export function microToSec(val: number) {
-  return Math.round((val / MICRO_TO_SEC + Number.EPSILON) * 100) / 100;
-}
-
-export const getPLDChartSteps = ({
-  maxDuration,
-  minDuration,
-  initStepValue,
-}: {
-  maxDuration: number;
-  minDuration: number;
-  initStepValue?: number;
-}) => {
-  let stepValue = 0.5;
-  // if diff is too low, let's lower
-  // down the steps value to increase steps
-  if (maxDuration - minDuration <= 5 * MICRO_TO_SEC) {
-    stepValue = 0.1;
-  }
-
-  if (initStepValue) {
-    stepValue = initStepValue;
-  }
-
-  let initValue = minDuration;
-  const stepValues = [initValue];
-
-  while (initValue < maxDuration) {
-    initValue += stepValue * MICRO_TO_SEC;
-    stepValues.push(initValue);
-  }
-
-  return stepValues;
-};
-
 export function PageLoadDistribution() {
   const { http } = useKibanaServices();
 

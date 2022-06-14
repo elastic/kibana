@@ -11,6 +11,7 @@ import { useHistory } from 'react-router-dom';
 import {
   AllSeries,
   fromQuery,
+  RECORDS_FIELD,
   toQuery,
 } from '@kbn/observability-plugin/public';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
@@ -44,7 +45,7 @@ export function PageViewsChart({ breakdown }: Props) {
         to: end ?? '',
       },
       name: 'ux-series-1',
-      selectedMetricField: '___records___',
+      selectedMetricField: RECORDS_FIELD,
       reportDefinitions: {
         [SERVICE_ENVIRONMENT]: urlParams?.environment
           ? [urlParams.environment]
@@ -57,7 +58,7 @@ export function PageViewsChart({ breakdown }: Props) {
     },
   ];
 
-  const onBrushEnd = ({ range }: any) => {
+  const onBrushEnd = ({ range }: { range: number[] }) => {
     if (!range) {
       return;
     }
