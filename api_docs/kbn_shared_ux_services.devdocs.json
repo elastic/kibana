@@ -30,7 +30,13 @@
         ],
         "signature": [
           "(params?: ",
-          "MockServicesFactoryParams",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.MockServicesFactoryParams",
+            "text": "MockServicesFactoryParams"
+          },
           " | undefined) => { application: ",
           {
             "pluginId": "@kbn/shared-ux-services",
@@ -100,7 +106,13 @@
             "label": "params",
             "description": [],
             "signature": [
-              "MockServicesFactoryParams",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.MockServicesFactoryParams",
+                "text": "MockServicesFactoryParams"
+              },
               " | undefined"
             ],
             "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
@@ -432,6 +444,32 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.MockServicesFactoryParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "MockServicesFactoryParams",
+        "description": [],
+        "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.MockServicesFactoryParams.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "MockDataServiceFactoryConfig"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/shared-ux-services",
         "id": "def-common.SharedUxApplicationService",

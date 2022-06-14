@@ -1,0 +1,13 @@
+env:
+  PUBLISH_API_DOCS_CHANGES: 'true'
+steps:
+  - command: .buildkite/scripts/steps/build_api_docs.sh
+    label: 'Build API Docs'
+    agents:
+      queue: n2-4-spot
+    key: build_api_docs
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

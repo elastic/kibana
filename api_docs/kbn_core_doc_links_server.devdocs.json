@@ -1,0 +1,101 @@
+{
+  "id": "@kbn/core-doc-links-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-doc-links-server",
+        "id": "def-server.DocLinksServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocLinksServiceSetup",
+        "description": [],
+        "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-doc-links-server",
+            "id": "def-server.DocLinksServiceSetup.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "The branch/version the docLinks are pointing to"
+            ],
+            "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-doc-links-server",
+            "id": "def-server.DocLinksServiceSetup.elasticWebsiteUrl",
+            "type": "string",
+            "tags": [],
+            "label": "elasticWebsiteUrl",
+            "description": [
+              "The base url for the elastic website"
+            ],
+            "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-doc-links-server",
+            "id": "def-server.DocLinksServiceSetup.links",
+            "type": "Object",
+            "tags": [],
+            "label": "links",
+            "description": [
+              "A record of all registered doc links"
+            ],
+            "signature": [
+              "DocLinks"
+            ],
+            "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-doc-links-server",
+        "id": "def-server.DocLinksServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "DocLinksServiceStart",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-doc-links-server",
+            "scope": "server",
+            "docId": "kibKbnCoreDocLinksServerPluginApi",
+            "section": "def-server.DocLinksServiceSetup",
+            "text": "DocLinksServiceSetup"
+          }
+        ],
+        "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

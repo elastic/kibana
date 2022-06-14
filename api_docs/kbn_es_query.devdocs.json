@@ -3353,164 +3353,6 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
-        "id": "def-common.DataViewBase",
-        "type": "Interface",
-        "tags": [],
-        "label": "DataViewBase",
-        "description": [
-          "\nA base interface for an index pattern"
-        ],
-        "path": "packages/kbn-es-query/src/es_query/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewBase.fields",
-            "type": "Array",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewFieldBase",
-                "text": "DataViewFieldBase"
-              },
-              "[]"
-            ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewBase.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewBase.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
-        "id": "def-common.DataViewFieldBase",
-        "type": "Interface",
-        "tags": [],
-        "label": "DataViewFieldBase",
-        "description": [
-          "\nA base interface for an index pattern field"
-        ],
-        "path": "packages/kbn-es-query/src/es_query/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewFieldBase.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewFieldBase.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nKibana field type"
-            ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewFieldBase.subType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "subType",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.IFieldSubType",
-                "text": "IFieldSubType"
-              },
-              " | undefined"
-            ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewFieldBase.script",
-            "type": "string",
-            "tags": [],
-            "label": "script",
-            "description": [
-              "\nScripted field painless script"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewFieldBase.lang",
-            "type": "string",
-            "tags": [],
-            "label": "lang",
-            "description": [
-              "\nScripted field langauge\nPainless is the only valid scripted field language"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewFieldBase.scripted",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "scripted",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
         "id": "def-common.FilterCompareOptions",
         "type": "Interface",
         "tags": [],
@@ -3709,14 +3551,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "keyof ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.NodeTypes",
-                "text": "NodeTypes"
-              }
+              "\"function\" | \"wildcard\" | \"literal\""
             ],
             "path": "packages/kbn-es-query/src/kuery/types.ts",
             "deprecated": false
@@ -3806,58 +3641,6 @@
             "label": "lon",
             "description": [],
             "path": "packages/kbn-es-query/src/filters/build_filters/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
-        "id": "def-common.NodeTypes",
-        "type": "Interface",
-        "tags": [],
-        "label": "NodeTypes",
-        "description": [],
-        "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.NodeTypes.function",
-            "type": "Object",
-            "tags": [],
-            "label": "function",
-            "description": [],
-            "signature": [
-              "FunctionType"
-            ],
-            "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.NodeTypes.literal",
-            "type": "Object",
-            "tags": [],
-            "label": "literal",
-            "description": [],
-            "signature": [
-              "LiteralType"
-            ],
-            "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.NodeTypes.wildcard",
-            "type": "Object",
-            "tags": [],
-            "label": "wildcard",
-            "description": [],
-            "signature": [
-              "WildcardType"
-            ],
-            "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
             "deprecated": false
           }
         ],
@@ -4026,6 +3809,54 @@
           "; query?: Record<string, any> | undefined; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/custom_filter.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.DataViewBase",
+        "type": "Type",
+        "tags": [],
+        "label": "DataViewBase",
+        "description": [
+          "\nA base interface for an index pattern"
+        ],
+        "signature": [
+          "{ fields: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          },
+          "[]; id?: string | undefined; title: string; }"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.DataViewFieldBase",
+        "type": "Type",
+        "tags": [],
+        "label": "DataViewFieldBase",
+        "description": [
+          "\nA base interface for an index pattern field"
+        ],
+        "signature": [
+          "{ name: string; type: string; subType?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubType",
+            "text": "IFieldSubType"
+          },
+          " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
