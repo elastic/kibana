@@ -68,7 +68,7 @@ export const prepareToInstallPipelines = (
         let createdDatastreamPipeline = false;
         const pipelineObjectRefs = filteredPaths.map((path) => {
           const { name } = getNameAndExtension(path);
-          if (name === dataStream.dataset) {
+          if (name === dataStream.ingest_pipeline) {
             createdDatastreamPipeline = true;
           }
           const nameForInstallation = getPipelineNameForInstallation({
