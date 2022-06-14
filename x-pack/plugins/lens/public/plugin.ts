@@ -228,6 +228,7 @@ export class LensPlugin {
   private gaugeVisualization: GaugeVisualizationType | undefined;
   private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
   private hasDiscoverAccess: boolean = false;
+  private dataViewsService: DataViewsPublicPluginStart | undefined;
 
   private stopReportManager?: () => void;
 
@@ -295,6 +296,7 @@ export class LensPlugin {
       uiActionsEnhanced.registerDrilldown(
         new OpenInDiscoverDrilldown({
           discover,
+          dataViews: () => this.dataViewsService!,
           hasDiscoverAccess: () => this.hasDiscoverAccess,
         })
       );
@@ -434,6 +436,7 @@ export class LensPlugin {
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {
     this.hasDiscoverAccess = core.application.capabilities.discover.show as boolean;
+    this.dataViewsService = startDependencies.dataViews;
     // unregisters the Visualize action and registers the lens one
     if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
       startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);
@@ -450,7 +453,11 @@ export class LensPlugin {
 
     startDependencies.uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      createOpenInDiscoverAction(startDependencies.discover!, this.hasDiscoverAccess)
+      createOpenInDiscoverAction(
+        startDependencies.discover!,
+        startDependencies.dataViews!,
+        this.hasDiscoverAccess
+      )
     );
 
     return {
