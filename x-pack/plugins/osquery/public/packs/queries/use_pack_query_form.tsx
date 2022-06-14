@@ -89,11 +89,6 @@ export const usePackQueryForm = ({
           draft.platform.join(',');
         }
 
-        if (draft.platform?.split(',').length === 3) {
-          // if all platforms are checked then use undefined
-          delete draft.platform;
-        }
-
         if (isArray(draft.version)) {
           if (!draft.version.length) {
             delete draft.version;
