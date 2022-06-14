@@ -31,7 +31,8 @@
   "paths": {
     "/api/cases": {
       "post": {
-        "description": "Creates a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.\n",
+        "summary": "Creates a case.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.\n",
         "tags": [
           "cases",
           "kibana"
@@ -476,7 +477,8 @@
         ]
       },
       "delete": {
-        "description": "Deletes one or more cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
+        "summary": "Deletes one or more cases.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
         "tags": [
           "cases",
           "kibana"
@@ -508,7 +510,8 @@
         ]
       },
       "patch": {
-        "description": "Updates one or more cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.\n",
+        "summary": "Updates one or more cases.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.\n",
         "tags": [
           "cases",
           "kibana"
@@ -972,7 +975,8 @@
     },
     "/api/cases/_find": {
       "get": {
-        "description": "Retrieves a paginated subset of cases. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "summary": "Retrieves a paginated subset of cases.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
         "tags": [
           "cases",
           "kibana"
@@ -1469,7 +1473,8 @@
     },
     "/api/cases/alerts/{alertId}": {
       "get": {
-        "description": "Returns the cases associated with a specific alert. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "summary": "Returns the cases associated with a specific alert.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
         "x-technical-preview": true,
         "tags": [
           "cases",
@@ -1528,7 +1533,8 @@
     },
     "/api/cases/configure": {
       "get": {
-        "description": "Retrieves external connection details, such as the closure type and default connector for cases. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration.\n",
+        "summary": "Retrieves external connection details, such as the closure type and default connector for cases.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration.\n",
         "tags": [
           "cases",
           "kibana"
@@ -1735,7 +1741,8 @@
         ]
       },
       "post": {
-        "description": "Sets external connection details, such as the closure type and default connector for cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.\n",
+        "summary": "Sets external connection details, such as the closure type and default connector for cases.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.\n",
         "tags": [
           "cases",
           "kibana"
@@ -2081,7 +2088,8 @@
     },
     "/api/cases/configure/{configurationId}": {
       "patch": {
-        "description": "Updates external connection details, such as the closure type and default connector for cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can it in your cases. Refer to the add connectors API.\n",
+        "summary": "Updates external connection details, such as the closure type and default connector for cases.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API.\n",
         "tags": [
           "cases",
           "kibana"
@@ -2414,9 +2422,85 @@
         }
       ]
     },
+    "/api/cases/configure/connectors/_find": {
+      "get": {
+        "summary": "Retrieves information about connectors.",
+        "description": "In particular, only the connectors that are supported for use in cases are  returned. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "actionTypeId": {
+                        "$ref": "#/components/schemas/connector_types"
+                      },
+                      "config": {
+                        "type": "object",
+                        "properties": {
+                          "apiUrl": {
+                            "type": "string"
+                          },
+                          "projectKey": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "isDeprecated": {
+                        "type": "boolean"
+                      },
+                      "isMissingSecrets": {
+                        "type": "boolean"
+                      },
+                      "isPreconfigured": {
+                        "type": "boolean"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "referencedByCount": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "findCaseResponse": {
+                    "$ref": "#/components/examples/find_connector_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/s/{spaceId}/api/cases": {
       "post": {
-        "description": "Creates a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.\n",
+        "summary": "Creates a case.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana  feature privileges, depending on the owner of the case you're creating.\n",
         "tags": [
           "cases",
           "kibana"
@@ -2864,7 +2948,8 @@
         ]
       },
       "delete": {
-        "description": "Deletes one or more cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
+        "summary": "Deletes one or more cases.",
+        "description": "You must have `all` privileges for the **Cases** feature in the  **Management**, **Observability**, or **Security** section of the Kibana  feature privileges, depending on the owner of the cases you're deleting.\n",
         "tags": [
           "cases",
           "kibana"
@@ -2899,7 +2984,8 @@
         ]
       },
       "patch": {
-        "description": "Updates one or more cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.\n",
+        "summary": "Updates one or more cases.",
+        "description": "You must have `all` privileges for the **Cases** feature in the  **Management**, **Observability**, or **Security** section of the Kibana  feature privileges, depending on the owner of the case you're updating.\n",
         "tags": [
           "cases",
           "kibana"
@@ -3366,7 +3452,8 @@
     },
     "/s/{spaceId}/api/cases/_find": {
       "get": {
-        "description": "Retrieves a paginated subset of cases. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "summary": "Retrieves a paginated subset of cases.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
         "tags": [
           "cases",
           "kibana"
@@ -3864,7 +3951,8 @@
     },
     "/s/{spaceId}/api/cases/alerts/{alertId}": {
       "get": {
-        "description": "Returns the cases associated with a specific alert. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "summary": "Returns the cases associated with a specific alert.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
         "x-technical-preview": true,
         "tags": [
           "cases",
@@ -3926,7 +4014,8 @@
     },
     "/s/{spaceId}/api/cases/configure": {
       "get": {
-        "description": "Retrieves external connection details, such as the closure type and default connector for cases. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration.\n",
+        "summary": "Retrieves external connection details, such as the closure type and default connector for cases.",
+        "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration.\n",
         "tags": [
           "cases",
           "kibana"
@@ -4136,7 +4225,8 @@
         ]
       },
       "post": {
-        "description": "Sets external connection details, such as the closure type and default connector for cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.\n",
+        "summary": "Sets external connection details, such as the closure type and default connector for cases.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.\n",
         "tags": [
           "cases",
           "kibana"
@@ -4485,7 +4575,8 @@
     },
     "/s/{spaceId}/api/cases/configure/{configurationId}": {
       "patch": {
-        "description": "Updates external connection details, such as the closure type and default connector for cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can it in your cases. Refer to the add connectors API.\n",
+        "summary": "Updates external connection details, such as the closure type and default connector for cases.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API.\n",
         "tags": [
           "cases",
           "kibana"
@@ -4803,6 +4894,86 @@
                         "example": "WzIwNzMsMV0="
                       }
                     }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/cases/configure/connectors/_find": {
+      "get": {
+        "summary": "Retrieves information about connectors.",
+        "description": "In particular, only the connectors that are supported for use in cases are returned. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "actionTypeId": {
+                        "$ref": "#/components/schemas/connector_types"
+                      },
+                      "config": {
+                        "type": "object",
+                        "properties": {
+                          "apiUrl": {
+                            "type": "string"
+                          },
+                          "projectKey": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "isDeprecated": {
+                        "type": "boolean"
+                      },
+                      "isMissingSecrets": {
+                        "type": "boolean"
+                      },
+                      "isPreconfigured": {
+                        "type": "boolean"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "referencedByCount": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "findConnectorResponse": {
+                    "$ref": "#/components/examples/find_connector_response"
                   }
                 }
               }
@@ -5170,6 +5341,24 @@
           "count_in_progress_cases": 0,
           "count_closed_cases": 0
         }
+      },
+      "find_connector_response": {
+        "summary": "Retrieve information about the connectors and their settings.",
+        "value": [
+          {
+            "id": "61787f53-4eee-4741-8df6-8fe84fa616f7",
+            "actionTypeId": ".jira",
+            "name": "my-Jira",
+            "isMissingSecrets": false,
+            "config": {
+              "apiUrl": "https://elastic.atlassian.net/",
+              "projectKey": "ES"
+            },
+            "isPreconfigured": false,
+            "isDeprecated": false,
+            "referencedByCount": 0
+          }
+        ]
       }
     }
   },
