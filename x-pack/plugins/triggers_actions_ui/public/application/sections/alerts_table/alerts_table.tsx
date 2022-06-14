@@ -27,7 +27,7 @@ import './alerts_table.scss';
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const GridStyles: EuiDataGridStyle = {
-  border: 'horizontal',
+  border: 'none',
   header: 'underline',
 };
 
@@ -147,15 +147,20 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     return <>{value.length ? value.join() : '--'}</>;
   };
 
+  const renderCellValue = useCallback(
+    () =>
+      props.alertsTableConfiguration?.getRenderCellValue
+        ? props.alertsTableConfiguration?.getRenderCellValue({
+            setFlyoutAlert: handleFlyoutAlert,
+          })
+        : basicRenderCellValue,
+    [handleFlyoutAlert, props.alertsTableConfiguration]
+  )();
+
   const handleRenderCellValue = useCallback(
     (_props: EuiDataGridCellValueElementProps) => {
       // https://github.com/elastic/eui/issues/5811
       const alert = alerts[_props.rowIndex - pagination.pageSize * pagination.pageIndex];
-      const renderCellValue = props.alertsTableConfiguration?.getRenderCellValue
-        ? props.alertsTableConfiguration?.getRenderCellValue({
-            setFlyoutAlert: handleFlyoutAlert,
-          })
-        : basicRenderCellValue;
       const data: Array<{ field: string; value: string[] }> = [];
       Object.entries(alert ?? {}).forEach(([key, value]) => {
         data.push({ field: key, value });
@@ -165,19 +170,17 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         data,
       });
     },
-    [
-      alerts,
-      handleFlyoutAlert,
-      pagination.pageIndex,
-      pagination.pageSize,
-      props.alertsTableConfiguration,
-    ]
+    [alerts, pagination.pageIndex, pagination.pageSize, renderCellValue]
   );
   console.log('drawing an alerts table');
   return (
-    <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
-      {flyoutAlertIndex > -1 && (
-        <Suspense fallback={null}>
+    <section
+      className="alertsTableResponseOps"
+      style={{ width: '100%' }}
+      data-test-subj={props['data-test-subj']}
+    >
+      <Suspense fallback={null}>
+        {flyoutAlertIndex > -1 && (
           <AlertsFlyout
             alert={alerts[flyoutAlertIndex]}
             alertsCount={alertsCount}
@@ -188,8 +191,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             onPaginate={onPaginateFlyout}
             isLoading={isLoading}
           />
-        </Suspense>
-      )}
+        )}
+      </Suspense>
       <EuiDataGrid
         aria-label="Alerts table"
         data-test-subj="alertsTable"

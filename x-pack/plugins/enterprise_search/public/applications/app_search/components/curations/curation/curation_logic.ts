@@ -15,10 +15,11 @@ import {
 import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { ENGINE_CURATIONS_PATH } from '../../../routes';
+import { flattenDocument } from '../../../utils/results';
 import { EngineLogic, generateEnginePath } from '../../engine';
 import { DELETE_SUCCESS_MESSAGE } from '../constants';
 
-import { Curation } from '../types';
+import { Curation, CurationResult } from '../types';
 import { addDocument, removeDocument } from '../utils';
 
 type CurationPageTabs = 'promoted' | 'history' | 'hidden';
@@ -235,7 +236,12 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
           `/internal/app_search/engines/${engineName}/curations/${props.curationId}`,
           { query: { skip_record_analytics: 'true' } }
         );
-        actions.onCurationLoad(response);
+        const payload = {
+          ...response,
+          hidden: response.hidden.map((x) => flattenDocument(x) as CurationResult),
+          promoted: response.promoted.map((x) => flattenDocument(x) as CurationResult),
+        };
+        actions.onCurationLoad(payload);
       } catch (e) {
         const { navigateToUrl } = KibanaLogic.values;
 
@@ -263,7 +269,12 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
             }),
           }
         );
-        actions.onCurationLoad(response);
+        const payload = {
+          ...response,
+          hidden: response.hidden.map((x) => flattenDocument(x) as CurationResult),
+          promoted: response.promoted.map((x) => flattenDocument(x) as CurationResult),
+        };
+        actions.onCurationLoad(payload);
       } catch (e) {
         flashAPIErrors(e);
         actions.onCurationError();
