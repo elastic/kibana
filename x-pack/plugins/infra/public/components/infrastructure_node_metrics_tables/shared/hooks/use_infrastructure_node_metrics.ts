@@ -19,7 +19,7 @@ import type {
   MetricsExplorerTimeOptions,
 } from '../../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
-import { MetricsIndicesStatus } from '../types';
+import { NodeMetricsTableData } from '../types';
 
 export interface SortState<T> {
   field: keyof T;
@@ -60,8 +60,7 @@ export const useInfrastructureNodeMetrics = <T>(
 
   const [transformedNodes, setTransformedNodes] = useState<T[]>([]);
   const fetch = useKibanaHttpFetch();
-  const { source, isLoadingSource, loadSourceFailureMessage, metricIndicesExist } =
-    useSourceContext();
+  const { source, isLoadingSource, loadSourceRequest, metricIndicesExist } = useSourceContext();
   const timerangeWithInterval = useTimerangeWithInterval(timerange);
 
   const [fetchNodesRequest, fetchNodes] = useTrackedPromise(
@@ -102,20 +101,13 @@ export const useInfrastructureNodeMetrics = <T>(
     fetchNodesRequest.state === 'pending' || fetchNodesRequest.state === 'uninitialized';
   const isLoading = isLoadingSource || isLoadingNodes;
 
-  const indicesStatus = useMemo<MetricsIndicesStatus>(
-    () =>
-      metricIndicesExist == null
-        ? 'unknown'
-        : !metricIndicesExist
-        ? 'missing'
-        : transformedNodes.length <= 0
-        ? 'empty'
-        : 'available',
-    [metricIndicesExist, transformedNodes.length]
+  const errors = useMemo<Error[]>(
+    () => [
+      ...(loadSourceRequest.state === 'rejected' ? [wrapAsError(loadSourceRequest.value)] : []),
+      ...(fetchNodesRequest.state === 'rejected' ? [wrapAsError(fetchNodesRequest.value)] : []),
+    ],
+    [fetchNodesRequest, loadSourceRequest]
   );
-
-  const fetchNodesFailureMessage =
-    fetchNodesRequest.state === 'rejected' ? fetchNodesRequest.value : undefined;
 
   useEffect(() => {
     fetchNodes();
@@ -137,11 +129,23 @@ export const useInfrastructureNodeMetrics = <T>(
 
   const pageCount = useMemo(() => Math.ceil(top100Nodes.length / TABLE_PAGE_SIZE), [top100Nodes]);
 
+  const data = useMemo<NodeMetricsTableData<T>>(
+    () =>
+      errors.length > 0
+        ? { state: 'error', errors }
+        : metricIndicesExist == null
+        ? { state: 'unknown' }
+        : !metricIndicesExist
+        ? { state: 'no-indices' }
+        : nodes.length <= 0
+        ? { state: 'empty-indices' }
+        : { state: 'data', currentPageIndex, pageCount, rows: nodes },
+    [currentPageIndex, errors, metricIndicesExist, nodes, pageCount]
+  );
+
   return {
-    indicesStatus,
     isLoading,
-    nodes,
-    pageCount,
+    data,
   };
 };
 
@@ -217,3 +221,5 @@ function sortDescending(nodeAValue: unknown, nodeBValue: unknown) {
 
   return 0;
 }
+
+const wrapAsError = (value: any): Error => (value instanceof Error ? value : new Error(`${value}`));

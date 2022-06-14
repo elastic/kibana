@@ -37,6 +37,7 @@ export const MetricsTableLoadingContent = () => (
       <FormattedMessage
         id="xpack.infra.metricsTable.loadingContentTitle"
         defaultMessage="Loading metrics"
+        tagName="h2"
       />
     }
   />
@@ -49,6 +50,7 @@ export const MetricsTableNoIndicesContent = () => (
       <FormattedMessage
         id="xpack.infra.metricsTable.noIndicesContentTitle"
         defaultMessage="No metric indices found"
+        tagName="h2"
       />
     }
   />
@@ -61,6 +63,7 @@ export const MetricsTableEmptyIndicesContent = () => (
       <FormattedMessage
         id="xpack.infra.metricsTable.emptyIndicesContentTitle"
         defaultMessage="Metric indices are empty"
+        tagName="h2"
       />
     }
   />

@@ -14,41 +14,33 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eu
 import React, { useCallback, useMemo } from 'react';
 import type { SortState } from '../shared';
 import {
-  MetricsIndicesStatus,
   MetricsNodeDetailsLink,
+  NodeMetricsTableData,
   NumberCell,
   StepwisePagination,
 } from '../shared';
-import { MetricsTableNoDataContent } from '../shared/components/no_data_content';
+import { MetricsTableErrorContent } from '../shared/components/error_content';
+import {
+  MetricsTableEmptyIndicesContent,
+  MetricsTableLoadingContent,
+  MetricsTableNoIndicesContent,
+} from '../shared/components/no_data_content';
 import type { HostNodeMetricsRow } from './use_host_metrics_table';
 
 export interface HostMetricsTableProps {
+  data: NodeMetricsTableData<HostNodeMetricsRow>;
+  isLoading: boolean;
+  setCurrentPageIndex: (value: number) => void;
+  setSortState: (state: SortState<HostNodeMetricsRow>) => void;
+  sortState: SortState<HostNodeMetricsRow>;
   timerange: {
     from: string;
     to: string;
   };
-  indicesStatus: MetricsIndicesStatus;
-  isLoading: boolean;
-  hosts: HostNodeMetricsRow[];
-  pageCount: number;
-  currentPageIndex: number;
-  setCurrentPageIndex: (value: number) => void;
-  sortState: SortState<HostNodeMetricsRow>;
-  setSortState: (state: SortState<HostNodeMetricsRow>) => void;
 }
 
 export const HostMetricsTable = (props: HostMetricsTableProps) => {
-  const {
-    currentPageIndex,
-    hosts,
-    indicesStatus,
-    isLoading,
-    pageCount,
-    setCurrentPageIndex,
-    setSortState,
-    sortState,
-    timerange,
-  } = props;
+  const { data, isLoading, setCurrentPageIndex, setSortState, sortState, timerange } = props;
 
   const columns = useMemo(() => hostMetricsColumns(timerange), [timerange]);
 
@@ -69,32 +61,47 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
     [setSortState, setCurrentPageIndex]
   );
 
+  const items = data.state === 'data' ? data.rows : NO_ITEMS;
+
+  const noItemsMessage =
+    data.state === 'error' ? (
+      <MetricsTableErrorContent />
+    ) : isLoading ? (
+      <MetricsTableLoadingContent />
+    ) : data.state === 'no-indices' ? (
+      <MetricsTableNoIndicesContent />
+    ) : data.state === 'empty-indices' ? (
+      <MetricsTableEmptyIndicesContent />
+    ) : null;
+
   return (
     <>
       <EuiBasicTable
         tableCaption="Infrastructure metrics for hosts"
-        items={hosts}
+        items={items}
         columns={columns}
         sorting={sortSettings}
         onChange={onTableSortChange}
         loading={isLoading}
-        noItemsMessage={
-          <MetricsTableNoDataContent indicesStatus={indicesStatus} isLoading={isLoading} />
-        }
+        noItemsMessage={noItemsMessage}
         data-test-subj="hostMetricsTable"
       />
-      <EuiSpacer size="s" />
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <StepwisePagination
-            ariaLabel="Host metrics pagination"
-            pageCount={pageCount}
-            currentPageIndex={currentPageIndex}
-            setCurrentPageIndex={setCurrentPageIndex}
-            data-test-subj="hostMetricsTablePagination"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {data.state === 'data' ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <StepwisePagination
+                ariaLabel="Host metrics pagination"
+                pageCount={data.pageCount}
+                currentPageIndex={data.currentPageIndex}
+                setCurrentPageIndex={setCurrentPageIndex}
+                data-test-subj="hostMetricsTablePagination"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      ) : null}
     </>
   );
 };
@@ -143,3 +150,5 @@ function hostMetricsColumns(
     },
   ];
 }
+
+const NO_ITEMS: HostNodeMetricsRow[] = [];

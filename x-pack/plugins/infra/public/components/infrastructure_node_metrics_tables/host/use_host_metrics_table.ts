@@ -53,11 +53,7 @@ export function useHostMetricsTable({ timerange, filterClauseDsl }: UseNodeMetri
     direction: 'desc',
   });
 
-  const {
-    isLoading,
-    nodes: hosts,
-    pageCount,
-  } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
+  const { data, isLoading } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
     metricsExplorerOptions: hostMetricsOptions,
     timerange,
     filterClauseDsl,
@@ -67,14 +63,12 @@ export function useHostMetricsTable({ timerange, filterClauseDsl }: UseNodeMetri
   });
 
   return {
-    timerange,
+    data,
     isLoading,
-    hosts,
-    pageCount,
-    currentPageIndex,
     setCurrentPageIndex,
-    sortState,
     setSortState,
+    sortState,
+    timerange,
   };
 }
 

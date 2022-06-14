@@ -23,3 +23,24 @@ export type IntegratedNodeMetricsTableProps = UseNodeMetricsTableOptions &
   CoreProvidersProps;
 
 export type MetricsIndicesStatus = 'available' | 'empty' | 'missing' | 'unknown';
+
+export type NodeMetricsTableData<NodeMetricsRow> =
+  | {
+      state: 'unknown';
+    }
+  | {
+      state: 'no-indices';
+    }
+  | {
+      state: 'empty-indices';
+    }
+  | {
+      state: 'data';
+      currentPageIndex: number;
+      pageCount: number;
+      rows: NodeMetricsRow[];
+    }
+  | {
+      state: 'error';
+      errors: Error[];
+    };
