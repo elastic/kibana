@@ -1009,6 +1009,80 @@ describe('IndexPattern Data Source', () => {
       optimizeMock.mockRestore();
     });
 
+    it('should update anticipated esAggs column IDs based on the order of the optimized agg expression builders', () => {
+      const queryBaseState: DataViewBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columns: {
+              col1: {
+                label: 'timestamp',
+                dataType: 'date',
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                isBucketed: true,
+                scale: 'interval',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                  dropPartials: false,
+                },
+              } as DateHistogramIndexPatternColumn,
+              col2: {
+                label: '95th percentile of bytes',
+                dataType: 'number',
+                operationType: 'percentile',
+                sourceField: 'bytes',
+                isBucketed: false,
+                scale: 'ratio',
+                params: {
+                  percentile: 95,
+                },
+              } as PercentileIndexPatternColumn,
+              col3: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+                timeScale: 'h',
+              },
+              col4: {
+                label: 'Count of records2',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+                timeScale: 'h',
+              },
+            },
+            columnOrder: ['col1', 'col2', 'col3', 'col4'],
+            incompleteColumns: {},
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const optimizeMock = jest
+        .spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs')
+        .mockImplementation((aggs, esAggsIdMap) => {
+          // change the order of the aggregations
+          return { aggs: aggs.reverse(), esAggsIdMap };
+        });
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+
+      expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
+
+      const idMap = JSON.parse(ast.chain[2].arguments.idMap as unknown as string);
+
+      expect(Object.keys(idMap)).toEqual(['col-0-3', 'col-1-2', 'col-2-1', 'col-3-0']);
+
+      optimizeMock.mockRestore();
+    });
+
     describe('references', () => {
       beforeEach(() => {
         // @ts-expect-error we are inserting an invalid type

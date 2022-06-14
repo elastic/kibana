@@ -217,17 +217,17 @@ function getExpressionForLayer(
       col-1-2:    column3
       col-3-3.98: column4 (98th percentile)
     */
-    const newEsAggsIdToOriginalColumn: Record<string, OriginalColumn[]> = {};
+
+    const updatedEsAggsIdMap: Record<string, OriginalColumn[]> = {};
+    const extractEsAggId = (id: string) => id.split('.')[0].split('-')[2];
+    const updatePositionIndex = (currentId: string, newIndex: number) => {
+      const [fullId, percentile] = currentId.split('.');
+      const idParts = fullId.split('-');
+      idParts[1] = String(newIndex);
+      return idParts.join('-') + (percentile ? `.${percentile}` : '');
+    };
     let counter = 0;
     aggs.forEach((builder) => {
-      const extractEsAggId = (id: string) => id.split('.')[0].split('-')[2];
-      const updatePositionIndex = (currentId: string, newIndex: number) => {
-        const [fullId, percentile] = currentId.split('.');
-        const idParts = fullId.split('-');
-        idParts[1] = String(newIndex);
-        return idParts.join('-') + (percentile ? `.${percentile}` : '');
-      };
-
       const esAggId = builder.functions[0].getArgument('id')?.[0];
       const matchingEsAggColumnIds = Object.keys(esAggsIdMap).filter(
         (id) => extractEsAggId(id) === esAggId
@@ -235,12 +235,11 @@ function getExpressionForLayer(
 
       matchingEsAggColumnIds.forEach((currentId) => {
         const currentColumn = esAggsIdMap[currentId][0];
-        // TODO what if multiple columns are mapped to, and only one is bucketed?
         const aggIndex = window.ELASTIC_LENS_DELAY_SECONDS
           ? counter + (currentColumn.isBucketed ? 0 : 1)
           : counter;
         const newId = updatePositionIndex(currentId, aggIndex);
-        newEsAggsIdToOriginalColumn[newId] = esAggsIdMap[currentId];
+        updatedEsAggsIdMap[newId] = esAggsIdMap[currentId];
 
         counter++;
       });
@@ -363,7 +362,7 @@ function getExpressionForLayer(
           type: 'function',
           function: 'lens_map_to_original_columns',
           arguments: {
-            idMap: [JSON.stringify(newEsAggsIdToOriginalColumn)],
+            idMap: [JSON.stringify(updatedEsAggsIdMap)],
           },
         },
         ...expressions,
