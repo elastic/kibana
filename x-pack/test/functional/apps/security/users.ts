@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
   const browser = getService('browser');
+  const security = getService('security');
 
   function isCloudEnvironment() {
     return config.get('servers.elasticsearch.hostname') !== 'localhost';
@@ -30,8 +31,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       roles: ['superuser'],
     };
 
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
     before(async () => {
       log.debug('users');
+      await security.testUser.setRoles(['cluster_security_manager']);
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });
@@ -175,9 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             return toastCount >= 1;
           });
           const successToast = await toasts.getToastElement(1);
-          expect(await successToast.getVisibleText()).to.be(
-            `Password changed for '${optionalUser.username}'.`
-          );
+          expect(await successToast.getVisibleText()).to.be('Password successfully changed');
         });
 
         it('of current user when submitting form', async () => {
@@ -196,14 +200,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             return toastCount >= 1;
           });
           const successToast = await toasts.getToastElement(1);
-          expect(await successToast.getVisibleText()).to.be(
-            `Password changed for '${optionalUser.username}'.`
-          );
+          expect(await successToast.getVisibleText()).to.be('Password successfully changed');
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/118728
-      describe.skip('Deactivate/Activate user', () => {
+      describe('Deactivate/Activate user', () => {
         it('deactivates user when confirming', async () => {
           await PageObjects.security.deactivatesUser(optionalUser);
           const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');

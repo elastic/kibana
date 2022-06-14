@@ -134,20 +134,22 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
   layer,
   datasourceLayers,
   paletteService
-) => ({
-  labels: generateCommonLabelsAstArgs(state, attributes, layer),
-  buckets: operations.map((o) => o.columnId).map(prepareDimension),
-  metric: layer.metric ? [prepareDimension(layer.metric)] : [],
-  legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
-  legendPosition: [layer.legendPosition || Position.Right],
-  maxLegendLines: [layer.legendMaxLines ?? 1],
-  legendSize: layer.legendSize ? [layer.legendSize] : [],
-  nestedLegend: [!!layer.nestedLegend],
-  truncateLegend: [
-    layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
-  ],
-  palette: generatePaletteAstArguments(paletteService, state.palette),
-});
+) => {
+  return {
+    labels: generateCommonLabelsAstArgs(state, attributes, layer),
+    buckets: operations.map((o) => o.columnId).map(prepareDimension),
+    metric: layer.metric ? [prepareDimension(layer.metric)] : [],
+    legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
+    legendPosition: [layer.legendPosition || Position.Right],
+    maxLegendLines: [layer.legendMaxLines ?? 1],
+    legendSize: layer.legendSize ? [layer.legendSize] : [],
+    nestedLegend: [!!layer.nestedLegend],
+    truncateLegend: [
+      layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
+    ],
+    palette: generatePaletteAstArguments(paletteService, state.palette),
+  };
+};
 
 const generatePieVisAst: GenerateExpressionAstFunction = (...rest) => ({
   type: 'expression',
@@ -207,7 +209,14 @@ const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => ({
     {
       type: 'function',
       function: 'mosaicVis',
-      arguments: generateCommonArguments(...rest),
+      arguments: {
+        ...generateCommonArguments(...rest),
+        // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
+        buckets: rest[2]
+          .reverse()
+          .map((o) => o.columnId)
+          .map(prepareDimension),
+      },
     },
   ],
 });
@@ -245,7 +254,8 @@ function expressionHelper(
   state: PieVisualizationState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
-  attributes: Attributes = { isPreview: false }
+  attributes: Attributes = { isPreview: false },
+  datasourceExpressionsByLayers: Record<string, Ast>
 ): Ast | null {
   const layer = state.layers[0];
   const datasource = datasourceLayers[layer.layerId];
@@ -261,26 +271,55 @@ function expressionHelper(
   if (!layer.metric || !operations.length) {
     return null;
   }
+  const visualizationAst = generateExprAst(
+    state,
+    attributes,
+    operations,
+    layer,
+    datasourceLayers,
+    paletteService
+  );
 
-  return generateExprAst(state, attributes, operations, layer, datasourceLayers, paletteService);
+  const datasourceAst = datasourceExpressionsByLayers[layer.layerId];
+  return {
+    type: 'expression',
+    chain: [
+      ...(datasourceAst ? datasourceAst.chain : []),
+      ...(visualizationAst ? visualizationAst.chain : []),
+    ],
+  };
 }
 
 export function toExpression(
   state: PieVisualizationState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
-  attributes: Partial<{ title: string; description: string }> = {}
+  attributes: Partial<{ title: string; description: string }> = {},
+  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ) {
-  return expressionHelper(state, datasourceLayers, paletteService, {
-    ...attributes,
-    isPreview: false,
-  });
+  return expressionHelper(
+    state,
+    datasourceLayers,
+    paletteService,
+    {
+      ...attributes,
+      isPreview: false,
+    },
+    datasourceExpressionsByLayers
+  );
 }
 
 export function toPreviewExpression(
   state: PieVisualizationState,
   datasourceLayers: DatasourceLayers,
-  paletteService: PaletteRegistry
+  paletteService: PaletteRegistry,
+  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ) {
-  return expressionHelper(state, datasourceLayers, paletteService, { isPreview: true });
+  return expressionHelper(
+    state,
+    datasourceLayers,
+    paletteService,
+    { isPreview: true },
+    datasourceExpressionsByLayers
+  );
 }

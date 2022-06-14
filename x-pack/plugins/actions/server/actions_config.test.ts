@@ -129,6 +129,17 @@ describe('isUriAllowed', () => {
     ).toEqual(true);
   });
 
+  test('returns true for network path references', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['my-domain.com'],
+      enabledActionTypes: [],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('//my-domain.com/foo')).toEqual(
+      true
+    );
+  });
+
   test('throws when the hostname in the requested uri is not in the allowedHosts', () => {
     const config: ActionsConfig = defaultActionsConfig;
     expect(

@@ -11,20 +11,26 @@ checks-reporter-with-killswitch "Lint: stylelint" \
   node scripts/stylelint
 echo "stylelint ✅"
 
+echo '--- Lint: eslint'
 # disable "Exit immediately" mode so that we can run eslint, capture it's exit code, and respond appropriately
 # after possibly commiting fixed files to the repo
 set +e;
-
-echo '--- Lint: eslint'
-checks-reporter-with-killswitch "Lint: eslint" \
+if is_pr && ! is_auto_commit_disabled; then
   node scripts/eslint --no-cache --fix
+else
+  node scripts/eslint --no-cache
+fi
 
 eslint_exit=$?
-
 # re-enable "Exit immediately" mode
 set -e;
 
-check_for_changed_files 'node scripts/eslint --no-cache --fix' true
+desc="node scripts/eslint --no-cache"
+if is_pr && ! is_auto_commit_disabled; then
+  desc="$desc --fix"
+fi
+
+check_for_changed_files "$desc" true
 
 if [[ "${eslint_exit}" != "0" ]]; then
   exit 1

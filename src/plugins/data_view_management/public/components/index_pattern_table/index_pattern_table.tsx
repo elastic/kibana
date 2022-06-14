@@ -13,6 +13,7 @@ import {
   EuiInMemoryTable,
   EuiPageHeader,
   EuiSpacer,
+  EuiIconTip,
   EuiBasicTableColumn,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -209,7 +210,20 @@ export const IndexPatternTable = ({
       width: '70%',
       render: (name: string, dataView: IndexPatternTableItem) => (
         <div>
-          <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>{name}</EuiLink>
+          <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>
+            {dataView.getName()}
+            {dataView.name ? (
+              <>
+                &nbsp;
+                <EuiIconTip
+                  type="iInCircle"
+                  color="text"
+                  aria-label={dataView.title}
+                  content={dataView.title}
+                />
+              </>
+            ) : null}
+          </EuiLink>
           {dataView?.id?.indexOf(securitySolution) === 0 && (
             <>
               &emsp;<EuiBadge>{securityDataView}</EuiBadge>
@@ -316,7 +330,7 @@ export const IndexPatternTable = ({
           pagination={pagination}
           sorting={sorting}
           search={search}
-          selection={selection}
+          selection={dataViews.getCanSaveSync() ? selection : undefined}
         />
       </ContextWrapper>
       {displayIndexPatternEditor}

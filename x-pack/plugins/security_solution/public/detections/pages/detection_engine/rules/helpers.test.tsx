@@ -81,6 +81,8 @@ describe('rule helpers', () => {
           ],
           saved_id: 'test123',
         },
+        relatedIntegrations: [],
+        requiredFields: [],
         threshold: {
           field: ['host.name'],
           value: '50',
@@ -97,11 +99,16 @@ describe('rule helpers', () => {
             language: '',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Titled timeline',
+        },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
         },
         newTermsFields: ['host.name'],
         historyWindowSize: '7d',
@@ -133,6 +140,7 @@ describe('rule helpers', () => {
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
+        setup: '',
       };
 
       expect(defineRuleData).toEqual(defineRuleStepData);
@@ -216,6 +224,8 @@ describe('rule helpers', () => {
           filters: [],
           saved_id: "Garrett's IP",
         },
+        relatedIntegrations: [],
+        requiredFields: [],
         threshold: {
           field: [],
           value: '100',
@@ -228,11 +238,16 @@ describe('rule helpers', () => {
             language: '',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
+        },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
         },
         newTermsFields: [],
         historyWindowSize: '7d',
@@ -258,8 +273,10 @@ describe('rule helpers', () => {
             language: 'kuery',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
+        relatedIntegrations: [],
+        requiredFields: [],
         threshold: {
           field: [],
           value: '100',
@@ -272,11 +289,16 @@ describe('rule helpers', () => {
             language: '',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
+        },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
         },
         newTermsFields: [],
         historyWindowSize: '7d',
@@ -394,6 +416,7 @@ describe('rule helpers', () => {
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
+        setup: '',
       };
 
       expect(result).toEqual(aboutRuleDataDetailsData);
@@ -403,7 +426,11 @@ describe('rule helpers', () => {
       const { note, ...mockRuleWithoutNote } = { ...mockRuleWithEverything('test-id') };
       const result: AboutStepRuleDetails = getModifiedAboutDetailsData(mockRuleWithoutNote);
 
-      const aboutRuleDetailsData = { note: '', description: mockRuleWithoutNote.description };
+      const aboutRuleDetailsData = {
+        note: '',
+        description: mockRuleWithoutNote.description,
+        setup: '',
+      };
 
       expect(result).toEqual(aboutRuleDetailsData);
     });

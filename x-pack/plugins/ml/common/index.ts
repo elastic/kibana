@@ -21,3 +21,4 @@ export { extractErrorMessage } from './util/errors';
 export type { RuntimeMappings } from './types/fields';
 export { getDefaultCapabilities as getDefaultMlCapabilities } from './types/capabilities';
 export { DATAFEED_STATE, JOB_STATE } from './constants/states';
+export type { MlSummaryJob, SummaryJobState } from './types/anomaly_detection_jobs';

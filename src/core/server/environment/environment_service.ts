@@ -6,16 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { PathConfigType, config as pathConfigDef } from '@kbn/utils';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
-import { IConfigService } from '../config';
+import type { Logger } from '@kbn/logging';
+import type { IConfigService } from '@kbn/config';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { AnalyticsServicePreboot } from '../analytics';
 import { HttpConfigType, config as httpConfigDef } from '../http';
 import { PidConfigType, config as pidConfigDef } from './pid_config';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { createDataFolder } from './create_data_folder';
 import { writePidFile } from './write_pid_file';
+
+/**
+ * @internal
+ */
+export interface PrebootDeps {
+  /**
+   * {@link AnalyticsServicePreboot}
+   */
+  analytics: AnalyticsServicePreboot;
+}
 
 /**
  * @internal
@@ -45,7 +56,7 @@ export class EnvironmentService {
     this.configService = core.configService;
   }
 
-  public async preboot() {
+  public async preboot({ analytics }: PrebootDeps) {
     // IMPORTANT: This code is based on the assumption that none of the configuration values used
     // here is supposed to change during preboot phase and it's safe to read them only once.
     const [pathConfig, serverConfig, pidConfig] = await Promise.all([
@@ -75,6 +86,24 @@ export class EnvironmentService {
       pathConfig,
       serverConfig,
       logger: this.log,
+    });
+
+    analytics.registerContextProvider({
+      name: 'kibana info',
+      context$: of({
+        kibana_uuid: this.uuid,
+        pid: process.pid,
+      }),
+      schema: {
+        kibana_uuid: {
+          type: 'keyword',
+          _meta: { description: 'Kibana instance UUID' },
+        },
+        pid: {
+          type: 'long',
+          _meta: { description: 'Process ID' },
+        },
+      },
     });
 
     return {

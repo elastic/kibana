@@ -5,6 +5,72 @@
     "functions": [
       {
         "parentPluginId": "unifiedSearch",
+        "id": "def-public.DataViewPicker",
+        "type": "Function",
+        "tags": [],
+        "label": "DataViewPicker",
+        "description": [],
+        "signature": [
+          "({ isMissingCurrent, currentDataViewId, onChangeDataView, onAddField, onDataViewCreated, trigger, selectableProps, showNewMenuTour, }: ",
+          "DataViewPickerProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPicker.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isMissingCurrent,\n  currentDataViewId,\n  onChangeDataView,\n  onAddField,\n  onDataViewCreated,\n  trigger,\n  selectableProps,\n  showNewMenuTour,\n}",
+            "description": [],
+            "signature": [
+              "DataViewPickerProps"
+            ],
+            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.DataViewsList",
+        "type": "Function",
+        "tags": [],
+        "label": "DataViewsList",
+        "description": [],
+        "signature": [
+          "({\n  dataViewsList,\n  onChangeDataView,\n  currentDataViewId,\n  selectableProps,\n  searchListInputId,\n}: ",
+          "DataViewsListProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/unified_search/public/dataview_picker/dataview_list.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewsList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  dataViewsList,\n  onChangeDataView,\n  currentDataViewId,\n  selectableProps,\n  searchListInputId,\n}",
+            "description": [],
+            "signature": [
+              "DataViewsListProps"
+            ],
+            "path": "src/plugins/unified_search/public/dataview_picker/dataview_list.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
         "id": "def-public.FilterItem",
         "type": "Function",
         "tags": [],
@@ -205,8 +271,8 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IIndexPattern",
-                "text": "IIndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               ")[]"
             ],
@@ -547,20 +613,7 @@
             "label": "nonKqlMode",
             "description": [],
             "signature": [
-              "\"lucene\" | \"text\" | undefined"
-            ],
-            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.nonKqlModeHelpText",
-            "type": "string",
-            "tags": [],
-            "label": "nonKqlModeHelpText",
-            "description": [],
-            "signature": [
-              "string | undefined"
+              "\"text\" | \"lucene\" | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false
@@ -716,6 +769,31 @@
       "children": [
         {
           "parentPluginId": "unifiedSearch",
+          "id": "def-public.UnifiedSearchPublicPluginStart.autocomplete",
+          "type": "Object",
+          "tags": [],
+          "label": "autocomplete",
+          "description": [
+            "\nautocomplete service\n{@link AutocompleteStart}"
+          ],
+          "signature": [
+            "{ getQuerySuggestions: ",
+            {
+              "pluginId": "unifiedSearch",
+              "scope": "public",
+              "docId": "kibUnifiedSearchAutocompletePluginApi",
+              "section": "def-public.QuerySuggestionGetFn",
+              "text": "QuerySuggestionGetFn"
+            },
+            "; hasQuerySuggestions: (language: string) => boolean; getValueSuggestions: ",
+            "ValueSuggestionsGetFn",
+            "; }"
+          ],
+          "path": "src/plugins/unified_search/public/types.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "unifiedSearch",
           "id": "def-public.UnifiedSearchPublicPluginStart.ui",
           "type": "Object",
           "tags": [],
@@ -732,15 +810,323 @@
       ],
       "lifecycle": "start",
       "initialIsOpen": true
+    },
+    "setup": {
+      "parentPluginId": "unifiedSearch",
+      "id": "def-public.UnifiedSearchPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "UnifiedSearchPluginSetup",
+      "description": [],
+      "path": "src/plugins/unified_search/public/types.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "unifiedSearch",
+          "id": "def-public.UnifiedSearchPluginSetup.autocomplete",
+          "type": "Object",
+          "tags": [],
+          "label": "autocomplete",
+          "description": [],
+          "signature": [
+            "{ getQuerySuggestions: ",
+            {
+              "pluginId": "unifiedSearch",
+              "scope": "public",
+              "docId": "kibUnifiedSearchAutocompletePluginApi",
+              "section": "def-public.QuerySuggestionGetFn",
+              "text": "QuerySuggestionGetFn"
+            },
+            "; getAutocompleteSettings: () => { terminateAfter: number; timeout: number; }; }"
+          ],
+          "path": "src/plugins/unified_search/public/types.ts",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
     }
   },
   "server": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-server.UnifiedSearchServerPlugin",
+        "type": "Class",
+        "tags": [],
+        "label": "UnifiedSearchServerPlugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "unifiedSearch",
+            "scope": "server",
+            "docId": "kibUnifiedSearchPluginApi",
+            "section": "def-server.UnifiedSearchServerPlugin",
+            "text": "UnifiedSearchServerPlugin"
+          },
+          " implements ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.Plugin",
+            "text": "Plugin"
+          },
+          "<",
+          {
+            "pluginId": "unifiedSearch",
+            "scope": "server",
+            "docId": "kibUnifiedSearchPluginApi",
+            "section": "def-server.UnifiedSearchServerPluginSetup",
+            "text": "UnifiedSearchServerPluginSetup"
+          },
+          ", void, object, object>"
+        ],
+        "path": "src/plugins/unified_search/server/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-server.UnifiedSearchServerPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/unified_search/server/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedSearch",
+                "id": "def-server.UnifiedSearchServerPlugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initializerContext",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { timeout: moment.Duration; enabled: boolean; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>"
+                ],
+                "path": "src/plugins/unified_search/server/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-server.UnifiedSearchServerPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<",
+              "UnifiedSearchServerPluginStartDependencies",
+              ", ",
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "server",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-server.UnifiedSearchServerPluginStart",
+                "text": "UnifiedSearchServerPluginStart"
+              },
+              ">, {}: ",
+              "UnifiedSearchServerPluginSetupDependencies",
+              ") => { autocomplete: { getAutocompleteSettings: () => { terminateAfter: number; timeout: number; }; }; }"
+            ],
+            "path": "src/plugins/unified_search/server/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedSearch",
+                "id": "def-server.UnifiedSearchServerPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<",
+                  "UnifiedSearchServerPluginStartDependencies",
+                  ", ",
+                  {
+                    "pluginId": "unifiedSearch",
+                    "scope": "server",
+                    "docId": "kibUnifiedSearchPluginApi",
+                    "section": "def-server.UnifiedSearchServerPluginStart",
+                    "text": "UnifiedSearchServerPluginStart"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/unified_search/server/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "unifiedSearch",
+                "id": "def-server.UnifiedSearchServerPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{}",
+                "description": [],
+                "signature": [
+                  "UnifiedSearchServerPluginSetupDependencies"
+                ],
+                "path": "src/plugins/unified_search/server/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-server.UnifiedSearchServerPlugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreStart",
+                "text": "CoreStart"
+              },
+              ", {}: ",
+              "UnifiedSearchServerPluginStartDependencies",
+              ") => {}"
+            ],
+            "path": "src/plugins/unified_search/server/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedSearch",
+                "id": "def-server.UnifiedSearchServerPlugin.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "path": "src/plugins/unified_search/server/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "unifiedSearch",
+                "id": "def-server.UnifiedSearchServerPlugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{}",
+                "description": [],
+                "signature": [
+                  "UnifiedSearchServerPluginStartDependencies"
+                ],
+                "path": "src/plugins/unified_search/server/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-server.UnifiedSearchServerPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/unified_search/server/plugin.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-server.UnifiedSearchServerPluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedSearchServerPluginStart",
+        "description": [],
+        "path": "src/plugins/unified_search/server/plugin.ts",
+        "deprecated": false,
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "unifiedSearch",
+      "id": "def-server.UnifiedSearchServerPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "UnifiedSearchServerPluginSetup",
+      "description": [],
+      "path": "src/plugins/unified_search/server/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "unifiedSearch",
+          "id": "def-server.UnifiedSearchServerPluginSetup.autocomplete",
+          "type": "Object",
+          "tags": [],
+          "label": "autocomplete",
+          "description": [],
+          "signature": [
+            "{ getAutocompleteSettings: () => { terminateAfter: number; timeout: number; }; }"
+          ],
+          "path": "src/plugins/unified_search/server/plugin.ts",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],

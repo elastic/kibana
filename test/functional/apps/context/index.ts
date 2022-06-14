@@ -15,8 +15,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const kibanaServer = getService('kibanaServer');
 
   describe('context app', function () {
-    this.tags('ciGroup1');
-
     before(async () => {
       await browser.setWindowSize(1200, 800);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');

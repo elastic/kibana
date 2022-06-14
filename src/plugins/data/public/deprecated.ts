@@ -30,7 +30,6 @@ import {
   disableFilter,
   fromKueryExpression,
   toElasticsearchQuery,
-  nodeTypes,
   buildEsQuery,
   buildQueryFromFilters,
   luceneStringToDsl,
@@ -49,38 +48,20 @@ import {
   COMPARE_ALL_OPTIONS,
   onlyDisabledFiltersChanged,
   getEsQueryConfig,
+  TimeRange,
 } from '../common';
 
 import {
   getDisplayValueFromFilter,
   generateFilters,
-  extractTimeRange,
-  changeTimeFilter as oldChangeTimeFilter,
   mapAndFlattenFilters as oldMapAndFlattenFilters,
-  extractTimeFilter as oldExtractTimeFilter,
-  convertRangeFilterToTimeRangeString as oldConvertRangeFilterToTimeRangeString,
 } from './query';
 
 /**
  * @deprecated  This import will be removed.
  * @removeBy 8.1
  */
-const changeTimeFilter = oldChangeTimeFilter;
-/**
- * @deprecated  This import will be removed.
- * @removeBy 8.1
- */
 const mapAndFlattenFilters = oldMapAndFlattenFilters;
-/**
- * @deprecated  This import will be removed.
- * @removeBy 8.1
- */
-const extractTimeFilter = oldExtractTimeFilter;
-/**
- * @deprecated  This import will be removed.
- * @removeBy 8.1
- */
-const convertRangeFilterToTimeRangeString = oldConvertRangeFilterToTimeRangeString;
 
 /**
  * Filter helpers namespace:
@@ -117,11 +98,7 @@ export const esFilters = {
   generateFilters,
   onlyDisabledFiltersChanged,
 
-  changeTimeFilter,
-  convertRangeFilterToTimeRangeString,
   mapAndFlattenFilters,
-  extractTimeFilter,
-  extractTimeRange,
 };
 
 /**
@@ -135,6 +112,7 @@ export type {
   PhraseFilter,
   MatchAllFilter,
   EsQueryConfig,
+  TimeRange,
 };
 export { isFilters };
 
@@ -143,7 +121,6 @@ export { isFilters };
  * @removeBy 8.1
  */
 export const esKuery = {
-  nodeTypes,
   fromKueryExpression,
   toElasticsearchQuery,
 };

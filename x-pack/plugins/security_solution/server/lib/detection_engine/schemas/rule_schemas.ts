@@ -64,7 +64,9 @@ import {
   timestampOverrideOrUndefined,
   to,
   references,
+  timestampFieldOrUndefined,
   eventCategoryOverrideOrUndefined,
+  tiebreakerFieldOrUndefined,
   savedIdOrUndefined,
   saved_id,
   thresholdNormalized,
@@ -73,9 +75,12 @@ import {
   updatedByOrNull,
   created_at,
   updated_at,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
   newTermsFields,
   historyWindowStart,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
@@ -108,6 +113,9 @@ export const baseRuleParams = t.exact(
     references,
     version,
     exceptionsList: listArray,
+    relatedIntegrations: t.union([RelatedIntegrationArray, t.undefined]),
+    requiredFields: t.union([RequiredFieldArray, t.undefined]),
+    setup: t.union([SetupGuide, t.undefined]),
   })
 );
 export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;
@@ -118,7 +126,9 @@ const eqlSpecificRuleParams = t.type({
   index: indexOrUndefined,
   query,
   filters: filtersOrUndefined,
+  timestampField: timestampFieldOrUndefined,
   eventCategoryOverride: eventCategoryOverrideOrUndefined,
+  tiebreakerField: tiebreakerFieldOrUndefined,
 });
 export const eqlRuleParams = t.intersection([baseRuleParams, eqlSpecificRuleParams]);
 export type EqlRuleParams = t.TypeOf<typeof eqlRuleParams>;

@@ -108,7 +108,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
             </div>
           </div>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
           />
           <div
             className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAssetManager__emptyPanel"
@@ -137,7 +137,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
                     className="euiEmptyPrompt__contentInner"
                   >
                     <h2
-                      className="euiTitle euiTitle--xsmall"
+                      className="euiTitle css-1c9cwui-euiTitle-xs"
                     >
                       Import your assets to get started
                     </h2>
@@ -312,7 +312,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
             </div>
           </div>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
           />
           <div
             className="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths euiFlexGrid--responsive"
@@ -338,7 +338,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   </figure>
                 </div>
                 <div
-                  className="euiSpacer euiSpacer--s"
+                  className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
                 />
                 <div
                   className="euiText euiText--extraSmall eui-textBreakAll"
@@ -363,7 +363,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   </p>
                 </div>
                 <div
-                  className="euiSpacer euiSpacer--s"
+                  className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
                 />
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow"
@@ -514,7 +514,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   </figure>
                 </div>
                 <div
-                  className="euiSpacer euiSpacer--s"
+                  className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
                 />
                 <div
                   className="euiText euiText--extraSmall eui-textBreakAll"
@@ -539,7 +539,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   </p>
                 </div>
                 <div
-                  className="euiSpacer euiSpacer--s"
+                  className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
                 />
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow"

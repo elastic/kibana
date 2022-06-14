@@ -13,14 +13,14 @@ import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
+import type {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
-import { getTopNavConfig } from '../utils';
+import { getTopNavConfig, isFallbackDataView } from '../utils';
 import type { NavigateToLensContext } from '../..';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
@@ -151,9 +151,7 @@ const TopNav = ({
     hideLensBadge,
     hideTryInLensBadge,
   ]);
-  const [indexPatterns, setIndexPatterns] = useState<DataView[]>(
-    vis.data.indexPattern ? [vis.data.indexPattern] : []
-  );
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const showDatePicker = () => {
     // tsvb loads without an indexPattern initially (TODO investigate).
     // hide timefilter only if timeFieldName is explicitly undefined.
@@ -161,7 +159,8 @@ const TopNav = ({
     return vis.type.options.showTimePicker && hasTimeField;
   };
   const showFilterBar = vis.type.options.showFilterBar;
-  const showQueryInput = vis.type.requiresSearch && vis.type.options.showQueryBar;
+  const showQueryInput =
+    vis.type.requiresSearch && vis.type.options.showQueryBar && vis.type.options.showQueryInput;
 
   useEffect(() => {
     return () => {
@@ -212,7 +211,9 @@ const TopNav = ({
     const asyncSetIndexPattern = async () => {
       let indexes: DataView[] | undefined;
 
-      if (vis.type.getUsedIndexPattern) {
+      if (vis.data.indexPattern) {
+        indexes = [vis.data.indexPattern];
+      } else if (vis.type.getUsedIndexPattern) {
         indexes = await vis.type.getUsedIndexPattern(vis.params);
       }
       if (!indexes || !indexes.length) {
@@ -226,10 +227,28 @@ const TopNav = ({
       }
     };
 
-    if (!vis.data.indexPattern) {
-      asyncSetIndexPattern();
-    }
-  }, [vis.params, vis.type, vis.data.indexPattern, services.dataViews]);
+    asyncSetIndexPattern();
+  }, [services.dataViews, vis.data.indexPattern, vis.params, vis.type]);
+
+  /** Synchronizing dataView with state **/
+  useEffect(() => {
+    const stateContainerSubscription = stateContainer.state$.subscribe(async ({ dataView }) => {
+      if (
+        dataView &&
+        visInstance.vis.data.indexPattern &&
+        dataView !== visInstance.vis.data.indexPattern.id
+      ) {
+        const dataViewFromState = await services.dataViews.get(dataView);
+
+        if (dataViewFromState) {
+          setIndexPatterns([dataViewFromState]);
+        }
+      }
+    });
+    return () => {
+      stateContainerSubscription.unsubscribe();
+    };
+  }, [services.dataViews, stateContainer.state$, visInstance.vis.data.indexPattern]);
 
   useEffect(() => {
     const autoRefreshFetchSub = services.data.query.timefilter.timefilter
@@ -246,6 +265,24 @@ const TopNav = ({
     };
   }, [services.data.query.timefilter.timefilter, doReload]);
 
+  const shouldShowDataViewPicker = Boolean(
+    vis.type.editorConfig?.enableDataViewChange &&
+      ((vis.data.indexPattern && !vis.data.savedSearchId) ||
+        isFallbackDataView(vis.data.indexPattern)) &&
+      indexPatterns.length
+  );
+
+  const onChangeDataView = useCallback(
+    async (selectedDataViewId: string) => {
+      if (selectedDataViewId) {
+        stateContainer.transitions.updateDataView(selectedDataViewId);
+      }
+    },
+    [stateContainer.transitions]
+  );
+
+  const isMissingCurrentDataView = isFallbackDataView(vis.data.indexPattern);
+
   return isChromeVisible ? (
     /**
      * Most visualizations have all search bar components enabled.
@@ -254,6 +291,7 @@ const TopNav = ({
      * All visualizations also have the timepicker\autorefresh component,
      * it is enabled by default in the TopNavMenu component.
      */
+
     <TopNavMenu
       appName={VISUALIZE_APP_NAME}
       config={config}
@@ -268,6 +306,32 @@ const TopNav = ({
       showFilterBar={showFilterBar}
       showQueryInput={showQueryInput}
       showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
+      dataViewPickerComponentProps={
+        shouldShowDataViewPicker && vis.data.indexPattern
+          ? {
+              currentDataViewId: vis.data.indexPattern.id,
+              trigger: {
+                label: isMissingCurrentDataView
+                  ? i18n.translate('visualizations.fallbackDataView.label', {
+                      defaultMessage: '{type} not found',
+                      values: {
+                        type: vis.data.savedSearchId
+                          ? i18n.translate('visualizations.search.label', {
+                              defaultMessage: 'Search',
+                            })
+                          : i18n.translate('visualizations.dataView.label', {
+                              defaultMessage: 'Data view',
+                            }),
+                      },
+                    })
+                  : vis.data.indexPattern.getName(),
+              },
+              isMissingCurrent: isMissingCurrentDataView,
+              onChangeDataView,
+              showNewMenuTour: false,
+            }
+          : undefined
+      }
       showSearchBar
       useDefaultBehaviors
     />

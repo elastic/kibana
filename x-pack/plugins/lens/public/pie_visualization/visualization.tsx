@@ -241,9 +241,11 @@ export const getPieVisualization = ({
     return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
   },
 
-  toExpression: (state, layers, attributes) =>
-    toExpression(state, layers, paletteService, attributes),
-  toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
+  toExpression: (state, layers, attributes, datasourceExpressionsByLayers) =>
+    toExpression(state, layers, paletteService, attributes, datasourceExpressionsByLayers),
+
+  toPreviewExpression: (state, layers, datasourceExpressionsByLayers) =>
+    toPreviewExpression(state, layers, paletteService, datasourceExpressionsByLayers),
 
   renderToolbar(domElement, props) {
     render(

@@ -1,12 +1,15 @@
 {
   "clusterStatus": {
-    "concurrent_connections": 174,
-    "count": 1,
-    "memory_limit": 1501560832,
-    "memory_size": 230227968,
-    "requests_total": 174,
-    "response_time_max": 2203,
+    "uuids": ["de3b8f2a-7bb9-4931-9bf3-997ba7824cf9"],
     "status": "green",
+    "requests_total": 174,
+    "concurrent_connections": 174,
+    "response_time_max": 2203,
+    "memory_size": 230227968,
+    "memory_limit": 1501560832,
+    "count": 1,
+    "status": "green",
+    "some_status_is_stale": true,
     "uuids": [
       "de3b8f2a-7bb9-4931-9bf3-997ba7824cf9"
     ]
@@ -15,175 +18,255 @@
     "kibana_cluster_requests": [
       {
         "bucket_size": "10 seconds",
-        "data": [
-          [
-            1504027460000,
-            113
-          ],
-          [
-            1504027470000,
-            146
-          ],
-          [
-            1504027480000,
-            162
-          ],
-          [
-            1504027490000,
-            164
-          ],
-          [
-            1504027500000,
-            166
-          ],
-          [
-            1504027510000,
-            168
-          ],
-          [
-            1504027520000,
-            170
-          ],
-          [
-            1504027530000,
-            172
-          ],
-          [
-            1504027540000,
-            174
-          ]
-        ],
+        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
         "metric": {
           "app": "kibana",
-          "description": "Total number of client requests received by the Kibana instance.",
           "field": "kibana_stats.requests.total",
+          "metricAgg": "max",
+          "label": "Client Requests",
+          "description": "Total number of client requests received by the Kibana instance.",
+          "units": "",
           "format": "0.[00]",
           "hasCalculation": false,
-          "isDerivative": false,
-          "label": "Client Requests",
-          "metricAgg": "max",
-          "units": ""
+          "isDerivative": false
         },
-        "timeRange": {
-          "max": 1504027568000,
-          "min": 1504027457000
-        }
+        "data": [
+          [1504027460000, 113],
+          [1504027470000, 146],
+          [1504027480000, 162],
+          [1504027490000, 164],
+          [1504027500000, 166],
+          [1504027510000, 168],
+          [1504027520000, 170],
+          [1504027530000, 172],
+          [1504027540000, 174]
+        ]
       }
     ],
     "kibana_cluster_response_times": [
       {
         "bucket_size": "10 seconds",
-        "data": [
-          [
-            1504027460000,
-            2203
-          ],
-          [
-            1504027470000,
-            2203
-          ],
-          [
-            1504027480000,
-            2203
-          ],
-          [
-            1504027490000,
-            2203
-          ],
-          [
-            1504027500000,
-            2203
-          ],
-          [
-            1504027510000,
-            2203
-          ],
-          [
-            1504027520000,
-            2203
-          ],
-          [
-            1504027530000,
-            2203
-          ],
-          [
-            1504027540000,
-            2203
-          ]
-        ],
+        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
         "metric": {
           "app": "kibana",
-          "description": "Maximum response time for client requests to the Kibana instance.",
           "field": "kibana_stats.response_times.max",
+          "metricAgg": "max",
+          "label": "Max",
+          "title": "Client Response Time",
+          "description": "Maximum response time for client requests to the Kibana instance.",
+          "units": "ms",
           "format": "0.[00]",
           "hasCalculation": false,
-          "isDerivative": false,
-          "label": "Max",
-          "metricAgg": "max",
-          "title": "Client Response Time",
-          "units": "ms"
+          "isDerivative": false
         },
-        "timeRange": {
-          "max": 1504027568000,
-          "min": 1504027457000
-        }
+        "data": [
+          [1504027460000, 2203],
+          [1504027470000, 2203],
+          [1504027480000, 2203],
+          [1504027490000, 2203],
+          [1504027500000, 2203],
+          [1504027510000, 2203],
+          [1504027520000, 2203],
+          [1504027530000, 2203],
+          [1504027540000, 2203]
+        ]
       },
       {
         "bucket_size": "10 seconds",
-        "data": [
-          [
-            1504027460000,
-            171.05714416503906
-          ],
-          [
-            1504027470000,
-            171.05714416503906
-          ],
-          [
-            1504027480000,
-            171.05714416503906
-          ],
-          [
-            1504027490000,
-            171.05714416503906
-          ],
-          [
-            1504027500000,
-            171.05714416503906
-          ],
-          [
-            1504027510000,
-            171.05714416503906
-          ],
-          [
-            1504027520000,
-            171.05714416503906
-          ],
-          [
-            1504027530000,
-            171.05714416503906
-          ],
-          [
-            1504027540000,
-            171.05714416503906
-          ]
-        ],
+        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
         "metric": {
           "app": "kibana",
-          "description": "Average response time for client requests to the Kibana instance.",
           "field": "kibana_stats.response_times.average",
+          "metricAgg": "max",
+          "label": "Average",
+          "title": "Client Response Time",
+          "description": "Average response time for client requests to the Kibana instance.",
+          "units": "ms",
           "format": "0.[00]",
           "hasCalculation": false,
-          "isDerivative": false,
-          "label": "Average",
-          "metricAgg": "max",
-          "title": "Client Response Time",
-          "units": "ms"
+          "isDerivative": false
         },
-        "timeRange": {
-          "max": 1504027568000,
-          "min": 1504027457000
-        }
+        "data": [
+          [1504027460000, 171.05714416503906],
+          [1504027470000, 171.05714416503906],
+          [1504027480000, 171.05714416503906],
+          [1504027490000, 171.05714416503906],
+          [1504027500000, 171.05714416503906],
+          [1504027510000, 171.05714416503906],
+          [1504027520000, 171.05714416503906],
+          [1504027530000, 171.05714416503906],
+          [1504027540000, 171.05714416503906]
+        ]
+      }
+    ],
+    "kibana_cluster_rule_overdue_count": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.cluster_rules.overdue.count",
+          "metricAgg": "max",
+          "label": "Rule Overdue Count",
+          "description": "Number of overdue rules across the entire cluster.",
+          "units": "",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "indices_found": { "internal": true, "metricbeat": false },
+        "data": [
+          [1504027460000, null],
+          [1504027470000, null],
+          [1504027480000, null],
+          [1504027490000, null],
+          [1504027500000, null],
+          [1504027510000, null],
+          [1504027520000, null],
+          [1504027530000, null],
+          [1504027540000, null]
+        ]
+      }
+    ],
+    "kibana_cluster_rule_overdue_duration": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.cluster_rules.overdue.delay.p50",
+          "metricAgg": "max",
+          "label": "Average Rule Overdue Delay",
+          "description": "Average delay of all overdue rules across the entire cluster.",
+          "units": "ms",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "indices_found": { "internal": true, "metricbeat": false },
+        "data": [
+          [1504027460000, null],
+          [1504027470000, null],
+          [1504027480000, null],
+          [1504027490000, null],
+          [1504027500000, null],
+          [1504027510000, null],
+          [1504027520000, null],
+          [1504027530000, null],
+          [1504027540000, null]
+        ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.cluster_rules.overdue.delay.p99",
+          "metricAgg": "max",
+          "label": "Worst Rule Overdue Delay",
+          "description": "Worst delay of all overdue rules across the entire cluster.",
+          "units": "ms",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "indices_found": { "internal": true, "metricbeat": false },
+        "data": [
+          [1504027460000, null],
+          [1504027470000, null],
+          [1504027480000, null],
+          [1504027490000, null],
+          [1504027500000, null],
+          [1504027510000, null],
+          [1504027520000, null],
+          [1504027530000, null],
+          [1504027540000, null]
+        ]
+      }
+    ],
+    "kibana_cluster_action_overdue_count": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.cluster_actions.overdue.count",
+          "metricAgg": "max",
+          "label": "Action Overdue Count",
+          "description": "Number of overdue actions across the entire cluster.",
+          "units": "",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "indices_found": { "internal": true, "metricbeat": false },
+        "data": [
+          [1504027460000, null],
+          [1504027470000, null],
+          [1504027480000, null],
+          [1504027490000, null],
+          [1504027500000, null],
+          [1504027510000, null],
+          [1504027520000, null],
+          [1504027530000, null],
+          [1504027540000, null]
+        ]
+      }
+    ],
+    "kibana_cluster_action_overdue_duration": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.cluster_actions.overdue.delay.p50",
+          "metricAgg": "max",
+          "label": "Average Action Overdue Delay",
+          "description": "Average delay of all overdue actions across the entire cluster.",
+          "units": "ms",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "indices_found": { "internal": true, "metricbeat": false },
+        "data": [
+          [1504027460000, null],
+          [1504027470000, null],
+          [1504027480000, null],
+          [1504027490000, null],
+          [1504027500000, null],
+          [1504027510000, null],
+          [1504027520000, null],
+          [1504027530000, null],
+          [1504027540000, null]
+        ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.cluster_actions.overdue.delay.p99",
+          "metricAgg": "max",
+          "label": "Worst Action Overdue Delay",
+          "description": "Worst delay of all overdue actions across the entire cluster.",
+          "units": "ms",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "indices_found": { "internal": true, "metricbeat": false },
+        "data": [
+          [1504027460000, null],
+          [1504027470000, null],
+          [1504027480000, null],
+          [1504027490000, null],
+          [1504027500000, null],
+          [1504027510000, null],
+          [1504027520000, null],
+          [1504027530000, null],
+          [1504027540000, null]
+        ]
       }
     ]
   }

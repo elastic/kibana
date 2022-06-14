@@ -13,6 +13,7 @@ import { usePreviewRule } from '../../../containers/detection_engine/rules/use_p
 import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/helpers';
 import { FieldValueThreshold } from '../threshold_input';
 import { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
+import { EqlOptionsSelected } from '../../../../../common/search_strategy';
 
 interface PreviewRouteParams {
   isDisabled: boolean;
@@ -26,6 +27,7 @@ interface PreviewRouteParams {
   threshold: FieldValueThreshold;
   machineLearningJobId: string[];
   anomalyThreshold: number;
+  eqlOptions: EqlOptionsSelected;
   newTermsFields: string[];
   historyWindowSize: string;
 }
@@ -42,6 +44,7 @@ export const usePreviewRoute = ({
   threshold,
   machineLearningJobId,
   anomalyThreshold,
+  eqlOptions,
   newTermsFields,
   historyWindowSize,
 }: PreviewRouteParams) => {
@@ -84,6 +87,7 @@ export const usePreviewRoute = ({
     threshold,
     machineLearningJobId,
     anomalyThreshold,
+    eqlOptions,
     newTermsFields,
     historyWindowSize,
   ]);
@@ -102,6 +106,7 @@ export const usePreviewRoute = ({
           threshold,
           machineLearningJobId,
           anomalyThreshold,
+          eqlOptions,
           newTermsFields,
           historyWindowSize,
         })
@@ -121,6 +126,7 @@ export const usePreviewRoute = ({
     threshold,
     machineLearningJobId,
     anomalyThreshold,
+    eqlOptions,
     newTermsFields,
     historyWindowSize,
   ]);

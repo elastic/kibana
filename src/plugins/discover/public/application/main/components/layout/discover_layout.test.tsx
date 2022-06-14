@@ -145,7 +145,14 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
     state: { columns: [] },
-    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
+    stateContainer: {
+      setAppState: () => {},
+      appStateContainer: {
+        getState: () => ({
+          interval: 'auto',
+        }),
+      },
+    } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),
   };
 

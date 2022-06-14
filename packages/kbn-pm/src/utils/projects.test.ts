@@ -249,6 +249,6 @@ describe('#includeTransitiveProjects', () => {
     const quux = projects.get('quux')!;
     const withTransitive = includeTransitiveProjects([quux], projects);
 
-    expect([...withTransitive.keys()]).toEqual(['quux', 'bar', 'baz', 'foo']);
+    expect([...withTransitive.keys()]).toEqual(['quux']);
   });
 });

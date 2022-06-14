@@ -13,7 +13,13 @@ import { MetricVisValue } from './metric_value';
 import { MetricOptions, MetricStyle, VisParams } from '../../common/types';
 import { LabelPosition } from '../../common/constants';
 
-const baseMetric: MetricOptions = { label: 'Foo', value: 'foo', lightText: false };
+const baseMetric: MetricOptions = {
+  label: 'Foo',
+  value: 'foo',
+  lightText: false,
+  rowIndex: 0,
+  colIndex: 0,
+};
 const font: MetricStyle = {
   spec: { fontSize: '12px' },
 

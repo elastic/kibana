@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } from '@elastic/eui';
-import type { PaletteRegistry } from '@kbn/coloring';
-import { defaultAnnotationColor } from '@kbn/event-annotation-plugin/public';
-import type { VisualizationDimensionEditorProps } from '../../types';
-import { State, XYDataLayerConfig } from '../types';
-import { FormatFactory } from '../../../common';
-import { getSeriesColor } from '../state_helpers';
 import {
-  defaultReferenceLineColor,
-  getAccessorColorConfig,
-  getColorAssignments,
-} from '../color_assignment';
-import { getSortedAccessors } from '../to_expression';
+  EuiFormRow,
+  EuiColorPicker,
+  EuiColorPickerProps,
+  EuiToolTip,
+  EuiIcon,
+  euiPaletteColorBlind,
+} from '@elastic/eui';
 import { TooltipWrapper } from '../../shared_components';
-import { isReferenceLayer, isAnnotationsLayer, getDataLayers } from '../visualization_helpers';
 
 const tooltipContent = {
   auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {
@@ -36,68 +31,77 @@ const tooltipContent = {
   }),
 };
 
+// copied from coloring package
+function isValidPonyfill(colorString: string) {
+  // we're using an old version of chroma without the valid function
+  try {
+    chroma(colorString);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+export function isValidColor(colorString?: string) {
+  // chroma can handle also hex values with alpha channel/transparency
+  // chroma accepts also hex without #, so test for it
+  return (
+    colorString && colorString !== '' && /^#/.test(colorString) && isValidPonyfill(colorString)
+  );
+}
+
+const getColorAlpha = (color?: string | null) =>
+  (color && isValidColor(color) && chroma(color)?.alpha()) || 1;
+
 export const ColorPicker = ({
-  state,
-  layerId,
-  accessor,
-  frame,
-  formatFactory,
-  paletteService,
   label,
   disableHelpTooltip,
   disabled,
   setConfig,
-}: VisualizationDimensionEditorProps<State> & {
-  formatFactory: FormatFactory;
-  paletteService: PaletteRegistry;
+  defaultColor,
+  overwriteColor,
+  showAlpha,
+}: {
+  overwriteColor?: string | null;
+  defaultColor?: string | null;
+  setConfig: (config: { color?: string }) => void;
   label?: string;
   disableHelpTooltip?: boolean;
   disabled?: boolean;
-  setConfig: (config: { color?: string }) => void;
+  showAlpha?: boolean;
 }) => {
-  const index = state.layers.findIndex((l) => l.layerId === layerId);
-  const layer = state.layers[index];
+  const [colorText, setColorText] = useState(overwriteColor || defaultColor);
+  const [validatedColor, setValidatedColor] = useState(overwriteColor || defaultColor);
+  const [currentColorAlpha, setCurrentColorAlpha] = useState(getColorAlpha(colorText));
+  const unflushedChanges = useRef(false);
 
-  const overwriteColor = getSeriesColor(layer, accessor);
-  const currentColor = useMemo(() => {
-    if (overwriteColor || !frame.activeData) return overwriteColor;
-    if (isReferenceLayer(layer)) {
-      return defaultReferenceLineColor;
-    } else if (isAnnotationsLayer(layer)) {
-      return defaultAnnotationColor;
+  useEffect(() => {
+    //  only the changes from outside the color picker should be applied
+    if (!unflushedChanges.current) {
+      // something external changed the color that is currently selected (switching from annotation line to annotation range)
+      if (
+        overwriteColor &&
+        validatedColor &&
+        overwriteColor.toUpperCase() !== validatedColor.toUpperCase()
+      ) {
+        setColorText(overwriteColor);
+        setValidatedColor(overwriteColor.toUpperCase());
+        setCurrentColorAlpha(getColorAlpha(overwriteColor));
+      }
     }
-
-    const dataLayer: XYDataLayerConfig = layer;
-    const sortedAccessors: string[] = getSortedAccessors(
-      frame.datasourceLayers[layer.layerId] ?? layer.accessors,
-      layer
-    );
-
-    const colorAssignments = getColorAssignments(
-      getDataLayers(state.layers),
-      { tables: frame.activeData },
-      formatFactory
-    );
-    const mappedAccessors = getAccessorColorConfig(
-      colorAssignments,
-      frame,
-      {
-        ...dataLayer,
-        accessors: sortedAccessors.filter((sorted) => dataLayer.accessors.includes(sorted)),
-      },
-      paletteService
-    );
-
-    return mappedAccessors.find((a) => a.columnId === accessor)?.color || null;
-  }, [overwriteColor, frame, paletteService, state.layers, accessor, formatFactory, layer]);
-
-  const [color, setColor] = useState(currentColor);
+    unflushedChanges.current = false;
+  }, [validatedColor, overwriteColor, defaultColor]);
 
   const handleColor: EuiColorPickerProps['onChange'] = (text, output) => {
-    setColor(text);
-    if (output.isValid || text === '') {
-      const newColor = text === '' ? undefined : output.hex;
-      setConfig({ color: newColor });
+    setColorText(text);
+    unflushedChanges.current = true;
+    if (output.isValid) {
+      setValidatedColor(output.hex.toUpperCase());
+      setCurrentColorAlpha(getColorAlpha(output.hex));
+      setConfig({ color: output.hex });
+    }
+    if (text === '') {
+      setConfig({ color: undefined });
     }
   };
 
@@ -109,16 +113,26 @@ export const ColorPicker = ({
 
   const colorPicker = (
     <EuiColorPicker
+      fullWidth
       data-test-subj="indexPattern-dimension-colorPicker"
       compressed
       isClearable={Boolean(overwriteColor)}
       onChange={handleColor}
-      color={disabled ? '' : color || currentColor}
+      color={disabled ? '' : colorText}
       disabled={disabled}
-      placeholder={i18n.translate('xpack.lens.xyChart.seriesColor.auto', {
-        defaultMessage: 'Auto',
-      })}
+      placeholder={
+        defaultColor?.toUpperCase() ||
+        i18n.translate('xpack.lens.xyChart.seriesColor.auto', {
+          defaultMessage: 'Auto',
+        })
+      }
       aria-label={inputLabel}
+      showAlpha={showAlpha}
+      swatches={
+        currentColorAlpha === 1
+          ? euiPaletteColorBlind()
+          : euiPaletteColorBlind().map((c) => chroma(c).alpha(currentColorAlpha).hex())
+      }
     />
   );
 
@@ -130,14 +144,13 @@ export const ColorPicker = ({
         <TooltipWrapper
           delay="long"
           position="top"
-          tooltipContent={color && !disabled ? tooltipContent.custom : tooltipContent.auto}
+          tooltipContent={colorText && !disabled ? tooltipContent.custom : tooltipContent.auto}
           condition={!disableHelpTooltip}
         >
           <span>
             {inputLabel}
             {!disableHelpTooltip && (
               <>
-                {''}
                 <EuiIcon
                   type="questionInCircle"
                   color="subdued"

@@ -9,8 +9,7 @@
 import type { HttpSetup, IHttpFetchError } from '@kbn/core/public';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { extractWarningMessages } from '../../../lib/utils';
-// @ts-ignore
-import * as es from '../../../lib/es/es';
+import { send } from '../../../lib/es/es';
 import { BaseResponseType } from '../../../types';
 
 const { collapseLiteralStrings } = XJson;
@@ -32,6 +31,9 @@ export interface RequestResult<V = unknown> {
   request: { data: string; method: string; path: string };
   response: ResponseObject<V>;
 }
+
+const getContentType = (response: Response | undefined) =>
+  (response?.headers.get('Content-Type') as BaseResponseType) ?? '';
 
 let CURRENT_REQ_ID = 0;
 export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
@@ -69,7 +71,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
       const startTime = Date.now();
 
       try {
-        const { response, body } = await es.send({
+        const { response, body } = await send({
           http: args.http,
           method,
           path,
@@ -103,7 +105,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
             }
 
             if (isMultiRequest) {
-              value = '# ' + req.method + ' ' + req.url + '\n' + value;
+              value = `# ${req.method} ${req.url} ${response.status} ${response.statusText}\n${value}`;
             }
 
             results.push({
@@ -111,7 +113,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
                 timeMs: Date.now() - startTime,
                 statusCode: response.status,
                 statusText: response.statusText,
-                contentType: response.headers.get('Content-Type') as BaseResponseType,
+                contentType: getContentType(response),
                 value,
               },
               request: {
@@ -128,9 +130,8 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
       } catch (error) {
         let value;
         const { response, body } = error as IHttpFetchError;
-        const contentType = response?.headers.get('Content-Type') ?? '';
         const statusCode = response?.status ?? 500;
-        const statusText = error?.response?.statusText ?? 'error';
+        const statusText = response?.statusText ?? 'error';
 
         if (body) {
           value = JSON.stringify(body, null, 2);
@@ -139,13 +140,13 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         }
 
         if (isMultiRequest) {
-          value = '# ' + req.method + ' ' + req.url + '\n' + value;
+          value = `# ${req.method} ${req.url} ${statusCode} ${statusText}\n${value}`;
         }
 
-        reject({
+        const result = {
           response: {
             value,
-            contentType,
+            contentType: getContentType(response),
             timeMs: Date.now() - startTime,
             statusCode,
             statusText,
@@ -155,7 +156,16 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
             method,
             path,
           },
-        });
+        };
+
+        // Reject on unknown errors
+        if (!response) {
+          reject(result);
+        }
+
+        // Add error to the list of results
+        results.push(result);
+        await sendNextRequest();
       }
     };
 

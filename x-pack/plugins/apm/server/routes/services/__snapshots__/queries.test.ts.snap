@@ -126,12 +126,13 @@ Array [
               },
               "terms": Object {
                 "field": "service.name",
-                "size": 50,
+                "size": 500,
               },
             },
           },
           "random_sampler": Object {
             "probability": 1,
+            "seed": 0,
           },
         },
       },
@@ -186,12 +187,13 @@ Array [
               },
               "terms": Object {
                 "field": "service.name",
-                "size": 50,
+                "size": 500,
               },
             },
           },
           "random_sampler": Object {
             "probability": 1,
+            "seed": 0,
           },
         },
       },

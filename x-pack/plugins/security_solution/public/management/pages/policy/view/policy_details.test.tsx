@@ -11,13 +11,17 @@ import React from 'react';
 import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import {
+  AppContextTestRender,
+  createAppRootMockRenderer,
+  resetReactDomCreatePortalMock,
+} from '../../../../common/mock/endpoint';
 import { getEndpointListPath, getPoliciesPath, getPolicyDetailPath } from '../../../common/routing';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { exceptionsFindHttpMocks } from '../../mocks/exceptions_list_http_mocks';
+import { exceptionsFindHttpMocks } from '../../../mocks/exceptions_list_http_mocks';
 
 jest.mock('./policy_forms/components/policy_form_layout');
 jest.mock('../../../../common/components/user_privileges');
@@ -38,6 +42,8 @@ describe('Policy Details', () => {
   let render: () => ReturnType<typeof mount>;
   let policyPackagePolicy: ReturnType<typeof generator.generatePolicyPackagePolicy>;
   let policyView: ReturnType<typeof render>;
+
+  beforeAll(() => resetReactDomCreatePortalMock());
 
   beforeEach(() => {
     const appContextMockRenderer = createAppRootMockRenderer();

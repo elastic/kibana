@@ -71,6 +71,7 @@ export const indexEndpointAndFleetActionsForHost = async (
         {
           index: AGENT_ACTIONS_INDEX,
           body: action,
+          refresh: 'wait_for',
         },
         ES_INDEX_OPTIONS
       )
@@ -98,6 +99,7 @@ export const indexEndpointAndFleetActionsForHost = async (
           .index({
             index: ENDPOINT_ACTIONS_INDEX,
             body: endpointActionsBody,
+            refresh: 'wait_for',
           })
           .catch(wrapErrorAndRejectPromise),
       ]);
@@ -125,6 +127,7 @@ export const indexEndpointAndFleetActionsForHost = async (
         {
           index: AGENT_ACTIONS_RESULTS_INDEX,
           body: actionResponse,
+          refresh: 'wait_for',
         },
         ES_INDEX_OPTIONS
       )
@@ -159,6 +162,7 @@ export const indexEndpointAndFleetActionsForHost = async (
           .index({
             index: ENDPOINT_ACTION_RESPONSES_INDEX,
             body: endpointActionResponseBody,
+            refresh: 'wait_for',
           })
           .catch(wrapErrorAndRejectPromise),
       ]);
@@ -197,6 +201,7 @@ export const indexEndpointAndFleetActionsForHost = async (
           {
             index: AGENT_ACTIONS_INDEX,
             body: action,
+            refresh: 'wait_for',
           },
           ES_INDEX_OPTIONS
         )
@@ -221,6 +226,7 @@ export const indexEndpointAndFleetActionsForHost = async (
             {
               index: AGENT_ACTIONS_INDEX,
               body: action1,
+              refresh: 'wait_for',
             },
             ES_INDEX_OPTIONS
           )
@@ -230,6 +236,7 @@ export const indexEndpointAndFleetActionsForHost = async (
             {
               index: AGENT_ACTIONS_INDEX,
               body: action2,
+              refresh: 'wait_for',
             },
             ES_INDEX_OPTIONS
           )

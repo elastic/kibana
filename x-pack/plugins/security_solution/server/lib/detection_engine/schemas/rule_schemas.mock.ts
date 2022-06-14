@@ -52,6 +52,9 @@ const getBaseRuleParams = (): BaseRuleParams => {
     threat: getThreatMock(),
     version: 1,
     exceptionsList: getListArrayMock(),
+    relatedIntegrations: [],
+    requiredFields: [],
+    setup: '',
   };
 };
 
@@ -85,7 +88,9 @@ export const getEqlRuleParams = (): EqlRuleParams => {
     index: ['some-index'],
     query: 'any where true',
     filters: undefined,
+    timestampField: undefined,
     eventCategoryOverride: undefined,
+    tiebreakerField: undefined,
   };
 };
 

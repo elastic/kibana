@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -13,7 +13,7 @@ import { useFleetStatus, useGetAgents } from '../../hooks';
 
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
-import { FLEET_SERVER_PACKAGE } from '../../constants';
+import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../constants';
 
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 
@@ -39,28 +39,38 @@ export const Instructions = (props: InstructionProps) => {
     mode,
     setMode,
     isIntegrationFlow,
+    refreshAgentPolicies,
   } = props;
   const fleetStatus = useFleetStatus();
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
 
+  useEffect(() => {
+    refreshAgentPolicies();
+  }, [refreshAgentPolicies]);
+
+  const fleetServerAgentPolicies: string[] = useMemo(
+    () => agentPolicies.filter((pol) => policyHasFleetServer(pol)).map((pol) => pol.id),
+    [agentPolicies]
+  );
+
   const { data: agents, isLoading: isLoadingAgents } = useGetAgents({
-    page: 1,
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
     showInactive: false,
+    kuery:
+      fleetServerAgentPolicies.length === 0
+        ? ''
+        : `${AGENTS_PREFIX}.policy_id:${fleetServerAgentPolicies
+            .map((id) => `"${id}"`)
+            .join(' or ')}`,
   });
 
-  const fleetServers = useMemo(() => {
-    const fleetServerAgentPolicies: string[] = agentPolicies
-      .filter((pol) => policyHasFleetServer(pol))
-      .map((pol) => pol.id);
-    return (agents?.items ?? []).filter((agent) =>
-      fleetServerAgentPolicies.includes(agent.policy_id ?? '')
-    );
-  }, [agents, agentPolicies]);
+  const fleetServers = agents?.items || [];
 
   const fleetServerHosts = useMemo(() => {
     return settings?.fleet_server_hosts || [];
   }, [settings]);
+
+  if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
 
   const hasNoFleetServerHost = fleetStatus.isReady && fleetServerHosts.length === 0;
 
@@ -80,8 +90,6 @@ export const Instructions = (props: InstructionProps) => {
   } else {
     setSelectionType('tabs');
   }
-
-  if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
 
   if (hasNoFleetServerHost) {
     return null;
@@ -104,7 +112,11 @@ export const Instructions = (props: InstructionProps) => {
               <EuiSpacer size="l" />
             </>
           )}
-          {isFleetServerPolicySelected ? <AdvancedTab /> : <ManagedSteps {...props} />}
+          {isFleetServerPolicySelected ? (
+            <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} />
+          ) : (
+            <ManagedSteps {...props} />
+          )}
         </>
       );
     }

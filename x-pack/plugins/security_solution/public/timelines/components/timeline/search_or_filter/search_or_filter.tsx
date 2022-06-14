@@ -62,24 +62,13 @@ interface Props {
 
 const SearchOrFilterContainer = styled.div`
   ${({ theme }) => `margin-top: ${theme.eui.euiSizeXS};`}
-  user-select: none;
-  .globalQueryBar {
-    padding: 0px;
-    .kbnQueryBar {
-      div:first-child {
-        margin-right: 0px;
-      }
-    }
-    .globalFilterGroup__wrapper.globalFilterGroup__wrapper-isVisible {
-      height: auto !important;
-    }
-  }
+  user-select: none; // This should not be here, it makes the entire page inaccessible
 `;
 
 SearchOrFilterContainer.displayName = 'SearchOrFilterContainer';
 
 const ModeFlexItem = styled(EuiFlexItem)`
-  user-select: none;
+  user-select: none; // Again, why?
 `;
 
 ModeFlexItem.displayName = 'ModeFlexItem';

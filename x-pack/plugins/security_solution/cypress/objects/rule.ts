@@ -110,13 +110,14 @@ export interface MachineLearningRule {
 
 export const getIndexPatterns = (): string[] => [
   'apm-*-transaction*',
-  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
   'logs-*',
   'packetbeat-*',
+  'traces-apm*',
   'winlogbeat-*',
+  '-*elastic-cloud-logs-*',
 ];
 
 export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
@@ -345,7 +346,10 @@ export const getNewTermsRule = (): NewTermsRule => ({
 });
 
 export const getMachineLearningRule = (): MachineLearningRule => ({
-  machineLearningJobs: ['linux_anomalous_network_service', 'linux_anomalous_network_activity_ecs'],
+  machineLearningJobs: [
+    'v3_linux_anomalous_process_all_hosts',
+    'v3_linux_anomalous_network_activity',
+  ],
   anomalyScoreThreshold: '20',
   name: 'New ML Rule Test',
   description: 'The new ML rule description.',
@@ -466,7 +470,9 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     severity,
     query,
   } = ruleResponse.body;
-  const rule = {
+
+  // NOTE: Order of the properties in this object matters for the tests to work.
+  const rule: RulesSchema = {
     id,
     updated_at: updatedAt,
     updated_by: updatedBy,
@@ -493,6 +499,9 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     version: 1,
     exceptions_list: [],
     immutable: false,
+    related_integrations: [],
+    required_fields: [],
+    setup: '',
     type: 'query',
     language: 'kuery',
     index: getIndexPatterns(),
@@ -500,6 +509,8 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     throttle: 'no_actions',
     actions: [],
   };
+
+  // NOTE: Order of the properties in this object matters for the tests to work.
   const details = {
     exported_count: 1,
     exported_rules_count: 1,

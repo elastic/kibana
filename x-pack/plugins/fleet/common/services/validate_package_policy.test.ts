@@ -241,6 +241,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           ],
         },
       ],
+      vars: {},
     };
 
     const invalidPackagePolicy: NewPackagePolicy = {
@@ -332,6 +333,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           ],
         },
       ],
+      vars: {},
     };
 
     const noErrorsValidationResults = {
@@ -370,6 +372,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           vars: { 'var-name': null },
         },
       },
+      vars: {},
     };
 
     it('returns no errors for valid package policy', () => {
@@ -416,6 +419,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             streams: { 'with-no-stream-vars-bar': {} },
           },
         },
+        vars: {},
       });
     });
 
@@ -487,6 +491,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             streams: { 'with-no-stream-vars-bar': {} },
           },
         },
+        vars: {},
       });
     });
 
@@ -505,6 +510,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: null,
+        vars: {},
       });
       expect(
         validatePackagePolicy(
@@ -520,6 +526,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: null,
+        vars: {},
       });
     });
 
@@ -538,6 +545,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: null,
+        vars: {},
       });
       expect(
         validatePackagePolicy(
@@ -553,6 +561,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: null,
+        vars: {},
       });
     });
 
@@ -604,6 +613,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             },
           },
         },
+        vars: {},
       });
     });
 
@@ -729,6 +739,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             },
           },
         },
+        vars: {},
         name: null,
         namespace: null,
       });
