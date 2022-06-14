@@ -43,7 +43,6 @@ export type {
   KueryNode,
   KueryParseOptions,
   KueryQueryOptions,
-  NodeTypes,
 } from './kuery';
 
 export {
