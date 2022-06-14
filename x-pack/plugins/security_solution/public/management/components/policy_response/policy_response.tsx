@@ -44,10 +44,6 @@ const StyledEuiTreeView = styled(EuiTreeView)`
       }
     }
   }
-
-  .euiCallOut.policyResponseErrorCallOut {
-    margin-left: ${(props) => props.theme.eui.paddingSizes.l};
-  }
 `;
 
 interface PolicyResponseProps {
