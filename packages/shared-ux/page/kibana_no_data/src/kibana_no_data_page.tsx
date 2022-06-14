@@ -6,27 +6,30 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState } from 'react';
-import { useData, useDocLinks, useEditors, usePermissions } from '@kbn/shared-ux-services';
-import {
-  NoDataViewsPrompt,
-  NoDataViewsPromptProvider,
-  NoDataViewsPromptServices,
-} from '@kbn/shared-ux-prompt-no-data-views';
 import { EuiLoadingElastic } from '@elastic/eui';
-import { NoDataConfigPage, NoDataPageProps } from '../page_template';
+import { NoDataConfigPage, NoDataPageProps } from '@kbn/shared-ux-components';
+import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
 
+import { useServices } from './services';
+
+/**
+ * Props for `KibanaNoDataPage`.
+ */
 export interface Props {
+  /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
+  /** `NoDataPage` configuration; see `NoDataPageProps`. */
   noDataConfig: NoDataPageProps;
 }
 
+/**
+ * A page to display when Kibana has no data, prompting a person to add integrations or create a new data view.
+ */
 export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => {
   // These hooks are temporary, until this component is moved to a package.
-  const { canCreateNewDataView } = usePermissions();
-  const { dataViewsDocLink } = useDocLinks();
-  const { openDataViewEditor } = useEditors();
+  const services = useServices();
+  const { hasESData, hasUserDataView } = services;
 
-  const { hasESData, hasUserDataView } = useData();
   const [isLoading, setIsLoading] = useState(true);
   const [dataExists, setDataExists] = useState(false);
   const [hasUserDataViews, setHasUserDataViews] = useState(false);
@@ -48,26 +51,8 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => 
     return <EuiLoadingElastic css={{ margin: 'auto' }} size="xxl" />;
   }
 
-  /*
-    TODO: clintandrewhall - the use and population of `NoDataViewPromptProvider` here is temporary,
-    until `KibanaNoDataPage` is moved to a package of its own.
-
-    Once `KibanaNoDataPage` is moved to a package, `NoDataViewsPromptProvider` will be *combined*
-    with `KibanaNoDataPageProvider`, creating a single Provider that manages contextual dependencies
-    throughout the React tree from the top-level of composition and consumption.
-  */
   if (!hasUserDataViews && dataExists) {
-    const services: NoDataViewsPromptServices = {
-      canCreateNewDataView,
-      dataViewsDocLink,
-      openDataViewEditor,
-    };
-
-    return (
-      <NoDataViewsPromptProvider {...services}>
-        <NoDataViewsPrompt onDataViewCreated={onDataViewCreated} />
-      </NoDataViewsPromptProvider>
-    );
+    return <NoDataViewsPrompt onDataViewCreated={onDataViewCreated} />;
   }
 
   if (!dataExists) {
