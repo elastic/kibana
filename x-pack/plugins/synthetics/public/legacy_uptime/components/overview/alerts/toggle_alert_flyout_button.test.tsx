@@ -15,8 +15,7 @@ import {
 import { ToggleAlertFlyoutButtonComponent } from './toggle_alert_flyout_button';
 import { ToggleFlyoutTranslations } from './translations';
 
-// FLAKY: https://github.com/elastic/kibana/issues/134310
-describe.skip('ToggleAlertFlyoutButtonComponent', () => {
+describe('ToggleAlertFlyoutButtonComponent', () => {
   describe('when users have write access to uptime', () => {
     it('enables the button to create a rule', () => {
       const { getByText } = render(
