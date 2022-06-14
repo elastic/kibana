@@ -151,6 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
 
             const expectedTitles = [
               'Status',
+              'Started at',
               'Last updated',
               'Duration',
               'Expected value',
@@ -160,6 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
             const expectedDescriptions = [
               'Active',
               'Oct 19, 2021 @ 15:00:41.555',
+              'Oct 19, 2021 @ 15:20:38.749',
               '20 minutes',
               '5',
               '30.727896995708154',

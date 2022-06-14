@@ -50,6 +50,7 @@ interface RuleStatsState {
 export interface TopAlert {
   fields: ParsedTechnicalFields & ParsedExperimentalFields;
   start: number;
+  lastUpdated: number;
   reason: string;
   link?: string;
   active: boolean;

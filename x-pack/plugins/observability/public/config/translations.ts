@@ -79,6 +79,9 @@ export const translations = {
     lastUpdatedLabel: i18n.translate('xpack.observability.alertsFlyout.lastUpdatedLabel', {
       defaultMessage: 'Last updated',
     }),
+    startedAtLabel: i18n.translate('xpack.observability.alertsFlyout.startedAtLabel', {
+      defaultMessage: 'Started at',
+    }),
     durationLabel: i18n.translate('xpack.observability.alertsFlyout.durationLabel', {
       defaultMessage: 'Duration',
     }),
