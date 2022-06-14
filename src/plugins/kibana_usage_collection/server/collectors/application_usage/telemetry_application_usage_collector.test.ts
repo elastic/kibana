@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Subject } from 'rxjs';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   Collector,
@@ -21,9 +22,6 @@ import { ApplicationUsageViews } from './types';
 
 import { SAVED_OBJECTS_DAILY_TYPE, SAVED_OBJECTS_TOTAL_TYPE } from './saved_objects_types';
 
-// use fake timers to avoid triggering rollups during tests
-jest.useFakeTimers();
-
 describe('telemetry_application_usage', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let collector: Collector<unknown>;
@@ -34,6 +32,8 @@ describe('telemetry_application_usage', () => {
   const registerType = jest.fn();
   const mockedFetchContext = createCollectorFetchContextMock();
 
+  let pluginStop$: Subject<void>;
+
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     usageCollectionMock = createUsageCollectionSetupMock();
@@ -43,16 +43,19 @@ describe('telemetry_application_usage', () => {
       collector = new Collector(logger, config);
       return createUsageCollectionSetupMock().makeUsageCollector(config);
     });
+    pluginStop$ = new Subject();
     registerApplicationUsageCollector(
       logger,
       usageCollectionMock,
       registerType,
-      getSavedObjectClient
+      getSavedObjectClient,
+      pluginStop$
     );
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    pluginStop$.next();
+    pluginStop$.complete();
   });
 
   test('registered collector is set', () => {
