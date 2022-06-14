@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-performance-testing-dataset-extractor"
-PKG_REQUIRE_NAME = "@kbn/performance-testing-dataset-extractor"
+PKG_DIRNAME = "kbn-scalability-simulation-generator"
+PKG_REQUIRE_NAME = "@kbn/scalability-simulation-generator"
 
 SOURCE_FILES = glob(
   [
@@ -38,9 +38,7 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-dev-cli-errors",
   "//packages/kbn-dev-cli-runner",
-  "//packages/kbn-test",
   "//packages/kbn-tooling-log",
-  "@npm//@elastic/elasticsearch",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -55,9 +53,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-dev-cli-errors:npm_module_types",
   "//packages/kbn-dev-cli-runner:npm_module_types",
-  "//packages/kbn-test:npm_module_types",
   "//packages/kbn-tooling-log:npm_module_types",
-  "@npm//@elastic/elasticsearch",
   "@npm//@types/node",
   "@npm//@types/jest",
 ]
