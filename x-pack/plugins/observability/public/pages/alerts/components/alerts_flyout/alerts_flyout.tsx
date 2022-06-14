@@ -96,7 +96,7 @@ export function AlertsFlyout({
     {
       title: translations.alertsFlyout.lastUpdatedLabel,
       description: (
-        <span title={alertData.start.toString()}>
+        <span title={alertData.lastUpdated.toString()}>
           {moment(alertData.lastUpdated).format(dateFormat)}
         </span>
       ),
