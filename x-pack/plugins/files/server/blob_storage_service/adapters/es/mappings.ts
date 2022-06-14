@@ -45,15 +45,6 @@ export interface FileChunkDocument {
   compression?: 'gzip' | string;
 
   /**
-   * Custom data that can be added by any application for retrieval purposes.
-   *
-   * @note Suitable for tags or other identifiers.
-   */
-  app_search_data?: {
-    [key: string]: JsonValue;
-  };
-
-  /**
    * Custom data that can be added by an application for its own purposes.
    *
    * @note Suitable for data about a file chunk that should not be searchable but
@@ -76,11 +67,6 @@ export const mappings: MappingTypeMapping = {
     compression: {
       index: false,
       type: 'keyword',
-    },
-    app_search_data: {
-      type: 'object',
-      dynamic: true,
-      properties: {},
     },
     app_meta_data: {
       enabled: false, // Do not parse this value for mapping in ES

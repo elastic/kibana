@@ -119,7 +119,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     const doc = await this.esClient.getSource<FileChunkDocument>({
       index: this.index,
       id: this.getReadableContentStream(id).getAttributesChunkId(),
-      _source_includes: ['app_search_data', 'app_meta_data'],
+      _source_includes: ['app_meta_data'],
       refresh: true,
     });
 
@@ -127,7 +127,6 @@ export class ElasticsearchBlobStorage implements BlobStorage {
       throw new Error('File not found');
     }
     return {
-      ...doc.app_search_data,
       ...doc.app_meta_data,
     };
   }

@@ -8,7 +8,7 @@
 import type { JsonValue } from '@kbn/utility-types';
 import type { Readable } from 'stream';
 
-export type BlobAttribute = [key: string, value: JsonValue, options?: { searchable?: boolean }];
+export type BlobAttribute = [key: string, value: JsonValue];
 
 /**
  * An array of {@link BlobAttribute}.

@@ -221,15 +221,11 @@ export class ContentStream extends Duplex {
     }
   }
 
-  private getAttributes: () =>
-    | undefined
-    | Pick<FileChunkDocument, 'app_meta_data' | 'app_search_data'> = once(() => {
+  private getAttributes: () => undefined | Pick<FileChunkDocument, 'app_meta_data'> = once(() => {
     if (!this.attributes.length) return undefined;
     this.throwIfDuplicateAttributeKeyNames();
-    return this.attributes.reduce((acc, [key, value, options]) => {
-      return options?.searchable
-        ? set(acc, `app_search_data.${key}`, value)
-        : set(acc, `app_meta_data.${key}`, value);
+    return this.attributes.reduce((acc, [key, value]) => {
+      return set(acc, `app_meta_data.${key}`, value);
     }, {});
   });
 

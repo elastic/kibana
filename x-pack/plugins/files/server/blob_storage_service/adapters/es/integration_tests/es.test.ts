@@ -136,39 +136,18 @@ describe('Elasticsearch blob storage', () => {
   });
 
   it('sets attributes on a blob', async () => {
-    const attrs: BlobAttributes = [
-      ['foo', 'bar'],
-      ['searchable', { a: 1 }, { searchable: true }],
-    ];
+    const attrs: BlobAttributes = [['foo', 'bar']];
     const { id } = await esBlobStorage.upload(Readable.from(['upload this']), attrs);
     const attrsResponse = await esBlobStorage.getAttributes(id);
     expect(attrsResponse).toEqual(
       expect.objectContaining({
         foo: 'bar',
-        searchable: { a: 1 },
       })
     );
 
-    const searchableAttributePath = 'app_search_data.searchable.a';
     const unsearchableAttributePath = 'app_meta_data.foo';
 
-    // We can search by searchable attributes
-    const {
-      hits: { hits: hits1 },
-    } = await esClient.search<FileChunkDocument>({
-      index: BLOB_STORAGE_SYSTEM_INDEX_NAME,
-      query: {
-        match: {
-          [searchableAttributePath]: 1,
-        },
-      },
-      _source_includes: ['app_search_data', 'app_meta_data'],
-    });
-    expect(hits1).toHaveLength(1);
-    expect(hits1[0]).toHaveProperty(`_source.${searchableAttributePath}`, 1);
-    expect(hits1[0]).toHaveProperty(`_source.${unsearchableAttributePath}`, 'bar'); // non searchable attributes are included
-
-    // We cannot search by other attributes
+    // We cannot search by metadata
     const {
       hits: { hits: hits2 },
     } = await esClient.search<FileChunkDocument>({

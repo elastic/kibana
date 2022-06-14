@@ -310,18 +310,13 @@ describe('ContentStream', () => {
 
     it('should store the attributes on the first document it creates', async () => {
       base64Stream = getContentStream({
-        attributes: [
-          ['myName', 'myValue'],
-          ['myOtherName', 'myOtherValue', { searchable: true }],
-          ['myOtherNameAsObject', { a: 1 }, { searchable: true }],
-        ],
+        attributes: [['myName', 'myValue']],
         params: { encoding: 'base64', maxChunkSize: '1028B' },
       });
       base64Stream.end('12345678');
       await new Promise((resolve) => base64Stream.once('finish', resolve));
 
       const expectedAttributeData = {
-        app_search_data: { myOtherName: 'myOtherValue', myOtherNameAsObject: { a: 1 } },
         app_meta_data: { myName: 'myValue' },
       };
 
