@@ -110,13 +110,7 @@ export const CommandInput = memo<CommandInputProps>(
             // ENTER
             // Execute command and blank out the input area
             case 13:
-              dispatch({
-                type: 'updateInputHistoryState',
-                payload: { command: updatedTextEnteredState },
-              });
-
               dispatch({ type: 'executeCommand', payload: { input: updatedTextEnteredState } });
-
               return '';
 
             // ARROW UP

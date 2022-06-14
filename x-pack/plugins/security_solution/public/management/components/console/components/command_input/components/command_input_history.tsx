@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFocusTrap, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { UserCommandInput } from '../../user_command_input';
 import { InputHistoryItem } from '../../console_state/types';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputHistory } from '../../../hooks/state_selectors/use_with_input_history';
@@ -32,6 +33,12 @@ export const CommandInputHistory = memo(() => {
     });
   }, [inputHistory]);
 
+  const selectableListProps: EuiSelectableProps<InputHistoryItem>['listProps'] = useMemo(() => {
+    return {
+      showIcons: false,
+    };
+  }, []);
+
   const renderAsIs: EuiSelectableProps<InputHistoryItem>['children'] = useCallback((list) => {
     return list;
   }, []);
@@ -50,7 +57,7 @@ export const CommandInputHistory = memo(() => {
   );
 
   const handleRenderOption = useCallback((option) => {
-    // Fomat item
+    return <UserCommandInput input={option.label} />;
   }, []);
 
   return (
@@ -59,6 +66,8 @@ export const CommandInputHistory = memo(() => {
         <EuiSelectable<InputHistoryItem>
           options={selectableHistoryOptions}
           onChange={handleSelectableOnChange}
+          renderOption={handleRenderOption}
+          listProps={selectableListProps}
           singleSelection={true}
           emptyMessage={NO_HISTORY_EMPTY_MESSAGE}
         >
