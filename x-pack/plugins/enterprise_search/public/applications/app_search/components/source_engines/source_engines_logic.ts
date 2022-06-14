@@ -88,8 +88,7 @@ export const SourceEnginesLogic = kea<
     indexedEngines: [
       [],
       {
-        setIndexedEngines: (_, { indexedEngines }) =>
-          indexedEngines.filter(({ type }) => type !== EngineTypes.elasticsearch),
+        setIndexedEngines: (_, { indexedEngines }) => indexedEngines,
       },
     ],
     selectedEngineNamesToAdd: [
