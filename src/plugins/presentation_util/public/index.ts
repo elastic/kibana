@@ -54,7 +54,7 @@ export {
   AddFromLibraryButton,
   PrimaryActionButton,
   PrimaryActionPopover,
-  /** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-components */
+  /** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-solution-toolbar` */
   QuickButtonGroup,
   SolutionToolbar,
   SolutionToolbarButton,

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { SolutionToolbarButton } from './button';
-export { SolutionToolbarPopover } from './popover';
+export { PrimaryButton } from './primary';
+export type { PrimaryButtonProps } from './primary';
+
+export { IconButtonGroup } from './icon_button_group';
+export type { IconButtonGroupProps, IconButton } from './icon_button_group';
+
 export { AddFromLibraryButton } from './add_from_library';
-export type { QuickButtonProps } from './quick_group';
-/** @deprecated use `IconButtonGroup` from `@kbn/shared-ux-solution-toolbar` */
-export { QuickButtonGroup } from './quick_group';
-export { PrimaryActionButton } from './primary_button';
-export { PrimaryActionPopover } from './primary_popover';
+export type { AddFromLibraryButtonProps } from './add_from_library';
