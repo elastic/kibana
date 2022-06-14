@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../common/endpoint/constants';
-import { SecuritySolutionRequestHandlerContext } from '../../../types';
-import {
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import type {
   ActivityLog,
   ActivityLogEntry,
   EndpointAction,
@@ -22,15 +22,21 @@ import {
 } from '../../../../common/endpoint/types';
 import {
   catchAndWrapError,
-  categorizeActionResults,
-  categorizeResponseResults,
   getActionRequestsResult,
   getActionResponsesResult,
   getTimeSortedData,
-  getUniqueLogData,
 } from '../../utils';
-import { EndpointMetadataService } from '../metadata';
+import type { EndpointMetadataService } from '../metadata';
 import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
+
+import {
+  categorizeActionResults,
+  categorizeResponseResults,
+  hasAckInResponse,
+  getUniqueLogData,
+  hasNoEndpointResponse,
+  hasNoFleetResponse,
+} from './utils';
 
 const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
 
@@ -146,41 +152,6 @@ const getActivityLog = async ({
   const sortedData = getTimeSortedData(uniqueLogData);
 
   return sortedData;
-};
-
-const hasAckInResponse = (response: EndpointActionResponse): boolean => {
-  return response.action_response?.endpoint?.ack ?? false;
-};
-
-// return TRUE if for given action_id/agent_id
-// there is no doc in .logs-endpoint.action.response-default
-const hasNoEndpointResponse = ({
-  action,
-  agentId,
-  indexedActionIds,
-}: {
-  action: EndpointAction;
-  agentId: string;
-  indexedActionIds: string[];
-}): boolean => {
-  return action.agents.includes(agentId) && !indexedActionIds.includes(action.action_id);
-};
-
-// return TRUE if for given action_id/agent_id
-// there is no doc in .fleet-actions-results
-const hasNoFleetResponse = ({
-  action,
-  agentId,
-  agentResponses,
-}: {
-  action: EndpointAction;
-  agentId: string;
-  agentResponses: EndpointActionResponse[];
-}): boolean => {
-  return (
-    action.agents.includes(agentId) &&
-    !agentResponses.map((e) => e.action_id).includes(action.action_id)
-  );
 };
 
 export const getPendingActionCounts = async (

@@ -14,7 +14,7 @@ import { getAuditLogResponse } from '../../services';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EndpointAppContext } from '../../types';
 
-export const actionsLogRequestHandler = (
+export const auditLogRequestHandler = (
   endpointContext: EndpointAppContext
 ): RequestHandler<
   EndpointActionLogRequestParams,

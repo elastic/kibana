@@ -101,12 +101,9 @@ export interface FleetActionResponseData {
 /**
  * And endpoint action created in Fleet's `.fleet-actions`
  */
-export interface EndpointAction {
+export interface EndpointAction extends ActionRequestFields {
   action_id: string;
   '@timestamp': string;
-  expiration: string;
-  type: 'INPUT_ACTION';
-  input_type: 'endpoint';
   agents: string[];
   user_id: string;
   // the number of seconds Elastic Agent (on the host) should
@@ -245,4 +242,15 @@ export interface ActionDetails {
 
 export interface ActionDetailsApiResponse {
   data: ActionDetails;
+}
+export interface ActionListApiResponse {
+  page: number | undefined;
+  pageSize: number | undefined;
+  startDate: string | undefined;
+  elasticAgentIds: string[] | undefined;
+  endDate: string | undefined;
+  userIds: string[] | undefined; // users that requested the actions
+  commands: string[] | undefined; // type of actions
+  data: ActionDetails[];
+  total: number;
 }
