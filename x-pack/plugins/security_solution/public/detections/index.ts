@@ -20,7 +20,6 @@ export class Detections {
   public setup() {}
 
   public start(storage: Storage): SecuritySubPlugin {
-    console.log('----1');
     return {
       storageTimelines: {
         timelineById: getTimelinesInStorageByIds(storage, DETECTIONS_TIMELINE_IDS),

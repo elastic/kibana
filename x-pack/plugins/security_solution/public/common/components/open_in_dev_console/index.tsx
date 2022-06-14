@@ -34,7 +34,7 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
         <EuiButton
           href={href}
           color="warning"
-          target="_blank"
+          target="_self"
           isDisabled={false}
           data-test-subj={`${dataTestSubjPrefix}-enabled-module-button`}
         >
@@ -48,7 +48,6 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
             <EuiButton
               href={href}
               color="warning"
-              target="_blank"
               isDisabled={true}
               data-test-subj={`${dataTestSubjPrefix}-disabled-module-button`}
               onMouseEnter={onMouseEnter}

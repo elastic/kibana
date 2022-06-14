@@ -60,3 +60,7 @@ export const PANEL_TITLE = i18n.translate(
     defaultMessage: 'Current host risk scores',
   }
 );
+
+export const IMPORT_DASHBOARD = i18n.translate('xpack.securitySolution.overview.importDasboard', {
+  defaultMessage: 'Import dashboard',
+});

@@ -8,14 +8,14 @@ import { useState, useEffect } from 'react';
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useKibana } from '../../../common/lib/kibana';
 
-const DASHBOARD_REQUEST_BODY_SEARCH = '"Current Risk Score for Hosts"';
+export const DASHBOARD_REQUEST_BODY_SEARCH = '"Current Risk Score for Hosts"';
 export const DASHBOARD_REQUEST_BODY = {
   type: 'dashboard',
   search: DASHBOARD_REQUEST_BODY_SEARCH,
   fields: ['title'],
 };
 
-export const useRiskyHostsDashboardButtonHref = (to: string, from: string) => {
+export const useRiskyHostsDashboardButtonHref = (to?: string, from?: string) => {
   const {
     dashboard,
     savedObjects: { client: savedObjectsClient },
@@ -24,7 +24,7 @@ export const useRiskyHostsDashboardButtonHref = (to: string, from: string) => {
   const [buttonHref, setButtonHref] = useState<string | undefined>();
 
   useEffect(() => {
-    if (dashboard?.locator && savedObjectsClient) {
+    if (dashboard?.locator && savedObjectsClient && to && from) {
       savedObjectsClient.find<SavedObjectAttributes>(DASHBOARD_REQUEST_BODY).then(
         async (DashboardsSO?: {
           savedObjects?: Array<{

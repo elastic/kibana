@@ -72,6 +72,7 @@ import { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { readConsoleRoute } from '../lib/console/routes/read_console_route';
 import { createDashboardsRoute } from '../lib/prebuilt_saved_objects/routes/create_dashboards';
+import { readSignalIndexRoute } from '../lib/detection_engine/routes/rules/read_signal_index_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -151,6 +152,7 @@ export const initRoutes = (
   createSignalsMigrationRoute(router, security);
   finalizeSignalsMigrationRoute(router, ruleDataService, security);
   deleteSignalsMigrationRoute(router, security);
+  readSignalIndexRoute(router, ruleDataService);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces

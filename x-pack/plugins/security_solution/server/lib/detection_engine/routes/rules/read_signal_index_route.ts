@@ -11,22 +11,22 @@ import {
   getIndexExists,
 } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_SIGNAL_INDEX_URL } from '../../../../../common/constants';
 
 import { buildSiemResponse } from '../utils';
 import { RuleDataPluginService } from '../../../../../../rule_registry/server';
-import { fieldAliasesOutdated } from './check_template_version';
-import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
-import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
+import { getIndexVersion } from '../index/get_index_version';
+import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
+import { fieldAliasesOutdated } from '../index/check_template_version';
 
-export const readIndexRoute = (
+export const readSignalIndexRoute = (
   router: SecuritySolutionPluginRouter,
   ruleDataService: RuleDataPluginService
 ) => {
   router.get(
     {
-      path: DETECTION_ENGINE_INDEX_URL,
+      path: DETECTION_ENGINE_SIGNAL_INDEX_URL,
       validate: false,
       options: {
         tags: ['access:securitySolution'],
