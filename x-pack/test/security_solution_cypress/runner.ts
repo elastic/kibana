@@ -68,8 +68,8 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
  */
 export async function SecuritySolutionCypressCliTestRunnerCI(
   context: FtrProviderContext,
-  totalCiJobs: number,
-  ciJobNumber: number
+  totalCiJobs: number = 1,
+  ciJobNumber: number = 1
 ) {
   const integrations = retrieveIntegrations(totalCiJobs, ciJobNumber);
   return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:spec', {
