@@ -230,15 +230,15 @@ export function MachineLearningTestResourcesProvider(
       await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter, indexPatternTitle);
     },
 
-    async createMLTestDashboardIfNeeded() {
-      await this.createDashboardIfNeeded(dashboards.mlTestDashboard);
+    async createMLTestDashboardIfNeeded(): Promise<string> {
+      return await this.createDashboardIfNeeded(dashboards.mlTestDashboard);
     },
 
     async deleteMLTestDashboard() {
       await this.deleteDashboardByTitle(dashboards.mlTestDashboard.requestBody.attributes.title);
     },
 
-    async createDashboardIfNeeded(dashboard: any) {
+    async createDashboardIfNeeded(dashboard: { requestBody: any }): Promise<string> {
       const title = dashboard.requestBody.attributes.title;
       const dashboardId = await this.getDashboardId(title);
       if (dashboardId !== undefined) {
