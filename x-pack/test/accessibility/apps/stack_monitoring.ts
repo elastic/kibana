@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('No monitoring data found should exist ', async () => {
+    it('a11y tests for no monitoring data found page', async () => {
       await noData.isOnNoDataPage();
       await a11y.testAppSnapshot();
     });
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // a11y violation caught here - if this rest is unskipped remove the test below it.
     // https://github.com/elastic/kibana/issues/134139
-    it.skip('Alerts Page', async function () {
+    it.skip('a11y tests for Alerts modal remind later button', async function () {
       await testSubjects.click('alerts-modal-remind-later-button');
       await a11y.testAppSnapshot();
     });
@@ -48,13 +48,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('alerts-modal-remind-later-button');
     });
 
-    it('Kibana Overview', async function () {
+    it('a11y tests for Kibana Overview', async function () {
       await clusterOverview.clickKibanaOverview();
       await kibanaOverview.isOnOverview();
       await a11y.testAppSnapshot();
     });
 
-    it('Kibana Instances Page', async function () {
+    it('a11y tests for Kibana Instances Page', async function () {
       await kibanaOverview.isOnOverview();
       await kibanaOverview.clickInstanceTab();
       await a11y.testAppSnapshot();
