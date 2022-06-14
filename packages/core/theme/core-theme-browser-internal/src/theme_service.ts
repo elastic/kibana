@@ -9,17 +9,19 @@
 import { Subject, Observable, of } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
-import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from './types';
+import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
 
-export interface SetupDeps {
+/** @internal */
+export interface ThemeServiceSetupDeps {
   injectedMetadata: InternalInjectedMetadataSetup;
 }
 
+/** @internal */
 export class ThemeService {
   private theme$?: Observable<CoreTheme>;
   private stop$ = new Subject<void>();
 
-  public setup({ injectedMetadata }: SetupDeps): ThemeServiceSetup {
+  public setup({ injectedMetadata }: ThemeServiceSetupDeps): ThemeServiceSetup {
     const theme = injectedMetadata.getTheme();
     this.theme$ = of({ darkMode: theme.darkMode });
 
