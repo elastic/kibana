@@ -317,7 +317,7 @@ describe('ContentStream', () => {
       await new Promise((resolve) => base64Stream.once('finish', resolve));
 
       const expectedAttributeData = {
-        app_meta_data: { myName: 'myValue' },
+        app_metadata: { myName: 'myValue' },
       };
 
       expect(client.index).toHaveBeenCalledTimes(3);

@@ -136,16 +136,20 @@ describe('Elasticsearch blob storage', () => {
   });
 
   it('sets attributes on a blob', async () => {
-    const attrs: BlobAttributes = [['foo', 'bar']];
+    const attrs: BlobAttributes = [
+      ['foo', 'bar'],
+      ['myObject', { foo: 'bar' }],
+    ];
     const { id } = await esBlobStorage.upload(Readable.from(['upload this']), attrs);
     const attrsResponse = await esBlobStorage.getAttributes(id);
     expect(attrsResponse).toEqual(
       expect.objectContaining({
         foo: 'bar',
+        myObject: { foo: 'bar' },
       })
     );
 
-    const unsearchableAttributePath = 'app_meta_data.foo';
+    const unsearchableAttributePath = 'app_metadata.foo';
 
     // We cannot search by metadata
     const {

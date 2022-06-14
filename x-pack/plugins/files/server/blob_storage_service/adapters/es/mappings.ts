@@ -50,7 +50,7 @@ export interface FileChunkDocument {
    * @note Suitable for data about a file chunk that should not be searchable but
    * used by an application when downloaded later.
    */
-  app_meta_data?: {
+  app_metadata?: {
     [key: string]: JsonValue;
   };
 }
@@ -68,7 +68,7 @@ export const mappings: MappingTypeMapping = {
       index: false,
       type: 'keyword',
     },
-    app_meta_data: {
+    app_metadata: {
       enabled: false, // Do not parse this value for mapping in ES
       type: 'object',
       properties: {},
