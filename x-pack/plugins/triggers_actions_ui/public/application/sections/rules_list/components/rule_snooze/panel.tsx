@@ -352,7 +352,10 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
         <EuiFlexItem />
         {COMMON_SNOOZE_TIMES.map(([value, unit]) => (
           <EuiFlexItem key={`snooze-${value}${unit}`}>
-            <EuiLink onClick={() => applySnooze(value, unit)}>
+            <EuiLink
+              data-test-subj={`linkSnooze${value}${unit}`}
+              onClick={() => applySnooze(value, unit)}
+            >
               {durationToTextString(value, unit)}
             </EuiLink>
           </EuiFlexItem>

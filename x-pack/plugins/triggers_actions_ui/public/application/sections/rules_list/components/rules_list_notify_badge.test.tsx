@@ -13,7 +13,6 @@ import moment from 'moment';
 import { RuleTableItem } from '../../../../types';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { RulesListNotifyBadge } from './rules_list_notify_badge';
-import { SnoozePanel } from './rule_snooze';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -129,10 +128,17 @@ describe('RulesListNotifyBadge', () => {
     );
 
     // Snooze for 1 hour
-    wrapper.find(SnoozePanel).find({ children: '1 hour' }).find('button').first().simulate('click');
+    wrapper.find('button[data-test-subj="linkSnooze1h"]').first().simulate('click');
     expect(onLoading).toHaveBeenCalledWith(true);
-    expect(onClose).toHaveBeenCalled();
-    expect(snoozeRule).toHaveBeenCalledWith(expect.stringContaining('1990'), '1h');
+    expect(snoozeRule).toHaveBeenCalledWith({
+      duration: 3600000,
+      id: null,
+      rRule: {
+        count: 1,
+        dtstart: '1990-01-01T05:00:00.000Z',
+        tzid: 'America/New_York',
+      },
+    });
 
     await act(async () => {
       jest.runOnlyPendingTimers();
@@ -140,6 +146,7 @@ describe('RulesListNotifyBadge', () => {
 
     expect(onRuleChanged).toHaveBeenCalled();
     expect(onLoading).toHaveBeenCalledWith(false);
+    expect(onClose).toHaveBeenCalled();
   });
 
   it('should allow the user to unsnooze rules', async () => {
@@ -163,7 +170,6 @@ describe('RulesListNotifyBadge', () => {
     // Unsnooze
     wrapper.find('[data-test-subj="ruleSnoozeCancel"] button').simulate('click');
     expect(onLoading).toHaveBeenCalledWith(true);
-    expect(onClose).toHaveBeenCalled();
 
     await act(async () => {
       jest.runOnlyPendingTimers();
@@ -171,5 +177,6 @@ describe('RulesListNotifyBadge', () => {
 
     expect(unsnoozeRule).toHaveBeenCalled();
     expect(onLoading).toHaveBeenCalledWith(false);
+    expect(onClose).toHaveBeenCalled();
   });
 });
