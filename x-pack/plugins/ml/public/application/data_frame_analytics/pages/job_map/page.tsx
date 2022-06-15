@@ -119,7 +119,7 @@ export const Page: FC = () => {
           />
         </MlPageHeader>
       ) : null}
-      {jobId !== undefined ? (
+      {jobId !== undefined && mapModelId === undefined ? (
         <MlPageHeader>
           <FormattedMessage
             data-test-subj="mlPageDataFrameAnalyticsMapTitle"
@@ -129,7 +129,7 @@ export const Page: FC = () => {
           />
         </MlPageHeader>
       ) : null}
-      {modelId !== undefined ? (
+      {modelId !== undefined && jobId === undefined ? (
         <MlPageHeader>
           <FormattedMessage
             data-test-subj="mlPageDataFrameAnalyticsMapTitle"
