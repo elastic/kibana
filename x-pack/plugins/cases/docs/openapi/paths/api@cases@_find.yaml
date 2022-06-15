@@ -1,7 +1,9 @@
 get:
+  summary: Retrieves a paginated subset of cases.
   description: >
-    Retrieves a paginated subset of cases.
-    You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
+    You must have `read` privileges for the **Cases** feature in the
+    **Management**, **Observability**, or **Security** section of the Kibana
+    feature privileges, depending on the owner of the cases you're seeking.
   tags:
     - cases
     - kibana
