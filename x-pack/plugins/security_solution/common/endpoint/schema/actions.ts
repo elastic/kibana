@@ -32,7 +32,7 @@ export const KillProcessRequestSchema = {
   }),
 };
 
-export const responseActionBodySchemas = schema.oneOf([
+export const ResponseActionBodySchema = schema.oneOf([
   HostIsolationRequestSchema.body,
   KillProcessRequestSchema.body,
 ]);
