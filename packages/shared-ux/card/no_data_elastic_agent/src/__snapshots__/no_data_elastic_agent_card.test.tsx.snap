@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ElasticAgentCard renders 1`] = `
-<div>
+exports[`NoDataElasticAgentCard renders 1`] = `
+<div
+  intl="[object Object]"
+>
   <div
     class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable css-1hu4pg0-EuiCard"
   >

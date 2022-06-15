@@ -35,7 +35,7 @@ export const RedirectAppLinksProvider: FC<Services> = ({ children, ...services }
 /**
  * Kibana-specific contextual services to be adapted for this component.
  */
-export interface KibanaServices {
+export interface KibanaDependencies {
   coreStart: {
     application: {
       currentAppId$: Observable<string | undefined>;
@@ -47,7 +47,7 @@ export interface KibanaServices {
 /**
  * Kibana-specific contextual services Provider.
  */
-export const RedirectAppLinksKibanaProvider: FC<KibanaServices> = ({ children, coreStart }) => {
+export const RedirectAppLinksKibanaProvider: FC<KibanaDependencies> = ({ children, coreStart }) => {
   const { navigateToUrl, currentAppId$ } = coreStart.application;
   const currentAppId = useObservable(currentAppId$, undefined);
 

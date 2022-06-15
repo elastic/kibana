@@ -8,30 +8,43 @@
 
 import React from 'react';
 import { NoDataCard } from './no_data_card';
-import type { NoDataCardProps } from './types';
+import mdx from '../README.mdx';
 
 export default {
-  title: 'Page Template/No Data/No Data Card',
+  title: 'Card',
   description: 'A wrapper around EuiCard, to be used on NoData page',
+  parameters: {
+    docs: {
+      page: mdx,
+    },
+  },
 };
 
-type Params = Pick<NoDataCardProps, 'button' | 'description'>;
-
-export const PureComponent = (params: Params) => {
-  return <NoDataCard title={'Add data'} {...params} />;
-};
-
-PureComponent.argTypes = {
+const argTypes = {
+  title: {
+    control: {
+      type: 'text',
+    },
+    defaultValue: 'Add data',
+  },
   button: {
     control: {
       type: 'text',
     },
-    defaultValue: 'Button text',
+    defaultValue: '',
   },
   description: {
     control: {
       type: 'text',
     },
-    defaultValue: 'This is a description',
+    defaultValue: '',
   },
 };
+
+type Params = Record<keyof typeof argTypes, any>;
+
+export const NoData = (params: Params) => {
+  return <NoDataCard {...params} />;
+};
+
+NoData.argTypes = argTypes;

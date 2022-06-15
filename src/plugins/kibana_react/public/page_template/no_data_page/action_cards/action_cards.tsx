@@ -10,10 +10,10 @@ import './action_cards.scss';
 
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import React, { ReactElement } from 'react';
-import { ElasticAgentCard, NoDataCard } from '../no_data_card';
+import { NoDataElasticAgentCard, NoDataCard } from '../no_data_card';
 
 interface ActionCardsProps {
-  actionCards: Array<ReactElement<typeof NoDataCard> | ReactElement<typeof ElasticAgentCard>>;
+  actionCards: Array<ReactElement<typeof NoDataCard> | ReactElement<typeof NoDataElasticAgentCard>>;
 }
 export const ActionCards = ({ actionCards }: ActionCardsProps) => {
   const cards = actionCards.map((card) => (

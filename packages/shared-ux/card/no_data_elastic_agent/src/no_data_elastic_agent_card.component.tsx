@@ -6,40 +6,41 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent } from 'react';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { EuiImage, EuiTextColor } from '@elastic/eui';
-import { ElasticAgentCardProps } from './types';
-import { NoDataCard } from './no_data_card';
+import { i18n } from '@kbn/i18n';
+
+import { NoDataCard, NoDataCardProps } from '@kbn/shared-ux-card-no-data';
+
 import ElasticAgentCardIllustration from './assets/elastic_agent_card.svg';
 
-export type ElasticAgentCardComponentProps = ElasticAgentCardProps & {
+export type Props = NoDataCardProps & {
+  /** Category to auto-select within Fleet */
+  category?: string;
+  /** True if the person can access Fleet, false otherwise */
   canAccessFleet: boolean;
 };
 
 const noPermissionTitle = i18n.translate(
-  'sharedUXComponents.noDataPage.elasticAgentCard.noPermission.title',
+  'sharedUXPackages.card.noDataElasticAgent.noPermission.title',
   {
     defaultMessage: `Contact your administrator`,
   }
 );
 
 const noPermissionDescription = i18n.translate(
-  'sharedUXComponents.noDataPage.elasticAgentCard.noPermission.description',
+  'sharedUXPackages.card.noDataElasticAgent.noPermission.description',
   {
     defaultMessage: `This integration is not yet enabled. Your administrator has the required permissions to turn it on.`,
   }
 );
 
-const elasticAgentCardTitle = i18n.translate(
-  'sharedUXComponents.noDataPage.elasticAgentCard.title',
-  {
-    defaultMessage: 'Add Elastic Agent',
-  }
-);
+const elasticAgentCardTitle = i18n.translate('sharedUXPackages.card.noDataElasticAgent.title', {
+  defaultMessage: 'Add Elastic Agent',
+});
 
 const elasticAgentCardDescription = i18n.translate(
-  'sharedUXComponents.noDataPage.elasticAgentCard.description',
+  'sharedUXPackages.card.noDataElasticAgent.description',
   {
     defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
   }
@@ -48,13 +49,13 @@ const elasticAgentCardDescription = i18n.translate(
 /**
  * Creates a specific NoDataCard pointing users to Integrations when `canAccessFleet`
  */
-export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardComponentProps> = ({
+export const NoDataElasticAgentCard = ({
   canAccessFleet,
   title = elasticAgentCardTitle,
   description,
-  ...cardRest
-}) => {
-  const props = canAccessFleet
+  ...props
+}: Props) => {
+  const cardProps = canAccessFleet
     ? {
         title,
         description: description || elasticAgentCardDescription,
@@ -79,5 +80,5 @@ export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardCompon
     />
   );
 
-  return <NoDataCard image={image} {...props} {...cardRest} />;
+  return <NoDataCard image={image} {...props} {...cardProps} />;
 };

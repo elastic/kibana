@@ -109,10 +109,10 @@ exports[`NoDataPage render 1`] = `
   <NoDataPageBody
     actionCards={
       Array [
-        <ElasticAgentCard
+        <NoDataElasticAgentCard
           solution="Elastic"
         />,
-        <ElasticAgentCard
+        <NoDataElasticAgentCard
           solution="Elastic"
         />,
         <NoDataCard />,

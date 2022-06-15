@@ -1,0 +1,25 @@
+---
+id: sharedUX/Components/NoDataElasticAgentCard
+slug: /shared-ux/components/no-data-elastic-agent-card
+title: No Data Elastic Agent Card
+summary: A card displayed when no data is available is available in Kibana, prompting a person to Add an Elastic Agent.
+tags: ['shared-ux', 'component']
+date: 2022-06-15
+---
+
+## Description
+
+A wrapper around `NoDataCard` that prompts a person to add an Elastic Agent.  All of the `NoDataCard` props are available, with `category` and `canAccessFleet` included.
+
+The `NoDataElasticAgentCard` connected component uses:
+
+- `navLinks.integrations` from `coreStart.application.capabilities` to determine if the user has access to the Integrations page.
+- `addBasePath` from `coreStart` to navigate to the Integrations page.
+
+## API
+| Export | Description |
+|---|---|
+| `NoDataElasticAgentCardProvider` | Provides contextual services to `NoDataElasticAgentCard`. |
+| `NoDataElasticAgentCardKibanaProvider` | Maps Kibana dependencies to provide contextual services to `NoDataElasticAgentCard`. |
+| `NoDataElasticAgentCard` | Uses a `Provider` to access contextual services to populate props on the `NoDataElasticAgentCardComponent`. |
+| `NoDataElasticAgentCardComponent` | The pure component, a pre-configured **NoDataCard**. |

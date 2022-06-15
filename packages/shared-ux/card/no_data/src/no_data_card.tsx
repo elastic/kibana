@@ -7,26 +7,43 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
-import { EuiButton, EuiCard, EuiScreenReaderOnly } from '@elastic/eui';
+import React, { MouseEventHandler, ReactNode } from 'react';
+import { EuiButton, EuiCard, EuiScreenReaderOnly, EuiCardProps } from '@elastic/eui';
 
-import type { NoDataCardProps } from './types';
 import { NoDataCardStyles } from './no_data_card.styles';
 
-const defaultDescription = i18n.translate(
-  'sharedUXComponents.pageTemplate.noDataCard.description',
-  {
-    defaultMessage: `Proceed without collecting data`,
-  }
-);
+const defaultDescription = i18n.translate('sharedUXPackages.card.noData.description', {
+  defaultMessage: `Proceed without collecting data`,
+});
 
-export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
+/**
+ * Props for the `NoDataCard` component.
+ */
+export type Props = Partial<Omit<EuiCardProps, 'layout'>> & {
+  /**
+   * Provide just a string for the button's label, or a whole component;
+   * The button will be hidden completely if `isDisabled=true`
+   */
+  button?: string | ReactNode;
+  /** Remapping `onClick` to any element */
+  onClick?: MouseEventHandler<HTMLElement>;
+  /**
+   * Description for the card;
+   * If not provided, the default will be used
+   */
+  description?: string | ReactNode;
+};
+
+/**
+ * A card that displays a message and a button when there is no data in Kibana.
+ */
+export const NoDataCard = ({
   title: titleProp,
   button,
   description,
   isDisabled,
-  ...cardRest
-}) => {
+  ...props
+}: Props) => {
   const styles = NoDataCardStyles();
 
   const footer = () => {
@@ -34,10 +51,12 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
     if (isDisabled) {
       return;
     }
+
     // Render a custom footer action if the button is not a simple string
     if (button && typeof button !== 'string') {
       return button;
     }
+
     // Default footer action is a button with the provided or default string
     return <EuiButton fill>{button || titleProp}</EuiButton>;
   };
@@ -59,7 +78,7 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
       description={cardDescription}
       footer={footer()}
       isDisabled={isDisabled}
-      {...cardRest}
+      {...props}
     />
   );
 };

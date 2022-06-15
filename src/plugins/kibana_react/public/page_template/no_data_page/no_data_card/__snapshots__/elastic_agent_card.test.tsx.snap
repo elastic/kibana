@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ElasticAgentCard props button 1`] = `
+exports[`NoDataElasticAgentCard props button 1`] = `
 <RedirectAppLinks
   application={
     Object {
@@ -54,7 +54,7 @@ exports[`ElasticAgentCard props button 1`] = `
 </RedirectAppLinks>
 `;
 
-exports[`ElasticAgentCard props category 1`] = `
+exports[`NoDataElasticAgentCard props category 1`] = `
 <RedirectAppLinks
   application={
     Object {
@@ -108,7 +108,7 @@ exports[`ElasticAgentCard props category 1`] = `
 </RedirectAppLinks>
 `;
 
-exports[`ElasticAgentCard props href 1`] = `
+exports[`NoDataElasticAgentCard props href 1`] = `
 <RedirectAppLinks
   application={
     Object {
@@ -162,7 +162,7 @@ exports[`ElasticAgentCard props href 1`] = `
 </RedirectAppLinks>
 `;
 
-exports[`ElasticAgentCard props recommended 1`] = `
+exports[`NoDataElasticAgentCard props recommended 1`] = `
 <RedirectAppLinks
   application={
     Object {
@@ -216,7 +216,7 @@ exports[`ElasticAgentCard props recommended 1`] = `
 </RedirectAppLinks>
 `;
 
-exports[`ElasticAgentCard renders 1`] = `
+exports[`NoDataElasticAgentCard renders 1`] = `
 <RedirectAppLinks
   application={
     Object {

@@ -14,14 +14,14 @@ import { useKibana } from '../../../context';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
 import { RedirectAppLinks } from '../../../app_links';
 
-export type ElasticAgentCardProps = NoDataPageActions & {
+export type NoDataElasticAgentCardProps = NoDataPageActions & {
   solution: string;
 };
 
 /**
  * Applies extra styling to a typical EuiAvatar
  */
-export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
+export const NoDataElasticAgentCard: FunctionComponent<NoDataElasticAgentCardProps> = ({
   solution,
   recommended,
   title,
@@ -60,16 +60,19 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
         image={image}
         title={
           <EuiTextColor color="default">
-            {i18n.translate('kibana-react.noDataPage.elasticAgentCard.noPermission.title', {
+            {i18n.translate('kibana-react.noDataPage.noDataElasticAgentCard.noPermission.title', {
               defaultMessage: `Contact your administrator`,
             })}
           </EuiTextColor>
         }
         description={
           <EuiTextColor color="default">
-            {i18n.translate('kibana-react.noDataPage.elasticAgentCard.noPermission.description', {
-              defaultMessage: `This integration is not yet enabled. Your administrator has the required permissions to turn it on.`,
-            })}
+            {i18n.translate(
+              'kibana-react.noDataPage.noDataElasticAgentCard.noPermission.description',
+              {
+                defaultMessage: `This integration is not yet enabled. Your administrator has the required permissions to turn it on.`,
+              }
+            )}
           </EuiTextColor>
         }
         isDisabled
@@ -77,7 +80,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     );
   }
 
-  const defaultCTAtitle = i18n.translate('kibana-react.noDataPage.elasticAgentCard.title', {
+  const defaultCTAtitle = i18n.translate('kibana-react.noDataPage.noDataElasticAgentCard.title', {
     defaultMessage: 'Add Elastic Agent',
   });
 
@@ -102,7 +105,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
             <span>{defaultCTAtitle}</span>
           </EuiScreenReaderOnly>
         }
-        description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
+        description={i18n.translate('kibana-react.noDataPage.noDataElasticAgentCard.description', {
           defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
         })}
         betaBadgeProps={{ label: recommended ? NO_DATA_RECOMMENDED : undefined }}

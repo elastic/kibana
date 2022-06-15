@@ -13,6 +13,11 @@ import {
   NoDataViewsPromptKibanaProvider,
 } from '@kbn/shared-ux-prompt-no-data-views';
 
+import {
+  NoDataElasticAgentCardProvider,
+  NoDataElasticAgentCardKibanaProvider,
+} from '@kbn/shared-ux-card-no-data-elastic-agent';
+
 import { LegacyServicesProvider, getLegacyServices } from './legacy_services';
 
 /**
@@ -85,7 +90,9 @@ export const KibanaNoDataPageProvider: FC<KibanaNoDataPageServices> = ({
 }) => (
   <KibanaNoDataPageContext.Provider value={services}>
     <NoDataViewsPromptProvider {...services}>
-      <LegacyServicesProvider {...getLegacyServices(services)}>{children}</LegacyServicesProvider>
+      <NoDataElasticAgentCardProvider {...services}>
+        <LegacyServicesProvider {...getLegacyServices(services)}>{children}</LegacyServicesProvider>
+      </NoDataElasticAgentCardProvider>
     </NoDataViewsPromptProvider>
   </KibanaNoDataPageContext.Provider>
 );
@@ -159,7 +166,9 @@ export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependenci
   return (
     <KibanaNoDataPageContext.Provider value={value}>
       <NoDataViewsPromptKibanaProvider {...dependencies}>
-        <LegacyServicesProvider {...getLegacyServices(value)}>{children}</LegacyServicesProvider>
+        <NoDataElasticAgentCardKibanaProvider {...dependencies}>
+          <LegacyServicesProvider {...getLegacyServices(value)}>{children}</LegacyServicesProvider>
+        </NoDataElasticAgentCardKibanaProvider>
       </NoDataViewsPromptKibanaProvider>
     </KibanaNoDataPageContext.Provider>
   );

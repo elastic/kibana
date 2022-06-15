@@ -7,9 +7,9 @@
  */
 
 import { CommonProps } from '@elastic/eui';
-import { ElasticAgentCardProps } from './no_data_card';
+import { NoDataElasticAgentCardProps } from '@kbn/shared-ux-card-no-data-elastic-agent';
 
-export type NoDataPageActions = ElasticAgentCardProps;
+export type NoDataPageActions = NoDataElasticAgentCardProps;
 
 export interface NoDataPageProps extends CommonProps {
   /**

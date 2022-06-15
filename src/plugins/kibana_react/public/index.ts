@@ -56,7 +56,7 @@ export type {
   NoDataPageActions,
   NoDataPageActionsProps,
   NoDataPageProps,
-  ElasticAgentCardProps,
+  NoDataElasticAgentCardProps,
 } from './page_template';
 export {
   KibanaPageTemplate,
@@ -65,7 +65,7 @@ export {
   NO_DATA_PAGE_TEMPLATE_PROPS,
   NO_DATA_RECOMMENDED,
   NoDataPage,
-  ElasticAgentCard,
+  NoDataElasticAgentCard,
   NoDataCard,
 } from './page_template';
 

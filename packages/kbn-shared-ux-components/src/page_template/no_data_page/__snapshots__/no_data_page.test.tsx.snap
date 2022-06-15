@@ -48,7 +48,7 @@ exports[`NoDataPage render 1`] = `
   <EuiSpacer
     size="xxl"
   />
-  <ElasticAgentCard
+  <NoDataElasticAgentCard
     key="empty-page-agent-action"
   />
 </div>

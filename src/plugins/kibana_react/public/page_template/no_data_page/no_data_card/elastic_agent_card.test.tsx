@@ -8,7 +8,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { ElasticAgentCard } from './elastic_agent_card';
+import { NoDataElasticAgentCard } from './elastic_agent_card';
 
 jest.mock('../../../context', () => ({
   ...jest.requireActual('../../../context'),
@@ -23,30 +23,32 @@ jest.mock('../../../context', () => ({
   }),
 }));
 
-describe('ElasticAgentCard', () => {
+describe('NoDataElasticAgentCard', () => {
   test('renders', () => {
-    const component = shallow(<ElasticAgentCard solution="Solution" />);
+    const component = shallow(<NoDataElasticAgentCard solution="Solution" />);
     expect(component).toMatchSnapshot();
   });
 
   describe('props', () => {
     test('recommended', () => {
-      const component = shallow(<ElasticAgentCard recommended solution="Solution" />);
+      const component = shallow(<NoDataElasticAgentCard recommended solution="Solution" />);
       expect(component).toMatchSnapshot();
     });
 
     test('button', () => {
-      const component = shallow(<ElasticAgentCard button="Button" solution="Solution" />);
+      const component = shallow(<NoDataElasticAgentCard button="Button" solution="Solution" />);
       expect(component).toMatchSnapshot();
     });
 
     test('href', () => {
-      const component = shallow(<ElasticAgentCard href="#" button="Button" solution="Solution" />);
+      const component = shallow(
+        <NoDataElasticAgentCard href="#" button="Button" solution="Solution" />
+      );
       expect(component).toMatchSnapshot();
     });
 
     test('category', () => {
-      const component = shallow(<ElasticAgentCard category="custom" solution="Solution" />);
+      const component = shallow(<NoDataElasticAgentCard category="custom" solution="Solution" />);
       expect(component).toMatchSnapshot();
     });
   });
