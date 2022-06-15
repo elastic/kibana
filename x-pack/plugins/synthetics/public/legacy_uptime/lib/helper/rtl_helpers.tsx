@@ -130,7 +130,6 @@ export const mockCore: () => Partial<CoreStart> = () => {
     storage: createMockStore(),
     data: dataPluginMock.createStartContract(),
     observability: {
-      useRulesLink: () => ({ href: 'newRuleLink' }),
       navigation: {
         // @ts-ignore
         PageTemplate: EuiPageTemplate,
