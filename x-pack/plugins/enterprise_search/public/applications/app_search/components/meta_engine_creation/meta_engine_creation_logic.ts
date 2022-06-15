@@ -16,7 +16,7 @@ import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ENGINE_PATH } from '../../routes';
 import { formatApiName } from '../../utils/format_api_name';
-import { EngineDetails, EngineTypes } from '../engine/types';
+import { EngineDetails } from '../engine/types';
 
 import { META_ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
 

@@ -11,7 +11,7 @@ import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_message
 import { HttpLogic } from '../../../shared/http';
 import { recursivelyFetchEngines } from '../../utils/recursively_fetch_engines';
 import { EngineLogic } from '../engine';
-import { EngineDetails, EngineTypes } from '../engine/types';
+import { EngineDetails } from '../engine/types';
 
 import { ADD_SOURCE_ENGINES_SUCCESS_MESSAGE, REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE } from './i18n';
 
