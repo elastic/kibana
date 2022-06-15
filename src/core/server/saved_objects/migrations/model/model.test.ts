@@ -60,6 +60,7 @@ describe('migrations v2 model', () => {
     batchSize: 1000,
     maxBatchSizeBytes: 1e8,
     discardUnknownObjects: false,
+    discardCorruptObjects: false,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
     targetIndexMappings: {
@@ -96,7 +97,7 @@ describe('migrations v2 model', () => {
     knownTypes: ['dashboard', 'config'],
     excludeFromUpgradeFilterHooks: {},
     migrationDocLinks: {
-      resolveMigrationFailures: 'resolveMigrationFailures',
+      resolveMigrationFailures: 'https://someurl.co/',
       repeatedTimeoutRequests: 'repeatedTimeoutRequests',
       routingAllocationDisabled: 'routingAllocationDisabled',
       clusterShardLimitExceeded: 'clusterShardLimitExceeded',
@@ -1138,24 +1139,56 @@ describe('migrations v2 model', () => {
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
 
-      it('REINDEX_SOURCE_TO_TEMP_READ -> FATAL if no outdated documents to reindex and transform failures seen with previous outdated documents', () => {
-        const testState: ReindexSourceToTempRead = {
-          ...state,
-          corruptDocumentIds: ['a:b'],
-          transformErrors: [],
-        };
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
-          outdatedDocuments: [],
-          lastHitSortValue: undefined,
-          totalHits: undefined,
+      describe('when transform failures or corrupt documents are found', () => {
+        it('REINDEX_SOURCE_TO_TEMP_READ -> FATAL if no outdated documents to reindex and transform failures seen with previous outdated documents', () => {
+          const testState: ReindexSourceToTempRead = {
+            ...state,
+            corruptDocumentIds: ['a:b'],
+            transformErrors: [],
+          };
+          const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+            outdatedDocuments: [],
+            lastHitSortValue: undefined,
+            totalHits: undefined,
+          });
+          const newState = model(testState, res) as FatalState;
+          expect(newState.controlState).toBe('FATAL');
+          expect(newState.reason).toMatchInlineSnapshot(`
+            "Migrations failed. Reason: 1 corrupt saved object documents were found: a:b
+
+            To allow migrations to proceed, please delete or fix these documents.
+            Note that you can configure Kibana to automatically discard corrupt documents and transform errors for this migration.
+            Please refer to https://someurl.co/ for more information."
+          `);
+          expect(newState.logs).toStrictEqual([]); // No logs because no hits
         });
-        const newState = model(testState, res) as FatalState;
-        expect(newState.controlState).toBe('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(`
-          "Migrations failed. Reason: 1 corrupt saved object documents were found: a:b
-          To allow migrations to proceed, please delete or fix these documents."
-        `);
-        expect(newState.logs).toStrictEqual([]); // No logs because no hits
+
+        it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if discardCorruptObjects=true', () => {
+          const testState: ReindexSourceToTempRead = {
+            ...state,
+            discardCorruptObjects: true,
+            corruptDocumentIds: ['a:b'],
+            transformErrors: [{ rawId: 'c:d', err: new Error('Oops!') }],
+          };
+          const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+            outdatedDocuments: [],
+            lastHitSortValue: undefined,
+            totalHits: undefined,
+          });
+          const newState = model(testState, res) as ReindexSourceToTempClosePit;
+          expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT');
+          expect(newState.logs.length).toEqual(1);
+          expect(newState.logs[0]).toMatchInlineSnapshot(`
+            Object {
+              "level": "warning",
+              "message": "Kibana has been configured to discard corrupt documents and documents that cause transform errors for this migration.
+            Therefore, the following documents will not be taken into account and they will not be available after the migration:
+            - \\"a:b\\" (corrupt)
+            - \\"c:d\\" (Oops!)
+            ",
+            }
+          `);
+        });
       });
     });
 
@@ -1250,6 +1283,7 @@ describe('migrations v2 model', () => {
           type: 'documents_transform_failed',
           corruptDocumentIds: ['a:b'],
           transformErrors: [],
+          processedDocs: [],
         });
         const newState = model(state, res) as ReindexSourceToTempRead;
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
@@ -1279,6 +1313,8 @@ describe('migrations v2 model', () => {
         sourceIndexPitId: 'pit_id',
         targetIndex: '.kibana_7.11.0_001',
         lastHitSortValue: undefined,
+        transformErrors: [],
+        corruptDocumentIds: [],
         progress: createInitialProgress(),
       };
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded', () => {
@@ -1671,6 +1707,7 @@ describe('migrations v2 model', () => {
             type: 'documents_transform_failed',
             corruptDocumentIds,
             transformErrors: [],
+            processedDocs: [],
           });
           const newState = model(
             outdatedDocumentsTransformState,
@@ -1691,6 +1728,7 @@ describe('migrations v2 model', () => {
             type: 'documents_transform_failed',
             corruptDocumentIds: newFailedTransformDocumentIds,
             transformErrors: transformationErrors,
+            processedDocs: [],
           });
           const newState = model(
             outdatedDocumentsTransformStateWithFailedDocuments,
