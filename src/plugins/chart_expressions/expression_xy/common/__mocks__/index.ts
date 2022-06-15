@@ -102,6 +102,10 @@ export const createArgsWithLayers = (
     showLabels: true,
     showTitle: true,
     title: '',
+    extent: {
+      mode: 'dataBounds',
+      type: 'axisExtentConfig',
+    },
   },
   yAxisConfigs: [
     {
