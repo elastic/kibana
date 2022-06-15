@@ -13,7 +13,8 @@ module.exports = createSerializer({
   includeStyles: false,
 });
 
-console.error = (message) => {
+const consoleError = console.error;
+console.error = (message, ...rest) => {
   // @see https://github.com/emotion-js/emotion/issues/1105
   // This error that Emotion throws doesn't apply to Jest, so
   // we're just going to remove the first/nth-child warning
@@ -24,4 +25,5 @@ console.error = (message) => {
   ) {
     return;
   }
+  consoleError(message, ...rest);
 };
