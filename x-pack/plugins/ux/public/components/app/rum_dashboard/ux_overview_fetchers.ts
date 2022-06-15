@@ -10,6 +10,7 @@ import {
   DataPublicPluginStart,
   isCompleteResponse,
 } from '@kbn/data-plugin/public';
+import { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import {
   FetchDataParams,
   HasDataParams,
@@ -24,7 +25,6 @@ import {
 } from '../../../services/data/core_web_vitals_query';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import { hasRumDataQuery } from '../../../services/data/has_rum_data_query';
-import { IKibanaSearchRequest } from '@kbn/data-plugin/common/search/types';
 
 export { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
