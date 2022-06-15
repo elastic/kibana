@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { useDiscoverServices } from '../../../../../utils/use_discover_services';
 
-export function GetFieldTypeDescription(type: string) {
-  const { docLinks } = useDiscoverServices();
+export function getFieldTypeDescription(type: string, docLinks: DocLinksStart) {
   switch (type) {
     case 'boolean':
       return i18n.translate('discover.fieldNameDescription.booleanField', {
