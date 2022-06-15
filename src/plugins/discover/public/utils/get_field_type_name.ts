@@ -9,13 +9,25 @@
 import { i18n } from '@kbn/i18n';
 import { KNOWN_FIELD_TYPES } from '../../common/field_types';
 
-const UNKNOWN_FIELD_TYPE_MESSAGE = i18n.translate('discover.fieldNameIcons.unknownFieldAriaLabel', {
-  defaultMessage: 'Unknown field',
-});
+export const UNKNOWN_FIELD_TYPE_MESSAGE = i18n.translate(
+  'discover.fieldNameIcons.unknownFieldAriaLabel',
+  {
+    defaultMessage: 'Unknown field',
+  }
+);
 
 export function getFieldTypeName(type?: string) {
   if (!type) {
     return UNKNOWN_FIELD_TYPE_MESSAGE;
+  }
+
+  if (type === 'source') {
+    // TODO: check if we can remove this logic
+
+    // Note that this type is currently not provided, type for _source is undefined
+    return i18n.translate('discover.fieldNameIcons.sourceFieldAriaLabel', {
+      defaultMessage: 'Source field',
+    });
   }
 
   const knownType: KNOWN_FIELD_TYPES = type as KNOWN_FIELD_TYPES;

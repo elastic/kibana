@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  getFieldTypeName,
-  KNOWN_FIELD_TYPES,
-  UNKNOWN_FIELD_TYPE_MESSAGE,
-} from './get_field_type_name';
+import { getFieldTypeName, UNKNOWN_FIELD_TYPE_MESSAGE } from './get_field_type_name';
+import { KNOWN_FIELD_TYPES } from '../../common/field_types';
 
 describe('getFieldTypeName', () => {
   describe('known field types should be recognized', () => {
