@@ -91,9 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows to filter by type', async () => {
         await navigationalSearch.searchFor('type:dashboard');
 
-        const results = await navigationalSearch.getDisplayedResults();
-
-        expect(results.map((result) => result.label)).to.eql([
+        expect(await sortLabels(navigationalSearch)).to.eql([
           'dashboard 1 (tag-2)',
           'dashboard 2 (tag-3)',
           'dashboard 3 (tag-1 and tag-3)',
