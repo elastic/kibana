@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { KNOWN_FIELD_TYPES } from '../../common/field_types';
 
 export const UNKNOWN_FIELD_TYPE_MESSAGE = i18n.translate(
@@ -17,7 +18,7 @@ export const UNKNOWN_FIELD_TYPE_MESSAGE = i18n.translate(
 );
 
 export function getFieldTypeName(type?: string) {
-  if (!type || type === 'unknown') {
+  if (!type || type === KBN_FIELD_TYPES.UNKNOWN) {
     return UNKNOWN_FIELD_TYPE_MESSAGE;
   }
 
