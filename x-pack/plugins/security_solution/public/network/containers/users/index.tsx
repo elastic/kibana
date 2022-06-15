@@ -20,7 +20,7 @@ import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkSelectors } from '../../store';
 import {
-  FlowTarget,
+  FlowTargetSourceDest,
   NetworkQueries,
   NetworkUsersRequestOptions,
   NetworkUsersStrategyResponse,
@@ -46,12 +46,12 @@ export interface NetworkUsersArgs {
 }
 
 interface UseNetworkUsers {
-  id?: string;
+  id: string;
   filterQuery?: ESTermQuery | string;
   endDate: string;
   startDate: string;
   skip: boolean;
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
   ip: string;
 }
 
@@ -59,7 +59,7 @@ export const useNetworkUsers = ({
   endDate,
   filterQuery,
   flowTarget,
-  id = ID,
+  id,
   ip,
   skip,
   startDate,

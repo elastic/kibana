@@ -50,7 +50,6 @@ import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { metrics } from '@opentelemetry/api-metrics';
-import { RulesClient } from './rules_client';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -64,6 +63,7 @@ import {
   RuleType,
   RuleTypeParams,
   RuleTypeState,
+  RulesClientApi,
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
@@ -128,7 +128,7 @@ export interface PluginSetupContract {
 export interface PluginStartContract {
   listTypes: RuleTypeRegistry['list'];
 
-  getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
+  getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
 
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
