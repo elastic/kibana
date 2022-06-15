@@ -103,6 +103,9 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
   );
 };
 
+// Return as an Option, returning none if error occurred getting health.
+// Currently, alerting health returns a 403 if the user is not authorized
+// for rules.
 async function getAlertingFrameworkHealth(
   http: HttpSetup
 ): Promise<Option<AlertingFrameworkHealth>> {
