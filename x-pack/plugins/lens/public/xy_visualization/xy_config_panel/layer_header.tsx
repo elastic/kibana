@@ -59,8 +59,8 @@ function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const { state, layerId } = props;
   const layers = state.layers.filter(isDataLayer);
-  const index = layers.findIndex((l) => l.layerId === layerId);
-  const layer = layers[index];
+  const layer = layers.find((l) => l.layerId === layerId)!;
+  const index = state.layers.findIndex((l) => l === layer)!;
   const currentVisType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
   const horizontalOnly = isHorizontalChart(state.layers);
 
