@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
+import { debounce } from 'lodash';
 import {
   GridItemHTMLElement,
   GridStack,
@@ -141,7 +142,7 @@ export class Grid extends React.Component<Props, State> {
       }
     };
 
-    subGrid?.on('drag resize', resizeWrapper);
+    subGrid?.on('drag resize', debounce(resizeWrapper, 200));
   };
 
   render() {
