@@ -12,7 +12,7 @@ import { TestProviders, mockBrowserFields, defaultHeaders } from '../../../../mo
 import { mockGlobalState } from '../../../../mock/global_state';
 import { tGridActions } from '../../../../store/t_grid';
 
-import { FieldsBrowser, FieldsBrowserComponentProps } from './field_browser';
+import { FieldBrowserModal, FieldBrowserModalProps } from './field_browser_modal';
 
 import { createStore, State } from '../../../../types';
 import { createSecuritySolutionStorageMock } from '../../../../mock/mock_local_storage';
@@ -27,7 +27,7 @@ jest.mock('react-redux', () => {
 });
 const timelineId = 'test';
 const onHide = jest.fn();
-const testProps: FieldsBrowserComponentProps = {
+const testProps: FieldBrowserModalProps = {
   columnHeaders: [],
   filteredBrowserFields: mockBrowserFields,
   searchInput: '',
@@ -44,7 +44,7 @@ const testProps: FieldsBrowserComponentProps = {
 };
 const { storage } = createSecuritySolutionStorageMock();
 
-describe('FieldsBrowser', () => {
+describe('FieldBrowserModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -52,7 +52,7 @@ describe('FieldsBrowser', () => {
   test('it renders the Close button', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser {...testProps} />
+        <FieldBrowserModal {...testProps} />
       </TestProviders>
     );
 
@@ -62,7 +62,7 @@ describe('FieldsBrowser', () => {
   test('it invokes the Close button', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser {...testProps} />
+        <FieldBrowserModal {...testProps} />
       </TestProviders>
     );
 
@@ -73,7 +73,7 @@ describe('FieldsBrowser', () => {
   test('it renders the Reset Fields button', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser {...testProps} />
+        <FieldBrowserModal {...testProps} />
       </TestProviders>
     );
 
@@ -83,7 +83,7 @@ describe('FieldsBrowser', () => {
   test('it invokes updateColumns action when the user clicks the Reset Fields button', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser {...testProps} columnHeaders={defaultHeaders} />
+        <FieldBrowserModal {...testProps} columnHeaders={defaultHeaders} />
       </TestProviders>
     );
 
@@ -100,7 +100,7 @@ describe('FieldsBrowser', () => {
   test('it invokes onHide when the user clicks the Reset Fields button', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser {...testProps} />
+        <FieldBrowserModal {...testProps} />
       </TestProviders>
     );
 
@@ -112,7 +112,7 @@ describe('FieldsBrowser', () => {
   test('it renders the search', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser {...testProps} />
+        <FieldBrowserModal {...testProps} />
       </TestProviders>
     );
 
@@ -122,7 +122,7 @@ describe('FieldsBrowser', () => {
   test('it renders the categories selector', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser {...testProps} />
+        <FieldBrowserModal {...testProps} />
       </TestProviders>
     );
 
@@ -132,7 +132,7 @@ describe('FieldsBrowser', () => {
   test('it renders the fields table', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser {...testProps} />
+        <FieldBrowserModal {...testProps} />
       </TestProviders>
     );
 
@@ -142,7 +142,7 @@ describe('FieldsBrowser', () => {
   test('focuses the search input when the component mounts', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser {...testProps} />
+        <FieldBrowserModal {...testProps} />
       </TestProviders>
     );
 
@@ -158,7 +158,7 @@ describe('FieldsBrowser', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser {...testProps} onSearchInputChange={onSearchInputChange} />
+        <FieldBrowserModal {...testProps} onSearchInputChange={onSearchInputChange} />
       </TestProviders>
     );
 
@@ -178,7 +178,7 @@ describe('FieldsBrowser', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser
+        <FieldBrowserModal
           {...testProps}
           options={{
             createFieldButton: MyTestComponent,
@@ -207,7 +207,7 @@ describe('FieldsBrowser', () => {
 
     const wrapper = mount(
       <TestProviders store={store}>
-        <FieldsBrowser
+        <FieldBrowserModal
           {...testProps}
           options={{
             createFieldButton: MyTestComponent,
