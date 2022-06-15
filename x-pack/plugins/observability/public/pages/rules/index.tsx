@@ -71,7 +71,6 @@ import {
   RULES_PLURAL_TITLE,
   SEARCH_PLACEHOLDER,
 } from './translations';
-import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 const ENTER_KEY = 13;
 
 function RulesPage() {
@@ -441,11 +440,7 @@ function RulesPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: (
-          <>
-            {RULES_PAGE_TITLE} <ExperimentalBadge />
-          </>
-        ),
+        pageTitle: <>{RULES_PAGE_TITLE}</>,
         rightSideItems: [
           authorizedToCreateAnyRules && (
             <EuiButton

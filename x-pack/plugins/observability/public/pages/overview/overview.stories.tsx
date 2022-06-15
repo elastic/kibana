@@ -82,13 +82,6 @@ const withCore = makeDecorator({
               appMountParameters: {
                 setHeaderActionMenu: () => {},
               } as unknown as AppMountParameters,
-              config: {
-                unsafe: {
-                  alertingExperience: { enabled: true },
-                  cases: { enabled: true },
-                  rules: { enabled: true },
-                },
-              },
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
               kibanaFeatures: [],

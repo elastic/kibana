@@ -24,14 +24,6 @@ const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMo
 export const core = coreMock.createStart();
 export const data = dataPluginMock.createStartContract();
 
-const config = {
-  unsafe: {
-    alertingExperience: { enabled: true },
-    cases: { enabled: true },
-    rules: { enabled: true },
-  },
-};
-
 const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
 export const render = (component: React.ReactNode) => {
@@ -41,7 +33,6 @@ export const render = (component: React.ReactNode) => {
         <PluginContext.Provider
           value={{
             appMountParameters,
-            config,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate: KibanaPageTemplate,
             kibanaFeatures: [],

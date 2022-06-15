@@ -39,7 +39,6 @@ import { asDuration } from '../../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../../rules/create_observability_rule_type_registry';
 import { parseAlert } from '../parse_alert';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
-import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { translations, paths } from '../../../../config';
 
 type AlertsFlyoutProps = {
@@ -122,7 +121,6 @@ export function AlertsFlyout({
   return (
     <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
       <EuiFlyoutHeader hasBorder>
-        <ExperimentalBadge />
         <EuiSpacer size="s" />
         <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
           <h2>{alertData.fields[ALERT_RULE_NAME]}</h2>
