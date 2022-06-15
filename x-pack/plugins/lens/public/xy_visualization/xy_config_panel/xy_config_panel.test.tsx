@@ -211,7 +211,7 @@ describe('XY Config panels', () => {
       });
       expect(component.find(AxisSettingsPopover).at(0).prop('setExtent')).toBeTruthy();
       expect(component.find(AxisSettingsPopover).at(1).prop('extent')).toBeFalsy();
-      expect(component.find(AxisSettingsPopover).at(1).prop('setExtent')).toBeFalsy();
+      expect(component.find(AxisSettingsPopover).at(1).prop('setExtent')).toBeTruthy();
       // default extent
       expect(component.find(AxisSettingsPopover).at(2).prop('extent')).toEqual({
         mode: 'full',

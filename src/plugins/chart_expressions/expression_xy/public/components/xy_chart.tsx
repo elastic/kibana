@@ -166,6 +166,7 @@ export function XYChart({
     gridlinesVisibilitySettings,
     valueLabels,
     hideEndzones,
+    xExtent,
     yLeftExtent,
     yRightExtent,
     valuesInLegend,
@@ -279,7 +280,8 @@ export function XYChart({
     dataLayers,
     minInterval,
     isTimeViz,
-    isHistogramViz
+    isHistogramViz,
+    xExtent
   );
 
   const getYAxesTitles = (axisSeries: Series[]) => {

@@ -37,6 +37,11 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: ['string'],
     help: strings.getYRightTitleHelp(),
   },
+  xExtent: {
+    types: [AXIS_EXTENT_CONFIG],
+    help: strings.getXExtentHelp(),
+    default: `{${AXIS_EXTENT_CONFIG}}`,
+  },
   yLeftExtent: {
     types: [AXIS_EXTENT_CONFIG],
     help: strings.getYLeftExtentHelp(),

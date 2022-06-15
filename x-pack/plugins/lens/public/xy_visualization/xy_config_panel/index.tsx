@@ -14,9 +14,9 @@ import { LegendSize } from '@kbn/visualizations-plugin/public';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../types';
 import { State, XYState } from '../types';
 import { isHorizontalChart } from '../state_helpers';
-import { LegendSettingsPopover } from '../../shared_components';
+import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { getAxesConfiguration, GroupsConfiguration } from '../axes_configuration';
+import { getAxesConfiguration, getXDomain, GroupsConfiguration } from '../axes_configuration';
 import { VisualOptionsPopover } from './visual_options_popover';
 import { getScaleType } from '../to_expression';
 import { TooltipWrapper } from '../../shared_components';
@@ -122,6 +122,7 @@ export const XyToolbar = memo(function XyToolbar(
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
   const dataBounds = getDataBounds(frame.activeData, axisGroups);
+  const xDataBounds = getXDomain(dataLayers, frame.activeData);
 
   const tickLabelsVisibilitySettings = {
     x: state?.tickLabelsVisibilitySettings?.x ?? true,
@@ -249,6 +250,15 @@ export const XyToolbar = memo(function XyToolbar(
     },
     [setState, state]
   );
+  const setXExtent = useCallback(
+    (extent: AxisExtentConfig | undefined) => {
+      setState({
+        ...state,
+        xExtent: extent,
+      });
+    },
+    [setState, state]
+  );
   const hasBarOrAreaOnRightAxis = Boolean(
     axisGroups
       .find((group) => group.groupId === 'right')
@@ -287,6 +297,10 @@ export const XyToolbar = memo(function XyToolbar(
           !chartHasMoreThanOneBarSeries)
       );
     }
+  );
+
+  const hasNumberHistogram = dataLayers.some(({ layerId, xAccessor }) =>
+    hasNumericHistogramDimension(props.frame.datasourceLayers[layerId], xAccessor)
   );
 
   // Ask the datasource if it has a say about default truncation value
@@ -485,6 +499,9 @@ export const XyToolbar = memo(function XyToolbar(
             useMultilayerTimeAxis={
               isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
             }
+            extent={hasNumberHistogram ? state?.xExtent || { mode: 'dataBounds' } : undefined}
+            setExtent={setXExtent}
+            dataBounds={xDataBounds}
           />
 
           <TooltipWrapper
