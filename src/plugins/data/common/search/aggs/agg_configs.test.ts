@@ -813,8 +813,7 @@ describe('AggConfigs', () => {
     });
 
     it('should generate the `metricsAtAllLevels` if hierarchical', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
-      ac.hierarchical = true;
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, hierarchical: true }, jest.fn());
 
       expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
         `"esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=true partialRows=false"`
@@ -822,8 +821,7 @@ describe('AggConfigs', () => {
     });
 
     it('should generate the `partialRows` argument', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
-      ac.partialRows = true;
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, partialRows: true }, jest.fn());
 
       expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
         `"esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=true"`

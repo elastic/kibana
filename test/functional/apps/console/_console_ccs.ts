@@ -37,7 +37,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clearTextArea();
       });
       it('it should be able to access remote data', async () => {
-        await PageObjects.console.enterRequest('\nGET ftr-remote:logstash-*/_search');
+        await PageObjects.console.enterRequest(
+          '\nGET ftr-remote:logstash-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"'
+        );
         await PageObjects.console.clickPlay();
         await retry.try(async () => {
           const actualResponse = await PageObjects.console.getResponse();

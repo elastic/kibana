@@ -6107,7 +6107,7 @@
             "section": "def-common.ExpressionAstExpression",
             "text": "ExpressionAstExpression"
           },
-          " | ",
+          " | FunctionArgs<FnDef>[K] | ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -6116,20 +6116,20 @@
             "text": "ExpressionAstExpressionBuilder"
           },
           " | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpressionBuilder",
+            "text": "ExpressionAstExpressionBuilder"
+          },
+          "[] | ",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
             "section": "def-common.ExpressionAstExpression",
             "text": "ExpressionAstExpression"
-          },
-          "[] | FunctionArgs<FnDef>[K] | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpressionBuilder",
-            "text": "ExpressionAstExpressionBuilder"
           },
           "[]; }) => ",
           {
@@ -6185,7 +6185,7 @@
                 "section": "def-common.ExpressionAstExpression",
                 "text": "ExpressionAstExpression"
               },
-              " | ",
+              " | FunctionArgs<FnDef>[K] | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -6194,20 +6194,20 @@
                 "text": "ExpressionAstExpressionBuilder"
               },
               " | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpressionBuilder",
+                "text": "ExpressionAstExpressionBuilder"
+              },
+              "[] | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
                 "section": "def-common.ExpressionAstExpression",
                 "text": "ExpressionAstExpression"
-              },
-              "[] | FunctionArgs<FnDef>[K] | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstExpressionBuilder",
-                "text": "ExpressionAstExpressionBuilder"
               },
               "[]; }"
             ],
@@ -7952,10 +7952,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/essql.ts"
               },
               {
                 "plugin": "canvas",
@@ -16528,7 +16524,7 @@
             "section": "def-common.ExpressionAstExpression",
             "text": "ExpressionAstExpression"
           },
-          " | ",
+          " | FunctionArgs<FnDef>[K] | ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -16537,20 +16533,20 @@
             "text": "ExpressionAstExpressionBuilder"
           },
           " | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpressionBuilder",
+            "text": "ExpressionAstExpressionBuilder"
+          },
+          "[] | ",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
             "section": "def-common.ExpressionAstExpression",
             "text": "ExpressionAstExpression"
-          },
-          "[] | FunctionArgs<FnDef>[K] | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpressionBuilder",
-            "text": "ExpressionAstExpressionBuilder"
           },
           "[]; }) => ",
           {
@@ -16606,7 +16602,7 @@
                 "section": "def-common.ExpressionAstExpression",
                 "text": "ExpressionAstExpression"
               },
-              " | ",
+              " | FunctionArgs<FnDef>[K] | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -16615,20 +16611,20 @@
                 "text": "ExpressionAstExpressionBuilder"
               },
               " | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpressionBuilder",
+                "text": "ExpressionAstExpressionBuilder"
+              },
+              "[] | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
                 "section": "def-common.ExpressionAstExpression",
                 "text": "ExpressionAstExpression"
-              },
-              "[] | FunctionArgs<FnDef>[K] | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstExpressionBuilder",
-                "text": "ExpressionAstExpressionBuilder"
               },
               "[]; }"
             ],
@@ -18383,10 +18379,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/essql.ts"
               },
               {
                 "plugin": "canvas",
@@ -26234,7 +26226,7 @@
             "section": "def-common.ExpressionAstExpression",
             "text": "ExpressionAstExpression"
           },
-          " | ",
+          " | FunctionArgs<FnDef>[K] | ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -26243,20 +26235,20 @@
             "text": "ExpressionAstExpressionBuilder"
           },
           " | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpressionBuilder",
+            "text": "ExpressionAstExpressionBuilder"
+          },
+          "[] | ",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
             "section": "def-common.ExpressionAstExpression",
             "text": "ExpressionAstExpression"
-          },
-          "[] | FunctionArgs<FnDef>[K] | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpressionBuilder",
-            "text": "ExpressionAstExpressionBuilder"
           },
           "[]; }) => ",
           {
@@ -26312,7 +26304,7 @@
                 "section": "def-common.ExpressionAstExpression",
                 "text": "ExpressionAstExpression"
               },
-              " | ",
+              " | FunctionArgs<FnDef>[K] | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -26321,20 +26313,20 @@
                 "text": "ExpressionAstExpressionBuilder"
               },
               " | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpressionBuilder",
+                "text": "ExpressionAstExpressionBuilder"
+              },
+              "[] | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
                 "docId": "kibExpressionsPluginApi",
                 "section": "def-common.ExpressionAstExpression",
                 "text": "ExpressionAstExpression"
-              },
-              "[] | FunctionArgs<FnDef>[K] | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstExpressionBuilder",
-                "text": "ExpressionAstExpressionBuilder"
               },
               "[]; }"
             ],
@@ -27951,13 +27943,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               "> | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
@@ -30204,10 +30190,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/essql.ts"
               },
               {
                 "plugin": "canvas",
@@ -33194,7 +33176,7 @@
             "label": "metric",
             "description": [],
             "signature": [
-              "\"sum\" | \"max\" | \"min\" | \"average\""
+              "\"min\" | \"max\" | \"sum\" | \"average\""
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
             "deprecated": false
@@ -40290,7 +40272,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"sum\" | \"max\" | \"min\" | \"average\")[]"
+                      "(\"min\" | \"max\" | \"sum\" | \"average\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
                     "deprecated": false
