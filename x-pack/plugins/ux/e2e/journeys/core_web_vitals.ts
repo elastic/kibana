@@ -46,7 +46,9 @@ journey('Core Web Vitals', async ({ page, params }) => {
       timeout: 29000,
     });
     expect(
-      new RegExp('[0-9]+% of the traffic represented').test(cwvSummary)
+      // match any three digits followed by string constant
+      // note this regex is suceptible to accepting values > 100
+      new RegExp('[0-9]{1,3}% of the traffic represented').test(cwvSummary)
     ).toBe(true);
   });
 });
