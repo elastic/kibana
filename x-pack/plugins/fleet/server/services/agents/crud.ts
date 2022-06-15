@@ -177,7 +177,7 @@ export async function getAgentsByKueryPit(
   };
 }
 
-export async function openAgentsPointInTime(esClient: ElasticsearchClient): string {
+export async function openAgentsPointInTime(esClient: ElasticsearchClient): Promise<string> {
   const pitKeepAlive = '10m';
   const pitRes = await esClient.openPointInTime({
     index: AGENTS_INDEX,
