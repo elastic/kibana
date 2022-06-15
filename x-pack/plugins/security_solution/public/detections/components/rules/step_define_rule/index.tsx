@@ -238,11 +238,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
   const ruleType = formRuleType || initialState.ruleType;
 
-  // TODO: update the logic for browserField stuff.
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
   const previousRuleType = usePrevious(ruleType);
-  // const fields: Readonly<BrowserFields> = aggregatableFields(browserFields);
   const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
     defaultValues?.eqlOptions || {}
   );
@@ -259,21 +257,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       setIndexPattern(initIndexPattern);
     }
   }, [initIndexPattern, dataSourceRadioIdSelected]);
-
-  // useEffect(() => {
-  //   // adding the && !isUpdateView to ensure we
-  //   // are not resetting the query bar if editing a rule
-  //   // I should figure how to make this work so that
-  //   // it only resets if the radioSelected changes state.
-  //   if (!isReadOnlyView && !isUpdateView) {
-  //     const { queryBar } = getFields();
-  //     const { queryBar: defaultQueryBar } = stepDefineDefaultValue;
-  //     queryBar.reset({
-  //       defaultValue: defaultQueryBar,
-  //     });
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [dataSourceRadioIdSelected]);
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = (optionId: string) => {

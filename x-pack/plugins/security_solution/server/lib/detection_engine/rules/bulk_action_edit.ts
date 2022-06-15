@@ -13,7 +13,7 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 import { invariant } from '../../../../common/utils/invariant';
-import { isEqlParams, isQueryParams, isThresholdParams, isThreatParams } from '../signals/utils';
+import { isMachineLearningParams } from '../signals/utils';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));
@@ -23,7 +23,6 @@ export const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
   return arr.filter((item) => !itemsSet.has(item));
 };
 
-// eslint-disable-next-line complexity
 export const applyBulkActionEditToRule = (
   existingRule: RuleAlertType,
   action: BulkActionEditPayload
@@ -52,13 +51,7 @@ export const applyBulkActionEditToRule = (
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
 
-      if (
-        (isEqlParams(rule.params) ||
-          isQueryParams(rule.params) ||
-          isThresholdParams(rule.params) ||
-          isThreatParams(rule.params)) &&
-        action.overwriteDataViews
-      ) {
+      if (!isMachineLearningParams(rule.params) && action.overwriteDataViews) {
         rule.params.dataViewId = undefined;
       }
       rule.params.index = addItemsToArray(rule.params.index ?? [], action.value);
@@ -71,13 +64,7 @@ export const applyBulkActionEditToRule = (
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
       );
 
-      if (
-        (isEqlParams(rule.params) ||
-          isQueryParams(rule.params) ||
-          isThresholdParams(rule.params) ||
-          isThreatParams(rule.params)) &&
-        action.overwriteDataViews
-      ) {
+      if (!isMachineLearningParams(rule.params) && action.overwriteDataViews) {
         rule.params.dataViewId = undefined;
       }
       rule.params.index = deleteItemsFromArray(rule.params.index ?? [], action.value);
@@ -96,13 +83,7 @@ export const applyBulkActionEditToRule = (
       );
       invariant(action.value.length !== 0, "Index patterns can't be overwritten with empty list");
 
-      if (
-        (isEqlParams(rule.params) ||
-          isQueryParams(rule.params) ||
-          isThresholdParams(rule.params) ||
-          isThreatParams(rule.params)) &&
-        action.overwriteDataViews
-      ) {
+      if (!isMachineLearningParams(rule.params) && action.overwriteDataViews) {
         rule.params.dataViewId = undefined;
       }
       rule.params.index = action.value;

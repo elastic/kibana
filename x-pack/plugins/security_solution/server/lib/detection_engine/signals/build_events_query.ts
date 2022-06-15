@@ -132,7 +132,6 @@ export const buildEventsSearchQuery = ({
     },
   });
 
-  // TODO: ensure null / undefined runtimeMappings doesn't blow anything up
   const searchQuery = {
     allow_no_indices: true,
     runtime_mappings: runtimeMappings,
