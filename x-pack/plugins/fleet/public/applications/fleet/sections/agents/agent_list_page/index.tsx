@@ -233,7 +233,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               kuery: kuery && kuery !== '' ? kuery : undefined,
               showInactive,
               showUpgradeable,
-              usePit: true,
               pitId,
             }),
             sendGetAgentStatus({
