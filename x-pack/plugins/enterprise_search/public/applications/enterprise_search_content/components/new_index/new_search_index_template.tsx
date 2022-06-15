@@ -25,6 +25,7 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
+  EuiSteps,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -102,7 +103,11 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
                 helpText={i18n.translate(
                   'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText',
                   {
-                    defaultMessage: 'Names cannot contain spaces or special characters',
+                    defaultMessage:
+                      'Names cannot contain spaces or special characters. {indexName}',
+                    values: {
+                      indexName: name.length > 0 ? `Your index will be named: ${name}` : '',
+                    },
                   }
                 )}
                 fullWidth
@@ -170,6 +175,82 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer />
+
+      <EuiSteps
+        steps={[
+          {
+            title: i18n.translate(
+              'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.createIndex.title',
+              {
+                defaultMessage: 'Create an Elasticsearch index',
+              }
+            ),
+
+            titleSize: 'xs',
+            children: (
+              <EuiText size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.createIndex.content',
+                    {
+                      defaultMessage:
+                        'Provide a unique name for your index and select an optional language analyzer.',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            ),
+            status: 'incomplete',
+          },
+          {
+            title: i18n.translate(
+              'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.configureIngestion.title',
+              {
+                defaultMessage: 'Configure ingestion settings',
+              }
+            ),
+            titleSize: 'xs',
+            children: (
+              <EuiText size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.configureIngestion.content',
+                    {
+                      defaultMessage:
+                        'Generate an API key and view the documentation for posting documents to the Elasticsearch API endpoint. Language clients are available for streamlined integration.',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            ),
+            status: 'incomplete',
+          },
+          {
+            title: i18n.translate(
+              'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.buildSearchExperience.title',
+              {
+                defaultMessage: 'Build a search experience',
+              }
+            ),
+            titleSize: 'xs',
+            children: (
+              <EuiText size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.buildSearchExperience.content',
+                    {
+                      defaultMessage:
+                        'Connect your newly created Elasticsearch index to an App Search engine to build a cusomtizable search experience.',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            ),
+            status: 'incomplete',
+          },
+        ]}
+      />
     </EuiPanel>
   );
 };

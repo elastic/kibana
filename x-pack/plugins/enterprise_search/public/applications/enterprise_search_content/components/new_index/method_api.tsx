@@ -22,7 +22,7 @@ import { NewSearchIndexLogic } from './new_search_index_logic';
 import { NewSearchIndexTemplate } from './new_search_index_template';
 
 export const MethodApi: React.FC = () => {
-  const { shouldCreateAlias } = useValues(NewSearchIndexLogic);
+  const { shouldCreateAlias, name } = useValues(NewSearchIndexLogic);
   const { toggleCreateAlias } = useActions(NewSearchIndexLogic);
 
   return (
@@ -38,18 +38,6 @@ export const MethodApi: React.FC = () => {
           <FormattedMessage
             id="xpack.enterpriseSearch.content.newIndex.methodApi.description"
             defaultMessage="Provide a name and optionally select a language analyzer for your documents. An Elasticsearch index will be created. In the next step, well display API instructions."
-            values={{
-              clientLibrariesLink: (
-                <EuiLink href="#" target="_blank">
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.methodApi.description.clientLibrariesLink',
-                    {
-                      defaultMessage: 'client libraries',
-                    }
-                  )}
-                </EuiLink>
-              ),
-            }}
           />
         </EuiText>
       }
@@ -59,34 +47,45 @@ export const MethodApi: React.FC = () => {
       <EuiCheckbox
         id="alias-checkbox"
         label={
-          <FormattedMessage
-            id="xpack.enterpriseSearch.content.newIndex.methodApi.aliasCheckbox"
-            defaultMessage={
-              'Create a search experience: create an {aliasDocLink} "search-<INDEX NAME>" and {appSearchEngineDocLink} connected to this index.'
-            }
-            values={{
-              aliasDocLink: (
-                <EuiLink href="#" target="_blank">
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.methodApi.aliasCheckbox.aliasDocLink',
-                    {
-                      defaultMessage: 'alias',
-                    }
-                  )}
-                </EuiLink>
-              ),
-              appSearchEngineDocLink: (
-                <EuiLink href="#" target="_blank">
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.methodApi.aliasCheckbox.appSearchEngineDocLink',
-                    {
-                      defaultMessage: 'App Search Engine',
-                    }
-                  )}
-                </EuiLink>
-              ),
-            }}
-          />
+          <EuiText size="s">
+            <i>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.newIndex.methodApi.aliasCheckbox"
+                defaultMessage="{createLabel} Create an {aliasDocLink} {indexName} and {appSearchEngineDocLink} connected to this index."
+                values={{
+                  createLabel: (
+                    <b>
+                      {i18n.translate(
+                        'expack.enterpriseSearch.content.newIndex.methodApi.aliasCheckbox.createLabel',
+                        { defaultMessage: 'Create a search experience:' }
+                      )}
+                    </b>
+                  ),
+                  aliasDocLink: (
+                    <EuiLink href="#" target="_blank">
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.newIndex.methodApi.aliasCheckbox.aliasDocLink',
+                        {
+                          defaultMessage: 'alias',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                  appSearchEngineDocLink: (
+                    <EuiLink href="#" target="_blank">
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.newIndex.methodApi.aliasCheckbox.appSearchEngineDocLink',
+                        {
+                          defaultMessage: 'App Search Engine',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                  indexName: name.length > 0 ? `search-${name}` : 'search-<INDEX NAME>',
+                }}
+              />
+            </i>
+          </EuiText>
         }
         onChange={toggleCreateAlias}
         checked={shouldCreateAlias}
