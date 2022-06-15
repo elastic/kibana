@@ -41,6 +41,8 @@ import {
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   GET_RUNNING_PROCESSES_ROUTE,
+  ISOLATE_HOST_ROUTE,
+  UNISOLATE_HOST_ROUTE,
 } from '../../../../common/endpoint/constants';
 import {
   ActionDetails,
@@ -219,6 +221,20 @@ describe('Response actions', () => {
       licenseService.stop();
       licenseEmitter.complete();
       getActionDetailsByIdSpy.mockClear();
+    });
+
+    it('correctly redirects legacy isolate to new route', async () => {
+      await callRoute(ISOLATE_HOST_ROUTE, { body: { endpoint_ids: ['XYZ'] } });
+      expect(mockResponse.custom).toBeCalled();
+      const response = mockResponse.custom.mock.calls[0][0];
+      expect(response.statusCode).toEqual(308);
+    });
+
+    it('correctly redirects legacy release to new route', async () => {
+      await callRoute(UNISOLATE_HOST_ROUTE, { body: { endpoint_ids: ['XYZ'] } });
+      expect(mockResponse.custom).toBeCalled();
+      const response = mockResponse.custom.mock.calls[0][0];
+      expect(response.statusCode).toEqual(308);
     });
 
     it('succeeds when an endpoint ID is provided', async () => {
