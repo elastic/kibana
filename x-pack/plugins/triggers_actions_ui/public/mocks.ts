@@ -64,6 +64,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         ...props,
         actionTypeRegistry,
         ruleTypeRegistry,
+        connectorServices,
       });
     },
     getEditAlertFlyout: (props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
@@ -71,6 +72,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         ...props,
         actionTypeRegistry,
         ruleTypeRegistry,
+        connectorServices,
       });
     },
     getAlertsStateTable: (props: AlertsTableStateProps) => {
@@ -98,7 +100,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
       return getRulesListNotifyBadgeLazy(props);
     },
     getRulesList: () => {
-      return getRulesListLazy();
+      return getRulesListLazy({ connectorServices });
     },
   };
 }
