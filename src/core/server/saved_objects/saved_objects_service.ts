@@ -11,11 +11,6 @@ import { filter, take, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import {
-  SavedObjectsClient,
-  SavedObjectsClientProvider,
-  SavedObjectsClientProviderOptions,
-} from '.';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { InternalCoreUsageDataSetup } from '../core_usage_data';
 import {
@@ -37,6 +32,11 @@ import {
   SavedObjectAttributes,
 } from './types';
 import type { SavedObjectsExtensions } from './service';
+import {
+  SavedObjectsClient,
+  SavedObjectsClientProvider,
+  SavedObjectsClientProviderOptions,
+} from './service';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import type {
   SavedObjectsClientFactoryProvider,

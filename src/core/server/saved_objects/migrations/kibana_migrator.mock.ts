@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
+import type { IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
 import { buildActiveMappings } from './core';
 
 const { mergeTypes } = jest.requireActual('./kibana_migrator');
@@ -61,6 +61,6 @@ const createMigrator = (
   return mockMigrator;
 };
 
-export const mockKibanaMigrator = {
+export const kibanaMigratorMock = {
   create: createMigrator,
 };

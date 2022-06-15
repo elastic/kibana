@@ -6,11 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { migratorInstanceMock } from './migrate.test.mocks';
+import { mockKibanaMigrator as KibanaMigrator } from './migrate.test.mocks';
+import { kibanaMigratorMock } from '../../migrations/kibana_migrator.mock';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 
 describe('SavedObjects /_migrate endpoint', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
+  const migratorInstanceMock = kibanaMigratorMock.create();
+
+  beforeAll(() => {
+    KibanaMigrator.mockReturnValue(migratorInstanceMock);
+  });
 
   beforeEach(async () => {
     root = kbnTestServer.createRoot({
