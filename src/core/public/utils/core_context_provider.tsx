@@ -7,8 +7,8 @@
  */
 
 import React, { FC } from 'react';
-import { CoreThemeProvider } from '../theme/core_theme_provider';
-import type { ThemeServiceStart } from '../theme';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { I18nStart } from '../i18n';
 
 interface CoreContextProviderProps {

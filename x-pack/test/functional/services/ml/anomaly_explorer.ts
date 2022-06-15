@@ -176,5 +176,17 @@ export function MachineLearningAnomalyExplorerProvider({
     async scrollMapContainerIntoView() {
       await testSubjects.scrollIntoView('mlAnomaliesMapContainer');
     },
+
+    async assertSingleMetricViewerButtonEnabled(expectedEnabled = true) {
+      const isEnabled = await testSubjects.isEnabled(
+        'mlAnomalyResultsViewSelectorSingleMetricViewer'
+      );
+      expect(isEnabled).to.eql(
+        expectedEnabled,
+        `Expected the Single Metric Viewer button to be '${
+          expectedEnabled ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    },
   };
 }
