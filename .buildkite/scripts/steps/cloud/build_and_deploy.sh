@@ -46,7 +46,7 @@ fi
 
 docker logout docker.elastic.co
 
-echo "--- Deploy"
+echo "--- Create Deployment"
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
 JSON_FILE=$(mktemp --suffix ".json")
 if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
@@ -69,22 +69,18 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   CLOUD_DEPLOYMENT_ID=$(jq -r --slurp '.[0].id' "$JSON_FILE")
   CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$JSON_FILE")
 
-  # Refresh vault token
+  echo -n "Writing to vault..."
   VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
   VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
   VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
   retry 5 30 vault login -no-print "$VAULT_TOKEN"
-
-  echo -n "Writing to vault..."
   retry 5 5 vault write "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
 
-  # Enable stack monitoring
+  echo -n "Enabling Stack Monitoring..."
   jq '
     .settings.observability.metrics.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'" |
     .settings.observability.logging.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'"
     ' .buildkite/scripts/steps/cloud/stack_monitoring.json > /tmp/stack_monitoring.json
-
-  echo -n "Enabling Stack Monitoring..."
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json > "$JSON_FILE"
   echo "done"
 else
