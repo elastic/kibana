@@ -172,3 +172,7 @@ export const AddCustomSourceLogic = kea<
 Using the above methods, you can keep your logic files small and isolated. Keep API calls separate from view and component logic. Keep the amount of logic you're processing limited per file. If your logic file starts exceeding about 150 lines of code, you should start thinking about splitting it up into separate chunks, if possible.
 
 Splitting up logic helps keep your application logic manageable and somewhat isolated, it helps keep your logic files testable, and it helps you understand what is happening in each logic file.
+
+## When connecting logic files, be explicit
+
+Kea has a feature where it will auto-connect logic files when you use actions and values from one file in another. This works, but has led to bugs in the past. Because it's generally better to be explicit than implicit, we prefer making these links explicit as well. Use the 'connect' feature on a Kea logic function to connect two different logics together. See above for an example.
