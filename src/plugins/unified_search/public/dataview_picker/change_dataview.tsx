@@ -22,6 +22,9 @@ import {
   EuiText,
   EuiTourStep,
   EuiContextMenuPanelProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { IDataPluginServices } from '@kbn/data-plugin/public';
@@ -162,38 +165,57 @@ export function ChangeDataView({
       );
     }
     panelItems.push(
-      <DataViewsList
-        dataViewsList={dataViewsList}
-        onChangeDataView={(newId) => {
-          onChangeDataView(newId);
-          setPopoverIsOpen(false);
-        }}
-        currentDataViewId={currentDataViewId}
-        selectableProps={selectableProps}
-        searchListInputId={searchListInputId}
-      />
-    );
+      <>
+        {onDataViewCreated && (
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+            justifyContent="spaceBetween"
+            css={css`
+              margin: ${euiTheme.size.s};
+              margin-bottom: 0;
+            `}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <h5>
+                  {i18n.translate('unifiedSearch.query.queryBar.indexPattern.dataViewsLabel', {
+                    defaultMessage: 'Data views',
+                  })}
+                </h5>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={() => {
+                  setPopoverIsOpen(false);
+                  onDataViewCreated();
+                }}
+                size="xs"
+                iconType="plusInCircleFilled"
+                iconSide="left"
+                data-test-subj="dataview-create-new"
+              >
+                {i18n.translate('unifiedSearch.query.queryBar.indexPattern.addNewDataView', {
+                  defaultMessage: 'Create a data view',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
 
-    if (onDataViewCreated) {
-      panelItems.push(
-        <EuiHorizontalRule margin="none" />,
-        <EuiContextMenuItem
-          css={css`
-            color: ${euiTheme.colors.primaryText};
-          `}
-          data-test-subj="dataview-create-new"
-          icon="plusInCircleFilled"
-          onClick={() => {
+        <DataViewsList
+          dataViewsList={dataViewsList}
+          onChangeDataView={(newId) => {
+            onChangeDataView(newId);
             setPopoverIsOpen(false);
-            onDataViewCreated();
           }}
-        >
-          {i18n.translate('unifiedSearch.query.queryBar.indexPattern.addNewDataView', {
-            defaultMessage: 'Create a data view',
-          })}
-        </EuiContextMenuItem>
-      );
-    }
+          currentDataViewId={currentDataViewId}
+          selectableProps={selectableProps}
+          searchListInputId={searchListInputId}
+        />
+      </>
+    );
 
     return panelItems;
   };
