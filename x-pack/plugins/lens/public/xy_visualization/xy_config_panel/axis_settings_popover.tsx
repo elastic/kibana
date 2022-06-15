@@ -236,9 +236,13 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
 
   const onExtentChange = useCallback(
     (newExtent) => {
-      const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrAreaOnAxis, newExtent);
-      if (setExtent && newExtent && !boundaryError && !isEqual(newExtent, extent)) {
-        if (axis === 'x' || !inclusiveZeroError) {
+      if (setExtent && newExtent && !isEqual(newExtent, extent)) {
+        const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrAreaOnAxis, newExtent);
+        if (
+          axis === 'x' ||
+          newExtent.mode !== 'custom' ||
+          (!boundaryError && !inclusiveZeroError)
+        ) {
           setExtent(newExtent);
         }
       }
