@@ -16,7 +16,7 @@ import {
   createTransportMock,
   ClientMock,
 } from './configure_client.test.mocks';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ElasticsearchClientConfig } from './client_config';
 import { configureClient } from './configure_client';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';

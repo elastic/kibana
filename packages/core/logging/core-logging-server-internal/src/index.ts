@@ -11,5 +11,11 @@ export type { LoggingConfigType, loggerContextConfigSchema, loggerSchema } from 
 export { LoggingSystem } from './logging_system';
 export type { ILoggingSystem } from './logging_system';
 export { LoggingService } from './logging_service';
-export type { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging_service';
+export type {
+  InternalLoggingServicePreboot,
+  InternalLoggingServiceSetup,
+  PrebootDeps,
+} from './logging_service';
 export { appendersSchema } from './appenders/appenders';
+export { LoggerAdapter } from './logger_adapter';
+export { getNextRollingTime } from './appenders/rolling_file/policies/time_interval';

@@ -11,12 +11,12 @@ jest.mock('uuid', () => ({
 }));
 
 import supertest from 'supertest';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { HttpService } from '../http_service';
 
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
 import { schema } from '@kbn/config-schema';
 
