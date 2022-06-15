@@ -42,10 +42,11 @@ journey('Core Web Vitals', async ({ page, params }) => {
     expect(await page.$('text=Largest contentful paint'));
     expect(await page.$('text=First input delay'));
     expect(await page.$('text=Cumulative layout shift'));
+    const cwvSummary = await page.innerText('text=traffic represented', {
+      timeout: 29000,
+    });
     expect(
-      await page.innerText('text=86% of the traffic represented', {
-        timeout: 29000,
-      })
-    );
+      new RegExp('[0-9]+% of the traffic represented').test(cwvSummary)
+    ).toBe(true);
   });
 });
