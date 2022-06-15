@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
 
@@ -51,7 +52,7 @@ export const getActionList = async ({
   // # of hits to skip
   const from = page * size;
 
-  const data = await getActionDetailsList({
+  const { actionDetails, totalRecords } = await getActionDetailsList({
     commands,
     elasticAgentIds,
     esClient,
@@ -71,8 +72,8 @@ export const getActionList = async ({
     elasticAgentIds,
     userIds,
     commands,
-    data,
-    total: data.length,
+    data: actionDetails,
+    total: totalRecords,
   };
 };
 
@@ -92,7 +93,10 @@ const getActionDetailsList = async ({
   size,
   startDate,
   userIds,
-}: GetActionDetailsListParam): Promise<ActionDetails[]> => {
+}: GetActionDetailsListParam): Promise<{
+  actionDetails: ActionDetails[];
+  totalRecords: number;
+}> => {
   let actionRequests;
   let actionReqIds;
   let actionResponses;
@@ -123,10 +127,11 @@ const getActionDetailsList = async ({
   }
 
   // return empty details array
-  if (!actionRequests?.body?.hits?.hits) return [];
+  if (!actionRequests?.body?.hits?.hits) return { actionDetails: [], totalRecords: 0 };
 
   // format endpoint actions into { type, item } structure
   const formattedActionRequests = formatEndpointActionResults(actionRequests?.body?.hits?.hits);
+  const totalRecords = (actionRequests?.body?.hits?.total as unknown as SearchTotalHits).value;
 
   // normalized actions with a flat structure to access relevant values
   const normalizedActionRequests: Array<ReturnType<typeof mapToNormalizedActionRequest>> =
@@ -189,5 +194,5 @@ const getActionDetailsList = async ({
     };
   });
 
-  return actionDetails;
+  return { actionDetails, totalRecords };
 };

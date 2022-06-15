@@ -215,6 +215,7 @@ describe('When using `getActionList()', () => {
 
   it('should return an empty array if no actions are found', async () => {
     actionRequests.hits.hits = [];
+    (actionRequests.hits.total as estypes.SearchTotalHits).value = 0;
     (actionResponses.hits.total as estypes.SearchTotalHits).value = 0;
     actionRequests = endpointActionGenerator.toEsSearchResponse([]);
 
