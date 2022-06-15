@@ -37,7 +37,7 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   const checked = useMemo(() => selectedDocs.includes(id), [selectedDocs, id]);
 
   useEffect(() => {
-    if (expanded && doc && expanded._id === doc._id) {
+    if (expanded && doc && expanded._id === doc._id && expanded._index === doc._index) {
       setCellProps({
         style: {
           backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
