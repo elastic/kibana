@@ -1249,13 +1249,13 @@ export class RulesClient {
           !isEqual(alertSavedObject.attributes.schedule, updateResult.schedule)
         ) {
           try {
-            await this.taskManager.bulkUpdateSchedules(
+            const { tasks } = await this.taskManager.bulkUpdateSchedules(
               [updateResult.scheduledTaskId],
               updateResult.schedule
             );
 
             this.logger.debug(
-              `Rule update has rescheduled the underlying task: ${updateResult.scheduledTaskId}`
+              `Rule update has rescheduled the underlying task: ${updateResult.scheduledTaskId} to run at: ${tasks?.[0]?.runAt}`
             );
           } catch (err) {
             this.logger.error(
