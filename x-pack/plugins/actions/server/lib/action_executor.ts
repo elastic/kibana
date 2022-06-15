@@ -259,7 +259,10 @@ export class ActionExecutor {
           event.error = event.error || {};
           event.error.message = actionErrorToMessage(result);
           if (result.error) {
-            logger.error(result.error);
+            logger.error(result.error, {
+              tags: [actionTypeId, actionId, 'action-run-failed'],
+              error: { stack_trace: result.error.stack },
+            });
           }
           logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
         } else {

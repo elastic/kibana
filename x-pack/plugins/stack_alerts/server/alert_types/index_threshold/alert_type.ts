@@ -137,7 +137,6 @@ export function getAlertType(
     const { alertId: ruleId, name, services, params } = options;
     const { alertFactory, scopedClusterClient } = services;
 
-    const hi = hi.hi;
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
       throw new Error(

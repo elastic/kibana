@@ -398,7 +398,7 @@ export class TaskRunner<
         err.message
       );
       this.logger.error(err, {
-        tags: [this.ruleType.id, ruleId, 'rule-run-failure'],
+        tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
         error: { stack_trace: err.stack },
       });
       throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
@@ -728,7 +728,7 @@ export class TaskRunner<
             this.logger.debug(message);
           } else {
             this.logger.error(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failure'],
+              tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
               error: { stack_trace: err.stack },
             });
           }
