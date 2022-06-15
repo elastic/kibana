@@ -39,7 +39,6 @@ export class DashboardPageObject extends FtrService {
   private readonly listingTable = this.ctx.getService('listingTable');
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
-  private readonly esArchiver = this.ctx.getService('esArchiver');
   private readonly header = this.ctx.getPageObject('header');
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
@@ -48,15 +47,12 @@ export class DashboardPageObject extends FtrService {
     : 'logstash-*';
   private readonly kibanaIndex = this.config.get('esTestCluster.ccs')
     ? 'test/functional/fixtures/kbn_archiver/ccs/dashboard/legacy/legacy.json'
-    : 'test/functional/fixtures/es_archiver/dashboard/legacy';
+    : 'test/functional/fixtures/kbn_archiver/dashboard/legacy/legacy.json';
 
   async initTests({ kibanaIndex = this.kibanaIndex, defaultIndex = this.logstashIndex } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
-    if (this.config.get('esTestCluster.ccs')) {
-      await this.kibanaServer.importExport.load(kibanaIndex);
-    } else {
-      await this.esArchiver.loadIfNeeded(kibanaIndex);
-    }
+    await this.kibanaServer.savedObjects.cleanStandardList();
+    await this.kibanaServer.importExport.load(kibanaIndex);
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
     await this.common.navigateToApp('dashboard');
   }

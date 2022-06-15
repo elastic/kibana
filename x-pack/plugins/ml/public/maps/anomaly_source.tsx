@@ -11,6 +11,7 @@ import {
   FieldFormatter,
   MAX_ZOOM,
   MIN_ZOOM,
+  TooltipFeatureAction,
   VECTOR_SHAPE_TYPE,
   VectorSourceRequestMeta,
 } from '@kbn/maps-plugin/common';
@@ -19,14 +20,10 @@ import { ITooltipProperty, GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-pl
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { GeoJsonWithMeta } from '@kbn/maps-plugin/public';
 import type { IField } from '@kbn/maps-plugin/public';
-import type {
-  Attribution,
-  ImmutableSourceProperty,
-  PreIndexedShape,
-} from '@kbn/maps-plugin/public';
+import type { Attribution, ImmutableSourceProperty } from '@kbn/maps-plugin/public';
 import type { SourceEditorArgs } from '@kbn/maps-plugin/public';
 import type { DataRequest } from '@kbn/maps-plugin/public';
-import type { IVectorSource, SourceStatus } from '@kbn/maps-plugin/public';
+import type { GetFeatureActionsArgs, IVectorSource, SourceStatus } from '@kbn/maps-plugin/public';
 import {
   AnomalySourceField,
   AnomalySourceTooltipProperty,
@@ -314,11 +311,8 @@ export class AnomalySource implements IVectorSource {
     return [];
   }
 
-  async getPreIndexedShape(
-    properties: { [p: string]: any } | null
-  ): Promise<PreIndexedShape | null> {
-    // IGNORE: This is only relevant if your source is backed by an index-pattern
-    return null;
+  getFeatureActions(args: GetFeatureActionsArgs): TooltipFeatureAction[] {
+    return [];
   }
 
   getQueryableIndexPatternIds(): string[] {
