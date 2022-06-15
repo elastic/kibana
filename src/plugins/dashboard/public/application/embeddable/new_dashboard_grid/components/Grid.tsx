@@ -6,9 +6,20 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { GridItemHTMLElement, GridStack, GridStackNode } from 'gridstack';
+import {
+  GridItemHTMLElement,
+  GridStack,
+  GridStackWidget,
+  GridStackNode,
+  GridStackEventHandlerCallback,
+} from 'gridstack';
 import 'gridstack/dist/h5/gridstack-dd-native';
 import { EuiButton } from '@elastic/eui';
+
+const CELL_HEIGHT = '70px';
+const GRID_CLASS = 'dshGrid';
+const HANDLE_CLASS = 'dshPanel__wrapper';
+const PANEL_CLASS = 'dshPanel';
 
 interface Props {
   test: number;
@@ -25,8 +36,11 @@ const NUM_COLUMNS = 48;
 const SHARED_GRID_PARMS = {
   margin: 5, // 5 pixels around each panel - so 10 pixels **between** two panels
   column: NUM_COLUMNS,
-  cellHeight: '70px',
+  cellHeight: CELL_HEIGHT,
   float: false,
+  acceptWidgets: true,
+  handleClass: HANDLE_CLASS,
+  itemClass: PANEL_CLASS,
 };
 
 export class Grid extends React.Component<Props, State> {
@@ -47,11 +61,11 @@ export class Grid extends React.Component<Props, State> {
     // Provides access to the GridStack instance across the React component.
     this.grid = GridStack.init({
       ...SHARED_GRID_PARMS,
-      acceptWidgets: true,
       minRow: 10,
+      class: GRID_CLASS,
     });
 
-    this.grid.on('dragstop', (event, element) => {
+    this.grid.on('drag', (event, element) => {
       console.log('grid drag stop');
       const node = (element as GridItemHTMLElement)?.gridstackNode;
       if (!node) return;
@@ -74,42 +88,62 @@ export class Grid extends React.Component<Props, State> {
       h: Math.round(1 + 3 * Math.random()),
       id,
       content: id,
+      resizeHandles: 'se',
     };
 
     this.setState((prevState) => ({
       count: prevState.count + 1,
       items: [...prevState.items, node],
     }));
-    this.grid?.addWidget(node);
+    const newWidget = this.grid?.addWidget(node);
+
+    console.log({ newWidget });
   };
 
   addNewGrid = () => {
-    const id = String(this.state.count);
-    const subGrid = this.grid?.addWidget({
+    const id = `panel-group-${this.state.count}`;
+    const newGroup = this.grid?.addWidget({
+      id,
       autoPosition: true,
       w: NUM_COLUMNS,
       h: 4,
+      // noResize: true,
+      resizeHandles: 'se',
       noResize: true,
-      content: '<h1>title</h1>',
+      content: `<h1 style="height:50px;width:100%">title</h1>`,
       subGrid: {
         ...SHARED_GRID_PARMS,
         minRow: 4,
         auto: true,
         acceptWidgets: true,
         class: 'nested1',
-        dragInOptions: {
-          helper: (event) => {
-            console.log(event);
-            return event.target as HTMLElement;
-          },
-        },
         children: [],
+        alwaysShowResizeHandle: true,
       },
     });
 
-    // subGrid.on('drag', (event, element) => {
-    //   console.log('dragging in subgrid');
-    // });
+    const subGrid = newGroup?.gridstackNode?.subGrid as GridStack;
+
+    console.log({ newGroup });
+    const updateHeight = (element: GridStackWidget) => {
+      if (newGroup?.gridstackNode) {
+        this.grid?.update(newGroup, { h: subGrid.getRow() + 1 });
+      }
+    };
+
+    const resizeWrapper: GridStackEventHandlerCallback = (event, el) => {
+      if (el) {
+        if (newGroup?.gridstackNode?.subGrid) {
+          if (Array.isArray(el)) {
+            // TODO: grab max height
+          } else {
+            updateHeight(el);
+          }
+        }
+      }
+    };
+
+    subGrid?.on('drag resize', resizeWrapper);
   };
 
   render() {

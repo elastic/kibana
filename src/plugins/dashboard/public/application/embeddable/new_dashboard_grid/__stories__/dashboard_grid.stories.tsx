@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import 'gridstack/dist/h5/gridstack-dd-native';
-import { Grid } from '../components/Grid';
+import { Grid } from '../components/grid';
 
 const Item = ({ id }) => <div>I am item: {id}</div>;
 
