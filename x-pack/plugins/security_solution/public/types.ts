@@ -79,11 +79,11 @@ export interface StartPlugins {
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery?: OsqueryPluginStart;
+  security: SecurityPluginSetup;
 }
 
 export type StartServices = CoreStart &
   StartPlugins & {
-    security: SecurityPluginSetup;
     storage: Storage;
     apm: ApmBase;
   };

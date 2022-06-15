@@ -115,6 +115,10 @@ export const createArgsWithLayers = (
     yLeft: false,
     yRight: false,
   },
+  xExtent: {
+    mode: 'dataBounds',
+    type: 'axisExtentConfig',
+  },
   yLeftExtent: {
     mode: 'full',
     type: 'axisExtentConfig',
