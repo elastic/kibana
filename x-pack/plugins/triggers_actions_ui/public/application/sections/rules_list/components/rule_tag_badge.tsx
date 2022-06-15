@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiBadge, EuiPopoverTitle } from '@elastic/eui';
+import { EuiPopover, EuiBadge, EuiPopoverTitle, EuiFlexGroup } from '@elastic/eui';
 
 const tagTitle = i18n.translate(
   'xpack.triggersActionsUI.sections.rules_list.rules_tag_badge.tagTitle',
@@ -24,6 +24,7 @@ export interface RuleTagBadgeProps {
   badgeDataTestSubj?: string;
   titleDataTestSubj?: string;
   tagItemDataTestSubj?: (tag: string) => string;
+  spread?: boolean;
 }
 
 const containerStyle = {
@@ -38,6 +39,7 @@ export const RuleTagBadge = (props: RuleTagBadgeProps) => {
     tags = [],
     onClick,
     onClose,
+    spread,
     badgeDataTestSubj = 'ruleTagBadge',
     titleDataTestSubj = 'ruleTagPopoverTitle',
     tagItemDataTestSubj = getTagItemDataTestSubj,
@@ -76,8 +78,12 @@ export const RuleTagBadge = (props: RuleTagBadgeProps) => {
       )),
     [tags, tagItemDataTestSubj]
   );
-
-  return (
+  return spread ? (
+    // Put 0 to fix negative left margin value.
+    <EuiFlexGroup data-test-subj="spreadTags" style={{ marginLeft: 0 }} wrap={true}>
+      {tagBadges}
+    </EuiFlexGroup>
+  ) : (
     <EuiPopover button={badge} anchorPosition="upCenter" isOpen={isOpen} closePopover={onClose}>
       <EuiPopoverTitle data-test-subj={titleDataTestSubj}>{tagTitle}</EuiPopoverTitle>
       <div style={containerStyle}>{tagBadges}</div>
