@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { truncate } from 'lodash';
-import open from 'opn';
-import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
-import { parse as parseUrl } from 'url';
 import { Headers, Logger } from '@kbn/core/server';
 import {
   KBN_SCREENSHOT_MODE_HEADER,
   ScreenshotModePluginSetup,
 } from '@kbn/screenshot-mode-plugin/server';
+import { truncate } from 'lodash';
+import open from 'opn';
+import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
+import { Subject } from 'rxjs';
+import { parse as parseUrl } from 'url';
+import { getDisallowedOutgoingUrlError } from '.';
 import { ConfigType } from '../../config';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
@@ -72,18 +74,13 @@ interface InterceptedRequest {
 
 const WAIT_FOR_DELAY_MS: number = 100;
 
-function getDisallowedOutgoingUrlError(interceptedUrl: string) {
-  return new Error(
-    `Received disallowed outgoing URL: "${interceptedUrl}". Failing the request and closing the browser.`
-  );
-}
-
 /**
  * @internal
  */
 export class HeadlessChromiumDriver {
   private listenersAttached = false;
   private interceptedCount = 0;
+  private screenshottingError$ = new Subject<Error>();
 
   constructor(
     private screenshotMode: ScreenshotModePluginSetup,
@@ -103,10 +100,14 @@ export class HeadlessChromiumDriver {
     });
   }
 
+  public get pageScreenshottingError$() {
+    return this.screenshottingError$;
+  }
+
   /*
    * Call Page.goto and wait to see the Kibana DOM content
    */
-  async open(
+  public async open(
     url: string,
     { headers, context, waitForSelector: pageLoadSelector, timeout }: OpenOptions,
     logger: Logger
@@ -183,7 +184,7 @@ export class HeadlessChromiumDriver {
     }
   }
 
-  async printA4Pdf({ title, logo }: { title: string; logo?: string }): Promise<Buffer> {
+  public async printA4Pdf({ title, logo }: { title: string; logo?: string }): Promise<Buffer> {
     await this.workaroundWebGLDrivenCanvases();
     return this.page.pdf({
       format: 'a4',
@@ -199,7 +200,7 @@ export class HeadlessChromiumDriver {
   /*
    * Receive a PNG buffer of the page screenshot from Chromium
    */
-  async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
+  public async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
     const { boundingClientRect, scroll } = elementPosition;
     const screenshot = await this.page.screenshot({
       clip: {
@@ -228,7 +229,7 @@ export class HeadlessChromiumDriver {
     return this.page.evaluate(fn, ...args);
   }
 
-  async waitForSelector(
+  public async waitForSelector(
     selector: string,
     opts: WaitForSelectorOpts,
     context: EvaluateMetaOpts,
@@ -262,7 +263,7 @@ export class HeadlessChromiumDriver {
    * Setting the viewport is required to ensure that all capture elements are visible: anything not in the
    * viewport can not be captured.
    */
-  async setViewport(
+  public async setViewport(
     { width: _width, height: _height, zoom }: { zoom: number; width: number; height: number },
     logger: Logger
   ): Promise<void> {
@@ -308,7 +309,9 @@ export class HeadlessChromiumDriver {
           requestId,
         });
         this.page.browser().close();
-        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        const error = getDisallowedOutgoingUrlError(interceptedUrl);
+        this.screenshottingError$.next(error);
+        logger.error(error);
         return;
       }
 
@@ -358,7 +361,9 @@ export class HeadlessChromiumDriver {
 
       if (!allowed || !this.allowRequest(interceptedUrl)) {
         this.page.browser().close();
-        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        const error = getDisallowedOutgoingUrlError(interceptedUrl);
+        this.screenshottingError$.next(error);
+        logger.error(error);
         return;
       }
     });
