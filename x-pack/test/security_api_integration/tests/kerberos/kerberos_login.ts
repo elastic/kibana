@@ -157,6 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
             lookup_realm: { name: 'kerb1', type: 'kerberos' },
             authentication_provider: { type: 'kerberos', name: 'kerberos' },
             authentication_type: 'token',
+            elastic_cloud_user: false,
           });
       });
 
