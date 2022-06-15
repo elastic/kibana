@@ -21,6 +21,15 @@ export function getFieldTypeName(type?: string) {
     return UNKNOWN_FIELD_TYPE_MESSAGE;
   }
 
+  if (type === 'source') {
+    // TODO: check if we can remove this logic as outdated
+
+    // Note that this type is currently not provided, type for _source is undefined
+    return i18n.translate('discover.fieldNameIcons.sourceFieldAriaLabel', {
+      defaultMessage: 'Source field',
+    });
+  }
+
   const knownType: KNOWN_FIELD_TYPES = type as KNOWN_FIELD_TYPES;
   switch (knownType) {
     case KNOWN_FIELD_TYPES.BOOLEAN:
