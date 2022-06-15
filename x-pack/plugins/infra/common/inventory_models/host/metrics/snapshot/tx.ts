@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import { networkTrafficWithInterfaces } from '../../../shared/metrics/snapshot/network_traffic_with_interfaces';
-export const tx = networkTrafficWithInterfaces(
-  'tx',
-  'system.network.out.bytes',
-  'system.network.name'
-);
+export const tx = { tx: { avg: { field: 'host.network.egress.bytes' } } };

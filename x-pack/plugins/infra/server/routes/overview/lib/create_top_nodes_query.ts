@@ -76,13 +76,13 @@ export const createTopNodesQuery = (
             },
           },
           rx: {
-            sum: {
-              field: 'host.network.in.bytes',
+            avg: {
+              field: 'host.network.ingress.bytes',
             },
           },
           tx: {
-            sum: {
-              field: 'host.network.out.bytes',
+            avg: {
+              field: 'host.network.egress.bytes',
             },
           },
           timeseries: {
@@ -111,12 +111,12 @@ export const createTopNodesQuery = (
                 },
               },
               rx: {
-                rate: {
+                avg: {
                   field: 'host.network.ingress.bytes',
                 },
               },
               tx: {
-                rate: {
+                avg: {
                   field: 'host.network.egress.bytes',
                 },
               },
