@@ -18,8 +18,8 @@ interface Args {
 type FileKindHandler = RequestHandler<unknown, unknown, unknown, FileKindsRequestHandlerContext>;
 
 /**
- * Wraps the {@link FilesRouter} in a proxy that will add a middle man for injecting
- * file kind into the route handler context
+ * Wraps {@link FilesRouter}, adding a middle man for injecting file-kind into
+ * route handler context
  */
 export function enhanceRouter({ router, fileKind }: Args): FileKindRouter {
   const handlerWrapper: (handler: FileKindHandler) => FileKindHandler =
