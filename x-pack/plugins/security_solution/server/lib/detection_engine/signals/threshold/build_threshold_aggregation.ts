@@ -24,35 +24,6 @@ export const buildThresholdMultiBucketAggregation = ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sortKeys: Record<string, any> | undefined;
 }) => {
-  const leafAggs = {
-    max_timestamp: {
-      max: {
-        field: timestampField,
-      },
-    },
-    min_timestamp: {
-      min: {
-        field: timestampField,
-      },
-    },
-    ...(shouldFilterByCardinality(threshold)
-      ? {
-          cardinality_count: {
-            cardinality: {
-              field: threshold.cardinality[0].field,
-            },
-          },
-          cardinality_check: {
-            bucket_selector: {
-              buckets_path: {
-                cardinalityCount: 'cardinality_count',
-              },
-              script: `params.cardinalityCount >= ${threshold.cardinality[0].value}`, // TODO: select cardinality operator?
-            },
-          },
-        }
-      : {}),
-  };
   return {
     thresholdTerms: {
       composite: {
@@ -67,7 +38,33 @@ export const buildThresholdMultiBucketAggregation = ({
         size: 10000,
       },
       aggs: {
-        ...leafAggs,
+        max_timestamp: {
+          max: {
+            field: timestampField,
+          },
+        },
+        min_timestamp: {
+          min: {
+            field: timestampField,
+          },
+        },
+        ...(shouldFilterByCardinality(threshold)
+          ? {
+              cardinality_count: {
+                cardinality: {
+                  field: threshold.cardinality[0].field,
+                },
+              },
+              cardinality_check: {
+                bucket_selector: {
+                  buckets_path: {
+                    cardinalityCount: 'cardinality_count',
+                  },
+                  script: `params.cardinalityCount >= ${threshold.cardinality[0].value}`, // TODO: user-selected cardinality operator?
+                },
+              },
+            }
+          : {}),
         count_check: {
           bucket_selector: {
             buckets_path: {
@@ -90,6 +87,24 @@ export const buildThresholdSingleBucketAggregation = ({
   timestampField: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sortKeys: Record<string, any> | undefined;
-}) => {
-  return {};
-};
+}) => ({
+  max_timestamp: {
+    max: {
+      field: timestampField,
+    },
+  },
+  min_timestamp: {
+    min: {
+      field: timestampField,
+    },
+  },
+  ...(shouldFilterByCardinality(threshold)
+    ? {
+        cardinality_count: {
+          cardinality: {
+            field: threshold.cardinality[0].field,
+          },
+        },
+      }
+    : {}),
+});

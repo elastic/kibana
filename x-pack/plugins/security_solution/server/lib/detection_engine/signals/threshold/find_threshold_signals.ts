@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import {
-  AggregationsCompositeAggregate,
-  AggregationsMultiBucketAggregateBase,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import {
   AlertInstanceContext,
@@ -26,9 +22,14 @@ import { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
 import {
   buildThresholdMultiBucketAggregation,
+  buildThresholdSingleBucketAggregation,
   // buildThresholdSingleBucketAggregation,
 } from './build_threshold_aggregation';
-import { ThresholdAggregationResult, ThresholdBucket } from './types';
+import {
+  ThresholdMultiBucketAggregationResult,
+  ThresholdBucket,
+  ThresholdSingleBucketAggregationResult,
+} from './types';
 
 interface FindThresholdSignalsParams {
   from: string;
@@ -44,10 +45,6 @@ interface FindThresholdSignalsParams {
 }
 
 const hasThresholdFields = (threshold: ThresholdNormalized) => !!threshold.field.length;
-
-const isCompositeAggregate = (
-  aggregate: AggregationsMultiBucketAggregateBase | undefined
-): aggregate is AggregationsCompositeAggregate => aggregate != null && 'after_key' in aggregate;
 
 // TODO: this is a dupe
 const shouldFilterByCardinality = (
@@ -83,8 +80,10 @@ export const findThresholdSignals = async ({
     searchErrors: [],
   };
 
+  const includeCardinalityFilter = shouldFilterByCardinality(threshold);
+
   const compareBuckets = (bucket1: ThresholdBucket, bucket2: ThresholdBucket) =>
-    shouldFilterByCardinality(threshold)
+    includeCardinalityFilter
       ? // cardinality - descending
         (bucket2.cardinality_count?.value ?? 0) - (bucket1.cardinality_count?.value ?? 0)
       : // max_timestamp - ascending
@@ -111,7 +110,8 @@ export const findThresholdSignals = async ({
         sortOrder: 'desc',
         buildRuleMessage,
       });
-      const searchResultWithAggs = searchResult as ThresholdAggregationResult;
+
+      const searchResultWithAggs = searchResult as ThresholdMultiBucketAggregationResult;
       if (!searchResultWithAggs.aggregations) {
         throw new Error('expected to find aggregations on search result');
       }
@@ -120,17 +120,64 @@ export const findThresholdSignals = async ({
       searchAfterResults.searchErrors.push(...searchErrors);
 
       const thresholdTerms = searchResultWithAggs.aggregations?.thresholdTerms;
+      sortKeys = thresholdTerms.after_key;
 
-      sortKeys = isCompositeAggregate(thresholdTerms) ? thresholdTerms.after_key : undefined;
+      // sortKeys = isCompositeAggregate(thresholdTerms) ? thresholdTerms.after_key : undefined;
+
       buckets.push(
         ...(searchResultWithAggs.aggregations.thresholdTerms.buckets as ThresholdBucket[])
       );
     } while (sortKeys); // we have to iterate over everything in order to sort
-  } else {
-    // TODO: handle the single-bucket case
-  }
 
-  buckets.sort(compareBuckets);
+    buckets.sort(compareBuckets);
+  } else {
+    const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+      aggregations: buildThresholdSingleBucketAggregation({
+        threshold,
+        timestampField: timestampOverride != null ? timestampOverride : TIMESTAMP,
+        sortKeys,
+      }),
+      searchAfterSortId: undefined,
+      timestampOverride,
+      index: inputIndexPattern,
+      from,
+      to,
+      services,
+      logger,
+      // @ts-expect-error refactor to pass type explicitly instead of unknown
+      filter,
+      pageSize: 0,
+      sortOrder: 'desc',
+      buildRuleMessage,
+      trackTotalHits: true,
+    });
+
+    const searchResultWithAggs = searchResult as ThresholdSingleBucketAggregationResult;
+    if (!searchResultWithAggs.aggregations) {
+      throw new Error('expected to find aggregations on search result');
+    }
+
+    searchAfterResults.searchDurations.push(searchDuration);
+    searchAfterResults.searchErrors.push(...searchErrors);
+
+    const docCount = searchResultWithAggs.hits.total.value;
+    if (
+      docCount >= threshold.value &&
+      (!includeCardinalityFilter ||
+        (searchResultWithAggs.aggregations.cardinality_count?.value ?? 0) >=
+          threshold.cardinality[0].value)
+    ) {
+      buckets.push({
+        doc_count: docCount,
+        key: {},
+        max_timestamp: searchResultWithAggs.aggregations.max_timestamp,
+        min_timestamp: searchResultWithAggs.aggregations.min_timestamp,
+        ...(includeCardinalityFilter
+          ? { cardinality_count: searchResultWithAggs.aggregations.cardinality_count }
+          : {}),
+      });
+    }
+  }
 
   return {
     buckets: buckets.slice(0, maxSignals),

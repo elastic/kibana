@@ -6,19 +6,18 @@
  */
 
 import {
-  AggregationsAggregationContainer,
   AggregationsCardinalityAggregate,
-  AggregationsCompositeAggregation,
   AggregationsCompositeBucket,
   AggregationsMaxAggregate,
   AggregationsMinAggregate,
-  AggregationsMultiBucketAggregateBase,
   AggregationsStringTermsBucket,
-  AggregationsTermsAggregation,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { SignalSource } from '../types';
-import { buildThresholdMultiBucketAggregation } from './build_threshold_aggregation';
+import {
+  buildThresholdMultiBucketAggregation,
+  buildThresholdSingleBucketAggregation,
+} from './build_threshold_aggregation';
 
 export interface ThresholdLeafAggregates {
   max_timestamp: AggregationsMaxAggregate;
@@ -26,30 +25,7 @@ export interface ThresholdLeafAggregates {
   cardinality_count?: AggregationsCardinalityAggregate;
 }
 
-export type ThresholdTermsBucket = AggregationsStringTermsBucket & ThresholdLeafAggregates;
-export type ThresholdCompositeBucket = AggregationsCompositeBucket & ThresholdLeafAggregates;
-
-export type ThresholdBucket = ThresholdTermsBucket | ThresholdCompositeBucket;
-
-export type ThresholdAggregate = AggregationsMultiBucketAggregateBase<ThresholdBucket>;
-
-export interface ThresholdAggregateContainer {
-  thresholdTerms: ThresholdAggregate;
-}
-
-export type ThresholdAggregationContainer = Record<
-  string,
-  | {
-      composite: AggregationsCompositeAggregation;
-      aggs?: Record<string, AggregationsAggregationContainer>;
-    }
-  | {
-      terms: AggregationsTermsAggregation;
-      aggs?: Record<string, AggregationsAggregationContainer>;
-    }
->;
-
-export type ThresholdAggregationResult = ESSearchResponse<
+export type ThresholdMultiBucketAggregationResult = ESSearchResponse<
   SignalSource,
   {
     body: {
@@ -57,3 +33,16 @@ export type ThresholdAggregationResult = ESSearchResponse<
     };
   }
 >;
+
+export type ThresholdSingleBucketAggregationResult = ESSearchResponse<
+  SignalSource,
+  {
+    body: {
+      aggregations: ReturnType<typeof buildThresholdSingleBucketAggregation>;
+    };
+  }
+>;
+
+export type ThresholdTermsBucket = AggregationsStringTermsBucket & ThresholdLeafAggregates;
+export type ThresholdCompositeBucket = AggregationsCompositeBucket & ThresholdLeafAggregates;
+export type ThresholdBucket = ThresholdTermsBucket | ThresholdCompositeBucket;
