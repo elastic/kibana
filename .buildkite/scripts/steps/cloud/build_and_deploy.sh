@@ -52,7 +52,10 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
     .resources.integrations_server[0].plan.integrations_server.version = "'$VERSION'"
     ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
+  echo -n "Creating deployment..."
   ecctl deployment create --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
+  echo "done"
+
   CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$JSON_FILE")
   CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$JSON_FILE")
   CLOUD_DEPLOYMENT_ID=$(jq -r --slurp '.[0].id' "$JSON_FILE")
@@ -71,13 +74,19 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
     .settings.observability.metrics.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'" |
     .settings.observability.logging.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'"
     ' .buildkite/scripts/steps/cloud/stack_monitoring.json > /tmp/stack_monitoring.json
+
+  echo -n "Enabling stack monitoring..."
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json &> "$JSON_FILE"
+  echo "done"
 else
 ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
   .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
   (.. | select(.version? != null).version) = "'$VERSION'"
   ' > /tmp/deploy.json
+
+  echo -n "Updating deployment..."
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
+  echo "done"
 fi
 
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
