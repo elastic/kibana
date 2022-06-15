@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import moment from 'moment';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -12,9 +14,23 @@ import {
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { rangeQuery } from './range_query';
 
+export function formatHasRumResult<T>(
+  esResult: ESSearchResponse<T, ReturnType<typeof hasRumDataQuery>>,
+  indices?: string
+) {
+  if (!esResult) return esResult;
+  return {
+    indices,
+    // @ts-ignore total.value is undefined by the returned type, total is a `number`
+    hasData: esResult.hits.total > 0,
+    serviceName:
+      esResult.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
+  };
+}
+
 export function hasRumDataQuery({
-  start,
-  end,
+  start = moment().subtract(24, 'h').valueOf(),
+  end = moment().valueOf(),
 }: {
   start?: number;
   end?: number;

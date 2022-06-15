@@ -24,7 +24,10 @@ import {
   DEFAULT_RANKS,
 } from '../../../services/data/core_web_vitals_query';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
-import { hasRumDataQuery } from '../../../services/data/has_rum_data_query';
+import {
+  formatHasRumResult,
+  hasRumDataQuery,
+} from '../../../services/data/has_rum_data_query';
 
 export { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
@@ -91,13 +94,7 @@ export async function hasRumData(
     }
   );
 
-  return {
-    indices: dataView.dynamicDataView?.title,
-    // @ts-ignore total.value is undefined by the returned type, total is a `number`
-    hasData: esQueryResponse.hits.total > 0,
-    serviceName:
-      esQueryResponse.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
-  };
+  return formatHasRumResult(esQueryResponse, dataView.dynamicDataView?.title);
 }
 
 async function esQuery<T>(
