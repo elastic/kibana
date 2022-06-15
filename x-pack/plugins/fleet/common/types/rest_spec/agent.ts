@@ -15,6 +15,7 @@ export interface GetAgentsRequest {
   query: ListWithKuery & {
     showInactive: boolean;
     showUpgradeable?: boolean;
+    pitId?: string;
   };
 }
 
@@ -22,6 +23,10 @@ export interface GetAgentsResponse extends ListResult<Agent> {
   totalInactive: number;
   // deprecated in 8.x
   list?: Agent[];
+}
+
+export interface OpenAgentsPitResponse {
+  pitId: string;
 }
 
 export interface GetOneAgentRequest {

@@ -90,6 +90,106 @@ export async function getAgents(esClient: ElasticsearchClient, options: GetAgent
   return agents;
 }
 
+// TODO replace getAgentsByKuery by getAgentsByKueryPit when moving to pit everywhere
+export async function getAgentsByKueryPit(
+  esClient: ElasticsearchClient,
+  options: ListWithKuery & {
+    showInactive: boolean;
+    pitId: string;
+  }
+): Promise<{
+  agents: Agent[];
+  total: number;
+  page: number;
+  perPage: number;
+}> {
+  const {
+    page = 1,
+    perPage = 20,
+    sortField = 'enrolled_at',
+    sortOrder = 'desc',
+    kuery,
+    showInactive = false,
+    showUpgradeable,
+  } = options;
+  const { pitId } = options;
+  const filters = [];
+
+  if (kuery && kuery !== '') {
+    filters.push(kuery);
+  }
+
+  if (showInactive === false) {
+    filters.push(ACTIVE_AGENT_CONDITION);
+  }
+
+  const kueryNode = _joinFilters(filters);
+  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+
+  const queryAgents = async (from: number, size: number) => {
+    return esClient.search<FleetServerAgent, {}>({
+      from,
+      size,
+      track_total_hits: true,
+      rest_total_hits_as_int: true,
+      body: {
+        ...body,
+        sort: [{ [sortField]: { order: sortOrder } }],
+      },
+      pit: {
+        id: pitId,
+        keep_alive: '1m',
+      },
+    });
+  };
+
+  const res = await queryAgents((page - 1) * perPage, perPage);
+
+  let agents = res.hits.hits.map(searchHitToAgent);
+  let total = res.hits.total as number;
+
+  // filtering for a range on the version string will not work,
+  // nor does filtering on a flattened field (local_metadata), so filter here
+  if (showUpgradeable) {
+    // fixing a bug where upgradeable filter was not returning right results https://github.com/elastic/kibana/issues/117329
+    // query all agents, then filter upgradeable, and return the requested page and correct total
+    // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
+    if (total < SO_SEARCH_LIMIT) {
+      const response = await queryAgents(0, SO_SEARCH_LIMIT);
+      agents = response.hits.hits
+        .map(searchHitToAgent)
+        .filter((agent) => isAgentUpgradeable(agent, appContextService.getKibanaVersion()));
+      total = agents.length;
+      const start = (page - 1) * perPage;
+      agents = agents.slice(start, start + perPage);
+    } else {
+      agents = agents.filter((agent) =>
+        isAgentUpgradeable(agent, appContextService.getKibanaVersion())
+      );
+    }
+  }
+
+  return {
+    agents,
+    total,
+    page,
+    perPage,
+  };
+}
+
+export async function openAgentsPointInTime(esClient: ElasticsearchClient): string {
+  const pitKeepAlive = '10m';
+  const pitRes = await esClient.openPointInTime({
+    index: AGENTS_INDEX,
+    keep_alive: pitKeepAlive,
+  });
+  return pitRes.id;
+}
+
+export async function closeAgentsPointInTime(esClient: ElasticsearchClient, pitId: string) {
+  await esClient.closePointInTime({ id: pitId });
+}
+
 export async function getAgentsByKuery(
   esClient: ElasticsearchClient,
   options: ListWithKuery & {

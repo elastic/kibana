@@ -121,6 +121,7 @@ export type {
   PackageSpecCategory,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  OpenAgentsPitResponse,
 } from '../../common';
 export { entries, ElasticsearchAssetType, KibanaAssetType, InstallStatus } from '../../common';
 

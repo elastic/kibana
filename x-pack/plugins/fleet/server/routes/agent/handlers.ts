@@ -15,6 +15,7 @@ import type {
   GetAgentStatusResponse,
   PutAgentReassignResponse,
   PostBulkAgentReassignResponse,
+  OpenAgentsPitResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -25,6 +26,7 @@ import type {
   GetAgentDataRequestSchema,
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
+  CloseAgentsPitRequestSchema,
 } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { licenseService } from '../../services';
@@ -122,6 +124,32 @@ export const getAgentsHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
+    if (request.query.pitId) {
+      const { agents, total, page, perPage } = await AgentService.getAgentsByKueryPit(esClient, {
+        page: request.query.page,
+        perPage: request.query.perPage,
+        showInactive: request.query.showInactive,
+        showUpgradeable: request.query.showUpgradeable,
+        kuery: request.query.kuery,
+        pitId: request.query.pitId,
+      });
+      const totalInactive = request.query.showInactive
+        ? await AgentService.countInactiveAgents(esClient, {
+            kuery: request.query.kuery,
+          })
+        : 0;
+
+      const body: GetAgentsResponse = {
+        list: agents, // deprecated
+        items: agents,
+        total,
+        totalInactive,
+        page,
+        perPage,
+      };
+      return response.ok({ body });
+    }
+
     const { agents, total, page, perPage } = await AgentService.getAgentsByKuery(esClient, {
       page: request.query.page,
       perPage: request.query.perPage,
@@ -144,6 +172,39 @@ export const getAgentsHandler: RequestHandler<
       perPage,
     };
     return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const openAgentsPitHandler: RequestHandler<undefined> = async (
+  context,
+  request,
+  response
+) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const res = await AgentService.openAgentsPointInTime(esClient);
+    const body: OpenAgentsPitResponse = {
+      pitId: res,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const closeAgentsPitHandler: RequestHandler<
+  TypeOf<typeof CloseAgentsPitRequestSchema.params>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    await AgentService.closeAgentsPointInTime(esClient, request.params.pitId);
+    return response.ok();
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }

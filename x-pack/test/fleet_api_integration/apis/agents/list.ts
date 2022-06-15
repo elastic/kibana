@@ -71,5 +71,21 @@ export default function ({ getService }: FtrProviderContext) {
       const agent = apiResponse.items[0];
       expect(agent.access_api_key_id).to.eql('api-key-2');
     });
+
+    it('should work with pit', async () => {
+      let { body: apiResponse } = await supertest.get(`/api/fleet/agents/openPit`).expect(200);
+
+      expect(apiResponse.pitId).not.to.be(undefined);
+
+      ({ body: apiResponse } = await supertest
+        .get(`/api/fleet/agents?pitId=${apiResponse.pitId}`)
+        .expect(200));
+
+      expect(apiResponse.items.length).to.be.greaterThan(0);
+
+      ({ body: apiResponse } = await supertest
+        .post(`/api/fleet/agents/closePit/${apiResponse.pitId}`)
+        .expect(200));
+    });
   });
 }

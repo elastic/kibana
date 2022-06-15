@@ -21,6 +21,7 @@ import {
   PostAgentUpgradeRequestSchema,
   PostBulkAgentUpgradeRequestSchema,
   PostCancelActionRequestSchema,
+  CloseAgentsPitRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -35,6 +36,8 @@ import {
   putAgentsReassignHandler,
   postBulkAgentsReassignHandler,
   getAgentDataHandler,
+  closeAgentsPitHandler,
+  openAgentsPitHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -91,6 +94,30 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     getAgentsHandler
+  );
+
+  // Open PIT
+  router.post(
+    {
+      path: AGENT_API_ROUTES.OPEN_PIT_PATTERN,
+      validate: {},
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    openAgentsPitHandler
+  );
+
+  // Close PIT
+  router.post(
+    {
+      path: AGENT_API_ROUTES.CLOSE_PIT_PATTERN,
+      validate: CloseAgentsPitRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    closeAgentsPitHandler
   );
 
   // Agent actions

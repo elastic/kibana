@@ -18,6 +18,13 @@ export const GetAgentsRequestSchema = {
     kuery: schema.maybe(schema.string()),
     showInactive: schema.boolean({ defaultValue: false }),
     showUpgradeable: schema.boolean({ defaultValue: false }),
+    pitId: schema.maybe(schema.string()),
+  }),
+};
+
+export const CloseAgentsPitRequestSchema = {
+  params: schema.object({
+    pitId: schema.string(),
   }),
 };
 

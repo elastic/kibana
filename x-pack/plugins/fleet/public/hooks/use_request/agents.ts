@@ -30,6 +30,7 @@ import type {
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
   GetCurrentUpgradesResponse,
+  OpenAgentsPitResponse,
 } from '../../types';
 
 import { useRequest, sendRequest } from './use_request';
@@ -60,6 +61,20 @@ export function sendGetAgents(query: GetAgentsRequest['query'], options?: Reques
     path: agentRouteService.getListPath(),
     query,
     ...options,
+  });
+}
+
+export function openGetAgentsPit() {
+  return sendRequest<OpenAgentsPitResponse>({
+    method: 'post',
+    path: agentRouteService.getOpenPitPath(),
+  });
+}
+
+export function closeGetAgentsPit(pitId: string) {
+  return sendRequest<{}>({
+    method: 'post',
+    path: agentRouteService.getClosePitPath(pitId),
   });
 }
 

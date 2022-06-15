@@ -32,6 +32,8 @@ import {
   useKibanaVersion,
   useStartServices,
   useFlyoutContext,
+  closeGetAgentsPit,
+  openGetAgentsPit,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, AgentPolicySummaryLine } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
@@ -198,6 +200,21 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
 
+  const [pitId, setPitId] = useState<string>();
+
+  const openPointInTime = useCallback(async () => {
+    if (!pitId) {
+      const openRes = await openGetAgentsPit();
+      if (openRes.error) {
+        throw openRes.error;
+      }
+      if (!openRes.data) {
+        throw new Error('Invalid POST /agents/openPit response');
+      }
+      setPitId(openRes.data?.pitId);
+    }
+  }, [pitId]);
+
   // Request to fetch agents and agent status
   const currentRequestRef = useRef<number>(0);
   const fetchData = useCallback(
@@ -208,6 +225,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
         try {
           setIsLoading(true);
+          await openPointInTime();
           const [agentsRequest, agentsStatusRequest] = await Promise.all([
             sendGetAgents({
               page: pagination.currentPage,
@@ -215,6 +233,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               kuery: kuery && kuery !== '' ? kuery : undefined,
               showInactive,
               showUpgradeable,
+              usePit: true,
+              pitId,
             }),
             sendGetAgentStatus({
               kuery: kuery && kuery !== '' ? kuery : undefined,
@@ -279,6 +299,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       showUpgradeable,
       allTags,
       notifications.toasts,
+      openPointInTime,
+      pitId,
     ]
   );
 
@@ -291,6 +313,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
     return () => clearInterval(interval);
   }, [fetchData]);
+
+  useEffect(() => {
+    return () => {
+      if (pitId) {
+        closeGetAgentsPit(pitId);
+      }
+    };
+  }, [pitId]);
 
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,

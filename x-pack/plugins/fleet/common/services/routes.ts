@@ -179,6 +179,8 @@ export const agentRouteService = {
   getCancelActionPath: (actionId: string) =>
     AGENT_API_ROUTES.CANCEL_ACTIONS_PATTERN.replace('{actionId}', actionId),
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
+  getOpenPitPath: () => AGENT_API_ROUTES.OPEN_PIT_PATTERN,
+  getClosePitPath: (pitId: string) => AGENT_API_ROUTES.CLOSE_PIT_PATTERN.replace('{pitId}', pitId),
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
   getIncomingDataPath: () => AGENT_API_ROUTES.DATA_PATTERN,
   getCreateActionPath: (agentId: string) =>
