@@ -6,3 +6,4 @@
  */
 
 export { useEuiTheme } from './use_eui_theme';
+export { useSetFilter } from './use_filter';
