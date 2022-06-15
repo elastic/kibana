@@ -8,21 +8,33 @@
 
 import { of, Subject } from 'rxjs';
 
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   LoggingService,
   InternalLoggingServiceSetup,
   InternalLoggingServicePreboot,
 } from './logging_service';
-import { loggingSystemMock } from './logging_system.mock';
 import { LoggerContextConfigType } from './logging_config';
+import type { ILoggingSystem } from './logging_system';
+
+const createLoggingSystemMock = () => {
+  const mocked: jest.Mocked<ILoggingSystem> = {
+    get: jest.fn().mockImplementation(() => loggerMock.create()),
+    asLoggerFactory: jest.fn().mockImplementation(() => loggerMock.create()),
+    setContextConfig: jest.fn(),
+    upgrade: jest.fn(),
+    stop: jest.fn(),
+  };
+  return mocked;
+};
 
 describe('LoggingService', () => {
-  let loggingSystem: ReturnType<typeof loggingSystemMock.create>;
+  let loggingSystem: jest.Mocked<ILoggingSystem>;
   let service: LoggingService;
   let preboot: InternalLoggingServicePreboot;
 
   beforeEach(() => {
-    loggingSystem = loggingSystemMock.create();
+    loggingSystem = createLoggingSystemMock();
     service = new LoggingService({ logger: loggingSystem.asLoggerFactory() } as any);
     preboot = service.preboot({ loggingSystem });
   });

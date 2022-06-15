@@ -6,9 +6,20 @@
  * Side Public License, v 1.
  */
 
+import stripAnsi from 'strip-ansi';
+import hasAnsi from 'has-ansi';
 import { LogLevel, LogRecord } from '@kbn/logging';
-import { stripAnsiSnapshotSerializer } from '../../../test_helpers/strip_ansi_snapshot_serializer';
 import { PatternLayout, patternSchema } from './pattern_layout';
+
+const stripAnsiSnapshotSerializer: jest.SnapshotSerializerPlugin = {
+  serialize(value: string) {
+    return stripAnsi(value);
+  },
+
+  test(value: any) {
+    return typeof value === 'string' && hasAnsi(value);
+  },
+};
 
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11));
 const records: LogRecord[] = [
