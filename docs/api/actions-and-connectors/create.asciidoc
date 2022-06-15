@@ -76,7 +76,7 @@ For more configuration properties, refer to <<action-types>>.
 
 `connector_type_id`::
 (Required, string) The connector type ID for the connector. For example,
-`.index`, `.jira`, or `server-log`.
+`.index`, `.jira`, or `.server-log`.
 
 `name`::
 (Required, string) The display name for the connector.
