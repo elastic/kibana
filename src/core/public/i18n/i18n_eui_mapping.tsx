@@ -618,6 +618,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '(opens in a new tab or window)',
       }
     ),
+    'euiLoadingChart.ariaLabel': i18n.translate('core.euiLoadingChart.ariaLabel', {
+      defaultMessage: 'Loading',
+    }),
+    'euiLoadingStrings.ariaLabel': i18n.translate('core.euiLoadingStrings.ariaLabel', {
+      defaultMessage: 'Loading',
+    }),
     'euiMark.highlightStart': i18n.translate('core.euiMark.highlightStart', {
       defaultMessage: 'highlight start',
     }),

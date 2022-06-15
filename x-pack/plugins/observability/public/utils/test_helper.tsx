@@ -7,10 +7,12 @@
 
 import { render as testLibRender } from '@testing-library/react';
 import { AppMountParameters } from '@kbn/core/public';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';

@@ -7,11 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsType, SavedObjectsValidationMap } from '@kbn/core/server';
-import {
-  type CspRuleSchema,
-  cspRuleSchema,
-  cspRuleAssetSavedObjectType,
-} from '../../common/schemas/csp_rule';
+import { cspRuleAssetSavedObjectType } from '../../common/constants';
+import { type CspRuleSchema, cspRuleSchema } from '../../common/schemas/csp_rule';
 
 const validationMap: SavedObjectsValidationMap = {
   '1.0.0': cspRuleSchema,

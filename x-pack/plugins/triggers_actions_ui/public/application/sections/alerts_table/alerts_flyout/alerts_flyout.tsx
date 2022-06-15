@@ -4,92 +4,162 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { get } from 'lodash';
+import React, { Suspense, lazy, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiHorizontalRule,
-  EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
+  EuiPagination,
+  EuiProgress,
+  EuiFlyoutFooter,
 } from '@elastic/eui';
-import { AlertsField, AlertsData } from '../../../../types';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import {
+  AlertsTableConfigurationRegistry,
+  AlertsTableFlyoutState,
+  AlertTableFlyoutComponent,
+} from '../../../../types';
 
-const REASON_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.reason',
+const AlertsFlyoutHeader = lazy(() => import('./alerts_flyout_header'));
+const PAGINATION_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.paginationLabel',
   {
-    defaultMessage: 'Reason',
-  }
-);
-
-const NEXT_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.next',
-  {
-    defaultMessage: 'Next',
-  }
-);
-const PREVIOUS_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.previous',
-  {
-    defaultMessage: 'Previous',
+    defaultMessage: 'Alert navigation',
   }
 );
 
 interface AlertsFlyoutProps {
-  alert: AlertsData;
+  alert: EcsFieldsResponse;
+  alertsTableConfiguration: AlertsTableConfigurationRegistry;
+  flyoutIndex: number;
+  alertsCount: number;
+  isLoading: boolean;
+  state: AlertsTableFlyoutState;
   onClose: () => void;
-  onPaginateNext: () => void;
-  onPaginatePrevious: () => void;
+  onPaginate: (pageIndex: number) => void;
 }
 export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   alert,
+  alertsTableConfiguration,
+  flyoutIndex,
+  alertsCount,
+  isLoading,
+  state,
   onClose,
-  onPaginateNext,
-  onPaginatePrevious,
+  onPaginate,
 }: AlertsFlyoutProps) => {
+  let Header: AlertTableFlyoutComponent;
+  let Body: AlertTableFlyoutComponent;
+  let Footer: AlertTableFlyoutComponent;
+
+  const {
+    header: internalHeader,
+    body: internalBody,
+    footer: internalFooter,
+  } = alertsTableConfiguration?.useInternalFlyout?.() ?? {
+    header: null,
+    body: null,
+    footer: null,
+  };
+
+  switch (state) {
+    case AlertsTableFlyoutState.external:
+      Header = alertsTableConfiguration?.externalFlyout?.header ?? AlertsFlyoutHeader;
+      Body = alertsTableConfiguration?.externalFlyout?.body ?? null;
+      Footer = alertsTableConfiguration?.externalFlyout?.footer ?? null;
+      break;
+    case AlertsTableFlyoutState.internal:
+      Header = internalHeader ?? AlertsFlyoutHeader;
+      Body = internalBody ?? null;
+      Footer = internalFooter ?? null;
+      break;
+  }
+
+  const passedProps = useMemo(
+    () => ({
+      alert,
+      isLoading,
+    }),
+    [alert, isLoading]
+  );
+
+  const FlyoutBody = useCallback(
+    () =>
+      Body ? (
+        <Suspense fallback={null}>
+          <Body {...passedProps} />
+        </Suspense>
+      ) : null,
+    [Body, passedProps]
+  );
+
+  const FlyoutFooter = useCallback(
+    () =>
+      Footer ? (
+        <Suspense fallback={null}>
+          <Footer {...passedProps} />
+        </Suspense>
+      ) : null,
+    [Footer, passedProps]
+  );
+
+  const FlyoutBodyMemo = useMemo(() => {
+    if (FlyoutBody) {
+      if (state === AlertsTableFlyoutState.external) {
+        return (
+          <EuiFlyoutBody>
+            <FlyoutBody />
+          </EuiFlyoutBody>
+        );
+      }
+      return <FlyoutBody />;
+    }
+  }, [FlyoutBody, state]);
+
+  const FlyoutFooterMemo = useMemo(() => {
+    if (FlyoutFooter) {
+      if (state === AlertsTableFlyoutState.external) {
+        return (
+          <EuiFlyoutFooter>
+            <FlyoutFooter />
+          </EuiFlyoutFooter>
+        );
+      }
+      return <FlyoutFooter />;
+    }
+  }, [FlyoutFooter, state]);
+
   return (
-    <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
+    <EuiFlyout
+      onClose={onClose}
+      size={state === AlertsTableFlyoutState.external ? 's' : 'm'}
+      data-test-subj="alertsFlyout"
+    >
+      {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
-          <h2>{get(alert, AlertsField.name)}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiTitle size="xs">
-          <h4>{REASON_LABEL}</h4>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s" data-test-subj="alertsFlyoutReason">
-          {get(alert, AlertsField.reason)}
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiHorizontalRule size="full" />
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexStart">
+        <Suspense fallback={null}>
+          <Header {...passedProps} />
+        </Suspense>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="alertsFlyoutPaginatePrevious"
-              fill
-              onClick={onPaginatePrevious}
-            >
-              {PREVIOUS_LABEL}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton data-test-subj="alertsFlyoutPaginateNext" fill onClick={onPaginateNext}>
-              {NEXT_LABEL}
-            </EuiButton>
+            <EuiPagination
+              aria-label={PAGINATION_LABEL}
+              pageCount={alertsCount}
+              activePage={flyoutIndex}
+              onPageClick={onPaginate}
+              compressed
+              data-test-subj="alertsFlyoutPagination"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      </EuiFlyoutHeader>
+      {FlyoutBodyMemo}
+      {FlyoutFooterMemo}
     </EuiFlyout>
   );
 };

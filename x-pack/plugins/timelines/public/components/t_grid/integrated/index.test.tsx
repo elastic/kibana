@@ -78,4 +78,13 @@ describe('integrated t_grid', () => {
       euiDarkVars.paddingSizes.xl
     );
   });
+  it(`does not render the empty state when the graph overlay is open`, () => {
+    render(
+      <TestProviders>
+        <TGridIntegrated {...defaultProps} graphOverlay={<div />} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('tGridEmptyState')).toBeNull();
+  });
 });

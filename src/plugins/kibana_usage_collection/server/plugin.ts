@@ -7,7 +7,8 @@
  */
 
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { Subject } from 'rxjs';
+import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import { ReplaySubject, Subject, type Subscription } from 'rxjs';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -21,6 +22,7 @@ import type {
   CoreUsageDataStart,
 } from '@kbn/core/server';
 import { SavedObjectsClient, EventLoopDelaysMonitor } from '@kbn/core/server';
+import { registerEbtCounters } from './ebt_counters';
 import {
   startTrackingEventLoopDelaysUsage,
   startTrackingEventLoopDelaysThreshold,
@@ -46,6 +48,7 @@ import {
 
 interface KibanaUsageCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
+  telemetry?: TelemetryPluginSetup;
 }
 
 type SavedObjectsRegisterType = SavedObjectsServiceSetup['registerType'];
@@ -59,15 +62,25 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   private coreUsageData?: CoreUsageDataStart;
   private eventLoopUsageCounter?: UsageCounter;
   private pluginStop$: Subject<void>;
+  private subscriptions: Subscription[];
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.metric$ = new Subject<OpsMetrics>();
-    this.pluginStop$ = new Subject();
+    this.pluginStop$ = new ReplaySubject(1);
     this.instanceUuid = initializerContext.env.instanceUuid;
+    this.subscriptions = [];
   }
 
-  public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
+  public setup(
+    coreSetup: CoreSetup,
+    { usageCollection, telemetry }: KibanaUsageCollectionPluginsDepsSetup
+  ) {
+    if (!telemetry) {
+      // If the telemetry plugin is disabled, let's set optIn false to flush the queues.
+      coreSetup.analytics.optIn({ global: { enabled: false } });
+    }
+    registerEbtCounters(coreSetup.analytics, usageCollection);
     usageCollection.createUsageCounter('uiCounters');
     this.eventLoopUsageCounter = usageCollection.createUsageCounter('eventLoop');
     coreSetup.coreUsageData.registerUsageCounter(usageCollection.createUsageCounter('core'));
@@ -88,7 +101,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.savedObjectsClient = savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
-    core.metrics.getOpsMetrics$().subscribe(this.metric$);
+    this.subscriptions.push(core.metrics.getOpsMetrics$().subscribe(this.metric$));
     this.coreUsageData = core.coreUsageData;
     startTrackingEventLoopDelaysUsage(
       this.savedObjectsClient,
@@ -109,6 +122,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
     this.pluginStop$.next();
     this.pluginStop$.complete();
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
   private registerUsageCollectors(
@@ -125,7 +139,11 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
     registerUiCountersUsageCollector(usageCollection);
 
-    registerUsageCountersRollups(this.logger.get('usage-counters-rollup'), getSavedObjectsClient);
+    registerUsageCountersRollups(
+      this.logger.get('usage-counters-rollup'),
+      getSavedObjectsClient,
+      pluginStop$
+    );
     registerUsageCountersUsageCollector(usageCollection);
 
     registerOpsStatsCollector(usageCollection, metric$);
@@ -137,9 +155,10 @@ export class KibanaUsageCollectionPlugin implements Plugin {
       this.logger.get('application-usage'),
       usageCollection,
       registerType,
-      getSavedObjectsClient
+      getSavedObjectsClient,
+      pluginStop$
     );
-    registerCloudProviderUsageCollector(usageCollection);
+    registerCloudProviderUsageCollector(usageCollection, pluginStop$);
     registerCspCollector(usageCollection, coreSetup.http);
     registerCoreUsageCollector(usageCollection, getCoreUsageDataService);
     registerConfigUsageCollector(usageCollection, getCoreUsageDataService);
@@ -148,7 +167,8 @@ export class KibanaUsageCollectionPlugin implements Plugin {
       this.logger.get('event-loop-delays'),
       usageCollection,
       registerType,
-      getSavedObjectsClient
+      getSavedObjectsClient,
+      pluginStop$
     );
   }
 }

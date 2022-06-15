@@ -5,92 +5,85 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
-import { KibanaLogic } from '../../../../../shared/kibana';
+import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../../app_logic';
-import { getAddPath, getSourcesPath } from '../../../../routes';
+import { getAddPath, getEditPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
-import { AddSourceHeader } from './add_source_header';
-import { AddSourceLogic } from './add_source_logic';
+import { hasCustomConnectorOption, hasExternalConnectorOption } from '../../source_data';
 
-interface ConfigurationChoiceProps {
-  sourceData: SourceDataItem;
-  goToInternalStep?: () => void;
-}
+import { SourcesLogic } from '../../sources_logic';
+
+import { AddSourceHeader } from './add_source_header';
 
 interface CardProps {
   title: string;
   description: string;
   buttonText: string;
-  onClick: () => void;
+  to: string;
   badgeLabel?: string;
+  disabledMessage?: string;
+}
+
+const ConnectorCard: React.FC<CardProps> = ({
+  title,
+  description,
+  buttonText,
+  to,
+  badgeLabel,
+  disabledMessage,
+}: CardProps) => (
+  <EuiFlexItem grow>
+    <EuiCard
+      isDisabled={!!disabledMessage}
+      hasBorder
+      title={title}
+      description={disabledMessage || description}
+      betaBadgeProps={{ label: badgeLabel }}
+      footer={
+        <EuiButtonTo color="primary" to={to} isDisabled={!!disabledMessage}>
+          {buttonText}
+        </EuiButtonTo>
+      }
+    />
+  </EuiFlexItem>
+);
+
+interface ConfigurationChoiceProps {
+  sourceData: SourceDataItem;
 }
 
 export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
-  sourceData: {
-    name,
-    serviceType,
-    externalConnectorAvailable,
-    internalConnectorAvailable,
-    customConnectorAvailable,
-  },
-  goToInternalStep,
+  sourceData: { name, categories = [], serviceType },
 }) => {
-  const { isOrganization } = useValues(AppLogic);
-  const { sourceConfigData } = useValues(AddSourceLogic);
-  const { categories } = sourceConfigData;
-  const goToInternal = goToInternalStep
-    ? goToInternalStep
-    : () =>
-        KibanaLogic.values.navigateToUrl(
-          `${getSourcesPath(
-            `${getSourcesPath(getAddPath(serviceType), isOrganization)}/internal`,
-            isOrganization
-          )}/`
-        );
-  const goToExternal = () =>
-    KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(
-        `${getSourcesPath(getAddPath(serviceType), isOrganization)}/external`,
-        isOrganization
-      )}/`
-    );
-  const goToCustom = () =>
-    KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(
-        `${getSourcesPath(getAddPath(serviceType), isOrganization)}/custom`,
-        isOrganization
-      )}/`
-    );
+  const externalConnectorAvailable = hasExternalConnectorOption(serviceType);
+  const customConnectorAvailable = hasCustomConnectorOption(serviceType);
 
-  const ConnectorCard: React.FC<CardProps> = ({
-    title,
-    description,
-    buttonText,
-    onClick,
-    badgeLabel,
-  }: CardProps) => (
-    <EuiFlexItem grow>
-      <EuiCard
-        hasBorder
-        title={title}
-        description={description}
-        betaBadgeProps={{ label: badgeLabel }}
-        footer={
-          <EuiButton color="primary" onClick={onClick}>
-            {buttonText}
-          </EuiButton>
-        }
-      />
-    </EuiFlexItem>
-  );
+  const { isOrganization } = useValues(AppLogic);
+
+  const { initializeSources, resetSourcesState } = useActions(SourcesLogic);
+
+  const { externalConfigured } = useValues(SourcesLogic);
+
+  useEffect(() => {
+    initializeSources();
+    return resetSourcesState;
+  }, []);
+
+  const internalTo = `${getSourcesPath(getAddPath(serviceType), isOrganization)}/`;
+  const externalTo = `${getSourcesPath(
+    getAddPath('external', serviceType),
+    isOrganization
+  )}/connector_registration`;
+  const customTo = `${getSourcesPath(getAddPath('custom', serviceType), isOrganization)}`;
 
   const internalConnectorProps: CardProps = {
     title: i18n.translate(
@@ -118,7 +111,7 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
         defaultMessage: 'Recommended',
       }
     ),
-    onClick: goToInternal,
+    to: internalTo,
   };
 
   const externalConnectorProps: CardProps = {
@@ -141,11 +134,11 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
         defaultMessage: 'Instructions',
       }
     ),
-    onClick: goToExternal,
+    to: externalTo,
     badgeLabel: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.betaLabel',
       {
-        defaultMessage: 'Beta',
+        defaultMessage: 'Technical preview',
       }
     ),
   };
@@ -169,7 +162,7 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
         defaultMessage: 'Instructions',
       }
     ),
-    onClick: goToCustom,
+    to: customTo,
   };
 
   return (
@@ -177,9 +170,26 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
       <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexStart" direction="row" responsive={false}>
-        {internalConnectorAvailable && <ConnectorCard {...internalConnectorProps} />}
-        {externalConnectorAvailable && <ConnectorCard {...externalConnectorProps} />}
-        {customConnectorAvailable && <ConnectorCard {...customConnectorProps} />}
+        <ConnectorCard {...internalConnectorProps} data-test-subj="InternalConnectorCard" />
+        {externalConnectorAvailable &&
+          (externalConfigured ? (
+            <ConnectorCard
+              {...externalConnectorProps}
+              buttonText={i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.reviewButtonLabel',
+                {
+                  defaultMessage: 'Review the connector package',
+                }
+              )}
+              to={getEditPath('external')}
+              data-test-subj="ExternalConnectorCard"
+            />
+          ) : (
+            <ConnectorCard {...externalConnectorProps} data-test-subj="ExternalConnectorCard" />
+          ))}
+        {customConnectorAvailable && (
+          <ConnectorCard {...customConnectorProps} data-test-subj="CustomConnectorCard" />
+        )}
       </EuiFlexGroup>
     </>
   );

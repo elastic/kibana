@@ -42,19 +42,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard state', function describeIndexTests() {
     // Used to track flag before and after reset
-    let isNewChartsLibraryEnabled = false;
+    let isNewChartsLibraryEnabled = true;
 
     before(async function () {
       isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
+      await browser.setLocalStorageItem('data.newDataViewMenu', 'true');
 
-      if (isNewChartsLibraryEnabled) {
+      if (!isNewChartsLibraryEnabled) {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyPieChartsLibrary': false,
+          'visualization:visualize:legacyPieChartsLibrary': true,
         });
-        await browser.refresh();
       }
+      await browser.refresh();
     });
 
     after(async function () {

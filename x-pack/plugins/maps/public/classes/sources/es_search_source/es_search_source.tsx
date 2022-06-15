@@ -36,6 +36,7 @@ import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   ES_GEO_FIELD_TYPE,
   FIELD_ORIGIN,
+  GEO_JSON_TYPE,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
   SCALING_TYPES,
@@ -52,11 +53,17 @@ import {
   DataRequestMeta,
   ESSearchSourceDescriptor,
   Timeslice,
+  TooltipFeatureAction,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
-import { GeoJsonWithMeta, IMvtVectorSource, SourceStatus } from '../vector_source';
+import {
+  GetFeatureActionsArgs,
+  GeoJsonWithMeta,
+  IMvtVectorSource,
+  SourceStatus,
+} from '../vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
@@ -69,6 +76,7 @@ import {
   getMatchingIndexes,
 } from './util/feature_edit';
 import { makePublicExecutionContext } from '../../../util';
+import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
 
 type ESSearchSourceSyncMeta = Pick<
   ESSearchSourceDescriptor,
@@ -131,9 +139,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     };
   }
 
-  constructor(descriptor: Partial<ESSearchSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<ESSearchSourceDescriptor>) {
     const sourceDescriptor = ESSearchSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters);
+    super(sourceDescriptor);
     this._descriptor = sourceDescriptor;
     this._tooltipFields = this._descriptor.tooltipProperties
       ? this._descriptor.tooltipProperties.map((property) => {
@@ -267,7 +275,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   async _getTopHits(
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
-    registerCancelCallback: (callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void,
+    inspectorAdapters: Adapters
   ) {
     const { topHitsSplitField: topHitsSplitFieldName, topHitsSize } = this._descriptor;
 
@@ -350,6 +359,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       requestDescription: 'Elasticsearch document top hits request',
       searchSessionId: searchFilters.searchSessionId,
       executionContext: makePublicExecutionContext('es_search_source:top_hits'),
+      requestsAdapter: inspectorAdapters.requests,
     });
 
     const allHits: any[] = [];
@@ -383,7 +393,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   async _getSearchHits(
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
-    registerCancelCallback: (callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void,
+    inspectorAdapters: Adapters
   ) {
     const indexPattern = await this.getIndexPattern();
 
@@ -432,6 +443,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       requestDescription: 'Elasticsearch document request',
       searchSessionId: searchFilters.searchSessionId,
       executionContext: makePublicExecutionContext('es_search_source:doc_search'),
+      requestsAdapter: inspectorAdapters.requests,
     });
 
     const isTimeExtentForTimeslice =
@@ -512,13 +524,19 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
-    isRequestStillActive: () => boolean
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
 
     const { hits, meta } = this._isTopHits()
-      ? await this._getTopHits(layerName, searchFilters, registerCancelCallback)
-      : await this._getSearchHits(layerName, searchFilters, registerCancelCallback);
+      ? await this._getTopHits(layerName, searchFilters, registerCancelCallback, inspectorAdapters)
+      : await this._getSearchHits(
+          layerName,
+          searchFilters,
+          registerCancelCallback,
+          inspectorAdapters
+        );
 
     const unusedMetaFields = indexPattern.metaFields.filter((metaField) => {
       return !['_id', '_index'].includes(metaField);
@@ -740,7 +758,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     };
   }
 
-  async getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null> {
+  // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
+  async _getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null> {
     if (properties === null) {
       return null;
     }
@@ -800,7 +819,11 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return 'hits';
   }
 
-  async getTileUrl(searchFilters: VectorSourceRequestMeta, refreshToken: string): Promise<string> {
+  async getTileUrl(
+    searchFilters: VectorSourceRequestMeta,
+    refreshToken: string,
+    hasLabels: boolean
+  ): Promise<string> {
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
@@ -837,6 +860,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
+&hasLabels=${hasLabels}\
 &requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
 &token=${refreshToken}`;
   }
@@ -902,6 +926,46 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       })
     );
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
+  }
+
+  getFeatureActions({
+    addFilters,
+    geoFieldNames,
+    getActionContext,
+    getFilterActions,
+    mbFeature,
+    onClose,
+  }: GetFeatureActionsArgs): TooltipFeatureAction[] {
+    if (geoFieldNames.length === 0 || addFilters === null) {
+      return [];
+    }
+
+    const isPolygon =
+      mbFeature.geometry.type === GEO_JSON_TYPE.POLYGON ||
+      mbFeature.geometry.type === GEO_JSON_TYPE.MULTI_POLYGON;
+
+    return isPolygon
+      ? [
+          {
+            label: i18n.translate('xpack.maps.tooltip.action.filterByGeometryLabel', {
+              defaultMessage: 'Filter by geometry',
+            }),
+            id: 'FILTER_BY_PRE_INDEXED_SHAPE_ACTION',
+            form: (
+              <FeatureGeometryFilterForm
+                onClose={onClose}
+                geoFieldNames={geoFieldNames}
+                addFilters={addFilters}
+                getFilterActions={getFilterActions}
+                getActionContext={getActionContext}
+                loadPreIndexedShape={async () => {
+                  return this._getPreIndexedShape(mbFeature.properties);
+                }}
+              />
+            ),
+          },
+        ]
+      : [];
   }
 }
 

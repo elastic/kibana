@@ -12,11 +12,11 @@ import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } 
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
+import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
-import { DocLinksStart } from '../doc_links';
 import { HttpStart } from '../http';
-import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { ChromeDocTitle, DocTitleService } from './doc_title';
@@ -47,7 +47,7 @@ export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;
-  injectedMetadata: InjectedMetadataStart;
+  injectedMetadata: InternalInjectedMetadataStart;
   notifications: NotificationsStart;
 }
 

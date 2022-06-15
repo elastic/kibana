@@ -72,6 +72,7 @@ export enum KibanaAssetType {
   mlModule = 'ml_module',
   tag = 'tag',
   osqueryPackAsset = 'osquery_pack_asset',
+  osquerySavedQuery = 'osquery_saved_query',
 }
 
 /*
@@ -89,6 +90,7 @@ export enum KibanaSavedObjectType {
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
   tag = 'tag',
   osqueryPackAsset = 'osquery-pack-asset',
+  osquerySavedQuery = 'osquery-saved-query',
 }
 
 export enum ElasticsearchAssetType {
@@ -147,7 +149,7 @@ interface RegistryOverridePropertyValue {
   screenshots?: RegistryImage[];
 }
 
-export type RegistryRelease = PackageSpecManifest['release'];
+export type RegistryRelease = NonNullable<PackageSpecManifest['release']>;
 export interface RegistryImage extends PackageSpecIcon {
   path: string;
 }
@@ -370,7 +372,6 @@ export interface EpmPackageAdditions {
   title: string;
   latestVersion: string;
   assets: AssetsGroupedByServiceByType;
-  removable?: boolean;
   notice?: string;
   keepPoliciesUpToDate?: boolean;
 }
@@ -396,6 +397,7 @@ export interface IntegrationCardItem {
   integration: string;
   id: string;
   categories: string[];
+  fromIntegrations?: string;
 }
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;

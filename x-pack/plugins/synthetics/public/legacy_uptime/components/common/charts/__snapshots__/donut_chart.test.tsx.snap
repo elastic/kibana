@@ -791,7 +791,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero c1"
         >
           <div
-            class="euiHealth euiHealth--textSizeS"
+            class="euiHealth css-qn8ayk-euiHealth-s"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -824,7 +824,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
         </span>
       </div>
       <div
-        class="euiSpacer euiSpacer--m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
@@ -833,7 +833,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero c1"
         >
           <div
-            class="euiHealth euiHealth--textSizeS"
+            class="euiHealth css-qn8ayk-euiHealth-s"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -946,7 +946,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
           class="euiFlexItem euiFlexItem--flexGrowZero c2"
         >
           <div
-            class="euiHealth euiHealth--textSizeS"
+            class="euiHealth css-qn8ayk-euiHealth-s"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -979,7 +979,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
         </span>
       </div>
       <div
-        class="euiSpacer euiSpacer--m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
@@ -988,7 +988,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
           class="euiFlexItem euiFlexItem--flexGrowZero c2"
         >
           <div
-            class="euiHealth euiHealth--textSizeS"
+            class="euiHealth css-qn8ayk-euiHealth-s"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"

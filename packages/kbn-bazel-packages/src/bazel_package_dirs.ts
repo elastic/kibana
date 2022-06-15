@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import globby from 'globby';
 import Path from 'path';
 
-import globby from 'globby';
 import { REPO_ROOT } from '@kbn/utils';
 
 /**
@@ -25,6 +25,7 @@ export const BAZEL_PACKAGE_DIRS = [
   'packages/analytics',
   'packages/analytics/shippers',
   'packages/analytics/shippers/elastic_v3',
+  'packages/core/*',
 ];
 
 /**

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
-import { ScaleType } from '@elastic/charts';
+import { Ast, AstFunction } from '@kbn/interpreter';
+import { Position, ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { AxisExtentConfig, ExtendedYConfig, YConfig } from '@kbn/expression-xy-plugin/common';
-import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { AxisExtentConfig, YConfig, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   State,
   XYDataLayerConfig,
@@ -214,10 +214,14 @@ export const buildExpression = (
                       : [],
                     position: !state.legend.isInside ? [state.legend.position] : [],
                     isInside: state.legend.isInside ? [state.legend.isInside] : [],
-                    legendSize:
-                      !state.legend.isInside && state.legend.legendSize
-                        ? [state.legend.legendSize]
-                        : [],
+                    legendSize: state.legend.isInside
+                      ? []
+                      : state.legend.position === Position.Top ||
+                        state.legend.position === Position.Bottom
+                      ? [LegendSize.AUTO]
+                      : state.legend.legendSize
+                      ? [state.legend.legendSize]
+                      : [],
                     horizontalAlignment:
                       state.legend.horizontalAlignment && state.legend.isInside
                         ? [state.legend.horizontalAlignment]
@@ -249,6 +253,8 @@ export const buildExpression = (
           fillOpacity: [state.fillOpacity || 0.3],
           yLeftExtent: [axisExtentConfigToExpression(state.yLeftExtent, validDataLayers)],
           yRightExtent: [axisExtentConfigToExpression(state.yRightExtent, validDataLayers)],
+          yLeftScale: [state.yLeftScale || 'linear'],
+          yRightScale: [state.yRightScale || 'linear'],
           axisTitlesVisibilitySettings: [
             {
               type: 'expression',
@@ -343,11 +349,6 @@ export const buildExpression = (
   };
 };
 
-const buildTableExpression = (datasourceExpression: Ast): ExpressionAstExpression => ({
-  type: 'expression',
-  chain: [{ type: 'function', function: 'kibana', arguments: {} }, ...datasourceExpression.chain],
-});
-
 const referenceLineLayerToExpression = (
   layer: XYReferenceLineLayerConfig,
   datasourceLayer: DatasourcePublicAPI,
@@ -358,7 +359,7 @@ const referenceLineLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'extendedReferenceLineLayer',
+        function: 'referenceLineLayer',
         arguments: {
           layerId: [layer.layerId],
           yConfig: layer.yConfig
@@ -368,7 +369,7 @@ const referenceLineLayerToExpression = (
             : [],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(getColumnToLabelMap(layer, datasourceLayer))],
-          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
+          ...(datasourceExpression ? { table: [datasourceExpression] } : {}),
         },
       },
     ],
@@ -425,19 +426,40 @@ const dataLayerToExpression = (
           layerId: [layer.layerId],
           hide: [Boolean(layer.hide)],
           xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
-          yScaleType: [
-            getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
-          ],
           xScaleType: [getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear)],
           isHistogram: [isHistogramDimension],
-          splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
+          splitAccessor: layer.collapseFn || !layer.splitAccessor ? [] : [layer.splitAccessor],
           yConfig: layer.yConfig
             ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig))
             : [],
           seriesType: [layer.seriesType],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
-          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
+          ...(datasourceExpression
+            ? {
+                table: [
+                  {
+                    ...datasourceExpression,
+                    chain: [
+                      ...datasourceExpression.chain,
+                      ...(layer.collapseFn
+                        ? [
+                            {
+                              type: 'function',
+                              function: 'lens_collapse',
+                              arguments: {
+                                by: layer.xAccessor ? [layer.xAccessor] : [],
+                                metric: layer.accessors,
+                                fn: [layer.collapseFn!],
+                              },
+                            } as AstFunction,
+                          ]
+                        : []),
+                    ],
+                  },
+                ],
+              }
+            : {}),
           palette: [
             {
               type: 'expression',

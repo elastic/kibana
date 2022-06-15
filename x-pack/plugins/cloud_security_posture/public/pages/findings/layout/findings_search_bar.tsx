@@ -17,15 +17,13 @@ import { FINDINGS_SEARCH_PLACEHOLDER } from '../translations';
 
 type SearchBarQueryProps = Pick<FindingsBaseURLQuery, 'query' | 'filters'>;
 
-interface FindingsSearchBarProps extends SearchBarQueryProps {
+interface FindingsSearchBarProps {
   setQuery(v: Partial<SearchBarQueryProps>): void;
   loading: boolean;
 }
 
 export const FindingsSearchBar = ({
   dataView,
-  query,
-  filters,
   loading,
   setQuery,
 }: FindingsSearchBarProps & { dataView: DataView }) => {
@@ -48,8 +46,6 @@ export const FindingsSearchBar = ({
         showSaveQuery={false}
         isLoading={loading}
         indexPatterns={[dataView]}
-        query={query}
-        filters={filters}
         onQuerySubmit={setQuery}
         // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
         onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}

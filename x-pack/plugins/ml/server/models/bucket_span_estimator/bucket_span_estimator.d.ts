@@ -6,9 +6,6 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
-import { RuntimeMappings } from '../../../common/types/fields';
-import { IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
 import { BucketSpanEstimatorData } from '../../../common/types/job_service';
 
 export function estimateBucketSpanFactory({

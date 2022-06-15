@@ -33,9 +33,12 @@ export async function rollupServiceProvider(
       rollupIndexPatternObject.typeMeta?.params !== undefined
     ) {
       const rollUpIndex: string = rollupIndexPatternObject.typeMeta.params.rollup_index;
-      const rollupCaps = await asCurrentUser.rollup.getRollupIndexCaps({
-        index: rollUpIndex,
-      });
+      const rollupCaps = await asCurrentUser.rollup.getRollupIndexCaps(
+        {
+          index: rollUpIndex,
+        },
+        { maxRetries: 0 }
+      );
 
       const indexRollupCaps = rollupCaps[rollUpIndex];
       if (indexRollupCaps && indexRollupCaps.rollup_jobs) {

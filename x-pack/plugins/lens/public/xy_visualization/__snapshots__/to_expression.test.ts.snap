@@ -134,13 +134,7 @@ Object {
                   ],
                   "table": Array [
                     Object {
-                      "chain": Array [
-                        Object {
-                          "arguments": Object {},
-                          "function": "kibana",
-                          "type": "function",
-                        },
-                      ],
+                      "chain": Array [],
                       "type": "expression",
                     },
                   ],
@@ -151,9 +145,6 @@ Object {
                     "linear",
                   ],
                   "yConfig": Array [],
-                  "yScaleType": Array [
-                    "linear",
-                  ],
                 },
                 "function": "extendedDataLayer",
                 "type": "function",
@@ -176,7 +167,7 @@ Object {
                   "legendSize": Array [],
                   "maxLines": Array [],
                   "position": Array [
-                    "bottom",
+                    "left",
                   ],
                   "shouldTruncate": Array [
                     true,
@@ -240,6 +231,9 @@ Object {
             "type": "expression",
           },
         ],
+        "yLeftScale": Array [
+          "linear",
+        ],
         "yRightExtent": Array [
           Object {
             "chain": Array [
@@ -261,6 +255,9 @@ Object {
             ],
             "type": "expression",
           },
+        ],
+        "yRightScale": Array [
+          "linear",
         ],
         "yRightTitle": Array [
           "",

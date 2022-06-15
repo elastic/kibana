@@ -17,6 +17,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import { HeatmapRenderProps, HeatmapArguments } from '../../common';
 import HeatmapComponent from './heatmap_component';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -47,6 +48,7 @@ const args: HeatmapArguments = {
     isVisible: true,
     position: 'top',
     type: 'heatmap_legend',
+    legendSize: LegendSize.SMALL,
   },
   gridConfig: {
     isCellLabelVisible: true,
@@ -118,6 +120,33 @@ describe('HeatmapComponent', function () {
   it('renders the legend on the correct position', () => {
     const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
     expect(component.find(Settings).prop('legendPosition')).toEqual('top');
+  });
+
+  it('sets correct legend sizes', () => {
+    const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
+    expect(component.find(Settings).prop('legendSize')).toEqual(80);
+
+    component.setProps({
+      args: {
+        ...args,
+        legend: {
+          ...args.legend,
+          legendSize: LegendSize.AUTO,
+        },
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toBeUndefined();
+
+    component.setProps({
+      args: {
+        ...args,
+        legend: {
+          ...args.legend,
+          legendSize: undefined,
+        },
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toEqual(130);
   });
 
   it('renders the legend toggle component if uiState is set', async () => {

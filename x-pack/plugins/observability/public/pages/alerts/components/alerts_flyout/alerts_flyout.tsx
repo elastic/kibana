@@ -77,8 +77,7 @@ export function AlertsFlyout({
   }
 
   const ruleId = alertData.fields['kibana.alert.rule.uuid'] ?? null;
-  const linkToRule = ruleId && prepend ? prepend(paths.management.ruleDetails(ruleId)) : null;
-
+  const linkToRule = ruleId && prepend ? prepend(paths.observability.ruleDetails(ruleId)) : null;
   const overviewListItems = [
     {
       title: translations.alertsFlyout.statusLabel,
@@ -89,9 +88,17 @@ export function AlertsFlyout({
       ),
     },
     {
-      title: translations.alertsFlyout.lastUpdatedLabel,
+      title: translations.alertsFlyout.startedAtLabel,
       description: (
         <span title={alertData.start.toString()}>{moment(alertData.start).format(dateFormat)}</span>
+      ),
+    },
+    {
+      title: translations.alertsFlyout.lastUpdatedLabel,
+      description: (
+        <span title={alertData.lastUpdated.toString()}>
+          {moment(alertData.lastUpdated).format(dateFormat)}
+        </span>
       ),
     },
     {

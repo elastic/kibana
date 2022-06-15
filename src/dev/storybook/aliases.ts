@@ -8,6 +8,7 @@
 
 // Please also add new aliases to test/scripts/jenkins_storybook.sh
 export const storybookAliases = {
+  unified_search: 'src/plugins/unified_search/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
   apm: 'x-pack/plugins/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
@@ -37,5 +38,5 @@ export const storybookAliases = {
   presentation: 'src/plugins/presentation_util/storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',
   shared_ux: 'packages/kbn-shared-ux-storybook/src/config',
-  ui_actions_enhanced: 'x-pack/plugins/ui_actions_enhanced/.storybook',
+  ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
 };

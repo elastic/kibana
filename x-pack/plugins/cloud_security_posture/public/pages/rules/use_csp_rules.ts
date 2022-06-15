@@ -7,8 +7,11 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { FunctionKeys } from 'utility-types';
 import type { SavedObjectsFindOptions, SimpleSavedObject } from '@kbn/core/public';
-import { UPDATE_RULES_CONFIG_ROUTE_PATH } from '../../../common/constants';
-import { cspRuleAssetSavedObjectType, type CspRuleSchema } from '../../../common/schemas/csp_rule';
+import {
+  UPDATE_RULES_CONFIG_ROUTE_PATH,
+  cspRuleAssetSavedObjectType,
+} from '../../../common/constants';
+import type { CspRuleSchema } from '../../../common/schemas/csp_rule';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { UPDATE_FAILED } from './translations';
 
@@ -25,20 +28,17 @@ export type RulesQueryResult = ReturnType<typeof useFindCspRules>;
 export const useFindCspRules = ({ search, page, perPage, filter }: RulesQuery) => {
   const { savedObjects } = useKibana().services;
 
-  return useQuery(
-    [cspRuleAssetSavedObjectType, { search, page, perPage }],
-    () =>
-      savedObjects.client.find<CspRuleSchema>({
-        type: cspRuleAssetSavedObjectType,
-        search,
-        searchFields: ['name'],
-        page: 1,
-        // NOTE: 'name.raw' is a field mapping we defined on 'name'
-        sortField: 'name.raw',
-        perPage,
-        filter,
-      }),
-    { refetchOnWindowFocus: false }
+  return useQuery([cspRuleAssetSavedObjectType, { search, page, perPage }], () =>
+    savedObjects.client.find<CspRuleSchema>({
+      type: cspRuleAssetSavedObjectType,
+      search,
+      searchFields: ['name'],
+      page: 1,
+      // NOTE: 'name.raw' is a field mapping we defined on 'name'
+      sortField: 'name.raw',
+      perPage,
+      filter,
+    })
   );
 };
 

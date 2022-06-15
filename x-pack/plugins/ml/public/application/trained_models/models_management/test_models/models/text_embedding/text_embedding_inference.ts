@@ -7,12 +7,14 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { i18n } from '@kbn/i18n';
 import { InferenceBase, InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getTextEmbeddingOutputComponent } from './text_embedding_output';
+import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
 
 export interface RawTextEmbeddingResponse {
-  predicted_value: number[];
+  inference_results: [{ predicted_value: number[] }];
 }
 
 export interface FormattedTextEmbeddingResponse {
@@ -25,12 +27,14 @@ export type TextEmbeddingResponse = InferResponse<
 >;
 
 export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse> {
+  protected inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING;
+
   public async infer() {
     try {
       this.setRunning();
-      const inputText = this.inputText$.value;
+      const inputText = this.inputText$.getValue();
       const payload = {
-        docs: { [this.inputField]: inputText },
+        docs: [{ [this.inputField]: inputText }],
       };
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
@@ -50,7 +54,13 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
   }
 
   public getInputComponent(): JSX.Element {
-    return getGeneralInputComponent(this);
+    const placeholder = i18n.translate(
+      'xpack.ml.trainedModels.testModelsFlyout.textEmbedding.inputText',
+      {
+        defaultMessage: 'Enter a phrase to test',
+      }
+    );
+    return getGeneralInputComponent(this, placeholder);
   }
 
   public getOutputComponent(): JSX.Element {
@@ -63,6 +73,6 @@ function processResponse(
   model: estypes.MlTrainedModelConfig,
   inputText: string
 ) {
-  const predictedValue = resp.predicted_value;
+  const predictedValue = resp.inference_results[0].predicted_value;
   return { response: { predictedValue }, rawResponse: resp, inputText };
 }

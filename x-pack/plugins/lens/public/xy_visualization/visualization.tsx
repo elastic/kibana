@@ -31,7 +31,7 @@ import { State, visualizationTypes, XYSuggestion, XYLayerConfig, XYDataLayerConf
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
-import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
+import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
 import {
   getGroupsAvailableInData,
@@ -276,10 +276,12 @@ export const getXyVisualization = ({
             ? [
                 {
                   columnId: dataLayer.splitAccessor,
-                  triggerIcon: 'colorBy' as const,
-                  palette: paletteService
-                    .get(dataLayer.palette?.name || 'default')
-                    .getCategoricalColors(10, dataLayer.palette?.params),
+                  triggerIcon: dataLayer.collapseFn ? ('aggregate' as const) : ('colorBy' as const),
+                  palette: dataLayer.collapseFn
+                    ? undefined
+                    : paletteService
+                        .get(dataLayer.palette?.name || 'default')
+                        .getCategoricalColors(10, dataLayer.palette?.params),
                 },
               ]
             : [],
@@ -514,8 +516,6 @@ export const getXyVisualization = ({
     );
   },
 
-  shouldBuildDatasourceExpressionManually: () => true,
-
   toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
     toExpression(
       state,
@@ -699,7 +699,7 @@ const getMappedAccessors = ({
       { tables: frame.activeData },
       fieldFormats.deserialize
     );
-    mappedAccessors = getAccessorColorConfig(
+    mappedAccessors = getAccessorColorConfigs(
       colorAssignments,
       frame,
       {

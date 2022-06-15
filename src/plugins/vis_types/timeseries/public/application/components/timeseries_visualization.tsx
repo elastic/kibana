@@ -126,7 +126,7 @@ function TimeseriesVisualization({
       const data = getClickFilterData(points, tables, model);
 
       const event = {
-        name: 'filterBucket',
+        name: 'filter',
         data: {
           data,
           negate: false,

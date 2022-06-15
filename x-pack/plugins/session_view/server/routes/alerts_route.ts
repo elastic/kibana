@@ -14,8 +14,11 @@ import {
   ALERTS_ROUTE,
   ALERTS_PER_PAGE,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
+  ALERT_UUID_PROPERTY,
+  ALERT_ORIGINAL_TIME_PROPERTY,
   PREVIEW_ALERTS_INDEX,
 } from '../../common/constants';
+
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 
 export const registerAlertsRoute = (
@@ -28,20 +31,42 @@ export const registerAlertsRoute = (
       validate: {
         query: schema.object({
           sessionEntityId: schema.string(),
+          investigatedAlertId: schema.maybe(schema.string()),
+          cursor: schema.maybe(schema.string()),
+          range: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },
     async (_context, request, response) => {
       const client = await ruleRegistry.getRacClientWithRequest(request);
-      const { sessionEntityId } = request.query;
-      const body = await doSearch(client, sessionEntityId);
+      const { sessionEntityId, investigatedAlertId, range, cursor } = request.query;
 
-      return response.ok({ body });
+      try {
+        const body = await searchAlerts(
+          client,
+          sessionEntityId,
+          ALERTS_PER_PAGE,
+          investigatedAlertId,
+          range,
+          cursor
+        );
+
+        return response.ok({ body });
+      } catch (err) {
+        return response.badRequest(err.message);
+      }
     }
   );
 };
 
-export const doSearch = async (client: AlertsClient, sessionEntityId: string) => {
+export const searchAlerts = async (
+  client: AlertsClient,
+  sessionEntityId: string,
+  size: number,
+  investigatedAlertId?: string,
+  range?: string[],
+  cursor?: string
+) => {
   const indices = (await client.getAuthorizedAlertsIndices(['siem']))?.filter(
     (index) => index !== PREVIEW_ALERTS_INDEX
   );
@@ -50,23 +75,69 @@ export const doSearch = async (client: AlertsClient, sessionEntityId: string) =>
     return { events: [] };
   }
 
-  const results = await client.find({
-    query: {
-      match: {
-        [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId,
+  try {
+    const results = await client.find({
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId,
+              },
+            },
+            range && {
+              range: {
+                [ALERT_ORIGINAL_TIME_PROPERTY]: {
+                  gte: range[0],
+                  lte: range[1],
+                },
+              },
+            },
+          ].filter((item) => !!item),
+        },
       },
-    },
-    track_total_hits: false,
-    size: ALERTS_PER_PAGE,
-    index: indices.join(','),
-  });
+      track_total_hits: true,
+      size,
+      index: indices.join(','),
+      sort: [{ '@timestamp': 'asc' }],
+      search_after: cursor ? [cursor] : undefined,
+    });
 
-  const events = results.hits.hits.map((hit: any) => {
-    // the alert indexes flattens many properties. this util unflattens them as session view expects structured json.
-    hit._source = expandDottedObject(hit._source);
+    // if an alert is being investigated, fetch it on it's own, as it's not guaranteed to come back in the above request.
+    // we only need to do this for the first page of alerts.
+    if (!cursor && investigatedAlertId) {
+      const investigatedAlertSearch = await client.find({
+        query: {
+          match: {
+            [ALERT_UUID_PROPERTY]: investigatedAlertId,
+          },
+        },
+        size: 1,
+        index: indices.join(','),
+      });
 
-    return hit;
-  });
+      if (investigatedAlertSearch.hits.hits.length > 0) {
+        results.hits.hits.unshift(investigatedAlertSearch.hits.hits[0]);
+      }
+    }
 
-  return { events };
+    const events = results.hits.hits.map((hit: any) => {
+      // the alert indexes flattens many properties. this util unflattens them as session view expects structured json.
+      hit._source = expandDottedObject(hit._source);
+
+      return hit;
+    });
+
+    const total =
+      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
+
+    return { total, events };
+  } catch (err) {
+    // unauthorized
+    if (err.output.statusCode === 404) {
+      return { total: 0, events: [] };
+    }
+
+    throw err;
+  }
 };

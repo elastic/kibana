@@ -9,7 +9,12 @@ import { BehaviorSubject } from 'rxjs';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { MLHttpFetchError } from '../../../../../../common/util/errors';
+import { SupportedPytorchTasksType } from '../../../../../../common/constants/trained_models';
 import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+
+export type InferenceType =
+  | SupportedPytorchTasksType
+  | keyof estypes.AggregationsInferenceConfigContainer;
 
 const DEFAULT_INPUT_FIELD = 'text_field';
 
@@ -32,6 +37,7 @@ export enum RUNNING_STATE {
 }
 
 export abstract class InferenceBase<TInferResponse> {
+  protected abstract inferenceType: InferenceType;
   protected readonly inputField: string;
   public inputText$ = new BehaviorSubject<string>('');
   public inferenceResult$ = new BehaviorSubject<TInferResponse | null>(null);
@@ -67,4 +73,27 @@ export abstract class InferenceBase<TInferResponse> {
   protected abstract getOutputComponent(): JSX.Element;
 
   protected abstract infer(): Promise<TInferResponse>;
+
+  protected getInferenceConfig(): estypes.AggregationsClassificationInferenceOptions | undefined {
+    return this.model.inference_config[
+      this.inferenceType as keyof estypes.AggregationsInferenceConfigContainer
+    ];
+  }
+
+  protected getNumTopClassesConfig(defaultOverride = 5) {
+    const options: estypes.AggregationsClassificationInferenceOptions | undefined =
+      this.getInferenceConfig();
+
+    if (options?.num_top_classes !== undefined && options?.num_top_classes > 0) {
+      return {};
+    }
+
+    return {
+      inference_config: {
+        [this.inferenceType]: {
+          num_top_classes: defaultOverride,
+        },
+      },
+    };
+  }
 }

@@ -2,9 +2,7 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/steps/test/test_group_env.sh
-
-export JOB=$BUILDKITE_PARALLEL_JOB
+export JOB=${BUILDKITE_PARALLEL_JOB:-0}
 
 # a jest failure will result in the script returning an exit code of 10
 exitCode=0

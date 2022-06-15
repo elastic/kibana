@@ -26,12 +26,14 @@ import type { CasesUiStart } from '@kbn/cases-plugin/public';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
+import type { KubernetesSecurityStart } from '@kbn/kubernetes-security-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ApmBase } from '@elastic/apm-rum';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -40,6 +42,7 @@ import type { Exceptions } from './exceptions';
 import type { Hosts } from './hosts';
 import type { Users } from './users';
 import type { Network } from './network';
+import type { Kubernetes } from './kubernetes';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
@@ -63,6 +66,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  kubernetesSecurity: KubernetesSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
@@ -75,12 +79,13 @@ export interface StartPlugins {
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery?: OsqueryPluginStart;
+  security: SecurityPluginSetup;
 }
 
 export type StartServices = CoreStart &
   StartPlugins & {
-    security: SecurityPluginSetup;
     storage: Storage;
+    apm: ApmBase;
   };
 
 export interface PluginSetup {
@@ -104,6 +109,7 @@ export interface SubPlugins {
   hosts: Hosts;
   users: Users;
   network: Network;
+  kubernetes: Kubernetes;
   overview: Overview;
   timelines: Timelines;
   management: Management;
@@ -119,6 +125,7 @@ export interface StartedSubPlugins {
   hosts: ReturnType<Hosts['start']>;
   users: ReturnType<Users['start']>;
   network: ReturnType<Network['start']>;
+  kubernetes: ReturnType<Kubernetes['start']>;
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;

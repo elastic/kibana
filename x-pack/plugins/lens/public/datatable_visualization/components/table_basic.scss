@@ -2,10 +2,6 @@
   height: 100%;
 }
 
-.lnsTableCell {
-  @include euiTextTruncate;
-}
-
 .lnsTableCell--left {
   text-align: left;
 }

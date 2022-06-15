@@ -41,7 +41,7 @@ import {
   FleetGetEndpointPackagePolicyHttpMockInterface,
   fleetGetPackageListHttpMock,
   FleetGetPackageListHttpMockInterface,
-} from '../mocks';
+} from '../../mocks';
 
 type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
   metadataList: () => MetadataListResponse;
