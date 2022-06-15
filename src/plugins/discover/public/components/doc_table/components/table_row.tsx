@@ -101,7 +101,7 @@ export const TableRow = ({
   const { singleDocProps, surrDocsProps } = useNavigationProps({
     indexPatternId: indexPattern.id!,
     rowIndex: row.raw._index,
-    rowId: row.id,
+    rowId: row.raw._id,
     filterManager,
     addBasePath,
     columns,
