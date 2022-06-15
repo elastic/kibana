@@ -8,8 +8,11 @@
 import './spaces_menu.scss';
 
 import { EuiAvatar, EuiPopoverFooter, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
-import React, { Component } from 'react';
+import type {
+  EuiSelectableOption,
+  // EuiSelectableOptionCheckedType,
+} from '@elastic/eui/src/components/selectable/selectable_option';
+import React, { Component, lazy } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import type { InjectedIntl } from '@kbn/i18n-react';
@@ -17,6 +20,7 @@ import { injectI18n } from '@kbn/i18n-react';
 
 import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
+// import { getSpaceAvatarComponent } from '../../space_avatar';
 import { ManageSpacesButton } from './manage_spaces_button';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
@@ -42,18 +46,6 @@ interface State {
   allowSpacesListFocus: boolean;
 }
 
-/**
- * Selectable Space Item for display and navigation purposes.
- */
-interface SelectableSpaceItem {
-  label: string;
-  key: string;
-  prepend: JSX.Element;
-  checked: EuiSelectableOptionCheckedType;
-  'data-test-subj': string;
-  className: string;
-}
-
 class SpacesMenuUI extends Component<Props, State> {
   // ToDo: removed unused state members
   public state = {
@@ -63,43 +55,31 @@ class SpacesMenuUI extends Component<Props, State> {
   };
 
   public render() {
-    const { intl, isLoading, spaces, serverBasePath, navigateToUrl } = this.props;
+    const { intl, spaces, serverBasePath, navigateToUrl } = this.props;
     // const { searchTerm } = this.state;
 
     // ToDo: how to clean this up into functions/members?
-    const spaceItems: SelectableSpaceItem[] = isLoading
-      ? [
-          {
-            label: '',
-            key: '',
-            prepend: <></>,
-            checked: 'off',
-            'data-test-subj': '',
-            className: 'selectable-space-item',
-          },
-        ]
-      : // this.getVisibleSpaces(searchTerm).map((space) => {
-        spaces.map((space) => {
-          return {
-            label: space.name,
-            key: space.id,
-            prepend: (
-              <EuiAvatar
-                type="space"
-                name={space.name}
-                size="s"
-                color={space.color}
-                imageUrl={space.imageUrl ?? ''}
-              />
-            ),
-            checked: 'off', // ToDo: set 'on' if this space ID matches the one we're in?
-            'data-test-subj': `${space.id}-selectableSpaceItem`,
-            className: 'selectableSpaceItem',
-          };
-        });
+    const spaceItems: EuiSelectableOption[] = spaces.map((space) => {
+      return {
+        label: space.name,
+        key: space.id,
+        prepend: (
+          <EuiAvatar
+            type="space"
+            name={space.name}
+            size="s"
+            color={space.color}
+            imageUrl={space.imageUrl ?? ''}
+          />
+        ),
+        checked: 'off', // ToDo: set 'on' if this space ID matches the one we're in?
+        'data-test-subj': `${space.id}-selectableSpaceItem`,
+        className: 'selectableSpaceItem',
+      };
+    });
 
-    const onChange = (newItems: SelectableSpaceItem[]) => {
-      newItems.forEach((element: { label: any; checked: any }) => {
+    const onChange = (newItems: EuiSelectableOption[]) => {
+      newItems.forEach((element) => {
         console.log(`**** ${element.label}, Checked: ${element.checked}`);
       });
       const selectedSpaceItem = newItems.filter((item) => item.checked?.includes('on'))[0];
@@ -131,12 +111,17 @@ class SpacesMenuUI extends Component<Props, State> {
     return (
       <EuiSelectable
         {...panelProps}
+        isLoading={this.props.isLoading}
         searchable={this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD}
-        // ToDo: I had to comment this out, due to it causing an error with EuiSelectable, but I wasn't quite sure I understood...
-        // searchProps={{
-        //   placeholder: 'Find a space',
-        //   compressed: true,
-        // }}
+        // ToDo: find a way to do this more robustly, i.e. not use 'any'
+        searchProps={
+          this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD
+            ? ({
+                placeholder: 'Find a space',
+                compressed: true,
+              } as any)
+            : undefined
+        }
         options={spaceItems}
         singleSelection={true}
         style={{ width: 300 }}
