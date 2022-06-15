@@ -25,7 +25,11 @@ describe('getFieldTypeName', () => {
     expect(getFieldTypeName(undefined)).toBe(UNKNOWN_FIELD_TYPE_MESSAGE);
   });
 
-  it(`should return '${UNKNOWN_FIELD_TYPE_MESSAGE}' when passed an unknown field type`, () => {
-    expect(getFieldTypeName('unknown_field_type')).toBe(UNKNOWN_FIELD_TYPE_MESSAGE);
+  it(`should return '${UNKNOWN_FIELD_TYPE_MESSAGE}' when passed 'unknown'`, () => {
+    expect(getFieldTypeName('unknown')).toBe(UNKNOWN_FIELD_TYPE_MESSAGE);
+  });
+
+  it('should return the original type string back when passed an unknown field type', () => {
+    expect(getFieldTypeName('unknown_field_type')).toBe('unknown_field_type');
   });
 });

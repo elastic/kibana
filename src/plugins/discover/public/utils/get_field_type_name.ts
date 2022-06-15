@@ -17,17 +17,8 @@ export const UNKNOWN_FIELD_TYPE_MESSAGE = i18n.translate(
 );
 
 export function getFieldTypeName(type?: string) {
-  if (!type) {
+  if (!type || type === 'unknown') {
     return UNKNOWN_FIELD_TYPE_MESSAGE;
-  }
-
-  if (type === 'source') {
-    // TODO: check if we can remove this logic
-
-    // Note that this type is currently not provided, type for _source is undefined
-    return i18n.translate('discover.fieldNameIcons.sourceFieldAriaLabel', {
-      defaultMessage: 'Source field',
-    });
   }
 
   const knownType: KNOWN_FIELD_TYPES = type as KNOWN_FIELD_TYPES;
@@ -99,6 +90,6 @@ export function getFieldTypeName(type?: string) {
     default:
       // If you see a typescript error here, that's a sign that there are missing switch cases ^^
       const _exhaustiveCheck: never = knownType;
-      return UNKNOWN_FIELD_TYPE_MESSAGE || _exhaustiveCheck;
+      return knownType || _exhaustiveCheck;
   }
 }
