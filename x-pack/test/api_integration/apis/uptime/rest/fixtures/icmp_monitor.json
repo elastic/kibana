@@ -33,5 +33,6 @@
   ],
   "name": "Test HTTP Monitor 04",
   "namespace": "testnamespace",
-  "origin": "ui"
+  "origin": "ui",
+  "form_monitor_type": "icmp"
 }

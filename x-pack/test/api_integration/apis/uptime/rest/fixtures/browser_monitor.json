@@ -43,5 +43,6 @@
   "locations": [],
   "name": "Test HTTP Monitor 03",
   "namespace": "testnamespace",
-  "origin": "ui"
+  "origin": "ui",
+  "form_monitor_type": "multistep"
 }

@@ -61,5 +61,6 @@
   }],
   "namespace": "testnamespace",
   "revision": 1,
-  "origin": "ui"
+  "origin": "ui",
+  "form_monitor_type": "http"
 }
