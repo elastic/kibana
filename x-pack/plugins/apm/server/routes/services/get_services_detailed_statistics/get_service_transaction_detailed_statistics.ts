@@ -29,6 +29,7 @@ import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 export async function getServiceTransactionDetailedStatistics({
   serviceNames,
@@ -39,7 +40,7 @@ export async function getServiceTransactionDetailedStatistics({
   offset,
   start,
   end,
-  probability,
+  randomSampler,
 }: {
   serviceNames: string[];
   environment: string;
@@ -49,7 +50,7 @@ export async function getServiceTransactionDetailedStatistics({
   offset?: string;
   start: number;
   end: number;
-  probability: number;
+  randomSampler: RandomSampler;
 }) {
   const { apmEventClient } = setup;
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
@@ -94,9 +95,7 @@ export async function getServiceTransactionDetailedStatistics({
         },
         aggs: {
           sample: {
-            random_sampler: {
-              probability,
-            },
+            random_sampler: randomSampler,
             aggs: {
               services: {
                 terms: {
