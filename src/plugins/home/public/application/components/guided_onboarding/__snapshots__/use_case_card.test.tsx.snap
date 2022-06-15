@@ -15,17 +15,17 @@ exports[`use case card should render use case card component for observability 1
   display="subdued"
   icon={
     <EuiAvatar
-      className="gettingStarted__useCaseIcon"
+      className="homUseCaseIcon"
       color="plain"
       iconSize="xl"
       iconType="eye"
-      name="observability icon"
+      name="Observability icon"
       size="xl"
     />
   }
   image={
     <div
-      className="gettingStarted__useCaseCard gettingStarted__observability"
+      className="homUseCaseCard homUseCaseCard--observability"
     />
   }
   onClick={[Function]}
@@ -59,17 +59,17 @@ exports[`use case card should render use case card component for search 1`] = `
   display="subdued"
   icon={
     <EuiAvatar
-      className="gettingStarted__useCaseIcon"
+      className="homUseCaseIcon"
       color="plain"
       iconSize="xl"
       iconType="inspect"
-      name="search icon"
+      name="Enterprise Search icon"
       size="xl"
     />
   }
   image={
     <div
-      className="gettingStarted__useCaseCard gettingStarted__search"
+      className="homUseCaseCard homUseCaseCard--search"
     />
   }
   onClick={[Function]}
@@ -103,17 +103,17 @@ exports[`use case card should render use case card component for security 1`] = 
   display="subdued"
   icon={
     <EuiAvatar
-      className="gettingStarted__useCaseIcon"
+      className="homUseCaseIcon"
       color="plain"
       iconSize="xl"
       iconType="securitySignal"
-      name="security icon"
+      name="Security icon"
       size="xl"
     />
   }
   image={
     <div
-      className="gettingStarted__useCaseCard gettingStarted__security"
+      className="homUseCaseCard homUseCaseCard--security"
     />
   }
   onClick={[Function]}

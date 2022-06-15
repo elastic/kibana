@@ -11,14 +11,15 @@ import { shallow } from 'enzyme';
 
 import { UseCaseCard } from './use_case_card';
 
-jest.mock('../../kibana_services', () => ({
-  getServices: () => ({
-    application: {
-      navigateToApp: () => {},
-    },
-    trackUiMetric: () => {},
-  }),
-}));
+jest.mock('../../kibana_services', () => {
+  const { applicationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+  return {
+    getServices: () => ({
+      application: applicationServiceMock.createStartContract(),
+      trackUiMetric: jest.fn(),
+    }),
+  };
+});
 describe('use case card', () => {
   test('should render use case card component for search', async () => {
     const component = await shallow(<UseCaseCard useCase="search" />);

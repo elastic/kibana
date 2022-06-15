@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLink,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -37,7 +36,6 @@ export const GettingStarted = () => {
         // using # prevents a reloading of the whole app when clicking the breadcrumb
         href: '#',
         text: i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' }),
-        // TODO telemetry for navigating away from getting started via breadcrumbs
         onClick: () => {
           trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__home_breadcrumb');
         },
@@ -48,57 +46,60 @@ export const GettingStarted = () => {
         }),
       },
     ]);
-  }, [chrome]);
+  }, [chrome, trackUiMetric]);
 
   const onSkip = () => {
-    // TODO telemetry for guided onboarding
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
     application.navigateToApp('home');
   };
   return (
-    <KibanaPageTemplate template="centeredBody">
-        <EuiTitle size="l" className="eui-textCenter">
-          <h1>
-            <FormattedMessage
-              id="home.guidedOnboarding.gettingStarted.useCaseSelectionTitle"
-              defaultMessage="What would you like to do first?"
-            />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText color="subdued" size="s" textAlign="center">
-          <p>
-            <FormattedMessage
-              id="home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle"
-              defaultMessage="Select an option below to get a quick tour of the most valuable features based on your preferences."
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiSpacer size="xxl" />
-        <EuiFlexGrid columns={3} gutterSize="xl">
-          <EuiFlexItem>
-            <UseCaseCard useCase="search" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UseCaseCard useCase="observability" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UseCaseCard useCase="security" />
-          </EuiFlexItem>
-        </EuiFlexGrid>
-        <EuiSpacer />
-        <EuiHorizontalRule />
-        <EuiSpacer />
-        <div className="eui-textCenter">
-          <EuiLink onClick={onSkip}>
-            <FormattedMessage
-              id="home.guidedOnboarding.gettingStarted.skip.buttonLabel"
-              defaultMessage="I'd like to do something else (Skip)"
-            />
-          </EuiLink>
-        </div>
-      </EuiPanel>
+    <KibanaPageTemplate
+      template="centeredBody"
+      pageContentProps={{
+        className: 'homGettingStarted',
+      }}
+    >
+      <EuiTitle size="l" className="eui-textCenter">
+        <h1>
+          <FormattedMessage
+            id="home.guidedOnboarding.gettingStarted.useCaseSelectionTitle"
+            defaultMessage="What would you like to do first?"
+          />
+        </h1>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText color="subdued" size="s" textAlign="center">
+        <p>
+          <FormattedMessage
+            id="home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle"
+            defaultMessage="Select an option below to get a quick tour of the most valuable features based on your preferences."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiSpacer size="xxl" />
+      <EuiFlexGrid columns={3} gutterSize="xl">
+        <EuiFlexItem>
+          <UseCaseCard useCase="search" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <UseCaseCard useCase="observability" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <UseCaseCard useCase="security" />
+        </EuiFlexItem>
+      </EuiFlexGrid>
+      <EuiSpacer />
+      <EuiHorizontalRule />
+      <EuiSpacer />
+      <div className="eui-textCenter">
+        <EuiLink onClick={onSkip}>
+          <FormattedMessage
+            id="home.guidedOnboarding.gettingStarted.skip.buttonLabel"
+            defaultMessage="I'd like to do something else (Skip)"
+          />
+        </EuiLink>
+      </div>
     </KibanaPageTemplate>
   );
 };

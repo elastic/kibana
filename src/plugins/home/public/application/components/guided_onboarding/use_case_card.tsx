@@ -7,28 +7,111 @@
  */
 
 import React from 'react';
-import { EuiAvatar, EuiCard, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiAvatar, EuiCard, EuiText, EuiTitle, IconType } from '@elastic/eui';
 
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../../kibana_services';
 
-import { i18nTexts, iconTypes, navigateOptions } from './constants';
-
 import './use_case_card.scss';
+
+type UseCaseConstants = {
+  [key in UseCase]: {
+    i18nTexts: {
+      title: string;
+      description: string;
+    };
+    icon: {
+      type: IconType;
+      name: string;
+    };
+    navigateOptions: {
+      appId: string;
+      path?: string;
+    };
+  };
+};
 
 type UseCase = 'search' | 'observability' | 'security';
 
+const constants: UseCaseConstants = {
+  search: {
+    i18nTexts: {
+      title: i18n.translate('home.guidedOnboarding.gettingStarted.search.cardTitle', {
+        defaultMessage: 'Search my data',
+      }),
+      description: i18n.translate('home.guidedOnboarding.gettingStarted.search.cardDescription', {
+        defaultMessage:
+          'Create a search experience for your websites, applications, workplace content, or anything in between.',
+      }),
+    },
+    icon: {
+      type: 'inspect',
+      name: i18n.translate('home.guidedOnboarding.gettingStarted.search.iconName', {
+        defaultMessage: 'Enterprise Search icon',
+      }),
+    },
+    navigateOptions: {
+      appId: 'enterpriseSearch',
+      // when navigating to ent search, do not provide path
+    },
+  },
+  observability: {
+    i18nTexts: {
+      title: i18n.translate('home.guidedOnboarding.gettingStarted.observability.cardTitle', {
+        defaultMessage: 'Monitor my infrastructure',
+      }),
+      description: i18n.translate(
+        'home.guidedOnboarding.gettingStarted.observability.cardDescription',
+        {
+          defaultMessage:
+            'Monitor your infrastructure by consolidating your logs, metrics, and traces for end‑to‑end observability.',
+        }
+      ),
+    },
+    icon: {
+      type: 'eye',
+      name: i18n.translate('home.guidedOnboarding.gettingStarted.observability.iconName', {
+        defaultMessage: 'Observability icon',
+      }),
+    },
+    navigateOptions: {
+      appId: 'observability',
+      path: '/overview',
+    },
+  },
+  security: {
+    i18nTexts: {
+      title: i18n.translate('home.guidedOnboarding.gettingStarted.security.cardTitle', {
+        defaultMessage: 'Protect my environment',
+      }),
+      description: i18n.translate('home.guidedOnboarding.gettingStarted.security.cardDescription', {
+        defaultMessage:
+          'Protect your environment by unifying SIEM, endpoint security, and cloud security to protect against threats.',
+      }),
+    },
+    icon: {
+      type: 'securitySignal',
+      name: i18n.translate('home.guidedOnboarding.gettingStarted.security.iconName', {
+        defaultMessage: 'Security icon',
+      }),
+    },
+    navigateOptions: {
+      appId: 'securitySolutionUI',
+      path: '/overview',
+    },
+  },
+};
 export const UseCaseCard = ({ useCase }: { useCase: UseCase }) => {
   const { application, trackUiMetric } = getServices();
 
   const onUseCaseSelection = () => {
-    // TODO telemetry for guided onboarding
     trackUiMetric(METRIC_TYPE.CLICK, `guided_onboarding__use_case__${useCase}`);
 
     localStorage.setItem(`guidedOnboarding.${useCase}.tourActive`, JSON.stringify(true));
-    application.navigateToApp(navigateOptions[useCase].appId, {
-      path: navigateOptions[useCase].path,
+    application.navigateToApp(constants[useCase].navigateOptions.appId, {
+      path: constants[useCase].navigateOptions.path,
     });
   };
 
@@ -39,24 +122,24 @@ export const UseCaseCard = ({ useCase }: { useCase: UseCase }) => {
       icon={
         <EuiAvatar
           iconSize="xl"
-          iconType={iconTypes[useCase]}
-          name={`${useCase} icon`}
+          iconType={constants[useCase].icon.type}
+          name={constants[useCase].icon.name}
           color="plain"
           size="xl"
-          className="gettingStarted__useCaseIcon"
+          className="homUseCaseIcon"
         />
       }
       image={<div className={`homUseCaseCard homUseCaseCard--${useCase}`} />}
       title={
         <EuiTitle size="xs">
           <h4>
-            <strong>{i18nTexts[useCase].title}</strong>
+            <strong>{constants[useCase].i18nTexts.title}</strong>
           </h4>
         </EuiTitle>
       }
       description={
         <EuiText color="subdued" size="xs">
-          <p>{i18nTexts[useCase].description}</p>
+          <p>{constants[useCase].i18nTexts.description}</p>
         </EuiText>
       }
       onClick={onUseCaseSelection}

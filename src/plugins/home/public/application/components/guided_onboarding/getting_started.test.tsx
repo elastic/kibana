@@ -22,16 +22,6 @@ jest.mock('../../kibana_services', () => {
     }),
   };
 });
-  getServices: () => ({
-    chrome: {
-      setBreadcrumbs: () => {},
-    },
-    application: {
-      navigateToApp: () => {},
-    },
-    trackUiMetric: () => {},
-  }),
-}));
 describe('getting started', () => {
   test('should render getting started component', async () => {
     const component = await shallow(<GettingStarted />);

@@ -1,4 +1,4 @@
-.gettingStarted__useCaseCard {
+.homUseCaseCard {
   // on smaller screens make top image taller
   @include euiBreakpoint('xs','s') {
     min-height: 250px;
@@ -10,18 +10,18 @@
   @include euiBreakpoint('l','xl') {
     min-height: 200px;
   }
-  &.gettingStarted__search {
+  &.homUseCaseCard--search {
     background-color: $euiColorWarning;
   }
-  &.gettingStarted__security {
+  &.homUseCaseCard--security {
     background-color: $euiColorAccent;
   }
 
-  &.gettingStarted__observability {
+  &.homUseCaseCard--observability {
     background-color: $euiColorSuccess;
   }
 }
 
-.gettingStarted__useCaseIcon {
+.homUseCaseIcon {
   @include euiBottomShadow;
 }
