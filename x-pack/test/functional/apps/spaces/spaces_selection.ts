@@ -21,14 +21,21 @@ export default function spaceSelectorFunctionalTests({
     'security',
     'spaceSelector',
   ]);
+  const spacesService = getService('spaces');
 
   describe('Spaces', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/spaces/selector');
+      // await esArchiver.load('x-pack/test/functional/es_archives/spaces/selector');
+      await spacesService.create({
+        id: 'another-space',
+        name: 'Another Space',
+        disabledFeatures: [],
+      });
     });
-    after(
-      async () => await esArchiver.unload('x-pack/test/functional/es_archives/spaces/selector')
-    );
+    after(async () => {
+      // await esArchiver.unload('x-pack/test/functional/es_archives/spaces/selector')
+      await spacesService.delete('another-space');
+    });
 
     this.tags('includeFirefox');
     describe('Space Selector', () => {
@@ -41,7 +48,7 @@ export default function spaceSelectorFunctionalTests({
         await PageObjects.security.forceLogout();
       });
 
-      it('allows user to navigate to different spaces', async () => {
+      it.only('allows user to navigate to different spaces', async () => {
         const spaceId = 'another-space';
 
         await PageObjects.security.login(undefined, undefined, {
