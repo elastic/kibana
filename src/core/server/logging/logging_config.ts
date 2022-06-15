@@ -7,8 +7,8 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { LogLevelId } from '@kbn/logging';
-import { AppenderConfigType, Appenders } from './appenders/appenders';
+import type { AppenderConfigType, LoggerConfigType } from '@kbn/core-logging-server';
+import { Appenders } from './appenders/appenders';
 
 // We need this helper for the types to be correct
 // (otherwise it assumes an array of A|B instead of a tuple [A,B])

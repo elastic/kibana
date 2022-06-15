@@ -10,5 +10,3 @@ export {
   SizeLimitTriggeringPolicy,
   sizeLimitTriggeringPolicyConfigSchema,
 } from './size_limit_policy';
-
-export type { SizeLimitTriggeringPolicyConfig } from './size_limit_policy';

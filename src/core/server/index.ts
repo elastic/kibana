@@ -31,6 +31,7 @@
 import { AwaitedProperties } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
 import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import type { AppenderConfigType, LoggingServiceSetup } from '@kbn/core-logging-server';
 import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
@@ -56,7 +57,7 @@ import {
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
-import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
+import { appendersSchema } from './logging';
 import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { DeprecationsServiceSetup, DeprecationsClient } from './deprecations';
@@ -247,7 +248,7 @@ export type {
   LoggerContextConfigInput,
   LoggerConfigType,
   AppenderConfigType,
-} from './logging';
+} from '@kbn/core-logging-server';
 export type {
   Logger,
   LoggerFactory,

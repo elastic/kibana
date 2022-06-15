@@ -16,7 +16,8 @@ import {
   rollPreviousFilesInOrderMock,
 } from './numeric_strategy.test.mocks';
 import { rollingFileAppenderMocks } from '../../mocks';
-import { NumericRollingStrategy, NumericRollingStrategyConfig } from './numeric_strategy';
+import type { NumericRollingStrategyConfig } from '@kbn/core-logging-server';
+import { NumericRollingStrategy } from './numeric_strategy';
 
 const logFileFolder = 'log-file-folder';
 const logFileBaseName = 'kibana.log';

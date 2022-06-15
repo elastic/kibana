@@ -7,16 +7,15 @@
  */
 
 import { DisposableAppender, LogLevel, Logger, LoggerFactory } from '@kbn/logging';
+import type { LoggerConfigType, LoggerContextConfigInput } from '@kbn/core-logging-server';
 import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { BaseLogger } from './logger';
 import { LoggerAdapter } from './logger_adapter';
 import {
   LoggingConfigType,
-  LoggerConfigType,
   LoggingConfig,
   LoggerContextConfigType,
-  LoggerContextConfigInput,
   loggerContextConfigSchema,
   config as loggingConfig,
 } from './logging_config';

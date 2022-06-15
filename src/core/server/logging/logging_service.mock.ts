@@ -8,9 +8,9 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import type { LoggingServiceSetup } from '@kbn/core-logging-server';
 import {
   LoggingService,
-  LoggingServiceSetup,
   InternalLoggingServiceSetup,
   InternalLoggingServicePreboot,
 } from './logging_service';

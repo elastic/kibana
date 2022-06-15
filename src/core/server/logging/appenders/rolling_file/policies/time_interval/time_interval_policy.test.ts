@@ -10,10 +10,8 @@ import { getNextRollingTimeMock } from './time_interval_policy.test.mocks';
 import moment from 'moment-timezone';
 import { LogLevel, LogRecord } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
-import {
-  TimeIntervalTriggeringPolicy,
-  TimeIntervalTriggeringPolicyConfig,
-} from './time_interval_policy';
+import type { TimeIntervalTriggeringPolicyConfig } from '@kbn/core-logging-server';
+import { TimeIntervalTriggeringPolicy } from './time_interval_policy';
 import { RollingFileContext } from '../../rolling_file_context';
 
 const format = 'YYYY-MM-DD HH:mm:ss';

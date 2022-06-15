@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { schema, ByteSizeValue } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { LogRecord } from '@kbn/logging';
+import type { SizeLimitTriggeringPolicyConfig } from '@kbn/core-logging-server';
 import { RollingFileContext } from '../../rolling_file_context';
 import { TriggeringPolicy } from '../policy';
 

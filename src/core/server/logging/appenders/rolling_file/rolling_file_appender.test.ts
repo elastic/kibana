@@ -17,7 +17,8 @@ import {
 import { rollingFileAppenderMocks } from './mocks';
 import moment from 'moment-timezone';
 import { LogLevel, LogRecord } from '@kbn/logging';
-import { RollingFileAppender, RollingFileAppenderConfig } from './rolling_file_appender';
+import type { RollingFileAppenderConfig } from '@kbn/core-logging-server';
+import { RollingFileAppender } from './rolling_file_appender';
 
 const config: RollingFileAppenderConfig = {
   type: 'rolling-file',

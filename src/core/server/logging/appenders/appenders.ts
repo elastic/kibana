@@ -9,15 +9,13 @@
 import { schema } from '@kbn/config-schema';
 import { assertNever } from '@kbn/std';
 import { DisposableAppender } from '@kbn/logging';
+import type { AppenderConfigType } from '@kbn/core-logging-server';
 
 import { Layouts } from '../layouts/layouts';
-import { ConsoleAppender, ConsoleAppenderConfig } from './console/console_appender';
-import { FileAppender, FileAppenderConfig } from './file/file_appender';
-import { RewriteAppender, RewriteAppenderConfig } from './rewrite/rewrite_appender';
-import {
-  RollingFileAppender,
-  RollingFileAppenderConfig,
-} from './rolling_file/rolling_file_appender';
+import { ConsoleAppender } from './console/console_appender';
+import { FileAppender } from './file/file_appender';
+import { RewriteAppender } from './rewrite/rewrite_appender';
+import { RollingFileAppender } from './rolling_file/rolling_file_appender';
 
 /**
  * Config schema for validting the shape of the `appenders` key in in {@link LoggerContextConfigType} or

@@ -10,7 +10,8 @@ import type { MockedKeys } from '@kbn/utility-types-jest';
 import { createRewritePolicyMock, resetAllMocks } from './rewrite_appender.test.mocks';
 import { rewriteAppenderMocks } from './mocks';
 import { LogLevel, LogRecord, LogMeta, DisposableAppender } from '@kbn/logging';
-import { RewriteAppender, RewriteAppenderConfig } from './rewrite_appender';
+import type { RewriteAppenderConfig } from '@kbn/core-logging-server';
+import { RewriteAppender } from './rewrite_appender';
 
 // Helper to ensure tuple is typed [A, B] instead of Array<A | B>
 const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];

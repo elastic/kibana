@@ -7,12 +7,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { NumericRollingStrategyConfig } from '@kbn/core-logging-server';
 import { RollingStrategy } from './strategy';
-import {
-  NumericRollingStrategy,
-  NumericRollingStrategyConfig,
-  numericRollingStrategyConfigSchema,
-} from './numeric';
+import { NumericRollingStrategy, numericRollingStrategyConfigSchema } from './numeric';
 import { RollingFileContext } from '../rolling_file_context';
 
 export type { RollingStrategy } from './strategy';

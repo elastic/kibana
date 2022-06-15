@@ -8,20 +8,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
-import { Layouts, LayoutConfigType } from '../../layouts/layouts';
+import type { RollingFileAppenderConfig } from '@kbn/core-logging-server';
+import { Layouts } from '../../layouts/layouts';
 import { BufferAppender } from '../buffer/buffer_appender';
-import {
-  TriggeringPolicyConfig,
-  createTriggeringPolicy,
-  triggeringPolicyConfigSchema,
-  TriggeringPolicy,
-} from './policies';
-import {
-  RollingStrategy,
-  createRollingStrategy,
-  RollingStrategyConfig,
-  rollingStrategyConfigSchema,
-} from './strategies';
+import { createTriggeringPolicy, triggeringPolicyConfigSchema, TriggeringPolicy } from './policies';
+import { RollingStrategy, createRollingStrategy, rollingStrategyConfigSchema } from './strategies';
 import { RollingFileManager } from './rolling_file_manager';
 import { RollingFileContext } from './rolling_file_context';
 

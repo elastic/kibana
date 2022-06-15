@@ -7,7 +7,8 @@
  */
 
 import { LogRecord, LogLevel, LogMeta } from '@kbn/logging';
-import { MetaRewritePolicy, MetaRewritePolicyConfig } from './meta_policy';
+import type { MetaRewritePolicyConfig } from '@kbn/core-logging-server';
+import { MetaRewritePolicy } from './meta_policy';
 
 describe('MetaRewritePolicy', () => {
   const createPolicy = (

@@ -9,9 +9,10 @@
 import { schema } from '@kbn/config-schema';
 import { Layout } from '@kbn/logging';
 import { assertNever } from '@kbn/std';
+import type { LayoutConfigType } from '@kbn/core-logging-server';
 
-import { JsonLayout, JsonLayoutConfigType } from './json_layout';
-import { PatternLayout, PatternLayoutConfigType } from './pattern_layout';
+import { JsonLayout } from './json_layout';
+import { PatternLayout } from './pattern_layout';
 
 const { oneOf } = schema;
 

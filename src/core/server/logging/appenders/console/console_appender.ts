@@ -8,11 +8,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
-import { Layouts, LayoutConfigType } from '../../layouts/layouts';
+import { Layouts } from '../../layouts/layouts';
 
 const { literal, object } = schema;
-
-
 
 /**
  *

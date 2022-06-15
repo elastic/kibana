@@ -11,7 +11,7 @@ import { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
 import { createWriteStream, WriteStream, mkdirSync } from 'fs';
 import { dirname } from 'path';
 
-import { Layouts, LayoutConfigType } from '../../layouts/layouts';
+import { Layouts } from '../../layouts/layouts';
 
 /**
  * Appender that formats all the `LogRecord` instances it receives and writes them to the specified file.
