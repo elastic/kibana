@@ -277,10 +277,17 @@ For detailed information about the sharing options, refer to <<reporting-getting
 [[alert-from-Discover]]
 === Generate alerts
 
-To create a rule from *Discover*,
-click *Alerts* in the toolbar. Then build the data view, query,
-and filters that match the data for which you want the alert notification.
-For detailed information, refer to <<alerting-getting-started, Alerting>>.
+From *Discover*, you can create an alert to periodically
+check when data goes above or below a certain threshold within a given time interval.
+
+. Ensure that your data view,
+query, and filters fetch the data for which you want an alert.
+. In the toolbar, click *Alerts > Create search threshold rule*.
++
+The *Create rule* form is pre-filled with the latest query sent to {es}.
+. Configure your query and actions, and then save your alert.
++
+For details about configuring your query, refer to <<rule-type-es-query, this doc>>.
 
 [float]
 === What’s next?
