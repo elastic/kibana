@@ -28784,7 +28784,6 @@
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.nodeTextAreaFieldLabel": "ノード",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.passwordTextFieldLabel": "パスワード",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.prioritySelectFieldLabel": "優先度",
-    "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredApiUrlTextField": "URL が必要です。",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredSeverityTextField": "重要度は必須です。",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredUsernameTextField": "ユーザー名が必要です。",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.resourceTextAreaFieldLabel": "リソース",

@@ -28623,7 +28623,6 @@
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.nodeTextAreaFieldLabel": "Nœud",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.passwordTextFieldLabel": "Mot de passe",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.prioritySelectFieldLabel": "Priorité",
-    "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredApiUrlTextField": "L'URL est requise.",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredSeverityTextField": "La sévérité est requise.",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredUsernameTextField": "Le nom d'utilisateur est requis.",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.resourceTextAreaFieldLabel": "Ressource",

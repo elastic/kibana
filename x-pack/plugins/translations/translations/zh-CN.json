@@ -28818,7 +28818,6 @@
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.nodeTextAreaFieldLabel": "节点",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.passwordTextFieldLabel": "密码",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.prioritySelectFieldLabel": "优先级",
-    "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredApiUrlTextField": "“URL”必填。",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredSeverityTextField": "“严重性”必填。",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredUsernameTextField": "“用户名”必填。",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.resourceTextAreaFieldLabel": "资源",
