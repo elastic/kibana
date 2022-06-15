@@ -72,7 +72,6 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
     .settings.observability.logging.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'"
     ' .buildkite/scripts/steps/cloud/stack_monitoring.json > /tmp/stack_monitoring.json
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json &> "$JSON_FILE"
-
 else
 ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
   .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
