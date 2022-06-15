@@ -61,7 +61,12 @@ export const getRenderCellValueFn =
         setCellProps({
           className: 'dscDocsGrid__cell--highlight',
         });
-      } else if (ctx.expanded && row && ctx.expanded._id === row._id) {
+      } else if (
+        ctx.expanded &&
+        row &&
+        ctx.expanded._id === row._id &&
+        ctx.expanded._index === row._index
+      ) {
         setCellProps({
           style: {
             backgroundColor: ctx.isDarkMode
