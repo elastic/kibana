@@ -10,7 +10,6 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 import { SecuritySolutionCypressCliTestRunnerCI } from './runner';
 
-const isChunkingDisabled = process.env.DISABLE_TEST_CASES_SPLITTING === 'true';
 const cliNumber = parseInt(process.env.CLI_NUMBER ?? '1', 10);
 const cliCount = parseInt(process.env.CLI_COUNT ?? '1', 10);
 
@@ -21,9 +20,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...securitySolutionCypressConfig.getAll(),
 
     testRunner: (context: FtrProviderContext) =>
-      // if isChunkingDisabled is true, we will run all existing tests instead splitting them between parallel jobs
-      isChunkingDisabled
-        ? SecuritySolutionCypressCliTestRunnerCI(context)
-        : SecuritySolutionCypressCliTestRunnerCI(context, cliCount, cliNumber),
+      SecuritySolutionCypressCliTestRunnerCI(context, cliCount, cliNumber),
   };
 }
