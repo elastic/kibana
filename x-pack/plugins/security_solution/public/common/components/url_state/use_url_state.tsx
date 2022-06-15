@@ -60,10 +60,9 @@ export const useUrlStateHooks = ({
   pathName,
   history,
 }: UrlStateContainerPropTypes) => {
-  const { search } = useLocation();
   const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
   const { filterManager, savedQueries } = useKibana().services.data.query;
-  const { pathname: browserPathName } = useLocation();
+  const { pathname: browserPathName, search } = useLocation();
   const prevProps = usePrevious({ pathName, pageName, urlState, search });
   const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
 

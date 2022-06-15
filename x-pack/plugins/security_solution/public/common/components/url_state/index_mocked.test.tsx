@@ -88,6 +88,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: mockProps.pathName,
+        search: mockProps.search,
       });
 
       const wrapper = mount(
@@ -142,6 +143,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: mockProps.pathName,
+        search: mockProps.search,
       });
 
       const wrapper = mount(
@@ -176,6 +178,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: mockProps.pathName,
+        search: mockProps.search,
       });
 
       const wrapper = mount(
@@ -287,6 +290,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: mockProps.pathName,
+        search: mockProps.search,
       });
 
       const wrapper = mount(
@@ -298,6 +302,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: updatedMockProps.pathName,
+        search: mockProps.search,
       });
 
       wrapper.setProps({
@@ -308,7 +313,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: MANAGEMENT_PATH,
-        search: '?',
+        search: mockProps.search,
         state: '',
       });
     });
@@ -364,6 +369,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: mockProps.pathName,
+        search: mockProps.search,
       });
 
       const wrapper = mount(
@@ -375,6 +381,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: updatedMockProps.pathName,
+        search: mockProps.search,
       });
 
       wrapper.setProps({
@@ -385,7 +392,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: DASHBOARDS_PATH,
-        search: '?',
+        search: mockProps.search,
         state: '',
       });
     });
@@ -402,6 +409,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
             (useLocation as jest.Mock).mockReturnValue({
               pathname: mockProps.pathName,
+              search: mockProps.search,
             });
 
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
@@ -434,6 +442,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
           (useLocation as jest.Mock).mockReturnValue({
             pathname: mockProps.pathName,
+            search: mockProps.search,
           });
 
           const wrapper = mount(
@@ -446,6 +455,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
           (useLocation as jest.Mock).mockReturnValue({
             pathname: updatedProps.pathName,
+            search: mockProps.search,
           });
 
           wrapper.setProps({ hookProps: updatedProps });
@@ -479,6 +489,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
           (useLocation as jest.Mock).mockReturnValue({
             pathname: mockProps.pathName,
+            search: mockProps.search,
           });
 
           const wrapper = mount(
@@ -491,6 +502,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
           (useLocation as jest.Mock).mockReturnValue({
             pathname: updatedMockProps.pathName,
+            search: mockProps.search,
           });
 
           wrapper.setProps({ hookProps: updatedMockProps });

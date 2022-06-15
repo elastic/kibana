@@ -101,7 +101,7 @@ export const createInitialState = (
       kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
       signalIndexName,
     },
-    globalUrlState: initialGlobalUrlParam,
+    globalUrlParam: initialGlobalUrlParam,
   };
 
   return preloadedState;
@@ -118,6 +118,6 @@ export const createReducer: (
     dragAndDrop: dragAndDropReducer,
     inputs: inputsReducer,
     sourcerer: sourcererReducer,
-    globalUrlState: globalUrlParamReducer,
+    globalUrlParam: globalUrlParamReducer,
     ...pluginsReducer,
   });
