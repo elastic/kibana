@@ -304,7 +304,9 @@ export class MbMap extends Component<Props, State> {
 
   async _loadMakiSprites(mbMap: MapboxMap) {
     if (this._isMounted) {
-      const pixelRatio = Math.floor(window.devicePixelRatio);
+      // Math.floor rounds values < 1 to 0. This occurs when browser is zoomed out
+      // Math.max wrapper ensures value is always at least 1 in these cases
+      const pixelRatio = Math.max(Math.floor(window.devicePixelRatio), 1);
       for (const [symbolId, { svg }] of Object.entries(MAKI_ICONS)) {
         if (!mbMap.hasImage(symbolId)) {
           const imageData = await createSdfIcon({ renderSize: MAKI_ICON_SIZE, svg });
