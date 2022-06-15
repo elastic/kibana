@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Subject } from 'rxjs';
 import {
   Collector,
   createUsageCollectionSetupMock,
@@ -30,14 +31,23 @@ describe('registerEventLoopDelaysCollector', () => {
   });
 
   const collectorFetchContext = createCollectorFetchContextMock();
+  let pluginStop$: Subject<void>;
 
   beforeAll(() => {
+    pluginStop$ = new Subject<void>();
+
     registerEventLoopDelaysCollector(
       logger,
       usageCollectionMock,
       mockRegisterType,
-      mockGetSavedObjectsClient
+      mockGetSavedObjectsClient,
+      pluginStop$
     );
+  });
+
+  afterAll(() => {
+    pluginStop$.next();
+    pluginStop$.complete();
   });
 
   it('registers event_loop_delays collector', () => {
