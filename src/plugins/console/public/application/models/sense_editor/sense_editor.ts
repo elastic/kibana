@@ -287,7 +287,7 @@ export class SenseEditor {
       const re = /("\${\w+}")/g;
 
       data = data.replaceAll(re, (match) => {
-        const key = match.replace(/[^a-z]+/g, '');
+        const key = match.replace(/[^a-z]+/gi, '');
         const value = getVariables().extractValue(key);
 
         if (
@@ -302,7 +302,6 @@ export class SenseEditor {
 
         return value;
       });
-
       request.data.push(data.trim());
       bodyStartLineNumber = dataEndPos.lineNumber + 1;
     }
