@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useDiscoverServices } from '../../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 
 export function GetFieldTypeDescription(type: string) {
   const { docLinks } = useDiscoverServices();

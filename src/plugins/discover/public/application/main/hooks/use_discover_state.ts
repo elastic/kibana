@@ -9,10 +9,10 @@ import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import { getState } from '../services/discover_state';
-import { getStateDefaults } from './get_state_defaults';
+import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch, getSavedSearch } from '../../../services/saved_searches';
-import { loadIndexPattern } from './resolve_index_pattern';
+import { loadIndexPattern } from '../utils/resolve_index_pattern';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
@@ -22,8 +22,8 @@ import {
 } from '../../../../common';
 import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
-import { getSwitchIndexPatternAppState } from './get_switch_index_pattern_app_state';
-import { SortPairArr } from '../../../components/doc_table/lib/get_sort';
+import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
+import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { ElasticSearchHit } from '../../../types';
 
 export function useDiscoverState({

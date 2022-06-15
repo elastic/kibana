@@ -9,7 +9,7 @@
 import { useMemo } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
-import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
+import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import {
   AppState as DiscoverState,
   GetStateReturn as DiscoverGetStateReturn,
