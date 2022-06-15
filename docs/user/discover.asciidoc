@@ -277,7 +277,7 @@ For detailed information about the sharing options, refer to <<reporting-getting
 [[alert-from-Discover]]
 === Generate an alert
 
-From *Discover*, you can create an alert to periodically
+From *Discover*, you can create a rule to periodically
 check when data goes above or below a certain threshold within a given time interval.
 
 . Ensure that your data view,
