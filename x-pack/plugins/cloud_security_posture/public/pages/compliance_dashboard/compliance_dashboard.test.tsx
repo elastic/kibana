@@ -198,7 +198,7 @@ describe('<ComplianceDashboard />', () => {
 
   it('shows noDataConfig when latestFindingsIndexStatus is inapplicable', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
-      data: { latestFindingsIndexStatus: 'inapplicable' },
+      data: { latestFindingsIndexStatus: 'indexed' },
     }));
     (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
       data: undefined,
@@ -212,11 +212,11 @@ describe('<ComplianceDashboard />', () => {
     expect(screen.queryByText(TEXT.CLOUD_POSTURE_SCORE)).not.toBeInTheDocument();
   });
 
-  it('shows dashboard when latestFindingsIndexStatus is applicable', () => {
+  it('shows dashboard when there are findings in latest findings index', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
       isLoading: false,
       isSuccess: true,
-      data: { latestFindingsIndexStatus: 'applicable' },
+      data: { status: 'indexed' },
     }));
 
     (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({

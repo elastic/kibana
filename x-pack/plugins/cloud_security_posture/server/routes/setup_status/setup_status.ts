@@ -93,12 +93,12 @@ const getInstalledPackageVersion = async (
 
 const geLatestFindingsIndexStatus = async (
   esClient: ElasticsearchClient,
-  installedPckVer: string | null,
+  installedIntegrations: number,
   healthyAgents: number
 ): Promise<LatestFindingsIndexState> => {
   if (await isFindingsExists(esClient)) return 'indexed';
 
-  if (installedPckVer == null) return 'not installed';
+  if (!installedIntegrations) return 'not installed';
 
   if (healthyAgents > 0) return 'indexing';
 
@@ -135,7 +135,7 @@ const getCspSetupStatus = async (
     CLOUD_SECURITY_POSTURE_PACKAGE_NAME
   );
 
-  const status = await geLatestFindingsIndexStatus(esClient, installedPckVer, healthyAgents);
+  const status = await geLatestFindingsIndexStatus(esClient, installedIntegrations, healthyAgents);
 
   return {
     status,

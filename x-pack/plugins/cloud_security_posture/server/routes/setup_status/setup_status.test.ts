@@ -78,6 +78,6 @@ describe('CspSetupStatus route', () => {
     const body = call[0]!.body;
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
-    await expect(body).toEqual({ latestFindingsIndexStatus: 'applicable' });
+    await expect(body).toEqual({ status: 'indexed' });
   });
 });

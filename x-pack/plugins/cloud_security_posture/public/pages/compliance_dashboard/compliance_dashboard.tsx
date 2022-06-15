@@ -36,7 +36,7 @@ const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataCo
 
 export const ComplianceDashboard = () => {
   const getInfo = useCspSetupStatusApi();
-  const isFindingsIndexApplicable = getInfo.data?.latestFindingsIndexStatus === 'applicable';
+  const isFindingsIndexApplicable = getInfo.data?.status === 'indexed';
   const getDashboardData = useComplianceDashboardDataApi({
     enabled: isFindingsIndexApplicable,
   });
