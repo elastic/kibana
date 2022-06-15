@@ -89,7 +89,7 @@ export function OverviewPage({ routeParams }: Props) {
     application: { capabilities },
   } = useKibana<ObservabilityAppServices>().services;
 
-  const { ObservabilityPageTemplate, config } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
@@ -155,9 +155,7 @@ export function OverviewPage({ routeParams }: Props) {
     docsLink: docLinks.links.observability.guide,
   });
 
-  const alertsLink = config.unsafe.alertingExperience.enabled
-    ? paths.observability.alerts
-    : paths.management.rules;
+  const alertsLink = paths.observability.alerts;
 
   return (
     <ObservabilityPageTemplate
@@ -198,7 +196,6 @@ export function OverviewPage({ routeParams }: Props) {
                     defaultMessage: 'Show alerts',
                   }),
                 }}
-                showExperimentalBadge={true}
               >
                 <CasesContext
                   owner={[observabilityFeatureId]}
