@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+/**
+ * Configuration of a rewrite appender
+ * @public
+ */
 export interface RewriteAppenderConfig {
   type: 'rewrite';
   /**

@@ -10,6 +10,10 @@ import type { ByteSizeValue } from '@kbn/config-schema';
 import type { Duration } from 'moment-timezone';
 import { LayoutConfigType } from '../layout';
 
+/**
+ * Configuration of a rolling-file appender
+ * @public
+ */
 export interface RollingFileAppenderConfig {
   type: 'rolling-file';
   /**

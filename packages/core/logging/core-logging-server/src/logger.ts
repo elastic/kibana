@@ -8,7 +8,11 @@
 
 import { LogLevelId } from '@kbn/logging';
 
-/** @public */
+/**
+ * Describes the configuration of a given logger.
+ *
+ * @public
+ */
 export interface LoggerConfigType {
   appenders: string[];
   name: string;

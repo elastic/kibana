@@ -38,7 +38,10 @@ export interface LoggingServiceSetup {
   configure(config$: Observable<LoggerContextConfigInput>): void;
 }
 
-/** @public */
+/**
+ * Input used to configure logging dynamically using {@link LoggingServiceSetup.configure}
+ * @public
+ */
 export interface LoggerContextConfigInput {
   // config-schema knows how to handle either Maps or Records
   appenders?: Record<string, AppenderConfigType> | Map<string, AppenderConfigType>;

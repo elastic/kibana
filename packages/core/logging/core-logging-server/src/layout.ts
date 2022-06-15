@@ -6,15 +6,25 @@
  * Side Public License, v 1.
  */
 
-/** @public */
+/**
+ * Configuration of a logging layout.
+ * See {@link JsonLayoutConfigType} and {@link PatternLayoutConfigType}
+ * @public
+ */
 export type LayoutConfigType = PatternLayoutConfigType | JsonLayoutConfigType;
 
-/** @public */
+/**
+ * Configuration of a json layout
+ * @public
+ */
 export interface JsonLayoutConfigType {
   type: 'json';
 }
 
-/** @public */
+/**
+ * Configuration of a pattern layout
+ * @public
+ */
 export interface PatternLayoutConfigType {
   type: 'pattern';
   highlight?: boolean;
