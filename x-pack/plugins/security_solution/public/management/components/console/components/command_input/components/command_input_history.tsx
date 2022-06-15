@@ -22,8 +22,8 @@ export const CommandInputHistory = memo(() => {
   const dispatch = useConsoleStateDispatch();
   const inputHistory = useWithInputHistory();
 
-  const selectableHistoryOptions = useMemo<EuiSelectableProps<InputHistoryItem>['options']>(() => {
-    return inputHistory.map((inputItem, index) => {
+  const selectableHistoryOptions = useMemo<EuiSelectableProps['options']>(() => {
+    return inputHistory.map<EuiSelectableProps['options'][number]>((inputItem, index) => {
       return {
         label: inputItem.input,
         key: inputItem.id,
@@ -34,6 +34,15 @@ export const CommandInputHistory = memo(() => {
   const selectableListProps: EuiSelectableProps<InputHistoryItem>['listProps'] = useMemo(() => {
     return {
       showIcons: false,
+      onKeyDownCapture: (ev) => {
+        // Works around an issue where the `enter` key event from the EuiSelectable gets capture
+        // by the outer `KeyCapture` input somehow. Likely due to the sequence of events between
+        // keyup, focus and the Focus trap component having the `returnFocus` on by default
+        if (ev.key === 'Enter') {
+          // @ts-expect-error
+          ev._CONSOLE_IGNORE_KEY = true;
+        }
+      },
     };
   }, []);
 
@@ -46,11 +55,12 @@ export const CommandInputHistory = memo(() => {
       const selected = items.find((item) => item.checked === 'on');
 
       dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
-      dispatch({ type: 'addFocusToKeyCapture' });
 
       if (selected) {
         dispatch({ type: 'updateInputTextEnteredState', payload: { textEntered: selected.label } });
       }
+
+      dispatch({ type: 'addFocusToKeyCapture' });
     },
     [dispatch]
   );

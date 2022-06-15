@@ -71,6 +71,7 @@ export interface CommandExecutionState {
 export type ConsoleDataAction =
   | { type: 'scrollDown' }
   | { type: 'addFocusToKeyCapture' }
+  | { type: 'removeFocusFromKeyCapture' }
   | { type: 'executeCommand'; payload: { input: string } }
   | { type: 'clear' }
   | {

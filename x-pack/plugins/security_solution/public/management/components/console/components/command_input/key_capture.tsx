@@ -81,6 +81,7 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
   const [, setLastInput] = useState('');
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const blurInputRef = useRef<HTMLInputElement | null>(null);
 
   const [isCapturing, setIsCapturing] = useState(false);
 
@@ -105,7 +106,22 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
 
   const handleOnKeyUp = useCallback<KeyboardEventHandler<HTMLInputElement>>(
     (ev) => {
-      if (!isCapturing) {
+      // There is a condition (still not clear how it is actually happening) where the `Enter` key
+      // event from the EuiSelectable component gets captured here by the Input. Its likely due to
+      // the sequence of events between keyup, focus and the Focus trap component having the
+      // `returnFocus` on by default.
+      // To avoid having that key Event from actually being processed, we check for this custom
+      // property on the event and skip processing it if we find it. This property is currently
+      // set by the CommandInputHistory (using EuiSelectable).
+
+      // @ts-expect-error
+      if (!isCapturing || ev._CONSOLE_IGNORE_KEY) {
+        // @ts-expect-error
+        if (ev._CONSOLE_IGNORE_KEY) {
+          // @ts-expect-error
+          ev._CONSOLE_IGNORE_KEY = false;
+        }
+
         return;
       }
 
@@ -153,7 +169,10 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
       },
 
       blur: () => {
-        // Implement blur
+        // only blur if the input has focus
+        if (inputRef.current && document.activeElement === inputRef.current) {
+          blurInputRef.current?.focus();
+        }
       },
     };
   }, []);
@@ -163,17 +182,15 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
   }
 
   return (
-    <KeyCaptureContainer
-      data-test-subj={getTestId('keyCapture')}
-      aria-hidden="true"
-      tabIndex={-1}
-      className="key-capture-container-test"
-    >
+    <KeyCaptureContainer data-test-subj={getTestId('keyCapture')} aria-hidden="true" tabIndex={-1}>
+      <input value="" ref={blurInputRef} tabIndex={-1} />
+
       <input
         className="invisible-input"
         data-test-subj={getTestId('keyCapture-input')}
         spellCheck="false"
         value=""
+        tabIndex={-1}
         onInput={handleOnInput}
         onKeyUp={handleOnKeyUp}
         onBlur={handleInputOnBlur}

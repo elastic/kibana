@@ -95,7 +95,7 @@ export const CommandInput = memo<CommandInputProps>(
     const handleTypingAreaClick = useCallback<MouseEventHandler>(
       (ev) => {
         if (keyCaptureFocusRef.current) {
-          keyCaptureFocusRef.current();
+          keyCaptureFocusRef.current.focus();
         }
       },
       [keyCaptureFocusRef]
@@ -123,6 +123,7 @@ export const CommandInput = memo<CommandInputProps>(
 
           // ARROW UP
           case 38:
+            dispatch({ type: 'removeFocusFromKeyCapture' });
             dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
             break;
         }

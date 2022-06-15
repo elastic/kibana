@@ -57,6 +57,10 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
       state.keyCapture?.current?.focus();
       return state;
 
+    case 'removeFocusFromKeyCapture':
+      state.keyCapture?.current?.blur();
+      return state;
+
     case 'executeCommand':
       return handleExecuteCommand(state, action);
 
