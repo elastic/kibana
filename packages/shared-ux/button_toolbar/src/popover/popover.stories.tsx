@@ -37,7 +37,12 @@ export default {
 
 export const Popover = ({ iconSide }: Params) => {
   return (
-    <Component label="Add element" iconType={iconSide === 'right' ? 'arrowDown' : 'plusInCircle'}  iconSide={iconSide} panelPaddingSize="none">
+    <Component
+      label="Add element"
+      iconType={iconSide === 'right' ? 'arrowDown' : 'plusInCircle'}
+      iconSide={iconSide}
+      panelPaddingSize="none"
+    >
       {() => (
         <EuiContextMenu
           initialPanelId={0}
