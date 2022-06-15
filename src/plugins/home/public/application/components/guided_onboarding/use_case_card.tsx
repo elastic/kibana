@@ -118,6 +118,19 @@ export const UseCaseCard = ({ useCase }: UseCaseProps) => {
     });
   };
 
+  const title = (
+    <EuiTitle size="xs">
+      <h4>
+        <strong>{constants[useCase].i18nTexts.title}</strong>
+      </h4>
+    </EuiTitle>
+  );
+  const description = (
+    <EuiText color="subdued" size="xs">
+      <p>{constants[useCase].i18nTexts.description}</p>
+    </EuiText>
+  );
+
   return (
     <EuiCard
       display="subdued"
@@ -133,18 +146,8 @@ export const UseCaseCard = ({ useCase }: UseCaseProps) => {
         />
       }
       image={<div className={`homUseCaseCard homUseCaseCard--${useCase}`} />}
-      title={
-        <EuiTitle size="xs">
-          <h4>
-            <strong>{constants[useCase].i18nTexts.title}</strong>
-          </h4>
-        </EuiTitle>
-      }
-      description={
-        <EuiText color="subdued" size="xs">
-          <p>{constants[useCase].i18nTexts.description}</p>
-        </EuiText>
-      }
+      title={title}
+      description={description}
       onClick={onUseCaseSelection}
     />
   );
