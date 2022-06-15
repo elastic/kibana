@@ -7,7 +7,7 @@
   flex-direction: column;
 
   tr:hover td {
-    background-color: transparentize($euiColorFullShade, .9);
+    background-color: $tvbHoverBackgroundColor;
   }
 }
 
@@ -45,7 +45,7 @@
 
 .tvbVisTopN--reversed {
   tr:hover td {
-    background-color: transparentize($euiColorEmptyShade, .9);
+    background-color: $tvbHoverBackgroundColorReversed;
   }
 
   .tvbVisTopN__label {
