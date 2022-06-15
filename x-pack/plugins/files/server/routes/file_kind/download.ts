@@ -11,17 +11,12 @@ import { Readable } from 'stream';
 import { findFile } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
-export const bodySchema = schema.stream();
-type Body = TypeOf<typeof bodySchema>;
-
 export const paramsSchema = schema.object({
   fileId: schema.string(),
 });
 type Params = TypeOf<typeof paramsSchema>;
 
-interface Response {
-  ok: true;
-}
+type Response = Readable;
 
 export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   { files: { fileService }, fileKind },
@@ -29,12 +24,10 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   res
 ) => {
   const {
-    body: stream,
     params: { fileId: id },
   } = req;
   const { error, result: file } = await findFile(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
-  await file.uploadContent(stream as Readable);
-  const body: Response = { ok: true };
+  const body: Response = await file.downloadContent();
   return res.ok({ body });
 };

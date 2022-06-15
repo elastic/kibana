@@ -66,6 +66,8 @@ export type FileSavedObjectAttributes<Meta = unknown> = {
   meta?: Meta;
 };
 
+export type FileJSON = FileSavedObjectAttributes;
+
 export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttributes<Meta>>;
 
 export type UpdatableFileAttributes<Meta = unknown> = Pick<
@@ -100,6 +102,8 @@ export interface File<Meta = unknown> {
   downloadContent(): Promise<Readable>;
 
   delete(): Promise<void>;
+
+  toJSON(): FileJSON;
 }
 
 /**
@@ -145,6 +149,15 @@ export interface FileKind {
       tags: string[];
     };
     delete?: {
+      tags: string[];
+    };
+    find?: {
+      tags: string[];
+    };
+    list?: {
+      tags: string[];
+    };
+    download?: {
       tags: string[];
     };
   };

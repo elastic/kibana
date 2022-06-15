@@ -22,15 +22,14 @@ interface Response {
 }
 
 export const handler: FileKindsRequestHandler<unknown, unknown, Body> = async (
-  { files: { fileServiceFactory, uploadEndpoint }, fileKind },
+  { files: { fileService, uploadEndpoint }, fileKind },
   req,
   res
 ) => {
   const {
     body: { name, alt, meta },
   } = req;
-  const fileService = fileServiceFactory.asScoped(req);
-  const file = await fileService.create({ fileKind, name, alt, meta });
+  const file = await fileService.asCurrentUser().create({ fileKind, name, alt, meta });
   const body: Response = {
     id: file.id,
     uploadTargetUrl: uploadEndpoint.get(file.fileKind, req),

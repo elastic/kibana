@@ -6,13 +6,9 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Readable } from 'stream';
-
-import { findFile } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
-export const bodySchema = schema.stream();
-type Body = TypeOf<typeof bodySchema>;
+import { findFile } from './helpers';
 
 export const paramsSchema = schema.object({
   fileId: schema.string(),
@@ -23,18 +19,29 @@ interface Response {
   ok: true;
 }
 
-export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
+export const handler: FileKindsRequestHandler<Params> = async (
   { files: { fileService }, fileKind },
   req,
   res
 ) => {
   const {
-    body: stream,
     params: { fileId: id },
   } = req;
   const { error, result: file } = await findFile(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
-  await file.uploadContent(stream as Readable);
-  const body: Response = { ok: true };
+  try {
+    await file.delete();
+  } catch (e) {
+    return res.customError({
+      statusCode: 500,
+      body: {
+        message:
+          'Something went wrong while update file attributes. Check server logs for more details.',
+      },
+    });
+  }
+  const body: Response = {
+    ok: true,
+  };
   return res.ok({ body });
 };

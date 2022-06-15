@@ -13,12 +13,15 @@ import type {
   KibanaResponseFactory,
   IKibanaResponse,
 } from '@kbn/core/server';
-import type { FileServiceFactory } from '../file_service';
+import type { FileServiceStart } from '../file_service';
 import type { UploadEndpoint } from '../services';
 
 export interface FilesRequestHandlerContext extends RequestHandlerContext {
   files: {
-    fileServiceFactory: FileServiceFactory;
+    fileService: {
+      asCurrentUser: () => FileServiceStart;
+      asInternalUser: () => FileServiceStart;
+    };
     uploadEndpoint: UploadEndpoint;
   };
 }

@@ -154,6 +154,10 @@ export class File<M = unknown> implements IFile {
     return file;
   }
 
+  public toJSON(): FileSavedObjectAttributes {
+    return this.attributes;
+  }
+
   private get attributes(): FileSavedObjectAttributes {
     return this.fileSO.attributes;
   }

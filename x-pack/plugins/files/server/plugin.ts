@@ -44,7 +44,10 @@ export class FilesPlugin
       PLUGIN_ID,
       (ctx, req) => {
         return {
-          fileServiceFactory: this.fileServiceFactory!,
+          fileService: {
+            asCurrentUser: () => this.fileServiceFactory!.asScoped(req),
+            asInternalUser: () => this.fileServiceFactory!.asInternal(),
+          },
           uploadEndpoint: getUploadEndpoint(),
         };
       }

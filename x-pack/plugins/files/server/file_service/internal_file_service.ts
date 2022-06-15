@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract, ISavedObjectsRepository } from '@kbn/core/server';
+import {
+  Logger,
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 
 import { BlobStorageService } from '../blob_storage_service';
@@ -18,6 +23,7 @@ import {
 } from '../../common';
 import { File } from '../file';
 import { FileKindsRegistry } from '../file_kinds_registry';
+import { FileNotFoundError } from './errors';
 
 export interface CreateFileArgs<Meta = unknown> {
   name: string;
@@ -94,10 +100,13 @@ export class InternalFileService {
         throw new Error(`Unexpected file kind "${actualFileKind}", expected "${fileKind}".`);
       }
       if (status === 'DELETED') {
-        throw new Error('File has been deleted');
+        throw new FileNotFoundError('File has been deleted');
       }
       return this.toFile(result, this.getFileKind(fileKind));
     } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw new FileNotFoundError('File not found');
+      }
       this.logger.error(`Could not retrieve file: ${e}`);
       throw e;
     }

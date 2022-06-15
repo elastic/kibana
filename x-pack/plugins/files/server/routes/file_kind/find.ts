@@ -6,35 +6,31 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Readable } from 'stream';
-
+import { FileJSON } from '../../../common/types';
 import { findFile } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
-export const bodySchema = schema.stream();
-type Body = TypeOf<typeof bodySchema>;
+interface Response {
+  file: FileJSON;
+}
 
 export const paramsSchema = schema.object({
   fileId: schema.string(),
 });
 type Params = TypeOf<typeof paramsSchema>;
 
-interface Response {
-  ok: true;
-}
-
-export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
+export const handler: FileKindsRequestHandler<Params> = async (
   { files: { fileService }, fileKind },
   req,
   res
 ) => {
   const {
-    body: stream,
     params: { fileId: id },
   } = req;
   const { error, result: file } = await findFile(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
-  await file.uploadContent(stream as Readable);
-  const body: Response = { ok: true };
+  const body: Response = {
+    file: file.toJSON(),
+  };
   return res.ok({ body });
 };
