@@ -829,14 +829,14 @@ export const FIELD: Record<string, FieldMeta> = {
     helpText: (
       <>
         <FormattedMessage
-          id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.indexResponseHeaders.helpText"
+          id="xpack.synthetics.monitorConfig.indexResponseHeaders.helpText"
           defaultMessage="Controls the indexing of the HTTP response headers to "
         />
         <EuiCode>http.response.body.headers</EuiCode>
       </>
     ),
     props: () => ({
-      label: i18n.translate('xpack.synthetics.monitorConfig.indexResponseHeader.label', {
+      label: i18n.translate('xpack.synthetics.monitorConfig.indexResponseHeaders.label', {
         defaultMessage: 'Index response headers',
       }),
       id: 'syntheticsMonitorConfigResponseHeadersIndex', // checkbox needs an id or it won't work
@@ -849,7 +849,7 @@ export const FIELD: Record<string, FieldMeta> = {
     helpText: (
       <>
         <FormattedMessage
-          id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.indexResponseHeaders.helpText"
+          id="xpack.synthetics.monitorConfig.indexResponseHeaders.helpText"
           defaultMessage="Controls the indexing of the HTTP response body contents to"
         />
         <EuiCode>http.response.body.contents</EuiCode>
