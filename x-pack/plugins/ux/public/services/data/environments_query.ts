@@ -54,6 +54,11 @@ export function getEnvironments({
                 },
               },
             },
+            {
+              term: {
+                'transaction.type': 'page-load',
+              },
+            },
             ...(serviceName === undefined && serviceName === null
               ? []
               : [{ term: { [SERVICE_NAME]: serviceName } }]),
