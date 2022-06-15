@@ -17,7 +17,6 @@ import {
   distinctUntilChanged,
   filter,
 } from 'rxjs';
-import { AbortController } from 'abort-controller';
 import { ElasticV3ServerShipper } from '@kbn/analytics-shippers-elastic-v3-server';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -90,6 +89,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private readonly isOptedIn$ = new BehaviorSubject<boolean | undefined>(undefined);
   private readonly isDev: boolean;
   private readonly fetcherTask: FetcherTask;
+  private optInPromise?: Promise<boolean | undefined>;
   /**
    * @private Used to mark the completion of the old UI Settings migration
    */
@@ -111,14 +111,15 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
    */
   private readonly optInPollerSubscription = timer(0, OPT_IN_POLL_INTERVAL_MS)
     .pipe(
-      exhaustMap(() => this.getOptInStatus()),
+      exhaustMap(() => {
+        this.optInPromise = this.getOptInStatus();
+        return this.optInPromise;
+      }),
       distinctUntilChanged()
     )
     .subscribe((isOptedIn) => this.isOptedIn$.next(isOptedIn));
 
   private security?: SecurityPluginStart;
-
-  private abortController = new AbortController();
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.logger = initializerContext.logger.get();
@@ -209,11 +210,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public stop() {
-    this.abortController.abort();
+  public async stop() {
     this.optInPollerSubscription.unsubscribe();
     this.isOptedIn$.complete();
     this.fetcherTask.stop();
+    if (this.optInPromise) await this.optInPromise;
   }
 
   private async getOptInStatus(): Promise<boolean | undefined> {
@@ -221,9 +222,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     let telemetrySavedObject: TelemetrySavedObject | undefined;
     try {
-      telemetrySavedObject = await getTelemetrySavedObject(internalRepositoryClient, {
-        requestOptions: { signal: this.abortController.signal },
-      });
+      telemetrySavedObject = await getTelemetrySavedObject(internalRepositoryClient);
     } catch (err) {
       this.logger.debug('Failed to check telemetry opt-in status: ' + err.message);
     }

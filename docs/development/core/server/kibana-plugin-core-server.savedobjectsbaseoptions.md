@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsBaseOptions 
+export interface SavedObjectsBaseOptions
 ```
 
 ## Properties
@@ -16,5 +16,4 @@ export interface SavedObjectsBaseOptions
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [namespace?](./kibana-plugin-core-server.savedobjectsbaseoptions.namespace.md) | string | <i>(Optional)</i> Specify the namespace for this operation |
-|  [requestOptions?](./kibana-plugin-core-server.savedobjectsbaseoptions.requestoptions.md) | TransportRequestOptions | <i>(Optional)</i> |
 

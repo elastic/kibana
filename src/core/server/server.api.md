@@ -70,7 +70,6 @@ import { ShipperClassConstructor } from '@kbn/analytics-client';
 import { Stream } from 'stream';
 import { TelemetryCounter } from '@kbn/analytics-client';
 import { TelemetryCounterType } from '@kbn/analytics-client';
-import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -2080,8 +2079,6 @@ export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referenca
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
     namespace?: string;
-    // (undocumented)
-    requestOptions?: TransportRequestOptions;
 }
 
 // @public (undocumented)
