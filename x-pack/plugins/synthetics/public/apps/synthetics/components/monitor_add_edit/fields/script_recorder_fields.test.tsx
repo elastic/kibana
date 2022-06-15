@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
-import { render } from '../../../lib/helper/rtl_helpers';
+import { render } from '../../../utils/testing/rtl_helpers';
 import { ScriptRecorderFields } from './script_recorder_fields';
-import { PolicyConfigContextProvider } from '../contexts';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
@@ -31,9 +30,12 @@ describe('<ScriptRecorderFields />', () => {
     fileName?: string;
   }) => {
     return (
-      <PolicyConfigContextProvider isEditable={isEditable}>
-        <ScriptRecorderFields script={script} fileName={fileName} onChange={onChange} />
-      </PolicyConfigContextProvider>
+      <ScriptRecorderFields
+        script={script}
+        fileName={fileName}
+        onChange={onChange}
+        isEditable={isEditable}
+      />
     );
   };
 
@@ -43,12 +45,7 @@ describe('<ScriptRecorderFields />', () => {
   });
 
   it('renders ScriptRecorderFields', () => {
-    const { getByText, queryByText } = render(<WrappedComponent />);
-
-    const downloadLink = getByText('Download the Elastic Synthetics Recorder');
-
-    expect(downloadLink).toBeInTheDocument();
-    expect(downloadLink).toHaveAttribute('target', '_blank');
+    const { queryByText } = render(<WrappedComponent />);
 
     expect(queryByText('Show script')).not.toBeInTheDocument();
     expect(queryByText('Remove script')).not.toBeInTheDocument();

@@ -7,7 +7,7 @@
 
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
-import { render } from '../../lib/helper/rtl_helpers';
+import { render } from '../../../utils/testing/rtl_helpers';
 import { ComboBox } from './combo_box';
 
 describe('<ComboBox />', () => {

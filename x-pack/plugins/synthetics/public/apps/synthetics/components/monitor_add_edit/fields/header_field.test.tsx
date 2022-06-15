@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
-import { render } from '../../lib/helper/rtl_helpers';
+import { render } from '../../../utils/testing/rtl_helpers';
 import { HeaderField, contentTypes } from './header_field';
-import { Mode } from './types';
+import { Mode } from '../types';
 
 describe('<HeaderField />', () => {
   const onChange = jest.fn();
