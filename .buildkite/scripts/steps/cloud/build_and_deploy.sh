@@ -29,6 +29,8 @@ DISTRIBUTION_EXISTS=$(docker manifest inspect $KIBANA_CLOUD_IMAGE &> /dev/null; 
 set -e
 
 if  [ $DISTRIBUTION_EXISTS -eq 0 ]; then
+  echo "Distribution already exists, skipping build"
+else
   node scripts/build \
     --skip-initialize \
     --skip-generic-folders \
@@ -40,8 +42,6 @@ if  [ $DISTRIBUTION_EXISTS -eq 0 ]; then
     --skip-docker-ubi \
     --skip-docker-ubuntu \
     --skip-docker-contexts
-else
-  echo "Distribution already exists, skipping build"
 fi
 
 docker logout docker.elastic.co
