@@ -11,8 +11,8 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import styled from 'styled-components';
 
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import type { FieldBrowserProps } from '../../../../../common/types/fields_browser';
-import { FieldsBrowser } from './field_browser';
+import type { FieldBrowserProps } from '../../../../../common/types/field_browser';
+import { FieldBrowserModal } from './field_browser_modal';
 import { filterBrowserFieldsByFieldName, filterSelectedBrowserFields } from './helpers';
 import * as i18n from './translations';
 
@@ -21,16 +21,16 @@ const FIELDS_BUTTON_CLASS_NAME = 'fields-button';
 /** wait this many ms after the user completes typing before applying the filter input */
 export const INPUT_TIMEOUT = 250;
 
-const FieldsBrowserButtonContainer = styled.div`
+const FieldBrowserButtonContainer = styled.div`
   display: inline-block;
   position: relative;
 `;
 
-FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
+FieldBrowserButtonContainer.displayName = 'FieldBrowserButtonContainer';
 /**
  * Manages the state of the field browser
  */
-export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
+export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
   timelineId,
   columnHeaders,
   browserFields,
@@ -122,7 +122,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   );
 
   return (
-    <FieldsBrowserButtonContainer data-test-subj="fields-browser-button-container">
+    <FieldBrowserButtonContainer data-test-subj="fields-browser-button-container">
       <EuiToolTip content={i18n.FIELDS_BROWSER}>
         <EuiButtonEmpty
           aria-label={i18n.FIELDS_BROWSER}
@@ -139,7 +139,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
       </EuiToolTip>
 
       {show && (
-        <FieldsBrowser
+        <FieldBrowserModal
           columnHeaders={columnHeaders}
           filteredBrowserFields={
             filteredBrowserFields != null ? filteredBrowserFields : browserFields
@@ -159,8 +159,8 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           width={width}
         />
       )}
-    </FieldsBrowserButtonContainer>
+    </FieldBrowserButtonContainer>
   );
 };
 
-export const StatefulFieldsBrowser = React.memo(StatefulFieldsBrowserComponent);
+export const FieldBrowser = React.memo(FieldBrowserComponent);

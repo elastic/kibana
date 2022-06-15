@@ -13,7 +13,7 @@ import { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
 import { getColumnHeader, getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 import { tGridActions } from '../../../../store/t_grid';
-import type { GetFieldTableColumns } from '../../../../../common/types/fields_browser';
+import type { GetFieldTableColumns } from '../../../../../common/types/field_browser';
 import { FieldTableHeader } from './field_table_header';
 
 const DEFAULT_SORTING: { field: string; direction: Direction } = {

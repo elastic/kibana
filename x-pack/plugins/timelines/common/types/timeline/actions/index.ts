@@ -12,7 +12,7 @@ import { BrowserFields } from '../../../search_strategy/index_fields';
 import { ColumnHeaderOptions } from '../columns';
 import { TimelineItem, TimelineNonEcsData } from '../../../search_strategy';
 import { Ecs } from '../../../ecs';
-import { FieldBrowserOptions } from '../../fields_browser';
+import { FieldBrowserOptions } from '../../field_browser';
 
 export interface ActionProps {
   action?: RowCellRender;

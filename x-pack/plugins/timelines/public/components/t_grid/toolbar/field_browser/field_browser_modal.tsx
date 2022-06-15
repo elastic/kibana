@@ -33,10 +33,7 @@ import { CategoriesSelector } from './categories_selector';
 import { FieldTable } from './field_table';
 import { CategoriesBadges } from './categories_badges';
 
-export type FieldsBrowserComponentProps = Pick<
-  FieldBrowserProps,
-  'timelineId' | 'width' | 'options'
-> & {
+export type FieldBrowserModalProps = Pick<FieldBrowserProps, 'timelineId' | 'width' | 'options'> & {
   /**
    * The current timeline column headers
    */
@@ -89,7 +86,7 @@ export type FieldsBrowserComponentProps = Pick<
  * This component has no internal state, but it uses lifecycle methods to
  * set focus to the search input, scroll to the selected category, etc
  */
-const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
+const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
   appliedFilterInput,
   columnHeaders,
   filteredBrowserFields,
@@ -226,4 +223,4 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
   );
 };
 
-export const FieldsBrowser = React.memo(FieldsBrowserComponent);
+export const FieldBrowserModal = React.memo(FieldBrowserModalComponent);

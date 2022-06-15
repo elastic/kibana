@@ -12,7 +12,7 @@ import { mockBrowserFields, TestProviders } from '../../../../mock';
 
 import { FIELD_BROWSER_WIDTH } from './helpers';
 
-import { StatefulFieldsBrowserComponent } from '.';
+import { FieldBrowserComponent } from './field_browser';
 
 describe('StatefulFieldsBrowser', () => {
   const timelineId = 'test';
@@ -20,7 +20,7 @@ describe('StatefulFieldsBrowser', () => {
   it('should render the Fields button, which displays the fields browser on click', () => {
     const result = render(
       <TestProviders>
-        <StatefulFieldsBrowserComponent
+        <FieldBrowserComponent
           browserFields={mockBrowserFields}
           columnHeaders={[]}
           timelineId={timelineId}
@@ -35,7 +35,7 @@ describe('StatefulFieldsBrowser', () => {
     it('should NOT render the fields browser until the Fields button is clicked', () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent
+          <FieldBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             timelineId={timelineId}
@@ -49,7 +49,7 @@ describe('StatefulFieldsBrowser', () => {
     it('should render the fields browser when the Fields button is clicked', async () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent
+          <FieldBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             timelineId={timelineId}
@@ -67,7 +67,7 @@ describe('StatefulFieldsBrowser', () => {
     it('should add a selected category, which creates the category badge', async () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent
+          <FieldBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             timelineId={timelineId}
@@ -93,7 +93,7 @@ describe('StatefulFieldsBrowser', () => {
     it('should remove a selected category, which deletes the category badge', async () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent
+          <FieldBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             timelineId={timelineId}
@@ -123,7 +123,7 @@ describe('StatefulFieldsBrowser', () => {
     it('should update the available categories according to the search input', async () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent
+          <FieldBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             timelineId={timelineId}
@@ -152,7 +152,7 @@ describe('StatefulFieldsBrowser', () => {
 
     const result = render(
       <TestProviders>
-        <StatefulFieldsBrowserComponent
+        <FieldBrowserComponent
           browserFields={mockBrowserFields}
           columnHeaders={[]}
           isEventViewer={isEventViewer}
@@ -169,7 +169,7 @@ describe('StatefulFieldsBrowser', () => {
 
     const result = render(
       <TestProviders>
-        <StatefulFieldsBrowserComponent
+        <FieldBrowserComponent
           browserFields={mockBrowserFields}
           columnHeaders={[]}
           isEventViewer={isEventViewer}
