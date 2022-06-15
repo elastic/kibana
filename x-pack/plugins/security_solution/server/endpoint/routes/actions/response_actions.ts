@@ -102,7 +102,7 @@ const commandToFeatureKeyMap = new Map<ResponseActions, FeatureKeys>([
 
 const returnActionIdCommands: ResponseActions[] = ['isolate', 'unisolate'];
 
-function responseActionRequestHandler<T extends EndpointActionDataParameterTypes = undefined>(
+function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
   endpointContext: EndpointAppContext,
   command: ResponseActions
 ): RequestHandler<
