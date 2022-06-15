@@ -17,4 +17,3 @@ export interface SavedObjectsBaseOptions
 |  --- | --- | --- |
 |  [namespace?](./kibana-plugin-core-public.savedobjectsbaseoptions.namespace.md) | string | <i>(Optional)</i> Specify the namespace for this operation |
 
-
