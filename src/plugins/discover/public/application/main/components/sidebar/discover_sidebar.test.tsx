@@ -15,7 +15,6 @@ import realHits from '../../../../__fixtures__/real_hits';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
-import { flattenHit } from '@kbn/data-plugin/public';
 import { DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { SavedObject } from '@kbn/core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
