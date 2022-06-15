@@ -119,15 +119,15 @@ const KubernetesSecurityRoutesComponent = ({
                 <>
                   <EuiText size="xs" css={styles.percentageChartTitle}>
                     <FormattedMessage
-                      id="xpack.kubernetesSecurity.sessionsChart.title"
-                      defaultMessage="Sessions"
+                      id="xpack.kubernetesSecurity.sessionChart.title"
+                      defaultMessage="Session Interactivity"
                     />
                   </EuiText>
                   <EuiIconTip
                     content={
                       <FormattedMessage
-                        id="xpack.kubernetesSecurity.sessionsChart.tooltip"
-                        defaultMessage="Sessions icon tip placeholder"
+                        id="xpack.kubernetesSecurity.sessionChart.tooltip"
+                        defaultMessage="Session Interactivity of a session depends on whether the session leader has a controlling terminal attached to it"
                       />
                     }
                   />
@@ -138,14 +138,14 @@ const KubernetesSecurityRoutesComponent = ({
               globalFilter={globalFilter}
               dataValueMap={{
                 true: {
-                  name: i18n.translate('xpack.kubernetesSecurity.sessionsChart.interactive', {
+                  name: i18n.translate('xpack.kubernetesSecurity.sessionChart.interactive', {
                     defaultMessage: 'Interactive',
                   }),
                   fieldName: ENTRY_LEADER_INTERACTIVE,
                   color: euiThemeVars.euiColorVis0,
                 },
                 false: {
-                  name: i18n.translate('xpack.kubernetesSecurity.sessionsChart.nonInteractive', {
+                  name: i18n.translate('xpack.kubernetesSecurity.sessionChart.nonInteractive', {
                     defaultMessage: 'Non-interactive',
                   }),
                   fieldName: ENTRY_LEADER_INTERACTIVE,
@@ -163,15 +163,15 @@ const KubernetesSecurityRoutesComponent = ({
                 <>
                   <EuiText size="xs" css={styles.percentageChartTitle}>
                     <FormattedMessage
-                      id="xpack.kubernetesSecurity.userLoginChart.title"
-                      defaultMessage="Sessions with entry root users"
+                      id="xpack.kubernetesSecurity.entryUserChart.title"
+                      defaultMessage="Session Entry Users"
                     />
                   </EuiText>
                   <EuiIconTip
                     content={
                       <FormattedMessage
-                        id="xpack.kubernetesSecurity.userLoginChart.tooltip"
-                        defaultMessage="Sessions with entry root users icon tip placeholder"
+                        id="xpack.kubernetesSecurity.entryUserChart.tooltip"
+                        defaultMessage="The session entry user is the native linux user who created the session"
                       />
                     }
                   />
@@ -182,14 +182,14 @@ const KubernetesSecurityRoutesComponent = ({
               globalFilter={globalFilter}
               dataValueMap={{
                 '0': {
-                  name: i18n.translate('xpack.kubernetesSecurity.userLoginChart.root', {
+                  name: i18n.translate('xpack.kubernetesSecurity.entryUserChart.root', {
                     defaultMessage: 'Root',
                   }),
                   fieldName: ENTRY_LEADER_USER_ID,
                   color: euiThemeVars.euiColorVis2,
                 },
                 nonRoot: {
-                  name: i18n.translate('xpack.kubernetesSecurity.userLoginChart.nonRoot', {
+                  name: i18n.translate('xpack.kubernetesSecurity.entryUserChart.nonRoot', {
                     defaultMessage: 'Non-root',
                   }),
                   fieldName: ENTRY_LEADER_USER_ID,
