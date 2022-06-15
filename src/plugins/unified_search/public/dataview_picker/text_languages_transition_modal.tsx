@@ -88,7 +88,7 @@ export function TextBasedLanguagesTransitionModal({
               onClick={() => closeModal(dismissModalChecked)}
               fill
               color="warning"
-              iconType="magnet"
+              iconType="merge"
             >
               {i18n.translate(
                 'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalCloseButton',
