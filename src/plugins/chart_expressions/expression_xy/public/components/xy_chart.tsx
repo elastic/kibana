@@ -281,7 +281,7 @@ export function XYChart({
               .find(({ layerId }) => series.layer === layerId)
               ?.table.columns.find((column) => column.id === series.accessor)?.name
         )
-        .filter((name) => Boolean(name))[0]
+        .find((name) => Boolean(name))
     );
   };
 
