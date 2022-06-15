@@ -42,9 +42,7 @@ journey('Core Web Vitals', async ({ page, params }) => {
     expect(await page.$('text=Largest contentful paint'));
     expect(await page.$('text=First input delay'));
     expect(await page.$('text=Cumulative layout shift'));
-    const cwvSummary = await page.innerText('text=traffic represented', {
-      timeout: 29000,
-    });
+    const cwvSummary = await page.innerText('text=traffic represented');
     expect(
       // match any three digits followed by string constant
       // note this regex is suceptible to accepting values > 100
