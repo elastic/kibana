@@ -34,7 +34,7 @@ export function enhanceRouter({ router, fileKind }: Args): FileKindRouter {
           RouteMethod,
           FileKindsRequestHandlerContext
         > = (opts, handler): void => {
-          Reflect.apply(target[prop as keyof FileKindRouter] as Function, target, [
+          return Reflect.apply(target[prop as keyof FileKindRouter] as Function, target, [
             opts,
             handlerWrapper(handler as FileKindHandler),
           ]);
