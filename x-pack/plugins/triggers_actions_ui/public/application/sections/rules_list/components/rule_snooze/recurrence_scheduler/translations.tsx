@@ -84,3 +84,38 @@ export const i18nFreqSummary = (interval: number) => ({
     }
   ),
 });
+
+export const i18nEndControlOptions = (interval: number) => [
+  {
+    text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurDay', {
+      defaultMessage: '{interval, plural, one {day} other {days}}',
+      values: { interval },
+    }),
+    value: RRuleFrequency.DAILY,
+    'data-test-subj': 'ruleSnoozeSchedulerRecurDay',
+  },
+  {
+    text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurWeek', {
+      defaultMessage: '{interval, plural, one {week} other {weeks}}',
+      values: { interval },
+    }),
+    value: RRuleFrequency.WEEKLY,
+    'data-test-subj': 'ruleSnoozeSchedulerRecurWeek',
+  },
+  {
+    text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurMonth', {
+      defaultMessage: '{interval, plural, one {month} other {months}}',
+      values: { interval },
+    }),
+    value: RRuleFrequency.MONTHLY,
+    'data-test-subj': 'ruleSnoozeSchedulerRecurMonth',
+  },
+  {
+    text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurYear', {
+      defaultMessage: '{interval, plural, one {year} other {years}}',
+      values: { interval },
+    }),
+    value: RRuleFrequency.YEARLY,
+    'data-test-subj': 'ruleSnoozeSchedulerRecurYear',
+  },
+];

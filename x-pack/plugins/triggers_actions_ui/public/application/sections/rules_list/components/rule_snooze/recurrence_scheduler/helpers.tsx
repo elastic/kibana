@@ -148,3 +148,42 @@ export const recurrenceSummary = ({
 
 export const rRuleWeekdayToWeekdayName = (weekday: string) =>
   moment().isoWeekday(RRULE_WEEKDAYS_TO_ISO_WEEKDAYS[weekday.slice(-2)]).format('dddd');
+
+export const buildCustomRecurrenceSchedulerState = ({
+  frequency,
+  interval,
+  byweekday,
+  monthlyRecurDay,
+  startDate,
+}: {
+  frequency: RRuleFrequency;
+  interval: number;
+  byweekday: Record<string, boolean>;
+  monthlyRecurDay: string;
+  startDate: Moment | null;
+}) => {
+  const isMonthlyByDay = frequency === RRuleFrequency.MONTHLY && monthlyRecurDay === 'day';
+  const isMonthlyByWeekday = frequency === RRuleFrequency.MONTHLY && monthlyRecurDay === 'weekday';
+  const useByMonthDay = startDate && (isMonthlyByDay || frequency === RRuleFrequency.YEARLY);
+
+  const configuredByweekday =
+    // If weekly frequency is selected, pull byweekday from chosen days
+    frequency === RRuleFrequency.WEEKLY
+      ? Object.keys(byweekday)
+          .filter((k) => byweekday[k] === true)
+          .map((n) => ISO_WEEKDAYS_TO_RRULE[Number(n)])
+      : // If monthly frequency is selected with the nth weekday option, pull byweekday from the configured startDate
+      startDate && isMonthlyByWeekday
+      ? generateNthByweekday(startDate)
+      : [];
+
+  const bymonthday = useByMonthDay ? [startDate.date()] : [];
+  const bymonth = startDate && frequency === RRuleFrequency.YEARLY ? [startDate.month()] : [];
+  return {
+    freq: frequency,
+    interval,
+    byweekday: configuredByweekday,
+    bymonthday,
+    bymonth,
+  };
+};

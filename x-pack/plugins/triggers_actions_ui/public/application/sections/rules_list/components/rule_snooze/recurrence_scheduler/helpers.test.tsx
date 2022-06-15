@@ -8,6 +8,7 @@
 import moment from 'moment';
 import { RRuleFrequency } from '../../../../../../types';
 import {
+  buildCustomRecurrenceSchedulerState,
   generateNthByweekday,
   getInitialByweekday,
   getWeekdayInfo,
@@ -153,6 +154,138 @@ describe('Recurrence scheduler helper', () => {
 
     test('it is Friday', () => {
       expect(rRuleWeekdayToWeekdayName('-1FR')).toEqual('Friday');
+    });
+  });
+
+  describe('buildCustomRecurrenceSchedulerState', () => {
+    test('Daily frequency ', () => {
+      expect(
+        buildCustomRecurrenceSchedulerState({
+          frequency: RRuleFrequency.DAILY,
+          interval: 2,
+          byweekday: {
+            '1': false,
+            '2': true,
+            '3': false,
+            '4': false,
+            '5': false,
+            '6': false,
+            '7': false,
+          },
+          monthlyRecurDay: 'day',
+          startDate: moment('11/23/2021'),
+        })
+      ).toEqual({
+        bymonth: [],
+        bymonthday: [],
+        byweekday: [],
+        freq: 3,
+        interval: 2,
+      });
+    });
+
+    test('Weekly frequency ', () => {
+      expect(
+        buildCustomRecurrenceSchedulerState({
+          frequency: RRuleFrequency.WEEKLY,
+          interval: 2,
+          byweekday: {
+            '1': false,
+            '2': true,
+            '3': false,
+            '4': false,
+            '5': false,
+            '6': false,
+            '7': false,
+          },
+          monthlyRecurDay: 'day',
+          startDate: moment('11/23/2021'),
+        })
+      ).toEqual({
+        bymonth: [],
+        bymonthday: [],
+        byweekday: ['TU'],
+        freq: 2,
+        interval: 2,
+      });
+    });
+
+    test('Monthly frequency ', () => {
+      expect(
+        buildCustomRecurrenceSchedulerState({
+          frequency: RRuleFrequency.MONTHLY,
+          interval: 2,
+          byweekday: {
+            '1': false,
+            '2': true,
+            '3': false,
+            '4': false,
+            '5': false,
+            '6': false,
+            '7': false,
+          },
+          monthlyRecurDay: 'day',
+          startDate: moment('11/23/2021'),
+        })
+      ).toEqual({
+        bymonth: [],
+        bymonthday: [23],
+        byweekday: [],
+        freq: 1,
+        interval: 2,
+      });
+    });
+
+    test('Monthly frequency by weekday ', () => {
+      expect(
+        buildCustomRecurrenceSchedulerState({
+          frequency: RRuleFrequency.MONTHLY,
+          interval: 2,
+          byweekday: {
+            '1': false,
+            '2': true,
+            '3': false,
+            '4': false,
+            '5': false,
+            '6': false,
+            '7': false,
+          },
+          monthlyRecurDay: 'weekday',
+          startDate: moment('11/23/2021'),
+        })
+      ).toEqual({
+        bymonth: [],
+        bymonthday: [],
+        byweekday: ['+4TU'],
+        freq: 1,
+        interval: 2,
+      });
+    });
+
+    test('Yearly frequency ', () => {
+      expect(
+        buildCustomRecurrenceSchedulerState({
+          frequency: RRuleFrequency.YEARLY,
+          interval: 2,
+          byweekday: {
+            '1': false,
+            '2': true,
+            '3': false,
+            '4': false,
+            '5': false,
+            '6': false,
+            '7': false,
+          },
+          monthlyRecurDay: 'day',
+          startDate: moment('11/23/2021'),
+        })
+      ).toEqual({
+        bymonth: [10],
+        bymonthday: [23],
+        byweekday: [],
+        freq: 0,
+        interval: 2,
+      });
     });
   });
 });
