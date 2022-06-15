@@ -19,7 +19,7 @@ export const useFetchPercentWidgetData = (
   index?: string
 ) => {
   const { http } = useKibana<CoreStart>().services;
-  const cachingKeys = [QUERY_KEY_PERCENT_WIDGET, widgetKey, filterQuery, groupBy, countBy];
+  const cachingKeys = [QUERY_KEY_PERCENT_WIDGET, widgetKey, filterQuery, groupBy, countBy, index];
   const query = useQuery(
     cachingKeys,
     async (): Promise<Record<string, number>> => {

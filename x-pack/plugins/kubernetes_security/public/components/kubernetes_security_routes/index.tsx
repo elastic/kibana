@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
@@ -122,7 +123,14 @@ const KubernetesSecurityRoutesComponent = ({
                       defaultMessage="Sessions"
                     />
                   </EuiText>
-                  <EuiIconTip content="Sessions icon tip placeholder" />
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.kubernetesSecurity.sessionsChart.tooltip"
+                        defaultMessage="Sessions icon tip placeholder"
+                      />
+                    }
+                  />
                 </>
               }
               widgetKey="sessionsPercentage"
@@ -130,12 +138,16 @@ const KubernetesSecurityRoutesComponent = ({
               globalFilter={globalFilter}
               dataValueMap={{
                 true: {
-                  name: 'Interactive',
+                  name: i18n.translate('xpack.kubernetesSecurity.sessionsChart.interactive', {
+                    defaultMessage: 'Interactive',
+                  }),
                   fieldName: ENTRY_LEADER_INTERACTIVE,
                   color: euiThemeVars.euiColorVis0,
                 },
                 false: {
-                  name: 'Non-interactive',
+                  name: i18n.translate('xpack.kubernetesSecurity.sessionsChart.nonInteractive', {
+                    defaultMessage: 'Non-interactive',
+                  }),
                   fieldName: ENTRY_LEADER_INTERACTIVE,
                   color: euiThemeVars.euiColorVis1,
                 },
@@ -155,25 +167,36 @@ const KubernetesSecurityRoutesComponent = ({
                       defaultMessage="Sessions with entry root users"
                     />
                   </EuiText>
-                  <EuiIconTip content="Sessions with entry root users icon tip placeholder" />
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.kubernetesSecurity.userLoginChart.tooltip"
+                        defaultMessage="Sessions with entry root users icon tip placeholder"
+                      />
+                    }
+                  />
                 </>
               }
               widgetKey="rootLoginPercentage"
+              indexPattern={indexPattern}
+              globalFilter={globalFilter}
               dataValueMap={{
                 '0': {
-                  name: 'Root',
+                  name: i18n.translate('xpack.kubernetesSecurity.userLoginChart.root', {
+                    defaultMessage: 'Root',
+                  }),
                   fieldName: ENTRY_LEADER_USER_ID,
                   color: euiThemeVars.euiColorVis2,
                 },
                 nonRoot: {
-                  name: 'Non-root',
+                  name: i18n.translate('xpack.kubernetesSecurity.userLoginChart.nonRoot', {
+                    defaultMessage: 'Non-root',
+                  }),
                   fieldName: ENTRY_LEADER_USER_ID,
                   color: euiThemeVars.euiColorVis3,
                   shouldHideFilter: true,
                 },
               }}
-              indexPattern={indexPattern}
-              globalFilter={globalFilter}
               groupedBy={ENTRY_LEADER_USER_ID}
               countBy={ENTRY_LEADER_ENTITY_ID}
               onReduce={onReduceRootAggs}

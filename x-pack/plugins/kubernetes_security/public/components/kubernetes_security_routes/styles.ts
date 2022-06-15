@@ -20,7 +20,7 @@ export const useStyles = () => {
       bottom: size.base,
       left: size.base,
       width: `calc(100% - ${size.xl})`,
-      fontSize: '12px',
+      fontSize: size.m,
       lineHeight: '18px',
       padding: `${size.xs} ${size.s}`,
       display: 'flex',

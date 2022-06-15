@@ -13,7 +13,7 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, colors, font } = euiTheme;
+    const { size, colors, font, border } = euiTheme;
 
     const container: CSSObject = {
       padding: size.base,
@@ -46,14 +46,14 @@ export const useStyles = () => {
     const percentageBackground: CSSObject = {
       position: 'relative',
       backgroundColor: colors.lightShade,
-      height: '4px',
-      borderRadius: '2px',
+      height: size.xs,
+      borderRadius: border.radius.small,
     };
 
     const percentageBar: CSSObject = {
       position: 'absolute',
-      height: '4px',
-      borderRadius: '2px',
+      height: size.xs,
+      borderRadius: border.radius.small,
     };
 
     const loadingSpinner: CSSObject = {
