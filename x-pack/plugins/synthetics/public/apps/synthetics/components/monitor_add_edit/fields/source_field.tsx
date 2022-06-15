@@ -54,10 +54,17 @@ export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Pro
       name: (
         <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.synthetics.createPackagePolicy.stepConfigure.browser.scriptRecorder.label"
-              defaultMessage="Script recorder"
-            />
+            {isEditFlow ? (
+              <FormattedMessage
+                id="xpack.synthetics.monitorConfig.scriptRecorderEdit.label"
+                defaultMessage="Upload new script"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.synthetics.monitorConfig.scriptRecorder.label"
+                defaultMessage="Script recorder"
+              />
+            )}
           </EuiFlexItem>
           <StyledBetaBadgeWrapper grow={false}>
             <EuiBetaBadge
