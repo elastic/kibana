@@ -97,7 +97,7 @@ export class Grid extends React.Component<Props, State> {
       items: [...prevState.items, node],
     }));
 
-    const newWidget = this.grid?.addWidget(node);
+    this.grid?.addWidget(node);
   };
 
   addNewGrid = () => {
@@ -108,17 +108,14 @@ export class Grid extends React.Component<Props, State> {
       w: NUM_COLUMNS,
       h: 4,
       // noResize: true,
-      resizeHandles: 'se',
       noResize: true,
       content: `<h1 style="height:50px;width:100%">title</h1>`,
       subGrid: {
         ...SHARED_GRID_PARMS,
         minRow: 4,
-        auto: true,
         acceptWidgets: true,
         class: 'nested1',
         children: [],
-        alwaysShowResizeHandle: true,
       },
     });
 
