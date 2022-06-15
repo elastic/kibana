@@ -1683,7 +1683,7 @@ describe('update()', () => {
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalled();
 
       expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
-        `Alert update failed to run its underlying task. TaskManager runNow failed with Error: Failed to run alert`
+        `Rule update failed to run its underlying task. TaskManager bulkUpdateSchedules failed with Error: Failed to run alert`
       );
     });
   });
