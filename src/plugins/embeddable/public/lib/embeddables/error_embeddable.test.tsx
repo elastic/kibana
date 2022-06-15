@@ -43,7 +43,7 @@ test('ErrorEmbeddable renders in compact mode', async () => {
                 class="euiText euiText--extraSmall errorEmbeddableCompact__button"
               >
                 <button
-                  class="euiLink eui-textTruncate css-7rgcqt-euiLink-subdued"
+                  class="euiLink euiLink--subdued eui-textTruncate"
                   type="button"
                 >
                   <span
