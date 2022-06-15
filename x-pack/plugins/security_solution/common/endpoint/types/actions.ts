@@ -9,7 +9,7 @@ import { TypeOf } from '@kbn/config-schema';
 import {
   ActionStatusRequestSchema,
   HostIsolationRequestSchema,
-  responseActionBodySchemas,
+  ResponseActionBodySchema,
 } from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
@@ -187,7 +187,7 @@ export interface ActivityLog {
 
 export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
 
-export type ResponseActionRequestBodies = TypeOf<typeof responseActionBodySchemas>;
+export type ResponseActionRequestBody = TypeOf<typeof ResponseActionBodySchema>;
 
 export interface HostIsolationResponse {
   action: string;

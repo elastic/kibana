@@ -17,7 +17,7 @@ import { CommentType } from '@kbn/cases-plugin/common';
 import {
   HostIsolationRequestSchema,
   KillProcessRequestSchema,
-  responseActionBodySchemas,
+  ResponseActionBodySchema,
 } from '../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../common/constants';
 import {
@@ -46,7 +46,7 @@ import { EndpointAppContext } from '../../types';
 import { getMetadataForEndpoints, getActionDetailsById } from '../../services';
 import { doLogsEndpointActionDsExists } from '../../utils';
 import { withEndpointAuthz } from '../with_endpoint_authz';
-import { FeatureKeys } from '../../services/feature_usage/service';
+import type { FeatureKeys } from '../../services/feature_usage/service';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -108,7 +108,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 ): RequestHandler<
   unknown,
   unknown,
-  TypeOf<typeof responseActionBodySchemas>,
+  TypeOf<typeof ResponseActionBodySchema>,
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {

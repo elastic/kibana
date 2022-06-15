@@ -46,7 +46,7 @@ import {
   ResponseActionApiResponse,
   HostMetadata,
   LogsEndpointAction,
-  ResponseActionRequestBodies,
+  ResponseActionRequestBody,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { EndpointAuthz } from '../../../../common/endpoint/types/authz';
@@ -63,7 +63,7 @@ import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
 
 interface CallRouteInterface {
-  body?: ResponseActionRequestBodies;
+  body?: ResponseActionRequestBody;
   idxResponse?: any;
   searchResponse?: HostMetadata;
   mockUser?: any;
