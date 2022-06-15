@@ -38,7 +38,6 @@ import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
-  elasticsearchClient: ElasticsearchClient;
 }
 interface SetupDependencies {
   security?: SecurityPluginSetup;
@@ -268,7 +267,15 @@ export class SearchSessionService
   };
 
   public find = async (
-    { savedObjectsClient, elasticsearchClient }: SearchSessionDependencies,
+    {
+      savedObjectsClient,
+      internalElasticsearchClient,
+    }: SearchSessionDependencies & {
+      /**
+       * Have to use internal client for checking search status
+       */
+      internalElasticsearchClient: ElasticsearchClient;
+    },
     user: AuthenticatedUser | null,
     options: Omit<SavedObjectsFindOptions, 'type'>
   ) => {
@@ -297,7 +304,7 @@ export class SearchSessionService
     findResponse.saved_objects = await Promise.all(
       findResponse.saved_objects.map(async (so) => {
         const sessionStatus = await getSessionStatus(
-          { client: elasticsearchClient },
+          { internalClient: internalElasticsearchClient },
           so.attributes,
           this.sessionConfig
         );
@@ -478,15 +485,16 @@ export class SearchSessionService
       const savedObjectsClient = savedObjects.getScopedClient(request, {
         includedHiddenTypes: [SEARCH_SESSION_TYPE],
       });
-      const elasticsearchClient = elasticsearch.client.asScoped(request).asCurrentUser;
-      const deps = { savedObjectsClient, elasticsearchClient };
+
+      const internalElasticsearchClient = elasticsearch.client.asScoped(request).asInternalUser;
+      const deps = { savedObjectsClient };
       return {
         getId: this.getId.bind(this, deps, user),
         trackId: this.trackId.bind(this, deps, user),
         getSearchIdMapping: this.getSearchIdMapping.bind(this, deps, user),
         save: this.save.bind(this, deps, user),
         get: this.get.bind(this, deps, user),
-        find: this.find.bind(this, deps, user),
+        find: this.find.bind(this, { ...deps, internalElasticsearchClient }, user),
         update: this.update.bind(this, deps, user),
         extend: this.extend.bind(this, deps, user),
         cancel: this.cancel.bind(this, deps, user),

@@ -15,7 +15,7 @@ import { SearchSessionsConfigSchema } from '../../../config';
 
 describe.skip('getSessionStatus', () => {
   const mockConfig = {} as unknown as SearchSessionsConfigSchema;
-  const deps = { client: elasticsearchServiceMock.createElasticsearchClient() };
+  const deps = { internalClient: elasticsearchServiceMock.createElasticsearchClient() };
   test("returns an in_progress status if there's nothing inside the session", async () => {
     const session: any = {
       idMapping: {},

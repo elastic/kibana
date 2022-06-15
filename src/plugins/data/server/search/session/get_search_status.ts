@@ -14,19 +14,20 @@ import { AsyncSearchStatusResponse } from '../..';
 import { SearchStatus } from './types';
 
 export async function getSearchStatus(
-  client: ElasticsearchClient,
+  internalClient: ElasticsearchClient,
   asyncId: string
 ): Promise<Pick<SearchSessionRequestInfo, 'status' | 'error'>> {
   // TODO: Handle strategies other than the default one
   // https://github.com/elastic/kibana/issues/127880
   try {
     // @ts-expect-error start_time_in_millis: EpochMillis is string | number
-    const apiResponse: TransportResult<AsyncSearchStatusResponse> = await client.asyncSearch.status(
-      {
-        id: asyncId,
-      },
-      { meta: true }
-    );
+    const apiResponse: TransportResult<AsyncSearchStatusResponse> =
+      await internalClient.asyncSearch.status(
+        {
+          id: asyncId,
+        },
+        { meta: true }
+      );
     const response = apiResponse.body;
     if ((response.is_partial && !response.is_running) || response.completion_status >= 400) {
       return {
