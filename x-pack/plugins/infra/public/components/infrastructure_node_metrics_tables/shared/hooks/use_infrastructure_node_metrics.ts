@@ -26,7 +26,7 @@ export interface SortState<T> {
 }
 
 interface UseInfrastructureNodeMetricsOptions<T> {
-  metricsExplorerOptions?: MetricsExplorerOptions;
+  metricsExplorerOptions: MetricsExplorerOptions;
   timerange: Pick<MetricsExplorerTimeOptions, 'from' | 'to'>;
   transform: (series: MetricsExplorerSeries) => T;
   sortState: SortState<T>;
@@ -57,7 +57,7 @@ export const useInfrastructureNodeMetrics = <T>(
   const [{ state: promiseState }, fetchNodes] = useTrackedPromise(
     {
       createPromise: (): Promise<MetricsExplorerResponse> => {
-        if (!source || !metricsExplorerOptions) {
+        if (!source) {
           return Promise.resolve(nullData);
         }
 
