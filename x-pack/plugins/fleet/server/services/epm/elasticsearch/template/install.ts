@@ -366,7 +366,7 @@ export function prepareTemplate({
   const templatePriority = getTemplatePriority(dataStream);
 
   const pipelineName = getPipelineNameForDatastream({ dataStream, packageVersion });
- 
+
   const defaultSettings = buildDefaultSettings({
     templateName,
     packageName,
