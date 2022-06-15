@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import {
-  type Observable,
-  Subject,
-  from,
-  merge,
-  firstValueFrom,
-  connectable,
-  ReplaySubject,
-} from 'rxjs';
+import { type Observable, Subject, merge, firstValueFrom } from 'rxjs';
 
-import { filter, map, pairwise, exhaustMap, share, takeUntil, finalize } from 'rxjs/operators';
+import {
+  filter,
+  map,
+  pairwise,
+  exhaustMap,
+  share,
+  shareReplay,
+  takeUntil,
+  finalize,
+  startWith,
+} from 'rxjs/operators';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 import type { ILicense } from './types';
 
@@ -33,26 +35,28 @@ export function createLicenseUpdate(
     share()
   );
 
-  const cached$ = connectable(fetched$, { connector: () => new ReplaySubject(1) });
+  // provide a first, empty license, so that we can compare in the filter below
+  const startWithArgs = initialValues ? [undefined, initialValues] : [undefined];
 
-  const cachedSubscription = cached$.connect(); // start periodic license fetch right away
+  const license$: Observable<ILicense> = fetched$.pipe(
+    shareReplay(1),
+    startWith(...startWithArgs),
+    pairwise(),
+    filter(([previous, next]) => hasLicenseInfoChanged(previous, next!)),
+    map(([, next]) => next!)
+  );
+
+  // start periodic license fetch right away
+  const makeItHot = license$.subscribe();
 
   stop$
     .pipe(
       finalize(() => {
         manuallyRefresh$.complete();
-        cachedSubscription.unsubscribe();
+        makeItHot.unsubscribe();
       })
     )
     .subscribe();
-
-  const initialValues$ = initialValues ? from([undefined, initialValues]) : from([undefined]);
-
-  const license$: Observable<ILicense> = merge(initialValues$, cached$).pipe(
-    pairwise(),
-    filter(([previous, next]) => hasLicenseInfoChanged(previous, next!)),
-    map(([, next]) => next!)
-  );
 
   return {
     license$,
