@@ -8,7 +8,10 @@
 /* eslint-disable max-classes-per-file */
 export class RuleDataWriteDisabledError extends Error {
   constructor(message?: string) {
-    super(message);
+    super(
+      message ??
+        `Rule registry writing is disabled. Make sure that "xpack.ruleRegistry.write.enabled" configuration is not set to false within "kibana.yml" and that Rule Data Client was initialized successfully.`
+    );
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'RuleDataWriteDisabledError';
   }
@@ -20,8 +23,9 @@ export class RuleDataWriterInitializationError extends Error {
     registrationContext: string,
     error: string | Error
   ) {
-    super(`There has been a catastrophic error trying to install ${resourceType} level resources for the following registration context: ${registrationContext}. 
-    This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: ${error.toString()}`);
+    super(
+      `There has been a catastrophic error trying to install ${resourceType} level resources for the following registration context: ${registrationContext}. This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: ${error.toString()}`
+    );
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'RuleDataWriterInitializationError';
   }

@@ -145,6 +145,8 @@ export const createLifecycleExecutor =
       state: previousState,
     } = options;
 
+    const ruleDataClientWriter = await ruleDataClient.getWriter();
+
     const state = getOrElse(
       (): WrappedLifecycleRuleState<State> => ({
         wrapped: previousState as State,
@@ -267,7 +269,7 @@ export const createLifecycleExecutor =
     if (allEventsToIndex.length > 0 && writeAlerts) {
       logger.debug(`[Rule Registry] Preparing to index ${allEventsToIndex.length} alerts.`);
 
-      await ruleDataClient.getWriter().bulk({
+      await ruleDataClientWriter.bulk({
         body: allEventsToIndex.flatMap(({ event, indexName }) => [
           indexName
             ? { index: { _id: event[ALERT_UUID]!, _index: indexName, require_alias: false } }

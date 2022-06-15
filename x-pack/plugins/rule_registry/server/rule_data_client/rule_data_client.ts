@@ -40,6 +40,8 @@ export class RuleDataClient implements IRuleDataClient {
   // Writers cached by namespace
   private writerCache: Map<string, IRuleDataWriter>;
 
+  private clusterClient: ElasticsearchClient | null = null;
+
   constructor(private readonly options: RuleDataClientConstructorOptions) {
     this.writeEnabled = this.options.isWriteEnabled;
     this.writerCacheEnabled = this.options.isWriterCacheEnabled;
@@ -131,14 +133,14 @@ export class RuleDataClient implements IRuleDataClient {
     };
   }
 
-  public getWriter(options: { namespace?: string } = {}): IRuleDataWriter {
+  public async getWriter(options: { namespace?: string } = {}): Promise<IRuleDataWriter> {
     const namespace = options.namespace || 'default';
     const cachedWriter = this.writerCache.get(namespace);
     const isWriterCacheEnabled = () => this.writerCacheEnabled;
 
     // There is no cached writer, so we'll install / update the namespace specific resources now.
     if (!isWriterCacheEnabled() || !cachedWriter) {
-      const writerForNamespace = this.initializeWriter(namespace);
+      const writerForNamespace = await this.initializeWriter(namespace);
       this.writerCache.set(namespace, writerForNamespace);
       return writerForNamespace;
     } else {
@@ -146,23 +148,20 @@ export class RuleDataClient implements IRuleDataClient {
     }
   }
 
-  private initializeWriter(namespace: string): IRuleDataWriter {
-    let hasInitializationError: boolean = false;
+  private async initializeWriter(namespace: string): Promise<IRuleDataWriter> {
     const isWriteEnabled = () => this.writeEnabled;
-    const turnOffWrite = () => {
-      this.writeEnabled = false;
-      hasInitializationError = true;
-    };
+    const turnOffWrite = () => (this.writeEnabled = false);
 
     const { indexInfo, resourceInstaller } = this.options;
     const alias = indexInfo.getPrimaryAlias(namespace);
 
     // Wait until both index and namespace level resources have been installed / updated.
-    const prepareForWriting = async () => {
-      if (!isWriteEnabled()) {
-        throw new RuleDataWriteDisabledError();
-      }
+    if (!isWriteEnabled()) {
+      this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
+      throw new RuleDataWriteDisabledError();
+    }
 
+    try {
       const indexLevelResourcesResult = await this.options.waitUntilReadyForWriting;
 
       if (isLeft(indexLevelResourcesResult)) {
@@ -174,7 +173,7 @@ export class RuleDataClient implements IRuleDataClient {
       } else {
         try {
           await resourceInstaller.installAndUpdateNamespaceLevelResources(indexInfo, namespace);
-          return indexLevelResourcesResult.right;
+          this.clusterClient = indexLevelResourcesResult.right;
         } catch (e) {
           throw new RuleDataWriterInitializationError(
             'namespace',
@@ -183,53 +182,44 @@ export class RuleDataClient implements IRuleDataClient {
           );
         }
       }
-    };
-
-    const prepareForWritingResult = prepareForWriting().catch((error) => {
+    } catch (error) {
       if (error instanceof RuleDataWriterInitializationError) {
         this.options.logger.error(error);
         this.options.logger.error(
           `The writer for the Rule Data Client for the ${indexInfo.indexOptions.registrationContext} registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
         );
         turnOffWrite();
-      } else if (error instanceof RuleDataWriteDisabledError) {
-        this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
       }
-      return undefined;
-    });
+
+      throw error;
+    }
 
     return {
       bulk: async (request: estypes.BulkRequest) => {
-        const clusterClient = await prepareForWritingResult;
-        if (clusterClient) {
-          try {
+        try {
+          if (this.clusterClient) {
             const requestWithDefaultParameters = {
               ...request,
               require_alias: true,
               index: alias,
             };
 
-            const response = await clusterClient.bulk(requestWithDefaultParameters, { meta: true });
+            const response = await this.clusterClient.bulk(requestWithDefaultParameters, {
+              meta: true,
+            });
 
             if (response.body.errors) {
               const error = new errors.ResponseError(response);
               this.options.logger.error(error);
             }
             return response;
-          } catch (error) {
-            this.options.logger.error(error);
-
-            return undefined;
+          } else {
+            this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
           }
-        } else {
-          if (hasInitializationError) {
-            throw new Error(
-              `Error initializing index resources for registration context ${indexInfo.indexOptions.registrationContext}. Check logs for details.`
-            );
-          }
-          this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
+        } catch (error) {
+          this.options.logger.error(error);
+          return undefined;
         }
-        return undefined;
       },
     };
   }
