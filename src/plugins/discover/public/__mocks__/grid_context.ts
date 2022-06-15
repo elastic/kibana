@@ -15,12 +15,12 @@ import { discoverServiceMock } from './services';
 import { GridContext } from '../components/discover_grid/discover_grid_context';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import type { ElasticSearchHit } from '../types';
-import { buildDataRecord } from '../application/main/utils/fetch_all';
 import { EsHitRecord } from '../application/types';
+import { buildDataTableRecord } from '../utils/build_data_record';
 
 const buildGridContext = (dataView: DataView, rows: ElasticSearchHit[]): GridContext => {
   const usedRows = rows.map((row) => {
-    return buildDataRecord(row as EsHitRecord, dataView);
+    return buildDataTableRecord(row as EsHitRecord, dataView);
   });
 
   return {

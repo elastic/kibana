@@ -35,7 +35,7 @@ import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
-import { buildDataRecord } from '../../utils/fetch_all';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -62,7 +62,7 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
 
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: esHits.map((esHit) => buildDataRecord(esHit, indexPattern)),
+    result: esHits.map((esHit) => buildDataTableRecord(esHit, indexPattern)),
   }) as DataDocuments$;
 
   const availableFields$ = new BehaviorSubject({

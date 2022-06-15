@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { flattenHit, ISearchSource } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
 import {
   sendCompleteMsg,
   sendErrorMsg,
@@ -34,8 +33,6 @@ import {
   SavedSearchData,
 } from './use_saved_search';
 import { DiscoverServices } from '../../../build_services';
-import { getDocId } from '../../../components/discover_grid/discover_grid_document_selection';
-import type { DataTableRecord } from '../../../types';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -47,19 +44,6 @@ export interface FetchDeps {
   searchSessionId: string;
   services: DiscoverServices;
   useNewFieldsApi: boolean;
-}
-
-export function buildDataRecord(
-  doc: EsHitRecord,
-  dataView?: DataView,
-  isAnchor?: boolean
-): DataTableRecord {
-  return {
-    id: getDocId(doc),
-    raw: doc,
-    flattened: flattenHit(doc, dataView, { includeIgnoredValues: true }),
-    isAnchor,
-  };
 }
 
 /**
@@ -158,7 +142,7 @@ export function fetchAll(
         }
         const dataView = searchSource.getField('index')!;
 
-        const resultDocs = docs.map((doc) => buildDataRecord(doc as EsHitRecord, dataView));
+        const resultDocs = docs.map((doc) => buildDataTableRecord(doc as EsHitRecord, dataView));
 
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,

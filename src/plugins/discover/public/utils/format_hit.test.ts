@@ -10,8 +10,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { indexPatternMock as dataViewMock } from '../__mocks__/index_pattern';
 import { formatHit } from './format_hit';
 import { discoverServiceMock } from '../__mocks__/services';
-import { buildDataRecord } from '../application/main/utils/fetch_all';
 import { DataTableRecord } from '../types';
+import { buildDataTableRecord } from './build_data_record';
 
 describe('formatHit', () => {
   let row: DataTableRecord;
@@ -27,7 +27,7 @@ describe('formatHit', () => {
         bytes: [123],
       },
     };
-    row = buildDataRecord(hit, dataViewMock);
+    row = buildDataTableRecord(hit, dataViewMock);
     (dataViewMock.getFormatterForField as jest.Mock).mockReturnValue({
       convert: (value: unknown) => `formatted:${value}`,
     });

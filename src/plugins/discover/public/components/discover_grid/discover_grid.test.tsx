@@ -14,11 +14,11 @@ import { esHits } from '../../__mocks__/es_hits';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
-import { getDocId } from './discover_grid_document_selection';
 import { ElasticSearchHit } from '../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { buildDataRecord } from '../../application/main/utils/fetch_all';
+import { buildDataTableRecord } from '../../utils/build_data_record';
+import { getDocId } from '../../utils/get_doc_id';
 
 function getProps() {
   return {
@@ -33,7 +33,7 @@ function getProps() {
     onResize: jest.fn(),
     onSetColumns: jest.fn(),
     onSort: jest.fn(),
-    rows: esHits.map((hit) => buildDataRecord(hit, indexPatternMock)),
+    rows: esHits.map((hit) => buildDataTableRecord(hit, indexPatternMock)),
     sampleSize: 30,
     searchDescription: '',
     searchTitle: '',
@@ -147,7 +147,7 @@ describe('DiscoverGrid', () => {
               bytes: 50,
             },
           },
-        ].map((row) => buildDataRecord(row, indexPatternMock)),
+        ].map((row) => buildDataTableRecord(row, indexPatternMock)),
       });
       expect(getDisplayedDocNr(component)).toBe(1);
       expect(getSelectedDocNr(component)).toBe(0);

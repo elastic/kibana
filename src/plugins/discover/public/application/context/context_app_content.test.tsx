@@ -19,7 +19,7 @@ import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataRecord } from '../main/utils/fetch_all';
+import { buildDataTableRecord } from '../../utils/build_data_record';
 
 describe('ContextAppContent test', () => {
   const mountComponent = ({
@@ -56,7 +56,7 @@ describe('ContextAppContent test', () => {
       anchorStatus: anchorStatus || LoadingStatus.LOADED,
       predecessorsStatus: LoadingStatus.LOADED,
       successorsStatus: LoadingStatus.LOADED,
-      rows: [buildDataRecord(hit, indexPatternMock)],
+      rows: [buildDataTableRecord(hit, indexPatternMock)],
       predecessors: [],
       successors: [],
       defaultStepSize: 5,

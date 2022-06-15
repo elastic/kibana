@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { EsHitRecord } from '../../types';
-import { buildDataRecord } from '../../main/utils/fetch_all';
 import { DataTableRecord } from '../../../types';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 export async function fetchAnchor(
   anchorId: string,
@@ -31,7 +31,7 @@ export async function fetchAnchor(
       })
     );
   }
-  return buildDataRecord(doc as EsHitRecord, indexPattern, true);
+  return buildDataTableRecord(doc as EsHitRecord, indexPattern, true);
 }
 
 export function updateSearchSource(

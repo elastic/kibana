@@ -5,31 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState, useContext, useMemo, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiCopy,
-  EuiPopover,
-  EuiCheckbox,
   EuiDataGridCellValueElementProps,
+  EuiPopover,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
+import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
-import type { DataTableRecord, ElasticSearchHit } from '../../types';
+import type { DataTableRecord } from '../../types';
 
-/**
- * Returning a generated id of a given ES document, since `_id` can be the same
- * when using different indices and shard routing
- */
-export const getDocId = (doc: ElasticSearchHit & { _routing?: string }) => {
-  const routing = doc._routing ? doc._routing : '';
-  return [doc._index, doc._id, routing].join('::');
-};
 export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
   const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } =
     useContext(DiscoverGridContext);

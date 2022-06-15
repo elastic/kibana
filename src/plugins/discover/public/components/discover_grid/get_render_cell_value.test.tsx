@@ -14,8 +14,8 @@ import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { ElasticSearchHit } from '../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataRecord } from '../../application/main/utils/fetch_all';
 import { EsHitRecord } from '../../application/types';
+import { buildDataTableRecord } from '../../utils/build_data_record';
 
 const mockServices = {
   uiSettings: {
@@ -72,7 +72,7 @@ const rowsFieldsWithTopLevelObject: ElasticSearchHit[] = [
   },
 ];
 
-const build = (hit: ElasticSearchHit) => buildDataRecord(hit as EsHitRecord, indexPatternMock);
+const build = (hit: ElasticSearchHit) => buildDataTableRecord(hit as EsHitRecord, indexPatternMock);
 
 describe('Discover grid cell rendering', function () {
   it('renders bytes column correctly', () => {

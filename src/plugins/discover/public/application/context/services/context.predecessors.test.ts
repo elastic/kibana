@@ -14,8 +14,8 @@ import { createContextSearchSourceStub } from './_stubs';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { DataPublicPluginStart, Query } from '@kbn/data-plugin/public';
 import { EsHitRecord } from '../../types';
-import { buildDataRecord } from '../../main/utils/fetch_all';
 import { DataTableRecord } from '../../../types';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -63,7 +63,7 @@ describe('context predecessors', function () {
       } as unknown as DataPublicPluginStart;
 
       fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
-        const anchor = buildDataRecord(
+        const anchor = buildDataTableRecord(
           {
             _source: {
               [indexPattern.timeFieldName!]: timeValIso,
@@ -205,7 +205,7 @@ describe('context predecessors', function () {
       } as unknown as DataPublicPluginStart;
 
       fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
-        const anchor = buildDataRecord(
+        const anchor = buildDataTableRecord(
           {
             _source: {
               [indexPattern.timeFieldName!]: timeValIso,

@@ -21,6 +21,7 @@ import { ISearchSource, Query, TimeRange, FilterStateStore } from '@kbn/data-plu
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '../utils/build_data_record';
 import { DataTableRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../services/saved_searches';
@@ -45,7 +46,6 @@ import { SortOrder } from '../components/doc_table/components/table_header/helpe
 import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
-import { buildDataRecord } from '../application/main/utils/fetch_all';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -202,7 +202,7 @@ export class SavedSearchEmbeddable
       this.updateOutput({ loading: false, error: undefined });
 
       this.searchProps!.rows = resp.hits.hits.map((hit) =>
-        buildDataRecord(hit, this.searchProps!.indexPattern)
+        buildDataTableRecord(hit, this.searchProps!.indexPattern)
       );
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;

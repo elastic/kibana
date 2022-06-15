@@ -8,10 +8,10 @@
 import { lastValueFrom } from 'rxjs';
 import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
 import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
 import { EsHitRecord } from '../../types';
-import { buildDataRecord } from '../../main/utils/fetch_all';
 import type { DataTableRecord } from '../../../types';
 
 interface RangeQuery {
@@ -81,7 +81,7 @@ export async function fetchHitsInInterval(
   const { rawResponse } = await lastValueFrom(fetch$);
   const dataView = searchSource.getField('index');
   const records = rawResponse.hits?.hits.map((hit) =>
-    buildDataRecord(hit as EsHitRecord, dataView!)
+    buildDataTableRecord(hit as EsHitRecord, dataView!)
   );
 
   return records ?? [];

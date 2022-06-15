@@ -16,8 +16,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { buildDataRecord } from '../../../utils/fetch_all';
 import { EsHitRecord } from '../../../../types';
+import { buildDataTableRecord } from '../../../../../utils/build_data_record';
 
 describe('fieldCalculator', function () {
   it('should have a _countMissing that counts nulls & undefineds in an array', function () {
@@ -121,7 +121,7 @@ describe('fieldCalculator', function () {
     let hits: any;
 
     beforeEach(function () {
-      hits = cloneDeep(realHits).map((hit: EsHitRecord) => buildDataRecord(hit, dataView));
+      hits = cloneDeep(realHits).map((hit: EsHitRecord) => buildDataTableRecord(hit, dataView));
     });
 
     it('Should return an array of values for _source fields', function () {
@@ -154,7 +154,7 @@ describe('fieldCalculator', function () {
     let params: { hits: any; field: any; count: number; dataView: DataView };
     beforeEach(function () {
       params = {
-        hits: cloneDeep(realHits).map((hit: EsHitRecord) => buildDataRecord(hit, dataView)),
+        hits: cloneDeep(realHits).map((hit: EsHitRecord) => buildDataTableRecord(hit, dataView)),
         field: dataView.fields.getByName('extension'),
         count: 3,
         dataView,

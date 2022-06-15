@@ -14,7 +14,7 @@ import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { buildDataRecord, fetchAll } from './fetch_all';
+import { fetchAll } from './fetch_all';
 import {
   DataAvailableFieldsMsg,
   DataChartsMessage,
@@ -28,6 +28,7 @@ import { fetchDocuments } from './fetch_documents';
 import { fetchChart } from './fetch_chart';
 import { fetchTotalHits } from './fetch_total_hits';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -122,7 +123,7 @@ describe('test fetchAll', () => {
       { fetchStatus: FetchStatus.LOADING },
       {
         fetchStatus: FetchStatus.COMPLETE,
-        result: hits.map((hit) => buildDataRecord(hit, indexPatternMock)),
+        result: hits.map((hit) => buildDataTableRecord(hit, indexPatternMock)),
       },
     ]);
   });

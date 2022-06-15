@@ -20,7 +20,7 @@ import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_wit
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, ElasticSearchHit } from '../../types';
-import { buildDataRecord } from '../../application/main/utils/fetch_all';
+import { buildDataTableRecord } from '../../utils/build_data_record';
 
 describe('Discover flyout', function () {
   setDocViewsRegistry(new DocViewsRegistry());
@@ -41,7 +41,7 @@ describe('Discover flyout', function () {
       history: () => ({ location: {} }),
     } as unknown as DiscoverServices;
 
-    const hit = buildDataRecord(
+    const hit = buildDataTableRecord(
       hitIndex ? esHits[hitIndex] : (esHits[0] as ElasticSearchHit),
       indexPatternMock
     );
@@ -53,7 +53,7 @@ describe('Discover flyout', function () {
       hits:
         hits ||
         esHits.map((entry: ElasticSearchHit) =>
-          buildDataRecord(entry, indexPattern || indexPatternMock)
+          buildDataTableRecord(entry, indexPattern || indexPatternMock)
         ),
       onAddColumn: jest.fn(),
       onClose,
@@ -126,7 +126,7 @@ describe('Discover flyout', function () {
         _type: '_doc',
         _source: { date: '2020-20-01T12:12:12.124', name: 'test2', extension: 'jpg' },
       },
-    ].map((hit) => buildDataRecord(hit, indexPatternMock));
+    ].map((hit) => buildDataTableRecord(hit, indexPatternMock));
     const { component } = mountComponent({ hits });
     const docNav = findTestSubject(component, 'dscDocNavigation');
     expect(docNav.length).toBeFalsy();

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { buildDataRecord } from '../../main/utils/fetch_all';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
 
-export const mockAnchorHit = buildDataRecord(
+export const mockAnchorHit = buildDataTableRecord(
   {
     _id: '123',
     _index: 'the-index-pattern-id',
@@ -43,7 +43,7 @@ export const mockPredecessorHits = [
     sort: ['2021-06-07T19:10:22.000Z', 2435],
     _version: 1,
   },
-].map((entry) => buildDataRecord(entry, indexPatternMock));
+].map((entry) => buildDataTableRecord(entry, indexPatternMock));
 
 export const mockSuccessorHits = [
   {
@@ -67,4 +67,4 @@ export const mockSuccessorHits = [
     sort: ['2021-06-07T18:47:16.000Z', 2437],
     _version: 1,
   },
-].map((entry) => buildDataRecord(entry, indexPatternMock));
+].map((entry) => buildDataTableRecord(entry, indexPatternMock));

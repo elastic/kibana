@@ -12,8 +12,8 @@ import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DocTableWrapper } from './doc_table_wrapper';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataRecord } from '../../application/main/utils/fetch_all';
 import { EsHitRecord } from '../../application/types';
+import { buildDataTableRecord } from '../../utils/build_data_record';
 
 describe('Doc table component', () => {
   const mountComponent = (rows?: EsHitRecord[]) => {
@@ -34,7 +34,7 @@ describe('Doc table component', () => {
             _source: { message: 'mock_message', bytes: 20 },
           } as EsHitRecord,
         ]
-      ).map((row) => buildDataRecord(row, indexPatternMock)),
+      ).map((row) => buildDataTableRecord(row, indexPatternMock)),
 
       sort: [['order_date', 'desc']],
       isLoading: false,

@@ -26,11 +26,13 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { EsHitRecord, FetchStatus } from '../../../types';
 import { AvailableFields$ } from '../../utils/use_saved_search';
-import { buildDataRecord } from '../../utils/fetch_all';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 function getCompProps(): DiscoverSidebarProps {
   const indexPattern = stubLogstashIndexPattern;
-  const hits = cloneDeep(realHits).map((hit: EsHitRecord) => buildDataRecord(hit, indexPattern));
+  const hits = cloneDeep(realHits).map((hit: EsHitRecord) =>
+    buildDataTableRecord(hit, indexPattern)
+  );
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,

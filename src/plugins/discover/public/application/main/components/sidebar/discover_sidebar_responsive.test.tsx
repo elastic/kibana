@@ -29,7 +29,7 @@ import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataRecord } from '../../utils/fetch_all';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 const mockServices = {
   history: () => ({
@@ -95,7 +95,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     columns: ['extension'],
     documents$: new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
-      result: hits.map((hit) => buildDataRecord(hit, indexPattern)),
+      result: hits.map((hit) => buildDataTableRecord(hit, indexPattern)),
     }) as DataDocuments$,
     availableFields$: new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
