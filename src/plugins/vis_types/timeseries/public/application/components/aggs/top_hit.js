@@ -204,7 +204,7 @@ const TopHitAggUi = (props) => {
               Should it be text or number?
             */}
             <input
-              className="tvbAgg__input"
+              className="euiFieldNumber"
               value={model.size}
               onChange={handleTextChange('size')}
             />
