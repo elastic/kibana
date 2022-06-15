@@ -32,7 +32,7 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
   const { services } = useKibana();
 
   const latestOnChange = useLatest(onChange);
-  const latestVersion = useLatest(version);
+  const latestSelectedVersion = useLatest(version);
 
   useEffect(() => {
     createCallApmApi(services as CoreStart);
@@ -43,10 +43,15 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
   }, []);
 
   React.useLayoutEffect(() => {
-    if (status === FETCH_STATUS.SUCCESS && data && !latestVersion.current) {
-      latestOnChange.current(data.latest);
+    if (
+      status === FETCH_STATUS.SUCCESS &&
+      data &&
+      !latestSelectedVersion.current
+    ) {
+      const latestVersion = data.versions[0];
+      latestOnChange.current(latestVersion);
     }
-  }, [latestVersion, status, data, latestOnChange]);
+  }, [latestSelectedVersion, status, data, latestOnChange]);
 
   const isFailed = status === FETCH_STATUS.FAILURE;
   let inputJSX;
