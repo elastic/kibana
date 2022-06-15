@@ -316,7 +316,7 @@ export const buildExpression = (
                     showLabels: [state?.tickLabelsVisibilitySettings?.x ?? true],
                     showGridLines: [state?.gridlinesVisibilitySettings?.x ?? true],
                     labelsOrientation: [state?.labelsOrientation?.x ?? 0],
-                    extent: state.xExtent ? axisExtentConfigToExpression(state.xExtent) : [],
+                    extent: state.xExtent ? [axisExtentConfigToExpression(state.xExtent)] : [],
                   },
                 },
               ],
