@@ -13,10 +13,17 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 
+import { PLUGIN_ID } from '../common/constants';
+
 import { BlobStorageService } from './blob_storage_service';
 import { FileServiceFactory } from './file_service';
 import { FilesPluginSetupDependencies, FilesPluginSetup, FilesPluginStart } from './types';
 import { fileKindsRegistry } from './file_kinds_registry';
+import { FilesRequestHandlerContext } from './routes/types';
+import { registerRoutes } from './routes';
+
+import { getUploadEndpoint, setUploadEndpoint, UploadEndpoint } from './services';
+import { FileKindsRequestHandlerContext } from './routes/file_kind/types';
 
 export class FilesPlugin
   implements Plugin<FilesPluginSetup, FilesPluginStart, FilesPluginSetupDependencies>
@@ -32,6 +39,37 @@ export class FilesPlugin
   public setup(core: CoreSetup, deps: FilesPluginSetupDependencies): FilesPluginSetup {
     FileServiceFactory.setup(core.savedObjects);
     this.securitySetup = deps.security;
+
+    core.http.registerRouteHandlerContext<FilesRequestHandlerContext, typeof PLUGIN_ID>(
+      PLUGIN_ID,
+      (ctx, req) => {
+        return {
+          fileServiceFactory: this.fileServiceFactory!,
+          uploadEndpoint: getUploadEndpoint(),
+        };
+      }
+    );
+
+    const router = core.http.createRouter<FileKindsRequestHandlerContext>();
+
+    fileKindsRegistry.register({
+      http: {
+        create: {
+          tags: [],
+        },
+      },
+      id: 'my-file',
+    });
+
+    core
+      .getStartServices()
+      .then(() => {
+        registerRoutes(router);
+      })
+      .catch(() => {
+        this.logger.error('Failed to register routes, file services may not function properly.');
+      });
+
     return {
       registerFileKind(fileKind) {
         fileKindsRegistry.register(fileKind);
@@ -40,18 +78,22 @@ export class FilesPlugin
   }
 
   public start(coreStart: CoreStart): FilesPluginStart {
+    const { http, savedObjects } = coreStart;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const blobStorageService = new BlobStorageService(
       esClient,
       this.logger.get('blob-storage-service')
     );
     this.fileServiceFactory = new FileServiceFactory(
-      coreStart.savedObjects,
+      savedObjects,
       blobStorageService,
       this.securitySetup,
       fileKindsRegistry,
       this.logger.get('files-service')
     );
+
+    setUploadEndpoint(UploadEndpoint.create({ http }));
+
     return {
       fileServiceFactory: this.fileServiceFactory,
     };

@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema, TypeOf } from '@kbn/config-schema';
+import type { FileKindsRequestHandler } from './types';
+
+export const bodySchema = schema.object({
+  name: schema.string(),
+  alt: schema.maybe(schema.string()),
+  meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+});
+
+type Body = TypeOf<typeof bodySchema>;
+
+interface Response {
+  id: string;
+  uploadTargetUrl: string;
+}
+
+export const handler: FileKindsRequestHandler<unknown, unknown, Body> = async (
+  { files: { fileServiceFactory, uploadEndpoint }, fileKind },
+  req,
+  res
+) => {
+  const {
+    body: { name, alt, meta },
+  } = req;
+  const fileService = fileServiceFactory.asScoped(req);
+  const file = await fileService.create({ fileKind, name, alt, meta });
+  const body: Response = {
+    id: file.id,
+    uploadTargetUrl: uploadEndpoint.get(file.fileKind, req),
+  };
+  return res.ok({ body });
+};

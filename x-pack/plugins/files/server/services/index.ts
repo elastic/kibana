@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { FileServiceFactory } from './file_service_factory';
-export type { FileServiceStart } from './file_service';
+export { setUploadEndpoint, getUploadEndpoint, UploadEndpoint } from './upload_endpoint';
