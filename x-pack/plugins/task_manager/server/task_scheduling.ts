@@ -78,6 +78,11 @@ export interface RunNowResult {
   state?: ConcreteTaskInstance['state'];
 }
 
+export interface ScheduleOpts {
+  taskInstance: TaskInstanceWithDeprecatedFields;
+  options?: Record<string, unknown>;
+}
+
 export class TaskScheduling {
   private store: TaskStore;
   private taskPollingLifecycle: TaskPollingLifecycle;
@@ -108,10 +113,8 @@ export class TaskScheduling {
    * @param task - The task being scheduled.
    * @returns {Promise<ConcreteTaskInstance>}
    */
-  public async schedule(
-    taskInstance: TaskInstanceWithDeprecatedFields,
-    options?: Record<string, unknown>
-  ): Promise<ConcreteTaskInstance> {
+  public async schedule(taskToSchedule: ScheduleOpts): Promise<ConcreteTaskInstance> {
+    const { taskInstance, options } = taskToSchedule;
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
@@ -126,6 +129,23 @@ export class TaskScheduling {
       ...modifiedTask,
       traceparent: traceparent || '',
     });
+  }
+
+  public async bulkSchedule(tasksToSchedule: ScheduleOpts[]): Promise<ConcreteTaskInstance[]> {
+    const bulkScheduleItems = await Promise.all(
+      tasksToSchedule.map(async (taskToSchedule) => {
+        const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
+          ...taskToSchedule.options,
+          taskInstance: ensureDeprecatedFieldsAreCorrected(
+            taskToSchedule.taskInstance,
+            this.logger
+          ),
+        });
+        return modifiedTask;
+      })
+    );
+
+    return await this.store.bulkSchedule(bulkScheduleItems);
   }
 
   /**
@@ -287,7 +307,7 @@ export class TaskScheduling {
     options?: Record<string, unknown>
   ): Promise<TaskInstanceWithId> {
     try {
-      return await this.schedule(taskInstance, options);
+      return await this.schedule({ taskInstance, options });
     } catch (err) {
       if (err.statusCode === VERSION_CONFLICT_STATUS) {
         return taskInstance;

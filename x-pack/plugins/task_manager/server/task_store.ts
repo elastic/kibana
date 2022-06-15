@@ -20,6 +20,7 @@ import {
   ISavedObjectsRepository,
   SavedObjectsUpdateResponse,
   ElasticsearchClient,
+  SavedObjectsBulkResponse,
 } from '@kbn/core/server';
 
 import { asOk, asErr, Result } from './lib/result_type';
@@ -144,6 +145,39 @@ export class TaskStore {
     }
 
     return savedObjectToConcreteTaskInstance(savedObject);
+  }
+
+  public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
+    const taskTypes = [...new Set(taskInstances.map((task) => task.taskType))];
+    for (const taskType of taskTypes) {
+      this.definitions.ensureHas(taskType);
+    }
+
+    let savedObjects: SavedObjectsBulkResponse<SerializedConcreteTaskInstance>;
+    try {
+      savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstance>(
+        taskInstances.map((task) => ({
+          id: task.id,
+          type: 'task',
+          attributes: taskInstanceToAttributes(task),
+        })),
+        { refresh: false }
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
+    for (const obj of savedObjects.saved_objects) {
+      // look for errors in the response
+      if (obj.error) {
+        const err = new Error(obj.error.message);
+        this.errors$.next(err);
+        throw err;
+      }
+    }
+
+    return savedObjects.saved_objects.map((obj) => savedObjectToConcreteTaskInstance(obj));
   }
 
   /**

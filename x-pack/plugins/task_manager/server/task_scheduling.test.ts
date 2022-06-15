@@ -74,7 +74,7 @@ describe('TaskScheduling', () => {
       params: {},
       state: {},
     };
-    await taskScheduling.schedule(task);
+    await taskScheduling.schedule({ taskInstance: task });
     expect(mockTaskStore.schedule).toHaveBeenCalled();
     expect(mockTaskStore.schedule).toHaveBeenCalledWith({
       ...task,
@@ -98,6 +98,27 @@ describe('TaskScheduling', () => {
     });
 
     expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('allows bulk scheduling tasks', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const tasks = [
+      {
+        taskType: 'foo',
+        params: {},
+        state: {},
+      },
+      {
+        taskType: 'bar',
+        params: {},
+        state: {},
+      },
+    ];
+    await taskScheduling.bulkSchedule(tasks.map((task) => ({ taskInstance: task })));
+    expect(mockTaskStore.bulkSchedule).toHaveBeenCalled();
+    expect(mockTaskStore.bulkSchedule).toHaveBeenCalledWith(
+      tasks.map((task) => ({ ...task, id: undefined, schedule: undefined }))
+    );
   });
 
   test('doesnt ignore failure to scheduling existing tasks for reasons other than already being scheduled', async () => {
@@ -126,10 +147,12 @@ describe('TaskScheduling', () => {
 
     return expect(
       taskScheduling.schedule({
-        id: 'my-foo-id',
-        taskType: 'foo',
-        params: {},
-        state: {},
+        taskInstance: {
+          id: 'my-foo-id',
+          taskType: 'foo',
+          params: {},
+          state: {},
+        },
       })
     ).rejects.toMatchObject({
       statusCode: 409,
