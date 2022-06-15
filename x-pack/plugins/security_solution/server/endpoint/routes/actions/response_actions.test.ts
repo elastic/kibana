@@ -35,7 +35,7 @@ import { parseExperimentalConfigValue } from '../../../../common/experimental_fe
 import { LicenseService } from '../../../../common/license';
 import {
   ISOLATE_HOST_ROUTE_V2,
-  RELEASE_HOST_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
   metadataTransformPrefix,
   ENDPOINT_ACTIONS_INDEX,
   KILL_PROCESS_ROUTE,
@@ -228,6 +228,7 @@ describe('Response actions', () => {
       expect(mockResponse.custom).toBeCalled();
       const response = mockResponse.custom.mock.calls[0][0];
       expect(response.statusCode).toEqual(308);
+      expect(response.headers?.location).toEqual(ISOLATE_HOST_ROUTE_V2);
     });
 
     it('correctly redirects legacy release to new route', async () => {
@@ -235,6 +236,7 @@ describe('Response actions', () => {
       expect(mockResponse.custom).toBeCalled();
       const response = mockResponse.custom.mock.calls[0][0];
       expect(response.statusCode).toEqual(308);
+      expect(response.headers?.location).toEqual(UNISOLATE_HOST_ROUTE_V2);
     });
 
     it('succeeds when an endpoint ID is provided', async () => {
@@ -366,7 +368,7 @@ describe('Response actions', () => {
     });
 
     it('sends the unisolate command payload from the unisolate route', async () => {
-      const ctx = await callRoute(RELEASE_HOST_ROUTE, {
+      const ctx = await callRoute(UNISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
       });
       const actionDoc: EndpointAction = (
@@ -412,7 +414,7 @@ describe('Response actions', () => {
     describe('With endpoint data streams', () => {
       it('handles unisolation', async () => {
         const ctx = await callRoute(
-          RELEASE_HOST_ROUTE,
+          UNISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
           },
@@ -553,7 +555,7 @@ describe('Response actions', () => {
       it('handles errors', async () => {
         const ErrMessage = 'Uh oh!';
         await callRoute(
-          RELEASE_HOST_ROUTE,
+          UNISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
             idxResponse: {
@@ -594,7 +596,7 @@ describe('Response actions', () => {
 
       it('allows any license level to unisolate', async () => {
         licenseEmitter.next(Gold);
-        await callRoute(RELEASE_HOST_ROUTE, {
+        await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           license: Gold,
         });
@@ -611,7 +613,7 @@ describe('Response actions', () => {
       });
 
       it('allows user to perform unisolation when canUnIsolateHost is true', async () => {
-        await callRoute(RELEASE_HOST_ROUTE, {
+        await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
         });
         expect(mockResponse.ok).toBeCalled();
@@ -626,7 +628,7 @@ describe('Response actions', () => {
       });
 
       it('prohibits user from performing un-isolation if canUnIsolateHost is false', async () => {
-        await callRoute(RELEASE_HOST_ROUTE, {
+        await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canUnIsolateHost: false },
         });

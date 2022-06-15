@@ -22,7 +22,7 @@ import {
 import { APP_ID } from '../../../../common/constants';
 import {
   ISOLATE_HOST_ROUTE_V2,
-  RELEASE_HOST_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
   ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTION_RESPONSES_DS,
   failedFleetActionErrorCode,
@@ -79,7 +79,11 @@ export function registerResponseActionRoutes(
       validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    withEndpointAuthz({ all: ['canUnIsolateHost'] }, logger, redirectHandler(RELEASE_HOST_ROUTE))
+    withEndpointAuthz(
+      { all: ['canUnIsolateHost'] },
+      logger,
+      redirectHandler(UNISOLATE_HOST_ROUTE_V2)
+    )
   );
 
   router.post(
@@ -97,7 +101,7 @@ export function registerResponseActionRoutes(
 
   router.post(
     {
-      path: RELEASE_HOST_ROUTE,
+      path: UNISOLATE_HOST_ROUTE_V2,
       validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
