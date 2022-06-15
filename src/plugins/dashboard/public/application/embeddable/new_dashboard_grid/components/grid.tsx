@@ -13,17 +13,23 @@ import {
   GridStackWidget,
   GridStackNode,
   GridStackEventHandlerCallback,
+  GridStackPosition,
 } from 'gridstack';
 import 'gridstack/dist/h5/gridstack-dd-native';
 import { EuiButton } from '@elastic/eui';
 
-const CELL_HEIGHT = '70px';
+const CELL_HEIGHT = 28;
 const GRID_CLASS = 'dshGrid';
 const HANDLE_CLASS = 'dshPanel__wrapper';
 const PANEL_CLASS = 'dshPanel';
+const NUM_COLUMNS = 48;
+const DEFAULT_PANEL_WIDTH = 24;
+const DEFAULT_PANEL_HEIGHT = 15;
+const DEFAULT_GROUP_HEIGHT = 15;
 
 interface Props {
   test: number;
+  gridData?: Array<GridStackPosition & { id: string; content: string }>;
 }
 
 interface State {
@@ -32,12 +38,10 @@ interface State {
   items: GridStackNode[];
 }
 
-const NUM_COLUMNS = 48;
-
 const SHARED_GRID_PARMS = {
   margin: 5, // 5 pixels around each panel - so 10 pixels **between** two panels
   column: NUM_COLUMNS,
-  cellHeight: CELL_HEIGHT,
+  cellHeight: `${CELL_HEIGHT}px`,
   float: false,
   acceptWidgets: true,
   handleClass: HANDLE_CLASS,
@@ -66,6 +70,10 @@ export class Grid extends React.Component<Props, State> {
       class: GRID_CLASS,
     });
 
+    if (this.props.gridData) {
+      this.grid.load(this.props.gridData, true);
+    }
+
     this.grid.on('drag', (event, element) => {
       console.log('grid drag stop');
       const node = (element as GridItemHTMLElement)?.gridstackNode;
@@ -83,10 +91,8 @@ export class Grid extends React.Component<Props, State> {
   addNewWidget = () => {
     const id = String(this.state.count);
     const node: GridStackNode = {
-      x: Math.round(NUM_COLUMNS * Math.random()),
-      y: 1,
-      w: Math.round(1 + 3 * Math.random()),
-      h: Math.round(1 + 3 * Math.random()),
+      w: DEFAULT_PANEL_WIDTH,
+      h: DEFAULT_PANEL_HEIGHT,
       id,
       content: id,
       resizeHandles: 'se',
@@ -106,13 +112,13 @@ export class Grid extends React.Component<Props, State> {
       id,
       autoPosition: true,
       w: NUM_COLUMNS,
-      h: 4,
+      h: DEFAULT_GROUP_HEIGHT,
       // noResize: true,
       noResize: true,
-      content: `<h1 style="height:50px;width:100%">title</h1>`,
+      content: `<h1 style="height:${CELL_HEIGHT}px;width:100%">title</h1>`,
       subGrid: {
         ...SHARED_GRID_PARMS,
-        minRow: 4,
+        minRow: DEFAULT_GROUP_HEIGHT,
         acceptWidgets: true,
         class: 'nested1',
         children: [],
@@ -121,7 +127,7 @@ export class Grid extends React.Component<Props, State> {
 
     const subGrid = newGroup?.gridstackNode?.subGrid as GridStack;
 
-    const updateHeight = (element: GridStackWidget) => {
+    const updateHeight = () => {
       if (newGroup?.gridstackNode) {
         this.grid?.update(newGroup, { h: subGrid.getRow() + 1 });
       }
@@ -130,11 +136,7 @@ export class Grid extends React.Component<Props, State> {
     const resizeWrapper: GridStackEventHandlerCallback = (event, el) => {
       if (el) {
         if (newGroup?.gridstackNode?.subGrid) {
-          if (Array.isArray(el)) {
-            // TODO: grab max height
-          } else {
-            updateHeight(el);
-          }
+          updateHeight();
         }
       }
     };
