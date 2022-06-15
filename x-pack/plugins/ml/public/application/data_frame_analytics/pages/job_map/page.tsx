@@ -27,16 +27,15 @@ import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_p
 
 export const Page: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
-  const mapJobId = globalState?.ml?.jobId;
-  const mapModelId = globalState?.ml?.modelId;
+  const jobId = globalState?.ml?.jobId;
+  const modelId = globalState?.ml?.modelId;
 
   const [isLoading, setIsLoading] = useState(false);
   const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(
-    !mapJobId && !mapModelId
+    !jobId && !modelId
   );
   const [jobsExist, setJobsExist] = useState(true);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
-  // const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds>();
 
   const setAnalyticsId = useCallback(
     (analyticsId: AnalyticsSelectorIds) => {
@@ -94,9 +93,6 @@ export const Page: FC = () => {
     );
   };
 
-  const jobId = mapJobId;
-  const modelId = mapModelId;
-
   return (
     <>
       <AnalyticsIdSelectorControls
@@ -118,7 +114,7 @@ export const Page: FC = () => {
           />
         </MlPageHeader>
       ) : null}
-      {jobId !== undefined && mapModelId === undefined ? (
+      {jobId !== undefined && modelId === undefined ? (
         <MlPageHeader>
           <FormattedMessage
             data-test-subj="mlPageDataFrameAnalyticsMapTitle"
@@ -145,7 +141,12 @@ export const Page: FC = () => {
       <UpgradeWarning />
 
       {jobId || modelId ? (
-        <JobMap analyticsId={jobId} modelId={modelId} forceRefresh={isLoading} />
+        <JobMap
+          key={`${jobId ?? modelId}-id`}
+          analyticsId={jobId}
+          modelId={modelId}
+          forceRefresh={isLoading}
+        />
       ) : (
         getEmptyState()
       )}
