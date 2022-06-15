@@ -5,174 +5,48 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import moment from 'moment';
-import { RuleSnooze } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
-  useGeneratedHtmlId,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiConfirmModal,
   EuiFieldNumber,
-  EuiSelect,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiHorizontalRule,
-  EuiTitle,
-  EuiFlexGrid,
-  EuiSpacer,
-  EuiLink,
-  EuiText,
-  EuiButtonEmpty,
   EuiIcon,
-  EuiConfirmModal,
+  EuiLink,
   EuiPopoverTitle,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { parseInterval } from '../../../../../../common';
-import type { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
-import { RuleSnoozeScheduler } from './scheduler';
-import { recurrenceSummary } from './recurrence_scheduler/helpers';
+import { RuleSnooze } from '@kbn/alerting-plugin/common';
+import moment from 'moment';
+import React, { useState, useCallback, useMemo } from 'react';
+import { parseInterval } from '../../../../../../../common';
 
-/*
- * TODO
- * 1 -Make sure user who does not have access to the rule can not create a schedule
- *
- */
+import { SnoozeSchedule } from '../../../../../../types';
+import { COMMON_SNOOZE_TIMES, SnoozeUnit } from './constants';
+import { durationToTextString, scheduleSummary, usePreviousSnoozeInterval } from './helpers';
+import { DAYS, HOURS, MINUTES, MONTHS, WEEKS } from './translations';
 
-export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
-const COMMON_SNOOZE_TIMES: Array<[number, SnoozeUnit]> = [
-  [1, 'h'],
-  [3, 'h'],
-  [8, 'h'],
-  [1, 'd'],
-];
-
-interface SnoozePanelProps {
+export interface BaseSnoozePanelProps {
   interval?: string;
   snoozeRule: (schedule: SnoozeSchedule) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
   showCancel: boolean;
   scheduledSnoozes: RuleSnooze;
   hasTitle?: boolean;
-}
-
-interface BaseSnoozePanelProps extends SnoozePanelProps {
   navigateToScheduler: (sched?: SnoozeSchedule) => void;
   isLoading: boolean;
   onRemoveAllSchedules: (ids: string[]) => void;
 }
 
-export const SnoozePanel: React.FC<SnoozePanelProps> = ({
-  interval,
-  snoozeRule,
-  unsnoozeRule,
-  showCancel,
-  scheduledSnoozes,
-  hasTitle = true,
-}) => {
-  const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
-  const [initialSchedule, setInitialSchedule] = useState<SnoozeSchedule | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const onSnoozeRule = useCallback(
-    async (schedule: SnoozeSchedule) => {
-      setIsLoading(true);
-      try {
-        await snoozeRule(schedule);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [setIsLoading, snoozeRule]
-  );
-
-  const onUnsnoozeRule = useCallback(
-    async (scheduleIds?: string[]) => {
-      setIsLoading(true);
-      try {
-        await unsnoozeRule(scheduleIds);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [setIsLoading, unsnoozeRule]
-  );
-
-  const saveSnoozeSchedule = useCallback(
-    async (schedule: SnoozeSchedule) => {
-      setIsLoading(true);
-      try {
-        await snoozeRule(schedule);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [snoozeRule, setIsLoading]
-  );
-
-  const cancelSnoozeSchedules = useCallback(
-    async (scheduleIds: string[]) => {
-      setIsLoading(true);
-      try {
-        await unsnoozeRule(scheduleIds);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [unsnoozeRule, setIsLoading]
-  );
-
-  const onOpenScheduler = useCallback(
-    (schedule?: SnoozeSchedule) => {
-      setInitialSchedule(schedule ?? null);
-      setIsSchedulerOpen(true);
-    },
-    [setInitialSchedule, setIsSchedulerOpen]
-  );
-
-  const onCloseScheduler = useCallback(() => setIsSchedulerOpen(false), [setIsSchedulerOpen]);
-
-  return !isSchedulerOpen ? (
-    <BaseSnoozePanel
-      isLoading={isLoading}
-      snoozeRule={onSnoozeRule}
-      unsnoozeRule={onUnsnoozeRule}
-      interval={interval}
-      showCancel={showCancel}
-      scheduledSnoozes={scheduledSnoozes}
-      navigateToScheduler={onOpenScheduler}
-      onRemoveAllSchedules={cancelSnoozeSchedules}
-      hasTitle={hasTitle}
-    />
-  ) : (
-    <RuleSnoozeScheduler
-      isLoading={isLoading}
-      initialSchedule={initialSchedule}
-      onClose={onCloseScheduler}
-      onSaveSchedule={saveSnoozeSchedule}
-      onCancelSchedules={cancelSnoozeSchedules}
-      hasTitle={hasTitle}
-    />
-  );
-};
-
-const PREV_SNOOZE_INTERVAL_KEY = 'triggersActionsUi_previousSnoozeInterval';
-export const usePreviousSnoozeInterval: (
-  p?: string | null
-) => [string | null, (n: string) => void] = (propsInterval) => {
-  const intervalFromStorage = localStorage.getItem(PREV_SNOOZE_INTERVAL_KEY);
-  const usePropsInterval = typeof propsInterval !== 'undefined';
-  const interval = usePropsInterval ? propsInterval : intervalFromStorage;
-  const [previousSnoozeInterval, setPreviousSnoozeInterval] = useState<string | null>(interval);
-  const storeAndSetPreviousSnoozeInterval = (newInterval: string) => {
-    if (!usePropsInterval) {
-      localStorage.setItem(PREV_SNOOZE_INTERVAL_KEY, newInterval);
-    }
-    setPreviousSnoozeInterval(newInterval);
-  };
-  return [previousSnoozeInterval, storeAndSetPreviousSnoozeInterval];
-};
-
-const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
+export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   isLoading,
   interval = '3d',
   snoozeRule,
@@ -523,91 +397,3 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
     </>
   );
 };
-
-export const futureTimeToInterval = (time?: Date | null) => {
-  if (!time) return;
-  const relativeTime = moment(time).locale('en').fromNow(true);
-  const [valueStr, unitStr] = relativeTime.split(' ');
-  let value = valueStr === 'a' || valueStr === 'an' ? 1 : parseInt(valueStr, 10);
-  let unit;
-  switch (unitStr) {
-    case 'year':
-    case 'years':
-      unit = 'M';
-      value = value * 12;
-      break;
-    case 'month':
-    case 'months':
-      unit = 'M';
-      break;
-    case 'day':
-    case 'days':
-      unit = 'd';
-      break;
-    case 'hour':
-    case 'hours':
-      unit = 'h';
-      break;
-    case 'minute':
-    case 'minutes':
-      unit = 'm';
-      break;
-  }
-
-  if (!unit) return;
-  return `${value}${unit}`;
-};
-
-const durationToTextString = (value: number, unit: SnoozeUnit) => {
-  // Moment.humanize will parse "1" as "a" or "an", e.g "an hour"
-  // Override this to output "1 hour"
-  if (value === 1) {
-    return ONE[unit];
-  }
-  return moment.duration(value, unit).humanize();
-};
-
-const scheduleSummary = (schedule: SnoozeSchedule) => {
-  if (schedule.rRule.freq == null) return moment(schedule.rRule.dtstart).format('LLLL');
-  const summary = recurrenceSummary(schedule.rRule as RecurrenceSchedule);
-  // Capitalize first letter of summary
-  return summary[0].toLocaleUpperCase() + summary.slice(1);
-};
-
-const MINUTES = i18n.translate('xpack.triggersActionsUI.sections.rulesList.minutesLabel', {
-  defaultMessage: 'minutes',
-});
-const HOURS = i18n.translate('xpack.triggersActionsUI.sections.rulesList.hoursLabel', {
-  defaultMessage: 'hours',
-});
-const DAYS = i18n.translate('xpack.triggersActionsUI.sections.rulesList.daysLabel', {
-  defaultMessage: 'days',
-});
-const WEEKS = i18n.translate('xpack.triggersActionsUI.sections.rulesList.weeksLabel', {
-  defaultMessage: 'weeks',
-});
-const MONTHS = i18n.translate('xpack.triggersActionsUI.sections.rulesList.monthsLabel', {
-  defaultMessage: 'months',
-});
-
-// i18n constants to override moment.humanize
-const ONE: Record<SnoozeUnit, string> = {
-  m: i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozeOneMinute', {
-    defaultMessage: '1 minute',
-  }),
-  h: i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozeOneHour', {
-    defaultMessage: '1 hour',
-  }),
-  d: i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozeOneDay', {
-    defaultMessage: '1 day',
-  }),
-  w: i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozeOneWeek', {
-    defaultMessage: '1 week',
-  }),
-  M: i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozeOneMonth', {
-    defaultMessage: '1 month',
-  }),
-};
-
-// eslint-disable-next-line import/no-default-export
-export { SnoozePanel as default };
