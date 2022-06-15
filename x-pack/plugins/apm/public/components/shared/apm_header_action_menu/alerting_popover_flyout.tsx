@@ -70,7 +70,7 @@ export function AlertingPopoverAndFlyout({
       {alertLabel}
     </EuiHeaderLink>
   );
-
+  const rulesLink = useRulesLink().href;
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
@@ -109,7 +109,7 @@ export function AlertingPopoverAndFlyout({
                   'xpack.apm.home.alertsMenu.viewActiveAlerts',
                   { defaultMessage: 'Manage rules' }
                 ),
-                href: useRulesLink().href,
+                href: rulesLink,
                 icon: 'tableOfContents',
               },
             ]
