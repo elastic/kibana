@@ -14,6 +14,9 @@ import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
 import { AggregateResult } from '../../../common/types/aggregate';
 import { useFetchPercentWidgetData } from './hooks';
 
+export const LOADING_TEST_ID = 'kubernetesSecurity:percent-widget-loading';
+export const PERCENT_DATA_TEST_ID = 'kubernetesSecurity:percentage-widget-data';
+
 export interface PercenWidgetDataValueMap {
   name: string;
   fieldName: string;
@@ -111,7 +114,14 @@ export const PercentWidget = ({
 
   return (
     <div css={styles.container}>
-      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+      {isLoading && (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          position="absolute"
+          data-test-subj={LOADING_TEST_ID}
+        />
+      )}
       <div css={styles.title}>{title}</div>
       <EuiFlexGroup direction="column" gutterSize="m">
         {Object.keys(dataValueMap).map((groupedByValue, idx) => {
@@ -121,6 +131,7 @@ export const PercentWidget = ({
               key={`percentage-widget--${dataValueMap[groupedByValue].name}`}
               onMouseEnter={() => setHoveredFilter(idx)}
               onMouseLeave={() => setHoveredFilter(null)}
+              data-test-subj={PERCENT_DATA_TEST_ID}
             >
               <EuiText size="xs" css={styles.dataInfo}>
                 {dataValueMap[groupedByValue].name}
