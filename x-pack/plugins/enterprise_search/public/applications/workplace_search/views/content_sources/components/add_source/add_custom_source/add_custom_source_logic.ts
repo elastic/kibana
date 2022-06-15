@@ -7,10 +7,10 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors, clearFlashMessages } from '../../../../../../shared/flash_messages';
-import { HttpLogic } from '../../../../../../shared/http';
-import { AppLogic } from '../../../../../app_logic';
+import { ApiStatus } from '../../../../../../../../common/types/api';
 import { CustomSource } from '../../../../../types';
+
+import { AddCustomSourceApiLogic } from './add_custom_source_api.logic';
 
 export interface AddCustomSourceProps {
   baseServiceType?: string;
@@ -23,8 +23,8 @@ export enum AddCustomSourceSteps {
 }
 
 export interface AddCustomSourceActions {
+  addSource(name: string, baseServiceType?: string): { name: string; baseServiceType: string };
   createContentSource(): void;
-  setButtonNotLoading(): void;
   setCustomSourceNameValue(customSourceNameValue: string): string;
   setNewCustomSource(data: CustomSource): CustomSource;
 }
@@ -34,6 +34,7 @@ interface AddCustomSourceValues {
   currentStep: AddCustomSourceSteps;
   customSourceNameValue: string;
   newCustomSource: CustomSource;
+  sourceApi: ApiStatus<CustomSource>;
 }
 
 /**
@@ -44,10 +45,13 @@ interface AddCustomSourceValues {
 export const AddCustomSourceLogic = kea<
   MakeLogicType<AddCustomSourceValues, AddCustomSourceActions, AddCustomSourceProps>
 >({
+  connect: {
+    actions: [AddCustomSourceApiLogic, ['addSource', 'addSourceSuccess', 'addSourceError']],
+    values: [AddCustomSourceApiLogic, ['sourceApi']],
+  },
   path: ['enterprise_search', 'workplace_search', 'add_custom_source_logic'],
   actions: {
     createContentSource: true,
-    setButtonNotLoading: true,
     setCustomSourceNameValue: (customSourceNameValue) => customSourceNameValue,
     setNewCustomSource: (data) => data,
   },
@@ -55,8 +59,9 @@ export const AddCustomSourceLogic = kea<
     buttonLoading: [
       false,
       {
-        setButtonNotLoading: () => false,
         createContentSource: () => true,
+        addSourceSuccess: () => false,
+        addSourceError: () => false,
       },
     ],
     currentStep: [
@@ -79,31 +84,19 @@ export const AddCustomSourceLogic = kea<
     ],
   }),
   listeners: ({ actions, values, props }) => ({
-    createContentSource: async () => {
-      clearFlashMessages();
-      const { isOrganization } = AppLogic.values;
-      const route = isOrganization
-        ? '/internal/workplace_search/org/create_source'
-        : '/internal/workplace_search/account/create_source';
-
+    createContentSource: () => {
       const { customSourceNameValue } = values;
-
-      const params = {
-        service_type: 'custom',
-        name: customSourceNameValue,
-        base_service_type: props.baseServiceType,
-      };
-
-      try {
-        const response = await HttpLogic.values.http.post<CustomSource>(route, {
-          body: JSON.stringify(params),
-        });
-        actions.setNewCustomSource(response);
-      } catch (e) {
-        flashAPIErrors(e);
-      } finally {
-        actions.setButtonNotLoading();
-      }
+      const { baseServiceType } = props;
+      actions.addSource(customSourceNameValue, baseServiceType);
+    },
+    addSourceSuccess: (customSource: CustomSource) => {
+      actions.setNewCustomSource(customSource);
     },
   }),
+  selectors: {
+    buttonLoading: [
+      (selectors) => [selectors.sourceApi],
+      (apiStatus) => apiStatus?.status === 'PENDING',
+    ],
+  },
 });
