@@ -11,8 +11,8 @@ import { AddFromLibraryButton as Component } from './add_from_library';
 import mdx from '../../../README.mdx';
 
 export default {
-  title: 'Solution Toolbar/Buttons',
-  description: 'An implementation of the solution toolbar primary button',
+  title: 'Button Toolbar/Buttons',
+  description: 'An implementation of the toolbar primary button',
   parameters: {
     docs: {
       page: mdx,

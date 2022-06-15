@@ -24,7 +24,7 @@ const argTypes = {
 type Params = Record<keyof typeof argTypes, any>;
 
 export default {
-  title: 'Solution Toolbar/Buttons',
+  title: 'Button Toolbar/Buttons',
   description: 'A primary button that is a part of a toolbar.',
   parameters: {
     docs: {

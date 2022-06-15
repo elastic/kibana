@@ -12,8 +12,8 @@ import { IconButtonGroup as Component } from './icon_button_group';
 import mdx from '../../../README.mdx';
 
 export default {
-  title: 'Solution Toolbar/Buttons',
-  description: 'A collection of buttons that is a part of a toolbar.',
+  title: 'Button Toolbar/Buttons',
+  description: 'A collection of icon buttons that is a part of a toolbar.',
   parameters: {
     docs: {
       page: mdx,

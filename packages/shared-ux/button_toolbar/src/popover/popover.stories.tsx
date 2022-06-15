@@ -25,7 +25,7 @@ const argTypes = {
 type Params = Record<keyof typeof argTypes, any>;
 
 export default {
-  title: 'Solution Toolbar',
+  title: 'Button Toolbar',
   description: 'A popover that is a part of a toolbar.',
   parameters: {
     docs: {
@@ -37,7 +37,7 @@ export default {
 
 export const Popover = ({ iconSide }: Params) => {
   return (
-    <Component label="Add element" iconType="plusInCircle" iconSide={iconSide}>
+    <Component label="Add element" iconType={iconSide === 'right' ? 'arrowDown' : 'plusInCircle'}  iconSide={iconSide} panelPaddingSize="none">
       {() => (
         <EuiContextMenu
           initialPanelId={0}
