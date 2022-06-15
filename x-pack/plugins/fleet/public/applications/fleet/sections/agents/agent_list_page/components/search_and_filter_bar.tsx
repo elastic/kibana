@@ -87,7 +87,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
-  refreshAgents: () => void;
+  refreshAgents: (args?: { refreshTags?: boolean }) => void;
   onClickAddAgent: () => void;
 }> = ({
   agentPolicies,
