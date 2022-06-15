@@ -95,9 +95,8 @@ export class Grid extends React.Component<Props, State> {
       count: prevState.count + 1,
       items: [...prevState.items, node],
     }));
-    const newWidget = this.grid?.addWidget(node);
 
-    console.log({ newWidget });
+    const newWidget = this.grid?.addWidget(node);
   };
 
   addNewGrid = () => {
@@ -124,7 +123,6 @@ export class Grid extends React.Component<Props, State> {
 
     const subGrid = newGroup?.gridstackNode?.subGrid as GridStack;
 
-    console.log({ newGroup });
     const updateHeight = (element: GridStackWidget) => {
       if (newGroup?.gridstackNode) {
         this.grid?.update(newGroup, { h: subGrid.getRow() + 1 });
