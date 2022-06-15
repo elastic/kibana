@@ -169,7 +169,7 @@ const NetworkDetailsComponent: React.FC = () => {
               endDate={to}
               narrowDateRange={narrowDateRange}
               docValueFields={docValueFields}
-              indexPatterns={indexPattern}
+              indexPatterns={selectedPatterns}
             />
 
             <EuiHorizontalRule />

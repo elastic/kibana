@@ -56,7 +56,7 @@ export const ExpandableUserDetails = ({
   isDraggable,
 }: ExpandableUserProps & { contextID: string; isDraggable?: boolean }) => {
   const { to, from, isInitializing } = useGlobalTime();
-  const { docValueFields, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { docValueFields, selectedPatterns } = useSourcererDataView();
 
   const [loading, { userDetails }] = useUserDetails({
     endDate: to,
@@ -95,7 +95,7 @@ export const ExpandableUserDetails = ({
             });
           }}
           docValueFields={docValueFields}
-          indexPatterns={indexPattern}
+          indexPatterns={selectedPatterns}
         />
       )}
     </AnomalyTableProvider>

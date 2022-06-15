@@ -141,7 +141,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           description: (
             <FirstLastSeen
               docValueFields={docValueFields}
-              indexNames={indexNames}
+              indexPatterns={indexNames}
               field={'host.name'}
               value={hostName}
               type={FirstLastSeenType.FIRST_SEEN}
@@ -153,7 +153,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           description: (
             <FirstLastSeen
               docValueFields={docValueFields}
-              indexNames={indexNames}
+              indexPatterns={indexNames}
               field={'host.name'}
               value={hostName}
               type={FirstLastSeenType.LAST_SEEN}

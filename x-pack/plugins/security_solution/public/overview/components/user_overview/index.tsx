@@ -50,7 +50,7 @@ export interface UserSummaryProps {
   endDate: string;
   narrowDateRange: NarrowDateRange;
   userName: string;
-  docValueFields: DocValueFields;
+  docValueFields: DocValueFields[];
   indexPatterns: string[];
 }
 

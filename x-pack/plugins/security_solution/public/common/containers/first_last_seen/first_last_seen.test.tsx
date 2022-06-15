@@ -10,15 +10,10 @@ import { renderHook } from '@testing-library/react-hooks';
 import { Direction } from '../../../../common/search_strategy';
 import { FirstLastSeenProps } from '../../components/first_last_seen';
 import { useKibana } from '../../lib/kibana';
-import { useSourcererDataView } from '../sourcerer';
 import { useFirstLastSeen } from '.';
 
 jest.mock('../../lib/kibana');
-jest.mock('../sourcerer');
 
-(useSourcererDataView as jest.Mock).mockReturnValue({
-  indicesExist: false,
-});
 const mockSearchStrategy = jest.fn();
 
 (useKibana as jest.Mock).mockReturnValue({

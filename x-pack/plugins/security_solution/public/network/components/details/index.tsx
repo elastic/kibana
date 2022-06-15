@@ -12,6 +12,7 @@ import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import {
+  DocValueFields,
   FlowTargetSourceDest,
   NetworkDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
@@ -52,7 +53,7 @@ export interface IpOverviewProps {
   narrowDateRange: NarrowDateRange;
   startDate: string;
   type: networkModel.NetworkType;
-  docValueFields: DocValueFields;
+  docValueFields: DocValueFields[];
   indexPatterns: string[];
 }
 

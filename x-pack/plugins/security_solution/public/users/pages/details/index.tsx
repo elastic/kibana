@@ -166,7 +166,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                     });
                   }}
                   docValueFields={docValueFields}
-                  indexPatterns={indexPattern}
+                  indexPatterns={selectedPatterns}
                 />
               )}
             </AnomalyTableProvider>

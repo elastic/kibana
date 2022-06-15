@@ -20,7 +20,7 @@ export enum FirstLastSeenType {
 }
 
 export interface FirstLastSeenProps {
-  indexNames: string[];
+  indexPatterns: string[];
   docValueFields: DocValueFields[];
   field: string;
   type: FirstLastSeenType;
@@ -28,12 +28,12 @@ export interface FirstLastSeenProps {
 }
 
 export const FirstLastSeen = React.memo<FirstLastSeenProps>(
-  ({ indexNames, docValueFields, field, type, value }) => {
+  ({ indexPatterns, docValueFields, field, type, value }) => {
     const [loading, { firstSeen, lastSeen, errorMessage }] = useFirstLastSeen({
       field,
       value,
       order: type === FirstLastSeenType.FIRST_SEEN ? Direction.asc : Direction.desc,
-      defaultIndex: indexNames,
+      defaultIndex: indexPatterns,
       docValueFields,
     });
     const valueSeen = useMemo(
