@@ -15,4 +15,6 @@ export type {
   ContentStreamArgs,
   ContentStreamEncoding,
   ContentStreamParameters,
+  ReadableContentStream,
+  WritableContentStream,
 } from './content_stream';

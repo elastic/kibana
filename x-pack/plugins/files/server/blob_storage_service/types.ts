@@ -5,7 +5,21 @@
  * 2.0.
  */
 
+import type { JsonValue } from '@kbn/utility-types';
 import type { Readable } from 'stream';
+
+export type BlobAttribute = [key: string, value: JsonValue];
+
+/**
+ * An array of {@link BlobAttribute}.
+ *
+ * @note Each key value must be unique.
+ */
+export type BlobAttributes = BlobAttribute[];
+
+export interface BlobAttributesResponse {
+  [key: string]: JsonValue;
+}
 
 /**
  * An interface that must be implemented by any blob storage adapter.
@@ -26,7 +40,7 @@ export interface BlobStorage {
    * Generates a random file ID and returns it upon successfully uploading a
    * file. The file size can be used when downloading the file later.
    */
-  upload(content: Readable): Promise<{ id: string; size: number }>;
+  upload(content: Readable, attrs?: BlobAttributes): Promise<{ id: string; size: number }>;
 
   /**
    * Download a file.
@@ -35,6 +49,11 @@ export interface BlobStorage {
    * stream.
    */
   download(args: { id: string; size?: number }): Promise<Readable>;
+
+  /**
+   * Get attributes of a blob.
+   */
+  getAttributes(id: string): Promise<BlobAttributesResponse>;
 
   /**
    * Delete a file given a unique ID.
