@@ -5,9 +5,19 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiButtonGroup, EuiPanel, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiTreeView,
+  EuiToken,
+  EuiButtonGroup,
+  EuiPanel,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { useStyles } from './styles';
 
 export const TreeNav = () => {
+  const styles = useStyles();
+
   const treeNavTypePrefix = useGeneratedHtmlId({
     prefix: 'treeNavType',
   });
@@ -25,6 +35,65 @@ export const TreeNav = () => {
     },
   ];
 
+  const items = [
+    {
+      label: 'Item One',
+      id: 'item_one',
+      icon: <EuiIcon type="folderClosed" />,
+      iconWhenExpanded: <EuiIcon type="folderOpen" />,
+      isExpanded: true,
+      children: [
+        {
+          label: 'Item A',
+          id: 'item_a',
+          icon: <EuiIcon type="document" />,
+        },
+        {
+          label: 'Item B',
+          id: 'item_b',
+          icon: <EuiIcon type="arrowRight" />,
+          iconWhenExpanded: <EuiIcon type="arrowDown" />,
+          children: [
+            {
+              label: 'A Cloud',
+              id: 'item_cloud',
+              icon: <EuiToken iconType="tokenConstant" />,
+            },
+            {
+              label: "I'm a Bug",
+              id: 'item_bug',
+              icon: <EuiToken iconType="tokenEnum" />,
+              callback: () => {},
+            },
+          ],
+        },
+        {
+          label: 'Item C',
+          id: 'item_c',
+          icon: <EuiIcon type="arrowRight" />,
+          iconWhenExpanded: <EuiIcon type="arrowDown" />,
+          children: [
+            {
+              label: 'Another Cloud',
+              id: 'item_cloud2',
+              icon: <EuiToken iconType="tokenConstant" />,
+            },
+            {
+              label: 'This one is a really long string that we will check truncates correctly',
+              id: 'item_bug2',
+              icon: <EuiToken iconType="tokenEnum" />,
+              callback: () => {},
+            },
+          ],
+        },
+      ],
+    },
+    {
+      label: 'Item Two',
+      id: 'item_two',
+    },
+  ];
+
   return (
     <>
       <EuiPanel hasBorder>
@@ -37,7 +106,9 @@ export const TreeNav = () => {
           buttonSize="compressed"
           isFullWidth
           color="primary"
+          css={styles.treeViewSwitcher}
         />
+        <EuiTreeView items={items} aria-label="Sample Folder Tree" />
       </EuiPanel>
     </>
   );
