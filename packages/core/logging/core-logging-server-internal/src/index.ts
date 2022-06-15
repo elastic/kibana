@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { config } from './logging_config';
+export type { LoggingConfigType, loggerContextConfigSchema, loggerSchema } from './logging_config';
+export { LoggingSystem } from './logging_system';
+export type { ILoggingSystem } from './logging_system';
+export { LoggingService } from './logging_service';
+export type { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging_service';
+export { appendersSchema } from './appenders/appenders';
