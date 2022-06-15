@@ -43,7 +43,7 @@ export async function findMissingConfigFiles(groups: GroupedTestFiles) {
 
   return (
     await asyncMapWithLimit(expectedConfigs, 20, async (path) =>
-      (await isFile(path)) ? [path] : []
+      !(await isFile(path)) ? [path] : []
     )
   ).flat();
 }
