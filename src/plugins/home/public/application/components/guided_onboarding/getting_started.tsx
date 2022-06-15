@@ -54,8 +54,7 @@ export const GettingStarted = () => {
     application.navigateToApp('home');
   };
   return (
-    <KibanaPageTemplate template="empty">
-      <EuiPanel className="gettingStarted__panel">
+    <KibanaPageTemplate template="centeredBody">
         <EuiTitle size="l" className="eui-textCenter">
           <h1>
             <FormattedMessage
