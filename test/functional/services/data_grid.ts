@@ -117,16 +117,8 @@ export class DataGridService extends FtrService {
     return rows;
   }
 
-  public async getTable(selector: string = 'docTable', renderMoreRows?: boolean) {
-    let table: WebElementWrapper;
-    if (renderMoreRows) {
-      await this.testSubjects.click('dataGridFullScreenButton');
-      table = await this.testSubjects.find(selector);
-      await this.testSubjects.click('dataGridFullScreenButton');
-    } else {
-      table = await this.testSubjects.find(selector);
-    }
-    return table;
+  public async getTable(selector: string = 'docTable') {
+    return await this.testSubjects.find(selector);
   }
 
   public async getBodyRows(options?: SelectOptions): Promise<WebElementWrapper[][]> {
@@ -134,12 +126,22 @@ export class DataGridService extends FtrService {
   }
 
   public async getRowsText(renderMoreRows?: boolean) {
-    const table = await this.getTable('docTable', true);
+    // open full screen mode
+    if (renderMoreRows) {
+      await this.testSubjects.click('dataGridFullScreenButton');
+    }
+
+    const table = await this.getTable('docTable');
     const rows = await table.findAllByCssSelector('.euiDataGridRow');
 
     const rowsText = [];
     for (const row of rows) {
       rowsText.push((await row.getVisibleText()).replace(/[\r\n]/gm, ''));
+    }
+
+    // close full screen mode
+    if (renderMoreRows) {
+      await this.testSubjects.click('dataGridFullScreenButton');
     }
     return rowsText;
   }
@@ -148,7 +150,12 @@ export class DataGridService extends FtrService {
    * Returns an array of rows (which are array of cells)
    */
   public async getDocTableRows(options?: SelectOptions) {
-    const table = await this.getTable('docTable', true);
+    // open full screen mode
+    if (options?.renderMoreRows) {
+      await this.testSubjects.click('dataGridFullScreenButton');
+    }
+
+    const table = await this.getTable('docTable');
 
     if (!table) {
       return [];
@@ -167,6 +174,11 @@ export class DataGridService extends FtrService {
         rows[rowIdx] = [];
       }
       rows[rowIdx].push(cell);
+    }
+
+    // close full screen mode
+    if (options?.renderMoreRows) {
+      await this.testSubjects.click('dataGridFullScreenButton');
     }
     return rows;
   }
