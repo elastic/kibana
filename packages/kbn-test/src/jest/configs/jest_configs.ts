@@ -53,7 +53,15 @@ export class JestConfigs {
 
         if (splitPath.length > 2) {
           const name = splitPath[1];
-          directories.add([root, name].join(path.sep));
+
+          // If name is `src`, then globby has led us one directory too deep.
+          // Just add the root instead.  A short-term fix until we can
+          // address https://github.com/elastic/kibana/issues/134413
+          if (name === 'src') {
+            directories.add(root);
+          } else {
+            directories.add([root, name].join(path.sep));
+          }
         }
       } else {
         throw new Error(
