@@ -9,11 +9,6 @@ import { Ast, AstFunction } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-<<<<<<< HEAD
-import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
-=======
-import type { YConfig, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
->>>>>>> upstream/main
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   State,
@@ -368,7 +363,7 @@ const yAxisConfigsToExpression = (
         arguments: {
           id: axis.id ? [axis.id] : [],
           position: axis.position ? [axis.position] : [],
-          extent: axis.extent ? [axisExtentConfigToExpression(axis.extent, validDataLayers)] : [],
+          extent: axis.extent ? [axisExtentConfigToExpression(axis.extent)] : [],
           showTitle: [axis.showTitle ?? true],
           title: axis.title !== undefined ? [axis.title] : [],
           showLabels: [axis.showLabels ?? true],

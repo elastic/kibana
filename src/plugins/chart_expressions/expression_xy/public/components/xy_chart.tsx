@@ -274,7 +274,7 @@ export function XYChart({
     minInterval,
     isTimeViz,
     isHistogramViz,
-    xAxisConfig.extent
+    xAxisConfig?.extent
   );
 
   const axisTitlesVisibilitySettings = {

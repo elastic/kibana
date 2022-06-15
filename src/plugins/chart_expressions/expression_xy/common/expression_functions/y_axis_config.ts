@@ -29,11 +29,6 @@ export const yAxisConfigFunction: YAxisConfigFn = {
       types: ['number'],
       help: strings.getAxisBoundsMarginHelp(),
     },
-    extent: {
-      types: [AXIS_EXTENT_CONFIG],
-      help: strings.getAxisExtentHelp(),
-      default: `{${AXIS_EXTENT_CONFIG}}`,
-    },
     scaleType: {
       options: [...Object.values(YScaleTypes)],
       help: strings.getAxisScaleTypeHelp(),

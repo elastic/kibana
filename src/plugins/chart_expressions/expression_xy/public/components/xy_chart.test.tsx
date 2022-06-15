@@ -519,11 +519,14 @@ describe('XYChart component', () => {
                   isHistogram: true,
                 },
               ],
-              xExtent: {
-                type: 'axisExtentConfig',
-                mode: 'custom',
-                lowerBound: 123,
-                upperBound: 456,
+              xAxisConfig: {
+                type: 'xAxisConfig',
+                extent: {
+                  type: 'axisExtentConfig',
+                  mode: 'custom',
+                  lowerBound: 123,
+                  upperBound: 456,
+                },
               },
             }}
           />
@@ -2455,7 +2458,7 @@ describe('XYChart component', () => {
         extent: {
           mode: 'dataBounds',
           type: 'axisExtentConfig',
-        }
+        },
       },
       markSizeRatio: 1,
       layers: [
@@ -2563,7 +2566,7 @@ describe('XYChart component', () => {
         extent: {
           mode: 'dataBounds',
           type: 'axisExtentConfig',
-        }
+        },
       },
       showTooltip: true,
       markSizeRatio: 1,
@@ -2653,7 +2656,7 @@ describe('XYChart component', () => {
         extent: {
           mode: 'dataBounds',
           type: 'axisExtentConfig',
-        }
+        },
       },
       markSizeRatio: 1,
       layers: [
