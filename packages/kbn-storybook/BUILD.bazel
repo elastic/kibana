@@ -43,6 +43,8 @@ RUNTIME_DEPS = [
   "@npm//@storybook/node-logger",
   "@npm//@storybook/react",
   "@npm//@storybook/theming",
+   "@npm//@storybook/addon-interactions",
+   "@npm//@storybook/testing-library",
   "@npm//loader-utils",
   "@npm//react",
   "@npm//webpack",
