@@ -45,7 +45,7 @@ Then this code would no longer be needed.
 // sourceFilter is used to define filter to get only relevant docs that contain metrics info
 // e.g: { 'source.module': 'system' }
 export interface MetricsQueryOptions<T extends string> {
-  sourceFilter?: QueryDslQueryContainer;
+  sourceFilter: QueryDslQueryContainer;
   groupByField: string;
   metricsMap: MetricsMap<T>;
 }
@@ -80,7 +80,7 @@ export function metricsToApiOptions<T extends string>(
     groupBy: metricsQueryOptions.groupByField,
     metrics,
     filterQuery: JSON.stringify(
-      buildFilterClause(filterClauseDsl, metricsQueryOptions.sourceFilter)
+      buildFilterClause(metricsQueryOptions.sourceFilter, filterClauseDsl)
     ),
   };
 
@@ -90,15 +90,12 @@ export function metricsToApiOptions<T extends string>(
 }
 
 function buildFilterClause(
-  filterClauseDsl: QueryDslQueryContainer | undefined,
-  baseFilter: QueryDslQueryContainer | undefined
+  sourceFilter: QueryDslQueryContainer,
+  filterClauseDsl?: QueryDslQueryContainer
 ): QueryDslQueryContainer {
   return {
     bool: {
-      filter: [
-        { ...(!!baseFilter ? baseFilter : {}) },
-        { ...(!!filterClauseDsl ? filterClauseDsl : {}) },
-      ],
+      filter: !!filterClauseDsl ? [sourceFilter, filterClauseDsl] : [sourceFilter],
     },
   };
 }
