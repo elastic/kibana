@@ -9,7 +9,30 @@ tags: ['kibana', 'onboarding', 'dev', 'logging', 'audit']
 
 ## Audit logging
 
-### Example
+Audit logging is a subscription feature that users can enable to keep track of security-related events, such as authorization success and failures. Logging these events enables you to monitor Kibana for suspicious activity and provides evidence in the event of an attack.
+
+Use the Kibana audit logs in conjunction with Elasticsearch audit logging to get a holistic view of all security related events. Kibana defers to the Elasticsearch security model for authentication, data index authorization, and features that are driven by cluster-wide privileges.
+
+### Automatic audit logging
+
+The Kibana Platform automatically records audit events for the following operations:
+- Calling HTTP endpoints
+- CRUD operations on Saved Objects [1]
+- CRUD operations on Spaces
+- Login / Logout events
+
+<DocCallOut color="warning">
+  [1] Saved Object operations are only audited when using the Scoped Saved Objects Client. Audit logging will not be performed if you create an unscoped client, or choose to exclude the `security` wrapper.
+</DocCallOut>
+
+More information on these events can be found in our [audit logging documentation](https://www.elastic.co/guide/en/kibana/current/xpack-security-audit-logging.html#xpack-security-ecs-audit-logging)
+
+### Custom audit logging
+
+There may be times when it makes sense for a feature to implement its own audit logging, in order to suppliment our automatic audit logging.
+Access to the audit logging service is exposed through the `security` plugin.
+
+#### Example
 
 ```typescript
 const auditLogger = securitySetup.audit.asScoped(request);
