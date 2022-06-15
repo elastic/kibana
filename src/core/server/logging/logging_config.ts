@@ -7,6 +7,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { LogLevelId } from '@kbn/logging';
 import { AppenderConfigType, Appenders } from './appenders/appenders';
 
 // We need this helper for the types to be correct
@@ -56,7 +57,11 @@ export const loggerSchema = schema.object({
 });
 
 /** @public */
-export type LoggerConfigType = TypeOf<typeof loggerSchema>;
+export interface LoggerConfigType {
+  appenders: string[];
+  name: string;
+  level: LogLevelId;
+}
 
 export const config = {
   path: 'logging',
@@ -77,6 +82,7 @@ export const config = {
   }),
 };
 
+/** @internal */
 export type LoggingConfigType = Pick<TypeOf<typeof config.schema>, 'loggers' | 'root'> & {
   appenders: Map<string, AppenderConfigType>;
 };
