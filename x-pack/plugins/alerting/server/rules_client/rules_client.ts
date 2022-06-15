@@ -1245,20 +1245,23 @@ export class RulesClient {
       (async () => {
         if (
           updateResult.scheduledTaskId &&
+          updateResult.schedule &&
           !isEqual(alertSavedObject.attributes.schedule, updateResult.schedule)
         ) {
-          this.taskManager
-            .runNow(updateResult.scheduledTaskId)
-            .then(() => {
-              this.logger.debug(
-                `Alert update has rescheduled the underlying task: ${updateResult.scheduledTaskId}`
-              );
-            })
-            .catch((err: Error) => {
-              this.logger.error(
-                `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
-              );
-            });
+          try {
+            const { tasks } = await this.taskManager.bulkUpdateSchedules(
+              [updateResult.scheduledTaskId],
+              updateResult.schedule
+            );
+
+            this.logger.debug(
+              `Rule update has rescheduled the underlying task: ${updateResult.scheduledTaskId} to run at: ${tasks?.[0]?.runAt}`
+            );
+          } catch (err) {
+            this.logger.error(
+              `Rule update failed to run its underlying task. TaskManager bulkUpdateSchedules failed with Error: ${err.message}`
+            );
+          }
         }
       })(),
     ]);
