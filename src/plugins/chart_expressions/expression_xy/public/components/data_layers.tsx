@@ -74,7 +74,7 @@ export const DataLayers: FC<Props> = ({
   chartHasMoreThanOneBarSeries,
   defaultXScaleType,
 }) => {
-  const colorAssignments = getColorAssignments(layers, formatFactory);
+  const colorAssignments = getColorAssignments(layers, formatFactory, titles);
   return (
     <>
       {layers.flatMap((layer) =>

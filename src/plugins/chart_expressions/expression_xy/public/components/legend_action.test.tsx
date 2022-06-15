@@ -17,6 +17,7 @@ import { LayerTypes } from '../../common/constants';
 import { getLegendAction } from './legend_action';
 import { LegendActionPopover } from './legend_action_popover';
 import { mockPaletteOutput } from '../../common/__mocks__';
+import { FormatFactory } from '../types';
 
 const table: Datatable = {
   type: 'datatable',
@@ -163,7 +164,7 @@ const sampleLayer: DataLayerConfig = {
   showLines: true,
   xAccessor: 'c',
   accessors: ['a', 'b'],
-  splitAccessor: 'splitAccessorId',
+  splitAccessors: ['splitAccessorId'],
   columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
   xScaleType: 'ordinal',
   isHistogram: false,
@@ -171,12 +172,25 @@ const sampleLayer: DataLayerConfig = {
   table,
 };
 
+const formatFactory = (() =>
+  ({
+    convert(x: unknown) {
+      return x;
+    },
+  } as unknown)) as FormatFactory;
+
 describe('getLegendAction', function () {
   let wrapperProps: LegendActionProps;
   const Component: ComponentType<LegendActionProps> = getLegendAction(
     [sampleLayer],
     jest.fn(),
-    jest.fn(),
+    formatFactory,
+    {
+      first: {
+        table,
+        formattedColumns: {},
+      },
+    },
     {}
   );
   let wrapper: ReactWrapper<LegendActionProps>;
@@ -188,6 +202,7 @@ describe('getLegendAction', function () {
       series: [
         {
           seriesKeys: ["Women's Accessories", 'test'],
+          splitAccessors: new Map().set('splitAccessorId', "Women's Accessories"),
         },
       ] as unknown as SeriesIdentifier[],
     };
@@ -205,6 +220,7 @@ describe('getLegendAction', function () {
       series: [
         {
           seriesKeys: ['test', 'b'],
+          splitAccessors: new Map().set('splitAccessorId', 'test'),
         },
       ] as unknown as SeriesIdentifier[],
     };
@@ -219,12 +235,13 @@ describe('getLegendAction', function () {
       series: [
         {
           seriesKeys: ["Women's Accessories", 'b'],
+          splitAccessors: new Map().set('splitAccessorId', "Women's Accessories"),
         },
       ] as unknown as SeriesIdentifier[],
     };
     wrapper = mountWithIntl(<Component {...newProps} />);
     expect(wrapper.find(EuiPopover).length).toBe(1);
-    expect(wrapper.find(EuiPopover).prop('title')).toEqual("Women's Accessories, filter options");
+    expect(wrapper.find(EuiPopover).prop('title')).toEqual("Women's Accessories - Label B, filter options");
     expect(wrapper.find(LegendActionPopover).prop('context')).toEqual({
       data: [
         {

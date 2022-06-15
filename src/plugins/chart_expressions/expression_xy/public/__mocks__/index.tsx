@@ -171,7 +171,7 @@ export const dateHistogramLayer: DataLayerConfig = {
   isStacked: true,
   isPercentage: false,
   isHorizontal: false,
-  splitAccessor: 'splitAccessorId',
+  splitAccessors: ['splitAccessorId'],
   seriesType: 'bar',
   accessors: ['yAccessorId'],
   palette: mockPaletteOutput,

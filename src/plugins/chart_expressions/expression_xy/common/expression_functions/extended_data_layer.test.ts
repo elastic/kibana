@@ -17,7 +17,7 @@ describe('extendedDataLayerConfig', () => {
     seriesType: 'line',
     xAccessor: 'c',
     accessors: ['a', 'b'],
-    splitAccessor: 'd',
+    splitAccessors: ['d'],
     xScaleType: 'linear',
     isHistogram: false,
     isHorizontal: false,

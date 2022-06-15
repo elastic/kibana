@@ -6,15 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { uniq, mapValues } from 'lodash';
+import { mapValues } from 'lodash';
+import { Datatable } from '@kbn/expressions-plugin';
 import { euiLightVars } from '@kbn/ui-theme';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import {
+  getAccessorByDimension,
+  getColumnByAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
 import { getFormat } from './format';
-
-const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
+import { LayerAccessorsTitles } from './layers';
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 
@@ -22,13 +25,64 @@ export type ColorAssignments = Record<
   string,
   {
     totalSeriesCount: number;
-    getRank(sortedLayer: CommonXYDataLayerConfig, seriesKey: string, yAccessor: string): number;
+    getRank(sortedLayer: CommonXYDataLayerConfig, seriesName: string): number;
   }
 >;
 
+export const getAllSeries = (
+  table: Datatable,
+  splitAccessors: CommonXYDataLayerConfig['splitAccessors'] = [],
+  accessors: CommonXYDataLayerConfig['accessors'],
+  columnToLabel: CommonXYDataLayerConfig['columnToLabel'],
+  titles: LayerAccessorsTitles,
+  formatFactory: FormatFactory
+) => {
+  const allSeries: string[] = [];
+  if (!table) {
+    return [];
+  }
+
+  const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
+
+  table.rows.forEach((row) => {
+    let seriesName = '';
+    splitAccessors.forEach((accessor) => {
+      const splitColumn = getColumnByAccessor(accessor, table.columns);
+      if (!splitColumn) return;
+      const splitAccessor = getAccessorByDimension(accessor, table.columns);
+      const columnFormatter =
+        splitAccessor && formatFactory(getFormat(table.columns, splitAccessor));
+      const name = columnFormatter
+        ? columnFormatter.convert(row[splitAccessor])
+        : row[splitAccessor];
+      if (seriesName) {
+        seriesName += ` - ${name}`;
+      } else {
+        seriesName = name;
+      }
+    });
+
+    accessors.forEach((accessor) => {
+      const yAccessor = getAccessorByDimension(accessor, table.columns);
+      const yTitle = columnToLabelMap[yAccessor] ?? titles?.yTitles?.[yAccessor] ?? null;
+      let name;
+      if (seriesName) {
+        name = accessors.length > 1 ? `${seriesName} - ${yTitle}` : seriesName;
+      } else {
+        name = yTitle;
+      }
+      if (!allSeries.includes(name)) {
+        allSeries.push(name);
+      }
+    });
+  });
+  return allSeries;
+};
+
 export function getColorAssignments(
   layers: CommonXYLayerConfig[],
-  formatFactory: FormatFactory
+  formatFactory: FormatFactory,
+  titles: LayerAccessorsTitles
 ): ColorAssignments {
   const layersPerPalette: Record<string, CommonXYDataLayerConfig[]> = {};
 
@@ -46,28 +100,17 @@ export function getColorAssignments(
 
   return mapValues(layersPerPalette, (paletteLayers) => {
     const seriesPerLayer = paletteLayers.map((layer) => {
-      if (!layer.splitAccessor) {
-        return { numberOfSeries: layer.accessors.length, splits: [] };
-      }
-      const splitAccessor = getAccessorByDimension(layer.splitAccessor, layer.table.columns);
-      const column = layer.table.columns?.find(({ id }) => id === splitAccessor);
-      const columnFormatter =
-        column && formatFactory(getFormat(layer.table.columns, layer.splitAccessor));
-      const splits =
-        !column || !layer.table
-          ? []
-          : uniq(
-              layer.table.rows.map((row) => {
-                let value = row[splitAccessor];
-                if (value && !isPrimitive(value)) {
-                  value = columnFormatter?.convert(value) ?? value;
-                } else {
-                  value = String(value);
-                }
-                return value;
-              })
-            );
-      return { numberOfSeries: (splits.length || 1) * layer.accessors.length, splits };
+      const allSeries =
+        getAllSeries(
+          layer.table,
+          layer.splitAccessors,
+          layer.accessors,
+          layer.columnToLabel,
+          titles,
+          formatFactory
+        ) || [];
+
+      return { numberOfSeries: allSeries.length, allSeries };
     });
     const totalSeriesCount = seriesPerLayer.reduce(
       (sum, perLayer) => sum + perLayer.numberOfSeries,
@@ -75,24 +118,19 @@ export function getColorAssignments(
     );
     return {
       totalSeriesCount,
-      getRank(sortedLayer: CommonXYDataLayerConfig, seriesKey: string, yAccessor: string) {
+      getRank(sortedLayer: CommonXYDataLayerConfig, seriesName: string) {
         const layerIndex = paletteLayers.findIndex(
           (layer) => sortedLayer.layerId === layer.layerId
         );
         const currentSeriesPerLayer = seriesPerLayer[layerIndex];
-        const splitRank = currentSeriesPerLayer.splits.indexOf(seriesKey);
+        const rank = currentSeriesPerLayer.allSeries.indexOf(seriesName);
         return (
           (layerIndex === 0
             ? 0
             : seriesPerLayer
                 .slice(0, layerIndex)
                 .reduce((sum, perLayer) => sum + perLayer.numberOfSeries, 0)) +
-          (sortedLayer.splitAccessor && splitRank !== -1
-            ? splitRank * sortedLayer.accessors.length
-            : 0) +
-          sortedLayer.accessors.findIndex(
-            (accessor) => getAccessorByDimension(accessor, sortedLayer.table.columns) === yAccessor
-          )
+          (rank !== -1 ? rank : 0)
         );
       },
     };

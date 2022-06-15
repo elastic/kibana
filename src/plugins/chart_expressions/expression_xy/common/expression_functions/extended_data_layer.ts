@@ -23,9 +23,10 @@ export const extendedDataLayerFunction: ExtendedDataLayerFn = {
       types: ['string'],
       help: strings.getXAccessorHelp(),
     },
-    splitAccessor: {
+    splitAccessors: {
       types: ['string'],
       help: strings.getSplitAccessorHelp(),
+      multi: true,
     },
     accessors: {
       types: ['string'],

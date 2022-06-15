@@ -61,7 +61,7 @@ describe('color_assignment', () => {
       isHorizontal: false,
       palette: { type: 'palette', name: 'palette1' },
       layerType: LayerTypes.DATA,
-      splitAccessor: 'split1',
+      splitAccessors: ['split1'],
       accessors: ['y1', 'y2'],
       table: tables['1'],
     },
@@ -77,7 +77,7 @@ describe('color_assignment', () => {
       isHorizontal: false,
       palette: { type: 'palette', name: 'palette2' },
       layerType: LayerTypes.DATA,
-      splitAccessor: 'split2',
+      splitAccessors: ['split2'],
       accessors: ['y3', 'y4'],
       table: tables['2'],
     },
@@ -92,7 +92,14 @@ describe('color_assignment', () => {
 
   describe('totalSeriesCount', () => {
     it('should calculate total number of series per palette', () => {
-      const assignments = getColorAssignments(layers, formatFactory);
+      const assignments = getColorAssignments(layers, formatFactory, {
+        yTitles: {
+          y1: 'test1',
+          y2: 'test2',
+          y3: 'test3',
+          y4: 'test4',
+        },
+      });
       // two y accessors, with 3 splitted series
       expect(assignments.palette1.totalSeriesCount).toEqual(2 * 3);
       expect(assignments.palette2.totalSeriesCount).toEqual(2 * 3);
@@ -101,7 +108,15 @@ describe('color_assignment', () => {
     it('should calculate total number of series spanning multible layers', () => {
       const assignments = getColorAssignments(
         [layers[0], { ...layers[1], palette: layers[0].palette }],
-        formatFactory
+        formatFactory,
+        {
+          yTitles: {
+            y1: 'test1',
+            y2: 'test2',
+            y3: 'test3',
+            y4: 'test4',
+          },
+        }
       );
       // two y accessors, with 3 splitted series, two times
       expect(assignments.palette1.totalSeriesCount).toEqual(2 * 3 + 2 * 3);
@@ -110,8 +125,16 @@ describe('color_assignment', () => {
 
     it('should calculate total number of series for non split series', () => {
       const assignments = getColorAssignments(
-        [layers[0], { ...layers[1], palette: layers[0].palette, splitAccessor: undefined }],
-        formatFactory
+        [layers[0], { ...layers[1], palette: layers[0].palette, splitAccessors: undefined }],
+        formatFactory,
+        {
+          yTitles: {
+            y1: 'test1',
+            y2: 'test2',
+            y3: 'test3',
+            y4: 'test4',
+          },
+        }
       );
       // two y accessors, with 3 splitted series for the first layer, 2 non splitted y accessors for the second layer
       expect(assignments.palette1.totalSeriesCount).toEqual(2 * 3 + 2);
@@ -120,7 +143,7 @@ describe('color_assignment', () => {
 
     it('should format non-primitive values and count them correctly', () => {
       const complexObject = { aProp: 123 };
-      const formatMock = jest.fn((x) => 'formatted');
+      const formatMock = jest.fn((value) => (typeof value === 'object' ? 'formatted' : value));
       const newLayers = [
         {
           ...layers[0],
@@ -134,25 +157,31 @@ describe('color_assignment', () => {
         (() =>
           ({
             convert: formatMock,
-          } as unknown)) as FormatFactory
+          } as unknown)) as FormatFactory,
+        {
+          yTitles: {
+            y1: 'test1',
+            y2: 'test2',
+            y3: 'test3',
+            y4: 'test4',
+          },
+        }
       );
       expect(assignments.palette1.totalSeriesCount).toEqual(2 * 2);
       expect(assignments.palette2.totalSeriesCount).toEqual(2 * 3);
       expect(formatMock).toHaveBeenCalledWith(complexObject);
     });
 
-    it('should handle missing tables', () => {
-      const assignments = getColorAssignments(
-        layers.map((l) => ({ ...l, table: {} as any })),
-        formatFactory
-      );
-      // if there is no data, just assume a single split
-      expect(assignments.palette1.totalSeriesCount).toEqual(2);
-    });
-
     it('should handle missing columns', () => {
       const newLayers = [{ ...layers[0], table: { ...tables['1'], columns: [] } }, layers[1]];
-      const assignments = getColorAssignments(newLayers, formatFactory);
+      const assignments = getColorAssignments(newLayers, formatFactory, {
+        yTitles: {
+          y1: 'test1',
+          y2: 'test2',
+          y3: 'test3',
+          y4: 'test4',
+        },
+      });
 
       // if the split column is missing, just assume a single split
       expect(assignments.palette1.totalSeriesCount).toEqual(2);
@@ -161,32 +190,53 @@ describe('color_assignment', () => {
 
   describe('getRank', () => {
     it('should return the correct rank for a series key', () => {
-      const assignments = getColorAssignments(layers, formatFactory);
+      const assignments = getColorAssignments(layers, formatFactory, {
+        yTitles: {
+          y1: 'test1',
+          y2: 'test2',
+          y3: 'test3',
+          y4: 'test4',
+        },
+      });
       // 3 series in front of 2/y2 - 1/y1, 1/y2 and 2/y1
-      expect(assignments.palette1.getRank(layers[0], '2', 'y2')).toEqual(3);
+      expect(assignments.palette1.getRank(layers[0], '2 - test2')).toEqual(3);
       // 1 series in front of 1/y4 - 1/y3
-      expect(assignments.palette2.getRank(layers[1], '1', 'y4')).toEqual(1);
+      expect(assignments.palette2.getRank(layers[1], '1 - test4')).toEqual(1);
     });
 
     it('should return the correct rank for a series key spanning multiple layers', () => {
       const newLayers = [layers[0], { ...layers[1], palette: layers[0].palette }];
-      const assignments = getColorAssignments(newLayers, formatFactory);
+      const assignments = getColorAssignments(newLayers, formatFactory, {
+        yTitles: {
+          y1: 'test1',
+          y2: 'test2',
+          y3: 'test3',
+          y4: 'test4',
+        },
+      });
       // 3 series in front of 2/y2 - 1/y1, 1/y2 and 2/y1
-      expect(assignments.palette1.getRank(newLayers[0], '2', 'y2')).toEqual(3);
+      expect(assignments.palette1.getRank(newLayers[0], '2 - test2')).toEqual(3);
       // 2 series in front for the current layer (1/y3, 1/y4), plus all 6 series from the first layer
-      expect(assignments.palette1.getRank(newLayers[1], '2', 'y3')).toEqual(8);
+      expect(assignments.palette1.getRank(newLayers[1], '2 - test3')).toEqual(8);
     });
 
     it('should return the correct rank for a series without a split', () => {
       const newLayers = [
         layers[0],
-        { ...layers[1], palette: layers[0].palette, splitAccessor: undefined },
+        { ...layers[1], palette: layers[0].palette, splitAccessors: undefined },
       ];
-      const assignments = getColorAssignments(newLayers, formatFactory);
+      const assignments = getColorAssignments(newLayers, formatFactory, {
+        yTitles: {
+          y1: 'test1',
+          y2: 'test2',
+          y3: 'test3',
+          y4: 'test4',
+        },
+      });
       // 3 series in front of 2/y2 - 1/y1, 1/y2 and 2/y1
-      expect(assignments.palette1.getRank(newLayers[0], '2', 'y2')).toEqual(3);
+      expect(assignments.palette1.getRank(newLayers[0], '2 - test2')).toEqual(3);
       // 1 series in front for the current layer (y3), plus all 6 series from the first layer
-      expect(assignments.palette1.getRank(newLayers[1], 'Metric y4', 'y4')).toEqual(7);
+      expect(assignments.palette1.getRank(newLayers[1], 'test4')).toEqual(7);
     });
 
     it('should return the correct rank for a series with a non-primitive value', () => {
@@ -202,29 +252,35 @@ describe('color_assignment', () => {
         newLayers,
         (() =>
           ({
-            convert: () => 'formatted',
-          } as unknown)) as FormatFactory
+            convert: (value: unknown) => (typeof value === 'object' ? 'formatted' : value),
+          } as unknown)) as FormatFactory,
+        {
+          yTitles: {
+            y1: 'test1',
+            y2: 'test2',
+            y3: 'test3',
+            y4: 'test4',
+          },
+        }
       );
       // 3 series in front of (complex object)/y1 - abc/y1, abc/y2
-      expect(assignments.palette1.getRank(layers[0], 'formatted', 'y1')).toEqual(2);
-    });
-
-    it('should handle missing tables', () => {
-      const assignments = getColorAssignments(
-        layers.map((l) => ({ ...l, table: {} as any })),
-        formatFactory
-      );
-      // if there is no data, assume it is the first splitted series. One series in front - 0/y1
-      expect(assignments.palette1.getRank(layers[0], '2', 'y2')).toEqual(1);
+      expect(assignments.palette1.getRank(layers[0], 'formatted - test1')).toEqual(2);
     });
 
     it('should handle missing columns', () => {
       const newLayers = [{ ...layers[0], table: { ...tables['1'], columns: [] } }, layers[1]];
 
-      const assignments = getColorAssignments(newLayers, formatFactory);
+      const assignments = getColorAssignments(newLayers, formatFactory, {
+        yTitles: {
+          y1: 'test1',
+          y2: 'test2',
+          y3: 'test3',
+          y4: 'test4',
+        },
+      });
 
       // if the split column is missing, assume it is the first splitted series. One series in front - 0/y1
-      expect(assignments.palette1.getRank(layers[0], '2', 'y2')).toEqual(1);
+      expect(assignments.palette1.getRank(layers[0], 'test2')).toEqual(1);
     });
   });
 });

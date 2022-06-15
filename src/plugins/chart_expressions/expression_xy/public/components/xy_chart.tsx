@@ -232,7 +232,9 @@ export function XYChart({
   const chartHasMoreThanOneSeries =
     filteredLayers.length > 1 ||
     filteredLayers.some((layer) => layer.accessors.length > 1) ||
-    filteredLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
+    filteredLayers.some(
+      (layer) => isDataLayer(layer) && layer.splitAccessors && layer.splitAccessors.length
+    );
   const shouldRotate = isHorizontalChart(dataLayers);
 
   const yAxesConfiguration = getAxesConfiguration(
@@ -261,7 +263,9 @@ export function XYChart({
   const chartHasMoreThanOneBarSeries =
     filteredBarLayers.length > 1 ||
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
-    filteredBarLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
+    filteredBarLayers.some(
+      (layer) => isDataLayer(layer) && layer.splitAccessors && layer.splitAccessors.length
+    );
 
   const isTimeViz = isTimeChart(dataLayers);
 
@@ -316,7 +320,7 @@ export function XYChart({
       .map((config) => ({
         ...config,
         position: config
-          ? getAxisGroupForReferenceLine(yAxesConfiguration, config)?.position
+          ? getAxisGroupForReferenceLine(yAxesConfiguration, config)?.position ?? Position.Bottom
           : Position.Bottom,
       })),
     ...groupedLineAnnotations,
@@ -468,27 +472,15 @@ export function XYChart({
     ];
 
     if (xySeries.seriesKeys.length > 1) {
-      const pointValue = xySeries.seriesKeys[0];
-      const splitAccessor = layer.splitAccessor
-        ? getAccessorByDimension(layer.splitAccessor, table.columns)
-        : undefined;
-
-      const splitFormat = splitAccessor
-        ? fieldFormats[layer.layerId].splitSeriesAccessors[splitAccessor]
-        : undefined;
-      const splitFormatter = formatFactory(splitFormat);
-
-      points.push({
-        row: table.rows.findIndex((row) => {
-          if (splitAccessor) {
-            if (formattedDatatables[layer.layerId]?.formattedColumns[splitAccessor]) {
-              return splitFormatter.convert(row[splitAccessor]) === pointValue;
-            }
-            return row[splitAccessor] === pointValue;
-          }
-        }),
-        column: table.columns.findIndex((col) => col.id === splitAccessor),
-        value: pointValue,
+      xySeries.splitAccessors.forEach((value, key) => {
+        const rowIndex = table.rows.findIndex((row) => {
+          return row[key] === value;
+        });
+        points.push({
+          row: rowIndex,
+          column: table.columns.findIndex((column) => column.id === key),
+          value: table.rows[rowIndex][key],
+        });
       });
     }
     const context: FilterEvent['data'] = {
@@ -665,7 +657,7 @@ export function XYChart({
         onElementClick={interactive ? clickHandler : undefined}
         legendAction={
           interactive
-            ? getLegendAction(dataLayers, onClickValue, formatFactory, formattedDatatables)
+            ? getLegendAction(dataLayers, onClickValue, formatFactory, formattedDatatables, titles)
             : undefined
         }
         showLegendExtra={isHistogramViz && valuesInLegend}
@@ -696,9 +688,9 @@ export function XYChart({
         gridLine={gridLineStyle}
         hide={xAxisConfig?.hide || dataLayers[0]?.hide || !dataLayers[0]?.xAccessor}
         tickFormat={(d) => {
-          let value = safeXAccessorLabelRenderer(d) || '';
+          const value = safeXAccessorLabelRenderer(d) || '';
           if (xAxisConfig?.truncate && value.length > xAxisConfig.truncate) {
-            value = `${value.slice(0, xAxisConfig.truncate)}...`;
+            return `${value.slice(0, xAxisConfig.truncate)}...`;
           }
           return value;
         }}
@@ -729,9 +721,9 @@ export function XYChart({
             }}
             hide={axis.hide || dataLayers[0]?.hide}
             tickFormat={(d) => {
-              let value = axis.formatter?.convert(d) || '';
+              const value = axis.formatter?.convert(d) || '';
               if (axis.truncate && value.length > axis.truncate) {
-                value = `${value.slice(0, axis.truncate)}...`;
+                return `${value.slice(0, axis.truncate)}...`;
               }
               return value;
             }}
@@ -752,7 +744,7 @@ export function XYChart({
           histogramMode={dataLayers.every(
             (layer) =>
               layer.isHistogram &&
-              (layer.isStacked || !layer.splitAccessor) &&
+              (layer.isStacked || !layer.splitAccessors || !layer.splitAccessors.length) &&
               (layer.isStacked ||
                 layer.seriesType !== SeriesTypes.BAR ||
                 !chartHasMoreThanOneBarSeries)
