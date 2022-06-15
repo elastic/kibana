@@ -57,13 +57,26 @@ export const getDefaultFormFields = (
 export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
   if (!monitor) return undefined;
 
-  const monitorType = monitor[ConfigKey.FORM_MONITOR_TYPE];
+  let formMonitorType = monitor[ConfigKey.FORM_MONITOR_TYPE];
+  const monitorType = monitor[ConfigKey.MONITOR_TYPE];
+  const monitorWithFormMonitorType = {
+    ...monitor,
+  };
 
-  switch (monitorType) {
+  // handle default monitor types from Uptime, which don't contain `ConfigKey.FORM_MONITOR_TYPE`
+  if (!formMonitorType) {
+    formMonitorType =
+      monitorType === DataStream.BROWSER
+        ? FormMonitorType.MULTISTEP
+        : (monitorType as Omit<DataStream, DataStream.BROWSER> as FormMonitorType);
+    monitorWithFormMonitorType[ConfigKey.FORM_MONITOR_TYPE] = formMonitorType;
+  }
+
+  switch (formMonitorType) {
     case FormMonitorType.MULTISTEP:
       const browserMonitor = monitor as BrowserFields;
       return {
-        ...monitor,
+        ...monitorWithFormMonitorType,
         'source.inline': {
           type: browserMonitor[ConfigKey.METADATA]?.script_source?.is_generated_script
             ? 'recorder'
@@ -75,16 +88,12 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
     case FormMonitorType.SINGLE:
     case FormMonitorType.ICMP:
       return {
-        ...monitor,
+        ...monitorWithFormMonitorType,
       };
     case FormMonitorType.HTTP:
-      return {
-        ...monitor,
-        isTLSEnabled: isCustomTLSEnabled(monitor),
-      };
     case FormMonitorType.TCP:
       return {
-        ...monitor,
+        ...monitorWithFormMonitorType,
         isTLSEnabled: isCustomTLSEnabled(monitor),
       };
   }
