@@ -7,10 +7,11 @@
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { defaults } from 'lodash';
+import { defaults, once, set } from 'lodash';
 import Puid from 'puid';
 import { Duplex, Writable, Readable } from 'stream';
 
+import type { BlobAttributes } from '../../../types';
 import type { FileChunkDocument } from '../mappings';
 
 /**
@@ -74,14 +75,19 @@ export class ContentStream extends Duplex {
   bytesWritten = 0;
 
   constructor(
-    private client: ElasticsearchClient,
+    private readonly client: ElasticsearchClient,
     private id: undefined | string,
-    private index: string,
-    private logger: Logger,
-    parameters: ContentStreamParameters = {}
+    private readonly index: string,
+    private readonly logger: Logger,
+    parameters: ContentStreamParameters = {},
+    private readonly attributes: BlobAttributes = []
   ) {
     super();
-    this.parameters = defaults(parameters, { encoding: 'base64', size: -1, maxChunkSize: '4mb' });
+    this.parameters = defaults(parameters, {
+      encoding: 'base64',
+      size: -1,
+      maxChunkSize: '4mb',
+    });
   }
 
   private decode(content: string) {
@@ -123,9 +129,9 @@ export class ContentStream extends Duplex {
       const response = await this.client.get<FileChunkDocument>({
         id,
         index: this.index,
-        _source_includes: ['content'],
+        _source_includes: ['data'],
       });
-      return response?._source?.content;
+      return response?._source?.data;
     } catch (e) {
       if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
         const readingHeadChunk = this.chunksRead <= 0;
@@ -190,14 +196,6 @@ export class ContentStream extends Duplex {
     });
   }
 
-  public getDocumentId(): undefined | string {
-    return this.id;
-  }
-
-  public getBytesWritten(): number {
-    return this.bytesWritten;
-  }
-
   private getId(): string {
     if (!this.id) {
       this.id = this.puid.generate();
@@ -213,8 +211,27 @@ export class ContentStream extends Duplex {
     return chunkNumber === 0 ? this.getHeadChunkId() : `${chunkNumber}.${this.getId()}`;
   }
 
-  private async writeChunk(content: string) {
+  private throwIfDuplicateAttributeKeyNames(): void {
+    const keyNameSet = new Set<string>();
+    for (const [name] of this.attributes) {
+      if (keyNameSet.has(name)) {
+        throw new Error(`Duplicate attributes are not allowed. Found duplicate name "${name}".`);
+      }
+      keyNameSet.add(name);
+    }
+  }
+
+  private getAttributes: () => undefined | Pick<FileChunkDocument, 'app_metadata'> = once(() => {
+    if (!this.attributes.length) return undefined;
+    this.throwIfDuplicateAttributeKeyNames();
+    return this.attributes.reduce((acc, [key, value]) => {
+      return set(acc, `app_metadata.${key}`, value);
+    }, {});
+  });
+
+  private async writeChunk(data: string) {
     const chunkId = this.getChunkId(this.chunksWritten);
+    const isHeadChunk = this.chunksWritten === 0;
 
     this.logger.debug(`Writing chunk #${this.chunksWritten} (${chunkId}).`);
 
@@ -222,8 +239,9 @@ export class ContentStream extends Duplex {
       id: chunkId,
       index: this.index,
       document: {
-        content,
-        head_chunk_id: this.chunksWritten > 0 ? this.getHeadChunkId() : undefined,
+        data,
+        head_chunk_id: isHeadChunk ? undefined : this.getHeadChunkId(),
+        ...(isHeadChunk ? this.getAttributes() : undefined),
       },
     });
   }
@@ -294,6 +312,31 @@ export class ContentStream extends Duplex {
       .then(() => callback())
       .catch(callback);
   }
+
+  /**
+   * This ID can be used to retrieve or delete all of the file chunks but does
+   * not necessarily correspond to an existing document.
+   *
+   * @note do not use this ID with anything other than a {@link ContentStream}
+   * compatible implementation for reading blob-like structures from ES.
+   *
+   * @note When creating a new blob, this value may be undefined until the first
+   * chunk is written.
+   */
+  public getContentReferenceId(): undefined | string {
+    return this.id;
+  }
+
+  public getBytesWritten(): number {
+    return this.bytesWritten;
+  }
+
+  /**
+   * Get the ID of the document containing all attributes for the current file id.
+   */
+  public getAttributesChunkId(): string {
+    return this.getHeadChunkId();
+  }
 }
 
 export interface ContentStreamArgs {
@@ -314,22 +357,31 @@ export interface ContentStreamArgs {
    */
   logger: Logger;
   parameters?: ContentStreamParameters;
+  attributes?: BlobAttributes;
 }
 
-function getContentStream({ client, id, index, logger, parameters }: ContentStreamArgs) {
-  return new ContentStream(client, id, index, logger, parameters);
+function getContentStream({
+  client,
+  id,
+  index,
+  logger,
+  parameters,
+  attributes,
+}: ContentStreamArgs) {
+  return new ContentStream(client, id, index, logger, parameters, attributes);
 }
 
-type WritableContentStream = Writable & Pick<ContentStream, 'getDocumentId' | 'getBytesWritten'>;
+export type WritableContentStream = Writable &
+  Pick<ContentStream, 'getContentReferenceId' | 'getBytesWritten'>;
 
 export function getWritableContentStream(args: ContentStreamArgs): WritableContentStream {
   return getContentStream(args);
 }
 
-type ReadableContentStream = Readable;
+export type ReadableContentStream = Readable & Pick<ContentStream, 'getAttributesChunkId'>;
 
 export function getReadableContentStream(
-  args: Omit<ContentStreamArgs, 'id'> & { id: string }
+  args: Omit<ContentStreamArgs, 'id' | 'attributes'> & { id: string }
 ): ReadableContentStream {
   return getContentStream(args);
 }
