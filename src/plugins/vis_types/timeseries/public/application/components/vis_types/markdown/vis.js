@@ -18,6 +18,8 @@ import { replaceVars } from '../../lib/replace_vars';
 import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 
+import './_markdown.scss';
+
 function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, getConfig, fieldFormatMap } = props;
   const series = get(visData, `${model.id}.series`, []);

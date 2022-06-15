@@ -12,6 +12,8 @@ import React from 'react';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import './_error.scss';
+
 const guidPattern = /\[[[a-f\d-\\]{36}\]/g;
 
 export function ErrorComponent(props) {

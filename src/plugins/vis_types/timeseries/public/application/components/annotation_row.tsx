@@ -17,6 +17,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   htmlIdGenerator,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -40,6 +41,7 @@ import { IconSelect } from './icon_select/icon_select';
 
 import type { Annotation, IndexPatternValue } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
+import { aggRowChildrenStyles } from '../styles/common.styles';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
@@ -72,6 +74,8 @@ export const AnnotationRow = ({
   const htmlId = htmlIdGenerator(model.id);
 
   const [fetchedIndex, setFetchedIndex] = useState<IndexPatternSelectProps['fetchedIndex']>(null);
+
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     const updateFetchedIndex = async (index: IndexPatternValue) => {
@@ -134,7 +138,7 @@ export const AnnotationRow = ({
           <ColorPicker disableTrash={true} onChange={onChange} name="color" value={model.color} />
         </EuiFlexItem>
 
-        <EuiFlexItem className="tvbAggRow__children">
+        <EuiFlexItem css={aggRowChildrenStyles(euiTheme)}>
           <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
             <EuiFlexItem>
               <IndexPatternSelect

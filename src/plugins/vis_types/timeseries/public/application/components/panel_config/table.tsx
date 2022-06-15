@@ -177,7 +177,7 @@ export class TablePanelConfig extends Component<
                       Should it be number or string?
                     */}
                     <input
-                      className="tvbAgg__input"
+                      className="euiFieldNumber"
                       type="number"
                       onChange={this.handleTextChange('pivot_rows')}
                       value={model.pivot_rows ?? ''}

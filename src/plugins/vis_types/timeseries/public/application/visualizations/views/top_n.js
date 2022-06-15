@@ -11,6 +11,8 @@ import React, { Component } from 'react';
 import { getLastValue, isEmptyValue } from '../../../../common/last_value_utils';
 import { getValueOrEmpty } from '../../../../common/empty_label';
 
+import './_top_n.scss';
+
 const RENDER_MODES = {
   POSITIVE: 'positive',
   NEGATIVE: 'negative',
