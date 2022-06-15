@@ -13,7 +13,7 @@ import { safeDump } from 'js-yaml';
 import type { FullAgentPolicy } from '../../../../../../../../../../common/types/models/agent_policy';
 
 import {
-  CreatePackagePolicyBottomBar,
+  CreatePackagePolicyFinalBottomBar,
   StandaloneModeWarningCallout,
   NotObscuredByBottomBar,
 } from '../..';
@@ -30,7 +30,6 @@ import {
 } from '../../../../../../../../../hooks';
 import {
   InstallStandaloneAgentStep,
-  AgentEnrollmentConfirmationStep,
   ConfigureStandaloneAgentStep,
 } from '../../../../../../../../../components/agent_enrollment_flyout/steps';
 import { StandaloneInstructions } from '../../../../../../../../../components/enrollment_instructions';
@@ -38,12 +37,10 @@ import { StandaloneInstructions } from '../../../../../../../../../components/en
 import type { InstallAgentPageProps } from './types';
 
 export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPageProps> = (props) => {
-  const { onBack, onNext, setIsManaged, agentPolicy, enrolledAgentIds } = props;
+  const { setIsManaged, agentPolicy, packageInfo } = props;
   const core = useStartServices();
   const kibanaVersion = useKibanaVersion();
-  const { docLinks } = core;
   const [yaml, setYaml] = useState<any | undefined>('');
-  const link = docLinks.links.fleet.troubleshooting;
   const [commandCopied, setCommandCopied] = useState(false);
   const [policyCopied, setPolicyCopied] = useState(false);
   const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
@@ -114,12 +111,6 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       fullCopyButton: true,
       onCopy: () => setCommandCopied(true),
     }),
-    AgentEnrollmentConfirmationStep({
-      selectedPolicyId: agentPolicy?.id,
-      troubleshootLink: link,
-      agentCount: enrolledAgentIds.length,
-      showLoading: true,
-    }),
   ];
 
   return (
@@ -127,18 +118,11 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       <StandaloneModeWarningCallout setIsManaged={setIsManaged} />
       <EuiSpacer size="xl" />
       <EuiSteps steps={steps} />
-      {!!enrolledAgentIds.length && (
+      {commandCopied && (
         <>
           <NotObscuredByBottomBar />
-          <CreatePackagePolicyBottomBar
-            cancelClickHandler={onBack}
-            onNext={onNext}
-            actionMessage={
-              <FormattedMessage
-                id="xpack.fleet.createFirstPackagePolicy.confirmIncomingDataButton"
-                defaultMessage="Confirm incoming data"
-              />
-            }
+          <CreatePackagePolicyFinalBottomBar
+            pkgkey={`${packageInfo.name}-${packageInfo.version}`}
           />
         </>
       )}
