@@ -13,14 +13,14 @@ const BLANK_INDEX_PATH = 'x-pack/test/functional/es_archives/uptime/blank';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime } = getPageObjects(['uptime']);
+
   const uptimeService = getService('uptime');
 
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   describe('certificates', function () {
-    // FLAKY: https://github.com/elastic/kibana/issues/114261
-    describe.skip('empty certificates', function () {
+    describe('empty certificates', function () {
       before(async () => {
         await esArchiver.load(BLANK_INDEX_PATH);
         await makeCheck({ es });
@@ -33,6 +33,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('go to certs page', async () => {
         await uptimeService.common.waitUntilDataIsLoaded();
+        await uptimeService.common.dismissManagementTour();
+
         await uptimeService.cert.hasViewCertButton();
         await uptimeService.navigation.goToCertificates();
       });
@@ -58,12 +60,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('can navigate to cert page', async () => {
         await uptimeService.common.waitUntilDataIsLoaded();
+        await uptimeService.common.dismissManagementTour();
+
         await uptimeService.cert.hasViewCertButton();
         await uptimeService.navigation.goToCertificates();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/114215
-      describe.skip('page', () => {
+      describe('page', () => {
         beforeEach(async () => {
           await uptimeService.navigation.goToCertificates();
           await uptimeService.navigation.refreshApp();

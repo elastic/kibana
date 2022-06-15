@@ -107,13 +107,26 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
     },
     async waitUntilDataIsLoaded() {
       await header.waitUntilLoadingHasFinished();
-      return retry.tryForTime(60 * 1000, async () => {
+      return retry.tryForTime(2 * 60 * 1000, async () => {
         if (await testSubjects.exists('data-missing')) {
-          await browser.refresh();
+          if (await testSubjects.exists('uptimeOverviewPage')) {
+            await find.clickByCssSelector('[href="/app/uptime/certificates"]');
+          } else if (await testSubjects.exists('uptimeCertificatesPage')) {
+            await find.clickByCssSelector('[href="/app/uptime"]');
+          } else {
+            await browser.refresh();
+          }
           await header.waitUntilLoadingHasFinished();
         }
         await testSubjects.missingOrFail('data-missing');
       });
+    },
+
+    async dismissManagementTour() {
+      const hasTour = await testSubjects.exists('syntheticsManagementTourDismiss');
+      if (hasTour) {
+        await testSubjects.click('syntheticsManagementTourDismiss');
+      }
     },
     async hasMappingsError() {
       return testSubjects.exists('xpack.synthetics.mappingsErrorPage');
