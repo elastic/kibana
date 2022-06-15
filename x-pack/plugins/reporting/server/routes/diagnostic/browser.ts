@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
+import type { DiagnosticResponse } from '.';
+import { incrementApiUsageCounter } from '..';
 import type { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import type { DiagnosticResponse } from '.';
 
 const logsToHelpMap = {
   'error while loading shared libraries': i18n.translate(
@@ -42,15 +43,16 @@ const logsToHelpMap = {
   }),
 };
 
+const path = `${API_DIAGNOSE_URL}/browser`;
+
 export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
 
   router.post(
-    {
-      path: `${API_DIAGNOSE_URL}/browser`,
-      validate: {},
-    },
-    authorizedUserPreRouting(reporting, async (_user, _context, _req, res) => {
+    { path: `${path}`, validate: {} },
+    authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
+      incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+
       try {
         const { screenshotting } = await reporting.getPluginStartDeps();
         const logs = await lastValueFrom(screenshotting.diagnose());
