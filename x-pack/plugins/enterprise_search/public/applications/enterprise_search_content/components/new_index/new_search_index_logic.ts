@@ -23,6 +23,7 @@ export interface NewSearchIndexValues extends Pick<SearchIndicesValues, 'searchE
   name: string;
   language: string;
   selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>;
+  shouldCreateAlias: boolean;
 }
 
 export interface NewSearchIndexActions {
@@ -31,6 +32,7 @@ export interface NewSearchIndexActions {
   setSelectedSearchEngineOptions(selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>): {
     selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>;
   };
+  toggleCreateAlias(): void;
 }
 
 export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({
@@ -44,6 +46,7 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
     setSelectedSearchEngineOptions: (selectedSearchEngines) => ({
       selectedSearchEngines,
     }),
+    toggleCreateAlias: () => true,
   },
   reducers: {
     language: [
@@ -62,6 +65,12 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
       [],
       {
         setSelectedSearchEngineOptions: (_, { selectedSearchEngines }) => selectedSearchEngines,
+      },
+    ],
+    shouldCreateAlias: [
+      true,
+      {
+        toggleCreateAlias: (shouldCreateAlias) => !shouldCreateAlias,
       },
     ],
   },
