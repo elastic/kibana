@@ -43,7 +43,7 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   });
 
   useEffect(() => {
-    if (expanded && doc && expanded._id === doc._id) {
+    if (expanded && doc && expanded._id === doc._id && expanded._index === doc._index) {
       setCellProps({
         style: {
           backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
