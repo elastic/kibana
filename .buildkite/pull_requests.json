@@ -28,6 +28,7 @@
         "^\\.github/",
         "\\.md$",
         "\\.mdx$",
+        "^api_docs/.+\\.devdocs\\.json$",
         "^\\.backportrc\\.json$",
         "^nav-kibana-dev\\.docnav\\.json$",
         "^src/dev/prs/kibana_qa_pr_list\\.json$",
