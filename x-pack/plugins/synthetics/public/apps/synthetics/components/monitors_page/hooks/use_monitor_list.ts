@@ -64,9 +64,10 @@ export function useMonitorList() {
     error,
     pageState,
     syntheticsMonitors,
+    total: data?.total ?? 0,
     loadPage,
     reloadPage,
     isDataQueried,
-    allTotal: data.allTotal ?? 0,
+    absoluteTotal: data.absoluteTotal ?? 0,
   };
 }

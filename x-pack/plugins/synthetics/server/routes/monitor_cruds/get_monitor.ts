@@ -114,7 +114,7 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         ...rest,
         monitors,
         perPage: perPageT,
-        allTotal: total,
+        absoluteTotal: total,
         syncErrors: server.syntheticsService.syncErrors,
       };
     }
@@ -125,7 +125,7 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       ...rest,
       monitors,
       perPage: perPageT,
-      allTotal: rest.total,
+      absoluteTotal: rest.total,
       syncErrors: server.syntheticsService.syncErrors,
     };
   },

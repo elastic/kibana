@@ -52,7 +52,7 @@ describe('<MonitorAsyncError />', () => {
       error: null,
       loading: true,
       data: {
-        allTotal: 6,
+        absoluteTotal: 6,
         perPage: 5,
         page: 1,
         total: 6,
