@@ -21,6 +21,8 @@ import {
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
+import { useLink } from '../../hooks';
+
 import {
   AgentPolicyDebugger,
   IntegrationDebugger,
@@ -68,6 +70,8 @@ const panels = [
 ];
 
 export const DebugPage: React.FunctionComponent = () => {
+  const { getHref } = useLink();
+
   return (
     <QueryClientProvider client={queryClient}>
       <EuiPage>
@@ -115,7 +119,7 @@ export const DebugPage: React.FunctionComponent = () => {
             listItems={[
               {
                 label: 'View Agents in Fleet UI',
-                href: '/app/fleet/agents',
+                href: getHref('agent_list'),
                 iconType: 'agentApp',
                 target: '_blank',
               },

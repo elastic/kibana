@@ -164,7 +164,11 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
 
         <EuiFlexItem grow={false}>
           <div>
-            <EuiButton color="danger" onClick={() => setIsResetAllModalVisible(true)}>
+            <EuiButton
+              color="danger"
+              isDisabled={!preconfiguredPolicies.data?.length}
+              onClick={() => setIsResetAllModalVisible(true)}
+            >
               Reset all
             </EuiButton>
           </div>
