@@ -7,30 +7,22 @@
 
 import './spaces_menu.scss';
 
-import {
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFieldSearch,
-  EuiLoadingContent,
-  EuiLoadingSpinner,
-  EuiText,
-} from '@elastic/eui';
-import type { ReactElement } from 'react';
-import React, { Component, lazy, Suspense } from 'react';
+import { EuiAvatar, EuiPopoverFooter, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import React, { Component } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import type { InjectedIntl } from '@kbn/i18n-react';
-import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import { injectI18n } from '@kbn/i18n-react';
 
 import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
-import { getSpaceAvatarComponent } from '../../space_avatar';
 import { ManageSpacesButton } from './manage_spaces_button';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
-const LazySpaceAvatar = lazy(() =>
-  getSpaceAvatarComponent().then((component) => ({ default: component }))
-);
+// const LazySpaceAvatar = lazy(() =>
+//   getSpaceAvatarComponent().then((component) => ({ default: component }))
+// );
 
 interface Props {
   id: string;
@@ -41,26 +33,91 @@ interface Props {
   intl: InjectedIntl;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
 }
 
 interface State {
+  // selectedSpace: Space;
   searchTerm: string;
   allowSpacesListFocus: boolean;
 }
 
+/**
+ * Selectable Space Item for display and navigation purposes.
+ */
+interface SelectableSpaceItem {
+  label: string;
+  key: string;
+  prepend: JSX.Element;
+  checked: EuiSelectableOptionCheckedType;
+  'data-test-subj': string;
+  className: string;
+}
+
 class SpacesMenuUI extends Component<Props, State> {
+  // ToDo: removed unused state members
   public state = {
+    // selectedSpace: this.props.spaces[0],
     searchTerm: '',
     allowSpacesListFocus: false,
   };
 
   public render() {
-    const { intl, isLoading } = this.props;
-    const { searchTerm } = this.state;
+    const { intl, isLoading, spaces, serverBasePath, navigateToUrl } = this.props;
+    // const { searchTerm } = this.state;
 
-    const items = isLoading
-      ? [1, 2, 3].map(this.renderPlaceholderMenuItem)
-      : this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
+    // ToDo: how to clean this up into functions/members?
+    const spaceItems: SelectableSpaceItem[] = isLoading
+      ? [
+          {
+            label: '',
+            key: '',
+            prepend: <></>,
+            checked: 'off',
+            'data-test-subj': '',
+            className: 'selectable-space-item',
+          },
+        ]
+      : // this.getVisibleSpaces(searchTerm).map((space) => {
+        spaces.map((space) => {
+          return {
+            label: space.name,
+            key: space.id,
+            prepend: (
+              <EuiAvatar
+                type="space"
+                name={space.name}
+                size="s"
+                color={space.color}
+                imageUrl={space.imageUrl ?? ''}
+              />
+            ),
+            checked: 'off', // ToDo: set 'on' if this space ID matches the one we're in?
+            'data-test-subj': `${space.id}-selectableSpaceItem`,
+            className: 'selectableSpaceItem',
+          };
+        });
+
+    const onChange = (newItems: SelectableSpaceItem[]) => {
+      newItems.forEach((element: { label: any; checked: any }) => {
+        console.log(`**** ${element.label}, Checked: ${element.checked}`);
+      });
+      const selectedSpaceItem = newItems.filter((item) => item.checked?.includes('on'))[0];
+
+      if (!!selectedSpaceItem) {
+        // selectedSpaceItem.checked = 'off';
+        // const selectedSpace = spaces.filter((space) => selectedSpaceItem.label === space.name)[0];
+
+        // ToDo: handle options (middle click or cmd/ctrl (new tab), shift click (new window))
+        const urlToSelectedSpace = addSpaceIdToPath(
+          serverBasePath,
+          selectedSpaceItem.key, // selectedSpace.id
+          ENTER_SPACE_PATH
+        );
+        // // Force full page reload (usually not a good idea, but we need to in order to change spaces)
+        navigateToUrl(urlToSelectedSpace);
+      }
+    };
 
     const panelProps = {
       id: this.props.id,
@@ -71,102 +128,34 @@ class SpacesMenuUI extends Component<Props, State> {
       }),
     };
 
-    if (this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD) {
-      return (
-        <EuiContextMenuPanel {...panelProps}>
-          {this.renderSearchField()}
-          {this.renderSpacesListPanel(items, searchTerm)}
-          {this.renderManageButton()}
-        </EuiContextMenuPanel>
-      );
-    }
-
-    items.push(this.renderManageButton());
-
-    return <EuiContextMenuPanel {...panelProps} items={items} />;
+    return (
+      <EuiSelectable
+        {...panelProps}
+        searchable={this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD}
+        // ToDo: I had to comment this out, due to it causing an error with EuiSelectable, but I wasn't quite sure I understood...
+        // searchProps={{
+        //   placeholder: 'Find a space',
+        //   compressed: true,
+        // }}
+        options={spaceItems}
+        singleSelection={true}
+        style={{ width: 300 }}
+        onChange={onChange}
+        listProps={{
+          rowHeight: 40,
+          showIcons: false,
+        }}
+      >
+        {(list, search) => (
+          <>
+            <EuiPopoverTitle paddingSize="s">{search || 'Your spaces'}</EuiPopoverTitle>
+            {list}
+            <EuiPopoverFooter paddingSize="s">{this.renderManageButton()}</EuiPopoverFooter>
+          </>
+        )}
+      </EuiSelectable>
+    );
   }
-
-  private getVisibleSpaces = (searchTerm: string): Space[] => {
-    const { spaces } = this.props;
-
-    let filteredSpaces = spaces;
-    if (searchTerm) {
-      filteredSpaces = spaces.filter((space) => {
-        const { name, description = '' } = space;
-        return (
-          name.toLowerCase().indexOf(searchTerm) >= 0 ||
-          description.toLowerCase().indexOf(searchTerm) >= 0
-        );
-      });
-    }
-
-    return filteredSpaces;
-  };
-
-  private renderSpacesListPanel = (items: ReactElement[], searchTerm: string) => {
-    if (items.length === 0) {
-      return (
-        <EuiText color="subdued" className="eui-textCenter">
-          <FormattedMessage
-            id="xpack.spaces.navControl.spacesMenu.noSpacesFoundTitle"
-            defaultMessage=" no spaces found "
-          />
-        </EuiText>
-      );
-    }
-
-    return (
-      <EuiContextMenuPanel
-        key={`spcMenuList`}
-        data-search-term={searchTerm}
-        className="spcMenu__spacesList"
-        initialFocusedItemIndex={this.state.allowSpacesListFocus ? 0 : undefined}
-        items={items}
-      />
-    );
-  };
-
-  private renderSearchField = () => {
-    const { intl } = this.props;
-    return (
-      <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
-        {
-          <EuiFieldSearch
-            placeholder={intl.formatMessage({
-              id: 'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
-              defaultMessage: 'Find a space',
-            })}
-            incremental={true}
-            onSearch={this.onSearch}
-            onKeyDown={this.onSearchKeyDown}
-            onFocus={this.onSearchFocus}
-            compressed
-          />
-        }
-      </div>
-    );
-  };
-
-  private onSearchKeyDown = (e: any) => {
-    //  9: tab
-    // 13: enter
-    // 40: arrow-down
-    const focusableKeyCodes = [9, 13, 40];
-
-    const keyCode = e.keyCode;
-    if (focusableKeyCodes.includes(keyCode)) {
-      // Allows the spaces list panel to receive focus. This enables keyboard and screen reader navigation
-      this.setState({
-        allowSpacesListFocus: true,
-      });
-    }
-  };
-
-  private onSearchFocus = () => {
-    this.setState({
-      allowSpacesListFocus: false,
-    });
-  };
 
   private renderManageButton = () => {
     return (
@@ -178,40 +167,6 @@ class SpacesMenuUI extends Component<Props, State> {
         capabilities={this.props.capabilities}
         navigateToApp={this.props.navigateToApp}
       />
-    );
-  };
-
-  private onSearch = (searchTerm: string) => {
-    this.setState({
-      searchTerm: searchTerm.trim().toLowerCase(),
-    });
-  };
-
-  private renderSpaceMenuItem = (space: Space): JSX.Element => {
-    const icon = (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazySpaceAvatar space={space} size={'s'} />
-      </Suspense>
-    );
-    return (
-      <EuiContextMenuItem
-        key={space.id}
-        data-test-subj={`${space.id}-gotoSpace`}
-        icon={icon}
-        href={addSpaceIdToPath(this.props.serverBasePath, space.id, ENTER_SPACE_PATH)}
-        toolTipTitle={space.description && space.name}
-        toolTipContent={space.description}
-      >
-        <EuiText className="spcMenu__item">{space.name}</EuiText>
-      </EuiContextMenuItem>
-    );
-  };
-
-  private renderPlaceholderMenuItem = (key: string | number): JSX.Element => {
-    return (
-      <EuiContextMenuItem key={key} disabled={true}>
-        <EuiLoadingContent lines={1} />
-      </EuiContextMenuItem>
     );
   };
 }

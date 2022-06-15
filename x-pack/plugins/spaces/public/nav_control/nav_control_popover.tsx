@@ -28,6 +28,7 @@ interface Props {
   anchorPosition: PopoverAnchorPosition;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   serverBasePath: string;
 }
 
@@ -92,6 +93,7 @@ export class NavControlPopover extends Component<Props, State> {
           onManageSpacesClick={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}
           navigateToApp={this.props.navigateToApp}
+          navigateToUrl={this.props.navigateToUrl}
         />
       );
     }
