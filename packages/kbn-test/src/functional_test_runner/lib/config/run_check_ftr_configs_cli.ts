@@ -14,8 +14,12 @@ import { createFailError } from '@kbn/dev-cli-errors';
 
 import { FTR_CONFIGS_MANIFEST_PATHS } from './ftr_configs_manifest';
 
-const THIS_PATH = Path.resolve(__dirname, __filename);
+const THIS_PATH = Path.resolve(
+  REPO_ROOT,
+  'packages/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts'
+);
 const THIS_REL = Path.relative(REPO_ROOT, THIS_PATH);
+
 const IGNORED_PATHS = [
   THIS_PATH,
   Path.resolve(REPO_ROOT, 'packages/kbn-test/src/jest/run_check_jest_configs_cli.ts'),
