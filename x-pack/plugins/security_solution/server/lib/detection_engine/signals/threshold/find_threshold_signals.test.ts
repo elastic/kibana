@@ -61,25 +61,14 @@ describe('findThresholdSignals', () => {
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
         aggregations: {
-          thresholdTerms: {
-            terms: {
-              script: {
-                source: '""',
-                lang: 'painless',
-              },
-              min_doc_count: 100,
+          max_timestamp: {
+            max: {
+              field: '@timestamp',
             },
-            aggs: {
-              max_timestamp: {
-                max: {
-                  field: '@timestamp',
-                },
-              },
-              min_timestamp: {
-                min: {
-                  field: '@timestamp',
-                },
-              },
+          },
+          min_timestamp: {
+            min: {
+              field: '@timestamp',
             },
           },
         },
@@ -323,39 +312,19 @@ describe('findThresholdSignals', () => {
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
         aggregations: {
-          thresholdTerms: {
-            terms: {
-              script: {
-                source: '""',
-                lang: 'painless',
-              },
-              min_doc_count: 200,
-              order: { cardinality_count: 'desc' },
+          cardinality_count: {
+            cardinality: {
+              field: 'source.ip',
             },
-            aggs: {
-              cardinality_count: {
-                cardinality: {
-                  field: 'source.ip',
-                },
-              },
-              cardinality_check: {
-                bucket_selector: {
-                  buckets_path: {
-                    cardinalityCount: 'cardinality_count',
-                  },
-                  script: 'params.cardinalityCount >= 5',
-                },
-              },
-              max_timestamp: {
-                max: {
-                  field: '@timestamp',
-                },
-              },
-              min_timestamp: {
-                min: {
-                  field: '@timestamp',
-                },
-              },
+          },
+          max_timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+          min_timestamp: {
+            min: {
+              field: '@timestamp',
             },
           },
         },
