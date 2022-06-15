@@ -277,6 +277,7 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           ruleTypeRegistry: this.ruleTypeRegistry,
+          connectorServices: this.connectorServices!,
         });
       },
       getEditAlertFlyout: (
@@ -286,6 +287,7 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           ruleTypeRegistry: this.ruleTypeRegistry,
+          connectorServices: this.connectorServices!,
         });
       },
       getAlertsStateTable: (props: AlertsTableStateProps) => {
@@ -313,7 +315,7 @@ export class Plugin
         return getRulesListNotifyBadgeLazy(props);
       },
       getRulesList: () => {
-        return getRulesListLazy();
+        return getRulesListLazy({ connectorServices: this.connectorServices! });
       },
     };
   }

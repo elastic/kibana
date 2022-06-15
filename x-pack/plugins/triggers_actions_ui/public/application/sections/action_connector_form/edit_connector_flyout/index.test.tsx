@@ -238,8 +238,6 @@ describe('EditConnectorFlyout', () => {
       await waitFor(() => {
         expect(getByTestId('test-connector-form')).toBeInTheDocument();
       });
-
-      // await waitForComponentToUpdate();
     });
   });
 
