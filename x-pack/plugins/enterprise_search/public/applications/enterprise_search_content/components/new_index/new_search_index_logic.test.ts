@@ -17,6 +17,7 @@ const DEFAULT_VALUES = {
   name: '',
   language: DEFAULT_LANGUAGE,
   selectedSearchEngines: [],
+  shouldCreateAlias: true,
 };
 
 describe('NewSearchIndexLogic', () => {
@@ -55,6 +56,15 @@ describe('NewSearchIndexLogic', () => {
 
       it('sets name to a sanitized value', () => {
         expect(NewSearchIndexLogic.values.name).toEqual('name-with-special-characters');
+      });
+    });
+
+    describe('toggleCreateAlias ', () => {
+      it('toggles shouldCreateAlias', () => {
+        NewSearchIndexLogic.actions.toggleCreateAlias();
+        expect(NewSearchIndexLogic.values.shouldCreateAlias).toEqual(false);
+        NewSearchIndexLogic.actions.toggleCreateAlias();
+        expect(NewSearchIndexLogic.values.shouldCreateAlias).toEqual(true);
       });
     });
   });
