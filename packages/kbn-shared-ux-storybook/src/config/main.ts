@@ -10,6 +10,11 @@ import { defaultConfig } from '@kbn/storybook';
 
 module.exports = {
   ...defaultConfig,
+  addons: [...(defaultConfig.addons || []), '@storybook/addon-interactions'],
+  features: {
+    ...defaultConfig.features,
+    interactionsDebugger: true,
+  },
   stories: [
     '../../../shared-ux/**/*.stories.+(tsx|mdx)',
     '../../../kbn-shared-ux*/**/*.stories.+(tsx|mdx)',
