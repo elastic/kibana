@@ -10,9 +10,10 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { pipeline as _pipeline, Readable } from 'stream';
 import { promisify } from 'util';
-import type { BlobStorage } from '../../types';
+import type { BlobAttributes, BlobStorage, BlobAttributesResponse } from '../../types';
+import type { ReadableContentStream } from './content_stream';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';
-import { mappings } from './mappings';
+import { FileChunkDocument, mappings } from './mappings';
 
 const pipeline = promisify(_pipeline);
 
@@ -65,7 +66,10 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     }
   }
 
-  public async upload(src: Readable): Promise<{ id: string; size: number }> {
+  public async upload(
+    src: Readable,
+    attributes?: BlobAttributes
+  ): Promise<{ id: string; size: number }> {
     await this.createIndexIfNotExists();
 
     try {
@@ -78,10 +82,14 @@ export class ElasticsearchBlobStorage implements BlobStorage {
           encoding: 'base64',
           maxChunkSize: this.chunkSize,
         },
+        attributes,
       });
       await pipeline(src, dest);
+
+      if (attributes) this.esClient.indices.refresh({ index: this.index }).catch(() => {}); // Enable search on attrs, fire and forget
+
       return {
-        id: dest.getDocumentId()!,
+        id: dest.getContentReferenceId()!,
         size: dest.getBytesWritten(),
       };
     } catch (e) {
@@ -90,7 +98,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     }
   }
 
-  public async download({ id, size }: { id: string; size?: number }): Promise<Readable> {
+  private getReadableContentStream(id: string, size?: number): ReadableContentStream {
     return getReadableContentStream({
       id,
       client: this.esClient,
@@ -101,6 +109,26 @@ export class ElasticsearchBlobStorage implements BlobStorage {
         size,
       },
     });
+  }
+
+  public async download({ id, size }: { id: string; size?: number }): Promise<Readable> {
+    return this.getReadableContentStream(id, size);
+  }
+
+  public async getAttributes(id: string): Promise<BlobAttributesResponse> {
+    const doc = await this.esClient.getSource<FileChunkDocument>({
+      index: this.index,
+      id: this.getReadableContentStream(id).getAttributesChunkId(),
+      _source_includes: ['app_metadata'],
+      refresh: true,
+    });
+
+    if (!doc) {
+      throw new Error('File not found');
+    }
+    return {
+      ...doc.app_metadata,
+    };
   }
 
   public async delete(id: string): Promise<void> {
