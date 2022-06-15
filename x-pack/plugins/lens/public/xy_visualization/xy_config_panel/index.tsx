@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -113,6 +113,13 @@ function hasPercentageAxis(axisGroups: GroupsConfiguration, groupId: string, sta
   );
 }
 
+const axisKeyToTitleMapping: Record<keyof AxesSettingsConfig, 'xTitle' | 'yTitle' | 'yRightTitle'> =
+  {
+    x: 'xTitle',
+    yLeft: 'yTitle',
+    yRight: 'yRightTitle',
+  };
+
 export const XyToolbar = memo(function XyToolbar(
   props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
 ) {
@@ -180,27 +187,28 @@ export const XyToolbar = memo(function XyToolbar(
     });
   };
 
-  const axisTitlesVisibilitySettings = {
-    x: state?.axisTitlesVisibilitySettings?.x ?? true,
-    yLeft: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
-    yRight: state?.axisTitlesVisibilitySettings?.yRight ?? true,
-  };
-  const onAxisTitlesVisibilitySettingsChange = (
-    axis: AxesSettingsConfigKeys,
-    checked: boolean
-  ): void => {
-    const newAxisTitlesVisibilitySettings = {
-      ...axisTitlesVisibilitySettings,
-      ...{
-        [axis]: checked,
-      },
-    };
-    setState({
-      ...state,
-      axisTitlesVisibilitySettings: newAxisTitlesVisibilitySettings,
-    });
-  };
+  const axisTitlesVisibilitySettings = useMemo(
+    () => ({
+      x: state?.axisTitlesVisibilitySettings?.x ?? true,
+      yLeft: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
+      yRight: state?.axisTitlesVisibilitySettings?.yRight ?? true,
+    }),
+    [
+      state?.axisTitlesVisibilitySettings?.x,
+      state?.axisTitlesVisibilitySettings?.yLeft,
+      state?.axisTitlesVisibilitySettings?.yRight,
+    ]
+  );
 
+  const onTitleStateChange = useCallback(
+    ({ title, visible }: { title?: string; visible: boolean }, axis: keyof AxesSettingsConfig) =>
+      setState({
+        ...state,
+        [axisKeyToTitleMapping[axis]]: title,
+        axisTitlesVisibilitySettings: { ...axisTitlesVisibilitySettings, [axis]: visible },
+      }),
+    [axisTitlesVisibilitySettings, setState, state]
+  );
   const nonOrdinalXAxis = dataLayers.every(
     (layer) =>
       !layer.xAccessor ||
@@ -452,7 +460,7 @@ export const XyToolbar = memo(function XyToolbar(
               axis="yLeft"
               layers={state?.layers}
               axisTitle={state?.yTitle}
-              updateTitleState={(value) => setState({ ...state, yTitle: value })}
+              updateTitleState={onTitleStateChange}
               areTickLabelsVisible={tickLabelsVisibilitySettings.yLeft}
               toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
               areGridlinesVisible={gridlinesVisibilitySettings.yLeft}
@@ -463,7 +471,6 @@ export const XyToolbar = memo(function XyToolbar(
               orientation={labelsOrientation.yLeft}
               setOrientation={onLabelsOrientationChange}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
-              toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
               extent={state?.yLeftExtent || { mode: 'full' }}
               setExtent={setLeftExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
@@ -483,7 +490,7 @@ export const XyToolbar = memo(function XyToolbar(
             axis="x"
             layers={state?.layers}
             axisTitle={state?.xTitle}
-            updateTitleState={(value) => setState({ ...state, xTitle: value })}
+            updateTitleState={onTitleStateChange}
             areTickLabelsVisible={tickLabelsVisibilitySettings.x}
             toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
             areGridlinesVisible={gridlinesVisibilitySettings.x}
@@ -491,7 +498,6 @@ export const XyToolbar = memo(function XyToolbar(
             orientation={labelsOrientation.x}
             setOrientation={onLabelsOrientationChange}
             isAxisTitleVisible={axisTitlesVisibilitySettings.x}
-            toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
             endzonesVisible={!state?.hideEndzones}
             setEndzoneVisibility={onChangeEndzoneVisiblity}
             hasBarOrAreaOnAxis={false}
@@ -522,7 +528,7 @@ export const XyToolbar = memo(function XyToolbar(
               axis="yRight"
               layers={state?.layers}
               axisTitle={state?.yRightTitle}
-              updateTitleState={(value) => setState({ ...state, yRightTitle: value })}
+              updateTitleState={onTitleStateChange}
               areTickLabelsVisible={tickLabelsVisibilitySettings.yRight}
               toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
               areGridlinesVisible={gridlinesVisibilitySettings.yRight}
@@ -535,7 +541,6 @@ export const XyToolbar = memo(function XyToolbar(
               setOrientation={onLabelsOrientationChange}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'right', state)}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
-              toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
               extent={state?.yRightExtent || { mode: 'full' }}
               setExtent={setRightExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}

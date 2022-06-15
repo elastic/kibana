@@ -53,7 +53,10 @@ export interface AxisSettingsPopoverProps {
   /**
    * Callback to axis title change
    */
-  updateTitleState: (value: string) => void;
+  updateTitleState: (
+    title: { title?: string; visible: boolean },
+    axis: AxesSettingsConfigKeys
+  ) => void;
   /**
    * Determines if the popover is Disabled
    */
@@ -86,10 +89,6 @@ export interface AxisSettingsPopoverProps {
    * Determines if the title visibility switch is on and the input text is disabled
    */
   isAxisTitleVisible: boolean;
-  /**
-   * Toggles the axis title visibility
-   */
-  toggleAxisTitleVisibility: (axis: AxesSettingsConfigKeys, checked: boolean) => void;
   /**
    * Set endzone visibility
    */
@@ -219,7 +218,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   isAxisTitleVisible,
   orientation,
   setOrientation,
-  toggleAxisTitleVisibility,
   setEndzoneVisibility,
   endzonesVisible,
   extent,
@@ -271,7 +269,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         axisTitle={axisTitle}
         updateTitleState={updateTitleState}
         isAxisTitleVisible={isAxisTitleVisible}
-        toggleAxisTitleVisibility={toggleAxisTitleVisibility}
       />
       <EuiFormRow
         display="columnCompressedSwitch"
