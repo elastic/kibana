@@ -10,7 +10,7 @@ export KBN_NP_PLUGINS_BUILT=true
 
 VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
 
-echo "--- Download kibana distribution"
+echo "--- Download Kibana Distribution"
 
 mkdir -p ./target
 buildkite-agent artifact download "kibana-$VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
@@ -75,6 +75,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
   retry 5 30 vault login -no-print "$VAULT_TOKEN"
 
+  echo -n "Writing to vault..."
   retry 5 5 vault write "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
 
   # Enable stack monitoring
@@ -83,7 +84,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
     .settings.observability.logging.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'"
     ' .buildkite/scripts/steps/cloud/stack_monitoring.json > /tmp/stack_monitoring.json
 
-  echo -n "Enabling stack monitoring..."
+  echo -n "Enabling Stack Monitoring..."
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json > "$JSON_FILE"
   echo "done"
 else
