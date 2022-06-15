@@ -24,20 +24,20 @@ export function EMSVectorTileStyleEditor({ color, onColorChange }: Props) {
   return (
     <EuiFormRow
       display="columnCompressed"
-      label={i18n.translate('xpack.maps.emsVectorTileStyleEditor.colorFilterPickerLabel', {
-        defaultMessage: 'Color filter',
+      label={i18n.translate('xpack.maps.emsVectorTileStyleEditor.colorBlendPickerLabel', {
+        defaultMessage: 'Color blend',
       })}
     >
       <EuiColorPicker
         compressed
-        aria-label="Color"
+        aria-label="Color blend"
         color={color}
         onChange={onChange}
         secondaryInputDisplay="top"
         isClearable
         format="hex"
-        placeholder="No filter"
-        aria-placeholder="No filter"
+        placeholder="No color"
+        aria-placeholder="No color"
       />
     </EuiFormRow>
   );
