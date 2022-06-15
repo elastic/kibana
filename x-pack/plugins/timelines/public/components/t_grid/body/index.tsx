@@ -69,7 +69,7 @@ import type { FieldBrowserOptions } from '../../../../common/types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
 import { StatefulEventContext } from '../../stateful_event_context';
-import { StatefulFieldsBrowser } from '../toolbar/fields_browser';
+import { FieldBrowser } from '../toolbar/field_browser';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -519,7 +519,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             ) : (
               <>
                 {additionalControls ?? null}
-                <StatefulFieldsBrowser
+                <FieldBrowser
                   data-test-subj="field-browser"
                   browserFields={browserFields}
                   options={fieldBrowserOptions}
