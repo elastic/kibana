@@ -11,7 +11,11 @@ import { useMemo } from 'react';
 import { ROW_HEIGHT_OPTION } from '../../common';
 import { isValidRowHeight } from '../utils/validate_row_height';
 import { useDiscoverServices } from './use_discover_services';
-import { DataGridOptionsRecord, getStoredRowHeight, updateStoredRowHeight } from '../utils/row_heights';
+import {
+  DataGridOptionsRecord,
+  getStoredRowHeight,
+  updateStoredRowHeight,
+} from '../utils/row_heights';
 
 interface UseRowHeightProps {
   rowHeightState?: number;
