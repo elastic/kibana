@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { incrementApiUsageCounter } from '..';
 import type { ReportingCore } from '../..';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
@@ -20,6 +21,8 @@ const API_BASE_URL_V1 = '/api/reporting/v1';
 const API_BASE_GENERATE_V1 = `${API_BASE_URL_V1}/generate`;
 
 export type CsvFromSavedObjectRequest = KibanaRequest<unknown, unknown, JobParamsDownloadCSV>;
+
+const path = `${API_BASE_GENERATE_V1}/immediate/csv_searchsource`;
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:
@@ -47,7 +50,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   // This API calls run the SearchSourceImmediate export type's runTaskFn directly
   router.post(
     {
-      path: `${API_BASE_GENERATE_V1}/immediate/csv_searchsource`,
+      path,
       validate: {
         body: schema.object({
           columns: schema.maybe(schema.arrayOf(schema.string())),
@@ -64,6 +67,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     authorizedUserPreRouting(
       reporting,
       async (user, context, req: CsvFromSavedObjectRequest, res) => {
+        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+
         const logger = parentLogger.get(CSV_SEARCHSOURCE_IMMEDIATE_TYPE);
         const runTaskFn = runTaskFnFactory(reporting, logger);
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
