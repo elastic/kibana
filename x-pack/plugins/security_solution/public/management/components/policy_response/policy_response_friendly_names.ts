@@ -361,8 +361,7 @@ const descriptions = Object.freeze(
       i18n.translate(
         'xpack.securitySolution.endpoint.details.policyResponse.description.full_disk_access',
         {
-          defaultMessage:
-            'You must enable full disk access for Elastic Endpoint on your machine. See our troubleshooting documentation for more information',
+          defaultMessage: 'You must enable full disk access for Elastic Endpoint on your machine. ',
         }
       ),
     ],
@@ -376,7 +375,7 @@ const linkTexts = Object.freeze(
       i18n.translate(
         'xpack.securitySolution.endpoint.details.policyResponse.link.text.full_disk_access',
         {
-          defaultMessage: 'Documentation',
+          defaultMessage: 'Learn more.',
         }
       ),
     ],

@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { EuiButton, EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiCallOut, EuiText } from '@elastic/eui';
 import { PolicyResponseActionFormatter } from './policy_response_friendly_names';
 
 const StyledEuiCallout = styled(EuiCallOut)`
@@ -35,17 +35,16 @@ export const PolicyResponseActionItem = memo(
       >
         <EuiText size="s" className="action-message" data-test-subj="endpointPolicyResponseMessage">
           {policyResponseActionFormatter.errorDescription}
+          {policyResponseActionFormatter.linkText && policyResponseActionFormatter.linkUrl && (
+            <EuiLink
+              target="_blank"
+              href={`${policyResponseActionFormatter.linkUrl}`}
+              data-test-subj="endpointPolicyResponseErrorCallOutLink"
+            >
+              {policyResponseActionFormatter.linkText}
+            </EuiLink>
+          )}
         </EuiText>
-        <EuiSpacer size="s" />
-        {policyResponseActionFormatter.linkText && policyResponseActionFormatter.linkUrl && (
-          <EuiButton
-            href={policyResponseActionFormatter.linkUrl}
-            color="danger"
-            data-test-subj="endpointPolicyResponseErrorCallOutLink"
-          >
-            {policyResponseActionFormatter.linkText}
-          </EuiButton>
-        )}
       </StyledEuiCallout>
     ) : (
       <EuiText size="xs" data-test-subj="endpointPolicyResponseMessage">
