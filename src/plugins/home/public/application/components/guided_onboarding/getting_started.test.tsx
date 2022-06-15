@@ -11,7 +11,17 @@ import { shallow } from 'enzyme';
 
 import { GettingStarted } from './getting_started';
 
-jest.mock('../../kibana_services', () => ({
+jest.mock('../../kibana_services', () => {
+  const { chromeServiceMock, applicationServiceMock } =
+    jest.requireActual('@kbn/core/public/mocks');
+  return {
+    getServices: () => ({
+      chrome: chromeServiceMock.createStartContract(),
+      application: applicationServiceMock.createStartContract(),
+      trackUiMetric: jest.fn(),
+    }),
+  };
+});
   getServices: () => ({
     chrome: {
       setBreadcrumbs: () => {},
