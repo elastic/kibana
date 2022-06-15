@@ -58,4 +58,4 @@ export { TGrid as default };
 export * from './drag_and_drop';
 export * from './last_updated';
 export * from './loading';
-export * from './fields_browser';
+export * from './field_browser';
