@@ -31,7 +31,6 @@ describe('Axes Settings', () => {
       areTickLabelsVisible: true,
       areGridlinesVisible: true,
       isAxisTitleVisible: true,
-      toggleAxisTitleVisibility: jest.fn(),
       toggleTickLabelsVisibility: jest.fn(),
       toggleGridlinesVisibility: jest.fn(),
       hasBarOrAreaOnAxis: false,
