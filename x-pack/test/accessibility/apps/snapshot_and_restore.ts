@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const es = getService('es');
 
-  describe('Stack Management - Snapshot Restore Accessibility', () => {
+  describe('Stack management- snapshot restore a11y tests', () => {
     before(async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickSnapshotRestore();
