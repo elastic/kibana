@@ -15,7 +15,7 @@ import { DataViewListItem } from '@kbn/data-views-plugin/public';
 export interface DataViewsListProps {
   dataViewsList: DataViewListItem[];
   onChangeDataView: (newId: string) => void;
-  isTextBasedLangSelected: boolean;
+  isTextBasedLangSelected?: boolean;
   currentDataViewId?: string;
   selectableProps?: EuiSelectableProps;
   searchListInputId?: string;
@@ -44,8 +44,8 @@ export function DataViewsList({
         key: id,
         label: name ? name : title,
         value: id,
-        checked: id === currentDataViewId && !isTextBasedLangSelected ? 'on' : undefined,
-        append: isTextBasedLangSelected ? (
+        checked: id === currentDataViewId && !Boolean(isTextBasedLangSelected) ? 'on' : undefined,
+        append: Boolean(isTextBasedLangSelected) ? (
           <EuiToolTip
             position="top"
             content={i18n.translate(
