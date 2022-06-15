@@ -15,7 +15,6 @@ exports[`use case card should render use case card component for observability 1
   display="subdued"
   icon={
     <EuiAvatar
-      className="homUseCaseIcon"
       color="plain"
       iconSize="xl"
       iconType="eye"
@@ -25,7 +24,12 @@ exports[`use case card should render use case card component for observability 1
   }
   image={
     <div
-      className="homUseCaseCard homUseCaseCard--observability"
+      css={
+        Object {
+          "backgroundColor": "#00BFB3",
+          "minHeight": 200,
+        }
+      }
     />
   }
   onClick={[Function]}
@@ -59,7 +63,6 @@ exports[`use case card should render use case card component for search 1`] = `
   display="subdued"
   icon={
     <EuiAvatar
-      className="homUseCaseIcon"
       color="plain"
       iconSize="xl"
       iconType="inspect"
@@ -69,7 +72,12 @@ exports[`use case card should render use case card component for search 1`] = `
   }
   image={
     <div
-      className="homUseCaseCard homUseCaseCard--search"
+      css={
+        Object {
+          "backgroundColor": "#FEC514",
+          "minHeight": 200,
+        }
+      }
     />
   }
   onClick={[Function]}
@@ -103,7 +111,6 @@ exports[`use case card should render use case card component for security 1`] = 
   display="subdued"
   icon={
     <EuiAvatar
-      className="homUseCaseIcon"
       color="plain"
       iconSize="xl"
       iconType="securitySignal"
@@ -113,7 +120,12 @@ exports[`use case card should render use case card component for security 1`] = 
   }
   image={
     <div
-      className="homUseCaseCard homUseCaseCard--security"
+      css={
+        Object {
+          "backgroundColor": "#F04E98",
+          "minHeight": 200,
+        }
+      }
     />
   }
   onClick={[Function]}
