@@ -16,3 +16,4 @@ export { registerRoutes as registerOutputRoutes } from './output';
 export { registerRoutes as registerSettingsRoutes } from './settings';
 export { registerRoutes as registerAppRoutes } from './app';
 export { registerRoutes as registerPreconfigurationRoutes } from './preconfiguration';
+export { registerRoutes as registerDownloadSourcesRoutes } from './download_source';

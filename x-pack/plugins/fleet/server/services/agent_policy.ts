@@ -842,6 +842,47 @@ class AgentPolicyService {
   ): Promise<FullAgentPolicy | null> {
     return getFullAgentPolicy(soClient, id, options);
   }
+
+  /**
+   * Remove an output from all agent policies that are using it, and replace the output by the default ones.
+   * @param soClient
+   * @param esClient
+   * @param downloadSourceId
+   */
+  public async removeDefaultSourceFromAll(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    downloadSourceId: string
+  ) {
+    const agentPolicies = (
+      await soClient.find<AgentPolicySOAttributes>({
+        type: SAVED_OBJECT_TYPE,
+        fields: ['revision', 'default_download_source_id'],
+        searchFields: ['default_download_source_id'],
+        search: escapeSearchQueryPhrase(downloadSourceId),
+        perPage: SO_SEARCH_LIMIT,
+      })
+    ).saved_objects.map((so) => ({
+      id: so.id,
+      ...so.attributes,
+    }));
+
+    if (agentPolicies.length > 0) {
+      await pMap(
+        agentPolicies,
+        (agentPolicy) =>
+          this.update(soClient, esClient, agentPolicy.id, {
+            default_download_source_id:
+              agentPolicy.default_download_source_id === downloadSourceId
+                ? null
+                : agentPolicy.default_download_source_id,
+          }),
+        {
+          concurrency: 50,
+        }
+      );
+    }
+  }
 }
 
 export const agentPolicyService = new AgentPolicyService();

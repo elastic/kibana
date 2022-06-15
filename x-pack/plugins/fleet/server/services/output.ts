@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import uuid from 'uuid/v5';
 import { omit } from 'lodash';
 
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
@@ -22,6 +21,8 @@ import {
   OutputInvalidError,
   FleetEncryptedSavedObjectEncryptionKeyRequired,
 } from '../errors';
+
+import { idToUuid } from '.';
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
@@ -46,23 +47,6 @@ const fakeRequest = {
     },
   },
 } as unknown as KibanaRequest;
-
-// differentiate
-function isUUID(val: string) {
-  return (
-    typeof val === 'string' &&
-    val.match(/[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/)
-  );
-}
-
-export function outputIdToUuid(id: string) {
-  if (isUUID(id)) {
-    return id;
-  }
-
-  // UUID v5 need a namespace (uuid.DNS), changing this params will result in loosing the ability to generate predicable uuid
-  return uuid(id, uuid.DNS);
-}
 
 function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
   const { output_id: outputId, ssl, ...atributes } = so.attributes;
@@ -239,7 +223,7 @@ class OutputService {
 
     const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
-      id: options?.id ? outputIdToUuid(options.id) : undefined,
+      id: options?.id ? idToUuid(options.id) : undefined,
     });
 
     return outputSavedObjectToOutput(newSo);
@@ -251,7 +235,7 @@ class OutputService {
     { ignoreNotFound = false } = { ignoreNotFound: true }
   ) {
     const res = await this.encryptedSoClient.bulkGet<OutputSOAttributes>(
-      ids.map((id) => ({ id: outputIdToUuid(id), type: SAVED_OBJECT_TYPE }))
+      ids.map((id) => ({ id: idToUuid(id), type: SAVED_OBJECT_TYPE }))
     );
 
     return res.saved_objects
@@ -288,7 +272,7 @@ class OutputService {
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
     const outputSO = await this.encryptedSoClient.get<OutputSOAttributes>(
       SAVED_OBJECT_TYPE,
-      outputIdToUuid(id)
+      idToUuid(id)
     );
 
     if (outputSO.error) {
@@ -327,7 +311,7 @@ class OutputService {
       id
     );
 
-    return this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+    return this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, idToUuid(id));
   }
 
   public async update(
@@ -400,7 +384,7 @@ class OutputService {
     }
     const outputSO = await this.encryptedSoClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
-      outputIdToUuid(id),
+      idToUuid(id),
       updateData
     );
 

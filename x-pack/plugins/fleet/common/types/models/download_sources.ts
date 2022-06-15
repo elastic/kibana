@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-export * from './agent_policy';
-export * from './agent';
-export * from './package_policy';
-export * from './output';
-export * from './enrollment_api_key';
-export * from './preconfiguration';
-export * from './download_sources';
+export interface DownloadSourceBase {
+  name: string;
+  host: string;
+  is_default: boolean;
+}
+
+export type DownloadSource = DownloadSourceBase & {
+  id: string;
+};
+export type DownloadSourceAttributes = DownloadSourceBase & {
+  source_id?: string;
+};

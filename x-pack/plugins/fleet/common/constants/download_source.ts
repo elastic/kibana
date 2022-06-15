@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export * from './agent_policy';
-export * from './agent';
-export * from './package_policy';
-export * from './output';
-export * from './enrollment_api_key';
-export * from './preconfiguration';
-export * from './download_sources';
+export const DEFAULT_DOWNLOAD_SOURCE = 'artifactory.elastic.co';
+
+export const DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE = 'ingest-download-sources';
+
+// export const DEFAULT_DOWNLOAD_SOURCE_ID = 'fleet-default-download-source';
