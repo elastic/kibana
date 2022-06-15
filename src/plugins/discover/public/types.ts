@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EsHitRecord } from './application/types';
-
-export type ElasticSearchHit<T = unknown> = estypes.SearchHit<T>;
-
-export type HitsFlattened = Array<Record<string, unknown>>;
+import * as estypes from "@elastic/elasticsearch/lib/api/typesWithBodyKey";
 
 export type ValueToStringConverter = (
   rowIndex: number,
   columnId: string,
   options?: { disableMultiline?: boolean }
 ) => { formattedString: string; withFormula: boolean };
+
+export type EsHitRecord = estypes.SearchHit;
+export type EsHitRecordList = EsHitRecord[];
 
 /**
  * This is the record/row of data provided to our Data Table

@@ -9,8 +9,7 @@ import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { EsHitRecord } from '../../types';
-import { DataTableRecord } from '../../../types';
+import { DataTableRecord, EsHitRecord } from '../../../types';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 export async function fetchAnchor(

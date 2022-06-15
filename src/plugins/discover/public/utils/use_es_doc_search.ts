@@ -13,8 +13,8 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../common';
-import { ElasticSearchHit } from '../types';
 import { useDiscoverServices } from './use_discover_services';
+import {EsHitRecord} from "@kbn/discover-plugin/public/types";
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;
 
@@ -67,9 +67,9 @@ export function useEsDocSearch({
   index,
   indexPattern,
   requestSource,
-}: DocProps): [ElasticRequestState, ElasticSearchHit | null, () => void] {
+}: DocProps): [ElasticRequestState, EsHitRecord | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
-  const [hit, setHit] = useState<ElasticSearchHit | null>(null);
+  const [hit, setHit] = useState<EsHitRecord | null>(null);
   const { data, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 

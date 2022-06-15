@@ -7,17 +7,12 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { keys, cloneDeep, clone, uniq, filter, map } from 'lodash';
-// @ts-expect-error
-import realHits from '../../../../../__fixtures__/real_hits';
+import { keys, clone, uniq, filter, map } from 'lodash';
+import { getDataTableRecords } from '../../../../../__fixtures__/real_hits';
 import type { DataView } from '@kbn/data-views-plugin/public';
-
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { EsHitRecord } from '../../../../types';
-import { buildDataTableRecord } from '../../../../../utils/build_data_record';
 
 describe('fieldCalculator', function () {
   it('should have a _countMissing that counts nulls & undefineds in an array', function () {
@@ -121,7 +116,7 @@ describe('fieldCalculator', function () {
     let hits: any;
 
     beforeEach(function () {
-      hits = cloneDeep(realHits).map((hit: EsHitRecord) => buildDataTableRecord(hit, dataView));
+      hits = getDataTableRecords(dataView);
     });
 
     it('Should return an array of values for _source fields', function () {
@@ -154,7 +149,7 @@ describe('fieldCalculator', function () {
     let params: { hits: any; field: any; count: number; dataView: DataView };
     beforeEach(function () {
       params = {
-        hits: cloneDeep(realHits).map((hit: EsHitRecord) => buildDataTableRecord(hit, dataView)),
+        hits: getDataTableRecords(dataView),
         field: dataView.fields.getByName('extension'),
         count: 3,
         dataView,

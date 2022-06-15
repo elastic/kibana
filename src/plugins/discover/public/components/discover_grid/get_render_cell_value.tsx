@@ -26,7 +26,7 @@ import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
 import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';
-import { DataTableRecord, ElasticSearchHit } from '../../types';
+import { DataTableRecord, EsHitRecord } from '../../types';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
 
@@ -147,10 +147,10 @@ function getInnerColumns(fields: Record<string, unknown[]>, columnId: string) {
   );
 }
 
-function getJSON(columnId: string, rowRaw: ElasticSearchHit, useTopLevelObjectColumns: boolean) {
+function getJSON(columnId: string, row: DataTableRecord, useTopLevelObjectColumns: boolean) {
   const json = useTopLevelObjectColumns
-    ? getInnerColumns(rowRaw.fields as Record<string, unknown[]>, columnId)
-    : rowRaw;
+    ? getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId)
+    : row.raw;
   return json as Record<string, unknown>;
 }
 
@@ -196,7 +196,7 @@ function renderPopoverContent({
         </EuiFlexItem>
         <EuiFlexItem>
           <JsonCodeEditor
-            json={getJSON(columnId, row.raw, useTopLevelObjectColumns)}
+            json={getJSON(columnId, row, useTopLevelObjectColumns)}
             width={defaultMonacoEditorWidth}
             height={200}
           />
@@ -232,7 +232,7 @@ function renderPopoverContent({
  * this is used for legacy stuff like displaying products of our ecommerce dataset
  */
 function getTopLevelObjectPairs(
-  row: ElasticSearchHit,
+  row: EsHitRecord,
   columnId: string,
   dataView: DataView,
   fieldsToShow: string[]

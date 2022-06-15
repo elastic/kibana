@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { DocViewerTab } from './doc_viewer_tab';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
-import { ElasticSearchHit } from '../../../../types';
+import { EsHitRecord } from '@kbn/discover-plugin/public/types';
 
 describe('DocViewerTab', () => {
   test('changing columns triggers an update', () => {
@@ -20,7 +20,7 @@ describe('DocViewerTab', () => {
       id: 1,
       render: jest.fn(),
       renderProps: {
-        hit: {} as ElasticSearchHit,
+        hit: {} as EsHitRecord,
         columns: ['test'],
         indexPattern: indexPatternMock,
       },
@@ -31,7 +31,7 @@ describe('DocViewerTab', () => {
     const nextProps = {
       ...props,
       renderProps: {
-        hit: {} as ElasticSearchHit,
+        hit: {} as EsHitRecord,
         columns: ['test2'],
         indexPattern: indexPatternMock,
       },

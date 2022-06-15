@@ -11,7 +11,7 @@ import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { EsHitRecordList } from '../../types';
+import { EsHitRecordList } from '../../../types';
 
 describe('context app', function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

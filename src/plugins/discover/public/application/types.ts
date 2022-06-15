@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
@@ -15,5 +14,3 @@ export enum FetchStatus {
   ERROR = 'error',
 }
 
-export type EsHitRecord = estypes.SearchHit;
-export type EsHitRecordList = EsHitRecord[];

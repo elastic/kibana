@@ -11,8 +11,7 @@ import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
-import { EsHitRecord } from '../../types';
-import type { DataTableRecord } from '../../../types';
+import type { DataTableRecord, EsHitRecord } from '../../../types';
 
 interface RangeQuery {
   format: string;

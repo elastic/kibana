@@ -12,9 +12,9 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerLegacyTable } from './table';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { DocViewRenderProps } from '../../../doc_views_types';
-import { ElasticSearchHit } from '../../../../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../../build_services';
+import { EsHitRecord } from '../../../../../types';
 
 const services = {
   uiSettings: {
@@ -110,7 +110,7 @@ describe('DocViewTable at Discover', () => {
       scripted: 123,
       _underscore: 123,
     },
-  } as ElasticSearchHit;
+  } as EsHitRecord;
 
   const props = {
     hit,
@@ -210,7 +210,7 @@ describe('DocViewTable at Discover Context', () => {
         Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. \
         Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut',
     },
-  } as ElasticSearchHit;
+  } as EsHitRecord;
   const props = {
     hit,
     columns: ['extension'],

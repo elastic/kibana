@@ -8,8 +8,8 @@
 
 import { calcFieldCounts } from './calc_field_counts';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
-import { EsHitRecord } from '../../types';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { EsHitRecord } from '../../../types';
 
 describe('calcFieldCounts', () => {
   test('returns valid field count data', async () => {

@@ -9,8 +9,7 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { flattenHit } from '@kbn/data-plugin/common';
 import { getDocId } from './get_doc_id';
-import type { EsHitRecord } from '../application/types';
-import type { DataTableRecord } from '../types';
+import type { DataTableRecord, EsHitRecord } from '../types';
 
 /**
  * Build a record for data table, explorer + classic one

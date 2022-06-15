@@ -13,8 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { createContextSearchSourceStub } from './_stubs';
 import { DataPublicPluginStart, Query } from '@kbn/data-plugin/public';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { EsHitRecord } from '../../types';
-import { DataTableRecord } from '../../../types';
+import { DataTableRecord, EsHitRecord } from '../../../types';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;

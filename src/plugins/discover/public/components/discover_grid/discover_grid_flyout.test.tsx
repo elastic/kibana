@@ -19,7 +19,7 @@ import { setDocViewsRegistry } from '../../kibana_services';
 import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord, ElasticSearchHit } from '../../types';
+import type { DataTableRecord, EsHitRecord } from '../../types';
 import { buildDataTableRecord } from '../../utils/build_data_record';
 
 describe('Discover flyout', function () {
@@ -42,7 +42,7 @@ describe('Discover flyout', function () {
     } as unknown as DiscoverServices;
 
     const hit = buildDataTableRecord(
-      hitIndex ? esHits[hitIndex] : (esHits[0] as ElasticSearchHit),
+      hitIndex ? esHits[hitIndex] : (esHits[0] as EsHitRecord),
       indexPatternMock
     );
 
@@ -52,7 +52,7 @@ describe('Discover flyout', function () {
       hit,
       hits:
         hits ||
-        esHits.map((entry: ElasticSearchHit) =>
+        esHits.map((entry: EsHitRecord) =>
           buildDataTableRecord(entry, indexPattern || indexPatternMock)
         ),
       onAddColumn: jest.fn(),

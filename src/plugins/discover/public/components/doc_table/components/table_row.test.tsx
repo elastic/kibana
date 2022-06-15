@@ -17,8 +17,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
-import { EsHitRecord } from '../../../application/types';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
+import {EsHitRecord} from "@kbn/discover-plugin/public/types";
 
 jest.mock('../lib/row_formatter', () => {
   const originalModule = jest.requireActual('../lib/row_formatter');

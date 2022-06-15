@@ -24,7 +24,7 @@ import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';
 import { AppState } from '../services/discover_state';
-import { EsHitRecord, FetchStatus } from '../../types';
+import { FetchStatus } from '../../types';
 import {
   DataCharts$,
   DataDocuments$,
@@ -33,6 +33,7 @@ import {
   SavedSearchData,
 } from './use_saved_search';
 import { DiscoverServices } from '../../../build_services';
+import { EsHitRecord } from '../../../types';
 
 export interface FetchDeps {
   abortController: AbortController;

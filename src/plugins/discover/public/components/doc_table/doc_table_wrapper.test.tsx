@@ -12,8 +12,8 @@ import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DocTableWrapper } from './doc_table_wrapper';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { EsHitRecord } from '../../application/types';
 import { buildDataTableRecord } from '../../utils/build_data_record';
+import { EsHitRecord } from '../../types';
 
 describe('Doc table component', () => {
   const mountComponent = (rows?: EsHitRecord[]) => {

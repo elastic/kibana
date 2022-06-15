@@ -14,11 +14,10 @@ import { esHitsComplex } from './es_hits_complex';
 import { discoverServiceMock } from './services';
 import { GridContext } from '../components/discover_grid/discover_grid_context';
 import { convertValueToString } from '../utils/convert_value_to_string';
-import type { ElasticSearchHit } from '../types';
-import { EsHitRecord } from '../application/types';
 import { buildDataTableRecord } from '../utils/build_data_record';
+import { EsHitRecord } from '../types';
 
-const buildGridContext = (dataView: DataView, rows: ElasticSearchHit[]): GridContext => {
+const buildGridContext = (dataView: DataView, rows: EsHitRecord[]): GridContext => {
   const usedRows = rows.map((row) => {
     return buildDataTableRecord(row as EsHitRecord, dataView);
   });

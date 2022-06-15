@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ElasticSearchHit } from '../types';
+import { EsHitRecord } from '../types';
 /**
  * Returning a generated id of a given ES document, since `_id` can be the same
  * when using different indices and shard routing
  */
-export const getDocId = (doc: ElasticSearchHit & { _routing?: string }) => {
+export const getDocId = (doc: EsHitRecord & { _routing?: string }) => {
   const routing = doc._routing ? doc._routing : '';
   return [doc._index, doc._id, routing].join('::');
 };

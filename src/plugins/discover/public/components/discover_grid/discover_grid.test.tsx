@@ -14,11 +14,11 @@ import { esHits } from '../../__mocks__/es_hits';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
-import { ElasticSearchHit } from '../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { buildDataTableRecord } from '../../utils/build_data_record';
 import { getDocId } from '../../utils/get_doc_id';
+import { EsHitRecord } from '../../types';
 
 function getProps() {
   return {
@@ -75,7 +75,7 @@ function getDisplayedDocNr(component: ReactWrapper<DiscoverGridProps>) {
 
 async function toggleDocSelection(
   component: ReactWrapper<DiscoverGridProps>,
-  document: ElasticSearchHit
+  document: EsHitRecord
 ) {
   act(() => {
     const docId = getDocId(document);

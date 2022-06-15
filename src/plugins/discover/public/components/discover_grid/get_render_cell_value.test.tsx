@@ -12,10 +12,9 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { ElasticSearchHit } from '../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { EsHitRecord } from '../../application/types';
 import { buildDataTableRecord } from '../../utils/build_data_record';
+import {EsHitRecord} from "@kbn/discover-plugin/public/types";
 
 const mockServices = {
   uiSettings: {
@@ -34,7 +33,7 @@ jest.mock('../../utils/use_discover_services', () => {
   };
 });
 
-const rowsSource: ElasticSearchHit[] = [
+const rowsSource: EsHitRecord[] = [
   {
     _id: '1',
     _index: 'test',
@@ -46,7 +45,7 @@ const rowsSource: ElasticSearchHit[] = [
   },
 ];
 
-const rowsFields: ElasticSearchHit[] = [
+const rowsFields: EsHitRecord[] = [
   {
     _id: '1',
     _index: 'test',
@@ -59,7 +58,7 @@ const rowsFields: ElasticSearchHit[] = [
   },
 ];
 
-const rowsFieldsWithTopLevelObject: ElasticSearchHit[] = [
+const rowsFieldsWithTopLevelObject: EsHitRecord[] = [
   {
     _id: '1',
     _index: 'test',
@@ -72,7 +71,7 @@ const rowsFieldsWithTopLevelObject: ElasticSearchHit[] = [
   },
 ];
 
-const build = (hit: ElasticSearchHit) => buildDataTableRecord(hit as EsHitRecord, indexPatternMock);
+const build = (hit: EsHitRecord) => buildDataTableRecord(hit, indexPatternMock);
 
 describe('Discover grid cell rendering', function () {
   it('renders bytes column correctly', () => {
@@ -798,7 +797,7 @@ describe('Discover grid cell rendering', function () {
 
   it('renders unmapped fields correctly', () => {
     (indexPatternMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
-    const rowsFieldsUnmapped: ElasticSearchHit[] = [
+    const rowsFieldsUnmapped: EsHitRecord[] = [
       {
         _id: '1',
         _index: 'test',

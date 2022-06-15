@@ -5,13 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { cloneDeep } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-// @ts-expect-error
-import realHits from '../../../../__fixtures__/real_hits';
-
+import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
@@ -24,15 +20,12 @@ import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import { EsHitRecord, FetchStatus } from '../../../types';
+import { FetchStatus } from '../../../types';
 import { AvailableFields$ } from '../../utils/use_saved_search';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 function getCompProps(): DiscoverSidebarProps {
   const indexPattern = stubLogstashIndexPattern;
-  const hits = cloneDeep(realHits).map((hit: EsHitRecord) =>
-    buildDataTableRecord(hit, indexPattern)
-  );
+  const hits = getDataTableRecords(indexPattern);
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
