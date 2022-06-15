@@ -7,12 +7,6 @@
           "deployment_id": null,
           "ref_id": "main-elasticsearch"
         }
-      },
-      "logging": {
-        "destination": {
-          "deployment_id": null,
-          "ref_id": "main-elasticsearch"
-        }
       }
     }
   }
