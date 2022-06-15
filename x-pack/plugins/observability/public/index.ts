@@ -77,7 +77,7 @@ export * from './typings';
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
-export { createUseRulesLink } from './hooks/create_use_rules_link';
+export { useRulesLink } from './hooks/use_rules_link';
 export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
 export type { LinkDescriptor } from './hooks/use_link_props';
 

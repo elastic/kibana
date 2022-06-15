@@ -15,9 +15,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useRulesLink } from '@kbn/observability-plugin/public';
 import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_flyout';
 import { PrefilledThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
-import { InfraClientStartDeps } from '../../../types';
 
 type VisibleFlyoutType = 'inventory' | 'threshold' | null;
 
@@ -25,9 +25,6 @@ export const MetricsAlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [visibleFlyoutType, setVisibleFlyoutType] = useState<VisibleFlyoutType>(null);
   const uiCapabilities = useKibana().services.application?.capabilities;
-  const {
-    services: { observability },
-  } = useKibana<InfraClientStartDeps>();
   const canCreateAlerts = useMemo(
     () => Boolean(uiCapabilities?.infrastructure?.save),
     [uiCapabilities]
@@ -86,7 +83,7 @@ export const MetricsAlertDropdown = () => {
     [setVisibleFlyoutType, closePopover]
   );
 
-  const manageRulesLinkProps = observability.useRulesLink();
+  const manageRulesLinkProps = useRulesLink();
 
   const manageAlertsMenuItem = useMemo(
     () => ({

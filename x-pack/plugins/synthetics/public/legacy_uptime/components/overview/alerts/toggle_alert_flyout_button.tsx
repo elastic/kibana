@@ -17,8 +17,8 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useRulesLink } from '@kbn/observability-plugin/public';
 import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/alerts';
-import { ClientPluginsStart } from '../../../../plugin';
 
 import { ToggleFlyoutTranslations } from './translations';
 import { ToggleAlertFlyoutButtonProps } from './alerts_containers';
@@ -45,10 +45,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const kibana = useKibana();
-  const {
-    services: { observability },
-  } = useKibana<ClientPluginsStart>();
-  const manageRulesUrl = observability.useRulesLink();
+  const manageRulesUrl = useRulesLink();
   const hasUptimeWrite = kibana.services.application?.capabilities.uptime?.save ?? false;
 
   const monitorStatusAlertContextMenuItem: EuiContextMenuPanelItemDescriptor = {

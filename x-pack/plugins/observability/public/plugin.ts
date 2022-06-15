@@ -43,7 +43,6 @@ import { createNavigationRegistry, NavigationEntry } from './services/navigation
 import { updateGlobalNavigation } from './update_global_navigation';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
-import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -267,7 +266,6 @@ export class Plugin
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
-      useRulesLink: createUseRulesLink(),
     };
   }
 
@@ -299,7 +297,6 @@ export class Plugin
         pluginsStart.dataViews,
         pluginsStart.lens
       ),
-      useRulesLink: createUseRulesLink(),
     };
   }
 }

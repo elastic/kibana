@@ -14,9 +14,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { IBasePath } from '@kbn/core/public';
+import { useRulesLink } from '@kbn/observability-plugin/public';
 import { AlertType } from '../../../../common/alert_types';
 import { AlertingFlyout } from '../../alerting/alerting_flyout';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
   defaultMessage: 'Alerts and rules',
@@ -60,9 +60,6 @@ export function AlertingPopoverAndFlyout({
 }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [alertType, setAlertType] = useState<AlertType | null>(null);
-  const {
-    plugins: { observability },
-  } = useApmPluginContext();
   const button = (
     <EuiHeaderLink
       color="text"
@@ -112,7 +109,7 @@ export function AlertingPopoverAndFlyout({
                   'xpack.apm.home.alertsMenu.viewActiveAlerts',
                   { defaultMessage: 'Manage rules' }
                 ),
-                href: observability.useRulesLink().href,
+                href: useRulesLink().href,
                 icon: 'tableOfContents',
               },
             ]
