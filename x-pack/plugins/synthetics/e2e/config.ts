@@ -27,6 +27,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
   const manifestUrl = process.env.SYNTHETICS_SERVICE_MANIFEST ?? kibanaConfig[MANIFEST_KEY];
   const serviceUsername = process.env.SYNTHETICS_SERVICE_USERNAME ?? kibanaConfig[SERVICE_USERNAME];
   const servicePassword = process.env.SYNTHETICS_SERVICE_PASSWORD ?? kibanaConfig[SERVICE_PASSWORD];
+  console.log(manifestUrl);
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
