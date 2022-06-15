@@ -17,7 +17,7 @@ import {
 
 describe('Recurrence scheduler helper', () => {
   describe('getWeekdayInfo', () => {
-    test('11/23/2021 should be the fourth tuesday of this month (november)', () => {
+    test('should return the fourth tuesday of the month for 11/23/2021', () => {
       expect(getWeekdayInfo(moment('11/23/2021'))).toEqual({
         dayOfWeek: 'Tuesday',
         isLastOfMonth: false,
@@ -25,7 +25,7 @@ describe('Recurrence scheduler helper', () => {
       });
     });
 
-    test('11/16/2021 should be the third tuesday of this month (november)', () => {
+    test('should return the third Tuesday of the month 11/16/2021', () => {
       expect(getWeekdayInfo(moment('11/16/2021'))).toEqual({
         dayOfWeek: 'Tuesday',
         isLastOfMonth: false,
@@ -33,7 +33,7 @@ describe('Recurrence scheduler helper', () => {
       });
     });
 
-    test('date is the last month for 12/25/2020', () => {
+    test('should return the last Friday of the month 12/25/2020', () => {
       expect(getWeekdayInfo(moment('12/25/2020'))).toEqual({
         dayOfWeek: 'Friday',
         isLastOfMonth: true,
@@ -41,7 +41,7 @@ describe('Recurrence scheduler helper', () => {
       });
     });
 
-    test('date === null', () => {
+    test('should return expected invalid props for a null date', () => {
       expect(getWeekdayInfo(moment(null))).toEqual({
         dayOfWeek: 'Invalid date',
         isLastOfMonth: true,
@@ -51,7 +51,7 @@ describe('Recurrence scheduler helper', () => {
   });
 
   describe('getInitialByweekday', () => {
-    test('happy path for 11/23/2021', () => {
+    test('when passed empty recurrence params, should return the day of the week of the passed in startDate', () => {
       expect(getInitialByweekday([], moment('11/23/2021'))).toEqual({
         '1': false,
         '2': true,
@@ -63,7 +63,7 @@ describe('Recurrence scheduler helper', () => {
       });
     });
 
-    test('check sanitization', () => {
+    test('when passed recurrence params, should return the passed in days of the week and ignore the startDate', () => {
       expect(getInitialByweekday(['+2MO', '-1FR'], moment('11/23/2021'))).toEqual({
         '1': true,
         '2': false,
@@ -75,7 +75,7 @@ describe('Recurrence scheduler helper', () => {
       });
     });
 
-    test('date === null', () => {
+    test('when passed a null date, should return only Monday', () => {
       expect(getInitialByweekday([], null)).toEqual({
         '1': true,
         '2': false,
@@ -89,11 +89,11 @@ describe('Recurrence scheduler helper', () => {
   });
 
   describe('generateNthByweekday', () => {
-    test('it is the 4th tuesday', () => {
+    test('should parse the 4th tuesday', () => {
       expect(generateNthByweekday(moment('11/23/2021'))).toEqual(['+4TU']);
     });
 
-    test('it is the 3rd tuesday', () => {
+    test('should parse the 3rd tuesday', () => {
       expect(generateNthByweekday(moment('11/16/2021'))).toEqual(['+3TU']);
     });
   });
@@ -143,15 +143,15 @@ describe('Recurrence scheduler helper', () => {
   });
 
   describe('rRuleWeekdayToWeekdayName', () => {
-    test('It is Monday', () => {
+    test('parses 2nd Monday', () => {
       expect(rRuleWeekdayToWeekdayName('+2MO')).toEqual('Monday');
     });
 
-    test('it is Tuesday', () => {
+    test('parses 3rd Tuesday', () => {
       expect(rRuleWeekdayToWeekdayName('+3TU')).toEqual('Tuesday');
     });
 
-    test('it is Friday', () => {
+    test('parses last Friday', () => {
       expect(rRuleWeekdayToWeekdayName('-1FR')).toEqual('Friday');
     });
   });
