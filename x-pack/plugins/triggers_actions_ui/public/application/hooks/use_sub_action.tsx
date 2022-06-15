@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { executeAction } from '../lib/action_connector_api';
@@ -85,7 +85,7 @@ export const useSubAction = <T,>(params: UseSubActionParams | null) => {
   const abortCtrl = useRef(new AbortController());
   const isMounted = useRef(false);
 
-  async function executeSubAction() {
+  const executeSubAction = useCallback(async () => {
     if (params == null) {
       return;
     }
@@ -127,7 +127,7 @@ export const useSubAction = <T,>(params: UseSubActionParams | null) => {
         });
       }
     }
-  }
+  }, [http, params]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -136,8 +136,7 @@ export const useSubAction = <T,>(params: UseSubActionParams | null) => {
       isMounted.current = false;
       abortCtrl.current.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [executeSubAction]);
 
   return {
     ...state,
