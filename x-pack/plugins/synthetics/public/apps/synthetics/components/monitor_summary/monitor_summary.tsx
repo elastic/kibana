@@ -6,6 +6,13 @@
  */
 
 import React from 'react';
+import { useSelector } from 'react-redux';
+import { selectMonitorStatus } from '../../state/monitor_summary';
+import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumbs';
 export const MonitorSummaryPage = () => {
+  const { data } = useSelector(selectMonitorStatus);
+
+  useMonitorListBreadcrumbs([{ text: data?.monitor.name ?? '' }]);
+
   return <></>;
 };
