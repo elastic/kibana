@@ -112,7 +112,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.missingOrFail('confirmRuleCloseModal');
   }
 
-  describe('create alert', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/126873
+  describe.skip('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
