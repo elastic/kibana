@@ -17,15 +17,15 @@ import {
 import 'gridstack/dist/h5/gridstack-dd-native';
 import { EuiButton } from '@elastic/eui';
 
-const CELL_HEIGHT = 28;
+const CELL_HEIGHT = 32;
 const GRID_CLASS = 'dshGrid';
 const HANDLE_CLASS = 'dshPanel__wrapper';
 const PANEL_CLASS = 'dshPanel';
 const NUM_COLUMNS = 48;
-const DEFAULT_PANEL_WIDTH = 24;
-const DEFAULT_PANEL_HEIGHT = 15;
-const DEFAULT_GROUP_HEIGHT = 15;
-const DEFAULT_GUTTERSIZE = 5;
+const DEFAULT_PANEL_WIDTH = NUM_COLUMNS / 2;
+const DEFAULT_PANEL_HEIGHT = NUM_COLUMNS / 3;
+const DEFAULT_GROUP_HEIGHT = NUM_COLUMNS / 3;
+const DEFAULT_GUTTERSIZE = 8;
 
 let grid: GridStack; // TODO: need to move this up into the application and out of this component
 
@@ -86,8 +86,8 @@ export const Grid: FC<Props> = ({
 
     const id = String(count);
     const node: GridStackNode = {
-      w: DEFAULT_PANEL_WIDTH,
-      h: DEFAULT_PANEL_HEIGHT,
+      w: Math.ceil(Math.random() * DEFAULT_PANEL_WIDTH + 1),
+      h: Math.ceil(Math.random() * DEFAULT_PANEL_HEIGHT + 1),
       id,
       content: id,
       resizeHandles: 'se',
@@ -128,8 +128,7 @@ export const Grid: FC<Props> = ({
 
     const updateHeight = () => {
       if (newGroup?.gridstackNode) {
-        console.log({ rows: subGrid.getRow() });
-        grid?.update(newGroup, { h: subGrid.getRow() + 2 });
+        grid?.update(newGroup, { h: subGrid.getRow() + 2 }); // the 2 here accounts for the height of the title and extra space for dragging panels
       }
     };
 
