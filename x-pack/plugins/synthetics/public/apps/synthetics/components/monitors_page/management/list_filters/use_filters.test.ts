@@ -35,13 +35,22 @@ describe('useMonitorListFilters', () => {
     defaultCore.savedObjects.client.find = jest.fn().mockReturnValue({
       aggregations: {
         locations: {
-          buckets: [{ key: 'Test' }, { key: 'Test 1' }],
+          buckets: [
+            { key: 'Test 1', doc_count: 1 },
+            { key: 'Test 2', doc_count: 2 },
+          ],
         },
         tags: {
-          buckets: [{ key: 'Test' }, { key: 'Test 1' }],
+          buckets: [
+            { key: 'Test 3', doc_count: 3 },
+            { key: 'Test 4', doc_count: 4 },
+          ],
         },
         types: {
-          buckets: [{ key: 'Test' }, { key: 'Test 1' }],
+          buckets: [
+            { key: 'Test 5', doc_count: 5 },
+            { key: 'Test 6', doc_count: 6 },
+          ],
         },
       },
     });
@@ -55,9 +64,18 @@ describe('useMonitorListFilters', () => {
     await waitForNextUpdate();
 
     expect(result.current).toStrictEqual({
-      locations: ['Test', 'Test 1'],
-      tags: ['Test', 'Test 1'],
-      types: ['Test', 'Test 1'],
+      locations: [
+        { label: 'Test 1', count: 1 },
+        { label: 'Test 2', count: 2 },
+      ],
+      tags: [
+        { label: 'Test 3', count: 3 },
+        { label: 'Test 4', count: 4 },
+      ],
+      types: [
+        { label: 'Test 5', count: 5 },
+        { label: 'Test 6', count: 6 },
+      ],
     });
   });
 });
