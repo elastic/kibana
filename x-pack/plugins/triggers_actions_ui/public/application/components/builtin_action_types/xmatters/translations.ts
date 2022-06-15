@@ -69,3 +69,10 @@ export const URL_INVALID = i18n.translate(
     defaultMessage: 'URL is invalid.',
   }
 );
+
+export const USERNAME_INVALID = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.error.invalidUsernameTextField',
+  {
+    defaultMessage: 'Username is invalid.',
+  }
+);

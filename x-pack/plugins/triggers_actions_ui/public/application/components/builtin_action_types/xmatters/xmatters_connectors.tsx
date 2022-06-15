@@ -149,7 +149,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
                   label: i18n.USERNAME_LABEL,
                   validations: [
                     {
-                      validator: emptyField(i18n.URL_INVALID),
+                      validator: emptyField(i18n.USERNAME_INVALID),
                     },
                   ],
                 }}

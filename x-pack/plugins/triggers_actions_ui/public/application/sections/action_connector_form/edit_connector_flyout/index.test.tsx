@@ -28,6 +28,11 @@ const updateConnectorResponse = {
   id: '123',
 };
 
+const executeConnectorResponse = {
+  status: 'ok',
+  data: {},
+};
+
 const connector: ActionConnector = {
   id: '123',
   name: 'My test',
@@ -64,6 +69,7 @@ describe('EditConnectorFlyout', () => {
       actions: { save: true, show: true },
     };
     appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
+    appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
   });
 
   it('renders', async () => {
@@ -371,7 +377,160 @@ describe('EditConnectorFlyout', () => {
     });
   });
 
-  describe('Testing', () => {});
+  describe('Testing', () => {
+    it('tests the connector correctly', async () => {
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+          tab={EditConnectorTabs.Test}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('test-connector-form')).toBeInTheDocument();
+      });
+
+      expect(getByTestId('executionAwaiting')).toBeInTheDocument();
+
+      act(() => {
+        userEvent.click(getByTestId('executeActionButton'));
+      });
+
+      await waitFor(() => {
+        expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
+          '/api/actions/connector/123/_execute',
+          { body: '{"params":{}}' }
+        );
+      });
+
+      expect(getByTestId('executionSuccessfulResult')).toBeInTheDocument();
+    });
+
+    it('resets the results when changing tabs', async () => {
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+          tab={EditConnectorTabs.Test}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('test-connector-form')).toBeInTheDocument();
+      });
+
+      expect(getByTestId('executionAwaiting')).toBeInTheDocument();
+
+      act(() => {
+        userEvent.click(getByTestId('executeActionButton'));
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('executionSuccessfulResult')).toBeInTheDocument();
+      });
+
+      act(() => {
+        userEvent.click(getByTestId('configureConnectorTab'));
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('nameInput')).toBeInTheDocument();
+      });
+
+      act(() => {
+        userEvent.click(getByTestId('testConnectorTab'));
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('test-connector-form')).toBeInTheDocument();
+      });
+
+      expect(getByTestId('executionAwaiting')).toBeInTheDocument();
+    });
+
+    it('throws an error correctly', async () => {
+      appMockRenderer.coreStart.http.post = jest
+        .fn()
+        .mockRejectedValue(new Error('error executing'));
+
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+          tab={EditConnectorTabs.Test}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('test-connector-form')).toBeInTheDocument();
+      });
+
+      act(() => {
+        userEvent.click(getByTestId('executeActionButton'));
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('executionFailureResult')).toBeInTheDocument();
+      });
+    });
+
+    it('resets the results when modifying the form', async () => {
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+          tab={EditConnectorTabs.Test}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('test-connector-form')).toBeInTheDocument();
+      });
+
+      act(() => {
+        userEvent.click(getByTestId('executeActionButton'));
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('executionSuccessfulResult')).toBeInTheDocument();
+      });
+
+      act(() => {
+        userEvent.click(getByTestId('configureConnectorTab'));
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('nameInput')).toBeInTheDocument();
+      });
+
+      await act(async () => {
+        await userEvent.clear(getByTestId('nameInput'));
+        await userEvent.type(getByTestId('nameInput'), 'My new name', {
+          delay: 10,
+        });
+      });
+
+      act(() => {
+        userEvent.click(getByTestId('testConnectorTab'));
+      });
+
+      await waitFor(() => {
+        expect(getByTestId('test-connector-form')).toBeInTheDocument();
+      });
+
+      expect(getByTestId('executionAwaiting')).toBeInTheDocument();
+      expect(getByTestId('executeActionButton')).toBeDisabled();
+    });
+  });
 
   describe('Footer', () => {
     it('shows the buttons', async () => {

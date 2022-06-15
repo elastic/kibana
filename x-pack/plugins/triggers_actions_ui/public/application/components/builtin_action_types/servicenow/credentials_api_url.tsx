@@ -51,7 +51,7 @@ const CredentialsApiUrlComponent: React.FC<Props> = ({ isLoading, readOnly, path
           label: i18n.API_URL_LABEL,
           validations: [
             {
-              validator: urlField(i18n.API_URL_REQUIRED),
+              validator: urlField(i18n.API_URL_INVALID),
             },
           ],
         }}

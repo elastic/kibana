@@ -14,10 +14,10 @@ export const API_URL_LABEL = i18n.translate(
   }
 );
 
-export const API_URL_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredApiUrlTextField',
+export const API_URL_INVALID = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.invalidApiUrlTextField',
   {
-    defaultMessage: 'URL is required.',
+    defaultMessage: 'URL is invalid.',
   }
 );
 
