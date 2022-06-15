@@ -9,11 +9,13 @@ deploying {kib}.
 [[using-apis]]
 == Using the APIs
 
-Interact with the {kib} APIs through the `curl` command and HTTP and HTTPs protocols.
+Prepend any {kib} API endpoint with `kbn:` and send the request through <<console-kibana, Dev Tools > Console>>.
+For example:
 
-It is recommended that you use HTTPs on port 5601 because it is more secure.
-
-NOTE: The {kib} Console supports only Elasticsearch APIs. You are unable to interact with the {kib} APIs with the Console and must use `curl` or another HTTP tool instead. For more information, refer to <<console-kibana,Console>>.
+[source,sh]
+--------------------------------------------------
+`GET kbn:/api/index_management/indices`
+--------------------------------------------------
 
 [float]
 [[api-authentication]]
