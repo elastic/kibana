@@ -21,7 +21,7 @@ import {
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
-import { useLink } from '../../hooks';
+import { useLink, useStartServices } from '../../hooks';
 
 import {
   AgentPolicyDebugger,
@@ -70,7 +70,10 @@ const panels = [
 ];
 
 export const DebugPage: React.FunctionComponent = () => {
+  const { chrome } = useStartServices();
   const { getHref } = useLink();
+
+  chrome.docTitle.change(['Debug', 'Fleet']);
 
   return (
     <QueryClientProvider client={queryClient}>
