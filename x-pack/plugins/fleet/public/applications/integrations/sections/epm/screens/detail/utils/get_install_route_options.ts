@@ -11,14 +11,15 @@ import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../
 // or are otherwise not accounted for by verbiage and elements throughout the multi-step UI
 const EXCLUDED_PACKAGES = [
   'apm',
-  'endpoint',
-  'synthetics',
-  'security_detection_engine',
-  'osquery_manager',
-  'dga',
   'cloud_security_posture',
-  'problemchild',
+  'dga',
+  'endpoint',
+  'fleet_server',
   'kubernetes',
+  'osquery_manager',
+  'problemchild',
+  'security_detection_engine',
+  'synthetics',
 ];
 
 interface GetInstallPkgRouteOptionsParams {
