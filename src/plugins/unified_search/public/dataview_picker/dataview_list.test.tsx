@@ -50,6 +50,7 @@ describe('DataView list component', () => {
       currentDataViewId: 'dataview-1',
       onChangeDataView: changeDataViewSpy,
       dataViewsList: list,
+      isTextBasedLangSelected: false,
     };
   });
   it('should trigger the onChangeDataView if a new dataview is selected', async () => {

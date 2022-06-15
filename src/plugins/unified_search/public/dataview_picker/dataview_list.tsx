@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiSelectable, EuiSelectableProps, EuiPanel } from '@elastic/eui';
+import { EuiSelectable, EuiSelectableProps, EuiPanel, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
@@ -45,6 +45,20 @@ export function DataViewsList({
         label: name ? name : title,
         value: id,
         checked: id === currentDataViewId && !isTextBasedLangSelected ? 'on' : undefined,
+        append: isTextBasedLangSelected ? (
+          <EuiToolTip
+            position="top"
+            content={i18n.translate(
+              'unifiedSearch.query.queryBar.indexPattern.textBasedLangSwitchWarning',
+              {
+                defaultMessage:
+                  'The current text-based query will be cleared when switching to a data view. Ensure that you have saved this search to avoid losing your work.',
+              }
+            )}
+          >
+            <EuiIcon type="alert" color="warning" />
+          </EuiToolTip>
+        ) : null,
       }))}
       onChange={(choices) => {
         const choice = choices.find(({ checked }) => checked) as unknown as {

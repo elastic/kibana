@@ -32,6 +32,8 @@ export interface DataViewPickerProps {
   showNewMenuTour?: boolean;
   // list of the supported text-based languages per application
   textBasedLanguages?: TextBasedLanguages[];
+  // called when the user clicks the Save and switch transition modal button
+  onSaveTextLanguageQuery?: () => void;
 }
 
 export const DataViewPicker = ({
@@ -44,6 +46,7 @@ export const DataViewPicker = ({
   selectableProps,
   showNewMenuTour,
   textBasedLanguages,
+  onSaveTextLanguageQuery,
 }: DataViewPickerProps) => {
   return (
     <ChangeDataView
@@ -56,6 +59,7 @@ export const DataViewPicker = ({
       selectableProps={selectableProps}
       showNewMenuTour={showNewMenuTour}
       textBasedLanguages={textBasedLanguages}
+      onSaveTextLanguageQuery={onSaveTextLanguageQuery}
     />
   );
 };
