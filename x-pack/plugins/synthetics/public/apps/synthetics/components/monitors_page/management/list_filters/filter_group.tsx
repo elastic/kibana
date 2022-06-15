@@ -33,20 +33,20 @@ export const FilterGroup = () => {
     {
       label: TYPE_LABEL,
       field: 'monitorType',
-      values: data.types.map((value: string) => ({ label: value, count: 0 })),
+      values: data.types,
     },
     {
       label: LOCATION_LABEL,
       field: 'locations',
-      values: data.locations.map((value: string) => ({
-        label: findLocationItem(value, locations)?.label ?? value,
-        count: 0,
+      values: data.locations.map(({ label, count }) => ({
+        label: findLocationItem(label, locations)?.label ?? label,
+        count,
       })),
     },
     {
       label: TAGS_LABEL,
       field: 'tags',
-      values: data.tags.map((value: string) => ({ label: value, count: 0 })),
+      values: data.tags,
     },
   ];
 

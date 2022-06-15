@@ -31,21 +31,20 @@ const aggs = {
   },
 };
 
+type Buckets = Array<{
+  key: string;
+  doc_count: number;
+}>;
+
 interface AggsResponse {
   types: {
-    buckets: Array<{
-      key: string;
-    }>;
+    buckets: Buckets;
   };
   locations: {
-    buckets: Array<{
-      key: string;
-    }>;
+    buckets: Buckets;
   };
   tags: {
-    buckets: Array<{
-      key: string;
-    }>;
+    buckets: Buckets;
   };
 }
 
@@ -63,9 +62,21 @@ export const useFilters = () => {
   return useMemo(() => {
     const { types, tags, locations } = (data?.aggregations as AggsResponse) ?? {};
     return {
-      types: types?.buckets?.map(({ key }) => key) ?? [],
-      tags: tags?.buckets?.map(({ key }) => key) ?? [],
-      locations: locations?.buckets?.map(({ key }) => key) ?? [],
+      types:
+        types?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
+          count,
+        })) ?? [],
+      tags:
+        tags?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
+          count,
+        })) ?? [],
+      locations:
+        locations?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
+          count,
+        })) ?? [],
     };
   }, [data]);
 };
