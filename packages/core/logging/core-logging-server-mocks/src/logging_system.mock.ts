@@ -7,9 +7,9 @@
  */
 
 // Test helpers to simplify mocking logs and collecting all their outputs
-import { LoggerFactory } from '@kbn/logging';
-import { ILoggingSystem } from './logging_system';
+import type { LoggerFactory } from '@kbn/logging';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 
 const createLoggingSystemMock = () => {
   const mockLog = loggerMock.create();

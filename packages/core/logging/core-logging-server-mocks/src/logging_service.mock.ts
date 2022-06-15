@@ -7,13 +7,12 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-
 import type { LoggingServiceSetup } from '@kbn/core-logging-server';
-import {
+import type {
   LoggingService,
   InternalLoggingServiceSetup,
   InternalLoggingServicePreboot,
-} from './logging_service';
+} from '@kbn/core-logging-server-internal';
 
 const createInternalPrebootMock = (): jest.Mocked<InternalLoggingServicePreboot> => ({
   configure: jest.fn(),

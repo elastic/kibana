@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { loggingSystemMock } from './logging_system.mock';
+export { loggingServiceMock } from './logging_service.mock';
