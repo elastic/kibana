@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,7 +36,20 @@ export const Page: FC = () => {
   );
   const [jobsExist, setJobsExist] = useState(true);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
-  const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds>();
+  // const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds>();
+
+  const setAnalyticsId = useCallback(
+    (analyticsId: AnalyticsSelectorIds) => {
+      setGlobalState({
+        ml: {
+          ...(analyticsId.job_id && !analyticsId.model_id ? { jobId: analyticsId.job_id } : {}),
+          ...(analyticsId.model_id ? { modelId: analyticsId.model_id } : {}),
+        },
+      });
+    },
+    [setGlobalState]
+  );
+
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -58,20 +71,6 @@ export const Page: FC = () => {
   useEffect(function checkJobs() {
     checkJobsExist();
   }, []);
-
-  useEffect(
-    function updateUrl() {
-      if (analyticsId !== undefined) {
-        setGlobalState({
-          ml: {
-            ...(analyticsId.job_id && !analyticsId.model_id ? { jobId: analyticsId.job_id } : {}),
-            ...(analyticsId.model_id ? { modelId: analyticsId.model_id } : {}),
-          },
-        });
-      }
-    },
-    [analyticsId?.job_id, analyticsId?.model_id]
-  );
 
   const getEmptyState = () => {
     if (jobsExist === false) {
@@ -95,8 +94,8 @@ export const Page: FC = () => {
     );
   };
 
-  const jobId = mapJobId ?? analyticsId?.job_id;
-  const modelId = mapModelId ?? analyticsId?.model_id;
+  const jobId = mapJobId;
+  const modelId = mapModelId;
 
   return (
     <>
