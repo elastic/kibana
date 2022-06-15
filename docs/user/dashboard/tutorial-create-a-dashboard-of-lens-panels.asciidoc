@@ -38,7 +38,7 @@ Open the visualization editor, then make sure the correct fields appear.
 
 . On the dashboard, click *Create visualization*.
 
-. Make sure the *Kibana Sample Data Logs* data view appears.
+. Make sure the *kibana_sample_data_logs* data view appears.
 +
 [role="screenshot"]
 image::images/lens_dataViewDropDown_8.3.png[Data view dropdown]

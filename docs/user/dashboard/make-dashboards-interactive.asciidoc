@@ -326,12 +326,12 @@ image:images/dashboard_urlDrilldownGithub_8.3.png[Open ios issues in the elastic
 
 Discover drilldowns enable you to open *Discover* from a *Lens* dashboard panel, taking the time range, filters, and other parameters with you so the context remains the same.
 
-For example, when you want to further explore the data in a *Lens* visualization, you can create a drilldown that opens the visualization data in *Discover*.
+For example, when you create a Discover drilldown for a pie chart, you can click a slice in the pie chart, and only the documents for the slice appear in *Discover*. 
 
 [role="screenshot"]
 image:images/dashboard_discoverDrilldown_8.3.gif[Drilldown on bar vertical stacked chart that navigates to Discover]
 
-Discover drilldowns are supported only by *Lens* panels. 
+NOTE: Discover drilldowns are supported only by *Lens* panels. To open all of the *Lens* dashboard panel data in *Discover*, check <<explore-the-underlying-documents, Open panel data in Discover>>.
 
 [float]
 ===== Create the Discover drilldown
@@ -343,8 +343,6 @@ Create a drilldown that opens *Discover* from the <<gs-get-data-into-kibana,*Sam
 . Click *Open in Discover*.
 
 . Give the drilldown a name. For example, `View bytes distribution in Discover`.
-
-. To take the time range, filters, and other parameters with you, select *Apply filter*.
 
 . To open the Discover drilldown in a new tab, select *Open in new tab*.
 

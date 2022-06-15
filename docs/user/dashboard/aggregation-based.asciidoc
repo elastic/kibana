@@ -153,7 +153,7 @@ Add the sample web logs data that you'll use to create the bar chart, then creat
 
 Open the *Aggregation based* editor and change the time range. 
 
-. On the dashboard, click *All types > Aggregation based*, select *Vertical bar*, then select *Kibana Sample Data Logs*.
+. On the dashboard, click *All types > Aggregation based*, select *Vertical bar*, then select *kibana_sample_data_logs*.
 
 . Make sure the <<set-time-filter, time filter>>> is *Last 7 days*.
 
