@@ -24,10 +24,10 @@ throughput similar to what the {ml} job expects – enabling the respective
 comparison can provide the answer.
 
 [role="screenshot"]
-image::apm/images/time-series-comparison.png[Time series comparison]
+image::apm/images/time-series-expected-bounds-comparison.png[Time series and expected bounds comparison]
 
 Select the *Comparison* box to apply time-based or expected bounds comparison.
-The time comparison options are based on the selected time filter range:
+The time-based comparison options are based on the selected time filter range:
 
 [options="header"]
 |====
@@ -42,6 +42,10 @@ The time comparison options are based on the selected time filter range:
 |> 7 days
 |An identical amount of time immediately before the selected time range
 |====
+
+You can use expected bounds comparison if {ml-jobs} exist in your selected 
+environment and you have 
+{ml-docs}/setup.html#kib-visibility-spaces[access to the {ml-features}].
 
 [discrete]
 [[service-latency]]
