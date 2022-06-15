@@ -20,7 +20,11 @@ export default {
 };
 
 export const UncontrolledExample = () => {
-  return <Grid test={2} />;
+  return <Grid />;
+};
+
+export const Columns12Example = () => {
+  return <Grid columns={12} />;
 };
 
 export const LogsDashboardExample = () => {
