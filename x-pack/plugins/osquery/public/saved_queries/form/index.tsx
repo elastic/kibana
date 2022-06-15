@@ -30,12 +30,14 @@ interface SavedQueryFormProps {
   viewMode?: boolean;
   hasPlayground?: boolean;
   isValid?: boolean;
+  validateFields: (fields: string[]) => void;
 }
 
 const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
   viewMode,
   hasPlayground,
   isValid,
+  validateFields,
 }) => {
   const [playgroundVisible, setPlaygroundVisible] = useState(false);
 
@@ -85,7 +87,7 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
       <EuiSpacer size="xl" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <ECSMappingEditorField euiFieldProps={euiFieldProps} />
+          <ECSMappingEditorField euiFieldProps={euiFieldProps} validateFields={validateFields} />
         </EuiFlexItem>
       </EuiFlexGroup>
       {!viewMode && hasPlayground && (

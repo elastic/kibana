@@ -36,11 +36,11 @@ const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
     defaultValue,
     handleSubmit,
   });
-  const { submit, isSubmitting, isValid } = form;
+  const { submit, isSubmitting, isValid, validateFields } = form;
 
   return (
     <Form form={form}>
-      <SavedQueryForm hasPlayground isValid={isValid} />
+      <SavedQueryForm hasPlayground isValid={isValid} validateFields={validateFields} />
       <EuiBottomBar>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>

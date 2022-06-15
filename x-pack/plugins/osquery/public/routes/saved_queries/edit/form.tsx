@@ -38,11 +38,11 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
     defaultValue,
     handleSubmit,
   });
-  const { submit, isSubmitting } = form;
+  const { submit, isSubmitting, validateFields } = form;
 
   return (
     <Form form={form}>
-      <SavedQueryForm viewMode={viewMode} hasPlayground />
+      <SavedQueryForm viewMode={viewMode} hasPlayground validateFields={validateFields} />
       {!viewMode && (
         <>
           <EuiBottomBar>
