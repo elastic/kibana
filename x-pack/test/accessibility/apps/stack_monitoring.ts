@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y tests for enabling self monitoring', async function () {
+    it('a11y tests for self monitoring home page', async function () {
       await noData.enableMonitoring();
       await a11y.testAppSnapshot();
       await retry.waitForWithTimeout('alert button to be visible', 30000, async () => {
