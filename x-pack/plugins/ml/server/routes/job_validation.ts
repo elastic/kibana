@@ -233,10 +233,16 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
+        const {
+          body: { job, start, end },
+        } = request;
+
         const resp = await validateDatafeedPreview(
           mlClient,
           getAuthorizationHeader(request),
-          request.body.job as CombinedJob
+          job as CombinedJob,
+          start,
+          end
         );
 
         return response.ok({

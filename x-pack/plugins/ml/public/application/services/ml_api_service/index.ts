@@ -214,7 +214,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    validateDatafeedPreview(payload: { job: CombinedJob }) {
+    validateDatafeedPreview(payload: { job: CombinedJob; start?: number; end?: number }) {
       const body = JSON.stringify(payload);
       return httpService.http<DatafeedValidationResponse>({
         path: `${basePath()}/validate/datafeed_preview`,
