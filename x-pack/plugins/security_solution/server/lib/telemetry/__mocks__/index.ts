@@ -14,7 +14,8 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_pol
 import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
 
 export const createMockTelemetryEventsSender = (
-  enableTelemetry?: boolean
+  enableTelemetry?: boolean,
+  canConnect?: boolean
 ): jest.Mocked<TelemetryEventsSender> => {
   return {
     setup: jest.fn(),
@@ -25,6 +26,7 @@ export const createMockTelemetryEventsSender = (
     queueTelemetryEvents: jest.fn(),
     processEvents: jest.fn(),
     isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemetry ?? jest.fn()),
+    isTelemetryServicesReachable: jest.fn().mockReturnValue(canConnect ?? jest.fn()),
     sendIfDue: jest.fn(),
     sendEvents: jest.fn(),
     sendOnDemand: jest.fn(),
@@ -64,8 +66,13 @@ const stubLicenseInfo = {
 };
 
 export const createMockTelemetryReceiver = (
-  diagnosticsAlert?: unknown
+  diagnosticsAlert?: unknown,
+  emptyTimelineTree?: boolean
 ): jest.Mocked<TelemetryReceiver> => {
+  const processTreeResponse = emptyTimelineTree
+    ? Promise.resolve([])
+    : Promise.resolve(Promise.resolve(stubProcessTree()));
+
   return {
     start: jest.fn(),
     fetchClusterInfo: jest.fn().mockReturnValue(stubClusterInfo),
@@ -82,7 +89,7 @@ export const createMockTelemetryReceiver = (
     fetchTimelineEndpointAlerts: jest
       .fn()
       .mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
-    buildProcessTree: jest.fn().mockReturnValue(Promise.resolve(stubProcessTree())),
+    buildProcessTree: jest.fn().mockReturnValue(processTreeResponse),
     fetchTimelineEvents: jest.fn().mockReturnValue(Promise.resolve(stubFetchTimelineEvents())),
   } as unknown as jest.Mocked<TelemetryReceiver>;
 };

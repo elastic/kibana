@@ -211,7 +211,10 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
-export type BulkEditFields = keyof Pick<Rule, 'actions' | 'tags'>;
+export type BulkEditFields = keyof Pick<
+  Rule,
+  'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen'
+>;
 
 export type BulkEditOperation =
   | {
@@ -223,24 +226,22 @@ export type BulkEditOperation =
       operation: 'add' | 'set';
       field: Extract<BulkEditFields, 'actions'>;
       value: NormalizedAlertAction[];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'schedule'>;
+      value: Rule['schedule'];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'throttle'>;
+      value: Rule['throttle'];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'notifyWhen'>;
+      value: Rule['notifyWhen'];
     };
-
-// schedule, throttle, notifyWhen is commented out before https://github.com/elastic/kibana/issues/124850 will be implemented
-// | {
-//     operation: 'set';
-//     field: Extract<BulkEditFields, 'schedule'>;
-//     value: Rule['schedule'];
-//   }
-// | {
-//     operation: 'set';
-//     field: Extract<BulkEditFields, 'throttle'>;
-//     value: Rule['throttle'];
-//   }
-// | {
-//     operation: 'set';
-//     field: Extract<BulkEditFields, 'notifyWhen'>;
-//     value: Rule['notifyWhen'];
-//   };
 
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
 
@@ -1493,6 +1494,36 @@ export class RulesClient {
         false
       );
     });
+
+    // update schedules only if schedule operation is present
+    const scheduleOperation = options.operations.find(
+      (
+        operation
+      ): operation is Extract<BulkEditOperation, { field: Extract<BulkEditFields, 'schedule'> }> =>
+        operation.field === 'schedule'
+    );
+
+    if (scheduleOperation?.value) {
+      const taskIds = updatedRules.reduce<string[]>((acc, rule) => {
+        if (rule.scheduledTaskId) {
+          acc.push(rule.scheduledTaskId);
+        }
+        return acc;
+      }, []);
+
+      try {
+        await this.taskManager.bulkUpdateSchedules(taskIds, scheduleOperation.value);
+        this.logger.debug(
+          `Successfully updated schedules for underlying tasks: ${taskIds.join(', ')}`
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failure to update schedules for underlying tasks: ${taskIds.join(
+            ', '
+          )}. TaskManager bulkUpdateSchedules failed with Error: ${error.message}`
+        );
+      }
+    }
 
     return { rules: updatedRules, errors, total };
   }
