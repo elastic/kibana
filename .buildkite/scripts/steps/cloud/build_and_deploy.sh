@@ -15,35 +15,42 @@ echo "--- Download kibana distribution"
 mkdir -p ./target
 buildkite-agent artifact download "kibana-$VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
-echo "--- Build and push Kibana Cloud Distribution"
-
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT
-
-node scripts/build \
-  --skip-initialize \
-  --skip-generic-folders \
-  --skip-platform-folders \
-  --skip-archives \
-  --docker-images \
-  --docker-tag-qualifier="$GIT_COMMIT" \
-  --docker-push \
-  --skip-docker-ubi \
-  --skip-docker-ubuntu \
-  --skip-docker-contexts
-
+echo "--- Build Cloud Distribution"
 ELASTICSEARCH_MANIFEST_URL="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/$(jq -r '.version' package.json)/manifest-latest-verified.json"
 ELASTICSEARCH_SHA=$(curl -s $ELASTICSEARCH_MANIFEST_URL | jq -r '.sha')
 ELASTICSEARCH_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud:$VERSION-$ELASTICSEARCH_SHA"
 
-CLOUD_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud)
+KIBANA_CLOUD_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION-$GIT_COMMIT"
 CLOUD_DEPLOYMENT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST"
 
+set +e
+DISTRIBUTION_EXISTS=$(docker manifest inspect $KIBANA_CLOUD_IMAGE &> /dev/null; echo $?)
+set -e
+
+if  [ $DISTRIBUTION_EXISTS -eq 0 ]; then
+  echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
+  node scripts/build \
+    --skip-initialize \
+    --skip-generic-folders \
+    --skip-platform-folders \
+    --skip-archives \
+    --docker-images \
+    --docker-tag-qualifier="$GIT_COMMIT" \
+    --docker-push \
+    --skip-docker-ubi \
+    --skip-docker-ubuntu \
+    --skip-docker-contexts
+   docker logout docker.elastic.co
+else
+  echo "Distribution already exists, skipping build"
+fi
+
+echo "--- Create deployment"
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
 JSON_FILE=$(mktemp --suffix ".json")
 if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   jq '
-    .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
+    .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
     .resources.elasticsearch[0].plan.elasticsearch.docker_image = "'$ELASTICSEARCH_CLOUD_IMAGE'" |
     .name = "'$CLOUD_DEPLOYMENT_NAME'" |
     .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
@@ -80,7 +87,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   echo "done"
 else
 ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
-  .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
+  .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
   (.. | select(.version? != null).version) = "'$VERSION'"
   ' > /tmp/deploy.json
 
@@ -101,7 +108,7 @@ cat << EOF | buildkite-agent annotate --style "info" --context cloud
 
   Credentials: \`vault read secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME\`
 
-  Kibana image: \`$CLOUD_IMAGE\`
+  Kibana image: \`$KIBANA_CLOUD_IMAGE\`
 
   Elasticsearch image: \`$ELASTICSEARCH_CLOUD_IMAGE\`
 EOF
