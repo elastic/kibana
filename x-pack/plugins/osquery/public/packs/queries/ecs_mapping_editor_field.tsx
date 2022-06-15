@@ -777,10 +777,11 @@ export const ECSMappingEditorField = React.memo(
     useEffect(() => {
       // Additional 'suspended' validation of osquery ecs fields. fieldsToValidateOnChange doesn't work because it happens before the osquerySchema gets updated.
       const fieldsToValidate = prepareEcsFieldsToValidate(itemsList.current);
-      setTimeout(() => validateFields(fieldsToValidate), 0);
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [query, itemsList.current, validateFields]);
+      // it always is at least 2 - empty fields
+      if (fieldsToValidate.length > 2) {
+        setTimeout(() => validateFields(fieldsToValidate), 0);
+      }
+    }, [query, validateFields]);
 
     useEffect(() => {
       if (!query?.length) {
