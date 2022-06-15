@@ -11,6 +11,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { BaseDataGenerator } from './base_data_generator';
 import {
+  ActivityLogAction,
   ActivityLogActionResponse,
   ActivityLogItemTypes,
   EndpointAction,
@@ -88,6 +89,23 @@ export class FleetActionGenerator extends BaseDataGenerator {
     return Object.assign(this.toEsSearchHit(this.generateResponse(overrides)), {
       _index: AGENT_ACTIONS_RESULTS_INDEX,
     });
+  }
+
+  /**
+   * An Activity Log entry as returned by the Activity log API
+   * @param overrides
+   */
+  generateActivityLogAction(overrides: DeepPartial<ActivityLogAction> = {}): ActivityLogAction {
+    return merge(
+      {
+        type: ActivityLogItemTypes.FLEET_ACTION,
+        item: {
+          id: this.seededUUIDv4(),
+          data: this.generate(),
+        },
+      },
+      overrides
+    );
   }
 
   /**
