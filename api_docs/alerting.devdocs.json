@@ -1487,16 +1487,7 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
-              "PublicMethodsOf",
-              "<",
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.RulesClient",
-                "text": "RulesClient"
-              },
-              ">"
+              "RulesClientApi"
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
