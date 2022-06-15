@@ -224,6 +224,9 @@ export function FieldValueSelection({
   );
 }
 
+// eslint-disable-next-line import/no-default-export
+export default FieldValueSelection;
+
 const Wrapper = styled.div`
   &&& {
     div.euiPopover__anchor {
