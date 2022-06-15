@@ -18,39 +18,6 @@ import {
   rollPreviousFilesInOrder,
 } from './rolling_tasks';
 
-export interface NumericRollingStrategyConfig {
-  type: 'numeric';
-  /**
-   * The suffix pattern to apply when renaming a file. The suffix will be applied
-   * after the `appender.fileName` file name, but before the file extension.
-   *
-   * Must include `%i`, as it is the value that will be converted to the file index
-   *
-   * @example
-   * ```yaml
-   * logging:
-   *   appenders:
-   *     rolling-file:
-   *       type: rolling-file
-   *       fileName: /var/logs/kibana.log
-   *       strategy:
-   *         type: default
-   *         pattern: "-%i"
-   *         max: 5
-   * ```
-   *
-   * will create `/var/logs/kibana-1.log`, `/var/logs/kibana-2.log`, and so on.
-   *
-   * Defaults to `-%i`.
-   */
-  pattern: string;
-  /**
-   * The maximum number of files to keep. Once this number is reached, oldest
-   * files will be deleted. Defaults to `7`
-   */
-  max: number;
-}
-
 export const numericRollingStrategyConfigSchema = schema.object({
   type: schema.literal('numeric'),
   pattern: schema.string({

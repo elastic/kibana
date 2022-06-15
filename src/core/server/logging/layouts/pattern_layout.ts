@@ -45,13 +45,6 @@ const conversions: Conversion[] = [
   DateConversion,
 ];
 
-/** @internal */
-export interface PatternLayoutConfigType {
-  type: 'pattern';
-  highlight?: boolean;
-  pattern?: string;
-}
-
 /**
  * Layout that formats `LogRecord` using the `pattern` string with optional
  * color highlighting (eg. to make log messages easier to read in the terminal).

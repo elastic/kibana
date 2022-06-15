@@ -13,12 +13,6 @@ import { dirname } from 'path';
 
 import { Layouts, LayoutConfigType } from '../../layouts/layouts';
 
-export interface FileAppenderConfig {
-  type: 'file';
-  layout: LayoutConfigType;
-  fileName: string;
-}
-
 /**
  * Appender that formats all the `LogRecord` instances it receives and writes them to the specified file.
  * @internal

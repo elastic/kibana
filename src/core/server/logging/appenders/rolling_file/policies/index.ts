@@ -24,15 +24,6 @@ import {
 
 export type { TriggeringPolicy } from './policy';
 
-/**
- * Any of the existing policy's configuration
- *
- * See {@link SizeLimitTriggeringPolicyConfig} and {@link TimeIntervalTriggeringPolicyConfig}
- */
-export type TriggeringPolicyConfig =
-  | SizeLimitTriggeringPolicyConfig
-  | TimeIntervalTriggeringPolicyConfig;
-
 const defaultPolicy: TimeIntervalTriggeringPolicyConfig = {
   type: 'time-interval',
   interval: moment.duration(24, 'hour'),

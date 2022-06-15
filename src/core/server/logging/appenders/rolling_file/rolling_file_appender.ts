@@ -25,26 +25,6 @@ import {
 import { RollingFileManager } from './rolling_file_manager';
 import { RollingFileContext } from './rolling_file_context';
 
-export interface RollingFileAppenderConfig {
-  type: 'rolling-file';
-  /**
-   * The layout to use when writing log entries
-   */
-  layout: LayoutConfigType;
-  /**
-   * The absolute path of the file to write to.
-   */
-  fileName: string;
-  /**
-   * The {@link TriggeringPolicy | policy} to use to determine if a rollover should occur.
-   */
-  policy: TriggeringPolicyConfig;
-  /**
-   * The {@link RollingStrategy | rollout strategy} to use for rolling.
-   */
-  strategy: RollingStrategyConfig;
-}
-
 /**
  * Appender that formats all the `LogRecord` instances it receives and writes them to the specified file.
  * @internal

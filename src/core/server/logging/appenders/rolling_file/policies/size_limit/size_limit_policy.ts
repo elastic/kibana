@@ -11,15 +11,6 @@ import { LogRecord } from '@kbn/logging';
 import { RollingFileContext } from '../../rolling_file_context';
 import { TriggeringPolicy } from '../policy';
 
-export interface SizeLimitTriggeringPolicyConfig {
-  type: 'size-limit';
-
-  /**
-   * The minimum size the file must have to roll over.
-   */
-  size: ByteSizeValue;
-}
-
 export const sizeLimitTriggeringPolicyConfigSchema = schema.object({
   type: schema.literal('size-limit'),
   size: schema.byteSize({ min: '1b', defaultValue: '100mb' }),

@@ -15,8 +15,6 @@ import { PatternLayout, PatternLayoutConfigType } from './pattern_layout';
 
 const { oneOf } = schema;
 
-export type LayoutConfigType = PatternLayoutConfigType | JsonLayoutConfigType;
-
 /** @internal */
 export class Layouts {
   public static configSchema = oneOf([JsonLayout.configSchema, PatternLayout.configSchema]);

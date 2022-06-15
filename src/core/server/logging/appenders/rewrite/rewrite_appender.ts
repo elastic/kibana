@@ -15,18 +15,7 @@ import {
   RewritePolicyConfig,
 } from './policies';
 
-export interface RewriteAppenderConfig {
-  type: 'rewrite';
-  /**
-   * The {@link Appender | appender(s)} to pass the log event to after
-   * implementing the specified rewrite policy.
-   */
-  appenders: string[];
-  /**
-   * The {@link RewritePolicy | policy} to use to manipulate the provided data.
-   */
-  policy: RewritePolicyConfig;
-}
+
 
 /**
  * Appender that can modify the `LogRecord` instances it receives before passing

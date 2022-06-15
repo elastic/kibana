@@ -56,13 +56,6 @@ export const loggerSchema = schema.object({
   level: levelSchema,
 });
 
-/** @public */
-export interface LoggerConfigType {
-  appenders: string[];
-  name: string;
-  level: LogLevelId;
-}
-
 export const config = {
   path: 'logging',
   schema: schema.object({
@@ -103,13 +96,6 @@ export const loggerContextConfigSchema = schema.object({
 
 /** @public */
 export type LoggerContextConfigType = TypeOf<typeof loggerContextConfigSchema>;
-
-/** @public */
-export interface LoggerContextConfigInput {
-  // config-schema knows how to handle either Maps or Records
-  appenders?: Record<string, AppenderConfigType> | Map<string, AppenderConfigType>;
-  loggers?: LoggerConfigType[];
-}
 
 /**
  * Describes the config used to fully setup logging subsystem.

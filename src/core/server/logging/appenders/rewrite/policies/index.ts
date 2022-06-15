@@ -12,12 +12,6 @@ import { MetaRewritePolicy, MetaRewritePolicyConfig, metaRewritePolicyConfigSche
 
 export type { RewritePolicy };
 
-/**
- * Available rewrite policies which specify what part of a {@link LogRecord}
- * can be modified.
- */
-export type RewritePolicyConfig = MetaRewritePolicyConfig;
-
 export const rewritePolicyConfigSchema = metaRewritePolicyConfigSchema;
 
 export const createRewritePolicy = (config: RewritePolicyConfig): RewritePolicy => {

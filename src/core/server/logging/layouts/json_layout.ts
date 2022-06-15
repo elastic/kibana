@@ -17,11 +17,6 @@ const jsonLayoutSchema = object({
   type: literal('json'),
 });
 
-/** @internal */
-export interface JsonLayoutConfigType {
-  type: 'json';
-}
-
 /**
  * Layout that just converts `LogRecord` into JSON string.
  * @internal

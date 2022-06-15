@@ -32,13 +32,6 @@ export const appendersSchema = schema.oneOf([
   RollingFileAppender.configSchema,
 ]);
 
-/** @public */
-export type AppenderConfigType =
-  | ConsoleAppenderConfig
-  | FileAppenderConfig
-  | RewriteAppenderConfig
-  | RollingFileAppenderConfig;
-
 /** @internal */
 export class Appenders {
   public static configSchema = appendersSchema;

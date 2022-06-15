@@ -13,30 +13,7 @@ import { has, unset } from 'lodash';
 import { assertNever } from '@kbn/std';
 import { RewritePolicy } from '../policy';
 
-type MetaRewritePolicyConfigProperties = Array<{
-  path: string;
-  value?: string | number | boolean | null;
-}>;
 
-export interface MetaRewritePolicyConfig {
-  type: 'meta';
-
-  /**
-   * The 'mode' specifies what action to perform on the specified properties.
-   *   - 'update' updates an existing property at the provided 'path'.
-   *   - 'remove' removes an existing property at the provided 'path'.
-   */
-  mode: 'remove' | 'update';
-
-  /**
-   * The properties to modify.
-   *
-   * @remarks
-   * Each provided 'path' is relative to the record's {@link LogMeta}.
-   * For the 'remove' mode, no 'value' is provided.
-   */
-  properties: MetaRewritePolicyConfigProperties;
-}
 
 export const metaRewritePolicyConfigSchema = schema.object({
   type: schema.literal('meta'),

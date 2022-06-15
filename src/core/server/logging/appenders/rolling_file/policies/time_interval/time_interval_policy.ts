@@ -14,28 +14,7 @@ import { TriggeringPolicy } from '../policy';
 import { getNextRollingTime } from './get_next_rolling_time';
 import { isValidRolloverInterval } from './utils';
 
-export interface TimeIntervalTriggeringPolicyConfig {
-  type: 'time-interval';
 
-  /**
-   * How often a rollover should occur.
-   *
-   * @remarks
-   * Due to how modulate rolling works, it is required to have an integer value for the highest time unit
-   * of the duration (you can't overflow to a higher unit).
-   * For example, `15m` and `4h` are valid values , but `90m` is not (as it is `1.5h`).
-   */
-  interval: Duration;
-
-  /**
-   * Indicates whether the interval should be adjusted to cause the next rollover to occur on the interval boundary.
-   *
-   * For example, if the interval is `4h` and the current hour is 3 am then
-   * the first rollover will occur at 4 am and then next ones will occur at 8 am, noon, 4pm, etc.
-   * The default value is true.
-   */
-  modulate: boolean;
-}
 
 export const timeIntervalTriggeringPolicyConfigSchema = schema.object({
   type: schema.literal('time-interval'),

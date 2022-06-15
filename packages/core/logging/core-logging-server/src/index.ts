@@ -6,6 +6,21 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export type { LoggingServiceSetup, LoggerContextConfigInput } from './contracts';
+export type { LoggerConfigType } from './logger';
+export type { LayoutConfigType, JsonLayoutConfigType, PatternLayoutConfigType } from './layout';
+export type {
+  FileAppenderConfig,
+  ConsoleAppenderConfig,
+  RollingFileAppenderConfig,
+  RewriteAppenderConfig,
+  AppenderConfigType,
+  RollingStrategyConfig,
+  NumericRollingStrategyConfig,
+  TimeIntervalTriggeringPolicyConfig,
+  SizeLimitTriggeringPolicyConfig,
+  TriggeringPolicyConfig,
+  RewritePolicyConfig,
+  MetaRewritePolicyConfigProperty,
+  MetaRewritePolicyConfig,
+} from './appenders';

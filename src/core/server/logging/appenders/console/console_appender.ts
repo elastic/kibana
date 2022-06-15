@@ -12,10 +12,7 @@ import { Layouts, LayoutConfigType } from '../../layouts/layouts';
 
 const { literal, object } = schema;
 
-export interface ConsoleAppenderConfig {
-  type: 'console';
-  layout: LayoutConfigType;
-}
+
 
 /**
  *
