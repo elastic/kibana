@@ -256,7 +256,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           <EuiFlexItem grow={false}>
             {i18n.translate(
               'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.snoozeActions',
-              { defaultMessage: 'Snooze actions' }
+              { defaultMessage: 'Snooze notifications' }
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -266,6 +266,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         <EuiPanel>
           <SnoozePanel
             interval={futureTimeToInterval(item.isSnoozedUntil)}
+            hasTitle={false}
             scheduledSnoozes={item.snoozeSchedule ?? []}
             showCancel={isRuleSnoozed(item)}
             snoozeRule={snoozeRuleInternal}
