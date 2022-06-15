@@ -16,6 +16,10 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import semver from 'semver';
 import { FtrProviderContext } from './ftr_provider_context';
 
+import { tiAbusechMalware } from './pipelines/ti_abusech_malware';
+import { tiAbusechMalwareBazaar } from './pipelines/ti_abusech_malware_bazaar';
+import { tiAbusechUrl } from './pipelines/ti_abusech_url';
+
 const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
   const pattern = resolve(
     __dirname,
@@ -27,7 +31,7 @@ const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
   return chunk(integrationsPaths, chunkSize)[chunkIndex - 1];
 };
 
-export async function SecuritySolutionConfigurableCypressTestRunner(
+export async function ThreatIntelligenceConfigurableCypressTestRunner(
   { getService }: FtrProviderContext,
   command: string,
   envVars?: Record<string, string>
@@ -35,10 +39,26 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
   const log = getService('log');
   const config = getService('config');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
-  await esArchiver.load('x-pack/test/threat_intelligence_cypress/es_archives/threat_intelligence', {
-    docsOnly: true,
-  });
+  const pipelines = [tiAbusechMalware, tiAbusechMalwareBazaar, tiAbusechUrl];
+
+  log.info('configure pipelines');
+
+  for (const pipeline of pipelines) {
+    const { status } = await es.transport.request({
+      method: 'PUT',
+      path: `_ingest/pipeline/${pipeline.name}`,
+      body: {
+        processors: pipeline.processors,
+        on_failure: pipeline.on_failure,
+      },
+    });
+
+    log.info(`PUT pipeline ${pipeline.name}: ${status}`);
+  }
+
+  await esArchiver.load('x-pack/test/threat_intelligence_cypress/es_archives/threat_intelligence');
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
@@ -59,38 +79,40 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
   });
 }
 
-export async function SecuritySolutionCypressCliTestRunnerCI(
+export async function ThreatIntelligenceCypressCliTestRunnerCI(
   context: FtrProviderContext,
   totalCiJobs: number,
   ciJobNumber: number
 ) {
   const integrations = retrieveIntegrations(totalCiJobs, ciJobNumber);
-  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:spec', {
+  return ThreatIntelligenceConfigurableCypressTestRunner(context, 'cypress:run:spec', {
     SPEC_LIST: integrations.join(','),
   });
 }
 
-export async function SecuritySolutionCypressCliResponseOpsTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:respops');
+export async function ThreatIntelligenceCypressCliResponseOpsTestRunner(
+  context: FtrProviderContext
+) {
+  return ThreatIntelligenceConfigurableCypressTestRunner(context, 'cypress:run:respops');
 }
 
-export async function SecuritySolutionCypressCliCasesTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:cases');
+export async function ThreatIntelligenceCypressCliCasesTestRunner(context: FtrProviderContext) {
+  return ThreatIntelligenceConfigurableCypressTestRunner(context, 'cypress:run:cases');
 }
 
-export async function SecuritySolutionCypressCliTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run');
+export async function ThreatIntelligenceCypressCliTestRunner(context: FtrProviderContext) {
+  return ThreatIntelligenceConfigurableCypressTestRunner(context, 'cypress:run');
 }
 
-export async function SecuritySolutionCypressCliFirefoxTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:firefox');
+export async function ThreatIntelligenceCypressCliFirefoxTestRunner(context: FtrProviderContext) {
+  return ThreatIntelligenceConfigurableCypressTestRunner(context, 'cypress:run:firefox');
 }
 
-export async function SecuritySolutionCypressVisualTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:open');
+export async function ThreatIntelligenceCypressVisualTestRunner(context: FtrProviderContext) {
+  return ThreatIntelligenceConfigurableCypressTestRunner(context, 'cypress:open');
 }
 
-export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrProviderContext) {
+export async function ThreatIntelligenceCypressCcsTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   await withProcRunner(log, async (procs) => {
@@ -114,7 +136,7 @@ export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrPr
   });
 }
 
-export async function SecuritySolutionCypressUpgradeCliTestRunner({
+export async function ThreatIntelligenceCypressUpgradeCliTestRunner({
   getService,
 }: FtrProviderContext) {
   const log = getService('log');
