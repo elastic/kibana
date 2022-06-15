@@ -28,8 +28,6 @@ data-type="inline"
 
 *Controls* are interactive panels you add to your dashboards to filter and display only the data you want to explore.
 
-deprecated::[8.3.0, "The new controls replace the previous link:https://www.elastic.co/guide/en/kibana/8.1/drilldowns.html#add-controls[*Input controls*]. Input controls are deprecated in 8.3.0, and will be removed in a future release."]
-
 There are two types of controls:
 
 * *Options list* &mdash; Adds a dropdown that allows you to filter the data with one or more options that you select.
