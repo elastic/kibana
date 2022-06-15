@@ -12,6 +12,7 @@ import { tEnum } from '../../utils/t_enum';
 export enum LocationStatus {
   GA = 'ga',
   EXPERIMENTAL = 'experimental',
+  BETA = 'beta',
 }
 
 export enum BandwidthLimitKey {
@@ -71,6 +72,7 @@ export const MonitorServiceLocationCodec = t.intersection([
     label: t.string,
     geo: LocationGeoCodec,
     url: t.string,
+    status: LocationStatusCodec,
   }),
 ]);
 
