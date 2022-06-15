@@ -1255,7 +1255,7 @@ export class RulesClient {
             );
 
             this.logger.debug(
-              `Alert update has rescheduled the underlying task: ${updateResult.scheduledTaskId}`
+              `Rule update has rescheduled the underlying task: ${updateResult.scheduledTaskId}`
             );
           } catch (err) {
             this.logger.error(
