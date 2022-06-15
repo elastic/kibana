@@ -38,7 +38,9 @@ export const GettingStarted = () => {
         href: '#',
         text: i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' }),
         // TODO telemetry for navigating away from getting started via breadcrumbs
-        onClick: () => {},
+        onClick: () => {
+          trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__home_breadcrumb');
+        },
       },
       {
         text: i18n.translate('home.breadcrumbs.gettingStartedTitle', {
