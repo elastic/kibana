@@ -1,11 +1,11 @@
 patch:
+  summary: Updates external connection details, such as the closure type and default connector for cases.
   description: >
-    Updates external connection details, such as the closure type and default
-    connector for cases. You must have all privileges for the **Cases** feature
-    in the **Management**, **Observability**, or **Security** section of the
-    Kibana feature privileges, depending on the owner of the case configuration.
+    You must have `all` privileges for the **Cases** feature in the
+    **Management**, **Observability**, or **Security** section of the Kibana
+    feature privileges, depending on the owner of the case configuration.
     Connectors are used to interface with external systems. You must create a
-    connector before you can it in your cases. Refer to the add connectors API.
+    connector before you can use it in your cases. Refer to the add connectors API.
   tags:
     - cases
     - kibana

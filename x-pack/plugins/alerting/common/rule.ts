@@ -41,6 +41,7 @@ export enum RuleExecutionStatusErrorReasons {
   License = 'license',
   Timeout = 'timeout',
   Disabled = 'disabled',
+  Validate = 'validate',
 }
 
 export enum RuleExecutionStatusWarningReasons {

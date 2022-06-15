@@ -18,13 +18,11 @@ export const links: LinkItem = {
     defaultMessage: 'A comprehensive overview of all hosts and host-related security events.',
   }),
   path: HOSTS_PATH,
-  globalNavEnabled: true,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.hosts', {
       defaultMessage: 'Hosts',
     }),
   ],
-  globalNavOrder: 9002,
   links: [
     {
       id: SecurityPageName.uncommonProcesses,
