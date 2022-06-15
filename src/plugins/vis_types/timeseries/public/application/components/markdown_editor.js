@@ -23,6 +23,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getDataViewsStart } from '../../services';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
+import './_markdown_editor.scss';
+
 export class MarkdownEditor extends Component {
   constructor(props) {
     super(props);
