@@ -38,6 +38,7 @@ interface TimeseriesVisualizationProps {
   uiState: PersistedState;
   syncColors: boolean;
   syncTooltips: boolean;
+  initialRender: () => void;
 }
 
 function TimeseriesVisualization({

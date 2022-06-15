@@ -122,6 +122,7 @@ describe('XYChart component', () => {
       syncTooltips: false,
       useLegacyTimeAxis: false,
       eventAnnotationService: eventAnnotationServiceMock,
+      renderComplete: jest.fn(),
     };
   });
 
