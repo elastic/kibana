@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/s/${space}${API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: "${journeyId}" AND ${syntheticsMonitorType}.attributes.project_id: "${projectId}"`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: "${journeyId}" AND ${syntheticsMonitorType}.attributes.project_id: "${projectId}"`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -126,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
           projectMonitors.monitors.map((monitor) => {
             return supertest
               .get(API_URLS.SYNTHETICS_MONITORS)
-              .query({ query: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
+              .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
               .set('kbn-xsrf', 'true')
               .expect(200);
           })
@@ -168,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
           projectMonitors.monitors.map((monitor) => {
             return supertest
               .get(API_URLS.SYNTHETICS_MONITORS)
-              .query({ query: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
+              .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
               .set('kbn-xsrf', 'true')
               .expect(200);
           })
@@ -210,7 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
         const getResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -258,7 +258,7 @@ export default function ({ getService }: FtrProviderContext) {
         const getResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -306,7 +306,7 @@ export default function ({ getService }: FtrProviderContext) {
         const getResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -381,7 +381,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(API_URLS.SYNTHETICS_MONITORS)
           .auth(username, password)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${secondMonitor.id}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -501,7 +501,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -555,7 +555,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);

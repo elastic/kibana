@@ -58,6 +58,7 @@ export {
   getCoreVitalsComponent,
   HeaderMenuPortal,
   FieldValueSuggestions,
+  FieldValueSelection,
   FilterValueLabel,
   SelectableUrlList,
   ExploratoryView,
