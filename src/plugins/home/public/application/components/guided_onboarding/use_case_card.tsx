@@ -46,7 +46,7 @@ export const UseCaseCard = ({ useCase }: { useCase: UseCase }) => {
           className="gettingStarted__useCaseIcon"
         />
       }
-      image={<div className={`gettingStarted__useCaseCard gettingStarted__${useCase}`} />}
+      image={<div className={`homUseCaseCard homUseCaseCard--${useCase}`} />}
       title={
         <EuiTitle size="xs">
           <h4>
