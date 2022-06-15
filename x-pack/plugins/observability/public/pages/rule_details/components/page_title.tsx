@@ -39,7 +39,7 @@ export function PageTitle({ rule }: PageHeaderProps) {
         </EuiText>
         <EuiSpacer size="s" />
       </EuiFlexItem>
-      <EuiFlexGroup alignItems="baseline">
+      <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem component="span" grow={false}>
           <EuiText color="subdued" size="xs">
             <b>{LAST_UPDATED_MESSAGE}</b> {BY_WORD} {rule.updatedBy} {ON_WORD}&nbsp;
@@ -48,15 +48,17 @@ export function PageTitle({ rule }: PageHeaderProps) {
             {moment(rule.createdAt).format('ll')}
           </EuiText>
         </EuiFlexItem>
-
-        {rule.tags.length > 0 &&
-          triggersActionsUi.getRuleTagBadge({
-            isOpen: isTagsPopoverOpen,
-            tags: rule.tags,
-            onClick: () => tagsClicked(),
-            onClose: () => closeTagsPopover(),
-          })}
+        <EuiSpacer size="xs" />
       </EuiFlexGroup>
+      {rule.tags.length > 0 &&
+        triggersActionsUi.getRuleTagBadge({
+          spread: true,
+          isOpen: isTagsPopoverOpen,
+          tags: rule.tags,
+          onClick: () => tagsClicked(),
+          onClose: () => closeTagsPopover(),
+        })}
+      <EuiSpacer size="xs" />
     </>
   );
 }
