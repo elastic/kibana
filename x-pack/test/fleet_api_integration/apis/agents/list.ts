@@ -73,9 +73,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should work with pit', async () => {
-      let { body: apiResponse } = await supertest.get(`/api/fleet/agents/openPit`).expect(200);
+      let { body: apiResponse } = await supertest
+        .post(`/api/fleet/agents/openPit`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
 
-      expect(apiResponse.pitId).not.to.be(undefined);
+      const pitId = apiResponse.pitId;
+
+      expect(pitId).not.to.be(undefined);
 
       ({ body: apiResponse } = await supertest
         .get(`/api/fleet/agents?pitId=${apiResponse.pitId}`)
@@ -83,9 +88,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(apiResponse.items.length).to.be.greaterThan(0);
 
-      ({ body: apiResponse } = await supertest
-        .post(`/api/fleet/agents/closePit/${apiResponse.pitId}`)
-        .expect(200));
+      await supertest
+        .post(`/api/fleet/agents/closePit/${pitId}`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
     });
   });
 }
