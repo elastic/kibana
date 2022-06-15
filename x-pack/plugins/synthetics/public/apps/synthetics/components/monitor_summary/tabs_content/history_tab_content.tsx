@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { EuiText } from '@elastic/eui';
 import React from 'react';
-export const MonitorSummaryPage = () => {
-  return <></>;
+
+export const HistoryTabContent = () => {
+  return <EuiText>Monitor history tab content</EuiText>;
 };

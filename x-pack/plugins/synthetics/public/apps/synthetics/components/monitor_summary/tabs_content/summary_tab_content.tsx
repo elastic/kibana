@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { EuiText } from '@elastic/eui';
 import React from 'react';
-export const MonitorSummaryPage = () => {
-  return <></>;
+
+export const SummaryTabContent = () => {
+  return <EuiText>Monitor summary tab content</EuiText>;
 };

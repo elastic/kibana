@@ -14,7 +14,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
-import { MonitorSummaryTabs } from './components/monitor_summary/monitor_summary_tabs';
+import { RunTestManually } from './components/monitor_summary/run_test_manually';
+import { MonitorSummaryHeaderContent } from './components/monitor_summary/monitor_summary_header_content';
 import { MonitorSummaryTitle } from './components/monitor_summary/monitor_summary_title';
 import { MonitorSummaryPage } from './components/monitor_summary/monitor_summary';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
@@ -87,17 +88,10 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
         hasShadow: false,
       },
       pageHeader: {
-        children: <MonitorSummaryTabs />,
-        pageTitle: (
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <MonitorSummaryTitle />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        rightSideItems: [
-          /* <AddMonitorBtn />*/
-        ],
+        paddingSize: 'none',
+        children: <MonitorSummaryHeaderContent />,
+        pageTitle: <MonitorSummaryTitle />,
+        rightSideItems: [<RunTestManually />],
       },
     },
     {

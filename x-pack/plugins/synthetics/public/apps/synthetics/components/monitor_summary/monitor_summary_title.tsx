@@ -7,6 +7,8 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { MonitorSummaryLastRunInfo } from './last_run_info';
 import { getMonitorStatusAction, selectMonitorStatus } from '../../state/monitor_summary';
 
 export const MonitorSummaryTitle = () => {
@@ -20,5 +22,10 @@ export const MonitorSummaryTitle = () => {
     dispatch(getMonitorStatusAction.get({ monitorId, dateStart: 'now-15m', dateEnd: 'now' }));
   }, [dispatch, monitorId]);
 
-  return <>{data?.monitor.name}</>;
+  return (
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexItem>{data?.monitor.name}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{data && <MonitorSummaryLastRunInfo ping={data} />}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };

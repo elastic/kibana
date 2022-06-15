@@ -5,57 +5,43 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiSpacer, EuiTabbedContent, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { ErrorsTabContent } from './tabs_content/errors_tab_content';
+import { HistoryTabContent } from './tabs_content/history_tab_content';
+import { SummaryTabContent } from './tabs_content/summary_tab_content';
 
 export const MonitorSummaryTabs = () => {
   const tabs = [
     {
       id: 'summary',
-      name: 'Summary',
+      name: SUMMARY_LABEL,
       content: (
         <>
           <EuiSpacer />
-          <EuiText>
-            <p>
-              Cobalt is a chemical element with symbol Co and atomic number 27. Like nickel, cobalt
-              is found in the Earth&rsquo;s crust only in chemically combined form, save for small
-              deposits found in alloys of natural meteoric iron. The free element, produced by
-              reductive smelting, is a hard, lustrous, silver-gray metal.
-            </p>
-          </EuiText>
+          <SummaryTabContent />
         </>
       ),
     },
     {
       id: 'history',
-      name: 'History',
+      name: HISTORY_LABEL,
       content: (
         <>
           <EuiSpacer />
-          <EuiText>
-            <p>
-              Intravenous sugar solution, also known as dextrose solution, is a mixture of dextrose
-              (glucose) and water. It is used to treat low blood sugar or water loss without
-              electrolyte loss.
-            </p>
-          </EuiText>
+          <HistoryTabContent />
         </>
       ),
     },
     {
       id: 'errors',
-      name: 'Errors',
-      prepend: <EuiIcon type="heatmap" />,
+      name: ERRORS_LABEL,
+      prepend: <EuiIcon type="alert" color="danger" />,
       content: (
         <>
           <EuiSpacer />
-          <EuiText>
-            <p>
-              Hydrogen is a chemical element with symbol H and atomic number 1. With a standard
-              atomic weight of 1.008, hydrogen is the lightest element on the periodic table
-            </p>
-          </EuiText>
+          <ErrorsTabContent />
         </>
       ),
     },
@@ -66,9 +52,19 @@ export const MonitorSummaryTabs = () => {
       tabs={tabs}
       initialSelectedTab={tabs[1]}
       autoFocus="selected"
-      onTabClick={(tab) => {
-        console.log('clicked tab', tab);
-      }}
+      onTabClick={(tab) => {}}
     />
   );
 };
+
+const SUMMARY_LABEL = i18n.translate('xpack.synthetics.monitorSummary.summary', {
+  defaultMessage: 'Summary',
+});
+
+const HISTORY_LABEL = i18n.translate('xpack.synthetics.monitorSummary.history', {
+  defaultMessage: 'History',
+});
+
+const ERRORS_LABEL = i18n.translate('xpack.synthetics.monitorSummary.errors', {
+  defaultMessage: 'Errors',
+});
