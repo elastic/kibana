@@ -107,6 +107,8 @@ export function monitorManagementPageProvider({
     },
 
     async clickAddMonitor() {
+      const isEnabled = await this.checkIsEnabled();
+      console.warn('isEnabled', isEnabled);
       await page.click('text=Add monitor');
     },
 
