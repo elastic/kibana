@@ -1259,7 +1259,7 @@ export class RulesClient {
             );
           } catch (err) {
             this.logger.error(
-              `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
+              `Rule update failed to run its underlying task. TaskManager bulkUpdateSchedules failed with Error: ${err.message}`
             );
           }
         }
