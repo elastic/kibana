@@ -107,7 +107,7 @@ const modelColumns = [
 ];
 
 interface Props {
-  setAnalyticsId: React.Dispatch<React.SetStateAction<AnalyticsSelectorIds | undefined>>;
+  setAnalyticsId: (update: AnalyticsSelectorIds) => void;
   jobsOnly?: boolean;
   setIsIdSelectorFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
