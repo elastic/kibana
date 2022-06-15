@@ -15,6 +15,11 @@ export type ChangeDataViewTriggerProps = EuiButtonProps & {
   title?: string;
 };
 
+export enum TextBasedLanguages {
+  SQL = 'SQL',
+  ESQL = 'ESQL',
+}
+
 /** @public */
 export interface DataViewPickerProps {
   trigger: ChangeDataViewTriggerProps;
@@ -25,6 +30,8 @@ export interface DataViewPickerProps {
   onAddField?: () => void;
   onDataViewCreated?: () => void;
   showNewMenuTour?: boolean;
+  // list of the supported text-based languages per application
+  textBasedLanguages?: TextBasedLanguages[];
 }
 
 export const DataViewPicker = ({
@@ -36,6 +43,7 @@ export const DataViewPicker = ({
   trigger,
   selectableProps,
   showNewMenuTour,
+  textBasedLanguages,
 }: DataViewPickerProps) => {
   return (
     <ChangeDataView
@@ -47,6 +55,7 @@ export const DataViewPicker = ({
       trigger={trigger}
       selectableProps={selectableProps}
       showNewMenuTour={showNewMenuTour}
+      textBasedLanguages={textBasedLanguages}
     />
   );
 };

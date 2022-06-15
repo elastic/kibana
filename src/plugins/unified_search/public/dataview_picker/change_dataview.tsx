@@ -31,6 +31,7 @@ import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewPickerProps } from '.';
 import { DataViewsList } from './dataview_list';
+import { TextBasedLanguagesList } from './text_languages_list';
 import { changeDataViewStyles } from './change_dataview.styles';
 
 const NEW_DATA_VIEW_MENU_STORAGE_KEY = 'data.newDataViewMenu';
@@ -63,11 +64,13 @@ export function ChangeDataView({
   trigger,
   selectableProps,
   showNewMenuTour = false,
+  textBasedLanguages,
 }: DataViewPickerProps) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   const [triggerLabel, setTriggerLabel] = useState('');
+  const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(false);
   const kibana = useKibana<IDataPluginServices>();
   const { application, data, storage } = kibana.services;
   const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
@@ -213,9 +216,48 @@ export function ChangeDataView({
           currentDataViewId={currentDataViewId}
           selectableProps={selectableProps}
           searchListInputId={searchListInputId}
+          isTextBasedLangSelected={isTextBasedLangSelected}
         />
       </>
     );
+
+    if (textBasedLanguages?.length) {
+      panelItems.push(
+        <EuiHorizontalRule margin="none" />,
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="none"
+          justifyContent="spaceBetween"
+          css={css`
+            margin: ${euiTheme.size.s};
+            margin-bottom: 0;
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <h5>
+                {i18n.translate(
+                  'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesLabel',
+                  {
+                    defaultMessage: 'Text-based query languages',
+                  }
+                )}
+              </h5>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>,
+        <TextBasedLanguagesList
+          textBasedLanguages={textBasedLanguages}
+          selectedOption={triggerLabel}
+          onChange={(lang) => {
+            setTriggerLabel(lang);
+            setPopoverIsOpen(false);
+            setIsTextBasedLangSelected(true);
+            // also update the query with the sql query
+          }}
+        />
+      );
+    }
 
     return panelItems;
   };

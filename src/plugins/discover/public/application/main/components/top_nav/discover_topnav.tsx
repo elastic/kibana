@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Query, TimeRange } from '@kbn/data-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
+import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
@@ -182,6 +183,7 @@ export const DiscoverTopNav = ({
     onAddField: addField,
     onDataViewCreated: createNewDataView,
     onChangeDataView: (newIndexPatternId: string) => onChangeIndexPattern(newIndexPatternId),
+    textBasedLanguages: ['SQL'] as DataViewPickerProps['textBasedLanguages'],
   };
 
   return (

@@ -16,7 +16,7 @@ export type { UnifiedSearchPublicPluginStart, UnifiedSearchPluginSetup } from '.
 export { SearchBar } from './search_bar';
 export { FilterLabel, FilterItem } from './filter_bar';
 export { DataViewsList } from './dataview_picker/dataview_list';
-export { DataViewPicker } from './dataview_picker';
+export { DataViewPicker, DataViewPickerProps } from './dataview_picker';
 
 export type { ApplyGlobalFilterActionContext } from './actions';
 export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
