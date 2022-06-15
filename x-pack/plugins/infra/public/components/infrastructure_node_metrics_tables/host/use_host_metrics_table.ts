@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
-import type { MetricsMap, SortState, UseNodeMetricsTableOptions } from '../shared';
+import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
 import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
+import { createMetricByFieldLookup } from '../shared/hooks/metrics_to_api_options';
+import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 type HostMetricsField =
   | 'system.cpu.cores'
@@ -20,24 +21,28 @@ type HostMetricsField =
   | 'system.memory.total'
   | 'system.memory.used.pct';
 
-const hostMetricsMap: MetricsMap<HostMetricsField> = {
-  'system.cpu.cores': { aggregation: 'max', field: 'system.cpu.cores' },
-  'system.cpu.total.norm.pct': {
-    aggregation: 'avg',
-    field: 'system.cpu.total.norm.pct',
+const hostsMetricsQueryConfig: MetricsQueryOptions<HostMetricsField> = {
+  sourceFilter: {
+    term: {
+      'event.module': 'system',
+    },
   },
-  'system.memory.total': { aggregation: 'max', field: 'system.memory.total' },
-  'system.memory.used.pct': {
-    aggregation: 'avg',
-    field: 'system.memory.used.pct',
+  groupByField: 'host.name',
+  metricsMap: {
+    'system.cpu.cores': { aggregation: 'max', field: 'system.cpu.cores' },
+    'system.cpu.total.norm.pct': {
+      aggregation: 'avg',
+      field: 'system.cpu.total.norm.pct',
+    },
+    'system.memory.total': { aggregation: 'max', field: 'system.memory.total' },
+    'system.memory.used.pct': {
+      aggregation: 'avg',
+      field: 'system.memory.used.pct',
+    },
   },
 };
 
-const { options: hostMetricsOptions, metricByField } = metricsToApiOptions(
-  hostMetricsMap,
-  'host.name'
-);
-export { metricByField };
+export const metricByField = createMetricByFieldLookup(hostsMetricsQueryConfig.metricsMap);
 
 export interface HostNodeMetricsRow {
   name: string;
@@ -54,10 +59,14 @@ export function useHostMetricsTable({ timerange, filterClauseDsl }: UseNodeMetri
     direction: 'desc',
   });
 
-  const hostsFilterClauseDsl = useMemo(
-    () => addEventModuleFilter(filterClauseDsl),
-    [filterClauseDsl]
-  );
+  const [hostMetricsOptions, setHostsMetricsOptions] = useState<MetricsExplorerOptions>();
+
+  useEffect(() => {
+    if (!hostMetricsOptions) {
+      const { options } = metricsToApiOptions(hostsMetricsQueryConfig, filterClauseDsl);
+      setHostsMetricsOptions(options);
+    }
+  }, [filterClauseDsl, hostMetricsOptions]);
 
   const {
     isLoading,
@@ -66,7 +75,6 @@ export function useHostMetricsTable({ timerange, filterClauseDsl }: UseNodeMetri
   } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
     metricsExplorerOptions: hostMetricsOptions,
     timerange,
-    filterClauseDsl: hostsFilterClauseDsl,
     transform: seriesToHostNodeMetricsRow,
     sortState,
     currentPageIndex,
@@ -81,25 +89,6 @@ export function useHostMetricsTable({ timerange, filterClauseDsl }: UseNodeMetri
     setCurrentPageIndex,
     sortState,
     setSortState,
-  };
-}
-
-function addEventModuleFilter(
-  filterClauseDsl: QueryDslQueryContainer | undefined
-): QueryDslQueryContainer {
-  return {
-    bool: {
-      filter: [
-        {
-          term: {
-            'event.module': 'system',
-          },
-        },
-        {
-          ...filterClauseDsl,
-        },
-      ],
-    },
   };
 }
 

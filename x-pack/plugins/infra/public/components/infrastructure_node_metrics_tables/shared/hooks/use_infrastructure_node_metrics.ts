@@ -6,10 +6,10 @@
  */
 
 import { parse } from '@kbn/datemath';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
+  MetricsExplorerRequestBody,
   MetricsExplorerResponse,
   MetricsExplorerSeries,
 } from '../../../../../common/http_api/metrics_explorer';
@@ -26,9 +26,8 @@ export interface SortState<T> {
 }
 
 interface UseInfrastructureNodeMetricsOptions<T> {
-  metricsExplorerOptions: MetricsExplorerOptions;
+  metricsExplorerOptions?: MetricsExplorerOptions;
   timerange: Pick<MetricsExplorerTimeOptions, 'from' | 'to'>;
-  filterClauseDsl?: QueryDslQueryContainer;
   transform: (series: MetricsExplorerSeries) => T;
   sortState: SortState<T>;
   currentPageIndex: number;
@@ -48,14 +47,7 @@ const nullData: MetricsExplorerResponse = {
 export const useInfrastructureNodeMetrics = <T>(
   options: UseInfrastructureNodeMetricsOptions<T>
 ) => {
-  const {
-    metricsExplorerOptions,
-    timerange,
-    filterClauseDsl,
-    transform,
-    sortState,
-    currentPageIndex,
-  } = options;
+  const { metricsExplorerOptions, timerange, transform, sortState, currentPageIndex } = options;
 
   const [transformedNodes, setTransformedNodes] = useState<T[]>([]);
   const fetch = useKibanaHttpFetch();
@@ -65,16 +57,16 @@ export const useInfrastructureNodeMetrics = <T>(
   const [{ state: promiseState }, fetchNodes] = useTrackedPromise(
     {
       createPromise: (): Promise<MetricsExplorerResponse> => {
-        if (!source) {
+        if (!source || !metricsExplorerOptions) {
           return Promise.resolve(nullData);
         }
 
-        const request = {
+        const request: MetricsExplorerRequestBody = {
           metrics: metricsExplorerOptions.metrics,
           groupBy: metricsExplorerOptions.groupBy,
           limit: NODE_COUNT_LIMIT,
           indexPattern: source.configuration.metricAlias,
-          filterQuery: JSON.stringify(filterClauseDsl),
+          filterQuery: metricsExplorerOptions.filterQuery,
           timerange: timerangeWithInterval,
         };
 
@@ -93,7 +85,7 @@ export const useInfrastructureNodeMetrics = <T>(
       },
       cancelPreviousOn: 'creation',
     },
-    [source, metricsExplorerOptions, timerangeWithInterval, filterClauseDsl]
+    [source, metricsExplorerOptions, timerangeWithInterval]
   );
   const isLoadingNodes = promiseState === 'pending' || promiseState === 'uninitialized';
 

@@ -5,40 +5,45 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
-import type { MetricsMap, SortState, UseNodeMetricsTableOptions } from '../shared';
+import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
 import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
+import { createMetricByFieldLookup } from '../shared/hooks/metrics_to_api_options';
+import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 type ContainerMetricsField =
   | 'kubernetes.container.start_time'
   | 'kubernetes.container.cpu.usage.node.pct'
   | 'kubernetes.container.memory.usage.bytes';
 
-const containerMetricsMap: MetricsMap<ContainerMetricsField> = {
-  'kubernetes.container.start_time': {
-    aggregation: 'max',
-    field: 'kubernetes.container.start_time',
+const containerMetricsQueryConfig: MetricsQueryOptions<ContainerMetricsField> = {
+  sourceFilter: {
+    term: {
+      'event.dataset': 'kubernetes.container',
+    },
   },
-  'kubernetes.container.cpu.usage.node.pct': {
-    aggregation: 'avg',
-    field: 'kubernetes.container.cpu.usage.node.pct',
-  },
-  'kubernetes.container.memory.usage.bytes': {
-    aggregation: 'avg',
-    field: 'kubernetes.container.memory.usage.bytes',
+  groupByField: 'kubernetes.pod.name',
+  metricsMap: {
+    'kubernetes.container.start_time': {
+      aggregation: 'max',
+      field: 'kubernetes.container.start_time',
+    },
+    'kubernetes.container.cpu.usage.node.pct': {
+      aggregation: 'avg',
+      field: 'kubernetes.container.cpu.usage.node.pct',
+    },
+    'kubernetes.container.memory.usage.bytes': {
+      aggregation: 'avg',
+      field: 'kubernetes.container.memory.usage.bytes',
+    },
   },
 };
 
-const { options: containerMetricsOptions, metricByField } = metricsToApiOptions(
-  containerMetricsMap,
-  'container.id'
-);
-export { metricByField };
+export const metricByField = createMetricByFieldLookup(containerMetricsQueryConfig.metricsMap);
 
 export interface ContainerNodeMetricsRow {
   name: string;
@@ -57,10 +62,14 @@ export function useContainerMetricsTable({
     direction: 'desc',
   });
 
-  const containersFilterClauseDsl = useMemo(
-    () => addEventModuleFilter(filterClauseDsl),
-    [filterClauseDsl]
-  );
+  const [containerMetricsOptions, setContainerMetricsOptions] = useState<MetricsExplorerOptions>();
+
+  useEffect(() => {
+    if (!containerMetricsOptions) {
+      const { options } = metricsToApiOptions(containerMetricsQueryConfig, filterClauseDsl);
+      setContainerMetricsOptions(options);
+    }
+  }, [filterClauseDsl, containerMetricsOptions]);
 
   const {
     isLoading,
@@ -69,7 +78,6 @@ export function useContainerMetricsTable({
   } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({
     metricsExplorerOptions: containerMetricsOptions,
     timerange,
-    filterClauseDsl: containersFilterClauseDsl,
     transform: seriesToContainerNodeMetricsRow,
     sortState,
     currentPageIndex,
@@ -84,25 +92,6 @@ export function useContainerMetricsTable({
     setCurrentPageIndex,
     sortState,
     setSortState,
-  };
-}
-
-function addEventModuleFilter(
-  filterClauseDsl: QueryDslQueryContainer | undefined
-): QueryDslQueryContainer {
-  return {
-    bool: {
-      filter: [
-        {
-          term: {
-            'event.module': 'kubernetes',
-          },
-        },
-        {
-          ...filterClauseDsl,
-        },
-      ],
-    },
   };
 }
 

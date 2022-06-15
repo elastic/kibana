@@ -5,40 +5,45 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
-import type { MetricsMap, SortState, UseNodeMetricsTableOptions } from '../shared';
+import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
 import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
+import { createMetricByFieldLookup } from '../shared/hooks/metrics_to_api_options';
+import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 type PodMetricsField =
   | 'kubernetes.pod.start_time'
   | 'kubernetes.pod.cpu.usage.node.pct'
   | 'kubernetes.pod.memory.usage.bytes';
 
-const podMetricsMap: MetricsMap<PodMetricsField> = {
-  'kubernetes.pod.start_time': {
-    aggregation: 'max',
-    field: 'kubernetes.pod.start_time',
+const podMetricsQueryConfig: MetricsQueryOptions<PodMetricsField> = {
+  sourceFilter: {
+    term: {
+      'event.dataset': 'kubernetes.pod',
+    },
   },
-  'kubernetes.pod.cpu.usage.node.pct': {
-    aggregation: 'avg',
-    field: 'kubernetes.pod.cpu.usage.node.pct',
-  },
-  'kubernetes.pod.memory.usage.bytes': {
-    aggregation: 'avg',
-    field: 'kubernetes.pod.memory.usage.bytes',
+  groupByField: 'kubernetes.pod.name',
+  metricsMap: {
+    'kubernetes.pod.start_time': {
+      aggregation: 'max',
+      field: 'kubernetes.pod.start_time',
+    },
+    'kubernetes.pod.cpu.usage.node.pct': {
+      aggregation: 'avg',
+      field: 'kubernetes.pod.cpu.usage.node.pct',
+    },
+    'kubernetes.pod.memory.usage.bytes': {
+      aggregation: 'avg',
+      field: 'kubernetes.pod.memory.usage.bytes',
+    },
   },
 };
 
-const { options: podMetricsOptions, metricByField } = metricsToApiOptions(
-  podMetricsMap,
-  'kubernetes.pod.name'
-);
-export { metricByField };
+export const metricByField = createMetricByFieldLookup(podMetricsQueryConfig.metricsMap);
 
 export interface PodNodeMetricsRow {
   name: string;
@@ -53,11 +58,14 @@ export function usePodMetricsTable({ timerange, filterClauseDsl }: UseNodeMetric
     field: 'averageCpuUsagePercent',
     direction: 'desc',
   });
+  const [podMetricsOptions, setPodMetricsOptions] = useState<MetricsExplorerOptions>();
 
-  const podsFilterClauseDsl = useMemo(
-    () => addEventModuleFilter(filterClauseDsl),
-    [filterClauseDsl]
-  );
+  useEffect(() => {
+    if (!podMetricsOptions) {
+      const { options } = metricsToApiOptions(podMetricsQueryConfig, filterClauseDsl);
+      setPodMetricsOptions(options);
+    }
+  }, [filterClauseDsl, podMetricsOptions]);
 
   const {
     isLoading,
@@ -66,7 +74,6 @@ export function usePodMetricsTable({ timerange, filterClauseDsl }: UseNodeMetric
   } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({
     metricsExplorerOptions: podMetricsOptions,
     timerange,
-    filterClauseDsl: podsFilterClauseDsl,
     transform: seriesToPodNodeMetricsRow,
     sortState,
     currentPageIndex,
@@ -81,25 +88,6 @@ export function usePodMetricsTable({ timerange, filterClauseDsl }: UseNodeMetric
     setCurrentPageIndex,
     sortState,
     setSortState,
-  };
-}
-
-function addEventModuleFilter(
-  filterClauseDsl: QueryDslQueryContainer | undefined
-): QueryDslQueryContainer {
-  return {
-    bool: {
-      filter: [
-        {
-          term: {
-            'event.module': 'kubernetes',
-          },
-        },
-        {
-          ...filterClauseDsl,
-        },
-      ],
-    },
   };
 }
 

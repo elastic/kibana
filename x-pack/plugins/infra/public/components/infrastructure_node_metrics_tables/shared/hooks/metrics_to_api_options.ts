@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   MetricsExplorerOptions,
   MetricsExplorerOptionsMetric,
@@ -40,6 +41,15 @@ If the endpoint where to change its return format to:
 Then this code would no longer be needed.
 */
 
+// MetricsQueryOptions wraps the basic things needed to build the query for metrics
+// sourceFilter is used to define filter to get only relevant docs that contain metrics info
+// e.g: { 'source.module': 'system' }
+export interface MetricsQueryOptions<T extends string> {
+  sourceFilter?: QueryDslQueryContainer;
+  groupByField: string;
+  metricsMap: MetricsMap<T>;
+}
+
 // The input to this generic type is a (union) string type that defines all the fields we want to
 // request metrics for. This input type serves as something like a "source of truth" for which
 // fields are being used. The resulting MetricsMap and metricByField helper ensures a type safe
@@ -57,27 +67,46 @@ export interface NodeMetricsExplorerOptionsMetric<Field extends string>
   field: Field;
 }
 
-export function metricsToApiOptions<T extends string>(metricsMap: MetricsMap<T>, groupBy: string) {
-  const metrics = Object.values(metricsMap) as Array<NodeMetricsExplorerOptionsMetric<T>>;
+export function metricsToApiOptions<T extends string>(
+  metricsQueryOptions: MetricsQueryOptions<T>,
+  filterClauseDsl?: QueryDslQueryContainer
+) {
+  const metrics = Object.values(metricsQueryOptions.metricsMap) as Array<
+    NodeMetricsExplorerOptionsMetric<T>
+  >;
 
   const options: MetricsExplorerOptions = {
     aggregation: 'avg',
-    groupBy,
+    groupBy: metricsQueryOptions.groupByField,
     metrics,
+    filterQuery: JSON.stringify(
+      buildFilterClause(filterClauseDsl, metricsQueryOptions.sourceFilter)
+    ),
   };
-
-  const metricByField = createFieldLookup(Object.keys(metricsMap) as T[], metrics);
 
   return {
     options,
-    metricByField,
   };
 }
 
-function createFieldLookup<T extends string>(
-  fields: T[],
-  metrics: Array<NodeMetricsExplorerOptionsMetric<T>>
-) {
+function buildFilterClause(
+  filterClauseDsl: QueryDslQueryContainer | undefined,
+  baseFilter: QueryDslQueryContainer | undefined
+): QueryDslQueryContainer {
+  return {
+    bool: {
+      filter: [
+        { ...(!!baseFilter ? baseFilter : {}) },
+        { ...(!!filterClauseDsl ? filterClauseDsl : {}) },
+      ],
+    },
+  };
+}
+
+export function createMetricByFieldLookup<T extends string>(metricMap: MetricsMap<T>) {
+  const fields = Object.keys(metricMap) as T[];
+  const metrics = Object.values(metricMap) as Array<NodeMetricsExplorerOptionsMetric<T>>;
+
   const setMetricIndexToField = (acc: Record<T, string>, field: T) => {
     return {
       ...acc,
