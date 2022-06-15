@@ -8,7 +8,7 @@
 
 import React, { FunctionComponent, createElement } from 'react';
 
-import { EUI_STYLES_GLOBAL } from '../../../utils';
+import { EUI_STYLES_GLOBAL } from '@kbn/core-base-common';
 import { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
 import { Styles } from './styles';
