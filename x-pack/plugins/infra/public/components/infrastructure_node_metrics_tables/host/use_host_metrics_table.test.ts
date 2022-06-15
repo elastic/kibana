@@ -47,7 +47,11 @@ describe('useHostMetricsTable hook', () => {
     );
 
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ filterClauseDsl: filterClauseWithEventModuleFilter })
+      expect.objectContaining({
+        metricsExplorerOptions: expect.objectContaining({
+          filterQuery: JSON.stringify(filterClauseWithEventModuleFilter),
+        }),
+      })
     );
   });
 });

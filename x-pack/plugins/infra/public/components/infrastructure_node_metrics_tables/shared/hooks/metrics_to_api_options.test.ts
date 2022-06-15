@@ -6,8 +6,11 @@
  */
 
 import type { MetricsExplorerOptions } from '../../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { createMetricByFieldLookup, MetricsQueryOptions } from './metrics_to_api_options';
-import { metricsToApiOptions } from './metrics_to_api_options';
+import {
+  createMetricByFieldLookup,
+  MetricsQueryOptions,
+  metricsToApiOptions,
+} from './metrics_to_api_options';
 
 describe('metricsToApiOptions', () => {
   type TestNodeTypeMetricsField = 'test.node.type.field1' | 'test.node.type.field2';
@@ -57,7 +60,7 @@ describe('metricsToApiOptions', () => {
     expect(options).toEqual({
       aggregation: 'avg',
       groupBy: 'test.node.type.groupingField',
-      filterQuery: JSON.stringify({ bool: { filter: [{ term: { 'event.module': 'test' } }, {}] } }),
+      filterQuery: JSON.stringify({ bool: { filter: [{ term: { 'event.module': 'test' } }] } }),
       metrics: [
         {
           field: 'test.node.type.field1',

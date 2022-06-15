@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
@@ -13,7 +13,6 @@ import type {
 import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
 import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
 import { createMetricByFieldLookup } from '../shared/hooks/metrics_to_api_options';
-import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 type HostMetricsField =
   | 'system.cpu.cores'
@@ -59,14 +58,10 @@ export function useHostMetricsTable({ timerange, filterClauseDsl }: UseNodeMetri
     direction: 'desc',
   });
 
-  const [hostMetricsOptions, setHostsMetricsOptions] = useState<MetricsExplorerOptions>();
-
-  useEffect(() => {
-    if (!hostMetricsOptions) {
-      const { options } = metricsToApiOptions(hostsMetricsQueryConfig, filterClauseDsl);
-      setHostsMetricsOptions(options);
-    }
-  }, [filterClauseDsl, hostMetricsOptions]);
+  const { options: hostMetricsOptions } = useMemo(
+    () => metricsToApiOptions(hostsMetricsQueryConfig, filterClauseDsl),
+    [filterClauseDsl]
+  );
 
   const {
     isLoading,

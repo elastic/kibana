@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
@@ -13,7 +13,6 @@ import type {
 import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
 import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
 import { createMetricByFieldLookup } from '../shared/hooks/metrics_to_api_options';
-import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 type PodMetricsField =
   | 'kubernetes.pod.start_time'
@@ -58,14 +57,11 @@ export function usePodMetricsTable({ timerange, filterClauseDsl }: UseNodeMetric
     field: 'averageCpuUsagePercent',
     direction: 'desc',
   });
-  const [podMetricsOptions, setPodMetricsOptions] = useState<MetricsExplorerOptions>();
 
-  useEffect(() => {
-    if (!podMetricsOptions) {
-      const { options } = metricsToApiOptions(podMetricsQueryConfig, filterClauseDsl);
-      setPodMetricsOptions(options);
-    }
-  }, [filterClauseDsl, podMetricsOptions]);
+  const { options: podMetricsOptions } = useMemo(
+    () => metricsToApiOptions(podMetricsQueryConfig, filterClauseDsl),
+    [filterClauseDsl]
+  );
 
   const {
     isLoading,

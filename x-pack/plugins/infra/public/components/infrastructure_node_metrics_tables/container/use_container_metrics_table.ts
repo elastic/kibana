@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
@@ -13,7 +13,6 @@ import type {
 import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
 import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
 import { createMetricByFieldLookup } from '../shared/hooks/metrics_to_api_options';
-import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 type ContainerMetricsField =
   | 'kubernetes.container.start_time'
@@ -26,7 +25,7 @@ const containerMetricsQueryConfig: MetricsQueryOptions<ContainerMetricsField> = 
       'event.dataset': 'kubernetes.container',
     },
   },
-  groupByField: 'kubernetes.pod.name',
+  groupByField: 'container.id',
   metricsMap: {
     'kubernetes.container.start_time': {
       aggregation: 'max',
@@ -62,14 +61,10 @@ export function useContainerMetricsTable({
     direction: 'desc',
   });
 
-  const [containerMetricsOptions, setContainerMetricsOptions] = useState<MetricsExplorerOptions>();
-
-  useEffect(() => {
-    if (!containerMetricsOptions) {
-      const { options } = metricsToApiOptions(containerMetricsQueryConfig, filterClauseDsl);
-      setContainerMetricsOptions(options);
-    }
-  }, [filterClauseDsl, containerMetricsOptions]);
+  const { options: containerMetricsOptions } = useMemo(
+    () => metricsToApiOptions(containerMetricsQueryConfig, filterClauseDsl),
+    [filterClauseDsl]
+  );
 
   const {
     isLoading,

@@ -28,7 +28,7 @@ describe('useContainerMetricsTable hook', () => {
 
     const filterClauseWithEventModuleFilter = {
       bool: {
-        filter: [{ term: { 'event.module': 'kubernetes' } }, { ...filterClauseDsl }],
+        filter: [{ term: { 'event.dataset': 'kubernetes.container' } }, { ...filterClauseDsl }],
       },
     };
 
@@ -40,7 +40,11 @@ describe('useContainerMetricsTable hook', () => {
     );
 
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ filterClauseDsl: filterClauseWithEventModuleFilter })
+      expect.objectContaining({
+        metricsExplorerOptions: expect.objectContaining({
+          filterQuery: JSON.stringify(filterClauseWithEventModuleFilter),
+        }),
+      })
     );
   });
 });

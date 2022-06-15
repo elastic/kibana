@@ -6,6 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ObjectValues } from '../../../../../common/utility_types';
 import type {
   MetricsExplorerOptions,
   MetricsExplorerOptionsMetric,
@@ -101,8 +102,8 @@ function buildFilterClause(
 }
 
 export function createMetricByFieldLookup<T extends string>(metricMap: MetricsMap<T>) {
-  const fields = Object.keys(metricMap) as T[];
-  const metrics = Object.values(metricMap) as Array<NodeMetricsExplorerOptionsMetric<T>>;
+  const fields = Object.keys(metricMap) as Array<keyof typeof metricMap>;
+  const metrics = Object.values(metricMap) as ObjectValues<typeof metricMap>;
 
   const setMetricIndexToField = (acc: Record<T, string>, field: T) => {
     return {
