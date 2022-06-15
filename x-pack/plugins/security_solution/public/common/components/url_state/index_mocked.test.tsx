@@ -203,42 +203,6 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       });
     });
 
-    // TODO Move the test to another file
-    // test('sourcerer redux state updates the url', () => {
-    //   mockProps = getMockPropsObj({
-    //     page: CONSTANTS.networkPage,
-    //     examplePath: '/network',
-    //     namespaceLower: 'network',
-    //     pageName: SecurityPageName.network,
-    //     detailName: undefined,
-    //   }).noSearch.undefinedQuery;
-
-    //   (useLocation as jest.Mock).mockReturnValue({
-    //     pathname: mockProps.pathName,
-    //   });
-
-    //   const wrapper = mount(
-    //     <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
-    //   );
-    //   const newUrlState = {
-    //     ...mockProps.urlState,
-    //     sourcerer: ['cool', 'patterns'],
-    //   };
-
-    //   wrapper.setProps({
-    //     hookProps: { ...mockProps, urlState: newUrlState, isInitializing: false },
-    //   });
-    //   wrapper.update();
-
-    //   expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
-    //     hash: '',
-    //     pathname: '/network',
-    //     search:
-    //       "?sourcerer=!(cool,patterns)&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
-    //     state: '',
-    //   });
-    // });
-
     test("administration page doesn't has query string when grouped nav disabled", () => {
       mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
       mockProps = getMockPropsObj({

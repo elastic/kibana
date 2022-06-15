@@ -37,7 +37,7 @@ export type SubPluginsInitReducer = HostsPluginReducer &
 export const createInitialState = (
   pluginsInitState: Omit<
     SecuritySubPlugins['store']['initialState'],
-    'app' | 'dragAndDrop' | 'inputs' | 'sourcerer' | 'globalUrlState'
+    'app' | 'dragAndDrop' | 'inputs' | 'sourcerer' | 'globalUrlParam'
   >,
   {
     defaultDataView,

@@ -14,7 +14,7 @@ export const initialGlobalUrlParam: GlobalUrlParam = {};
 
 export const globalUrlParamReducer = reducerWithInitialState(initialGlobalUrlParam)
   .case(registerUrlParam, (state, { key, initialValue }) => {
-    // It doesn't allow 2 places using the same query param
+    // It doesn't allow the query param to be used twice
     if (state[key] !== undefined) {
       throw new Error(`Url param string '${key}' is already being used.`);
     }

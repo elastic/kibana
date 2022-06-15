@@ -28,7 +28,7 @@ interface RegisterUrlParams<State> {
 }
 
 /**
- * Adds urlStateKey and the initial value to redux store.
+ * Adds UrlParamKey and the initial value to redux store.
  */
 export const registerUrlParam = <State>({
   urlParamKey,

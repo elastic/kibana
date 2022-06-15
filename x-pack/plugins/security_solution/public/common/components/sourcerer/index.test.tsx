@@ -27,9 +27,11 @@ import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { TimelineId, TimelineType } from '../../../../common/types';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
+import { updateUrlParam } from '../../utils/global_query_string';
 
 const mockDispatch = jest.fn();
 
+jest.mock('../../utils/global_query_string');
 jest.mock('../../containers/sourcerer');
 jest.mock('../../containers/sourcerer/use_signal_helpers');
 const mockUseUpdateDataView = jest.fn().mockReturnValue(() => true);
@@ -411,6 +413,52 @@ describe('Sourcerer component', () => {
       })
     );
   });
+
+  it('onSave updates the URL param', () => {
+    store = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          kibanaDataViews: [
+            mockGlobalState.sourcerer.defaultDataView,
+            {
+              ...mockGlobalState.sourcerer.defaultDataView,
+              id: '1234',
+              title: 'filebeat-*',
+              patternList: ['filebeat-*'],
+            },
+          ],
+          sourcererScopes: {
+            ...mockGlobalState.sourcerer.sourcererScopes,
+            [SourcererScopeName.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+              selectedDataViewId: id,
+              selectedPatterns: patternListNoSignals.slice(0, 2),
+            },
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="sourcerer-save"]`).first().simulate('click');
+
+    expect(updateUrlParam).toHaveBeenCalledWith(
+      expect.objectContaining({ urlParamKey: 'sourcerer' })
+    );
+  });
+
   it('resets to default index pattern', async () => {
     const wrapper = mount(
       <TestProviders store={store}>

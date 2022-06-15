@@ -98,3 +98,4 @@ export const GlobalHeader = React.memo(
     );
   }
 );
+GlobalHeader.displayName = 'GlobalHeader';
