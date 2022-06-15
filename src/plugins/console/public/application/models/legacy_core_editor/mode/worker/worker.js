@@ -2017,22 +2017,6 @@ ace.define(
           next();
         }
       },
-      variable = function () {
-        let variable = '';
-        if (ch === '$') {
-          next('$');
-          next('{');
-          while (ch) {
-            variable += ch;
-            if (ch === '}') {
-              next('}');
-              return variable
-            }
-            next();
-          }
-        }
-        error('Bad variable');
-      },
       newLine = function () {
         if (ch == '\n') next();
       },
@@ -2203,8 +2187,6 @@ ace.define(
           return string();
         case '-':
           return number();
-        case '$':
-          return variable();
         default:
           return ch >= '0' && ch <= '9' ? number() : word();
       }

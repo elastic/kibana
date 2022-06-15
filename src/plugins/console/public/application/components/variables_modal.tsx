@@ -83,7 +83,7 @@ export function DevToolsVariablesModal({ onClose, onSaveVariables, variablesServ
           <Controller
             control={control}
             defaultValue={variable}
-            rules={{ required: true, pattern: /^[A-Za-z]+$/i }}
+            rules={{ required: true }}
             render={({ field }) => (
               <EuiFieldText
                 placeholder="Add a new variable"

@@ -61,13 +61,13 @@ export function InputHighlightRules() {
         'start',
         'url'
       ),
-      addEOL(['whitespace', 'variable.punctuation'], /(\s+)(\${\w+})/, 'start', 'url'),
+      addEOL(['whitespace', 'variable.template'], /(\s+)(\${\w+})/, 'start', 'url'),
       addEOL(['whitespace', 'url.protocol_host'], /(\s+)(https?:\/\/[^?\/,]+)/, 'start', 'url'),
       addEOL(['whitespace', 'url.slash'], /(\s+)(\/)/, 'start', 'url'),
       addEOL(['whitespace'], /(\s+)/, 'start', 'url')
     ),
     url: mergeTokens(
-      addEOL(['variable.punctuation'], /(\${\w+})/, 'start'),
+      addEOL(['variable.template'], /(\${\w+})/, 'start'),
       addEOL(['url.part'], /(_sql)/, 'start-sql', 'url-sql'),
       addEOL(['url.part'], /([^?\/,\s]+)/, 'start'),
       addEOL(['url.comma'], /(,)/, 'start'),
@@ -75,7 +75,7 @@ export function InputHighlightRules() {
       addEOL(['url.questionmark'], /(\?)/, 'start', 'urlParams')
     ),
     urlParams: mergeTokens(
-      addEOL(['url.param', 'url.equal', 'variable.punctuation'], /([^&=]+)(=)(\${\w+})/, 'start'),
+      addEOL(['url.param', 'url.equal', 'variable.template'], /([^&=]+)(=)(\${\w+})/, 'start'),
       addEOL(['url.param', 'url.equal', 'url.value'], /([^&=]+)(=)([^&]*)/, 'start'),
       addEOL(['url.param'], /([^&=]+)/, 'start'),
       addEOL(['url.amp'], /(&)/, 'start')
@@ -132,7 +132,7 @@ export function InputHighlightRules() {
   // Add comment rules to json rule set
   this.$rules.json.unshift({ include: 'comments' });
 
-  this.$rules.json.unshift({ token: 'variable.punctuation', regex: /(\${\w+})/ });
+  this.$rules.json.unshift({ token: 'variable.template', regex: /("\${\w+}")/ });
 
   if (this.constructor === InputHighlightRules) {
     this.normalizeRules();

@@ -255,8 +255,8 @@ export class SenseEditor {
 
     request.url = '';
 
-    while (t && t.type && (t.type.indexOf('url') === 0 || t.type === 'variable.punctuation')) {
-      if (t.type === 'variable.punctuation') {
+    while (t && t.type && (t.type.indexOf('url') === 0 || t.type === 'variable.template')) {
+      if (t.type === 'variable.template') {
         t.value = replaceVariableWithValue(t.value);
       }
       request.url += t.value;
@@ -284,10 +284,22 @@ export class SenseEditor {
         end: dataEndPos,
       };
       let data = this.coreEditor.getValueInRange(bodyRange)!;
-      const re = /(\${\w+})/g;
+      const re = /("\${\w+}")/g;
 
       data = data.replaceAll(re, (match) => {
-        const value = replaceVariableWithValue(match);
+        const key = match.replace(/[^a-z]+/g, '');
+        const value = getVariables().extractValue(key);
+
+        if (
+          !(value.startsWith('{') && value.endsWith('}')) &&
+          isNaN(parseFloat(value)) &&
+          !(value.startsWith('[') && value.endsWith(']')) &&
+          value !== 'true' &&
+          value !== 'false'
+        ) {
+          return JSON.stringify(value);
+        }
+
         return value;
       });
 
