@@ -6,6 +6,7 @@
  */
 
 import type { Dispatch, Reducer } from 'react';
+import { CommandInputProps } from '../command_input';
 import type { Command, CommandDefinition, CommandExecutionComponent } from '../../types';
 
 export interface ConsoleDataState {
@@ -18,8 +19,8 @@ export interface ConsoleDataState {
   /** UI function that scrolls the console down to the bottom */
   scrollToBottom: () => void;
 
-  /** UI function that places focus on the Input area of the console (show cursor blinking) */
-  focusOnInputArea: () => void;
+  /** UI interface that places allows interaction with the `KeyCapture` component */
+  keyCapture: CommandInputProps['focusRef'];
 
   /**
    * List of commands entered by the user and being shown in the UI
@@ -69,7 +70,7 @@ export interface CommandExecutionState {
 
 export type ConsoleDataAction =
   | { type: 'scrollDown' }
-  | { type: 'focusOnInputArea' }
+  | { type: 'addFocusToKeyCapture' }
   | { type: 'executeCommand'; payload: { input: string } }
   | { type: 'clear' }
   | {

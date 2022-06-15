@@ -6,7 +6,7 @@
  */
 
 import React, { CSSProperties, memo, ReactElement, useCallback, useMemo } from 'react';
-import { EuiPopover } from '@elastic/eui';
+import { EuiFocusTrap, EuiPopover } from '@elastic/eui';
 import { CommandInputHistory } from './command_input_history';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
@@ -37,7 +37,7 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
 
   const handlePopoverOnClose = useCallback(() => {
     dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
-    dispatch({ type: 'focusOnInputArea' });
+    dispatch({ type: 'addFocusToKeyCapture' });
   }, [dispatch]);
 
   return (
@@ -53,7 +53,9 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
       focusTrapProps={focusTrapProps}
       ownFocus={false}
     >
-      {show === 'input-history' && <CommandInputHistory />}
+      <EuiFocusTrap clickOutsideDisables={true}>
+        {show === 'input-history' && <CommandInputHistory />}
+      </EuiFocusTrap>
     </EuiPopover>
   );
 });

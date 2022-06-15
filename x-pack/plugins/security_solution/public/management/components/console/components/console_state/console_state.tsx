@@ -26,15 +26,7 @@ type ConsoleStateProviderProps = PropsWithChildren<{}> & InitialStateInterface;
  * A Console wide data store for internal state management between inner components
  */
 export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
-  ({
-    commands,
-    scrollToBottom,
-    focusOnInputArea,
-    HelpComponent,
-    dataTestSubj,
-    managedKey,
-    children,
-  }) => {
+  ({ commands, scrollToBottom, keyCapture, HelpComponent, dataTestSubj, managedKey, children }) => {
     const [getConsoleState, storeConsoleState] = useWithManagedConsoleState(managedKey);
 
     const stateInitializer = useCallback(
@@ -46,7 +38,7 @@ export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
 
     const [state, dispatch] = useReducer(
       stateDataReducer,
-      { commands, scrollToBottom, focusOnInputArea, HelpComponent, dataTestSubj },
+      { commands, scrollToBottom, keyCapture, HelpComponent, dataTestSubj },
       stateInitializer
     );
 

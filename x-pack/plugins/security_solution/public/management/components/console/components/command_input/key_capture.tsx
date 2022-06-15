@@ -11,6 +11,7 @@ import React, {
   memo,
   MutableRefObject,
   useCallback,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -46,6 +47,11 @@ const KeyCaptureContainer = styled.span`
   }
 `;
 
+interface KeyCaptureFocusInterface {
+  focus: (force?: boolean) => void;
+  blur: () => void;
+}
+
 export interface KeyCaptureProps {
   onCapture: (params: {
     value: string | undefined;
@@ -55,7 +61,7 @@ export interface KeyCaptureProps {
     >;
   }) => void;
   onStateChange?: (isCapturing: boolean) => void;
-  focusRef?: MutableRefObject<((force?: boolean) => void) | null>;
+  focusRef?: MutableRefObject<KeyCaptureFocusInterface | null>;
 }
 
 /**
@@ -135,17 +141,25 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
     });
   }, []);
 
-  const setFocus = useCallback((force: boolean = false) => {
-    // If user selected text and `force` is not true, then don't focus (else they lose selection)
-    if (!force && (window.getSelection()?.toString() ?? '').length > 0) {
-      return;
-    }
+  const keyCaptureFocusMethods = useMemo<KeyCaptureFocusInterface>(() => {
+    return {
+      focus: (force: boolean = false) => {
+        // If user selected text and `force` is not true, then don't focus (else they lose selection)
+        if (!force && (window.getSelection()?.toString() ?? '').length > 0) {
+          return;
+        }
 
-    inputRef.current?.focus();
+        inputRef.current?.focus();
+      },
+
+      blur: () => {
+        // Implement blur
+      },
+    };
   }, []);
 
   if (focusRef) {
-    focusRef.current = setFocus;
+    focusRef.current = keyCaptureFocusMethods;
   }
 
   return (

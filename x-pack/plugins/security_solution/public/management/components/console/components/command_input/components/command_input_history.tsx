@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFocusTrap, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
+import { EuiSelectable, EuiSelectableProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UserCommandInput } from '../../user_command_input';
 import { InputHistoryItem } from '../../console_state/types';
@@ -46,7 +46,7 @@ export const CommandInputHistory = memo(() => {
       const selected = items.find((item) => item.checked === 'on');
 
       dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
-      dispatch({ type: 'focusOnInputArea' });
+      dispatch({ type: 'addFocusToKeyCapture' });
 
       if (selected) {
         dispatch({ type: 'updateInputTextEnteredState', payload: { textEntered: selected.label } });
@@ -61,18 +61,16 @@ export const CommandInputHistory = memo(() => {
 
   return (
     <div>
-      <EuiFocusTrap clickOutsideDisables={true}>
-        <EuiSelectable<InputHistoryItem>
-          options={selectableHistoryOptions}
-          onChange={handleSelectableOnChange}
-          renderOption={handleRenderOption}
-          listProps={selectableListProps}
-          singleSelection={true}
-          emptyMessage={NO_HISTORY_EMPTY_MESSAGE}
-        >
-          {renderAsIs}
-        </EuiSelectable>
-      </EuiFocusTrap>
+      <EuiSelectable<InputHistoryItem>
+        options={selectableHistoryOptions}
+        onChange={handleSelectableOnChange}
+        renderOption={handleRenderOption}
+        listProps={selectableListProps}
+        singleSelection={true}
+        emptyMessage={NO_HISTORY_EMPTY_MESSAGE}
+      >
+        {renderAsIs}
+      </EuiSelectable>
     </div>
   );
 });

@@ -106,29 +106,29 @@ export const Console = memo<ConsoleProps>(
       // it is stored in State and currently not updated if it changes
     }, []);
 
-    const focusOnInputArea = useCallback(() => {
+    const setFocusOnInput = useCallback(() => {
       if (inputFocusRef.current) {
-        inputFocusRef.current();
+        inputFocusRef.current.focus();
       }
     }, []);
 
     // When the console is shown, set focus to it so that user can just start typing
     useEffect(() => {
       if (!managedConsole || managedConsole.isOpen) {
-        setTimeout(focusOnInputArea, 2);
+        setTimeout(setFocusOnInput, 2);
       }
-    }, [focusOnInputArea, managedConsole]);
+    }, [setFocusOnInput, managedConsole]);
 
     return (
       <ConsoleStateProvider
         commands={commands}
         scrollToBottom={scrollToBottom}
-        focusOnInputArea={focusOnInputArea}
+        keyCapture={inputFocusRef}
         managedKey={managedKey}
         HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
       >
-        <ConsoleWindow onClick={focusOnInputArea} {...commonProps}>
+        <ConsoleWindow onClick={setFocusOnInput} {...commonProps}>
           <EuiFlexGroup
             direction="column"
             className="layout"

@@ -14,33 +14,17 @@ import { getBuiltinCommands } from '../../service/builtin_commands';
 
 export type InitialStateInterface = Pick<
   ConsoleDataState,
-  | 'commands'
-  | 'scrollToBottom'
-  | 'dataTestSubj'
-  | 'HelpComponent'
-  | 'managedKey'
-  | 'focusOnInputArea'
+  'commands' | 'scrollToBottom' | 'dataTestSubj' | 'HelpComponent' | 'managedKey' | 'keyCapture'
 >;
 
 export const initiateState = (
-  {
-    commands: commandList,
-    scrollToBottom,
-    focusOnInputArea,
-    dataTestSubj,
-    HelpComponent,
-    managedKey,
-  }: InitialStateInterface,
+  { commands: userCommandList, ...otherOptions }: InitialStateInterface,
   managedConsolePriorState?: ConsoleDataState
 ): ConsoleDataState => {
-  const commands = getBuiltinCommands().concat(commandList);
+  const commands = getBuiltinCommands().concat(userCommandList);
   const state = managedConsolePriorState ?? {
     commands,
-    scrollToBottom,
-    focusOnInputArea,
-    HelpComponent,
-    dataTestSubj,
-    managedKey,
+    ...otherOptions,
     commandHistory: [],
     sidePanel: { show: null },
     input: {
@@ -50,13 +34,13 @@ export const initiateState = (
     },
   };
 
+  // If we have prior state from ConsoleManager, then ensure that its updated
+  // with the initial state provided by `Console` during initial render so that
+  // we don't reference stale references.
   if (managedConsolePriorState) {
     Object.assign(state, {
       commands,
-      scrollToBottom,
-      HelpComponent,
-      dataTestSubj,
-      managedKey,
+      ...otherOptions,
     });
   }
 
@@ -69,8 +53,8 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
       state.scrollToBottom();
       return state;
 
-    case 'focusOnInputArea':
-      state.focusOnInputArea();
+    case 'addFocusToKeyCapture':
+      state.keyCapture?.current?.focus();
       return state;
 
     case 'executeCommand':
