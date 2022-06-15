@@ -23,12 +23,12 @@ ELASTICSEARCH_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud:$VERS
 KIBANA_CLOUD_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION-$GIT_COMMIT"
 CLOUD_DEPLOYMENT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST"
 
+echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 set +e
 DISTRIBUTION_EXISTS=$(docker manifest inspect $KIBANA_CLOUD_IMAGE &> /dev/null; echo $?)
 set -e
 
 if  [ $DISTRIBUTION_EXISTS -eq 0 ]; then
-  echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
   node scripts/build \
     --skip-initialize \
     --skip-generic-folders \
@@ -40,10 +40,11 @@ if  [ $DISTRIBUTION_EXISTS -eq 0 ]; then
     --skip-docker-ubi \
     --skip-docker-ubuntu \
     --skip-docker-contexts
-   docker logout docker.elastic.co
 else
   echo "Distribution already exists, skipping build"
 fi
+
+docker logout docker.elastic.co
 
 echo "--- Deploy"
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
