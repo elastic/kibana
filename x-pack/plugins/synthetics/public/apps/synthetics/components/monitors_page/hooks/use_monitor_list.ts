@@ -68,6 +68,6 @@ export function useMonitorList() {
     loadPage,
     reloadPage,
     isDataQueried,
-    allTotal: data.allTotal ?? 0,
+    absoluteTotal: data.absoluteTotal ?? 0,
   };
 }

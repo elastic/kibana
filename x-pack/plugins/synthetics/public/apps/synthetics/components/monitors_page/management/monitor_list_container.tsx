@@ -19,6 +19,7 @@ export const MonitorListContainer = ({ isEnabled }: { isEnabled?: boolean }) => 
     loading: monitorsLoading,
     syntheticsMonitors,
     total,
+    absoluteTotal,
     loadPage,
     reloadPage,
   } = useMonitorList();
@@ -29,7 +30,7 @@ export const MonitorListContainer = ({ isEnabled }: { isEnabled?: boolean }) => 
     sortOrder: pageState.sortOrder,
   });
 
-  if (!isEnabled && total === 0) {
+  if (!isEnabled && absoluteTotal === 0) {
     return null;
   }
 
