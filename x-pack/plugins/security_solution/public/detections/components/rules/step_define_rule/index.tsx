@@ -530,9 +530,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <RuleTypeEuiFormRow $isVisible={dataSourceRadioIdSelected === DATA_VIEW_SELECT_ID}>
-              {DataViewSelectorMemo}
-            </RuleTypeEuiFormRow>
+            {!isMlRule(ruleType) && (
+              <RuleTypeEuiFormRow $isVisible={dataSourceRadioIdSelected === DATA_VIEW_SELECT_ID}>
+                {DataViewSelectorMemo}
+              </RuleTypeEuiFormRow>
+            )}
             <RuleTypeEuiFormRow
               $isVisible={dataSourceRadioIdSelected === INDEX_PATTERN_SELECT_ID}
               fullWidth
@@ -564,6 +566,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [
     dataSourceRadioIdSelected,
     dataViewIndexPatternToggleButtonOptions,
+    ruleType,
     DataViewSelectorMemo,
     indexModified,
     handleResetIndices,
