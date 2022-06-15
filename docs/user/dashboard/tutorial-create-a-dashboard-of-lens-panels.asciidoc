@@ -82,9 +82,6 @@ In the layer pane, *Unique count of clientip* appears because the editor automat
 .. In the *Name* field, enter `Unique visitors`.
 
 .. Click *Close*.
-+
-[role="screenshot"]
-image::images/lens_metricUniqueVisitors_8.3.png[Metric visualization that displays number of unique visitors]
 
 . Click *Save and return*.
 +
