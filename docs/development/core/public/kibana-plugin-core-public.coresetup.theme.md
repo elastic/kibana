@@ -4,7 +4,6 @@
 
 ## CoreSetup.theme property
 
-[ThemeServiceSetup](./kibana-plugin-core-public.themeservicesetup.md)
 
 <b>Signature:</b>
 
