@@ -275,7 +275,7 @@ For detailed information about the sharing options, refer to <<reporting-getting
 
 [float]
 [[alert-from-Discover]]
-=== Generate an alert
+=== Generate alerts
 
 From *Discover*, you can create a rule to periodically
 check when data goes above or below a certain threshold within a given time interval.
