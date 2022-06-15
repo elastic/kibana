@@ -22,17 +22,20 @@ export function EMSVectorTileStyleEditor({ color, onColorChange }: Props) {
     });
   };
 
-  const colorPickerLabel = i18n.translate('xpack.maps.emsVectorTileStyleEditor.colorBlendPickerLabel', {
-    defaultMessage: 'Color blend',
-  });
-  const noColorPlaceholder = i18n.translate('xpack.maps.emsVectorTileStyleEditor.colorBlendPickerPlaceholder', {
-    defaultMessage: 'No color',
-  });
+  const colorPickerLabel = i18n.translate(
+    'xpack.maps.emsVectorTileStyleEditor.colorBlendPickerLabel',
+    {
+      defaultMessage: 'Color blend',
+    }
+  );
+  const noColorPlaceholder = i18n.translate(
+    'xpack.maps.emsVectorTileStyleEditor.colorBlendPickerPlaceholder',
+    {
+      defaultMessage: 'No color',
+    }
+  );
   return (
-    <EuiFormRow
-      display="columnCompressed"
-      label={colorPickerLabel}
-    >
+    <EuiFormRow display="columnCompressed" label={colorPickerLabel}>
       <EuiColorPicker
         compressed
         aria-label={colorPickerLabel}
