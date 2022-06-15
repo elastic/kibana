@@ -45,7 +45,7 @@ else
   echo "Distribution already exists, skipping build"
 fi
 
-echo "--- Create deployment"
+echo "--- Deploy"
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
 JSON_FILE=$(mktemp --suffix ".json")
 if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
@@ -60,7 +60,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
     ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
   echo -n "Creating deployment..."
-  ecctl deployment create --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
+  ecctl deployment create --track --output json --file /tmp/deploy.json > "$JSON_FILE"
   echo "done"
 
   CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$JSON_FILE")
@@ -83,7 +83,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
     ' .buildkite/scripts/steps/cloud/stack_monitoring.json > /tmp/stack_monitoring.json
 
   echo -n "Enabling stack monitoring..."
-  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json &> "$JSON_FILE"
+  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json > "$JSON_FILE"
   echo "done"
 else
 ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
@@ -92,7 +92,7 @@ ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
   ' > /tmp/deploy.json
 
   echo -n "Updating deployment..."
-  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
+  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$JSON_FILE"
   echo "done"
 fi
 
