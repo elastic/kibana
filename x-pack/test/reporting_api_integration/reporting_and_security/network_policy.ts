@@ -15,11 +15,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   /*
-   * The Reporting API Functional Test config implements a network policy that
-   * is designed to disallow the following Canvas worksheet
+   * The tests server config implements a network policy that is designed to disallow the following Canvas worksheet
    */
-  // FLAKY: https://github.com/elastic/kibana/issues/111381
-  describe.skip('Network Policy', () => {
+  describe('Network Policy', () => {
     before(async () => {
       await reportingAPI.initLogs(); // includes a canvas worksheet with an offending image URL
     });
@@ -36,8 +34,10 @@ export default function ({ getService }: FtrProviderContext) {
       // Retry the download URL until a "failed" response status is returned
       await retry.tryForTime(120000, async () => {
         const { body } = await supertest.get(downloadPath).expect(500);
+
+        // FIXME there should be a specific error code for failing jobs due to a disallowed URL
         expect(body.message).to.match(
-          /Reporting generation failed: ReportingError\(code: browser_unexpectedly_closed_error\) "/
+          /Reporting generation failed: ReportingError\(code: browser_(screenshot|unexpectedly_closed)_error\) "/
         );
       });
     });
