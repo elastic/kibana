@@ -7,7 +7,7 @@
 
 import { ENDPOINT_ACTION_LOG_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointActionLogRequestSchema } from '../../../../common/endpoint/schema/actions';
-import { actionsLogRequestHandler } from './audit_log_handler';
+import { auditLogRequestHandler } from './audit_log_handler';
 
 import { SecuritySolutionPluginRouter } from '../../../types';
 import { EndpointAppContext } from '../../types';
@@ -29,7 +29,7 @@ export function registerActionAuditLogRoutes(
     withEndpointAuthz(
       { all: ['canIsolateHost'] },
       endpointContext.logFactory.get('hostIsolationLogs'),
-      actionsLogRequestHandler(endpointContext)
+      auditLogRequestHandler(endpointContext)
     )
   );
 }

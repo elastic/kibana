@@ -15,6 +15,7 @@ import { initClient, Document } from './es_client';
 interface CLIParams {
   param: {
     journeyName: string;
+    scalabilitySetup: ScalabilitySetup;
     buildId: string;
   };
   client: {
@@ -25,26 +26,38 @@ interface CLIParams {
   log: ToolingLog;
 }
 
+interface Stage {
+  action: string;
+  minUsersCount?: number;
+  maxUsersCount: number;
+  duration: string;
+}
+
+export interface ScalabilitySetup {
+  warmup: { stages: Stage[] };
+  test: { stages: Stage[] };
+  maxDuration: string;
+}
+
 export const extractor = async ({ param, client, log }: CLIParams) => {
   const authOptions = {
     node: client.baseURL,
     username: client.username,
     password: client.password,
   };
+  const { journeyName, scalabilitySetup, buildId } = param;
+  log.info(
+    `Searching transactions with 'labels.testBuildId=${buildId}' and 'labels.journeyName=${journeyName}'`
+  );
   const esClient = initClient(authOptions);
-  const hits = await esClient.getTransactions(param.buildId, param.journeyName);
+  const hits = await esClient.getTransactions(buildId, journeyName);
   if (!hits || hits.length === 0) {
-    log.warning(`
-      No transactions found with 'labels.testBuildId=${param.buildId}' and 'labels.journeyName=${param.journeyName}'
-      \nOutput file won't be generated
-    `);
+    log.warning(`No transactions found. Output file won't be generated.`);
     return;
   }
 
   const source = hits[0]!._source as Document;
-  const journeyName = source.labels.journeyName || 'Unknown Journey';
   const kibanaVersion = source.service.version;
-  const maxUsersCount = source.labels.maxUsersCount || '0';
 
   const data = hits
     .map((hit) => hit!._source as Document)
@@ -72,12 +85,12 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   const output = {
     journeyName,
     kibanaVersion,
-    maxUsersCount,
+    scalabilitySetup,
     traceItems: data,
   };
 
   const outputDir = path.resolve('target/scalability_traces');
-  const fileName = `${output.journeyName.replace(/ /g, '')}-${param.buildId}.json`;
+  const fileName = `${output.journeyName.replace(/ /g, '')}-${buildId}.json`;
   const filePath = path.resolve(outputDir, fileName);
 
   log.info(`Found ${hits.length} transactions, output file: ${filePath}`);
