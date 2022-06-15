@@ -62,7 +62,6 @@ export interface Props {
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
   editData?: DataView;
-  showEmptyPrompt?: boolean;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -79,7 +78,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   defaultTypeIsRollup,
   requireTimestampField = false,
   editData,
-  showEmptyPrompt = true,
 }: Props) => {
   const {
     services: { http, dataViews, uiSettings, searchClient, overlays },
@@ -366,12 +364,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   );
 
   return (
-    <EmptyPrompts
-      onCancel={onCancel}
-      allSources={allSources}
-      loadSources={loadSources}
-      showEmptyPrompt={showEmptyPrompt}
-    >
+    <EmptyPrompts onCancel={onCancel} loadSources={loadSources}>
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
         <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
           <EuiTitle data-test-subj="flyoutTitle">

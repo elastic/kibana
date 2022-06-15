@@ -7,83 +7,50 @@
  */
 
 import React, { useState, FC, useEffect } from 'react';
-import useAsync from 'react-use/lib/useAsync';
 
 import { EuiFlyoutBody } from '@elastic/eui';
-import { DEFAULT_ASSETS_TO_IGNORE } from '@kbn/data-plugin/common';
-import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
 import { useKibana } from '../../shared_imports';
 
-import { MatchedItem, DataViewEditorContext } from '../../types';
-
-import { getIndices } from '../../lib';
+import { DataViewEditorContext } from '../../types';
 
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
 import { PromptFooter } from './prompt_footer';
 
-const removeAliases = (mItem: MatchedItem) => !mItem.item.indices;
-
 interface Props {
   onCancel: () => void;
-  allSources: MatchedItem[];
   loadSources: () => void;
-  showEmptyPrompt?: boolean;
 }
 
-export function isUserDataIndex(source: MatchedItem) {
-  // filter out indices that start with `.`
-  if (source.name.startsWith('.')) return false;
-
-  // filter out sources from DEFAULT_ASSETS_TO_IGNORE
-  if (source.name === DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE) return false;
-  if (source.name === DEFAULT_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE) return false;
-  if (source.name === DEFAULT_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE) return false;
-  if (source.name === DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE) return false;
-
-  // filter out empty sources created by apm server
-  if (source.name.startsWith('apm-')) return false;
-
-  return true;
+interface DataState {
+  hasDataView?: boolean;
+  hasESData?: boolean;
 }
 
-export const EmptyPrompts: FC<Props> = ({
-  allSources,
-  onCancel,
-  children,
-  loadSources,
-  showEmptyPrompt,
-}) => {
+export const EmptyPrompts: FC<Props> = ({ onCancel, children, loadSources }) => {
   const {
-    services: { docLinks, application, http, searchClient, dataViews },
+    services: { docLinks, application, dataViews },
   } = useKibana<DataViewEditorContext>();
 
-  const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
-  const [hasCheckedRemoteClusters, setHasCheckedRemoteClusters] = useState<boolean>(false);
-
   const [goToForm, setGoToForm] = useState<boolean>(false);
+  const [isLoadingDataState, setIsLoadingDataState] = useState<boolean>(true);
+  const [dataState, setDataState] = useState<DataState>({});
 
-  const hasDataIndices = allSources.some(isUserDataIndex);
-  const hasUserIndexPattern = useAsync(() => dataViews.hasUserDataView().catch(() => true));
+  const { hasDataView, hasESData } = dataState;
 
   useEffect(() => {
-    if (!hasDataIndices && !hasCheckedRemoteClusters) {
-      setHasCheckedRemoteClusters(true);
-
-      getIndices({
-        http,
-        isRollupIndex: () => false,
-        pattern: '*:*',
-        showAllIndices: false,
-      }).then((dataSources) => {
-        setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
+    (async function () {
+      setDataState({
+        hasDataView: await dataViews.hasData.hasDataView(),
+        hasESData: await dataViews.hasData.hasESData(),
       });
-    }
-  }, [http, hasDataIndices, searchClient, hasCheckedRemoteClusters]);
+      setIsLoadingDataState(false);
+    })();
+  }, [dataViews]);
 
-  if (hasUserIndexPattern.loading) return null; // return null to prevent UI flickering while loading
+  if (isLoadingDataState) return null; // return null to prevent UI flickering while loading
 
-  if (!hasUserIndexPattern.value && !goToForm) {
-    if (!hasDataIndices && !remoteClustersExist) {
+  if (!hasDataView && !goToForm) {
+    if (!hasESData) {
       // load data
       return (
         <>
@@ -100,23 +67,8 @@ export const EmptyPrompts: FC<Props> = ({
           <PromptFooter onCancel={onCancel} />
         </>
       );
-    } else if (showEmptyPrompt) {
-      // first time
-      return (
-        <>
-          <EuiFlyoutBody>
-            <NoDataViewsPromptComponent
-              onClickCreate={() => setGoToForm(true)}
-              canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
-              dataViewsDocLink={docLinks.links.indexPatterns.introduction}
-              emptyPromptColor={'subdued'}
-            />
-          </EuiFlyoutBody>
-          <PromptFooter onCancel={onCancel} />
-        </>
-      );
     } else {
-      setGoToForm(true);
+      return <>{children}</>;
     }
   }
 
