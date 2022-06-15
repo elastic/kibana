@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const elasticAgentStandaloneManifest = `
----
+export const elasticAgentStandaloneManifest = `---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -66,6 +65,11 @@ spec:
             - name: proc
               mountPath: /hostfs/proc
               readOnly: true
+            - name: etc-kubernetes
+              mountPath: /hostfs/etc/kubernetes
+            - name: var-lib
+              mountPath: /hostfs/var/lib
+              readOnly: true
             - name: cgroup
               mountPath: /hostfs/sys/fs/cgroup
               readOnly: true
@@ -75,6 +79,15 @@ spec:
             - name: varlog
               mountPath: /var/log
               readOnly: true
+            - name: passwd
+              mountPath: /hostfs/etc/passwd
+              readOnly: true
+            - name: group
+              mountPath: /hostfs/etc/group
+              readOnly: true
+            - name: systemd
+              mountPath: /hostfs/etc/systemd
+              readOnly: true
       volumes:
         - name: datastreams
           configMap:
@@ -83,6 +96,18 @@ spec:
         - name: proc
           hostPath:
             path: /proc
+        - name: etc-kubernetes
+          hostPath:
+            path: /etc/kubernetes
+        - name: var-lib
+          hostPath:
+            path: /var/lib
+        - name: passwd
+          hostPath:
+            path: /etc/passwd
+        - name: group
+          hostPath:
+            path: /etc/group
         - name: cgroup
           hostPath:
             path: /sys/fs/cgroup
@@ -92,6 +117,9 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
+        - name: systemd
+          hostPath:
+            path: /etc/systemd
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -149,6 +177,9 @@ rules:
       - pods
       - services
       - configmaps
+      - serviceaccounts
+      - persistentvolumes
+      - persistentvolumeclaims
     verbs: ["get", "list", "watch"]
   # Enable this rule only if planing to use kubernetes_secrets provider
   #- apiGroups: [""]
@@ -164,6 +195,7 @@ rules:
       - statefulsets
       - deployments
       - replicasets
+      - daemonsets
     verbs: ["get", "list", "watch"]
   - apiGroups: ["batch"]
     resources:
@@ -181,6 +213,23 @@ rules:
       - "/metrics"
     verbs:
       - get
+  # required for cloudbeat
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources:
+      - clusterrolebindings
+      - clusterroles
+      - rolebindings
+      - roles
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - ingressclasses
+      - ingresses
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["policy"]
+    resources:
+      - podsecuritypolicies
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -222,7 +271,8 @@ metadata:
 ---
 `;
 
-export const elasticAgentManagedManifest = `apiVersion: apps/v1
+export const elasticAgentManagedManifest = `---
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: elastic-agent
@@ -285,6 +335,11 @@ spec:
             - name: proc
               mountPath: /hostfs/proc
               readOnly: true
+            - name: etc-kubernetes
+              mountPath: /hostfs/etc/kubernetes
+            - name: var-lib
+              mountPath: /hostfs/var/lib
+              readOnly: true
             - name: cgroup
               mountPath: /hostfs/sys/fs/cgroup
               readOnly: true
@@ -294,10 +349,31 @@ spec:
             - name: varlog
               mountPath: /var/log
               readOnly: true
+            - name: passwd
+              mountPath: /hostfs/etc/passwd
+              readOnly: true
+            - name: group
+              mountPath: /hostfs/etc/group
+              readOnly: true
+            - name: systemd
+              mountPath: /hostfs/etc/systemd
+              readOnly: true
       volumes:
         - name: proc
           hostPath:
             path: /proc
+        - name: etc-kubernetes
+          hostPath:
+            path: /etc/kubernetes
+        - name: var-lib
+          hostPath:
+            path: /var/lib
+        - name: passwd
+          hostPath:
+            path: /etc/passwd
+        - name: group
+          hostPath:
+            path: /etc/group
         - name: cgroup
           hostPath:
             path: /sys/fs/cgroup
@@ -307,6 +383,9 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
+        - name: systemd
+          hostPath:
+            path: /etc/systemd
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -364,6 +443,9 @@ rules:
       - pods
       - services
       - configmaps
+      - serviceaccounts
+      - persistentvolumes
+      - persistentvolumeclaims
     verbs: ["get", "list", "watch"]
   # Enable this rule only if planing to use kubernetes_secrets provider
   #- apiGroups: [""]
@@ -379,6 +461,7 @@ rules:
       - statefulsets
       - deployments
       - replicasets
+      - daemonsets
     verbs: ["get", "list", "watch"]
   - apiGroups:
       - ""
@@ -396,6 +479,23 @@ rules:
       - "/metrics"
     verbs:
       - get
+  # required for cloudbeat
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources:
+      - clusterrolebindings
+      - clusterroles
+      - rolebindings
+      - roles
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - ingressclasses
+      - ingresses
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["policy"]
+    resources:
+      - podsecuritypolicies
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -435,5 +535,4 @@ metadata:
   labels:
     k8s-app: elastic-agent
 ---
-
 `;

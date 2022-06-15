@@ -6,8 +6,8 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
+import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 
 import {
   RuleExecutionEvent,
@@ -18,13 +18,14 @@ import { invariant } from '../../../../../common/utils/invariant';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { GetAggregateExecutionEventsArgs } from '../client_for_routes/client_interface';
 import {
-  RULE_SAVED_OBJECT_TYPE,
   RULE_EXECUTION_LOG_PROVIDER,
+  RULE_SAVED_OBJECT_TYPE,
   RuleExecutionLogAction,
 } from './constants';
 import {
   formatExecutionEventResponse,
   getExecutionEventAggregation,
+  mapRuleExecutionStatusToPlatformStatus,
 } from './get_execution_event_aggregation';
 import {
   EXECUTION_UUID_FIELD,
@@ -62,10 +63,15 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       let totalExecutions: number | undefined;
       // If 0 or 3 statuses are selected we can search for all statuses and don't need this pre-filter by ID
       if (statusFilters.length > 0 && statusFilters.length < 3) {
+        const outcomes = mapRuleExecutionStatusToPlatformStatus(statusFilters);
+        const outcomeFilter = outcomes.length ? `OR event.outcome:(${outcomes.join(' OR ')})` : '';
         const statusResults = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
           start,
           end,
-          filter: `kibana.alert.rule.execution.status:(${statusFilters.join(' OR ')})`,
+          // Also query for `event.outcome` to catch executions that only contain platform events
+          filter: `kibana.alert.rule.execution.status:(${statusFilters.join(
+            ' OR '
+          )}) ${outcomeFilter}`,
           aggs: {
             totalExecutions: {
               cardinality: {

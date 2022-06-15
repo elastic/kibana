@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { parse } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ReportingUsageStats } from '../../reporting_services';
+import { ReportingUsageStats } from '../../services/reporting_upgrade_services';
 
 interface UsageStats {
   reporting: ReportingUsageStats;
@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'share']);
   const testSubjects = getService('testSubjects');
+  const log = getService('log');
 
   const spaces = [
     { space: 'default', basePath: '' },
@@ -39,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     { name: 'ecommerce', type: 'png', link: 'PNG Reports' },
   ];
 
-  describe('reporting smoke tests', () => {
+  describe('upgrade reporting smoke tests', () => {
     let completedReportCount: number;
     let usage: UsageStats;
     describe('initial state', () => {
@@ -53,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
     spaces.forEach(({ space, basePath }) => {
-      describe('generate report space ' + space, () => {
+      describe('generate report for space ' + space, () => {
         beforeEach(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
@@ -63,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           completedReportCount = reportingAPI.getCompletedReportCount(usage);
         });
         reportingTests.forEach(({ name, type, link }) => {
-          it('name ' + name + ' type ' + type, async () => {
+          it('name: ' + name + ' type: ' + type, async () => {
             await PageObjects.home.launchSampleDashboard(name);
             await PageObjects.share.openShareMenuItem(link);
             if (type === 'pdf_optimize') {
@@ -89,9 +90,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
             await postUrl.click();
             const url = await browser.getClipboardValue();
-            await reportingAPI.expectAllJobsToFinishSuccessfully([
-              await reportingAPI.postJob(parse(url).pathname + '?' + parse(url).query),
-            ]);
+            // Add try/catch for https://github.com/elastic/elastic-stack-testing/issues/1199
+            // Waiting for job to finish sometimes gets socket hang up error, from what I
+            // observed during debug testing the command does complete.
+            // Checking expected report count will still fail if the job did not finish.
+            try {
+              await reportingAPI.expectAllJobsToFinishSuccessfully([
+                await reportingAPI.postJob(parse(url).pathname + '?' + parse(url).query),
+              ]);
+            } catch (e) {
+              log.debug(`Error waiting for job to finish: ${e}`);
+            }
             usage = (await usageAPI.getUsageStats()) as UsageStats;
             reportingAPI.expectCompletedReportCount(usage, completedReportCount + 1);
           });

@@ -63,14 +63,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     throw new Error(`Could not find ${policyName} in policy table`);
   };
 
-  describe('Index Lifecycle Management', async () => {
+  describe('Index Lifecycle Management Accessibility', async () => {
     before(async () => {
       await esClient.snapshot.createRepository({
         name: REPO_NAME,
         body: {
           type: 'fs',
           settings: {
-            // use one of the values defined in path.repo in test/functional/config.js
+            // use one of the values defined in path.repo in test/functional/config.base.js
             location: '/tmp/',
           },
         },

@@ -12,8 +12,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('search sessions management', function () {
-    this.tags('ciGroup5');
-
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/dashboard/async_search');

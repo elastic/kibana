@@ -42,6 +42,8 @@ export const getAnomaliesNetworkTableColumns = (
           anomaliesByNetwork.anomaly
         )}`,
         render: (item) => <NetworkDetailsLink ip={item} flowTarget={flowTarget} />,
+        isAggregatable: true,
+        fieldType: 'ip',
       }),
   },
   ...getAnomaliesDefaultTableColumns(startDate, endDate),

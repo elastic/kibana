@@ -360,7 +360,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('aggregated or scripted job', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
@@ -413,7 +413,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('pre-fills the job selection');
           await ml.jobSelection.assertJobSelection([testData.jobConfig.job_id]);
 
-          await ml.testExecution.logTestStep('displays the swimlanes');
+          await ml.testExecution.logTestStep('displays the swim lanes');
           await ml.anomalyExplorer.assertOverallSwimlaneExists();
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
         });
@@ -453,15 +453,21 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('pre-fills the job selection');
           await ml.jobSelection.assertJobSelection([testData.jobConfig.job_id]);
 
-          await ml.testExecution.logTestStep('displays the swimlanes');
+          await ml.testExecution.logTestStep('displays the swim lanes');
           await ml.anomalyExplorer.assertOverallSwimlaneExists();
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
 
           // TODO: click on swimlane cells to trigger warning callouts
           // when we figure out a way to click inside canvas renderings
 
-          await ml.testExecution.logTestStep('should navigate to single metric viewer');
-          await ml.navigation.navigateToSingleMetricViewerViaAnomalyExplorer();
+          await ml.testExecution.logTestStep(
+            'should prevent navigation to the Single Metric Viewer'
+          );
+          await ml.anomalyExplorer.assertSingleMetricViewerButtonEnabled(false);
+        });
+
+        it('should prevent opening this job in the Single Metric Viewer', async () => {
+          await ml.navigation.navigateToSingleMetricViewer(testData.jobConfig.job_id);
 
           await ml.testExecution.logTestStep(
             'should show warning message and ask to select another job'

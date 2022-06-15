@@ -30,7 +30,7 @@ import * as i18n from './translations';
 import { AllRulesUtilityBar } from '../utility_bar';
 import { AllExceptionListsColumns, getAllExceptionListsColumns } from './columns';
 import { useAllExceptionLists } from './use_all_exception_lists';
-import { ReferenceErrorModal } from '../../../../../components/value_lists_management_modal/reference_error_modal';
+import { ReferenceErrorModal } from '../../../../../components/value_lists_management_flyout/reference_error_modal';
 import { patchRule } from '../../../../../containers/detection_engine/rules/api';
 import { ExceptionsSearchBar } from './exceptions_search_bar';
 import { getSearchFilters } from '../helpers';
@@ -96,7 +96,7 @@ export const ExceptionListsTable = React.memo(() => {
   const [exportingListIds, setExportingListIds] = useState<string[]>([]);
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const { navigateToUrl } = application;
-  const { addError } = useAppToasts();
+  const { addError, addSuccess } = useAppToasts();
 
   const handleDeleteSuccess = useCallback(
     (listId?: string) => () => {
@@ -165,9 +165,10 @@ export const ExceptionListsTable = React.memo(() => {
   const handleExportSuccess = useCallback(
     (listId: string) =>
       (blob: Blob): void => {
+        addSuccess(i18n.EXCEPTION_EXPORT_SUCCESS);
         setExportDownload({ name: listId, blob });
       },
-    []
+    [addSuccess]
   );
 
   const handleExportError = useCallback(

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import path from 'path';
-
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { USER } from '../../../services/ml/security_common';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const PageObjects = getPageObjects(['common', 'error']);
 
   const testUsers = [
     { user: USER.ML_VIEWER, discoverAvailable: true },
@@ -21,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('for user with read ML access', function () {
-    this.tags(['skipFirefox', 'mlqa']);
+    this.tags(['skipFirefox', 'ml']);
 
     describe('with no data loaded', function () {
       for (const testUser of testUsers) {
@@ -102,6 +101,13 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.overviewPage.assertDFACreateJobButtonExists();
             await ml.overviewPage.assertDFACreateJobButtonEnabled(false);
           });
+
+          it('should redirect to the Overview page from the unrecognized routes', async () => {
+            await PageObjects.common.navigateToUrl('ml', 'magic-ai');
+
+            await ml.testExecution.logTestStep('should display a warning banner');
+            await ml.overviewPage.assertPageNotFoundBannerText('magic-ai');
+          });
         });
       }
     });
@@ -117,12 +123,8 @@ export default function ({ getService }: FtrProviderContext) {
       const ecIndexPattern = 'ft_module_sample_ecommerce';
       const ecExpectedTotalCount = '287';
 
-      const uploadFilePath = path.join(
-        __dirname,
-        '..',
-        'data_visualizer',
-        'files_to_import',
-        'artificial_server_log'
+      const uploadFilePath = require.resolve(
+        '../data_visualizer/files_to_import/artificial_server_log'
       );
       const expectedUploadFileTitle = 'artificial_server_log';
 

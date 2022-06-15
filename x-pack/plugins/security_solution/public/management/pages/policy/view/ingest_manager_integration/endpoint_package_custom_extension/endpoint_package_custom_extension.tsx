@@ -6,12 +6,12 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useHttp } from '../../../../../../common/lib/kibana';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../host_isolation_exceptions/view/hooks';
 import { TrustedAppsApiClient } from '../../../../trusted_apps/service/api_client';
-import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { BlocklistsApiClient } from '../../../../blocklist/services';
 import { FleetArtifactsCard } from './components/fleet_artifacts_card';
@@ -34,7 +34,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
   (props) => {
     const http = useHttp();
     const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
-    const { canAccessEndpointManagement } = useEndpointPrivileges();
+    const { loading, canAccessEndpointManagement } = useEndpointPrivileges();
 
     const trustedAppsApiClientInstance = useMemo(
       () => TrustedAppsApiClient.getInstance(http),
@@ -106,7 +106,13 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       ]
     );
 
-    return canAccessEndpointManagement ? artifactCards : <NoPermissions />;
+    return loading ? (
+      <EuiLoadingSpinner data-test-subj="endpointExtensionLoadingSpinner" />
+    ) : canAccessEndpointManagement ? (
+      artifactCards
+    ) : (
+      <NoPermissions />
+    );
   }
 );
 

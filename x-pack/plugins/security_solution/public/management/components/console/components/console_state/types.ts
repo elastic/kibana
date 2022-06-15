@@ -5,28 +5,67 @@
  * 2.0.
  */
 
-import { Dispatch, Reducer } from 'react';
-import { CommandServiceInterface } from '../../types';
-import { HistoryItemComponent } from '../history_item';
-import { BuiltinCommandServiceInterface } from '../../service/types.builtin_command_service';
+import type { Dispatch, Reducer } from 'react';
+import type { Command, CommandDefinition, CommandExecutionComponent } from '../../types';
 
 export interface ConsoleDataState {
-  /** Command service defined on input to the `Console` component by consumers of the component */
-  commandService: CommandServiceInterface;
-  /** Command service for builtin console commands */
-  builtinCommandService: BuiltinCommandServiceInterface;
+  /**
+   * Commands available in the console, which includes both the builtin command and the ones
+   * defined on input to the `Console` component by consumers of the component
+   */
+  commands: CommandDefinition[];
+
   /** UI function that scrolls the console down to the bottom */
   scrollToBottom: () => void;
+
   /**
    * List of commands entered by the user and being shown in the UI
    */
-  commandHistory: Array<ReturnType<HistoryItemComponent>>;
+  commandHistory: CommandHistoryItem[];
+
+  sidePanel: {
+    show: null | 'help'; // will have other values in the future
+  };
+
+  /** Component defined on input to the Console that will handle the `help` command */
+  HelpComponent?: CommandExecutionComponent;
+
   dataTestSubj?: string;
+
+  /** The key for the console when it is under ConsoleManager control */
+  managedKey?: symbol;
+}
+
+export interface CommandHistoryItem {
+  id: string;
+  command: Command;
+  state: CommandExecutionState;
+}
+
+export interface CommandExecutionState {
+  status: 'pending' | 'success' | 'error';
+  store: Record<string, unknown>;
 }
 
 export type ConsoleDataAction =
   | { type: 'scrollDown' }
-  | { type: 'executeCommand'; payload: { input: string } };
+  | { type: 'executeCommand'; payload: { input: string } }
+  | { type: 'clear' }
+  | {
+      type: 'showSidePanel';
+      payload: { show: ConsoleDataState['sidePanel']['show'] };
+    }
+  | {
+      type: 'updateCommandStoreState';
+      payload: {
+        id: string;
+        value: (prevState: CommandExecutionState['store']) => CommandExecutionState['store'];
+      };
+    }
+  | {
+      type: 'updateCommandStatusState';
+      payload: { id: string; value: CommandExecutionState['status'] };
+    };
 
 export interface ConsoleStore {
   state: ConsoleDataState;

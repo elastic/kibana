@@ -29,10 +29,8 @@ import {
   ResponseTypeSpecific,
 } from '../../../../common/detection_engine/schemas/request';
 import { AppClient } from '../../../types';
-import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { transformTags } from '../routes/rules/utils';
 import {
   transformFromAlertThrottle,
   transformToAlertThrottle,
@@ -60,7 +58,9 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         index: params.index,
         query: params.query,
         filters: params.filters,
+        timestampField: params.timestamp_field,
         eventCategoryOverride: params.event_category_override,
+        tiebreakerField: params.tiebreaker_field,
       };
     }
     case 'threat_match': {
@@ -133,7 +133,7 @@ export const convertCreateAPIToInternalSchema = (
   const newRuleId = input.rule_id ?? uuid.v4();
   return {
     name: input.name,
-    tags: addTags(input.tags ?? [], newRuleId, false),
+    tags: input.tags ?? [],
     alertTypeId: ruleTypeMappings[input.type],
     consumer: SERVER_APP_ID,
     params: {
@@ -163,6 +163,9 @@ export const convertCreateAPIToInternalSchema = (
       note: input.note,
       version: input.version ?? 1,
       exceptionsList: input.exceptions_list ?? [],
+      relatedIntegrations: [],
+      requiredFields: [],
+      setup: '',
       ...typeSpecificParams,
     },
     schedule: { interval: input.interval ?? '5m' },
@@ -183,7 +186,9 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         index: params.index,
         query: params.query,
         filters: params.filters,
+        timestamp_field: params.timestampField,
         event_category_override: params.eventCategoryOverride,
+        tiebreaker_field: params.tiebreakerField,
       };
     }
     case 'threat_match': {
@@ -278,6 +283,9 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     version: params.version,
     exceptions_list: params.exceptionsList,
     immutable: params.immutable,
+    related_integrations: params.relatedIntegrations ?? [],
+    required_fields: params.requiredFields ?? [],
+    setup: params.setup ?? '',
   };
 };
 
@@ -301,7 +309,7 @@ export const internalRuleToAPIResponse = (
     created_at: rule.createdAt.toISOString(),
     created_by: rule.createdBy ?? 'elastic',
     name: rule.name,
-    tags: transformTags(rule.tags),
+    tags: rule.tags,
     interval: rule.schedule.interval,
     enabled: rule.enabled,
     // Security solution shared rule params

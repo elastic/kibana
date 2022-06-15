@@ -35,12 +35,12 @@ export const createListRoute = (
             ?.foundObjectId ?? id;
 
         const appLinks = (appLinksMap.get(sampleDataset.id) ?? []).map((data) => {
-          const { sampleObject, getPath, label, icon } = data;
+          const { sampleObject, getPath, label, icon, order } = data;
           if (sampleObject === null) {
-            return { path: getPath(''), label, icon };
+            return { path: getPath(''), label, icon, order };
           }
           const objectId = findObjectId(sampleObject.type, sampleObject.id);
-          return { path: getPath(objectId), label, icon };
+          return { path: getPath(objectId), label, icon, order };
         });
         const sampleDataStatus = await getSampleDatasetStatus(
           context,

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
 import type { AwaitedProperties } from '@kbn/utility-types';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 
 import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
@@ -31,6 +32,7 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
+
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz';
 import { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 
@@ -125,6 +127,14 @@ const createSecuritySolutionRequestContextMock = (
     getRuleDataService: jest.fn(() => clients.ruleDataService),
     getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
+    getInternalFleetServices: jest.fn(() => {
+      // TODO: Mock EndpointInternalFleetServicesInterface and return the mocked object.
+      throw new Error('Not implemented');
+    }),
+    getScopedFleetServices: jest.fn((req: KibanaRequest) => {
+      // TODO: Mock EndpointScopedFleetServicesInterface and return the mocked object.
+      throw new Error('Not implemented');
+    }),
   };
 };
 

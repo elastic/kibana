@@ -33,6 +33,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     id: 'test',
     actionTypeId: '.servicenow',
     isPreconfigured: false,
+    isDeprecated: true,
     name: 'SN',
     config: {
       apiUrl: 'https://test/',
@@ -42,6 +43,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
 
   const usesImportSetApiConnector = {
     ...usesTableApiConnector,
+    isDeprecated: false,
     config: {
       ...usesTableApiConnector.config,
       usesTableApi: false,
@@ -94,6 +96,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     const actionConnector = {
       actionTypeId: '.servicenow',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {},
       secrets: {},
     } as ServiceNowActionConnector;
@@ -117,6 +120,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     const actionConnector = {
       actionTypeId: '.servicenow',
       isPreconfigured: false,
+      isDeprecated: false,
       isMissingSecrets: true,
       config: {},
       secrets: {},
@@ -336,7 +340,11 @@ describe('ServiceNowActionConnectorFields renders', () => {
       );
 
       expect(wrapper.find('[data-test-subj="update-connector-btn"]').exists()).toBeTruthy();
-      wrapper.find('[data-test-subj="update-connector-btn"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="update-connector-btn"]')
+        .first()
+        .find('button')
+        .simulate('click');
       expect(wrapper.find('[data-test-subj="updateConnectorForm"]').exists()).toBeTruthy();
 
       await act(async () => {
@@ -383,7 +391,11 @@ describe('ServiceNowActionConnectorFields renders', () => {
       );
 
       expect(wrapper.find('[data-test-subj="update-connector-btn"]').exists()).toBeTruthy();
-      wrapper.find('[data-test-subj="update-connector-btn"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="update-connector-btn"]')
+        .first()
+        .find('button')
+        .simulate('click');
       expect(wrapper.find('[data-test-subj="updateConnectorForm"]').exists()).toBeTruthy();
 
       // The async is needed so the act will finished before asserting for the callout

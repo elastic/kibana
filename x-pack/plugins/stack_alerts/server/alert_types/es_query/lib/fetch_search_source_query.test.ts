@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OnlySearchSourceAlertParams } from '../types';
+import { OnlySearchSourceRuleParams } from '../types';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { updateSearchSource } from './fetch_search_source_query';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -29,7 +29,7 @@ const createDataView = () => {
   });
 };
 
-const defaultParams: OnlySearchSourceAlertParams = {
+const defaultParams: OnlySearchSourceRuleParams = {
   size: 100,
   timeWindowSize: 5,
   timeWindowUnit: 'm',

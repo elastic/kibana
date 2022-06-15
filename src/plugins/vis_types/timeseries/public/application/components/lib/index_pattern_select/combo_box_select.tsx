@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState, useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
@@ -23,7 +24,7 @@ type IdsWithTitle = Awaited<ReturnType<DataViewsService['getIdsWithTitle']>>;
 type SelectedOptions = EuiComboBoxProps<string>['selectedOptions'];
 
 const toComboBoxOptions = (options: IdsWithTitle) =>
-  options.map(({ title, id }) => ({ label: title, id }));
+  options.map(({ name, title, id }) => ({ label: name ? name : title, id }));
 
 export const ComboBoxSelect = ({
   fetchedIndex,
@@ -55,7 +56,7 @@ export const ComboBoxSelect = ({
         options = [
           {
             id: indexPattern.id,
-            label: indexPattern.title,
+            label: indexPattern.getName(),
           },
         ];
       }
@@ -71,14 +72,23 @@ export const ComboBoxSelect = ({
     fetchIndexes();
   }, []);
 
+  const isInvalid = Boolean(fetchedIndex.missedIndex);
+
   return (
     <EuiComboBox
       singleSelection={{ asPlainText: true }}
+      isInvalid={isInvalid}
       onChange={onComboBoxChange}
       options={toComboBoxOptions(availableIndexes)}
       selectedOptions={selectedOptions}
       isDisabled={disabled}
-      placeholder={placeholder}
+      placeholder={
+        isInvalid
+          ? i18n.translate('visTypeTimeseries.indexPatternSelect.noDataView', {
+              defaultMessage: 'Data view not found',
+            })
+          : placeholder
+      }
       data-test-subj={dataTestSubj}
       {...(allowSwitchMode && {
         append: (

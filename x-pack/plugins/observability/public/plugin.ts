@@ -27,11 +27,14 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SharedUXPluginStart } from '@kbn/shared-ux-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaFeature } from '@kbn/features-plugin/common';
+
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ConfigSchema } from '.';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
@@ -41,7 +44,7 @@ import { createCallObservabilityApi } from './services/call_observability_api';
 import { createNavigationRegistry, NavigationEntry } from './services/navigation_registry';
 import { updateGlobalNavigation } from './update_global_navigation';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
-import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
+import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
 
@@ -51,9 +54,11 @@ export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
+  usageCollection: UsageCollectionSetup;
   cases: CasesUiStart;
   embeddable: EmbeddableStart;
   home?: HomePublicPluginStart;
@@ -64,6 +69,7 @@ export interface ObservabilityPublicPluginsStart {
   discover: DiscoverStart;
   features: FeaturesPluginStart;
   kibanaFeatures: KibanaFeature[];
+  sharedUX: SharedUXPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -144,6 +150,13 @@ export class Plugin
       const { renderApp } = await import('./application');
       // Get start services
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
+
+      // Register alerts metadata
+      const { registerAlertsTableConfiguration } = await import(
+        './config/register_alerts_table_configuration'
+      );
+      const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+      registerAlertsTableConfiguration(alertsTableConfigurationRegistry);
       // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
       // subset of this privilege are not authorized to access this endpoint and will receive a 404
       // error that causes the Alerting view to fail to load.
@@ -162,6 +175,7 @@ export class Plugin
         observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: navigation.PageTemplate,
         kibanaFeatures,
+        usageCollection: pluginsSetup.usageCollection,
       });
     };
 
@@ -268,7 +282,6 @@ export class Plugin
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
-
     const config = this.initializerContext.config.get();
 
     updateGlobalNavigation({
@@ -283,6 +296,7 @@ export class Plugin
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
+      getSharedUXContext: pluginsStart.sharedUX.getContextServices,
     });
 
     return {
@@ -291,7 +305,11 @@ export class Plugin
       },
       createExploratoryViewUrl,
       getAppDataView: getAppDataView(pluginsStart.dataViews),
-      ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(coreStart, pluginsStart),
+      ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(
+        coreStart.uiSettings,
+        pluginsStart.dataViews,
+        pluginsStart.lens
+      ),
       useRulesLink: createUseRulesLink(config.unsafe.rules.enabled),
     };
   }

@@ -18,6 +18,9 @@ import {
   apmProgressiveLoading,
   enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
+  enableNewSyntheticsView,
+  apmTraceExplorerTab,
+  apmOperationsTab,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -31,6 +34,22 @@ const technicalPreviewLabel = i18n.translate(
  * uiSettings definitions for Observability.
  */
 export const uiSettings: Record<string, UiSettingsParams<boolean | number | string>> = {
+  [enableNewSyntheticsView]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableNewSyntheticsViewExperimentName', {
+      defaultMessage: 'Enable new synthetic monitoring application',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.observability.enableNewSyntheticsViewExperimentDescription',
+      {
+        defaultMessage:
+          'Enable new synthetic monitoring application in observability. Refresh the page to apply the setting.',
+      }
+    ),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
   [enableInspectEsQueries]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentName', {
@@ -71,7 +90,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     value: false,
     description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
-      defaultMessage: 'Enable the Infrastruture view feature in APM app',
+      defaultMessage: 'Enable the Infrastructure view feature in APM app',
     }),
     schema: schema.boolean(),
   },
@@ -168,6 +187,36 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     schema: schema.boolean(),
     value: false,
     requiresPageReload: false,
+    type: 'boolean',
+  },
+  [apmTraceExplorerTab]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmTraceExplorerTab', {
+      defaultMessage: 'APM Trace Explorer',
+    }),
+    description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL',
+      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: true,
+    type: 'boolean',
+  },
+  [apmOperationsTab]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmOperationsBreakdown', {
+      defaultMessage: 'APM Operations Breakdown',
+    }),
+    description: i18n.translate('xpack.observability.apmOperationsBreakdownDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations',
+      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: true,
     type: 'boolean',
   },
 };

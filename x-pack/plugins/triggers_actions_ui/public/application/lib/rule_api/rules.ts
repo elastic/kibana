@@ -7,9 +7,21 @@
 import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { Rule, Pagination, Sorting } from '../../../types';
+import { Rule, Pagination, Sorting, RuleStatus } from '../../../types';
 import { mapFiltersToKql } from './map_filters_to_kql';
 import { transformRule } from './common_transformations';
+
+export interface LoadRulesProps {
+  http: HttpSetup;
+  page: Pagination;
+  searchText?: string;
+  typesFilter?: string[];
+  actionTypesFilter?: string[];
+  tagsFilter?: string[];
+  ruleExecutionStatusesFilter?: string[];
+  ruleStatusesFilter?: RuleStatus[];
+  sort?: Sorting;
+}
 
 const rewriteResponseRes = (results: Array<AsApiContract<Rule>>): Rule[] => {
   return results.map((item) => transformRule(item));
@@ -21,23 +33,23 @@ export async function loadRules({
   searchText,
   typesFilter,
   actionTypesFilter,
+  ruleExecutionStatusesFilter,
   ruleStatusesFilter,
+  tagsFilter,
   sort = { field: 'name', direction: 'asc' },
-}: {
-  http: HttpSetup;
-  page: Pagination;
-  searchText?: string;
-  typesFilter?: string[];
-  actionTypesFilter?: string[];
-  ruleStatusesFilter?: string[];
-  sort?: Sorting;
-}): Promise<{
+}: LoadRulesProps): Promise<{
   page: number;
   perPage: number;
   total: number;
   data: Rule[];
 }> {
-  const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, ruleStatusesFilter });
+  const filters = mapFiltersToKql({
+    typesFilter,
+    actionTypesFilter,
+    tagsFilter,
+    ruleExecutionStatusesFilter,
+    ruleStatusesFilter,
+  });
   const res = await http.get<
     AsApiContract<{
       page: number;

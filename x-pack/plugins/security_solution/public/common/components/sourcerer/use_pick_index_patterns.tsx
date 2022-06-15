@@ -10,7 +10,7 @@ import { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
 import { getSourcererDataView } from '../../containers/sourcerer/api';
-import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
+import { getScopePatternListSelection, sortWithExcludesAtEnd } from '../../store/sourcerer/helpers';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { getDataViewSelectOptions, getPatternListWithoutSignals } from './helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
@@ -42,7 +42,7 @@ interface UsePickIndexPatterns {
 }
 
 const patternListToOptions = (patternList: string[], selectablePatterns?: string[]) =>
-  patternList.sort().map((s) => ({
+  sortWithExcludesAtEnd(patternList).map((s) => ({
     label: s,
     value: s,
     ...(selectablePatterns != null ? { disabled: !selectablePatterns.includes(s) } : {}),

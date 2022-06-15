@@ -32,6 +32,7 @@ import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { MapsStartApi } from '@kbn/maps-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -52,6 +53,7 @@ export interface ApmPluginStartDeps {
   maps?: MapsStartApi;
   inspector: InspectorPluginStart;
   observability: ObservabilityPublicStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
@@ -77,8 +79,14 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
           return await dataHelper.hasRumData(params!);
         },
         fetchData: async (params: FetchDataParams) => {
+          const [_, startPlugins] = await core.getStartServices();
+
+          const { data: dataStartPlugin } = startPlugins as ApmPluginStartDeps;
           const dataHelper = await getUxDataHelper();
-          return await dataHelper.fetchUxOverviewDate(params);
+          return await dataHelper.fetchUxOverviewDate({
+            ...params,
+            dataStartPlugin,
+          });
         },
       });
     }

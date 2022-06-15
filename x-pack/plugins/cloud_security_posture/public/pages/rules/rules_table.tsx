@@ -9,7 +9,6 @@ import {
   Criteria,
   EuiButtonEmpty,
   EuiSwitch,
-  EuiToolTip,
   EuiTableFieldDataColumnType,
   EuiBasicTable,
   EuiBasicTableProps,
@@ -58,7 +57,7 @@ export const RulesTable = ({
     pageIndex: page,
     pageSize,
     totalItemCount: total,
-    pageSizeOptions: [1, 5, 10, 25],
+    pageSizeOptions: [10, 25, 100],
   };
 
   const selection: EuiBasicTableProps<RuleSavedObject>['selection'] = {
@@ -128,8 +127,8 @@ const getColumns = ({
     ),
   },
   {
-    field: 'section', // TODO: what field is this?
-    name: TEXT.SECTION,
+    field: 'attributes.section',
+    name: TEXT.CIS_SECTION,
     width: '15%',
   },
   {
@@ -142,15 +141,13 @@ const getColumns = ({
     field: 'attributes.enabled',
     name: TEXT.ENABLED,
     render: (enabled, rule) => (
-      <EuiToolTip content={enabled ? TEXT.DEACTIVATE : TEXT.ACTIVATE}>
-        <EuiSwitch
-          showLabel={false}
-          label={enabled ? TEXT.DISABLE : TEXT.ENABLE}
-          checked={enabled}
-          onChange={() => toggleRule(rule)}
-          data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.attributes.id)}
-        />
-      </EuiToolTip>
+      <EuiSwitch
+        showLabel={false}
+        label={enabled ? TEXT.DISABLE : TEXT.ENABLE}
+        checked={enabled}
+        onChange={() => toggleRule(rule)}
+        data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
+      />
     ),
     width: '10%',
   },

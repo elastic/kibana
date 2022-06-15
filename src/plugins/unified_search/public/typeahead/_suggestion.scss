@@ -15,12 +15,16 @@ $kbnTypeaheadTypes: (
   @include euiBottomShadowFlat;
   border-top-left-radius: $euiBorderRadius;
   border-top-right-radius: $euiBorderRadius;
+  // Clips the shadow so it doesn't show above the input (below)
+  clip-path: polygon(-50px -50px, calc(100% + 50px) -50px, calc(100% + 50px) 100%, -50px 100%);
 }
 
 .kbnTypeahead__popover--bottom {
-  @include euiBottomShadow($adjustBorders: true);
+  @include euiBottomShadow;
   border-bottom-left-radius: $euiBorderRadius;
   border-bottom-right-radius: $euiBorderRadius;
+  // Clips the shadow so it doesn't show above the input (top)
+  clip-path: polygon(-50px 1px, calc(100% + 50px) 1px, calc(100% + 50px) calc(100% + 50px), -50px calc(100% + 50px));
 }
 
 .kbnTypeahead {
@@ -59,7 +63,6 @@ $kbnTypeaheadTypes: (
 
     .kbnTypeahead__item:first-child {
       border-bottom: none;
-      border-radius: $euiBorderRadius $euiBorderRadius 0 0;
     }
 
     .kbnTypeahead__item.active {

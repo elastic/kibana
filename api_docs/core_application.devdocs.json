@@ -510,7 +510,7 @@
             "tags": [],
             "label": "id",
             "description": [
-              "\nThe unique identifier of the application"
+              "\nThe unique identifier of the application.\n\nCan only be composed of alphanumeric characters, `-`, `:` and `_`"
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": false
@@ -1210,7 +1210,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "- navigation options"
+                ],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -1594,13 +1596,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
             "path": "src/core/public/application/types.ts",

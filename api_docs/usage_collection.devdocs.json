@@ -2190,9 +2190,9 @@
           "\r\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"keyword\" | \"date\" | \"text\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
+          "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
         ],
-        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

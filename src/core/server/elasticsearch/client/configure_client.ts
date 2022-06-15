@@ -7,7 +7,7 @@
  */
 
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-import { Logger } from '../../logging';
+import type { Logger } from '@kbn/logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 import { createTransport } from './create_transport';

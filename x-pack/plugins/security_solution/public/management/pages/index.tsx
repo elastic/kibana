@@ -6,7 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import {

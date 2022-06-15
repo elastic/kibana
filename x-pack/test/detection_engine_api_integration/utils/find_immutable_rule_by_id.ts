@@ -9,11 +9,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
-import {
-  DETECTION_ENGINE_RULES_URL,
-  INTERNAL_IMMUTABLE_KEY,
-  INTERNAL_RULE_ID_KEY,
-} from '@kbn/security-solution-plugin/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 
 /**
  * Helper to cut down on the noise in some of the tests. This
@@ -32,7 +28,7 @@ export const findImmutableRuleById = async (
 }> => {
   const response = await supertest
     .get(
-      `${DETECTION_ENGINE_RULES_URL}/_find?filter=alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true" AND alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`
+      `${DETECTION_ENGINE_RULES_URL}/_find?filter=alert.attributes.params.immutable: true AND alert.attributes.params.ruleId: "${ruleId}"`
     )
     .set('kbn-xsrf', 'true')
     .send();

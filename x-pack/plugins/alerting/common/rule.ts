@@ -11,8 +11,8 @@ import {
   SavedObjectsResolveResponse,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/core/server';
-import { RuleExecutionMetrics } from '.';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
+import { RuleSnooze } from './rule_snooze_type';
 
 export type RuleTypeState = Record<string, unknown>;
 export type RuleTypeParams = Record<string, unknown>;
@@ -41,6 +41,7 @@ export enum RuleExecutionStatusErrorReasons {
   License = 'license',
   Timeout = 'timeout',
   Disabled = 'disabled',
+  Validate = 'validate',
 }
 
 export enum RuleExecutionStatusWarningReasons {
@@ -49,9 +50,6 @@ export enum RuleExecutionStatusWarningReasons {
 
 export interface RuleExecutionStatus {
   status: RuleExecutionStatuses;
-  numberOfTriggeredActions?: number;
-  numberOfGeneratedActions?: number;
-  metrics?: RuleExecutionMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;
   error?: {
@@ -79,6 +77,7 @@ export interface RuleAggregations {
   ruleEnabledStatus: { enabled: number; disabled: number };
   ruleMutedStatus: { muted: number; unmuted: number };
   ruleSnoozedStatus: { snoozed: number };
+  ruleTags: string[];
 }
 
 export interface MappedParamsProperties {
@@ -107,12 +106,13 @@ export interface Rule<Params extends RuleTypeParams = never> {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
-  notifyWhen: RuleNotifyWhenType | null;
   muteAll: boolean;
+  notifyWhen: RuleNotifyWhenType | null;
   mutedInstanceIds: string[];
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeEndTime?: Date | null; // Remove ? when this parameter is made available in the public API
+  snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
+  isSnoozedUntil?: Date | null;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;

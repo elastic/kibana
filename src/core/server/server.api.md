@@ -23,8 +23,11 @@ import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { ConfigService } from '@kbn/config';
 import { ContextProviderOpts } from '@kbn/analytics-client';
+import { CoreId } from '@kbn/core-base-common-internal';
 import { DetailedPeerCertificate } from 'tls';
-import type { DocLinks } from '@kbn/doc-links';
+import { DiscoveredPlugin } from '@kbn/core-base-common';
+import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { Duration } from 'moment';
 import { Duration as Duration_2 } from 'moment-timezone';
 import { Ecs } from '@kbn/logging';
@@ -53,7 +56,9 @@ import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import { PluginName } from '@kbn/core-base-common';
+import { PluginOpaqueId } from '@kbn/core-base-common';
+import { PluginType } from '@kbn/core-base-common';
 import { Readable } from 'stream';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
@@ -77,12 +82,12 @@ export { AnalyticsClient }
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
 //
 // @public
-export type AnalyticsServicePreboot = AnalyticsClient;
+export type AnalyticsServicePreboot = Omit<AnalyticsClient, 'shutdown'>;
 
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
 //
 // @public
-export type AnalyticsServiceSetup = AnalyticsClient;
+export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
 
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
 //
@@ -422,8 +427,7 @@ export interface CoreEnvironmentUsageData {
     };
 }
 
-// @internal (undocumented)
-export type CoreId = symbol;
+export { CoreId }
 
 // @internal
 export interface CoreIncrementCounterParams {
@@ -504,6 +508,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     coreUsageData: CoreUsageDataSetup;
     // (undocumented)
     deprecations: DeprecationsServiceSetup;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     docLinks: DocLinksServiceSetup;
     // (undocumented)
@@ -538,6 +544,8 @@ export interface CoreStart {
     capabilities: CapabilitiesStart;
     // @internal (undocumented)
     coreUsageData: CoreUsageDataStart;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     docLinks: DocLinksServiceStart;
     // (undocumented)
@@ -921,26 +929,11 @@ export interface DeprecationsServiceSetup {
 // @public
 export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
 
-// @public
-export interface DiscoveredPlugin {
-    readonly configPath: ConfigPath;
-    readonly enabledOnAnonymousPages?: boolean;
-    readonly id: PluginName;
-    readonly optionalPlugins: readonly PluginName[];
-    readonly requiredBundles: readonly PluginName[];
-    readonly requiredPlugins: readonly PluginName[];
-    readonly type: PluginType;
-}
+export { DiscoveredPlugin }
 
-// @public (undocumented)
-export interface DocLinksServiceSetup {
-    readonly elasticWebsiteUrl: string;
-    readonly links: DocLinks;
-    readonly version: string;
-}
+export { DocLinksServiceSetup }
 
-// @public (undocumented)
-export type DocLinksServiceStart = DocLinksServiceSetup;
+export { DocLinksServiceStart }
 
 export { Ecs }
 
@@ -1364,11 +1357,17 @@ export interface IRouter<Context extends RequestHandlerContext = RequestHandlerC
 // @public
 export type IsAuthenticated = (request: KibanaRequest) => boolean;
 
-// @public (undocumented)
-export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
+// @public
+export interface ISavedObjectsExporter {
+    exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
+    exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
+}
 
-// @public (undocumented)
-export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
+// @public
+export interface ISavedObjectsImporter {
+    import(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    resolveImportErrors(options: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+}
 
 // @public (undocumented)
 export interface ISavedObjectsPointInTimeFinder<T, A> {
@@ -1470,10 +1469,10 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    custom: <T extends string | Record<string, any> | Error | Buffer | Stream | {
+    custom: <T extends string | Record<string, any> | Buffer | Error | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
-    } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
+    } | Stream | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
     badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
@@ -1494,10 +1493,10 @@ export const kibanaResponseFactory: {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
-    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Error | Buffer | Stream | {
+    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Buffer | Error | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
-    }>;
+    } | Stream>;
     redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
@@ -1794,11 +1793,9 @@ export interface PluginManifest {
     readonly version: string;
 }
 
-// @public
-export type PluginName = string;
+export { PluginName }
 
-// @public (undocumented)
-export type PluginOpaqueId = symbol;
+export { PluginOpaqueId }
 
 // @internal (undocumented)
 export interface PluginsServiceSetup {
@@ -1811,11 +1808,7 @@ export interface PluginsServiceStart {
     contracts: Map<PluginName, unknown>;
 }
 
-// @public (undocumented)
-export enum PluginType {
-    preboot = "preboot",
-    standard = "standard"
-}
+export { PluginType }
 
 // @public (undocumented)
 export const pollEsNodesVersion: ({ internalClient, log, kibanaVersion, ignoreVersionMismatch, esVersionCheckInterval: healthCheckInterval, }: PollEsNodesVersionOptions) => Observable<NodesVersionCompatibility>;
@@ -2382,15 +2375,17 @@ export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOp
     types: string[];
 }
 
-// @public (undocumented)
-export class SavedObjectsExporter {
+// @internal (undocumented)
+export class SavedObjectsExporter implements ISavedObjectsExporter {
     constructor({ savedObjectsClient, typeRegistry, exportSizeLimit, logger, }: {
         savedObjectsClient: SavedObjectsClientContract;
         typeRegistry: ISavedObjectTypeRegistry;
         exportSizeLimit: number;
         logger: Logger;
     });
+    // (undocumented)
     exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
+    // (undocumented)
     exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
 }
 
@@ -2534,14 +2529,16 @@ export interface SavedObjectsImportConflictError {
     type: 'conflict';
 }
 
-// @public (undocumented)
-export class SavedObjectsImporter {
+// @internal (undocumented)
+export class SavedObjectsImporter implements ISavedObjectsImporter {
     constructor({ savedObjectsClient, typeRegistry, importSizeLimit, }: {
         savedObjectsClient: SavedObjectsClientContract;
         typeRegistry: ISavedObjectTypeRegistry;
         importSizeLimit: number;
     });
-    import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    // (undocumented)
+    import({ readStream, createNewCopies, namespace, overwrite, refresh, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    // (undocumented)
     resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 }
 
@@ -2604,6 +2601,7 @@ export interface SavedObjectsImportOptions {
     namespace?: string;
     overwrite: boolean;
     readStream: Readable;
+    refresh?: boolean | 'wait_for';
 }
 
 // @public
@@ -2938,6 +2936,7 @@ export interface SavedObjectsUpdateObjectsSpacesResponseObject {
 export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
     references?: SavedObjectReference[];
     refresh?: MutatingOperationRefreshSetting;
+    retryOnConflict?: number;
     upsert?: Attributes;
     version?: string;
 }
@@ -3245,8 +3244,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/elasticsearch/client/types.ts:81:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:405:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:407:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:514:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:339:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:341:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:448:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

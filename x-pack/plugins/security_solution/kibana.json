@@ -13,7 +13,6 @@
     "alerting",
     "cases",
     "data",
-    "dataEnhanced",
     "embeddable",
     "eventLog",
     "features",
@@ -28,7 +27,7 @@
     "triggersActionsUi",
     "uiActions",
     "unifiedSearch",
-    "sessionView"
+    "kubernetesSecurity"
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",

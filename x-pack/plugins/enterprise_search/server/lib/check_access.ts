@@ -98,6 +98,6 @@ export const checkAccess = async ({
 
   // When enterpriseSearch.host is defined in kibana.yml,
   // make a HTTP call which returns product access
-  const { access } = (await callEnterpriseSearchConfigAPI({ request, config, log })) || {};
-  return access || DENY_ALL_PLUGINS;
+  const response = (await callEnterpriseSearchConfigAPI({ request, config, log })) || {};
+  return 'access' in response ? response.access || DENY_ALL_PLUGINS : DENY_ALL_PLUGINS;
 };
