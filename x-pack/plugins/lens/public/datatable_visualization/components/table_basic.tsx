@@ -337,22 +337,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   ]);
 
   const renderCellValue = useMemo(
-    () =>
-      createGridCell(
-        formatters,
-        columnConfig,
-        DataContext,
-        props.uiSettings,
-        props.args.fitRowToContent,
-        props.args.rowHeightLines
-      ),
-    [
-      formatters,
-      columnConfig,
-      props.uiSettings,
-      props.args.fitRowToContent,
-      props.args.rowHeightLines,
-    ]
+    () => createGridCell(formatters, columnConfig, DataContext, props.uiSettings),
+    [formatters, columnConfig, props.uiSettings]
   );
 
   const columnVisibility = useMemo(

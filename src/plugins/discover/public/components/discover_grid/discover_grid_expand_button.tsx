@@ -25,7 +25,12 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
       setCellProps({
         className: 'dscDocsGrid__cell--highlight',
       });
-    } else if (expanded && current && expanded._id === current._id) {
+    } else if (
+      expanded &&
+      current &&
+      expanded._id === current._id &&
+      expanded._index === current._index
+    ) {
       setCellProps({
         style: {
           backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,

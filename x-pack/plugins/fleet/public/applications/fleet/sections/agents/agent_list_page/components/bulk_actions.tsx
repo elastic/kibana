@@ -36,7 +36,7 @@ export interface Props {
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
-  refreshAgents: () => void;
+  refreshAgents: (args?: { refreshTags?: boolean }) => void;
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -163,7 +163,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             agentCount={agentCount}
             onClose={() => {
               setIsUnenrollModalOpen(false);
-              refreshAgents();
+              refreshAgents({ refreshTags: true });
             }}
           />
         </EuiPortal>
