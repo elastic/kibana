@@ -17,7 +17,9 @@ export interface TextBasedLanguagesListProps {
   selectedOption: string;
 }
 
-export function TextBasedLanguagesList({
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default function TextBasedLanguagesList({
   textBasedLanguages,
   onChange,
   selectedOption,

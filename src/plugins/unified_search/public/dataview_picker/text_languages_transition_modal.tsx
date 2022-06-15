@@ -28,8 +28,9 @@ export interface TextBasedLanguagesTransitionModalProps {
   // defined by the application
   onSave: (dismissFlag: boolean) => void;
 }
-
-export function TextBasedLanguagesTransitionModal({
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default function TextBasedLanguagesTransitionModal({
   closeModal,
   onSave,
 }: TextBasedLanguagesTransitionModalProps) {

@@ -31,8 +31,8 @@ import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewPickerProps } from '.';
 import { DataViewsList } from './dataview_list';
-import { TextBasedLanguagesList } from './text_languages_list';
-import { TextBasedLanguagesTransitionModal } from './text_languages_transition_modal';
+import type { TextBasedLanguagesListProps } from './text_languages_list';
+import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
 import { changeDataViewStyles } from './change_dataview.styles';
 
 // local storage key for the tour component
@@ -57,6 +57,26 @@ const newMenuTourDismissLabel = i18n.translate(
   {
     defaultMessage: 'Got it',
   }
+);
+
+const Fallback = () => <div />;
+
+const LazyTextBasedLanguagesTransitionModal = React.lazy(
+  () => import('./text_languages_transition_modal')
+);
+export const TextBasedLanguagesTransitionModal = (
+  props: TextBasedLanguagesTransitionModalProps
+) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyTextBasedLanguagesTransitionModal {...props} />
+  </React.Suspense>
+);
+
+const LazyTextBasedLanguagesList = React.lazy(() => import('./text_languages_list'));
+export const TextBasedLanguagesList = (props: TextBasedLanguagesListProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyTextBasedLanguagesList {...props} />
+  </React.Suspense>
 );
 
 export function ChangeDataView({
