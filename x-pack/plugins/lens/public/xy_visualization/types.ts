@@ -86,6 +86,7 @@ export interface XYState {
   fittingFunction?: FittingFunction;
   emphasizeFitting?: boolean;
   endValue?: EndValue;
+  xExtent?: AxisExtentConfig;
   yLeftExtent?: AxisExtentConfig;
   yRightExtent?: AxisExtentConfig;
   layers: XYLayerConfig[];
