@@ -21,23 +21,28 @@ export function EMSVectorTileStyleEditor({ color, onColorChange }: Props) {
       color: selectedColor,
     });
   };
+
+  const colorPickerLabel = i18n.translate('xpack.maps.emsVectorTileStyleEditor.colorBlendPickerLabel', {
+    defaultMessage: 'Color blend',
+  });
+  const noColorPlaceholder = i18n.translate('xpack.maps.emsVectorTileStyleEditor.colorBlendPickerPlaceholder', {
+    defaultMessage: 'No color',
+  });
   return (
     <EuiFormRow
       display="columnCompressed"
-      label={i18n.translate('xpack.maps.emsVectorTileStyleEditor.colorBlendPickerLabel', {
-        defaultMessage: 'Color blend',
-      })}
+      label={colorPickerLabel}
     >
       <EuiColorPicker
         compressed
-        aria-label="Color blend"
+        aria-label={colorPickerLabel}
         color={color}
         onChange={onChange}
         secondaryInputDisplay="top"
         isClearable
         format="hex"
-        placeholder="No color"
-        aria-placeholder="No color"
+        placeholder={noColorPlaceholder}
+        aria-placeholder={noColorPlaceholder}
       />
     </EuiFormRow>
   );
