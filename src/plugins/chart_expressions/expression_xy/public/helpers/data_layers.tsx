@@ -146,28 +146,27 @@ export const getFormattedTable = (
     {}
   );
 
-  const formattedTableInfo = table.rows.reduce<{
+  const formattedTableInfo: {
     rows: Datatable['rows'];
     formattedColumns: Record<string, true>;
-  }>(
-    ({ rows: formattedRows, formattedColumns }, row) => {
-      const formattedRowInfo = getFormattedRow(
-        row,
-        table.columns,
-        columnsFormatters,
-        xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
-        xScaleType
-      );
-      return {
-        rows: [...formattedRows, formattedRowInfo.row],
-        formattedColumns: { ...formattedColumns, ...formattedRowInfo.formattedColumns },
-      };
-    },
-    {
-      rows: [],
-      formattedColumns: {},
-    }
-  );
+  } = {
+    rows: [],
+    formattedColumns: {},
+  };
+  for (const row of table.rows) {
+    const formattedRowInfo = getFormattedRow(
+      row,
+      table.columns,
+      columnsFormatters,
+      xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
+      xScaleType
+    );
+    formattedTableInfo.rows.push(formattedRowInfo.row);
+    formattedTableInfo.formattedColumns = {
+      ...formattedTableInfo.formattedColumns,
+      ...formattedRowInfo.formattedColumns,
+    };
+  }
 
   return {
     table: { ...table, rows: formattedTableInfo.rows },
