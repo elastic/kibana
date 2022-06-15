@@ -98,7 +98,7 @@ export const ExpandableNetworkDetails = ({
     services: { uiSettings },
   } = useKibana();
 
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
     indexPattern,
@@ -138,6 +138,8 @@ export const ExpandableNetworkDetails = ({
       startDate={from}
       endDate={to}
       narrowDateRange={narrowDateRange}
+      docValueFields={docValueFields}
+      indexPatterns={indexPattern}
     />
   ) : (
     <LandingCards />

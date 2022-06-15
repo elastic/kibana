@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import '../../../../common/mock/match_media';
-import { TestProviders } from '../../../../common/mock';
+import { mockGlobalState, TestProviders } from '../../../../common/mock';
 import { ExpandableHostDetails } from './expandable_host';
 
 describe('Expandable Host Component', () => {
@@ -27,6 +27,18 @@ describe('Expandable Host Component', () => {
       );
 
       expect(wrapper.find('ExpandableHostDetails').render()).toMatchSnapshot();
+    });
+
+    test('it should render the HostOverview of the ExpandableHostDetails with the correct indices', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <ExpandableHostDetails {...mockProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('HostOverview').prop('indexNames')).toStrictEqual(
+        mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns
+      );
     });
   });
 });

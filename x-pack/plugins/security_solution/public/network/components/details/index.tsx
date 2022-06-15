@@ -49,6 +49,8 @@ export interface IpOverviewProps {
   narrowDateRange: NarrowDateRange;
   startDate: string;
   type: networkModel.NetworkType;
+  docValueFields: DocValueFields;
+  indexPatterns: string[];
 }
 
 export const IpOverview = React.memo<IpOverviewProps>(
@@ -66,6 +68,8 @@ export const IpOverview = React.memo<IpOverviewProps>(
     isLoadingAnomaliesData,
     anomaliesData,
     narrowDateRange,
+    docValueFields,
+    indexPatterns,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -114,6 +118,8 @@ export const IpOverview = React.memo<IpOverviewProps>(
           title: i18n.FIRST_SEEN,
           description: (
             <FirstLastSeen
+              docValueFields={docValueFields}
+              indexPatterns={indexPatterns}
               field={`${flowTarget}.ip`}
               value={ip}
               type={FirstLastSeenType.FIRST_SEEN}
@@ -124,6 +130,8 @@ export const IpOverview = React.memo<IpOverviewProps>(
           title: i18n.LAST_SEEN,
           description: (
             <FirstLastSeen
+              docValueFields={docValueFields}
+              indexPatterns={indexPatterns}
               field={`${flowTarget}.ip`}
               value={ip}
               type={FirstLastSeenType.LAST_SEEN}

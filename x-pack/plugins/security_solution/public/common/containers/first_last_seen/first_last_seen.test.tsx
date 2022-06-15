@@ -43,13 +43,14 @@ const mockSearchStrategy = jest.fn();
   },
 });
 
-const renderUseFirstLastSeen = (props: Partial<FirstLastSeenProps> = {}) =>
+const renderUseFirstLastSeen = () =>
   renderHook<FirstLastSeenProps, ReturnType<typeof useFirstLastSeen>>(() =>
     useFirstLastSeen({
       order: Direction.asc,
       field: 'host.name',
       value: 'some-host',
-      ...props,
+      defaultIndex: [],
+      docValueFields: [],
     })
   );
 

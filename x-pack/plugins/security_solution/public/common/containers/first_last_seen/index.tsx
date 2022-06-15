@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 
 import {
+  DocValueFields,
   Direction,
   FirstLastSeenQuery,
   FirstLastSeenRequestOptions,
@@ -19,7 +20,6 @@ import {
 } from '../../../../common/search_strategy';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useKibana } from '../../lib/kibana';
-import { useSourcererDataView } from '../sourcerer';
 import * as i18n from './translations';
 
 const ID = 'firstLastSeenQuery';
@@ -35,18 +35,21 @@ interface UseFirstLastSeen {
   field: string;
   value: string;
   order: Direction.asc | Direction.desc;
+  defaultIndex: string[];
+  docValueFields: DocValueFields[];
 }
 
 export const useFirstLastSeen = ({
   field,
   value,
   order,
+  defaultIndex,
+  docValueFields,
 }: UseFirstLastSeen): [boolean, FirstLastSeenArgs] => {
   const { search } = useKibana().services.data;
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const { docValueFields, selectedPatterns: defaultIndex } = useSourcererDataView();
 
   const [firstLastSeenRequest, setFirstLastSeenRequest] = useState<FirstLastSeenRequestOptions>({
     defaultIndex,
@@ -64,6 +67,7 @@ export const useFirstLastSeen = ({
     errorMessage: null,
     id: ID,
   });
+
   const { addError, addWarning } = useAppToasts();
 
   const firstLastSeenSearch = useCallback(

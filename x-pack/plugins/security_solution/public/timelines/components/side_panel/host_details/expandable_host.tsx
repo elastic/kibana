@@ -64,7 +64,7 @@ export const ExpandableHostDetails = ({
     Otherwise, an empty array is defaulted for the `indexNames` in the query which leads to inconsistencies in the data returned
     (i.e. extraneous endpoint data is retrieved from the backend leading to endpoint data not being returned)
   */
-  const { selectedPatterns } = useSourcererDataView();
+  const { docValueFields, selectedPatterns } = useSourcererDataView();
 
   const [loading, { hostDetails: hostOverview }] = useHostDetails({
     endDate: to,
@@ -82,12 +82,14 @@ export const ExpandableHostDetails = ({
       {({ isLoadingAnomaliesData, anomaliesData }) => (
         <HostOverview
           contextID={contextID}
+          docValueFields={docValueFields}
           id={ID}
           isInDetailsSidePanel
           data={hostOverview as HostItem}
           anomaliesData={anomaliesData}
           isDraggable={isDraggable}
           isLoadingAnomaliesData={isLoadingAnomaliesData}
+          indexNames={selectedPatterns}
           loading={loading}
           startDate={from}
           endDate={to}

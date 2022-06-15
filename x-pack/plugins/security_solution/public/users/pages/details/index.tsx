@@ -165,6 +165,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                       to: fromTo.to,
                     });
                   }}
+                  docValueFields={docValueFields}
+                  indexPatterns={indexPattern}
                 />
               )}
             </AnomalyTableProvider>

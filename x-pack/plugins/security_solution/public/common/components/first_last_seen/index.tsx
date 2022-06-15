@@ -12,7 +12,7 @@ import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import { useFirstLastSeen } from '../../containers/first_last_seen';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { Direction } from '../../../../common/search_strategy';
+import { Direction, DocValueFields } from '../../../../common/search_strategy';
 
 export enum FirstLastSeenType {
   FIRST_SEEN = 'first-seen',
@@ -20,50 +20,56 @@ export enum FirstLastSeenType {
 }
 
 export interface FirstLastSeenProps {
+  indexNames: string[];
+  docValueFields: DocValueFields[];
   field: string;
-  value: string;
   type: FirstLastSeenType;
+  value: string;
 }
 
-export const FirstLastSeen = React.memo<FirstLastSeenProps>(({ field, type, value }) => {
-  const [loading, { firstSeen, lastSeen, errorMessage }] = useFirstLastSeen({
-    field,
-    value,
-    order: type === FirstLastSeenType.FIRST_SEEN ? Direction.asc : Direction.desc,
-  });
-  const valueSeen = useMemo(
-    () => (type === FirstLastSeenType.FIRST_SEEN ? firstSeen : lastSeen),
-    [firstSeen, lastSeen, type]
-  );
+export const FirstLastSeen = React.memo<FirstLastSeenProps>(
+  ({ indexNames, docValueFields, field, type, value }) => {
+    const [loading, { firstSeen, lastSeen, errorMessage }] = useFirstLastSeen({
+      field,
+      value,
+      order: type === FirstLastSeenType.FIRST_SEEN ? Direction.asc : Direction.desc,
+      defaultIndex: indexNames,
+      docValueFields,
+    });
+    const valueSeen = useMemo(
+      () => (type === FirstLastSeenType.FIRST_SEEN ? firstSeen : lastSeen),
+      [firstSeen, lastSeen, type]
+    );
 
-  if (errorMessage != null) {
+    if (errorMessage != null) {
+      return (
+        <EuiToolTip
+          position="top"
+          content={errorMessage}
+          data-test-subj="firstLastSeenErrorToolTip"
+          aria-label={`firstLastSeenError-${type}`}
+          id={`firstLastSeenError-${field}-${type}`}
+        >
+          <EuiIcon aria-describedby={`firstLastSeenError-${field}-${type}`} type="alert" />
+        </EuiToolTip>
+      );
+    }
+
     return (
-      <EuiToolTip
-        position="top"
-        content={errorMessage}
-        data-test-subj="firstLastSeenErrorToolTip"
-        aria-label={`firstLastSeenError-${type}`}
-        id={`firstLastSeenError-${field}-${type}`}
-      >
-        <EuiIcon aria-describedby={`firstLastSeenError-${field}-${type}`} type="alert" />
-      </EuiToolTip>
+      <>
+        {loading && <EuiLoadingSpinner data-test-subj="loading-spinner" size="m" />}
+        {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
+          ? valueSeen
+          : !loading &&
+            valueSeen !== null && (
+              <EuiText data-test-subj="first-last-seen-value" size="s">
+                <FormattedRelativePreferenceDate value={`${valueSeen}`} />
+              </EuiText>
+            )}
+        {!loading && valueSeen === null && getEmptyTagValue()}
+      </>
     );
   }
-
-  return (
-    <>
-      {loading && <EuiLoadingSpinner data-test-subj="loading-spinner" size="m" />}
-      {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
-        ? valueSeen
-        : !loading &&
-          valueSeen !== null && (
-            <EuiText data-test-subj="first-last-seen-value" size="s">
-              <FormattedRelativePreferenceDate value={`${valueSeen}`} />
-            </EuiText>
-          )}
-      {!loading && valueSeen === null && getEmptyTagValue()}
-    </>
-  );
-});
+);
 
 FirstLastSeen.displayName = 'FirstLastSeen';

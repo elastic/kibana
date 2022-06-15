@@ -10,7 +10,11 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { buildUserNamesFilter, RiskSeverity } from '../../../../common/search_strategy';
+import {
+  buildUserNamesFilter,
+  DocValueFields,
+  RiskSeverity,
+} from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
@@ -46,6 +50,8 @@ export interface UserSummaryProps {
   endDate: string;
   narrowDateRange: NarrowDateRange;
   userName: string;
+  docValueFields: DocValueFields;
+  indexPatterns: string[];
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup)`
@@ -67,6 +73,8 @@ export const UserOverview = React.memo<UserSummaryProps>(
     startDate,
     endDate,
     userName,
+    docValueFields,
+    indexPatterns,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -169,6 +177,8 @@ export const UserOverview = React.memo<UserSummaryProps>(
             title: i18n.FIRST_SEEN,
             description: (
               <FirstLastSeen
+                docValueFields={docValueFields}
+                indexPatterns={indexPatterns}
                 field={'user.name'}
                 value={userName}
                 type={FirstLastSeenType.FIRST_SEEN}
@@ -179,6 +189,8 @@ export const UserOverview = React.memo<UserSummaryProps>(
             title: i18n.LAST_SEEN,
             description: (
               <FirstLastSeen
+                docValueFields={docValueFields}
+                indexPatterns={indexPatterns}
                 field={'user.name'}
                 value={userName}
                 type={FirstLastSeenType.LAST_SEEN}
@@ -210,7 +222,16 @@ export const UserOverview = React.memo<UserSummaryProps>(
           },
         ],
       ],
-      [data, getDefaultRenderer, contextID, isDraggable, userName, firstColumn]
+      [
+        data,
+        docValueFields,
+        indexPatterns,
+        getDefaultRenderer,
+        contextID,
+        isDraggable,
+        userName,
+        firstColumn,
+      ]
     );
     return (
       <>
