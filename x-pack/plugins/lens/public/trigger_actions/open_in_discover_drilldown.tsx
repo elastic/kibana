@@ -18,6 +18,7 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { DiscoverSetup } from '@kbn/discover-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { DataViewsService } from '@kbn/data-views-plugin/public';
 import { execute, isCompatible, isLensEmbeddable } from './open_in_discover_helpers';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
@@ -31,6 +32,7 @@ export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
 
 interface UrlDrilldownDeps {
   discover: Pick<DiscoverSetup, 'locator'>;
+  dataViews: () => Pick<DataViewsService, 'get'>;
   hasDiscoverAccess: () => boolean;
 }
 
@@ -104,6 +106,7 @@ export class OpenInDiscoverDrilldown
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
     return isCompatible({
       discover: this.deps.discover,
+      dataViews: this.deps.dataViews(),
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
       embeddable: context.embeddable as IEmbeddable,
@@ -116,19 +119,13 @@ export class OpenInDiscoverDrilldown
   };
 
   public readonly execute = async (config: Config, context: ActionContext) => {
-    const { extractTimeRange } = await import('@kbn/es-query');
-    const { restOfFilters: filters, timeRange: timeRange } = extractTimeRange(
-      context.filters,
-      context.timeFieldName
-    );
     execute({
       discover: this.deps.discover,
+      dataViews: this.deps.dataViews(),
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
       embeddable: context.embeddable as IEmbeddable,
       openInSameTab: !config.openInNewTab,
-      filters,
-      timeRange,
     });
   };
 }
