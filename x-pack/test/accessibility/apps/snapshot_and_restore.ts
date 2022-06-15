@@ -1,0 +1,116 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const PageObjects = getPageObjects(['common', 'settings', 'header', 'snapshotRestore']);
+  const a11y = getService('a11y');
+  const es = getService('es');
+
+  describe('Stack Management - Snapshot Restore Accessibility', () => {
+    before(async () => {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickSnapshotRestore();
+    });
+
+    describe('empty state', async () => {
+      it('empty snapshots table', async () => {
+        await a11y.testAppSnapshot();
+      });
+
+      it('empty repositories table', async () => {
+        await PageObjects.snapshotRestore.navToRepositories();
+        await a11y.testAppSnapshot();
+      });
+
+      it('empty policies table', async () => {
+        await PageObjects.snapshotRestore.navToPolicies();
+        await a11y.testAppSnapshot();
+      });
+
+      it('empty restored snapshots status table', async () => {
+        await PageObjects.snapshotRestore.navToRestoreStatus();
+        await a11y.testAppSnapshot();
+      });
+    });
+
+    describe('table views with data', async () => {
+      const snapshotName = `testsnapshot${Date.now().toString()}`;
+      before(async () => {
+        await es.snapshot.createRepository({
+          name: 'testrepo',
+          verify: true,
+          type: 'fs',
+          repository: {
+            type: 'fs',
+            settings: {
+              location: 'temp',
+            },
+          },
+          settings: {
+            location: 'temp',
+          },
+        });
+
+        await es.snapshot.create({
+          repository: 'testrepo',
+          snapshot: snapshotName,
+          wait_for_completion: true,
+        });
+
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickSnapshotRestore();
+      });
+      it('snapshots table with data', async () => {
+        await a11y.testAppSnapshot();
+      });
+      it('repository table with data', async () => {
+        await PageObjects.snapshotRestore.navToRepositories();
+        await a11y.testAppSnapshot();
+      });
+
+      describe('create policy wizard', async () => {
+        before(async () => {
+          await PageObjects.snapshotRestore.navToPolicies();
+        });
+        it('page one', async () => {
+          await PageObjects.snapshotRestore.fillCreateNewPolicyPageOne(
+            'testpolicy',
+            '<daily-snap-{now/d}>'
+          );
+          await a11y.testAppSnapshot();
+        });
+        it('page two', async () => {
+          await PageObjects.snapshotRestore.fillCreateNewPolicyPageTwo();
+          await a11y.testAppSnapshot();
+        });
+        it('page three', async () => {
+          await PageObjects.snapshotRestore.fillCreateNewPolicyPageThree();
+          await a11y.testAppSnapshot();
+        });
+        it('submit page four', async () => {
+          await PageObjects.snapshotRestore.submitNewPolicy();
+          await a11y.testAppSnapshot();
+        });
+        it('new policy flyout', async () => {
+          await a11y.testAppSnapshot();
+        });
+        it('policy table with data', async () => {
+          await PageObjects.snapshotRestore.closeFlyout();
+          await a11y.testAppSnapshot();
+        });
+      });
+
+      after(async () => {
+        await es.snapshot.delete({ snapshot: snapshotName, repository: 'testrepo' });
+        await es.snapshot.deleteRepository({ name: ['testrepo'] });
+        await es.slm.deleteLifecycle({ policy_id: 'testpolicy' });
+      });
+    });
+  });
+}
