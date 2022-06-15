@@ -32,9 +32,6 @@ type UseCaseConstants = {
     };
   };
 };
-
-type UseCase = 'search' | 'observability' | 'security';
-
 const constants: UseCaseConstants = {
   search: {
     i18nTexts: {
@@ -103,7 +100,13 @@ const constants: UseCaseConstants = {
     },
   },
 };
-export const UseCaseCard = ({ useCase }: { useCase: UseCase }) => {
+
+export type UseCase = 'search' | 'observability' | 'security';
+export interface UseCaseProps {
+  useCase: UseCase;
+}
+
+export const UseCaseCard = ({ useCase }: UseCaseProps) => {
   const { application, trackUiMetric } = getServices();
 
   const onUseCaseSelection = () => {
