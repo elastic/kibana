@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { get, once } from 'lodash';
+import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n-react';
