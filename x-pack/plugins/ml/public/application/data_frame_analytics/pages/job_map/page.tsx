@@ -145,13 +145,8 @@ export const Page: FC = () => {
       <SavedObjectsWarning onCloseFlyout={refresh} />
       <UpgradeWarning />
 
-      {jobId ?? modelId ? (
-        <JobMap
-          key={`${jobId ?? modelId}-id`}
-          analyticsId={jobId}
-          modelId={modelId}
-          forceRefresh={isLoading}
-        />
+      {jobId || modelId ? (
+        <JobMap analyticsId={jobId} modelId={modelId} forceRefresh={isLoading} />
       ) : (
         getEmptyState()
       )}
