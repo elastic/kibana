@@ -51,6 +51,7 @@ import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
+import { registerAlertsTableConfiguration } from './components/alerting/register_alerts_tables_configurations';
 import {
   getApmEnrollmentFlyoutData,
   LazyApmCustomAssetsExtension,
@@ -311,6 +312,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           import('./application'),
           core.getStartServices(),
         ]);
+
+        // Register alerts metadata
+        const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
+        registerAlertsTableConfiguration(alertsTableConfigurationRegistry);
 
         return renderApp({
           coreStart,
