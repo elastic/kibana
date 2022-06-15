@@ -14,9 +14,14 @@ import { createFailError } from '@kbn/dev-cli-errors';
 
 import { FTR_CONFIGS_MANIFEST_PATHS } from './ftr_configs_manifest';
 
+const IGNORED_PATHS = [
+  resolve(REPO_ROOT, 'packages/kbn-test/src/jest/run_check_jest_configs_cli.ts'),
+  resolve(__dirname, __filename),
+];
+
 export async function runCheckFtrConfigsCli() {
   run(
-    async () => {
+    async ({ log }) => {
       const { stdout } = await execa('git', [
         'ls-tree',
         '--full-tree',
@@ -31,7 +36,7 @@ export async function runCheckFtrConfigsCli() {
         .map((file) => resolve(REPO_ROOT, file));
 
       const possibleConfigs = files.filter((file) => {
-        if (file.includes('run_check_ftr_configs_cli.ts')) {
+        if (IGNORED_PATHS.includes(file)) {
           return false;
         }
 
@@ -56,12 +61,15 @@ export async function runCheckFtrConfigsCli() {
           .match(/(testRunner)|(testFiles)/);
       });
 
-      for (const config of possibleConfigs) {
-        if (!FTR_CONFIGS_MANIFEST_PATHS.includes(config)) {
-          throw createFailError(
-            `${config} looks like a new FTR config. Please add it to .buildkite/ftr_configs.yml. If it's not an FTR config, please contact #kibana-operations`
-          );
-        }
+      const invalid = possibleConfigs.filter((path) => !FTR_CONFIGS_MANIFEST_PATHS.includes(path));
+      if (invalid.length) {
+        const invalidList = invalid.join('\n  - ');
+        log.error(
+          `The following files look like FTR configs which are not listed in .buildkite/ftr_configs.yml:\n  - ${invalidList}`
+        );
+        throw createFailError(
+          `Please add the listed paths to .buildkite/ftr_configs.yml. If it's not an FTR config, please contact #kibana-operations`
+        );
       }
     },
     {
