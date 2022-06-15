@@ -104,7 +104,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             />
           </EuiContextMenuItem>,
           <EuiContextMenuItem
-            icon="cross"
+            icon="trash"
             disabled={!hasFleetAllPrivileges || !agent.active}
             onClick={() => {
               setIsUnenrollModalOpen(true);
