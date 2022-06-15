@@ -14,16 +14,19 @@ high-level visibility into how a service is performing across your infrastructur
 
 [discrete]
 [[service-time-comparison]]
-=== Time series comparison
+=== Time series and expected bounds comparison
 
-Comparing how a service performs relative to a previous time frame can offer additional insight into
-the health of your services. For example, has latency been slowly increasing over time, or did the service
-experience a sudden spike--enabling a time series comparison can provide the answer.
+Comparing how a service performs relative to a previous time frame or to the 
+expected bounds from the corresponding {anomaly-job} can offer additional 
+insight into the health of your services. For example, has latency been slowly 
+increasing over time, did the service experience a sudden spike, is the actual 
+throughput similar to what the {ml} job expects – enabling the respective 
+comparison can provide the answer.
 
 [role="screenshot"]
 image::apm/images/time-series-comparison.png[Time series comparison]
 
-Select the *Comparison* box to enable or disable time series comparison.
+Select the *Comparison* box to apply time-based or expected bounds comparison.
 The time comparison options are based on the selected time filter range:
 
 [options="header"]
