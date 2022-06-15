@@ -114,14 +114,6 @@ export const DebugPage: React.FunctionComponent = () => {
           <EuiListGroup
             listItems={[
               {
-                label: 'Download Health Check Report',
-                isDisabled: true,
-                iconType: 'download',
-                href: '/api/fleet/health_check',
-                target: '_blank',
-                download: 'fleet_health_check_report.txt',
-              },
-              {
                 label: 'View Agents in Fleet UI',
                 href: '/app/fleet/agents',
                 iconType: 'agentApp',
