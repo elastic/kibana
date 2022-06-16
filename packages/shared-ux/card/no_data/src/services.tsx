@@ -33,11 +33,11 @@ export type NoDataCardServices = Services & RedirectAppLinksServices;
  * A Context Provider that provides services to the component and its dependencies.
  */
 export const NoDataCardProvider: FC<NoDataCardServices> = ({ children, ...services }) => {
-  const { addBasePath, canAccessFleet, ...props } = services;
+  const { addBasePath, canAccessFleet } = services;
 
   return (
     <Context.Provider value={{ addBasePath, canAccessFleet }}>
-      <RedirectAppLinksProvider {...props}>{children}</RedirectAppLinksProvider>
+      <RedirectAppLinksProvider {...services}>{children}</RedirectAppLinksProvider>
     </Context.Provider>
   );
 };

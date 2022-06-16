@@ -10,14 +10,14 @@ import React from 'react';
 
 import { Params, getStoryArgTypes, getStoryServices } from './mocks';
 
-import { NoDataCard as NoDataCardComponent } from './no_data_card.component';
-import { NoDataCard } from './no_data_card';
+import { NoDataCard as Component } from './no_data_card.component';
+import { NoDataCard as ConnectedComponent } from './no_data_card';
 import { NoDataCardProvider } from './services';
 
 import mdx from '../README.mdx';
 
 export default {
-  title: 'Card/No Data Card',
+  title: 'No Data/Card',
   description: 'A solution-specific wrapper around `EuiCard`, to be used on `NoData` page',
   parameters: {
     docs: {
@@ -28,18 +28,18 @@ export default {
 
 const argTypes = getStoryArgTypes();
 
-export const Component = (params: Params) => {
-  return <NoDataCardComponent {...params} />;
-};
-
-Component.argTypes = argTypes;
-
-export const ConnectedComponent = (params: Params) => {
+export const NoDataCard = (params: Params) => {
   return (
     <NoDataCardProvider {...getStoryServices(params)}>
-      <NoDataCard {...params} />
+      <ConnectedComponent {...params} />
     </NoDataCardProvider>
   );
 };
 
-ConnectedComponent.argTypes = argTypes;
+NoDataCard.argTypes = argTypes;
+
+export const NoDataCardComponent = (params: Params) => {
+  return <Component {...params} />;
+};
+
+NoDataCardComponent.argTypes = argTypes;
