@@ -16,5 +16,5 @@ export interface QueryParams {
 }
 
 export const fetchMonitorStatus = async (params: QueryParams): Promise<Ping> => {
-  return await apiService.get(SYNTHETICS_API_URLS.MONITOR_STATUS, params);
+  return await apiService.get(SYNTHETICS_API_URLS.MONITOR_STATUS, { ...params });
 };

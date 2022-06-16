@@ -16,7 +16,7 @@ export const MonitorSummaryLastRunInfo = ({ ping }: { ping: Ping }) => {
   const isBrowserType = ping.monitor.type === 'browser';
 
   return (
-    <EuiFlexGroup gutterSize="xs">
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
         {ping.monitor.status === 'up' ? (
           <EuiBadge color="success">{isBrowserType ? SUCCESS_LABEL : UP_LABEL}</EuiBadge>
@@ -25,7 +25,7 @@ export const MonitorSummaryLastRunInfo = ({ ping }: { ping: Ping }) => {
         )}
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText className="eui-displayInline" size="s">
+        <EuiText className="eui-displayInline" size="m">
           {i18n.translate('xpack.synthetics.monitorSummary.lastRunTime', {
             defaultMessage: 'in {loc}. Last run on {time}',
             values: {
