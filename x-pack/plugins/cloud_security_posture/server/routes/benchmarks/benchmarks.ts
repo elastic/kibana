@@ -195,6 +195,9 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
     {
       path: BENCHMARKS_ROUTE_PATH,
       validate: { query: benchmarksInputSchema },
+      options: {
+        tags: ['access:csp-read'],
+      },
     },
     async (context, request, response) => {
       if (!(await context.fleet).authz.fleet.all) {

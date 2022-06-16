@@ -23,6 +23,9 @@ export const defineEsPitRoute = (router: CspRouter, cspContext: CspAppContext): 
     {
       path: ES_PIT_ROUTE_PATH,
       validate: { query: esPitInputSchema },
+      options: {
+        tags: ['access:csp-read'],
+      },
     },
     async (context, request, response) => {
       if (!(await context.fleet).authz.fleet.all) {

@@ -118,7 +118,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
     all: {
       app: [APP_ID, 'csp', 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'lists-all', 'lists-read', 'lists-summary', 'rac'],
+      api: [APP_ID, 'lists-all', 'lists-read', 'lists-summary', 'rac', 'csp-all'],
       savedObject: {
         all: [
           'alert',
@@ -146,7 +146,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
     read: {
       app: [APP_ID, 'csp', 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'lists-read', 'rac'],
+      api: [APP_ID, 'lists-read', 'rac', 'csp-read'],
       savedObject: {
         all: [],
         read: [
