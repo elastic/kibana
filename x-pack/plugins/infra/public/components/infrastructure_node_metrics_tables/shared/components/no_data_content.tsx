@@ -5,45 +5,60 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiLoadingLogo } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import React from 'react';
+import {
+  noMetricIndicesPromptDescription,
+  noMetricIndicesPromptPrimaryActionTitle,
+  noMetricIndicesPromptTitle,
+} from '../../../empty_states';
 
 export const MetricsTableLoadingContent = () => (
   <EuiEmptyPrompt
     data-test-subj="metricsTableLoadingContent"
+    icon={<EuiLoadingLogo logo="logoMetrics" size="xl" />}
     title={
-      <FormattedMessage
-        id="xpack.infra.metricsTable.loadingContentTitle"
-        defaultMessage="Loading metrics"
-        tagName="h2"
-      />
+      <h2>
+        <FormattedMessage
+          id="xpack.infra.metricsTable.loadingContentTitle"
+          defaultMessage="Loading metrics"
+        />
+      </h2>
     }
   />
 );
 
-export const MetricsTableNoIndicesContent = () => (
-  <EuiEmptyPrompt
-    data-test-subj="metricsTableNoIndicesContent"
-    title={
-      <FormattedMessage
-        id="xpack.infra.metricsTable.noIndicesContentTitle"
-        defaultMessage="No metric indices found"
-        tagName="h2"
-      />
-    }
-  />
-);
+export const MetricsTableNoIndicesContent = () => {
+  const integrationsLinkProps = useLinkProps({ app: 'integrations', pathname: 'browse' });
+
+  return (
+    <EuiEmptyPrompt
+      data-test-subj="metricsTableLoadingContent"
+      iconType="logoMetrics"
+      title={<h2>{noMetricIndicesPromptTitle}</h2>}
+      body={<p>{noMetricIndicesPromptDescription}</p>}
+      actions={
+        <EuiButton color="primary" fill {...integrationsLinkProps}>
+          {noMetricIndicesPromptPrimaryActionTitle}
+        </EuiButton>
+      }
+    />
+  );
+};
 
 export const MetricsTableEmptyIndicesContent = () => (
   <EuiEmptyPrompt
     data-test-subj="metricsTableEmptyIndicesContent"
     title={
-      <FormattedMessage
-        id="xpack.infra.metricsTable.emptyIndicesContentTitle"
-        defaultMessage="Metric indices are empty"
-        tagName="h2"
-      />
+      <h2>
+        <FormattedMessage
+          id="xpack.infra.metricsTable.emptyIndicesContentTitle"
+          defaultMessage="Metric indices are empty"
+        />
+      </h2>
     }
   />
 );

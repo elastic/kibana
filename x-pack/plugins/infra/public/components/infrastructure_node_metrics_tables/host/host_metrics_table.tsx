@@ -15,16 +15,14 @@ import React, { useCallback, useMemo } from 'react';
 import type { SortState } from '../shared';
 import {
   MetricsNodeDetailsLink,
+  MetricsTableEmptyIndicesContent,
+  MetricsTableErrorContent,
+  MetricsTableLoadingContent,
+  MetricsTableNoIndicesContent,
   NodeMetricsTableData,
   NumberCell,
   StepwisePagination,
 } from '../shared';
-import { MetricsTableErrorContent } from '../shared/components/error_content';
-import {
-  MetricsTableEmptyIndicesContent,
-  MetricsTableLoadingContent,
-  MetricsTableNoIndicesContent,
-} from '../shared/components/no_data_content';
 import type { HostNodeMetricsRow } from './use_host_metrics_table';
 
 export interface HostMetricsTableProps {
@@ -61,53 +59,50 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
     [setSortState, setCurrentPageIndex]
   );
 
-  const items = data.state === 'data' ? data.rows : NO_ITEMS;
-
-  const noItemsMessage =
-    data.state === 'error' ? (
+  if (data.state === 'error') {
+    return (
       <>
         {data.errors.map((error) => (
           <MetricsTableErrorContent error={error} />
         ))}
       </>
-    ) : isLoading ? (
-      <MetricsTableLoadingContent />
-    ) : data.state === 'no-indices' ? (
-      <MetricsTableNoIndicesContent />
-    ) : data.state === 'empty-indices' ? (
-      <MetricsTableEmptyIndicesContent />
-    ) : null;
-
-  return (
-    <>
-      <EuiBasicTable
-        tableCaption="Infrastructure metrics for hosts"
-        items={items}
-        columns={columns}
-        sorting={sortSettings}
-        onChange={onTableSortChange}
-        loading={isLoading}
-        noItemsMessage={noItemsMessage}
-        data-test-subj="hostMetricsTable"
-      />
-      {data.state === 'data' ? (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <StepwisePagination
-                ariaLabel="Host metrics pagination"
-                pageCount={data.pageCount}
-                currentPageIndex={data.currentPageIndex}
-                setCurrentPageIndex={setCurrentPageIndex}
-                data-test-subj="hostMetricsTablePagination"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      ) : null}
-    </>
-  );
+    );
+  } else if (isLoading && data.state !== 'data') {
+    return <MetricsTableLoadingContent />;
+  } else if (data.state === 'no-indices') {
+    return <MetricsTableNoIndicesContent />;
+  } else if (data.state === 'empty-indices') {
+    return <MetricsTableEmptyIndicesContent />;
+  } else if (data.state === 'data') {
+    return (
+      <>
+        <EuiBasicTable
+          tableCaption="Infrastructure metrics for hosts"
+          items={data.rows}
+          columns={columns}
+          sorting={sortSettings}
+          onChange={onTableSortChange}
+          loading={isLoading}
+          noItemsMessage={<MetricsTableLoadingContent />}
+          data-test-subj="hostMetricsTable"
+        />
+        <EuiSpacer size="s" />
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
+          <EuiFlexItem grow={false}>
+            <StepwisePagination
+              ariaLabel="Host metrics pagination"
+              pageCount={data.pageCount}
+              currentPageIndex={data.currentPageIndex}
+              setCurrentPageIndex={setCurrentPageIndex}
+              data-test-subj="hostMetricsTablePagination"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    );
+  } else {
+    return null;
+  }
 };
 
 function hostMetricsColumns(
@@ -154,5 +149,3 @@ function hostMetricsColumns(
     },
   ];
 }
-
-const NO_ITEMS: HostNodeMetricsRow[] = [];

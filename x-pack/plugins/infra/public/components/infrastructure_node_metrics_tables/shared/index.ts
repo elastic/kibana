@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-export { MetricsNodeDetailsLink, NumberCell, StepwisePagination, UptimeCell } from './components';
+export {
+  MetricsNodeDetailsLink,
+  MetricsTableEmptyIndicesContent,
+  MetricsTableErrorContent,
+  MetricsTableLoadingContent,
+  MetricsTableNoIndicesContent,
+  NumberCell,
+  StepwisePagination,
+  UptimeCell,
+} from './components';
 export { metricsToApiOptions, useInfrastructureNodeMetrics } from './hooks';
 export type { MetricsMap, SortState } from './hooks';
 export type {

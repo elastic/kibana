@@ -56,11 +56,7 @@ export function useContainerMetricsTable({
     direction: 'desc',
   });
 
-  const {
-    isLoading,
-    nodes: containers,
-    pageCount,
-  } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({
+  const { data, isLoading } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({
     metricsExplorerOptions: containerMetricsOptions,
     timerange,
     filterClauseDsl,
@@ -70,14 +66,13 @@ export function useContainerMetricsTable({
   });
 
   return {
-    timerange,
-    isLoading,
-    containers,
-    pageCount,
     currentPageIndex,
+    data,
+    isLoading,
     setCurrentPageIndex,
-    sortState,
     setSortState,
+    sortState,
+    timerange,
   };
 }
 

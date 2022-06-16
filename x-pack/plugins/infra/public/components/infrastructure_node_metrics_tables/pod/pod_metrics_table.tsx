@@ -10,43 +10,36 @@ import type {
   EuiBasicTableColumn,
   EuiTableSortingType,
 } from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { MetricsNodeDetailsLink, NumberCell, StepwisePagination, UptimeCell } from '../shared';
+import {
+  MetricsNodeDetailsLink,
+  NodeMetricsTableData,
+  NumberCell,
+  StepwisePagination,
+  UptimeCell,
+  MetricsTableEmptyIndicesContent,
+  MetricsTableErrorContent,
+  MetricsTableLoadingContent,
+  MetricsTableNoIndicesContent,
+} from '../shared';
 import type { SortState } from '../shared';
 import type { PodNodeMetricsRow } from './use_pod_metrics_table';
 
 export interface PodMetricsTableProps {
+  data: NodeMetricsTableData<PodNodeMetricsRow>;
+  isLoading: boolean;
+  setCurrentPageIndex: (value: number) => void;
+  setSortState: (state: SortState<PodNodeMetricsRow>) => void;
+  sortState: SortState<PodNodeMetricsRow>;
   timerange: {
     from: string;
     to: string;
   };
-  isLoading: boolean;
-  pods: PodNodeMetricsRow[];
-  pageCount: number;
-  currentPageIndex: number;
-  setCurrentPageIndex: (value: number) => void;
-  sortState: SortState<PodNodeMetricsRow>;
-  setSortState: (state: SortState<PodNodeMetricsRow>) => void;
 }
 
 export const PodMetricsTable = (props: PodMetricsTableProps) => {
-  const {
-    timerange,
-    isLoading,
-    pods,
-    pageCount,
-    currentPageIndex,
-    setCurrentPageIndex,
-    sortState,
-    setSortState,
-  } = props;
+  const { data, isLoading, setCurrentPageIndex, setSortState, sortState, timerange } = props;
 
   const columns = useMemo(() => podNodeColumns(timerange), [timerange]);
 
@@ -65,38 +58,50 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
     setCurrentPageIndex(0);
   };
 
-  if (isLoading) {
+  if (data.state === 'error') {
     return (
-      <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
-        <EuiLoadingSpinner size="xl" data-test-subj="podMetricsTableLoader" />
-      </EuiFlexGroup>
+      <>
+        {data.errors.map((error) => (
+          <MetricsTableErrorContent error={error} />
+        ))}
+      </>
     );
+  } else if (isLoading && data.state !== 'data') {
+    return <MetricsTableLoadingContent />;
+  } else if (data.state === 'no-indices') {
+    return <MetricsTableNoIndicesContent />;
+  } else if (data.state === 'empty-indices') {
+    return <MetricsTableEmptyIndicesContent />;
+  } else if (data.state === 'data') {
+    return (
+      <>
+        <EuiBasicTable
+          tableCaption="Infrastructure metrics for pods"
+          items={data.rows}
+          columns={columns}
+          sorting={sorting}
+          onChange={onTableSortChange}
+          loading={isLoading}
+          noItemsMessage={<MetricsTableLoadingContent />}
+          data-test-subj="podMetricsTable"
+        />
+        <EuiSpacer size="s" />
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
+          <EuiFlexItem grow={false}>
+            <StepwisePagination
+              ariaLabel="Pod metrics pagination"
+              pageCount={data.pageCount}
+              currentPageIndex={data.currentPageIndex}
+              setCurrentPageIndex={setCurrentPageIndex}
+              data-test-subj="podMetricsTablePagination"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    );
+  } else {
+    return null;
   }
-
-  return (
-    <>
-      <EuiBasicTable
-        tableCaption="Infrastructure metrics for pods"
-        items={pods}
-        columns={columns}
-        sorting={sorting}
-        onChange={onTableSortChange}
-        data-test-subj="podMetricsTable"
-      />
-      <EuiSpacer size="s" />
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <StepwisePagination
-            ariaLabel="Pod metrics pagination"
-            pageCount={pageCount}
-            currentPageIndex={currentPageIndex}
-            setCurrentPageIndex={setCurrentPageIndex}
-            data-test-subj="podMetricsTablePagination"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
 };
 
 function podNodeColumns(

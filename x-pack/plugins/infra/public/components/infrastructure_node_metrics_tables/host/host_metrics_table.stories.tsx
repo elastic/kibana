@@ -7,12 +7,12 @@
 
 import { EuiCard } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
-import { HostMetricsTable } from './host_metrics_table';
 import type { HostMetricsTableProps } from './host_metrics_table';
+import { HostMetricsTable } from './host_metrics_table';
 import { HostNodeMetricsRow } from './use_host_metrics_table';
 
 const mockServices = {
@@ -20,6 +20,42 @@ const mockServices = {
     getUrlForApp: (app: string, { path }: { path: string }) => `your-kibana/app/${app}/${path}`,
   },
 };
+
+export default {
+  title: 'infra/Node Metrics Tables/Host',
+  decorators: [
+    (wrappedStory) => <EuiCard title="Host metrics">{wrappedStory()}</EuiCard>,
+    (wrappedStory) => (
+      <I18nProvider>
+        <KibanaContextProvider services={mockServices}>{wrappedStory()}</KibanaContextProvider>
+      </I18nProvider>
+    ),
+    decorateWithGlobalStorybookThemeProviders,
+  ],
+  component: HostMetricsTable,
+  args: {
+    data: {
+      state: 'empty-indices',
+    },
+    isLoading: false,
+    sortState: {
+      direction: 'desc',
+      field: 'averageCpuUsagePercent',
+    },
+    timerange: {
+      from: 'now-15m',
+      to: 'now',
+    },
+  },
+  argTypes: {
+    setSortState: {
+      action: 'Sort field or direction changed',
+    },
+    setCurrentPageIndex: {
+      action: 'Page changed',
+    },
+  },
+} as Meta<HostMetricsTableProps>;
 
 const loadedHosts: HostNodeMetricsRow[] = [
   {
@@ -58,42 +94,6 @@ const loadedHosts: HostNodeMetricsRow[] = [
     averageMemoryUsagePercent: 99,
   },
 ];
-
-export default {
-  title: 'infra/Node Metrics Tables/Host',
-  decorators: [
-    (wrappedStory) => <EuiCard title="Host metrics">{wrappedStory()}</EuiCard>,
-    (wrappedStory) => (
-      <I18nProvider>
-        <KibanaContextProvider services={mockServices}>{wrappedStory()}</KibanaContextProvider>
-      </I18nProvider>
-    ),
-    decorateWithGlobalStorybookThemeProviders,
-  ],
-  component: HostMetricsTable,
-  args: {
-    data: {
-      state: 'empty-indices',
-    },
-    isLoading: false,
-    sortState: {
-      direction: 'desc',
-      field: 'averageCpuUsagePercent',
-    },
-    timerange: {
-      from: 'now-15m',
-      to: 'now',
-    },
-  },
-  argTypes: {
-    setSortState: {
-      action: 'Sort field or direction changed',
-    },
-    setCurrentPageIndex: {
-      action: 'Page changed',
-    },
-  },
-} as Meta<HostMetricsTableProps>;
 
 const Template: Story<HostMetricsTableProps> = (args) => {
   return <HostMetricsTable {...args} />;
