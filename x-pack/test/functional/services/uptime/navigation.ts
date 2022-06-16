@@ -16,10 +16,15 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
   const goToUptimeRoot = async () => {
     // Check if are already on overview uptime page, we don't need to repeat the step
     await retry.tryForTime(60 * 1000, async () => {
-      if (await testSubjects.exists('uptimeSettingsToOverviewLink', { timeout: 0 })) {
-        await testSubjects.click('uptimeSettingsToOverviewLink');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('uptimeOverviewPage', { timeout: 2000 });
+      if (
+        (await testSubjects.exists('uptimeOverviewPage')) ||
+        (await testSubjects.exists('uptimeMonitorPage')) ||
+        (await testSubjects.exists('uptimeCertificatesPage')) ||
+        (await testSubjects.exists('uptimeSettingsPage'))
+      ) {
+        if (await find.existsByCssSelector('[href="/app/uptime"]', 0)) {
+          await find.clickByCssSelector('[href="/app/uptime"]');
+        }
       } else {
         await PageObjects.common.navigateToApp('uptime');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -63,9 +68,9 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
       if (!(await testSubjects.exists('uptimeMonitorPage', { timeout: 0 }))) {
         return retry.try(async () => {
           await testSubjects.click(`monitor-page-link-${monitorId}`);
-        });
-        await testSubjects.existOrFail('uptimeMonitorPage', {
-          timeout: 30000,
+          await testSubjects.existOrFail('uptimeMonitorPage', {
+            timeout: 30000,
+          });
         });
       }
     },
