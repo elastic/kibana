@@ -2928,7 +2928,6 @@
     "discover.docTable.tableHeader.sortByColumnDescendingAriaLabel": "按“{columnName}”降序排序",
     "discover.docTable.tableHeader.sortByColumnUnsortedAriaLabel": "停止按“{columnName}”排序",
     "discover.docTable.tableHeader.timeFieldIconTooltip": "此字段表示事件发生的时间。",
-    "discover.docTable.tableHeader.timeFieldIconTooltipAriaLabel": "主要时间字段。",
     "discover.docTable.tableRow.detailHeading": "已展开文档",
     "discover.docTable.tableRow.filterForValueButtonAriaLabel": "筛留值",
     "discover.docTable.tableRow.filterForValueButtonTooltip": "筛留值",

@@ -282,13 +282,13 @@ describe('Discover grid columns', function () {
             [Function],
           ],
           "display": <div
-            aria-label="Primary time field."
+            aria-label="timestamp - this field represents the time that events occurred."
           >
             <EuiToolTip
               content="This field represents the time that events occurred."
               delay="regular"
               display="inlineBlock"
-              position="bottom"
+              position="top"
             >
               <React.Fragment>
                 timestamp

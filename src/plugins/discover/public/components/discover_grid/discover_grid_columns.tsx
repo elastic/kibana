@@ -111,9 +111,13 @@ export function buildEuiGridColumn({
   };
 
   if (column.id === indexPattern.timeFieldName) {
+    const timeFieldName = indexPatternField?.customLabel ?? indexPattern.timeFieldName;
     const primaryTimeAriaLabel = i18n.translate(
       'discover.docTable.tableHeader.timeFieldIconTooltipAriaLabel',
-      { defaultMessage: 'Primary time field.' }
+      {
+        defaultMessage: '{timeFieldName} - this field represents the time that events occurred.',
+        values: { timeFieldName },
+      }
     );
     const primaryTimeTooltip = i18n.translate(
       'discover.docTable.tableHeader.timeFieldIconTooltip',
@@ -124,9 +128,9 @@ export function buildEuiGridColumn({
 
     column.display = (
       <div aria-label={primaryTimeAriaLabel}>
-        <EuiToolTip position="bottom" content={primaryTimeTooltip}>
+        <EuiToolTip content={primaryTimeTooltip}>
           <>
-            {indexPatternField?.customLabel ?? indexPattern.timeFieldName} <EuiIcon type="clock" />
+            {timeFieldName} <EuiIcon type="clock" />
           </>
         </EuiToolTip>
       </div>
