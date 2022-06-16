@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { UNNAMED_LOCATION } from '../../../../../common/constants';
 import { Ping } from '../../../../../common/runtime_types';
 
 export const MonitorSummaryLastRunInfo = ({ ping }: { ping: Ping }) => {
@@ -20,19 +19,33 @@ export const MonitorSummaryLastRunInfo = ({ ping }: { ping: Ping }) => {
       <EuiFlexItem grow={false}>
         {ping.monitor.status === 'up' ? (
           <EuiBadge color="success">{isBrowserType ? SUCCESS_LABEL : UP_LABEL}</EuiBadge>
-        ) : (
+        ) : ping.monitor.status === 'up' ? (
           <EuiBadge color="danger">{isBrowserType ? FAILED_LABEL : DOWN_LABEL}</EuiBadge>
+        ) : (
+          <EuiBadge color="default">{PENDING_LABEL}</EuiBadge>
         )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText className="eui-displayInline" size="s">
+          {i18n.translate('xpack.synthetics.monitorSummary.lastRunTime', {
+            defaultMessage: 'in {loc}.',
+            values: {
+              // empty value will be replaced with value from location select
+              loc: ping.observer?.geo?.name ?? '--',
+            },
+          })}
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText className="eui-displayInline" size="s">
-          {i18n.translate('xpack.synthetics.monitorSummary.lastRunTime', {
-            defaultMessage: 'in {loc}. Last run on {time}',
-            values: {
-              loc: ping.observer?.geo?.name ?? UNNAMED_LOCATION,
-              time: moment(ping.timestamp).format('LLL'),
-            },
-          })}
+          {ping.timestamp
+            ? i18n.translate('xpack.synthetics.monitorSummary.lastRunTime', {
+                defaultMessage: 'Last run on {time}',
+                values: {
+                  time: moment(ping.timestamp).format('LLL'),
+                },
+              })
+            : WAITING}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -41,6 +54,10 @@ export const MonitorSummaryLastRunInfo = ({ ping }: { ping: Ping }) => {
 
 const FAILED_LABEL = i18n.translate('xpack.synthetics.monitorSummary.failed', {
   defaultMessage: 'Failed',
+});
+
+const PENDING_LABEL = i18n.translate('xpack.synthetics.monitorSummary.pending', {
+  defaultMessage: 'Pending',
 });
 
 const SUCCESS_LABEL = i18n.translate('xpack.synthetics.monitorSummary.succeeded', {
@@ -53,4 +70,8 @@ const UP_LABEL = i18n.translate('xpack.synthetics.monitorSummary.up', {
 
 const DOWN_LABEL = i18n.translate('xpack.synthetics.monitorSummary.down', {
   defaultMessage: 'Down',
+});
+
+const WAITING = i18n.translate('xpack.synthetics.monitorSummary.waiting', {
+  defaultMessage: 'Waiting for test run result.',
 });
