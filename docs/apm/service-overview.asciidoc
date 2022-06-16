@@ -42,7 +42,7 @@ The time-based comparison options are based on the selected time filter range:
 |An identical amount of time immediately before the selected time range
 |====
 
-You can use expected bounds comparison if {ml-jobs} exist in your selected 
+You can use the expected bounds comparison if {ml-jobs} exist in your selected 
 environment and you have 
 {ml-docs}/setup.html#kib-visibility-spaces[access to the {ml-features}].
 
