@@ -7,7 +7,7 @@
 import { ElementFactory } from '../../../types';
 
 export const metricVis: ElementFactory = () => ({
-  name: 'metricVis',
+  name: 'bigNumberVis',
   displayName: '(New) Metric Vis',
   type: 'chart',
   help: 'Metric visualization',
@@ -16,6 +16,6 @@ export const metricVis: ElementFactory = () => ({
 | selectFilter
 | demodata
 | head 1
-| metricVis metric={visdimension "percent_uptime"} colorMode="Labels"
+| bigNumberVis metric={visdimension "percent_uptime"} colorMode="Labels"
 | render`,
 });

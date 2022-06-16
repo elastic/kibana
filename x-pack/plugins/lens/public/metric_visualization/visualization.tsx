@@ -105,7 +105,7 @@ const toExpression = (
       ...(datasourceExpression?.chain ?? []),
       {
         type: 'function',
-        function: 'metricVis',
+        function: 'bigNumberVis',
         arguments: {
           labelPosition: [state?.titlePosition || DEFAULT_TITLE_POSITION],
           font: [

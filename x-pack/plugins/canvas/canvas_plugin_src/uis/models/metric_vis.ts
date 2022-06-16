@@ -14,7 +14,7 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 const { MetricVis: strings } = ViewStrings;
 
 export const metricVis = () => ({
-  name: 'metricVis',
+  name: 'bigNumberVis',
   displayName: strings.getDisplayName(),
   args: [
     {

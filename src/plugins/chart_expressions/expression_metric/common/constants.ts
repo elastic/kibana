@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const EXPRESSION_METRIC_NAME = 'metricVis';
+export const EXPRESSION_METRIC_NAME = 'bigNumberVis';
 
 export const LabelPosition = {
   BOTTOM: 'bottom',
