@@ -58,10 +58,10 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexGroup alignItems="center" gutterSize="xs" wrap>
               <EuiFlexItem grow={false}>
                 <EuiText size="s" data-test-subj="responderHeaderEndpointName">
-                  <h6>
+                  <h6 className="eui-textTruncate">
                     <FormattedMessage
                       id="xpack.securitySolution.responder.header.endpointName"
                       defaultMessage="ENDPOINT {name}"
