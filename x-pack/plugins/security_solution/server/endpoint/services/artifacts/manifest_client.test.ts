@@ -13,7 +13,7 @@ import { getManifestClientMock } from './mocks';
 import { ManifestClient } from './manifest_client';
 
 describe('manifest_client', () => {
-  describe('ManifestClient sanity checks', () => {
+  describe('ManifestClient checks', () => {
     test('can create ManifestClient', () => {
       const manifestClient = new ManifestClient(savedObjectsClientMock.create(), 'v1');
       expect(manifestClient).toBeInstanceOf(ManifestClient);

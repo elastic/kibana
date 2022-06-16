@@ -239,7 +239,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          // sanity check
+          // basic check
           await supertest
             .get(`${LIST_ITEM_URL}/_find?list_id=${LIST_ID}`)
             .set('kbn-xsrf', 'true')

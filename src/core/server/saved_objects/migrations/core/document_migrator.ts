@@ -670,7 +670,7 @@ function wrapWithTry(
     try {
       const result = migrationFn(doc, context);
 
-      // A basic sanity check to help migration authors detect basic errors
+      // A basic check to help migration authors detect basic errors
       // (e.g. forgetting to return the transformed doc)
       if (!result || !result.type) {
         throw new Error(`Invalid saved object returned from migration ${type.name}:${version}.`);
