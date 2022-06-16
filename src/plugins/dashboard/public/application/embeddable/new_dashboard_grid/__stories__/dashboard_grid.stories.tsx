@@ -7,11 +7,25 @@
  */
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
+import { renderToString } from 'react-dom/server';
 import 'gridstack/dist/h5/gridstack-dd-native';
 import { Grid } from '../components/grid';
 import { smallGridData, mediumGridData, largeGridData } from './fixtures';
 
-const Item = ({ id }) => <div>I am item: {id}</div>;
+import {
+  MarkdownGridPanel,
+  ControlsPanel,
+  MetricsPanel,
+  UniqueVisitorsPanel,
+  ResponseCodesPanel,
+  GraphPanel,
+  LogsTable,
+} from '../constants';
+
+import SANKEY_CHART_GRAPH from '../images/sankey_chart.png';
+import DESTINATION_HEATMAP from '../images/destination_heatmap.png';
+import REQUEST_MAP from '../images/total_requests_map.png';
+import BYTES_BAR_GRAPH from '../images/bytes_bar_graph.png';
 
 export default {
   component: EuiPanel,
@@ -40,51 +54,11 @@ export const LogsDashboardExample = () => {
   const gridData = [
     {
       x: 0,
-      y: 19,
-      w: 24,
-      h: 18,
-      id: '4',
-      content: 'Logs panel',
-    },
-    {
-      x: 0,
-      y: 52,
-      w: 24,
-      h: 13,
-      id: '9',
-      content: 'Logs panel',
-    },
-    {
-      x: 12,
-      y: 6,
-      w: 12,
-      h: 8,
-      id: '11',
-      content: 'Logs panel',
-    },
-    {
-      x: 24,
-      y: 19,
-      w: 24,
-      h: 33,
-      id: '14',
-      content: 'Logs panel',
-    },
-    {
-      x: 24,
-      y: 6,
-      w: 24,
-      h: 13,
-      id: '15',
-      content: 'Logs panel',
-    },
-    {
-      x: 0,
       y: 0,
       w: 17,
       h: 6,
       id: '343f0bef-0b19-452e-b1c8-59beb18b6f0c',
-      content: 'Logs panel',
+      content: renderToString(<MarkdownGridPanel />),
     },
     {
       x: 17,
@@ -92,7 +66,7 @@ export const LogsDashboardExample = () => {
       w: 31,
       h: 6,
       id: '30326cdb-4ddd-49eb-a4f1-b555caa21d7c',
-      content: 'Logs panel',
+      content: renderToString(<ControlsPanel />),
     },
     {
       x: 0,
@@ -100,7 +74,23 @@ export const LogsDashboardExample = () => {
       w: 12,
       h: 8,
       id: 'bb94016e-f4a6-49ca-87a9-296a2869d570',
-      content: 'Logs panel',
+      content: renderToString(<MetricsPanel value="2,777" label="Visits" fontSize="22px" />),
+    },
+    {
+      x: 12,
+      y: 6,
+      w: 12,
+      h: 8,
+      id: '11',
+      content: renderToString(<UniqueVisitorsPanel />),
+    },
+    {
+      x: 24,
+      y: 6,
+      w: 24,
+      h: 13,
+      id: '15',
+      content: renderToString(<ResponseCodesPanel />),
     },
     {
       x: 0,
@@ -108,7 +98,7 @@ export const LogsDashboardExample = () => {
       w: 12,
       h: 5,
       id: '01d8e435-91c0-484f-a11e-856747050b0a',
-      content: 'Logs panel',
+      content: renderToString(<MetricsPanel value="4.4%" label="HTTP 4xx" fontSize="12px" />),
     },
     {
       x: 12,
@@ -116,7 +106,30 @@ export const LogsDashboardExample = () => {
       w: 12,
       h: 5,
       id: '8c1456d4-1993-4ba2-b701-04aca02c9fef',
-      content: 'Logs panel',
+      content: renderToString(<MetricsPanel value="3.4%" label="HTTP 5xx" fontSize="12px" />),
+    },
+    {
+      x: 0,
+      y: 19,
+      w: 24,
+      h: 18,
+      id: '4',
+      content: renderToString(
+        <GraphPanel title="[Logs] Total Requests and Bytes" graph={REQUEST_MAP} />
+      ),
+    },
+    {
+      x: 24,
+      y: 19,
+      w: 24,
+      h: 33,
+      id: '14',
+      content: renderToString(
+        <GraphPanel
+          title="[Logs] Machine OS and Destination Sankey Chart"
+          graph={SANKEY_CHART_GRAPH}
+        />
+      ),
     },
     {
       x: 0,
@@ -124,7 +137,28 @@ export const LogsDashboardExample = () => {
       w: 24,
       h: 15,
       id: '8e59c7cf-6e42-4343-a113-c4a255fcf2ce',
-      content: 'Logs panel',
+      content: renderToString(
+        <GraphPanel title="[Logs] Unique Destination Heatmap" graph={DESTINATION_HEATMAP} />
+      ),
+    },
+    {
+      x: 0,
+      y: 52,
+      w: 24,
+      h: 13,
+      id: '9',
+      content: renderToString(<LogsTable />),
+    },
+
+    {
+      x: 24,
+      y: 52,
+      w: 24,
+      h: 13,
+      id: '10',
+      content: renderToString(
+        <GraphPanel title="[Logs] Bytes distribution" graph={BYTES_BAR_GRAPH} height="93%" />
+      ),
     },
   ];
 
