@@ -60,6 +60,9 @@ describe('Search service', () => {
         fieldFormats: {},
         indexPatterns: {},
         screenshotMode: screenshotModePluginMock.createStartContract(),
+        nowProvider: {
+          get: jest.fn(),
+        },
       } as any);
       expect(start).toHaveProperty('aggs');
       expect(start).toHaveProperty('search');

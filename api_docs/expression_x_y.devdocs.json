@@ -470,6 +470,19 @@
           },
           {
             "parentPluginId": "expressionXY",
+            "id": "def-common.DataLayerArgs.showLines",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showLines",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionXY",
             "id": "def-common.DataLayerArgs.pointsRadius",
             "type": "number",
             "tags": [],
@@ -1095,6 +1108,26 @@
           },
           {
             "parentPluginId": "expressionXY",
+            "id": "def-common.XYArgs.xExtent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "xExtent",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxisExtentConfig",
+                "text": "AxisExtentConfig"
+              },
+              " & { type: \"axisExtentConfig\"; }"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionXY",
             "id": "def-common.XYArgs.yLeftExtent",
             "type": "CompoundType",
             "tags": [],
@@ -1141,7 +1174,7 @@
             "label": "yLeftScale",
             "description": [],
             "signature": [
-              "\"time\" | \"log\" | \"sqrt\" | \"linear\""
+              "\"time\" | \"log\" | \"linear\" | \"sqrt\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
@@ -1154,7 +1187,7 @@
             "label": "yRightScale",
             "description": [],
             "signature": [
-              "\"time\" | \"log\" | \"sqrt\" | \"linear\""
+              "\"time\" | \"log\" | \"linear\" | \"sqrt\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
@@ -1503,6 +1536,42 @@
               },
               " | undefined"
             ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYArgs.detailedTooltip",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "detailedTooltip",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYArgs.orderBucketsBySum",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "orderBucketsBySum",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYArgs.showTooltip",
+            "type": "boolean",
+            "tags": [],
+            "label": "showTooltip",
+            "description": [],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           }
@@ -2353,7 +2422,7 @@
         "label": "YScaleType",
         "description": [],
         "signature": [
-          "\"time\" | \"log\" | \"sqrt\" | \"linear\""
+          "\"time\" | \"log\" | \"linear\" | \"sqrt\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,

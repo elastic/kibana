@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Serializable, SerializableRecord } from '@kbn/utility-types';
 import { FieldFormat } from './field_format';
 import { FieldFormatsRegistry } from './field_formats_registry';
 
@@ -77,11 +78,12 @@ export enum FIELD_FORMAT_IDS {
 }
 
 /** @public */
-export interface FieldFormatConfig {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type FieldFormatConfig = {
   id: FieldFormatId;
   params: FieldFormatParams;
   es?: boolean;
-}
+};
 
 /**
  * If a service is being shared on both the client and the server, and
@@ -95,7 +97,10 @@ export interface FieldFormatConfig {
  *
  @public
  */
-export type FieldFormatsGetConfigFn<T = unknown> = (key: string, defaultOverride?: T) => T;
+export type FieldFormatsGetConfigFn<T extends Serializable = Serializable> = (
+  key: string,
+  defaultOverride?: T
+) => T;
 
 export type IFieldFormat = FieldFormat;
 
@@ -126,9 +131,7 @@ export type FieldFormatInstanceType = (new (
  * TODO: support strict typing for params depending on format type
  * https://github.com/elastic/kibana/issues/108158
  */
-export interface FieldFormatParams {
-  [param: string]: any;
-}
+export type FieldFormatParams = SerializableRecord;
 
 /**
  * Params provided by the registry to every field formatter
@@ -152,9 +155,10 @@ export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' | 'regis
  *
  * @public
  */
-export interface SerializedFieldFormat<TParams = FieldFormatParams> {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SerializedFieldFormat<TParams extends FieldFormatParams = FieldFormatParams> = {
   id?: string;
   params?: TParams;
-}
+};
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

@@ -16,6 +16,8 @@ const props = {
   alert: {
     [AlertsField.name]: ['one'],
     [AlertsField.reason]: ['two'],
+    _id: '0123456789',
+    _index: '.alerts-default',
   },
   alertsTableConfiguration: {
     id: 'test',
@@ -34,9 +36,11 @@ const props = {
     externalFlyout: {
       body: () => <h3>External flyout body</h3>,
     },
-    internalFlyout: {
+    useInternalFlyout: () => ({
       body: () => <h3>Internal flyout body</h3>,
-    },
+      header: null,
+      footer: () => null,
+    }),
     getRenderCellValue: () =>
       jest.fn().mockImplementation((rcvProps) => {
         return `${rcvProps.colIndex}:${rcvProps.rowIndex}`;
@@ -82,6 +86,7 @@ describe('AlertsFlyout', () => {
   for (const configuration of configurations) {
     const base = {
       body: () => <h5>Body</h5>,
+      footer: () => null,
     };
 
     it(`should use ${configuration} header configuration`, async () => {
@@ -89,10 +94,21 @@ describe('AlertsFlyout', () => {
         ...props,
         alertsTableConfiguration: {
           ...props.alertsTableConfiguration,
-          [`${configuration}Flyout`]: {
-            ...base,
-            header: () => <h4>Header</h4>,
-          },
+          ...(configuration === AlertsTableFlyoutState.external
+            ? {
+                [`${configuration}Flyout`]: {
+                  ...base,
+                  header: () => <h4>Header</h4>,
+                  footer: () => null,
+                },
+              }
+            : {
+                useInternalFlyout: () => ({
+                  ...base,
+                  header: () => <h4>Header</h4>,
+                  footer: () => null,
+                }),
+              }),
         },
         state: configuration,
       };
@@ -110,6 +126,17 @@ describe('AlertsFlyout', () => {
         ...props,
         alertsTableConfiguration: {
           ...props.alertsTableConfiguration,
+          ...(configuration === AlertsTableFlyoutState.external
+            ? {
+                [`${configuration}Flyout`]: {
+                  ...base,
+                },
+              }
+            : {
+                useInternalFlyout: () => ({
+                  ...base,
+                }),
+              }),
           [`${configuration}Flyout`]: {
             ...base,
           },
@@ -130,10 +157,19 @@ describe('AlertsFlyout', () => {
         ...props,
         alertsTableConfiguration: {
           ...props.alertsTableConfiguration,
-          [`${configuration}Flyout`]: {
-            ...base,
-            footer: () => <h6>Footer</h6>,
-          },
+          ...(configuration === AlertsTableFlyoutState.external
+            ? {
+                [`${configuration}Flyout`]: {
+                  ...base,
+                  footer: () => <h6>Footer</h6>,
+                },
+              }
+            : {
+                useInternalFlyout: () => ({
+                  ...base,
+                  footer: () => <h6>Footer</h6>,
+                }),
+              }),
         },
         state: configuration,
       };

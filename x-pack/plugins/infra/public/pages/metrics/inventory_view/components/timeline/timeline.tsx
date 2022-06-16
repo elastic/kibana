@@ -19,9 +19,9 @@ import {
   TooltipValue,
   niceTimeFormatter,
   ElementClickListener,
-  GeometryValue,
   RectAnnotation,
   RectAnnotationDatum,
+  XYChartElementEvent,
 } from '@elastic/charts';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -138,10 +138,11 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     : { max: 0, min: 0 };
 
   const onClickPoint: ElementClickListener = useCallback(
-    ([[geometryValue]]) => {
-      if (!Array.isArray(geometryValue)) {
-        // casting to GeometryValue as we are using cartesian charts
-        const { x: timestamp } = geometryValue as GeometryValue;
+    ([elementEvent]) => {
+      // casting to GeometryValue as we are using cartesian charts
+      const [geometryValue] = elementEvent as XYChartElementEvent;
+      if (geometryValue && !Array.isArray(geometryValue)) {
+        const { x: timestamp } = geometryValue;
         jumpToTime(timestamp);
         stopAutoReload();
       }

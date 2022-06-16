@@ -46,7 +46,6 @@ export {
   getEsQueryConfig,
   luceneStringToDsl,
   nodeBuilder,
-  nodeTypes,
   onlyDisabledFiltersChanged,
   pinFilter,
   toElasticsearchQuery,
@@ -100,15 +99,9 @@ export {
   CSV_MIME_TYPE,
 } from './exports';
 export type {
-  IIndexPatternFieldList,
-  FieldFormatMap,
-  RuntimeType,
-  RuntimeField,
   DataViewAttributes,
   FieldAttrs,
   FieldAttrSet,
-  OnNotification,
-  OnError,
   UiSettingsCommon,
   GetFieldsOptions,
   IDataViewsApiClient,

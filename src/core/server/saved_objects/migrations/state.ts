@@ -96,6 +96,13 @@ export interface BaseState extends ControlState {
    */
   readonly discardUnknownObjects: boolean;
   /**
+   * If saved objects exist which are corrupt or they can't be migrated due to
+   * transform errors, they will cause the migration to fail. If this flag is set
+   * to `true`, kibana will discard the objects that cause these errors
+   * and proceed with the migration.
+   */
+  readonly discardCorruptObjects: boolean;
+  /**
    * The current alias e.g. `.kibana` which always points to the latest
    * version index
    */
@@ -221,13 +228,16 @@ export interface ReindexSourceToTempOpenPit extends PostInitState {
   readonly sourceIndex: Option.Some<string>;
 }
 
-export interface ReindexSourceToTempRead extends PostInitState {
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_READ';
+interface ReindexSourceToTempBatch extends PostInitState {
   readonly sourceIndexPitId: string;
   readonly lastHitSortValue: number[] | undefined;
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
   readonly progress: Progress;
+}
+
+export interface ReindexSourceToTempRead extends ReindexSourceToTempBatch {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_READ';
 }
 
 export interface ReindexSourceToTempClosePit extends PostInitState {
@@ -235,23 +245,15 @@ export interface ReindexSourceToTempClosePit extends PostInitState {
   readonly sourceIndexPitId: string;
 }
 
-export interface ReindexSourceToTempTransform extends PostInitState {
+export interface ReindexSourceToTempTransform extends ReindexSourceToTempBatch {
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM';
   readonly outdatedDocuments: SavedObjectsRawDoc[];
-  readonly sourceIndexPitId: string;
-  readonly lastHitSortValue: number[] | undefined;
-  readonly corruptDocumentIds: string[];
-  readonly transformErrors: TransformErrorObjects[];
-  readonly progress: Progress;
 }
 
-export interface ReindexSourceToTempIndexBulk extends PostInitState {
+export interface ReindexSourceToTempIndexBulk extends ReindexSourceToTempBatch {
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK';
   readonly transformedDocBatches: [SavedObjectsRawDoc[]];
   readonly currentBatch: number;
-  readonly sourceIndexPitId: string;
-  readonly lastHitSortValue: number[] | undefined;
-  readonly progress: Progress;
 }
 
 export type SetTempWriteBlock = PostInitState & {
