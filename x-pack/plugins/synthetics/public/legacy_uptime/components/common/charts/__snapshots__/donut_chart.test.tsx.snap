@@ -400,6 +400,15 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": true,
               },
             },
+            "metric": Object {
+              "background": "#FFFFFF",
+              "barBackground": "#EDF0F5",
+              "nonFiniteText": "N/A",
+              "text": Object {
+                "darkColor": "#343741",
+                "lightColor": "#E0E5EE",
+              },
+            },
             "partition": Object {
               "circlePadding": 2,
               "emptySizeRatio": 0,
