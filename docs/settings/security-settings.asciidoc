@@ -193,6 +193,7 @@ Sets the interval at which {kib} tries to remove expired and invalid sessions fr
 +
 TIP: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 
+[float]
 [[security-encrypted-saved-objects-settings]]
 ==== Encrypted saved objects settings
 
@@ -206,6 +207,7 @@ An arbitrary string of at least 32 characters that is used to encrypt sensitive 
 [[xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys]] xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys::
 An optional list of previously used encryption keys. Like <<xpack-encryptedSavedObjects-encryptionKey, `xpack.encryptedSavedObjects.encryptionKey`>>, these must be at least 32 characters in length. {kib} doesn't use these keys for encryption, but may still require them to decrypt some existing saved objects. Use this setting if you wish to change your encryption key, but don't want to lose access to saved objects that were previously encrypted with a different key.
 
+[float]
 [[security-reporting-settings]]
 ==== Secure reporting settings
 
