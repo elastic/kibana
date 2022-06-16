@@ -600,7 +600,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       query: `_id:"${docId}" and _index:"${index}"`,
     };
     searchSource.setField('query', query);
-    
+
     // searchSource calls dataView.getComputedFields to seed docvalueFields
     // dataView.getComputedFields adds each date field in the dataView to docvalueFields to ensure standardized date format across kibana
     // we don't need these as they request unneeded fields and bloat responses
@@ -610,15 +610,18 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     searchSource.setField('source', false);
 
     // Get all tooltip properties from fields API
-    searchSource.setField('fields', this._getTooltipPropertyNames().map(fieldName => {
-      const field = indexPattern.fields.getByName(fieldName);
-      return field && field.type === 'date'
-        ? {
-            field: fieldName,
-            format: 'strict_date_optional_time',
-          }
-        : fieldName;
-    }));
+    searchSource.setField(
+      'fields',
+      this._getTooltipPropertyNames().map((fieldName) => {
+        const field = indexPattern.fields.getByName(fieldName);
+        return field && field.type === 'date'
+          ? {
+              field: fieldName,
+              format: 'strict_date_optional_time',
+            }
+          : fieldName;
+      })
+    );
 
     const { rawResponse: resp } = await lastValueFrom(
       searchSource.fetch$({
