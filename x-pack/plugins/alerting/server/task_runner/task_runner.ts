@@ -6,7 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { cloneDeep, mapValues, omit, pickBy, without } from 'lodash';
+import { mapValues, omit, without } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import uuid from 'uuid';
 import { KibanaRequest, Logger } from '@kbn/core/server';
@@ -20,7 +20,6 @@ import {
   ErrorWithReason,
   executionStatusFromError,
   executionStatusFromState,
-  getRecoveredAlerts,
   ruleExecutionStatusToRaw,
   isRuleSnoozed,
 } from '../lib';
@@ -51,7 +50,6 @@ import {
   RuleTypeParams,
   RuleTypeState,
   parseDuration,
-  WithoutReservedActionGroups,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -293,16 +291,12 @@ export class TaskRunner<
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const ruleType = this.ruleTypeRegistry.get(alertTypeId);
 
-    const alerts = mapValues<
-      Record<string, RawAlertInstance>,
-      Alert<InstanceState, InstanceContext>
-    >(
-      alertRawInstances,
-      (rawAlert, alertId) => new Alert<InstanceState, InstanceContext>(alertId, rawAlert)
-    );
-
-    const originalAlerts = cloneDeep(alerts);
-    const originalAlertIds = new Set(Object.keys(originalAlerts));
+    const alerts: Record<string, Alert<InstanceState, InstanceContext>> = {};
+    for (const id in alertRawInstances) {
+      if (alertRawInstances.hasOwnProperty(id)) {
+        alerts[id] = new Alert<InstanceState, InstanceContext>(id, alertRawInstances[id]);
+      }
+    }
 
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
@@ -325,6 +319,12 @@ export class TaskRunner<
     const wrappedSearchSourceClient = wrapSearchSourceClient({
       ...wrappedClientOptions,
       searchSourceClient,
+    });
+
+    const alertFactory = createAlertFactory<InstanceState, InstanceContext>({
+      alerts,
+      logger: this.logger,
+      canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
     });
 
     let updatedRuleTypeState: void | Record<string, unknown>;
@@ -351,15 +351,7 @@ export class TaskRunner<
             searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
             uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
             scopedClusterClient: wrappedScopedClusterClient.client(),
-            alertFactory: createAlertFactory<
-              InstanceState,
-              InstanceContext,
-              WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-            >({
-              alerts,
-              logger: this.logger,
-              canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
-            }),
+            alertFactory,
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
           },
@@ -421,32 +413,32 @@ export class TaskRunner<
     ruleRunMetricsStore.setEsSearchDurationMs(searchMetrics.esSearchDurationMs);
 
     // Cleanup alerts that are no longer scheduling actions to avoid over populating the alertInstances object
-    const alertsWithScheduledActions = pickBy(
-      alerts,
-      (alert: Alert<InstanceState, InstanceContext>) => alert.hasScheduledActions()
-    );
+    // const alertsWithScheduledActions = pickBy(
+    //   alerts,
+    //   (alert: Alert<InstanceState, InstanceContext>) => alert.hasScheduledActions()
+    // );
 
-    const recoveredAlerts = getRecoveredAlerts(alerts, originalAlertIds);
+    const { newAlerts, activeAlerts, recoveredAlerts } = alertFactory.getAlerts();
 
     logActiveAndRecoveredAlerts({
       logger: this.logger,
-      activeAlerts: alertsWithScheduledActions,
+      activeAlerts,
       recoveredAlerts,
       ruleLabel,
       canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
     });
 
-    trackAlertDurations({
-      originalAlerts,
-      currentAlerts: alertsWithScheduledActions,
-      recoveredAlerts,
-    });
+    // trackAlertDurations({
+    //   originalAlerts,
+    //   currentAlerts: alertsWithScheduledActions,
+    //   recoveredAlerts,
+    // });
 
     if (this.shouldLogAndScheduleActionsForAlerts()) {
       generateNewAndRecoveredAlertEvents({
         alertingEventLogger: this.alertingEventLogger,
-        originalAlerts,
-        currentAlerts: alertsWithScheduledActions,
+        newAlerts,
+        activeAlerts,
         recoveredAlerts,
         ruleLabel,
         ruleRunMetricsStore,
@@ -460,7 +452,7 @@ export class TaskRunner<
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
-      const alertsWithExecutableActions = Object.entries(alertsWithScheduledActions).filter(
+      const alertsWithExecutableActions = Object.entries(activeAlerts).filter(
         ([alertName, alert]: [string, Alert<InstanceState, InstanceContext>]) => {
           const throttled = alert.isThrottled(throttle);
           const muted = mutedAlertIdsSet.has(alertName);
@@ -530,7 +522,7 @@ export class TaskRunner<
       alertInstances: mapValues<
         Record<string, Alert<InstanceState, InstanceContext>>,
         RawAlertInstance
-      >(alertsWithScheduledActions, (alert) => alert.toRaw()),
+      >(activeAlerts, (alert) => alert.toRaw()),
     };
   }
 
@@ -852,26 +844,20 @@ function generateNewAndRecoveredAlertEvents<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext
 >(params: GenerateNewAndRecoveredAlertEventsParams<InstanceState, InstanceContext>) {
-  const {
-    alertingEventLogger,
-    currentAlerts,
-    originalAlerts,
-    recoveredAlerts,
-    ruleRunMetricsStore,
-  } = params;
-  const originalAlertIds = Object.keys(originalAlerts);
-  const currentAlertIds = Object.keys(currentAlerts);
+  const { alertingEventLogger, activeAlerts, newAlerts, recoveredAlerts, ruleRunMetricsStore } =
+    params;
+  const activeAlertIds = Object.keys(activeAlerts);
   const recoveredAlertIds = Object.keys(recoveredAlerts);
-  const newIds = without(currentAlertIds, ...originalAlertIds);
+  const newAlertIds = Object.keys(newAlerts);
 
   if (apm.currentTransaction) {
     apm.currentTransaction.addLabels({
-      alerting_new_alerts: newIds.length,
+      alerting_new_alerts: newAlertIds.length,
     });
   }
 
-  ruleRunMetricsStore.setNumberOfActiveAlerts(currentAlertIds.length);
-  ruleRunMetricsStore.setNumberOfNewAlerts(newIds.length);
+  ruleRunMetricsStore.setNumberOfActiveAlerts(activeAlertIds.length);
+  ruleRunMetricsStore.setNumberOfNewAlerts(newAlertIds.length);
   ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
 
   for (const id of recoveredAlertIds) {
@@ -890,10 +876,10 @@ function generateNewAndRecoveredAlertEvents<
     });
   }
 
-  for (const id of newIds) {
+  for (const id of newAlertIds) {
     const { actionGroup, subgroup: actionSubgroup } =
-      currentAlerts[id].getScheduledActionOptions() ?? {};
-    const state = currentAlerts[id].getState();
+      activeAlerts[id].getScheduledActionOptions() ?? {};
+    const state = activeAlerts[id].getState();
     const message = `${params.ruleLabel} created new alert: '${id}'`;
     alertingEventLogger.logAlert({
       action: EVENT_LOG_ACTIONS.newInstance,
@@ -905,10 +891,10 @@ function generateNewAndRecoveredAlertEvents<
     });
   }
 
-  for (const id of currentAlertIds) {
+  for (const id of activeAlertIds) {
     const { actionGroup, subgroup: actionSubgroup } =
-      currentAlerts[id].getScheduledActionOptions() ?? {};
-    const state = currentAlerts[id].getState();
+      activeAlerts[id].getScheduledActionOptions() ?? {};
+    const state = activeAlerts[id].getState();
     const message = `${params.ruleLabel} active alert: '${id}' in ${
       actionSubgroup
         ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
@@ -970,17 +956,8 @@ async function scheduleActionsForRecoveredAlerts<
 
 function logActiveAndRecoveredAlerts<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
->(
-  params: LogActiveAndRecoveredAlertsParams<
-    InstanceState,
-    InstanceContext,
-    ActionGroupIds,
-    RecoveryActionGroupId
-  >
-) {
+  InstanceContext extends AlertInstanceContext
+>(params: LogActiveAndRecoveredAlertsParams<InstanceState, InstanceContext>) {
   const { logger, activeAlerts, recoveredAlerts, ruleLabel, canSetRecoveryContext } = params;
   const activeAlertIds = Object.keys(activeAlerts);
   const recoveredAlertIds = Object.keys(recoveredAlerts);

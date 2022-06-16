@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Dictionary } from 'lodash';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
@@ -53,9 +52,9 @@ export interface TrackAlertDurationsParams<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext
 > {
-  originalAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
+  originalAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
+  currentAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
+  recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
 }
 
 export interface GenerateNewAndRecoveredAlertEventsParams<
@@ -63,9 +62,9 @@ export interface GenerateNewAndRecoveredAlertEventsParams<
   InstanceContext extends AlertInstanceContext
 > {
   alertingEventLogger: AlertingEventLogger;
-  originalAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
+  newAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
+  activeAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
+  recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
   ruleLabel: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
 }
@@ -77,8 +76,8 @@ export interface ScheduleActionsForRecoveredAlertsParams<
 > {
   logger: Logger;
   recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
-  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
-  executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
+  recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
+  executionHandler: ExecutionHandler<RecoveryActionGroupId>;
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
@@ -86,13 +85,11 @@ export interface ScheduleActionsForRecoveredAlertsParams<
 
 export interface LogActiveAndRecoveredAlertsParams<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  InstanceContext extends AlertInstanceContext
 > {
   logger: Logger;
-  activeAlerts: Dictionary<Alert<InstanceState, InstanceContext, ActionGroupIds>>;
-  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
+  activeAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
+  recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
   ruleLabel: string;
   canSetRecoveryContext: boolean;
 }
