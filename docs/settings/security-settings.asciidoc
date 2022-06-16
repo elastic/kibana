@@ -213,7 +213,7 @@ These settings control the encryption of report data. For more details, refer to
 
 IMPORTANT: In high-availability deployments, make sure you use the same encryption key for all instances of {kib}. Although the keys can be specified in clear text in `kibana.yml`, it's recommended to store them securely in the <<secure-settings,{kib} Keystore>>.
 
-[[xpack-reporting-encryptionKey]] `xpack.reporting.encryptionKey`::
+[[xpack-securitySettings-reporting-encryptionKey]] `xpack.reporting.encryptionKey`::
 An arbitrary string of at least 32 characters that is used to encrypt sensitive reporting data before being stored in {es}. By default, {kib} generates a random key when it starts, which causes pending reports to fail after restart. Configure `xpack.reporting.encryptionKey` to preserve the same key across multiple restarts and multiple {kib} instances.
 
 
