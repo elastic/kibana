@@ -69,8 +69,7 @@ export const eqlValidator = async (
     const { data } = KibanaServices.get();
     let dataViewTitle = index?.join();
     let runtimeMappings = {};
-
-    if (dataViewId != null && dataViewId !== '') {
+    if (dataViewId != null) {
       const dataView = await data.dataViews.get(dataViewId);
 
       dataViewTitle = dataView.title;
