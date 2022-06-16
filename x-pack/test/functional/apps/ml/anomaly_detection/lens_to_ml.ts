@@ -5,33 +5,10 @@
  * 2.0.
  */
 
-// import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-// import { JOB_CONFIG, DATAFEED_CONFIG, ML_EMBEDDABLE_TYPES } from './constants';
-
-// const testDataList = [
-//   {
-//     type: 'testData',
-//     suiteSuffix: 'with multi metric job',
-//     panelTitle: `ML anomaly charts for ${JOB_CONFIG.job_id}`,
-//     jobConfig: JOB_CONFIG,
-//     datafeedConfig: DATAFEED_CONFIG,
-//     dashboardTitle: `ML anomaly charts for fq_multi_1_ae ${Date.now()}`,
-//     expected: {
-//       influencers: [
-//         {
-//           field: 'airline',
-//           count: 10,
-//           labelsContained: ['AAL'],
-//         },
-//       ],
-//     },
-//   },
-// ];
-//
 
 export default function ({ getService, getPageObject, getPageObjects }: FtrProviderContext) {
-  // const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
@@ -39,11 +16,76 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
   const retry = getService('retry');
   const headerPage = getPageObject('header');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
+  const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
+
+  const dashboardTitle = 'lens_to_ml';
 
   async function retrySwitchTab(tabIndex: number, seconds: number) {
     await retry.tryForTime(seconds * 1000, async () => {
       await browser.switchTab(tabIndex);
     });
+  }
+
+  async function setFarequoteTimerange() {
+    await PageObjects.timePicker.setAbsoluteRange(
+      'Feb 7, 2016 @ 00:00:00.000',
+      'Feb 11, 2016 @ 23:59:54.000'
+    );
+  }
+
+  async function dashboardPreparation(selectedPanelTitle: string) {
+    await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
+    await ml.dashboardEmbeddables.assertDashboardPanelExists(selectedPanelTitle);
+
+    await setFarequoteTimerange();
+
+    const header = await dashboardPanelActions.getPanelHeading(selectedPanelTitle);
+    await dashboardPanelActions.openContextMenuMorePanel(header);
+  }
+
+  async function createJobInWizard(
+    jobId: string,
+    splitField?: string,
+    aggAndFieldIdentifier?: string
+  ) {
+    await headerPage.waitUntilLoadingHasFinished();
+
+    if (splitField !== undefined) {
+      await ml.jobWizardMultiMetric.assertDetectorSplitExists(splitField);
+      await ml.jobWizardCommon.assertInfluencerSelection([splitField]);
+    }
+
+    if (aggAndFieldIdentifier !== undefined) {
+      await ml.jobWizardCommon.assertAggAndFieldInputExists();
+      await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier, true);
+      await ml.jobWizardCommon.assertAnomalyChartExists('LINE');
+    }
+
+    await ml.testExecution.logTestStep('job creation displays the job details step');
+    await ml.jobWizardCommon.advanceToJobDetailsSection();
+
+    await ml.testExecution.logTestStep('job creation inputs the job id');
+    await ml.jobWizardCommon.assertJobIdInputExists();
+    await ml.jobWizardCommon.setJobId(jobId);
+
+    await ml.testExecution.logTestStep('job creation displays the validation step');
+    await ml.jobWizardCommon.advanceToValidationSection();
+
+    await ml.testExecution.logTestStep('job creation displays the summary step');
+    await ml.jobWizardCommon.advanceToSummarySection();
+
+    await ml.testExecution.logTestStep('job creation creates the job and finishes processing');
+    await ml.jobWizardCommon.assertCreateJobButtonExists();
+    await ml.jobWizardCommon.createJobAndWaitForCompletion();
+
+    await ml.testExecution.logTestStep('job creation displays the created job in the job list');
+    await ml.navigation.navigateToMl();
+    await ml.navigation.navigateToJobManagement();
+
+    await ml.jobTable.filterWithSearchString(jobId, 1);
+
+    await ml.jobTable.assertJobRowJobId(jobId);
   }
 
   describe('anomaly charts in dashboard', function () {
@@ -52,12 +94,18 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
-      await ml.testResources.installKibanaSampleData('flights');
+
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/apps/ml/anomaly_detection/fixtures/lens_to_ml.json'
+      );
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.removeKibanaSampleData('flights');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/apps/ml/anomaly_detection/fixtures/lens_to_ml.json'
+      );
     });
 
     beforeEach(async () => {
@@ -75,143 +123,100 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
         }
       });
 
-      it('can create multi metric job from vis', async () => {
-        const dashboardTitle = '[Flights] Global Flight Dashboard';
-        const selectedPanelTitle = '[Flights] Delay Type';
+      it('can create multi metric job from vis with single layer', async () => {
+        const selectedPanelTitle = 'panel1';
         const jobId = 'testest4';
-        const splitField = 'FlightDelayType';
+        const splitField = 'airline';
 
-        await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
-        await ml.dashboardEmbeddables.assertDashboardPanelExists(selectedPanelTitle);
-        const header = await dashboardPanelActions.getPanelHeading(selectedPanelTitle);
-        await dashboardPanelActions.openContextMenuMorePanel(header);
+        await dashboardPreparation(selectedPanelTitle);
+
         await testSubjects.click('embeddablePanelAction-create-ml-ad-job-action');
 
         await retrySwitchTab(1, 3);
         tabsCount++;
 
-        await headerPage.waitUntilLoadingHasFinished();
-        await ml.jobWizardMultiMetric.assertDetectorSplitExists(splitField);
-        await ml.jobWizardCommon.assertInfluencerSelection([splitField]);
-
-        await ml.testExecution.logTestStep('job creation displays the job details step');
-        await ml.jobWizardCommon.advanceToJobDetailsSection();
-
-        await ml.testExecution.logTestStep('job creation inputs the job id');
-        await ml.jobWizardCommon.assertJobIdInputExists();
-        await ml.jobWizardCommon.setJobId(jobId);
-
-        await ml.testExecution.logTestStep('job creation displays the validation step');
-        await ml.jobWizardCommon.advanceToValidationSection();
-
-        await ml.testExecution.logTestStep('job creation displays the summary step');
-        await ml.jobWizardCommon.advanceToSummarySection();
-
-        await ml.testExecution.logTestStep('job creation creates the job and finishes processing');
-        await ml.jobWizardCommon.assertCreateJobButtonExists();
-        await ml.jobWizardCommon.createJobAndWaitForCompletion();
-
-        await ml.testExecution.logTestStep('job creation displays the created job in the job list');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
-
-        await ml.jobTable.filterWithSearchString(jobId, 1);
-
-        await ml.jobTable.assertJobRowJobId(jobId);
+        await createJobInWizard(jobId, splitField, undefined);
       });
 
-      it('can create singel metric job from vis', async () => {
-        const dashboardTitle = '[Flights] Global Flight Dashboard';
-        const selectedPanelTitle = '[Flights] Flight count';
+      it('can create single metric job from vis with single layer', async () => {
+        const selectedPanelTitle = 'panel2';
         const aggAndFieldIdentifier = 'Count(Event rate)';
         const jobId = 'testest52';
 
-        await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
-        await ml.dashboardEmbeddables.assertDashboardPanelExists(selectedPanelTitle);
-        const header = await dashboardPanelActions.getPanelHeading(selectedPanelTitle);
-        await dashboardPanelActions.openContextMenuMorePanel(header);
+        await dashboardPreparation(selectedPanelTitle);
+
         await testSubjects.click('embeddablePanelAction-create-ml-ad-job-action');
 
         await retrySwitchTab(1, 3);
         tabsCount++;
 
-        await headerPage.waitUntilLoadingHasFinished();
-        await ml.jobWizardCommon.assertAggAndFieldInputExists();
-        await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier, true);
-        await ml.jobWizardCommon.assertAnomalyChartExists('LINE');
+        await createJobInWizard(jobId, undefined, aggAndFieldIdentifier);
+      });
 
-        await ml.testExecution.logTestStep('job creation displays the job details step');
-        await ml.jobWizardCommon.advanceToJobDetailsSection();
+      it('can create multi metric job from vis with multiple compatible layers and single incompatible layer', async () => {
+        const selectedPanelTitle = 'panel3';
+        const aggAndFieldIdentifier = 'Mean(responsetime)';
+        const jobId = 'testest524';
+        const numberOfCompatibleLayers = 2;
+        const numberOfIncompatibleLayers = 1;
 
-        await ml.testExecution.logTestStep('job creation inputs the job id');
-        await ml.jobWizardCommon.assertJobIdInputExists();
-        await ml.jobWizardCommon.setJobId(jobId);
+        await dashboardPreparation(selectedPanelTitle);
 
-        await ml.testExecution.logTestStep('job creation displays the validation step');
-        await ml.jobWizardCommon.advanceToValidationSection();
+        await testSubjects.click('embeddablePanelAction-create-ml-ad-job-action');
 
-        await ml.testExecution.logTestStep('job creation displays the summary step');
-        await ml.jobWizardCommon.advanceToSummarySection();
+        await testSubjects.existOrFail('mlFlyoutLensLayerSelector');
 
-        await ml.testExecution.logTestStep('job creation creates the job and finishes processing');
-        await ml.jobWizardCommon.assertCreateJobButtonExists();
-        await ml.jobWizardCommon.createJobAndWaitForCompletion();
+        const compatibleLayers = await testSubjects.findAll('mlLensLayerCompatible');
+        expect(compatibleLayers.length).to.eql(
+          numberOfCompatibleLayers,
+          `Expected number of compatible layers to be ${numberOfCompatibleLayers} (got '${compatibleLayers.length}')`
+        );
 
-        await ml.testExecution.logTestStep('job creation displays the created job in the job list');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
+        const incompatibleLayers = await testSubjects.findAll('mlLensLayerIncompatible');
+        expect(incompatibleLayers.length).to.eql(
+          numberOfIncompatibleLayers,
+          `Expected number of compatible layers to be ${numberOfIncompatibleLayers} (got '${incompatibleLayers.length}')`
+        );
 
-        await ml.jobTable.filterWithSearchString(jobId, 1);
+        await testSubjects.click('mlLensLayerCompatibleButton_1');
 
-        await ml.jobTable.assertJobRowJobId(jobId);
+        await retrySwitchTab(1, 3);
+        tabsCount++;
+
+        await createJobInWizard(jobId, undefined, aggAndFieldIdentifier);
+      });
+
+      it('shows flyout for job from vis with no compatible layers', async () => {
+        const selectedPanelTitle = 'panel4';
+        const numberOfCompatibleLayers = 0;
+        const numberOfIncompatibleLayers = 1;
+
+        await dashboardPreparation(selectedPanelTitle);
+
+        await testSubjects.click('embeddablePanelAction-create-ml-ad-job-action');
+
+        await testSubjects.existOrFail('mlFlyoutLensLayerSelector');
+
+        const compatibleLayers = await testSubjects.findAll('mlLensLayerCompatible');
+        expect(compatibleLayers.length).to.eql(
+          numberOfCompatibleLayers,
+          `Expected number of compatible layers to be ${numberOfCompatibleLayers} (got '${compatibleLayers.length}')`
+        );
+
+        const incompatibleLayers = await testSubjects.findAll('mlLensLayerIncompatible');
+        expect(incompatibleLayers.length).to.eql(
+          numberOfIncompatibleLayers,
+          `Expected number of compatible layers to be ${numberOfIncompatibleLayers} (got '${incompatibleLayers.length}')`
+        );
+      });
+
+      it('does not show link to ml with vis with no compatible layers', async () => {
+        const selectedPanelTitle = 'panel5';
+
+        await dashboardPreparation(selectedPanelTitle);
+
+        await testSubjects.missingOrFail('embeddablePanelAction-create-ml-ad-job-action');
       });
     });
-
-    // for (const testData of testDataList) {
-    //   describe(testData.suiteSuffix, function () {
-    //     before(async () => {
-    //       await ml.api.createAndRunAnomalyDetectionLookbackJob(
-    //         testData.jobConfig,
-    //         testData.datafeedConfig
-    //       );
-    //       await PageObjects.common.navigateToApp('dashboard');
-    //     });
-
-    //     after(async () => {
-    //       await ml.testResources.deleteDashboardByTitle(testData.dashboardTitle);
-    //     });
-
-    //     it('can open job selection flyout', async () => {
-    //       // await PageObjects.dashboard.clickNewDashboard();
-    //       // await ml.dashboardEmbeddables.assertDashboardIsEmpty();
-    //       // await ml.dashboardEmbeddables.openAnomalyJobSelectionFlyout(
-    //       //   ML_EMBEDDABLE_TYPES.ANOMALY_CHARTS
-    //       // );
-    //     });
-
-    //     it('can select jobs', async () => {
-    //       await ml.dashboardJobSelectionTable.setRowCheckboxState(testData.jobConfig.job_id, true);
-    //       await ml.dashboardJobSelectionTable.applyJobSelection();
-    //       await ml.dashboardEmbeddables.assertAnomalyChartsEmbeddableInitializerExists();
-    //       await ml.dashboardEmbeddables.assertSelectMaxSeriesToPlotValue(6);
-    //     });
-
-    //     it('create new anomaly charts panel', async () => {
-    //       await ml.dashboardEmbeddables.clickInitializerConfirmButtonEnabled();
-    //       await ml.dashboardEmbeddables.assertDashboardPanelExists(testData.panelTitle);
-
-    //       await ml.dashboardEmbeddables.assertNoMatchingAnomaliesMessageExists();
-
-    //       await PageObjects.timePicker.setAbsoluteRange(
-    //         'Feb 7, 2016 @ 00:00:00.000',
-    //         'Feb 11, 2016 @ 00:00:00.000'
-    //       );
-    //       await PageObjects.timePicker.pauseAutoRefresh();
-    //       await ml.dashboardEmbeddables.assertAnomalyChartsSeverityThresholdControlExists();
-    //       await ml.dashboardEmbeddables.assertAnomalyChartsExists();
-    //       await PageObjects.dashboard.saveDashboard(testData.dashboardTitle);
-    //     });
-    //   });
-    // }
   });
 }
