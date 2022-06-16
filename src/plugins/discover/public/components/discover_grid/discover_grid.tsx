@@ -517,8 +517,8 @@ export const DiscoverGrid = ({
         {showDisclaimer && (
           <p className="dscDiscoverGrid__footer">
             <FormattedMessage
-              id="discover.howToSeeOtherMatchingDocumentsDescriptionGrid"
-              defaultMessage="These are the first {sampleSize} documents matching your search, refine your search to see others."
+              id="discover.howToSeeOtherMatchingDocumentsDescription"
+              defaultMessage="You're viewing the first {sampleSize} documents that match your search. To configure this value, go to Advanced Settings."
               values={{ sampleSize }}
             />
           </p>
