@@ -35,6 +35,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import { DataViewBase } from '@kbn/es-query';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
@@ -72,6 +73,7 @@ export interface AddExceptionFlyoutProps {
   ruleId: string;
   exceptionListType: ExceptionListType;
   ruleIndices: string[];
+  dataViewId?: string;
   alertData?: AlertData;
   /**
    * The components that use this may or may not define `alertData`
@@ -127,6 +129,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   ruleName,
   ruleId,
   ruleIndices,
+  dataViewId,
   exceptionListType,
   alertData,
   isAlertDataLoading,
@@ -135,7 +138,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onRuleChange,
   alertStatus,
 }: AddExceptionFlyoutProps) {
-  const { http, unifiedSearch } = useKibana().services;
+  const { http, unifiedSearch, data } = useKibana().services;
   const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -166,7 +169,21 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     }
   }, [jobs, ruleIndices]);
 
-  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
+  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
+    useFetchIndex(memoRuleIndices);
+
+  const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPatterns);
+
+  useEffect(() => {
+    const fetchSingleDataView = async () => {
+      if (dataViewId != null && dataViewId !== '') {
+        const dv = await data.dataViews.get(dataViewId);
+        setIndexPattern(dv);
+      }
+    };
+
+    fetchSingleDataView();
+  }, [data.dataViews, dataViewId, setIndexPattern]);
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -513,7 +530,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 listNamespaceType: ruleExceptionList.namespace_type,
                 listTypeSpecificIndexPatternFilter: filterIndexPatterns,
                 ruleName,
-                indexPatterns,
+                indexPatterns:
+                  dataViewId != null && dataViewId !== '' ? indexPattern : indexIndexPatterns,
                 isOrDisabled: isExceptionBuilderFormDisabled,
                 isAndDisabled: isExceptionBuilderFormDisabled,
                 isNestedDisabled: isExceptionBuilderFormDisabled,

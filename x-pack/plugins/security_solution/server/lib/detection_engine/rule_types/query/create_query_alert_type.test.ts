@@ -41,6 +41,7 @@ describe('Custom Query Alerts', () => {
     ruleDataClient,
     eventLogService,
     ruleExecutionLoggerFactory: () => ruleExecutionLogMock.forExecutors.create(),
+    version: '8.3',
   });
   const eventsTelemetry = createMockTelemetryEventsSender(true);
 

@@ -63,6 +63,8 @@ export const createIndicatorMatchAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
+          inputIndex,
+          runtimeMappings,
           buildRuleMessage,
           bulkCreate,
           exceptionItems,
@@ -77,6 +79,8 @@ export const createIndicatorMatchAlertType = (
       } = execOptions;
 
       const result = await threatMatchExecutor({
+        inputIndex,
+        runtimeMappings,
         buildRuleMessage,
         bulkCreate,
         exceptionItems,

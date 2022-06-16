@@ -7,6 +7,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   AlertInstanceContext,
@@ -32,6 +33,7 @@ interface FindThresholdSignalsParams {
   threshold: ThresholdNormalized;
   buildRuleMessage: BuildRuleMessage;
   timestampOverride: TimestampOverrideOrUndefined;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export const findThresholdSignals = async ({
@@ -44,6 +46,7 @@ export const findThresholdSignals = async ({
   threshold,
   buildRuleMessage,
   timestampOverride,
+  runtimeMappings,
 }: FindThresholdSignalsParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -143,5 +146,6 @@ export const findThresholdSignals = async ({
     pageSize: 0,
     sortOrder: 'desc',
     buildRuleMessage,
+    runtimeMappings,
   });
 };

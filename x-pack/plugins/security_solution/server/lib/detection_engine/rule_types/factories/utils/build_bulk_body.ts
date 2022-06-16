@@ -49,7 +49,8 @@ export const buildBulkBody = (
   mergeStrategy: ConfigType['alertMergeStrategy'],
   ignoreFields: ConfigType['alertIgnoreFields'],
   applyOverrides: boolean,
-  buildReasonMessage: BuildReasonMessage
+  buildReasonMessage: BuildReasonMessage,
+  indicesToQuery: string[]
 ): BaseFieldsLatest => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const eventFields = buildEventTypeAlert(mergedDoc);
@@ -85,7 +86,7 @@ export const buildBulkBody = (
     return {
       ...filteredSource,
       ...eventFields,
-      ...buildAlert([mergedDoc], completeRule, spaceId, reason, overrides),
+      ...buildAlert([mergedDoc], completeRule, spaceId, reason, indicesToQuery, overrides),
       ...additionalAlertFields({ ...mergedDoc, _source: { ...mergedDoc._source, ...eventFields } }),
     };
   }

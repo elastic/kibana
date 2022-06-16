@@ -9,6 +9,7 @@ import { Moment } from 'moment';
 
 import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { RuleExecutorOptions, RuleType } from '@kbn/alerting-plugin/server';
 import {
@@ -66,6 +67,8 @@ export interface RunOpts<TParams extends RuleParams> {
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
   ruleDataReader: IRuleDataReader;
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export type SecurityAlertType<
@@ -98,6 +101,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   ruleDataClient: IRuleDataClient;
   eventLogService: IEventLogService;
   ruleExecutionLoggerFactory: RuleExecutionLogForExecutorsFactory;
+  version: string;
 }
 
 export type CreateSecurityRuleTypeWrapper = (

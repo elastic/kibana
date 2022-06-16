@@ -83,6 +83,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   anomalyThreshold: rule.anomaly_threshold ?? 50,
   machineLearningJobId: rule.machine_learning_job_id ?? [],
   index: rule.index ?? [],
+  dataViewId: rule.data_view_id,
   threatIndex: rule.threat_index ?? [],
   threatQueryBar: {
     query: { query: rule.threat_query ?? '', language: rule.threat_language ?? '' },

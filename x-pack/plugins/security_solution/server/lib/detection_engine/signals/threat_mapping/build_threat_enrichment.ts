@@ -50,6 +50,7 @@ export const buildThreatEnrichment = ({
       },
       pitId,
       reassignPitId,
+      runtimeMappings: undefined,
     });
 
     return threatResponse.hits.hits;

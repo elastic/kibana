@@ -31,6 +31,7 @@ const mockTheme = getMockTheme({
   },
 });
 
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

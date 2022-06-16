@@ -72,6 +72,8 @@ describe('threshold_executor', () => {
         })),
         wrapHits: jest.fn(),
         ruleDataReader: ruleDataClientMock.getReader({ namespace: 'default' }),
+        runtimeMappings: {},
+        inputIndex: ['auditbeat-*'],
       });
       expect(response.warningMessages.length).toEqual(1);
     });

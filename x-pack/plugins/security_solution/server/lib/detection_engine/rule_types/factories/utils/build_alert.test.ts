@@ -39,6 +39,7 @@ import {
   ALERT_DEPTH,
   ALERT_ORIGINAL_EVENT,
   ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_RULE_INDICES,
 } from '../../../../../../common/field_maps/field_names';
 import { getCompleteRuleMock, getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
 
@@ -59,7 +60,13 @@ describe('buildAlert', () => {
     const completeRule = getCompleteRuleMock(getQueryRuleParams());
     const reason = 'alert reasonable reason';
     const alert = {
-      ...buildAlert([doc], completeRule, SPACE_ID, reason),
+      ...buildAlert(
+        [doc],
+        completeRule,
+        SPACE_ID,
+        reason,
+        completeRule.ruleParams.index as string[]
+      ),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert[TIMESTAMP];
@@ -151,6 +158,7 @@ describe('buildAlert', () => {
         query: 'user.name: root or user.name: admin',
         filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
       },
+      [ALERT_RULE_INDICES]: completeRule.ruleParams.index,
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         actions: [],
         author: ['Elastic'],
@@ -232,7 +240,13 @@ describe('buildAlert', () => {
     const completeRule = getCompleteRuleMock(getQueryRuleParams());
     const reason = 'alert reasonable reason';
     const alert = {
-      ...buildAlert([doc], completeRule, SPACE_ID, reason),
+      ...buildAlert(
+        [doc],
+        completeRule,
+        SPACE_ID,
+        reason,
+        completeRule.ruleParams.index as string[]
+      ),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert[TIMESTAMP];
@@ -251,6 +265,7 @@ describe('buildAlert', () => {
         },
       ],
       [ALERT_ORIGINAL_TIME]: '2020-04-20T21:27:45.000Z',
+      [ALERT_RULE_INDICES]: completeRule.ruleParams.index,
       ...flattenWithPrefix(ALERT_ORIGINAL_EVENT, {
         action: 'socket_opened',
         dataset: 'socket',

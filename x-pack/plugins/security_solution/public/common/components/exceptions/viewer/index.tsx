@@ -56,6 +56,7 @@ interface ExceptionsViewerProps {
   ruleId: string;
   ruleName: string;
   ruleIndices: string[];
+  dataViewId?: string;
   exceptionListsMeta: ExceptionListIdentifiers[];
   availableListTypes: ExceptionListTypeEnum[];
   commentsAccordionId: string;
@@ -66,6 +67,7 @@ const ExceptionsViewerComponent = ({
   ruleId,
   ruleName,
   ruleIndices,
+  dataViewId,
   exceptionListsMeta,
   availableListTypes,
   commentsAccordionId,
@@ -341,6 +343,7 @@ const ExceptionsViewerComponent = ({
             ruleName={ruleName}
             ruleId={ruleId}
             ruleIndices={ruleIndices}
+            dataViewId={dataViewId}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
             onCancel={handleOnCancelExceptionModal}
@@ -353,6 +356,7 @@ const ExceptionsViewerComponent = ({
         <AddExceptionFlyout
           ruleName={ruleName}
           ruleIndices={ruleIndices}
+          dataViewId={dataViewId}
           ruleId={ruleId}
           exceptionListType={exceptionListTypeToEdit}
           onCancel={handleOnCancelExceptionModal}

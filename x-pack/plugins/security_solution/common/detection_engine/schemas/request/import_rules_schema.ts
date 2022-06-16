@@ -53,6 +53,7 @@ import {
   filters,
   RuleId,
   index,
+  data_view_id,
   output_index,
   saved_id,
   timeline_id,
@@ -123,6 +124,7 @@ export const importRulesSchema = t.intersection([
       filters, // defaults to undefined if not set during decode
       from: DefaultFromString, // defaults to "now-6m" if not set during decode
       index, // defaults to undefined if not set during decode
+      data_view_id, // defaults to undefined if not set during decode
       immutable: OnlyFalseAllowed, // defaults to "false" if not set during decode
       interval: DefaultIntervalString, // defaults to "5m" if not set during decode
       query, // defaults to undefined if not set during decode

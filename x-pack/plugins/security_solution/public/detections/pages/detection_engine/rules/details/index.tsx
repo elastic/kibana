@@ -34,6 +34,7 @@ import {
 
 import { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -173,7 +174,16 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearEventsLoading,
   clearSelected,
 }) => {
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    data,
+    application: {
+      navigateToApp,
+      capabilities: { actions },
+    },
+    timelines: timelinesUi,
+    spaces: spacesApi,
+  } = useKibana().services;
+
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -241,24 +251,43 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           defineRuleData: null,
           scheduleRuleData: null,
         };
+  const [dataViewTitle, setDataViewTitle] = useState<string>();
+  useEffect(() => {
+    const fetchDataViewTitle = async () => {
+      if (defineRuleData?.dataViewId != null && defineRuleData?.dataViewId !== '') {
+        const dataView = await data.dataViews.get(defineRuleData?.dataViewId);
+        setDataViewTitle(dataView.title);
+      }
+    };
+    fetchDataViewTitle();
+  }, [data.dataViews, defineRuleData?.dataViewId]);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
 
+  useEffect(() => {
+    const fetchDataViews = async () => {
+      const dataViewsRefs = await data.dataViews.getIdsWithTitle();
+      if (dataViewsRefs.length > 0) {
+        const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
+          (acc, item) => ({
+            ...acc,
+            [item.id]: item,
+          }),
+          {}
+        );
+        setDataViewOptions(dataViewIdIndexPatternMap);
+      }
+    };
+    fetchDataViews();
+  }, [data.dataViews]);
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
-  const {
-    services: {
-      application: {
-        capabilities: { actions },
-      },
-      timelines: timelinesUi,
-      spaces: spacesApi,
-    },
-  } = useKibana();
+
   const hasActionsPrivileges = useMemo(() => {
     if (rule?.actions != null && rule?.actions.length > 0 && isBoolean(actions.show)) {
       return actions.show;
@@ -450,7 +479,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     ),
     [isExistingRule, ruleDetailTab, setRuleDetailTab, pageTabs]
   );
-  const ruleIndices = useMemo(() => rule?.index ?? DEFAULT_INDEX_PATTERN, [rule?.index]);
 
   const lastExecution = rule?.execution_summary?.last_execution;
   const lastExecutionStatus = lastExecution?.status;
@@ -734,7 +762,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             descriptionColumns="singleSplit"
                             isReadOnlyView={true}
                             isLoading={false}
-                            defaultValues={defineRuleData}
+                            defaultValues={{ dataViewTitle, ...defineRuleData }}
+                            kibanaDataViews={dataViewOptions}
                           />
                         )}
                       </StepPanel>
@@ -814,7 +843,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <ExceptionsViewer
                   ruleId={ruleId ?? ''}
                   ruleName={rule?.name ?? ''}
-                  ruleIndices={ruleIndices}
+                  ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
+                  dataViewId={rule?.data_view_id}
                   availableListTypes={exceptionLists.allowedExceptionListTypes}
                   commentsAccordionId={'ruleDetailsTabExceptions'}
                   exceptionListsMeta={exceptionLists.lists}
@@ -828,7 +858,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           </SecuritySolutionPageWrapper>
         </RuleDetailsContextProvider>
       </StyledFullHeightContainer>
-
       <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
     </>
   );

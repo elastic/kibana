@@ -71,6 +71,8 @@ export const createThresholdAlertType = (
           tuple,
           wrapHits,
           ruleDataReader,
+          inputIndex,
+          runtimeMappings,
         },
         services,
         startedAt,
@@ -91,6 +93,8 @@ export const createThresholdAlertType = (
         version,
         wrapHits,
         ruleDataReader,
+        inputIndex,
+        runtimeMappings,
       });
 
       return result;
