@@ -17,7 +17,6 @@ import {
   disableFilter as oldDisableFilter,
   fromKueryExpression as oldFromKueryExpression,
   toElasticsearchQuery as oldToElasticsearchQuery,
-  nodeTypes as oldNodeTypes,
   buildEsQuery as oldBuildEsQuery,
   buildQueryFromFilters as oldBuildQueryFromFilters,
   luceneStringToDsl as oldLuceneStringToDsl,
@@ -81,11 +80,6 @@ const fromKueryExpression = oldFromKueryExpression;
  * @removeBy 8.1
  */
 const toElasticsearchQuery = oldToElasticsearchQuery;
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
-const nodeTypes = oldNodeTypes;
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
  * @removeBy 8.1
@@ -367,7 +361,6 @@ export {
   disableFilter,
   fromKueryExpression,
   toElasticsearchQuery,
-  nodeTypes,
   buildEsQuery,
   buildQueryFromFilters,
   luceneStringToDsl,
