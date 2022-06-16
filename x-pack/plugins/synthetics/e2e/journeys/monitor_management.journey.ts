@@ -98,7 +98,6 @@ const createMonitorJourney = ({
     async ({ page, params }: { page: Page; params: any }) => {
       const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
       const isRemote = process.env.SYNTHETICS_REMOTE_ENABLED;
-      console.warn('isRemote', isRemote);
 
       before(async () => {
         await uptime.waitForLoadingToFinish();
