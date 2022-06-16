@@ -67,15 +67,15 @@ export class ResolutionEditor extends Component<Props, State> {
     ];
     if (scale[GRID_RESOLUTION.FINE] !== scale[GRID_RESOLUTION.MOST_FINE]) {
       ticks.push({
-        label: i18n.translate('xpack.maps.source.esGrid.mediumSmallSizeLabel', {
-          defaultMessage: `medium-small`,
+        label: i18n.translate('xpack.maps.source.esGrid.smallSizeLabel', {
+          defaultMessage: `small`,
         }),
         value: scale[GRID_RESOLUTION.MOST_FINE],
       });
     }
     ticks.push({
-      label: i18n.translate('xpack.maps.source.esGrid.smallSizeLabel', {
-        defaultMessage: `small`,
+      label: i18n.translate('xpack.maps.source.esGrid.extraSmallSizeLabel', {
+        defaultMessage: `extra small`,
       }),
       value: scale[GRID_RESOLUTION.SUPER_FINE],
     });
@@ -151,7 +151,7 @@ export class ResolutionEditor extends Component<Props, State> {
         <p>
           <FormattedMessage
             id="xpack.maps.source.esGrid.vectorTileModal.message"
-            defaultMessage="Small size uses vector tiles from the Elasticsearch vector tile API. Elasticsearch vector tile API does not support 'Top terms' metric. Switching to small size will remove all 'Top terms' metrics from your layer configuration."
+            defaultMessage="Extra small size uses vector tiles from the Elasticsearch vector tile API. Elasticsearch vector tile API does not support 'Top terms' metric. Switching to extra small size will remove all 'Top terms' metrics from your layer configuration."
           />
         </p>
       </EuiConfirmModal>
