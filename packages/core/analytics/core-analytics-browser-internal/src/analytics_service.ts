@@ -11,25 +11,10 @@ import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { trackClicks } from './track_clicks';
 import { getSessionId } from './get_session_id';
 import { createLogger } from './logger';
-
-/**
- * Exposes the public APIs of the AnalyticsClient during the setup phase.
- * {@link AnalyticsClient}
- * @public
- */
-export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
-/**
- * Exposes the public APIs of the AnalyticsClient during the start phase
- * {@link AnalyticsClient}
- * @public
- */
-export type AnalyticsServiceStart = Pick<
-  AnalyticsClient,
-  'optIn' | 'reportEvent' | 'telemetryCounter$'
->;
 
 /** @internal */
 export interface AnalyticsServiceSetupDeps {

@@ -154,21 +154,23 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   };
 
   private getCurrentDataViewAndField = async (): Promise<{
-    dataView: DataView;
-    field: DataViewField;
+    dataView?: DataView;
+    field?: DataViewField;
   }> => {
     const { dataViewId, fieldName } = this.getInput();
+
     if (!this.dataView || this.dataView.id !== dataViewId) {
-      this.dataView = await this.dataViewsService.get(dataViewId);
-      if (this.dataView === undefined) {
-        this.onFatalError(
-          new Error(RangeSliderStrings.errors.getDataViewNotFoundError(dataViewId))
-        );
+      try {
+        this.dataView = await this.dataViewsService.get(dataViewId);
+        if (!this.dataView)
+          throw new Error(RangeSliderStrings.errors.getDataViewNotFoundError(dataViewId));
+      } catch (e) {
+        this.onFatalError(e);
       }
     }
 
     if (!this.field || this.field.name !== fieldName) {
-      this.field = this.dataView.getFieldByName(fieldName);
+      this.field = this.dataView?.getFieldByName(fieldName);
       if (this.field === undefined) {
         this.onFatalError(new Error(RangeSliderStrings.errors.getDataViewNotFoundError(fieldName)));
       }
@@ -176,7 +178,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.updateComponentState({
         field: this.field,
         fieldFormatter: this.field
-          ? this.dataView.getFormatterForField(this.field).getConverterFor('text')
+          ? this.dataView?.getFormatterForField(this.field).getConverterFor('text')
           : (value: string) => value,
       });
     }
@@ -196,6 +198,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     this.updateComponentState({ loading: true });
     this.updateOutput({ loading: true });
     const { dataView, field } = await this.getCurrentDataViewAndField();
+    if (!dataView || !field) return;
+
     const embeddableInput = this.getInput();
     const { ignoreParentSettings, fieldName, query, timeRange } = embeddableInput;
     let { filters = [] } = embeddableInput;
@@ -304,13 +308,14 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const hasEitherSelection = hasLowerSelection || hasUpperSelection;
 
     const { dataView, field } = await this.getCurrentDataViewAndField();
+    if (!dataView || !field) return;
 
     if (!hasData || !hasEitherSelection) {
       this.updateComponentState({
         loading: false,
         isInvalid: !ignoreParentSettings?.ignoreValidations && hasEitherSelection,
       });
-      this.updateOutput({ filters: [], dataViews: [dataView], loading: false });
+      this.updateOutput({ filters: [], dataViews: dataView && [dataView], loading: false });
       return;
     }
 
