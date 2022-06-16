@@ -107,7 +107,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
   }),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  app: [APP_ID, 'kibana'],
+  app: [APP_ID, 'csp', 'kibana'],
   catalogue: [APP_ID],
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -116,7 +116,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
   subFeatures: [],
   privileges: {
     all: {
-      app: [APP_ID, 'kibana'],
+      app: [APP_ID, 'csp', 'kibana'],
       catalogue: [APP_ID],
       api: [APP_ID, 'lists-all', 'lists-read', 'lists-summary', 'rac'],
       savedObject: {
@@ -126,6 +126,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
           'exception-list-agnostic',
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
+          'csp_rule',
         ],
         read: [],
       },
@@ -143,7 +144,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
       ui: ['show', 'crud'],
     },
     read: {
-      app: [APP_ID, 'kibana'],
+      app: [APP_ID, 'csp', 'kibana'],
       catalogue: [APP_ID],
       api: [APP_ID, 'lists-read', 'rac'],
       savedObject: {
@@ -153,6 +154,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
           'exception-list-agnostic',
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
+          'csp_rule',
         ],
       },
       alerting: {

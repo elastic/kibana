@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export { cspRuleAssetSavedObjectType } from './constants';
 export const PLUGIN_ID = 'csp';
 export const PLUGIN_NAME = 'Cloud Security';
