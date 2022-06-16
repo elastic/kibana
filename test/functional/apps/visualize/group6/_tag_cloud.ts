@@ -29,7 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'tagCloud',
   ]);
 
-  describe('tag cloud chart', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/134515
+  describe.skip('tag cloud chart', function () {
     const vizName1 = 'Visualization tagCloud';
     const termsField = 'machine.ram';
 
