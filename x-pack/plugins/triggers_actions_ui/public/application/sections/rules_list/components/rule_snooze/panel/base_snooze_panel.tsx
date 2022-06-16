@@ -153,7 +153,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   return (
     <>
       {hasTitle && (
-        <EuiPopoverTitle>
+        <EuiPopoverTitle data-test-subj="snoozePanelTitle">
           <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiIcon type="bellSlash" />
@@ -297,6 +297,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                 color="danger"
                 size="xs"
                 onClick={() => setIsRemoveAllModalVisible(true)}
+                data-test-subj="ruleRemoveAllSchedules"
               >
                 {i18n.translate('xpack.triggersActionsUI.sections.rulesList.removeAllButton', {
                   defaultMessage: 'Remove all',
@@ -304,7 +305,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexGroup direction="column" gutterSize="xs" data-test-subj="ruleSchedulesList">
             {scheduledSnoozes!.map((schedule) => (
               <EuiFlexItem key={`snooze-${schedule.id}`}>
                 <button
@@ -329,7 +330,11 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onClickAddSchedule}>
+              <EuiButtonEmpty
+                data-test-subj="ruleSchedulesListAddButton"
+                iconType="plusInCircleFilled"
+                onClick={onClickAddSchedule}
+              >
                 {i18n.translate('xpack.triggersActionsUI.sections.rulesList.addButton', {
                   defaultMessage: 'Add',
                 })}
