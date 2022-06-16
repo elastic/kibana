@@ -26,7 +26,7 @@ import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 
 import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { RuleSchema } from '../../../common/schemas/csp_rule';
+import { RuleSchema } from '../../../common/types';
 
 import {
   ElasticsearchClient,

@@ -11,7 +11,7 @@ import {
   UPDATE_RULES_CONFIG_ROUTE_PATH,
   CSP_RULE_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
-import type { RuleSchema } from '../../../common/schemas/csp_rule';
+import type { RuleSchema } from '../../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { UPDATE_FAILED } from './translations';
 

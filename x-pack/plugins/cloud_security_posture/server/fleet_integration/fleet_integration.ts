@@ -17,8 +17,7 @@ import {
   CSP_RULE_SAVED_OBJECT_TYPE,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
-import type { RuleSchema } from '../../common/schemas/csp_rule';
-import type { RuleTemplateSchema } from '../../common/schemas/csp_rule_template';
+import type { RuleSchema, RuleTemplateSchema } from '../../common/types';
 
 type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends ReadonlyArray<
   infer ElementType

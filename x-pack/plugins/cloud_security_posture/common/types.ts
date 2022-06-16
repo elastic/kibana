@@ -74,4 +74,9 @@ export interface Benchmark {
   rules: CspRulesStatus;
 }
 
-export * from './schemas';
+export type {
+  RuleMetadataSchema,
+  RuleSchema,
+  RuleTemplateSchema,
+  CspRulesConfigSchema,
+} from './schemas';

@@ -8,3 +8,4 @@
 export * from './csp_rule';
 export * from './csp_rule_metadata';
 export * from './csp_rule_template';
+export * from './csp_configuration';

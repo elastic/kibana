@@ -20,8 +20,7 @@ import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/comm
 import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { CspAppContext } from '../../plugin';
-import { CspRulesConfigSchema } from '../../../common/schemas/csp_configuration';
-import type { RuleSchema } from '../../../common/schemas/csp_rule';
+import type { RuleSchema, CspRulesConfigSchema } from '../../../common/types';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   UPDATE_RULES_CONFIG_ROUTE_PATH,

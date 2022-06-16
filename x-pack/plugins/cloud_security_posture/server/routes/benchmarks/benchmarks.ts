@@ -19,7 +19,6 @@ import type {
   AgentPolicy,
   ListResult,
 } from '@kbn/fleet-plugin/common';
-import { RuleSchema } from '../../../common/schemas/csp_rule';
 import {
   BENCHMARKS_ROUTE_PATH,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
@@ -31,7 +30,7 @@ import {
   BenchmarksQuerySchema,
 } from '../../../common/schemas/benchmark';
 import { CspAppContext } from '../../plugin';
-import type { Benchmark, CspRulesStatus } from '../../../common/types';
+import type { Benchmark, CspRulesStatus, RuleSchema } from '../../../common/types';
 import { isNonNullable } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
 
