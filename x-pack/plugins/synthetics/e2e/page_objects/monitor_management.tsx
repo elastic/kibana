@@ -90,7 +90,6 @@ export function monitorManagementPageProvider({
     async checkIsEnabled() {
       await page.waitForTimeout(5 * 1000);
       const addMonitorBtn = await this.getAddMonitorButton();
-      console.warn(JSON.stringify(addMonitorBtn));
       const isDisabled = await addMonitorBtn.isDisabled();
       return !isDisabled;
     },
@@ -108,11 +107,7 @@ export function monitorManagementPageProvider({
     },
 
     async clickAddMonitor() {
-      const isEnabled = await this.checkIsEnabled();
-      console.warn('isEnabled', isEnabled);
       await page.click('text=Add monitor');
-      const html = await page.content();
-      console.warn('html', html);
       await this.findByText('Monitor settings');
     },
 
