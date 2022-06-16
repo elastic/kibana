@@ -118,6 +118,7 @@ export function getMonitorListColumns({
     {
       align: 'left' as const,
       field: ConfigKey.SCHEDULE,
+      sortable: true,
       name: i18n.translate('xpack.synthetics.management.monitorList.frequency', {
         defaultMessage: 'Frequency',
       }),
