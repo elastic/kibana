@@ -376,6 +376,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           : state.stagedPreview || {
               datasourceStates: state.datasourceStates,
               visualization: state.visualization,
+              activeData: state.activeData,
             },
       };
     },
