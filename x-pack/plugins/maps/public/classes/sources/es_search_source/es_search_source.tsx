@@ -839,7 +839,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       searchSource.setField('sort', this._buildEsSort());
     }
 
-    // Get all tooltip properties from fields API
+    // use fields API
     searchSource.setField(
       'fields',
       searchFilters.fieldNames
