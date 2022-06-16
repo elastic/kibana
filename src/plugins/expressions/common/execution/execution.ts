@@ -449,12 +449,16 @@ export class Execution<
   }
 
   validate<Type = unknown>(value: Type, argDef: ExpressionFunctionParameter<Type>): void {
-    if (argDef.strict && argDef.options?.length && !argDef.options.includes(value)) {
-      throw new Error(
-        `Value '${value}' is not among the allowed options for argument '${
-          argDef.name
-        }': '${argDef.options.join("', '")}'`
-      );
+    if (argDef.options?.length && !argDef.options.includes(value)) {
+      const message = `Value '${value}' is not among the allowed options for argument '${
+        argDef.name
+      }': '${argDef.options.join("', '")}'`;
+
+      if (argDef.strict) {
+        throw new Error(message);
+      }
+
+      this.logger?.warn(message);
     }
   }
 
