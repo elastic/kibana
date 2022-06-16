@@ -231,7 +231,10 @@ async function installPipeline({
 
   const esClientParams = {
     id: pipelineToInstall.nameForInstallation,
-    body: pipelineToInstall.contentForInstallation,
+    body:
+      pipelineToInstall.extension === 'yml'
+        ? pipelineToInstall.contentForInstallation
+        : JSON.parse(pipelineToInstall.contentForInstallation),
   };
 
   const esClientRequestOptions: TransportRequestOptions = {
