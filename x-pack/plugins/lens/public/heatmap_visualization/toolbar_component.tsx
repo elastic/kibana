@@ -154,19 +154,17 @@ export const HeatmapToolbar = memo(
                 <AxisTitleSettings
                   axis="yLeft"
                   axisTitle={state?.gridConfig.yTitle}
-                  updateTitleState={(value) =>
+                  updateTitleState={({ title, visible }) => {
                     setState({
                       ...state,
-                      gridConfig: { ...state.gridConfig, yTitle: value },
-                    })
-                  }
+                      gridConfig: {
+                        ...state.gridConfig,
+                        yTitle: title,
+                        isYAxisTitleVisible: visible,
+                      },
+                    });
+                  }}
                   isAxisTitleVisible={state?.gridConfig.isYAxisTitleVisible}
-                  toggleAxisTitleVisibility={(_, checked) =>
-                    setState({
-                      ...state,
-                      gridConfig: { ...state.gridConfig, isYAxisTitleVisible: checked },
-                    })
-                  }
                 />
               </ToolbarPopover>
             </TooltipWrapper>
@@ -189,19 +187,17 @@ export const HeatmapToolbar = memo(
                 <AxisTitleSettings
                   axis="x"
                   axisTitle={state?.gridConfig.xTitle}
-                  updateTitleState={(value) =>
+                  updateTitleState={({ title, visible }) =>
                     setState({
                       ...state,
-                      gridConfig: { ...state.gridConfig, xTitle: value },
+                      gridConfig: {
+                        ...state.gridConfig,
+                        xTitle: title,
+                        isXAxisTitleVisible: visible,
+                      },
                     })
                   }
                   isAxisTitleVisible={state?.gridConfig.isXAxisTitleVisible}
-                  toggleAxisTitleVisibility={(_, checked) =>
-                    setState({
-                      ...state,
-                      gridConfig: { ...state.gridConfig, isXAxisTitleVisible: checked },
-                    })
-                  }
                 />
               </ToolbarPopover>
             </TooltipWrapper>
