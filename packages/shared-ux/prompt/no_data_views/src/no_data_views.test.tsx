@@ -14,19 +14,14 @@ import { EuiButton } from '@elastic/eui';
 
 import { NoDataViewsPrompt } from './no_data_views';
 import { NoDataViewsPromptServices, NoDataViewsPromptProvider } from './services';
-
-const getServices = (canCreateNewDataView: boolean = true) => ({
-  canCreateNewDataView,
-  openDataViewEditor: jest.fn(),
-  dataViewsDocLink: 'some/link',
-});
+import { getMockServices } from './mocks';
 
 describe('<NoDataViewsPromptTest />', () => {
   let services: NoDataViewsPromptServices;
   let mount: (element: JSX.Element) => ReactWrapper;
 
   beforeEach(() => {
-    services = getServices();
+    services = getMockServices();
     mount = (element: JSX.Element) =>
       mountWithIntl(<NoDataViewsPromptProvider {...services}>{element}</NoDataViewsPromptProvider>);
   });

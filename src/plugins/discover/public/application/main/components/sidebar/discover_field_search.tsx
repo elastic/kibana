@@ -35,7 +35,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon } from '@kbn/react-field';
-import { GetFieldTypeDescription } from './lib/get_field_type_description';
+import { getFieldTypeDescription } from './lib/get_field_type_description';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 
 export interface State {
@@ -112,9 +112,9 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
       .map((element, index) => ({
         id: index,
         dataType: element,
-        description: GetFieldTypeDescription(element),
+        description: getFieldTypeDescription(element, docLinks),
       }));
-  }, [presentFieldTypes]);
+  }, [presentFieldTypes, docLinks]);
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
