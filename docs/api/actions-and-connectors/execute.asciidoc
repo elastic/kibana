@@ -50,6 +50,16 @@ depending on the connector type. For information about the parameter properties,
 refer to <<action-types>>.
 +
 --
+.Index connectors
+[%collapsible%open]
+====
+`documents`::
+(Required, array of objects) The documents to index in JSON format.
+
+For more information, refer to
+{kibana-ref}/index-action-type.html[Index connector and action].
+====
+
 .Server log connectors
 [%collapsible%open]
 ====
@@ -102,7 +112,7 @@ The API returns the following:
     "items": [
       {
         "index": {
-          "_index": "updated-index",
+          "_index": "test-index",
           "_id": "iKyijHcBKCsmXNFrQe3T",
           "_version": 1,
           "result": "created",
@@ -111,7 +121,7 @@ The API returns the following:
             "successful": 1,
             "failed": 0
           },
-          "_seq_no": 7,
+          "_seq_no": 0,
           "_primary_term": 1,
           "status": 201
         }
