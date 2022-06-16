@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   kqlQuery,
   rangeQuery,
@@ -67,28 +68,50 @@ export async function getIsUsingServiceDestinationMetrics({
 }) {
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(
-    'get_has_service_destination_metrics',
-    {
-      apm: {
-        events: [getProcessorEventForServiceDestinationStatistics(true)],
-      },
-      body: {
-        terminate_after: 1,
-        size: 1,
-        query: {
-          bool: {
-            filter: [
-              ...rangeQuery(start, end),
-              ...kqlQuery(kuery),
-              ...getDocumentTypeFilterForServiceDestinationStatistics(true),
-              ...(useSpanName ? [{ exists: { field: SPAN_NAME } }] : []),
-            ],
+  async function getServiceDestinationMetricsCount(
+    query?: QueryDslQueryContainer
+  ) {
+    const response = await apmEventClient.search(
+      'get_service_destination_metrics_count',
+      {
+        apm: {
+          events: [getProcessorEventForServiceDestinationStatistics(true)],
+        },
+        body: {
+          size: 1,
+          terminate_after: 1,
+          query: {
+            bool: {
+              filter: [
+                ...rangeQuery(start, end),
+                ...kqlQuery(kuery),
+                ...getDocumentTypeFilterForServiceDestinationStatistics(true),
+              ],
+            },
           },
         },
-      },
-    }
-  );
+      }
+    );
 
-  return response.hits.total.value > 0;
+    return response.hits.total.value;
+  }
+
+  if (!useSpanName) {
+    return (await getServiceDestinationMetricsCount()) > 0;
+  }
+
+  const [
+    anyServiceDestinationMetricsCount,
+    serviceDestinationMetricsWithoutSpanNameCount,
+  ] = await Promise.all([
+    getServiceDestinationMetricsCount(),
+    getServiceDestinationMetricsCount({
+      bool: { must_not: [{ exists: { field: SPAN_NAME } }] },
+    }),
+  ]);
+
+  return (
+    anyServiceDestinationMetricsCount > 0 &&
+    serviceDestinationMetricsWithoutSpanNameCount === 0
+  );
 }
