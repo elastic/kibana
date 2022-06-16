@@ -47,6 +47,7 @@
     {
       "label": "Tutorials",
       "items": [
+        { "id": "kibDevTutorialSetupDevWindowsWSL"},
         { "id": "kibDevTutorialTestingPlugins" },
         { "id": "kibDevTutorialSavedObject" },
         { "id": "kibDevTutorialSubmitPullRequest" },

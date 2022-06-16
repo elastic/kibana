@@ -1,0 +1,78 @@
+---
+id: kibDevTutorialSetupDevWindowsWSL
+slug: /kibana-dev-docs/tutorial/setup-dev-windows-wsl
+title: Development on Windows with WSL
+summary: Learn how to setup a development environment on Windows using WSL
+date: 2022-06-16
+tags: ['kibana', 'onboarding', 'dev', 'windows', 'setup', 'wsl']
+---
+
+
+# Overview
+
+Development on Windows is recommended through WSL2.  WSL lets users run a Linux environment on Windows, providing a supported development environment for Kibana.
+
+## Install WSL
+
+<DocCallOut title="Prerequisites">
+  You must be running Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11.
+</DocCallOut>
+
+The latest setup instructions can be found at https://docs.microsoft.com/en-us/windows/wsl/install
+
+1) Open Powershell as an administrator
+
+2) Install WSL with Ubuntu and restart the machine when prompted
+    ```
+    wsl --install -d Ubuntu
+    ```
+
+    In case you already have WSL installed you can just `wsl --update` and then reboot the machine.
+
+3) Once rebooted the installation will proceed for a new WSL install. If that's not the case make sure you're using 
+   WSL2 and Ubuntu by
+   ```
+   wsl --set-default-version 2
+   ```
+
+   and
+
+   ```
+   wsl --set-default Ubuntu 
+   ```  
+
+4) Install support for Google Chrome by running the following inside WSL shell
+
+   ```
+   sudo apt update && sudo apt -y upgrade && sudo apt -y autoremove 
+   cd /tmp
+   sudo wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+   sudo dpkg -i google-chrome-stable_current_amd64.deb
+   sudo apt install --fix-broken -y
+   sudo dpkg -i google-chrome-stable_current_amd64.deb
+   ```
+
+  Now you can launch Google Chrome by either `google-chrome` on your WSL shell or from Ubuntu Applications on Windows. 
+
+5) Check if there are other useful [GUI packages you would want to add on WSL](https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps#update-the-packages-in-your-distribution) and after that the configuration is complete.
+
+## Setup Kibana
+
+The next step is now <DocLink id="kibDevTutorialSetupDevEnv" section="get-the-code" text="setup your development environment" /> for Kibana inside WSL just like in any other case.
+
+## Install VSCode
+
+Even though in previous steps you might have installed Nautilus and other X11 apps that allows you to use the file explorer for the WSL environment or even using some apps supported by X11 like 
+Sublime Text our recommended way to write your code is by using VSCode installed natively on Windows and then use its remote development extension to connect into the WSL environment. You can do this 
+by completing the following:
+
+1) Install VSCode on Windows
+2) Check the "Add to PATH" option during setup
+3) Install the [Remote Development](https://aka.ms/vscode-remote/download/extension) package
+
+For more information you can find the official documentation on how to Remote development is supported with an extension [here](https://code.visualstudio.com/docs/remote/wsl).
+
+## Success
+
+At this point you should be able to develop Kibana using WSL by writing code on VSCode, running commands for build, test and manage your dev environment using the WSL shell and finally having a basic GUI 
+support for your WSL environment using the applications we recommended like Google Chrome and others you choose to install like for example Nautilus file manager or other X11 based ones.
