@@ -632,6 +632,10 @@ const expectAssetsInstalled = ({
           type: 'ingest_pipeline',
         },
         {
+          id: 'metrics-all_assets.test_metrics-0.1.0',
+          type: 'ingest_pipeline',
+        },
+        {
           id: 'default',
           type: 'ml_model',
         },
