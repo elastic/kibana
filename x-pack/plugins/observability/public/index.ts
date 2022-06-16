@@ -8,7 +8,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110905
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginInitializerContext, PluginInitializer } from '@kbn/core/public';
+import { PluginInitializer } from '@kbn/core/public';
 import { lazy } from 'react';
 import {
   Plugin,
@@ -33,21 +33,13 @@ export {
 } from '../common/ui_settings_keys';
 export { uptimeOverviewLocatorID } from '../common';
 
-export interface ConfigSchema {
-  unsafe: {
-    alertingExperience: { enabled: boolean };
-    rules: { enabled: boolean };
-    cases: { enabled: boolean };
-  };
-}
-
 export const plugin: PluginInitializer<
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicPluginsStart
-> = (context: PluginInitializerContext<ConfigSchema>) => {
-  return new Plugin(context);
+> = () => {
+  return new Plugin();
 };
 
 export * from './components/shared/action_menu';
@@ -58,6 +50,7 @@ export {
   getCoreVitalsComponent,
   HeaderMenuPortal,
   FieldValueSuggestions,
+  FieldValueSelection,
   FilterValueLabel,
   SelectableUrlList,
   ExploratoryView,
