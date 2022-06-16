@@ -24,7 +24,6 @@ import {
   AxisStyle,
   TooltipType,
   Placement,
-  RenderChangeListener,
   Direction,
   XYChartElementEvent,
 } from '@elastic/charts';
@@ -192,8 +191,8 @@ export function XYChart({
     datatables: filteredLayers.map(({ table }) => table),
   });
 
-  const onRenderChange = useCallback<RenderChangeListener>(
-    (isRendered) => {
+  const onRenderChange = useCallback(
+    (isRendered: boolean = true) => {
       if (isRendered) {
         renderComplete();
       }
@@ -216,7 +215,9 @@ export function XYChart({
     const icon: IconType = getIconForSeriesType(
       getDataLayers(layers)?.[0]?.seriesType || SeriesTypes.BAR
     );
-    return <EmptyPlaceholder className="xyChart__empty" icon={icon} />;
+    return (
+      <EmptyPlaceholder className="xyChart__empty" icon={icon} renderComplete={onRenderChange} />
+    );
   }
 
   // use formatting hint of first x axis column to format ticks

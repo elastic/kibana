@@ -21,7 +21,6 @@ import {
   ESFixedIntervalUnit,
   ESCalendarIntervalUnit,
   PartialTheme,
-  RenderChangeListener,
 } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
@@ -174,8 +173,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       [uiState]
     );
 
-    const onRenderChange = useCallback<RenderChangeListener>(
-      (isRendered) => {
+    const onRenderChange = useCallback(
+      (isRendered: boolean = true) => {
         if (isRendered) {
           renderComplete();
         }
@@ -309,7 +308,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
     );
     if (!chartData || !chartData.length) {
-      return <EmptyPlaceholder icon={HeatmapIcon} />;
+      return <EmptyPlaceholder icon={HeatmapIcon} renderComplete={onRenderChange} />;
     }
 
     if (!yAxisColumn) {

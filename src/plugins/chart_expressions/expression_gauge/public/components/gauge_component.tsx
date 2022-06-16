@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { FC, memo, useCallback } from 'react';
-import { Chart, Goal, RenderChangeListener, Settings } from '@elastic/charts';
+import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PaletteOutput } from '@kbn/coloring';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -278,8 +278,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       [uiState]
     );
 
-    const onRenderChange = useCallback<RenderChangeListener>(
-      (isRendered) => {
+    const onRenderChange = useCallback(
+      (isRendered: boolean = true) => {
         if (isRendered) {
           renderComplete();
         }
@@ -309,7 +309,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     const icon = getIcons(gaugeType);
 
     if (typeof metricValue !== 'number') {
-      return <EmptyPlaceholder icon={icon} />;
+      return <EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />;
     }
 
     const goal = accessors.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
@@ -326,6 +326,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
               defaultMessage="Minimum and maximum values may not be equal"
             />
           }
+          renderComplete={onRenderChange}
         />
       );
     }
@@ -340,6 +341,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
               defaultMessage="Minimum value may not be greater than maximum value"
             />
           }
+          renderComplete={onRenderChange}
         />
       );
     }
