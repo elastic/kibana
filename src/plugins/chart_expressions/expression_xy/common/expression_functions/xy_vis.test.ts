@@ -222,8 +222,6 @@ describe('xyVis', () => {
       args: { layers, ...rest },
     } = sampleArgs();
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
-    sampleLayer.xScaleType = 'time';
-    sampleLayer.isHistogram = true;
 
     expect(
       xyVisFunction.fn(
@@ -235,7 +233,7 @@ describe('xyVis', () => {
           annotationLayers: [],
           isHistogram: true,
           xScaleType: 'time',
-          xExtent: { type: 'axisExtentConfig', mode: 'dataBounds', lowerBound: 5, upperBound: 10 },
+          xExtent: { type: 'axisExtentConfig', mode: 'dataBounds' },
         },
         createMockExecutionContext()
       )
@@ -287,12 +285,59 @@ describe('xyVis', () => {
           xExtent: {
             type: 'axisExtentConfig',
             mode: 'dataBounds',
-            lowerBound: 0,
-            upperBound: 10,
           },
         },
         createMockExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it renders with custom xExtent for a numeric histogram', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    const result = await xyVisFunction.fn(
+      data,
+      {
+        ...rest,
+        ...restLayerArgs,
+        referenceLines: [],
+        annotationLayers: [],
+        isHistogram: true,
+        xExtent: {
+          type: 'axisExtentConfig',
+          mode: 'custom',
+          lowerBound: 0,
+          upperBound: 10,
+        },
+      },
+      createMockExecutionContext()
+    );
+
+    expect(result).toEqual({
+      type: 'render',
+      as: XY_VIS,
+      value: {
+        args: {
+          ...rest,
+          xExtent: {
+            type: 'axisExtentConfig',
+            mode: 'custom',
+            lowerBound: 0,
+            upperBound: 10,
+          },
+          layers: [
+            {
+              layerType,
+              table: data,
+              layerId: 'dataLayers-0',
+              type,
+              ...restLayerArgs,
+              isHistogram: true,
+            },
+          ],
+        },
+      },
+    });
   });
 });
