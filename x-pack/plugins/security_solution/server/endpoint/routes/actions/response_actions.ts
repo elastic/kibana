@@ -16,7 +16,7 @@ import { CommentType } from '@kbn/cases-plugin/common';
 
 import {
   HostIsolationRequestSchema,
-  KillProcessRequestSchema,
+  KillOrSuspendProcessRequestSchema,
   ResponseActionBodySchema,
 } from '../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../common/constants';
@@ -27,6 +27,7 @@ import {
   ENDPOINT_ACTION_RESPONSES_DS,
   failedFleetActionErrorCode,
   KILL_PROCESS_ROUTE,
+  SUSPEND_PROCESS_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -36,7 +37,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActions,
-  KillProcessParameters,
+  ResponseActionParametersWithPidOrEntityId,
 } from '../../../../common/endpoint/types';
 import type {
   SecuritySolutionPluginRouter,
@@ -83,13 +84,32 @@ export function registerResponseActionRoutes(
   router.post(
     {
       path: KILL_PROCESS_ROUTE,
-      validate: KillProcessRequestSchema,
+      validate: KillOrSuspendProcessRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
       { all: ['canKillProcess'] },
       logger,
-      responseActionRequestHandler<KillProcessParameters>(endpointContext, 'kill-process')
+      responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        endpointContext,
+        'kill-process'
+      )
+    )
+  );
+
+  router.post(
+    {
+      path: SUSPEND_PROCESS_ROUTE,
+      validate: KillOrSuspendProcessRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canSuspendProcess'] },
+      logger,
+      responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        endpointContext,
+        'suspend-process'
+      )
     )
   );
 }
@@ -98,6 +118,7 @@ const commandToFeatureKeyMap = new Map<ResponseActions, FeatureKeys>([
   ['isolate', 'HOST_ISOLATION'],
   ['unisolate', 'HOST_ISOLATION'],
   ['kill-process', 'KILL_PROCESS'],
+  ['suspend-process', 'SUSPEND_PROCESS'],
 ]);
 
 const returnActionIdCommands: ResponseActions[] = ['isolate', 'unisolate'];

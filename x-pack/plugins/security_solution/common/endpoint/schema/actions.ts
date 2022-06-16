@@ -22,7 +22,7 @@ export const HostIsolationRequestSchema = {
   body: schema.object({ ...BaseActionRequestSchema }),
 };
 
-export const KillProcessRequestSchema = {
+export const KillOrSuspendProcessRequestSchema = {
   body: schema.object({
     ...BaseActionRequestSchema,
     parameters: schema.oneOf([
@@ -34,7 +34,7 @@ export const KillProcessRequestSchema = {
 
 export const ResponseActionBodySchema = schema.oneOf([
   HostIsolationRequestSchema.body,
-  KillProcessRequestSchema.body,
+  KillOrSuspendProcessRequestSchema.body,
 ]);
 
 export const EndpointActionLogRequestSchema = {

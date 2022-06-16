@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import {
   EndpointActionListRequestSchema,
   HostIsolationRequestSchema,
-  KillProcessRequestSchema,
+  KillOrSuspendProcessRequestSchema,
 } from './actions';
 
 describe('actions schemas', () => {
@@ -190,7 +190,7 @@ describe('actions schemas', () => {
     });
   });
 
-  describe('KillProcessRequestSchema', () => {
+  describe('KillOrSuspendProcessRequestSchema', () => {
     it('should require at least 1 Endpoint ID', () => {
       expect(() => {
         HostIsolationRequestSchema.body.validate({});
@@ -199,7 +199,7 @@ describe('actions schemas', () => {
 
     it('should accept pid', () => {
       expect(() => {
-        KillProcessRequestSchema.body.validate({
+        KillOrSuspendProcessRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           parameters: {
             pid: 1234,
@@ -210,7 +210,7 @@ describe('actions schemas', () => {
 
     it('should accept entity_id', () => {
       expect(() => {
-        KillProcessRequestSchema.body.validate({
+        KillOrSuspendProcessRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           parameters: {
             entity_id: 5678,
@@ -221,7 +221,7 @@ describe('actions schemas', () => {
 
     it('should reject pid and entity_id together', () => {
       expect(() => {
-        KillProcessRequestSchema.body.validate({
+        KillOrSuspendProcessRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           parameters: {
             pid: 1234,
@@ -233,7 +233,7 @@ describe('actions schemas', () => {
 
     it('should reject if no pid or entity_id', () => {
       expect(() => {
-        KillProcessRequestSchema.body.validate({
+        KillOrSuspendProcessRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           comment: 'a user comment',
           parameters: {},
@@ -243,7 +243,7 @@ describe('actions schemas', () => {
 
     it('should accept a comment', () => {
       expect(() => {
-        KillProcessRequestSchema.body.validate({
+        KillOrSuspendProcessRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           comment: 'a user comment',
           parameters: {

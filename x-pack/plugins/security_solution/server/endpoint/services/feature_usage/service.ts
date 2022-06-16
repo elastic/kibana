@@ -19,6 +19,7 @@ const FEATURES = {
   MEMORY_THREAT_PROTECTION: 'Memory threat protection',
   BEHAVIOR_PROTECTION: 'Behavior protection',
   KILL_PROCESS: 'Kill process',
+  SUSPEND_PROCESS: 'Suspend process',
 } as const;
 
 export type FeatureKeys = keyof typeof FEATURES;
