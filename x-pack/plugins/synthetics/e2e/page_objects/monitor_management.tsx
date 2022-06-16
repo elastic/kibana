@@ -108,7 +108,6 @@ export function monitorManagementPageProvider({
 
     async clickAddMonitor() {
       await page.click('text=Add monitor');
-      await this.findByText('Monitor settings');
     },
 
     async deleteMonitors() {
