@@ -6,8 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { RuleTableItem } from '../../../types';
-import { getRulesListNotifyBadgeLazy } from '../../../common/get_rules_list_notify_badge';
+import {
+  TriggersAndActionsUIPublicPluginStart,
+  RuleTableItem,
+} from '@kbn/triggers-actions-ui-plugin/public';
+
+interface SandboxProps {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+}
 
 const mockRule: RuleTableItem = {
   id: '1',
@@ -41,13 +47,13 @@ const mockRule: RuleTableItem = {
   enabledInLicense: true,
 };
 
-export const RulesListNotifyBadgeSandbox = () => {
+export const RulesListNotifyBadgeSandbox = ({ triggersActionsUi }: SandboxProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   return (
     <div style={{ flex: 1 }}>
-      {getRulesListNotifyBadgeLazy({
+      {triggersActionsUi.getRulesListNotifyBadge({
         rule: mockRule,
         isOpen,
         isLoading,

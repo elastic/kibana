@@ -6,28 +6,25 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../test/functional/ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
+  const PageObjects = getPageObjects(['common']);
   const esArchiver = getService('esArchiver');
 
-  describe('Rules list', () => {
+  describe('Rule tag filter', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'triggersActions',
-        '/__components_sandbox'
-      );
+      await PageObjects.common.navigateToApp('triggersActionsUiExample/rule_tag_filter');
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
     it('shoud load from shareable lazy loader', async () => {
-      await testSubjects.find('rulesList');
-      const exists = await testSubjects.exists('rulesList');
+      await testSubjects.find('ruleTagFilter');
+      const exists = await testSubjects.exists('ruleTagFilter');
       expect(exists).to.be(true);
     });
   });

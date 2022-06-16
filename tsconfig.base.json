@@ -277,6 +277,8 @@
       "@kbn/third-party-lens-navigation-prompt-plugin/*": ["x-pack/examples/third_party_lens_navigation_prompt/*"],
       "@kbn/third-party-vis-lens-example-plugin": ["x-pack/examples/third_party_vis_lens_example"],
       "@kbn/third-party-vis-lens-example-plugin/*": ["x-pack/examples/third_party_vis_lens_example/*"],
+      "@kbn/triggers-actions-ui-example-plugin": ["x-pack/examples/triggers_actions_ui_example"],
+      "@kbn/triggers-actions-ui-example-plugin/*": ["x-pack/examples/triggers_actions_ui_example/*"],
       "@kbn/ui-actions-enhanced-examples-plugin": ["x-pack/examples/ui_actions_enhanced_examples"],
       "@kbn/ui-actions-enhanced-examples-plugin/*": ["x-pack/examples/ui_actions_enhanced_examples/*"],
       "@kbn/actions-plugin": ["x-pack/plugins/actions"],

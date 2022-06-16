@@ -6,21 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../test/functional/ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
+  const PageObjects = getPageObjects(['common']);
   const esArchiver = getService('esArchiver');
 
-  // Failing: See https://github.com/elastic/kibana/issues/132739
-  describe.skip('Rule tag badge', () => {
+  describe('Rule tag badge', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'triggersActions',
-        '/__components_sandbox'
-      );
+      await PageObjects.common.navigateToApp('triggersActionsUiExample/rule_tag_badge');
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');

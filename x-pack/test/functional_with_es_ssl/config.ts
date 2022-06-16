@@ -75,7 +75,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
         `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
           'internalAlertsTable',
-          'internalShareableComponentsSandbox',
           'ruleTagFilter',
           'ruleStatusFilter',
         ])}`,

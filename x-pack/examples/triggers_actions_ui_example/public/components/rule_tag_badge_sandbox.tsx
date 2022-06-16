@@ -12,16 +12,20 @@
  */
 
 import React, { useState } from 'react';
-import { getRuleTagBadgeLazy } from '../../../common/get_rule_tag_badge';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+
+interface SandboxProps {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+}
 
 const tags = ['tag1', 'tag2', 'tag3', 'tag4'];
 
-export const RuleTagBadgeSandbox = () => {
+export const RuleTagBadgeSandbox = ({ triggersActionsUi }: SandboxProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (
     <div style={{ flex: 1 }}>
-      {getRuleTagBadgeLazy({
+      {triggersActionsUi.getRuleTagBadge({
         isOpen,
         tags,
         onClick: () => setIsOpen(true),
