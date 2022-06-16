@@ -27,7 +27,7 @@ export const MonitorSummaryLastRunInfo = ({ ping }: { ping: Ping }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText className="eui-displayInline" size="s">
-          {i18n.translate('xpack.synthetics.monitorSummary.lastRunTime', {
+          {i18n.translate('xpack.synthetics.monitorSummary.lastRunLocation', {
             defaultMessage: 'in {loc}.',
             values: {
               // empty value will be replaced with value from location select
