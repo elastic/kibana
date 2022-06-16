@@ -47,6 +47,9 @@ const tabs = [
   },
 ];
 
+
+
+
 export interface StateProps {
   advancedSettings: AdvancedSettings;
   urlTemplates: UrlTemplate[];
@@ -105,10 +108,11 @@ export function SettingsComponent({
         <EuiTabs style={{ margin: '0 -16px -25px' }}>
           {tabs
             .filter(({ id }) => id !== 'drillDowns' || workspaceProps.canEditDrillDownUrls)
-            .map(({ title }, index) => (
+            .map(({ title,id }, index) => (
               <EuiTab
                 key={title}
                 isSelected={activeTab === index}
+                data-test-subj={id}
                 onClick={() => {
                   setActiveTab(index);
                 }}
