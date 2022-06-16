@@ -240,10 +240,12 @@ export function ObservabilityTour({
   children,
   navigateToApp,
   isPageDataLoaded,
+  showTour,
 }: {
   children: ({ isTourVisible }: { isTourVisible: boolean }) => ReactNode;
   navigateToApp: ApplicationStart['navigateToApp'];
   isPageDataLoaded: boolean;
+  showTour: boolean;
 }) {
   const prevTourState = localStorage.getItem(observabilityTourStorageKey);
   const { activeStep: initialActiveStep, isTourActive: initialIsTourActive } =
@@ -265,9 +267,14 @@ export function ObservabilityTour({
 
   const endTour = useCallback(() => setIsTourActive(false), []);
 
-  // We must wait for the page data to load in order for the tour to render correctly
-  // The tour should also not render on small devices
-  const isTourVisible = isTourActive && isPageDataLoaded && isSmallBreakpoint === false;
+  /**
+   * The tour should only be visible if the following conditions are met:
+   * - Only pages with the side nav should show the tour (showTour === true)
+   * - Tour is set to active per localStorage setting (isTourActive === true)
+   * - Any page data must be loaded in order for the tour to render correctly
+   * - The tour should only render on medium-large screens
+   */
+  const isTourVisible = showTour && isTourActive && isPageDataLoaded && isSmallBreakpoint === false;
 
   useEffect(() => {
     localStorage.setItem(observabilityTourStorageKey, JSON.stringify({ isTourActive, activeStep }));

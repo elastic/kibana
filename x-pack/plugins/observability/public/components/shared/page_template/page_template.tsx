@@ -128,7 +128,12 @@ export function ObservabilityPageTemplate({
 
   return (
     <SharedUxServicesProvider {...sharedUXServices}>
-      <ObservabilityTour navigateToApp={navigateToApp} isPageDataLoaded={isPageDataLoaded}>
+      <ObservabilityTour
+        navigateToApp={navigateToApp}
+        isPageDataLoaded={isPageDataLoaded}
+        // The tour is dependent on the solution nav, and should not render if it is not visible
+        showTour={showSolutionNav}
+      >
         {({ isTourVisible }) => {
           return (
             <KibanaPageTemplate
