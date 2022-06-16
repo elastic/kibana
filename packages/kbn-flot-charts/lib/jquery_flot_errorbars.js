@@ -167,7 +167,7 @@ shadowSize and lineWidth are derived as well from the points series.
                 radius = s.points.radius,
                 err = [s.points.xerr, s.points.yerr];
 
-        // ensure no inverted axis hack is applied to flot
+        //ensure no inverted axis hack is applied to flot
         var invertX = false;
         if (ax[0].p2c(ax[0].max) < ax[0].p2c(ax[0].min)) {
             invertX = true;
