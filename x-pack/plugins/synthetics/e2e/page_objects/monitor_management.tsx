@@ -110,6 +110,7 @@ export function monitorManagementPageProvider({
       const isEnabled = await this.checkIsEnabled();
       console.warn('isEnabled', isEnabled);
       await page.click('text=Add monitor');
+      await this.findByText('Monitor settings');
     },
 
     async deleteMonitors() {
