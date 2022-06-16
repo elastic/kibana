@@ -34,6 +34,7 @@ import { CspAppContext } from '../../plugin';
 import type { Benchmark, CspRulesStatus } from '../../../common/types';
 import { isNonNullable } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
+import { ConsoleAppender } from '@kbn/core/server/logging/appenders/console/console_appender';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
