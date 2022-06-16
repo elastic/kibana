@@ -8,11 +8,8 @@
 import './spaces_menu.scss';
 
 import { EuiAvatar, EuiPopoverFooter, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-import type {
-  EuiSelectableOption,
-  // EuiSelectableOptionCheckedType,
-} from '@elastic/eui/src/components/selectable/selectable_option';
-import React, { Component, lazy } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import React, { Component } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import type { InjectedIntl } from '@kbn/i18n-react';
@@ -55,54 +52,15 @@ class SpacesMenuUI extends Component<Props, State> {
   };
 
   public render() {
-    const { intl, spaces, serverBasePath, navigateToUrl } = this.props;
+    // const { intl, spaces, serverBasePath, navigateToUrl } = this.props;
     // const { searchTerm } = this.state;
 
-    // ToDo: how to clean this up into functions/members?
-    const spaceItems: EuiSelectableOption[] = spaces.map((space) => {
-      return {
-        label: space.name,
-        key: space.id,
-        prepend: (
-          <EuiAvatar
-            type="space"
-            name={space.name}
-            size="s"
-            color={space.color}
-            imageUrl={space.imageUrl ?? ''}
-          />
-        ),
-        checked: 'off', // ToDo: set 'on' if this space ID matches the one we're in?
-        'data-test-subj': `${space.id}-selectableSpaceItem`,
-        className: 'selectableSpaceItem',
-      };
-    });
-
-    const onChange = (newItems: EuiSelectableOption[]) => {
-      newItems.forEach((element) => {
-        console.log(`**** ${element.label}, Checked: ${element.checked}`);
-      });
-      const selectedSpaceItem = newItems.filter((item) => item.checked?.includes('on'))[0];
-
-      if (!!selectedSpaceItem) {
-        // selectedSpaceItem.checked = 'off';
-        // const selectedSpace = spaces.filter((space) => selectedSpaceItem.label === space.name)[0];
-
-        // ToDo: handle options (middle click or cmd/ctrl (new tab), shift click (new window))
-        const urlToSelectedSpace = addSpaceIdToPath(
-          serverBasePath,
-          selectedSpaceItem.key, // selectedSpace.id
-          ENTER_SPACE_PATH
-        );
-        // // Force full page reload (usually not a good idea, but we need to in order to change spaces)
-        navigateToUrl(urlToSelectedSpace);
-      }
-    };
+    const spaceMenuOptions: EuiSelectableOption[] = this.getSpaceOptions();
 
     const panelProps = {
       id: this.props.id,
       className: 'spcMenu',
-      title: intl.formatMessage({
+      title: this.props.intl.formatMessage({
         id: 'xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle',
         defaultMessage: 'Change current space',
       }),
@@ -122,10 +80,10 @@ class SpacesMenuUI extends Component<Props, State> {
               } as any)
             : undefined
         }
-        options={spaceItems}
+        options={spaceMenuOptions}
         singleSelection={true}
         style={{ width: 300 }}
-        onChange={onChange}
+        onChange={this.spaceSelectionChange}
         listProps={{
           rowHeight: 40,
           showIcons: false,
@@ -141,6 +99,70 @@ class SpacesMenuUI extends Component<Props, State> {
       </EuiSelectable>
     );
   }
+
+  private getSpaceOptions = (): EuiSelectableOption[] => {
+    return this.props.spaces.map((space) => {
+      return {
+        label: space.name,
+        key: space.id,
+        prepend: (
+          <EuiAvatar
+            type="space"
+            name={space.name}
+            size="s"
+            color={space.color}
+            imageUrl={space.imageUrl ?? ''}
+          />
+        ),
+        checked: undefined, // ToDo: set 'on' if this space ID matches the one we're in?
+        'data-test-subj': `${space.id}-selectableSpaceItem`,
+        className: 'selectableSpaceItem',
+      };
+    });
+  };
+
+  private spaceSelectionChange = (
+    newOptions: EuiSelectableOption[]
+    // event: KeyboardEvent | MouseEvent this (EuiSelectableOnChangeEvent) is not available yet (added to EUI 22 days ago)...may need to rebase
+  ) => {
+    // newOptions.forEach((option) => {
+    //   console.log(`**** ${option.label}, Checked: ${option.checked}`);
+    // });
+    const selectedSpaceItem = newOptions.filter((item) => item.checked === 'on')[0];
+
+    if (!!selectedSpaceItem) {
+      // selectedSpaceItem.checked = undefined;
+      // const selectedSpace = spaces.filter((space) => selectedSpaceItem.label === space.name)[0];
+
+      // ToDo: handle options (middle click or cmd/ctrl (new tab), shift click (new window))
+      const urlToSelectedSpace = addSpaceIdToPath(
+        this.props.serverBasePath,
+        selectedSpaceItem.key, // selectedSpace.id
+        ENTER_SPACE_PATH
+      );
+
+      // console.log(`**** Event: ${event.type}`);
+
+      // const mouseE = event as EuiSelectableOnChangeEvent;
+      // if (mouseE && mouseE.button === 1) {
+      //   console.log(`**** MIDDLE CLICK`);
+      // } else if (mouseE && mouseE.ctrlKey) {
+      //   console.log(`**** CTRL/CMD CLICK`);
+      // } else if (mouseE && mouseE.shiftKey) {
+      //   console.log(`**** SHIFT CLICK`);
+      // }
+
+      // const keyE = event as KeyboardEvent;
+      // if (keyE && keyE.ctrlKey === 1) {
+      //   console.log(`**** CTRL/CMD ENTER`);
+      // } else if (keyE && keyE.shiftKey) {
+      //   console.log(`**** SHIFT ENTER`);
+      // }
+      // Force full page reload (usually not a good idea, but we need to in order to change spaces)
+      // console.log(`**** URL: ${urlToSelectedSpace}`);
+      this.props.navigateToUrl(urlToSelectedSpace);
+    }
+  };
 
   private renderManageButton = () => {
     return (
