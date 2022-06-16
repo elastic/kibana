@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -178,6 +178,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { dataViewFieldEditor, dataViewEditor } = services;
   const { availableFields$ } = props;
 
+  const canEditDataViewField =
+    dataViewFieldEditor.userPermissions.editIndexPattern() && useNewFieldsApi;
+  const canEditDataView = dataViewEditor.userPermissions.editDataView();
+
   useEffect(
     () => {
       // For an external embeddable like the Field stats
@@ -203,57 +207,56 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     ]
   );
 
-  const editField = useCallback(
-    (fieldName?: string) => {
-      const indexPatternFieldEditPermission =
-        dataViewFieldEditor?.userPermissions.editIndexPattern();
-      const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
-      if (!canEditIndexPatternField || !selectedIndexPattern) {
-        return;
-      }
-      const ref = dataViewFieldEditor.openEditor({
-        ctx: {
-          dataView: selectedIndexPattern,
-        },
-        fieldName,
-        onSave: async () => {
-          onEditRuntimeField();
-        },
-      });
-      if (setFieldEditorRef) {
-        setFieldEditorRef(ref);
-      }
-      if (closeFlyout) {
-        closeFlyout();
-      }
-    },
+  const editField = useMemo(
+    () =>
+      canEditDataViewField && selectedIndexPattern
+        ? (fieldName?: string) => {
+            const ref = dataViewFieldEditor.openEditor({
+              ctx: {
+                dataView: selectedIndexPattern,
+              },
+              fieldName,
+              onSave: async () => {
+                onEditRuntimeField();
+              },
+            });
+            if (setFieldEditorRef) {
+              setFieldEditorRef(ref);
+            }
+            if (closeFlyout) {
+              closeFlyout();
+            }
+          }
+        : undefined,
     [
+      canEditDataViewField,
       closeFlyout,
       dataViewFieldEditor,
       selectedIndexPattern,
       setFieldEditorRef,
       onEditRuntimeField,
-      useNewFieldsApi,
     ]
   );
 
-  const createNewDataView = useCallback(() => {
-    const dataViewEditPermission = dataViewEditor.userPermissions.editDataView();
-    if (!dataViewEditPermission) {
-      return;
-    }
-    const ref = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        onDataViewCreated(dataView);
-      },
-    });
-    if (setDataViewEditorRef) {
-      setDataViewEditorRef(ref);
-    }
-    if (closeFlyout) {
-      closeFlyout();
-    }
-  }, [dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]);
+  const createNewDataView = useMemo(
+    () =>
+      canEditDataView
+        ? () => {
+            const ref = dataViewEditor.openEditor({
+              onSave: async (dataView) => {
+                onDataViewCreated(dataView);
+              },
+            });
+            if (setDataViewEditorRef) {
+              setDataViewEditorRef(ref);
+            }
+            if (closeFlyout) {
+              closeFlyout();
+            }
+          }
+        : undefined,
+    [canEditDataView, dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]
+  );
 
   if (!selectedIndexPattern) {
     return null;

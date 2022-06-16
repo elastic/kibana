@@ -244,7 +244,8 @@ export const LensTopNavMenu = ({
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
-  const editPermission = dataViewFieldEditor.userPermissions.editIndexPattern();
+  const canEditDataViewField = dataViewFieldEditor.userPermissions.editIndexPattern();
+  const canEditDataView = dataViewEditor.userPermissions.editDataView();
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
@@ -644,7 +645,7 @@ export const LensTopNavMenu = ({
 
   const editField = useMemo(
     () =>
-      editPermission
+      canEditDataViewField
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             if (currentIndexPattern?.id) {
               const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
@@ -660,39 +661,54 @@ export const LensTopNavMenu = ({
             }
           }
         : undefined,
-    [editPermission, currentIndexPattern?.id, data.dataViews, dataViewFieldEditor, refreshFieldList]
+    [
+      canEditDataViewField,
+      currentIndexPattern?.id,
+      data.dataViews,
+      dataViewFieldEditor,
+      refreshFieldList,
+    ]
   );
 
   const addField = useMemo(
-    () => (editPermission && editField ? () => editField(undefined, 'add') : undefined),
-    [editField, editPermission]
+    () => (canEditDataViewField && editField ? () => editField(undefined, 'add') : undefined),
+    [editField, canEditDataViewField]
   );
 
-  const createNewDataView = useCallback(() => {
-    const dataViewEditPermission = dataViewEditor.userPermissions.editDataView();
-    if (!dataViewEditPermission) {
-      return;
-    }
-    closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          handleIndexPatternChange({
-            activeDatasources: Object.keys(datasourceStates).reduce(
-              (acc, datasourceId) => ({
-                ...acc,
-                [datasourceId]: datasourceMap[datasourceId],
-              }),
-              {}
-            ),
-            datasourceStates,
-            indexPatternId: dataView.id,
-            setDatasourceState,
-          });
-          refreshFieldList();
-        }
-      },
-    });
-  }, [dataViewEditor, datasourceMap, datasourceStates, refreshFieldList, setDatasourceState]);
+  const createNewDataView = useMemo(
+    () =>
+      canEditDataView
+        ? () => {
+            closeDataViewEditor.current = dataViewEditor.openEditor({
+              onSave: async (dataView) => {
+                if (dataView.id) {
+                  handleIndexPatternChange({
+                    activeDatasources: Object.keys(datasourceStates).reduce(
+                      (acc, datasourceId) => ({
+                        ...acc,
+                        [datasourceId]: datasourceMap[datasourceId],
+                      }),
+                      {}
+                    ),
+                    datasourceStates,
+                    indexPatternId: dataView.id,
+                    setDatasourceState,
+                  });
+                  refreshFieldList();
+                }
+              },
+            });
+          }
+        : undefined,
+    [
+      dataViewEditor,
+      canEditDataView,
+      datasourceMap,
+      datasourceStates,
+      refreshFieldList,
+      setDatasourceState,
+    ]
+  );
 
   const dataViewPickerProps = {
     trigger: {

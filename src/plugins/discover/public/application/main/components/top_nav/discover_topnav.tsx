@@ -52,11 +52,11 @@ export const DiscoverTopNav = ({
   );
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
-  const editPermission = useMemo(
-    () => dataViewFieldEditor.userPermissions.editIndexPattern(),
-    [dataViewFieldEditor]
-  );
-  const canEditDataViewField = !!editPermission && useNewFieldsApi;
+
+  const canEditDataViewField =
+    dataViewFieldEditor.userPermissions.editIndexPattern() && useNewFieldsApi;
+  const canEditDataView = dataViewEditor.userPermissions.editDataView();
+
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
@@ -117,19 +117,21 @@ export const DiscoverTopNav = ({
     [editField, canEditDataViewField]
   );
 
-  const createNewDataView = useCallback(() => {
-    const dataViewEditPermission = dataViewEditor.userPermissions.editDataView();
-    if (!dataViewEditPermission) {
-      return;
-    }
-    closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          onChangeIndexPattern(dataView.id);
-        }
-      },
-    });
-  }, [dataViewEditor, onChangeIndexPattern]);
+  const createNewDataView = useMemo(
+    () =>
+      canEditDataView
+        ? () => {
+            closeDataViewEditor.current = dataViewEditor.openEditor({
+              onSave: async (dataView) => {
+                if (dataView.id) {
+                  onChangeIndexPattern(dataView.id);
+                }
+              },
+            });
+          }
+        : undefined,
+    [canEditDataView, dataViewEditor, onChangeIndexPattern]
+  );
 
   const topNavMenu = useMemo(
     () =>
@@ -180,9 +182,7 @@ export const DiscoverTopNav = ({
     },
     currentDataViewId: indexPattern?.id,
     onAddField: addField,
-    onDataViewCreated: dataViewEditor.userPermissions.editDataView()
-      ? createNewDataView
-      : undefined,
+    onDataViewCreated: createNewDataView,
     onChangeDataView: (newIndexPatternId: string) => onChangeIndexPattern(newIndexPatternId),
   };
 

@@ -68,9 +68,9 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
    */
   setFieldEditorRef?: (ref: () => void | undefined) => void;
 
-  editField: (fieldName?: string) => void;
+  editField?: (fieldName?: string) => void;
 
-  createNewDataView: () => void;
+  createNewDataView?: () => void;
 
   /**
    * a statistics of the distribution of fields in the given hits
@@ -111,11 +111,8 @@ export function DiscoverSidebarComponent({
   createNewDataView,
   showDataViewPicker,
 }: DiscoverSidebarProps) {
-  const { uiSettings, dataViewFieldEditor, dataViewEditor } = useDiscoverServices();
+  const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
-
-  const dataViewFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
-  const canEditDataViewField = !!dataViewFieldEditPermission && useNewFieldsApi;
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
@@ -258,7 +255,7 @@ export function DiscoverSidebarComponent({
 
   const deleteField = useMemo(
     () =>
-      canEditDataViewField && selectedIndexPattern
+      editField && selectedIndexPattern
         ? async (fieldName: string) => {
             const ref = dataViewFieldEditor.openDeleteModal({
               ctx: {
@@ -279,7 +276,7 @@ export function DiscoverSidebarComponent({
         : undefined,
     [
       selectedIndexPattern,
-      canEditDataViewField,
+      editField,
       setFieldEditorRef,
       closeFlyout,
       onEditRuntimeField,
@@ -320,10 +317,8 @@ export function DiscoverSidebarComponent({
           <DataViewPicker
             currentDataViewId={selectedIndexPattern.id}
             onChangeDataView={onChangeIndexPattern}
-            onAddField={canEditDataViewField ? editField : undefined}
-            onDataViewCreated={
-              dataViewEditor.userPermissions.editDataView() ? createNewDataView : undefined
-            }
+            onAddField={editField}
+            onDataViewCreated={createNewDataView}
             trigger={{
               label: selectedIndexPattern?.getName() || '',
               'data-test-subj': 'indexPattern-switch-link',
@@ -398,8 +393,8 @@ export function DiscoverSidebarComponent({
                                 selected={true}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
-                                onEditField={canEditDataViewField ? editField : undefined}
-                                onDeleteField={canEditDataViewField ? deleteField : undefined}
+                                onEditField={editField}
+                                onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
                               />
                             </li>
@@ -458,8 +453,8 @@ export function DiscoverSidebarComponent({
                                 getDetails={getDetailsByField}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
-                                onEditField={canEditDataViewField ? editField : undefined}
-                                onDeleteField={canEditDataViewField ? deleteField : undefined}
+                                onEditField={editField}
+                                onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
                               />
                             </li>
@@ -487,8 +482,8 @@ export function DiscoverSidebarComponent({
                             getDetails={getDetailsByField}
                             trackUiMetric={trackUiMetric}
                             multiFields={multiFields?.get(field.name)}
-                            onEditField={canEditDataViewField ? editField : undefined}
-                            onDeleteField={canEditDataViewField ? deleteField : undefined}
+                            onEditField={editField}
+                            onDeleteField={deleteField}
                             showFieldStats={showFieldStats}
                           />
                         </li>
@@ -500,7 +495,7 @@ export function DiscoverSidebarComponent({
             )}
           </div>
         </EuiFlexItem>
-        {canEditDataViewField && (
+        {!!editField && (
           <EuiFlexItem grow={false}>
             <EuiButton
               iconType="indexOpen"
