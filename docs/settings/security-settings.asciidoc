@@ -201,10 +201,21 @@ These settings control the encryption of saved objects with sensitive data. For 
 IMPORTANT: In high-availability deployments, make sure you use the same encryption and decryption keys for all instances of {kib}. Although the keys can be specified in clear text in `kibana.yml`, it's recommended to store them securely in the <<secure-settings,{kib} Keystore>>.
 
 [[xpack-encryptedSavedObjects-encryptionKey]] xpack.encryptedSavedObjects.encryptionKey::
-An arbitrary string of at least 32 characters that is used to encrypt sensitive properties of saved objects before they're stored in {es}. If not set, {kib} will generate a random key on startup, but certain features won't be available until you set the encryption key explicitly.
+An arbitrary string of at least 32 characters that is used to encrypt sensitive properties of saved objects before they're stored in {es}. Certain features won't be available until you set the encryption key explicitly.
 
 [[xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys]] xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys::
 An optional list of previously used encryption keys. Like <<xpack-encryptedSavedObjects-encryptionKey, `xpack.encryptedSavedObjects.encryptionKey`>>, these must be at least 32 characters in length. {kib} doesn't use these keys for encryption, but may still require them to decrypt some existing saved objects. Use this setting if you wish to change your encryption key, but don't want to lose access to saved objects that were previously encrypted with a different key.
+
+[[security-reporting-settings]]
+==== Secure reporting settings
+
+These settings control the encryption of report data. For more details, refer to <<reporting-settings-kb>>.
+
+IMPORTANT: In high-availability deployments, make sure you use the same encryption key for all instances of {kib}. Although the keys can be specified in clear text in `kibana.yml`, it's recommended to store them securely in the <<secure-settings,{kib} Keystore>>.
+
+[[xpack-reporting-encryptionKey]] `xpack.reporting.encryptionKey`::
+An arbitrary string of at least 32 characters that is used to encrypt sensitive reporting data before being stored in {es}. By default, {kib} generates a random key when it starts, which causes pending reports to fail after restart. Configure `xpack.reporting.encryptionKey` to preserve the same key across multiple restarts and multiple {kib} instances.
+
 
 [float]
 [[audit-logging-settings]]
