@@ -86,12 +86,12 @@ export interface AxisConfig {
   showLabels?: boolean;
   showTitle?: boolean;
   showGridLines?: boolean;
+  extent?: AxisExtentConfigResult;
 }
 
 export interface YAxisConfig extends AxisConfig {
   mode?: AxisMode;
   boundsMargin?: number;
-  extent?: AxisExtentConfigResult;
   scaleType?: YScaleType;
 }
 

@@ -8,12 +8,13 @@
 
 import { strings } from '../i18n';
 import { XAxisConfigFn, YAxisConfigFn } from '../types';
+import { AXIS_EXTENT_CONFIG } from '../constants';
 
 type CommonAxisConfigFn = XAxisConfigFn | YAxisConfigFn;
 
 export const commonAxisConfigArgs: Omit<
   CommonAxisConfigFn['args'],
-  'scaleType' | 'mode' | 'extent' | 'boundsMargin'
+  'scaleType' | 'mode' | 'boundsMargin'
 > = {
   title: {
     types: ['string'],
@@ -62,5 +63,10 @@ export const commonAxisConfigArgs: Omit<
   truncate: {
     types: ['number'],
     help: strings.getAxisTruncateHelp(),
+  },
+  extent: {
+    types: [AXIS_EXTENT_CONFIG],
+    help: strings.getAxisExtentHelp(),
+    default: `{${AXIS_EXTENT_CONFIG}}`,
   },
 };

@@ -130,6 +130,7 @@ Object {
             "chain": Array [
               Object {
                 "arguments": Object {
+                  "extent": Array [],
                   "id": Array [
                     "x",
                   ],

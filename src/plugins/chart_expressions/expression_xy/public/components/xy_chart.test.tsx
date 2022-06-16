@@ -503,6 +503,43 @@ describe('XYChart component', () => {
     });
   });
 
+  describe('x axis extents', () => {
+    const { args } = sampleArgs();
+
+    test('it passes custom x axis extents to elastic-charts settings spec', () => {
+      {
+        const component = shallow(
+          <XYChart
+            {...defaultProps}
+            args={{
+              ...args,
+              layers: [
+                {
+                  ...(args.layers[0] as DataLayerConfig),
+                  isHistogram: true,
+                },
+              ],
+              xAxisConfig: {
+                type: 'xAxisConfig',
+                extent: {
+                  type: 'axisExtentConfig',
+                  mode: 'custom',
+                  lowerBound: 123,
+                  upperBound: 456,
+                },
+              },
+            }}
+          />
+        );
+        expect(component.find(Settings).prop('xDomain')).toEqual({
+          min: 123,
+          max: 456,
+          minInterval: 50,
+        });
+      }
+    });
+  });
+
   describe('y axis extents', () => {
     const { args } = sampleArgs();
 
@@ -2466,6 +2503,10 @@ describe('XYChart component', () => {
         showGridLines: true,
         labelsOrientation: 0,
         position: 'bottom',
+        extent: {
+          mode: 'dataBounds',
+          type: 'axisExtentConfig',
+        },
       },
       markSizeRatio: 1,
       layers: [
@@ -2570,6 +2611,10 @@ describe('XYChart component', () => {
         showGridLines: true,
         labelsOrientation: 0,
         position: 'bottom',
+        extent: {
+          mode: 'dataBounds',
+          type: 'axisExtentConfig',
+        },
       },
       showTooltip: true,
       markSizeRatio: 1,
@@ -2656,6 +2701,10 @@ describe('XYChart component', () => {
         labelsOrientation: 0,
         title: '',
         position: 'bottom',
+        extent: {
+          mode: 'dataBounds',
+          type: 'axisExtentConfig',
+        },
       },
       markSizeRatio: 1,
       layers: [

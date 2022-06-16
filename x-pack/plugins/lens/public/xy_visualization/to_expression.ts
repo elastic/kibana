@@ -9,7 +9,6 @@ import { Ast, AstFunction } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   State,
@@ -33,6 +32,7 @@ import {
 } from './visualization_helpers';
 import { getUniqueLabels } from './annotations/helpers';
 import { layerTypes } from '../../common';
+import { axisExtentConfigToExpression } from '../shared_components';
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI,
@@ -316,6 +316,7 @@ export const buildExpression = (
                     showLabels: [state?.tickLabelsVisibilitySettings?.x ?? true],
                     showGridLines: [state?.gridlinesVisibilitySettings?.x ?? true],
                     labelsOrientation: [state?.labelsOrientation?.x ?? 0],
+                    extent: state.xExtent ? [axisExtentConfigToExpression(state.xExtent)] : [],
                   },
                 },
               ],
@@ -362,7 +363,7 @@ const yAxisConfigsToExpression = (
         arguments: {
           id: axis.id ? [axis.id] : [],
           position: axis.position ? [axis.position] : [],
-          extent: axis.extent ? [axisExtentConfigToExpression(axis.extent, validDataLayers)] : [],
+          extent: axis.extent ? [axisExtentConfigToExpression(axis.extent)] : [],
           showTitle: [axis.showTitle ?? true],
           title: axis.title !== undefined ? [axis.title] : [],
           showLabels: [axis.showLabels ?? true],
@@ -578,21 +579,3 @@ const extendedYConfigToRLDecorationConfigExpression = (
     ],
   };
 };
-
-const axisExtentConfigToExpression = (
-  extent: AxisExtentConfig | undefined,
-  layers: ValidXYDataLayerConfig[]
-): Ast => ({
-  type: 'expression',
-  chain: [
-    {
-      type: 'function',
-      function: 'axisExtentConfig',
-      arguments: {
-        mode: [extent?.mode ?? 'full'],
-        lowerBound: extent?.lowerBound !== undefined ? [extent?.lowerBound] : [],
-        upperBound: extent?.upperBound !== undefined ? [extent?.upperBound] : [],
-      },
-    },
-  ],
-});

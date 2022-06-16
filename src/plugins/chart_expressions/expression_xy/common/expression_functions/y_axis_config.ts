@@ -8,7 +8,7 @@
 
 import { Position } from '@elastic/charts';
 import { strings } from '../i18n';
-import { Y_AXIS_CONFIG, AxisModes, AXIS_EXTENT_CONFIG, YScaleTypes } from '../constants';
+import { Y_AXIS_CONFIG, AxisModes, YScaleTypes } from '../constants';
 import { YAxisConfigFn } from '../types';
 import { commonAxisConfigArgs } from './common_axis_args';
 
@@ -28,11 +28,6 @@ export const yAxisConfigFunction: YAxisConfigFn = {
     boundsMargin: {
       types: ['number'],
       help: strings.getAxisBoundsMarginHelp(),
-    },
-    extent: {
-      types: [AXIS_EXTENT_CONFIG],
-      help: strings.getAxisExtentHelp(),
-      default: `{${AXIS_EXTENT_CONFIG}}`,
     },
     scaleType: {
       options: [...Object.values(YScaleTypes)],
