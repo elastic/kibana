@@ -3046,7 +3046,6 @@
     "discover.hitCountSpinnerAriaLabel": "読み込み中の最終一致件数",
     "discover.hitsPluralTitle": "{formattedHits} {hits, plural, other  {一致}}",
     "discover.howToSeeOtherMatchingDocumentsDescription": "これらは検索条件に一致した初めの {sampleSize} 件のドキュメントです。他の結果を表示するには検索条件を絞ってください。",
-    "discover.howToSeeOtherMatchingDocumentsDescriptionGrid": "これらは検索条件に一致した初めの {sampleSize} 件のドキュメントです。他の結果を表示するには検索条件を絞ってください。",
     "discover.inspectorRequestDataTitleChart": "グラフデータ",
     "discover.inspectorRequestDataTitleDocuments": "ドキュメント",
     "discover.inspectorRequestDataTitleTotalHits": "総ヒット数",
