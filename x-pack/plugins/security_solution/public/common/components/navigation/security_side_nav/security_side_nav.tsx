@@ -17,6 +17,9 @@ import { CustomSideNavItem, DefaultSideNavItem, SideNavItem } from '../solution_
 import { NavLinkItem } from '../types';
 import { EuiIconLaunch } from './icons/launch';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
+import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
+import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
+import { bottomNavOffset } from '../../../lib/helpers';
 
 const isFooterNavItem = (id: SecurityPageName) =>
   id === SecurityPageName.landing || id === SecurityPageName.administration;
@@ -148,9 +151,21 @@ export const SecuritySideNav: React.FC = () => {
   const [items, footerItems] = useSideNavItems();
   const selectedId = useSelectedId();
 
+  const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
+  const [isTimelineBottomBarVisible] = useShowTimeline();
+  const bottomOffset =
+    isTimelineBottomBarVisible || isPolicySettingsVisible ? bottomNavOffset : undefined;
+
   if (items.length === 0 && footerItems.length === 0) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;
   }
 
-  return <SolutionGroupedNav items={items} footerItems={footerItems} selectedId={selectedId} />;
+  return (
+    <SolutionGroupedNav
+      items={items}
+      footerItems={footerItems}
+      selectedId={selectedId}
+      bottomOffset={bottomOffset}
+    />
+  );
 };
