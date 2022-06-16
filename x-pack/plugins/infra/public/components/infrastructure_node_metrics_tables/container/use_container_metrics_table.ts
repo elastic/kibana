@@ -5,39 +5,47 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
-import type { MetricsMap, SortState, UseNodeMetricsTableOptions } from '../shared';
-import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
+import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
+import {
+  metricsToApiOptions,
+  useInfrastructureNodeMetrics,
+  createMetricByFieldLookup,
+} from '../shared';
 
 type ContainerMetricsField =
   | 'kubernetes.container.start_time'
   | 'kubernetes.container.cpu.usage.node.pct'
   | 'kubernetes.container.memory.usage.bytes';
 
-const containerMetricsMap: MetricsMap<ContainerMetricsField> = {
-  'kubernetes.container.start_time': {
-    aggregation: 'max',
-    field: 'kubernetes.container.start_time',
+const containerMetricsQueryConfig: MetricsQueryOptions<ContainerMetricsField> = {
+  sourceFilter: {
+    term: {
+      'event.dataset': 'kubernetes.container',
+    },
   },
-  'kubernetes.container.cpu.usage.node.pct': {
-    aggregation: 'avg',
-    field: 'kubernetes.container.cpu.usage.node.pct',
-  },
-  'kubernetes.container.memory.usage.bytes': {
-    aggregation: 'avg',
-    field: 'kubernetes.container.memory.usage.bytes',
+  groupByField: 'container.id',
+  metricsMap: {
+    'kubernetes.container.start_time': {
+      aggregation: 'max',
+      field: 'kubernetes.container.start_time',
+    },
+    'kubernetes.container.cpu.usage.node.pct': {
+      aggregation: 'avg',
+      field: 'kubernetes.container.cpu.usage.node.pct',
+    },
+    'kubernetes.container.memory.usage.bytes': {
+      aggregation: 'avg',
+      field: 'kubernetes.container.memory.usage.bytes',
+    },
   },
 };
 
-const { options: containerMetricsOptions, metricByField } = metricsToApiOptions(
-  containerMetricsMap,
-  'container.id'
-);
-export { metricByField };
+export const metricByField = createMetricByFieldLookup(containerMetricsQueryConfig.metricsMap);
 
 export interface ContainerNodeMetricsRow {
   name: string;
@@ -56,6 +64,11 @@ export function useContainerMetricsTable({
     direction: 'desc',
   });
 
+  const { options: containerMetricsOptions } = useMemo(
+    () => metricsToApiOptions(containerMetricsQueryConfig, filterClauseDsl),
+    [filterClauseDsl]
+  );
+
   const {
     isLoading,
     nodes: containers,
@@ -63,7 +76,6 @@ export function useContainerMetricsTable({
   } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({
     metricsExplorerOptions: containerMetricsOptions,
     timerange,
-    filterClauseDsl,
     transform: seriesToContainerNodeMetricsRow,
     sortState,
     currentPageIndex,

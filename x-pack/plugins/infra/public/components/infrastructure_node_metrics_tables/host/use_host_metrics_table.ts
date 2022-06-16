@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
-import type { MetricsMap, SortState, UseNodeMetricsTableOptions } from '../shared';
-import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
+import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
+import {
+  metricsToApiOptions,
+  useInfrastructureNodeMetrics,
+  createMetricByFieldLookup,
+} from '../shared';
 
 type HostMetricsField =
   | 'system.cpu.cores'
@@ -19,24 +23,28 @@ type HostMetricsField =
   | 'system.memory.total'
   | 'system.memory.used.pct';
 
-const hostMetricsMap: MetricsMap<HostMetricsField> = {
-  'system.cpu.cores': { aggregation: 'max', field: 'system.cpu.cores' },
-  'system.cpu.total.norm.pct': {
-    aggregation: 'avg',
-    field: 'system.cpu.total.norm.pct',
+const hostsMetricsQueryConfig: MetricsQueryOptions<HostMetricsField> = {
+  sourceFilter: {
+    term: {
+      'event.module': 'system',
+    },
   },
-  'system.memory.total': { aggregation: 'max', field: 'system.memory.total' },
-  'system.memory.used.pct': {
-    aggregation: 'avg',
-    field: 'system.memory.used.pct',
+  groupByField: 'host.name',
+  metricsMap: {
+    'system.cpu.cores': { aggregation: 'max', field: 'system.cpu.cores' },
+    'system.cpu.total.norm.pct': {
+      aggregation: 'avg',
+      field: 'system.cpu.total.norm.pct',
+    },
+    'system.memory.total': { aggregation: 'max', field: 'system.memory.total' },
+    'system.memory.used.pct': {
+      aggregation: 'avg',
+      field: 'system.memory.used.pct',
+    },
   },
 };
 
-const { options: hostMetricsOptions, metricByField } = metricsToApiOptions(
-  hostMetricsMap,
-  'host.name'
-);
-export { metricByField };
+export const metricByField = createMetricByFieldLookup(hostsMetricsQueryConfig.metricsMap);
 
 export interface HostNodeMetricsRow {
   name: string;
@@ -53,6 +61,11 @@ export function useHostMetricsTable({ timerange, filterClauseDsl }: UseNodeMetri
     direction: 'desc',
   });
 
+  const { options: hostMetricsOptions } = useMemo(
+    () => metricsToApiOptions(hostsMetricsQueryConfig, filterClauseDsl),
+    [filterClauseDsl]
+  );
+
   const {
     isLoading,
     nodes: hosts,
@@ -60,7 +73,6 @@ export function useHostMetricsTable({ timerange, filterClauseDsl }: UseNodeMetri
   } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
     metricsExplorerOptions: hostMetricsOptions,
     timerange,
-    filterClauseDsl,
     transform: seriesToHostNodeMetricsRow,
     sortState,
     currentPageIndex,
