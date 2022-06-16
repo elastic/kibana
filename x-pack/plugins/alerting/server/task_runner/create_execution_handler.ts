@@ -6,6 +6,7 @@
  */
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
+import { ExecuteOptions } from '@kbn/actions-plugin/server';
 import { transformActionParams } from './transform_action_params';
 import { injectActionParams } from './inject_action_params';
 import {
@@ -16,9 +17,11 @@ import {
   RuleTypeState,
 } from '../types';
 import { CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
-  options: ExecutionHandlerOptions<ActionGroupIds>
+  ruleRunMetricsStore: RuleRunMetricsStore,
+  alertsToExecute: Array<ExecutionHandlerOptions<ActionGroupIds>>
 ) => Promise<void>;
 
 export function createExecutionHandler<
@@ -61,147 +64,153 @@ export function createExecutionHandler<
     ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
   );
 
-  return async ({
-    actionGroup,
-    actionSubgroup,
-    context,
-    state,
-    ruleRunMetricsStore,
-    alertId,
-  }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
-    if (!ruleTypeActionGroups.has(actionGroup)) {
-      logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
-      return;
+  return async (
+    ruleRunMetricsStore: RuleRunMetricsStore,
+    alertsToExecute: Array<ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>>
+  ) => {
+    const alertsToEnqueue: ExecuteOptions[] = [];
+    const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
+
+    for (const alert of alertsToExecute) {
+      const { actionGroup, actionSubgroup, context, state, alertId } = alert;
+
+      if (!ruleTypeActionGroups.has(actionGroup)) {
+        logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
+      } else {
+        const actions = ruleActions
+          .filter(({ group }) => group === actionGroup)
+          .map((action) => {
+            return {
+              ...action,
+              params: transformActionParams({
+                actionsPlugin,
+                alertId: ruleId,
+                alertType: ruleType.id,
+                actionTypeId: action.actionTypeId,
+                alertName: ruleName,
+                spaceId,
+                tags,
+                alertInstanceId: alertId,
+                alertActionGroup: actionGroup,
+                alertActionGroupName: ruleTypeActionGroups.get(actionGroup)!,
+                alertActionSubgroup: actionSubgroup,
+                context,
+                actionParams: action.params,
+                actionId: action.id,
+                state,
+                kibanaBaseUrl,
+                alertParams: ruleParams,
+              }),
+            };
+          })
+          .map((action) => ({
+            ...action,
+            params: injectActionParams({
+              ruleId,
+              spaceId,
+              actionParams: action.params,
+              actionTypeId: action.actionTypeId,
+            }),
+          }));
+
+        ruleRunMetricsStore.incrementNumberOfGeneratedActions(actions.length);
+
+        let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
+        for (const action of actions) {
+          const { actionTypeId } = action;
+
+          ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
+
+          if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
+            ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+              actionTypeId,
+              status: ActionsCompletion.PARTIAL,
+            });
+            logger.debug(
+              `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
+            );
+            break;
+          }
+
+          if (
+            ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
+              actionTypeId,
+              actionsConfigMap,
+            })
+          ) {
+            if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
+              logger.debug(
+                `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
+              );
+            }
+            ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+              actionTypeId,
+              status: ActionsCompletion.PARTIAL,
+            });
+            continue;
+          }
+
+          if (!actionsPlugin.isActionExecutable(action.id, actionTypeId, { notifyUsage: true })) {
+            logger.warn(
+              `Rule "${ruleId}" skipped scheduling action "${action.id}" because it is disabled`
+            );
+            continue;
+          }
+
+          ruleRunMetricsStore.incrementNumberOfTriggeredActions();
+          ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
+
+          const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
+
+          const enqueueOptions = {
+            id: action.id,
+            params: action.params,
+            spaceId,
+            apiKey: apiKey ?? null,
+            consumer: ruleConsumer,
+            source: asSavedObjectExecutionSource({
+              id: ruleId,
+              type: 'alert',
+            }),
+            executionId,
+            relatedSavedObjects: [
+              {
+                id: ruleId,
+                type: 'alert',
+                namespace: namespace.namespace,
+                typeId: ruleType.id,
+              },
+            ],
+          };
+
+          if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
+            ephemeralActionsToSchedule--;
+            try {
+              await actionsClient.ephemeralEnqueuedExecution(enqueueOptions);
+            } catch (err) {
+              if (isEphemeralTaskRejectedDueToCapacityError(err)) {
+                alertsToEnqueue.push(enqueueOptions);
+                // await actionsClient.enqueueExecutions(enqueueOptions);
+              }
+            }
+          } else {
+            alertsToEnqueue.push(enqueueOptions);
+            // await actionsClient.enqueueExecutions(enqueueOptions);
+          }
+
+          alertingEventLogger.logAction({
+            id: action.id,
+            typeId: actionTypeId,
+            alertId,
+            alertGroup: actionGroup,
+            alertSubgroup: actionSubgroup,
+          });
+        }
+      }
     }
 
-    const actions = ruleActions
-      .filter(({ group }) => group === actionGroup)
-      .map((action) => {
-        return {
-          ...action,
-          params: transformActionParams({
-            actionsPlugin,
-            alertId: ruleId,
-            alertType: ruleType.id,
-            actionTypeId: action.actionTypeId,
-            alertName: ruleName,
-            spaceId,
-            tags,
-            alertInstanceId: alertId,
-            alertActionGroup: actionGroup,
-            alertActionGroupName: ruleTypeActionGroups.get(actionGroup)!,
-            alertActionSubgroup: actionSubgroup,
-            context,
-            actionParams: action.params,
-            actionId: action.id,
-            state,
-            kibanaBaseUrl,
-            alertParams: ruleParams,
-          }),
-        };
-      })
-      .map((action) => ({
-        ...action,
-        params: injectActionParams({
-          ruleId,
-          spaceId,
-          actionParams: action.params,
-          actionTypeId: action.actionTypeId,
-        }),
-      }));
-
-    ruleRunMetricsStore.incrementNumberOfGeneratedActions(actions.length);
-
-    const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
-    let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
-
-    for (const action of actions) {
-      const { actionTypeId } = action;
-
-      ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
-
-      if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
-        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-          actionTypeId,
-          status: ActionsCompletion.PARTIAL,
-        });
-        logger.debug(
-          `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
-        );
-        break;
-      }
-
-      if (
-        ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
-          actionTypeId,
-          actionsConfigMap,
-        })
-      ) {
-        if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
-          logger.debug(
-            `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
-          );
-        }
-        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-          actionTypeId,
-          status: ActionsCompletion.PARTIAL,
-        });
-        continue;
-      }
-
-      if (!actionsPlugin.isActionExecutable(action.id, actionTypeId, { notifyUsage: true })) {
-        logger.warn(
-          `Rule "${ruleId}" skipped scheduling action "${action.id}" because it is disabled`
-        );
-        continue;
-      }
-
-      ruleRunMetricsStore.incrementNumberOfTriggeredActions();
-      ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
-
-      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
-
-      const enqueueOptions = {
-        id: action.id,
-        params: action.params,
-        spaceId,
-        apiKey: apiKey ?? null,
-        consumer: ruleConsumer,
-        source: asSavedObjectExecutionSource({
-          id: ruleId,
-          type: 'alert',
-        }),
-        executionId,
-        relatedSavedObjects: [
-          {
-            id: ruleId,
-            type: 'alert',
-            namespace: namespace.namespace,
-            typeId: ruleType.id,
-          },
-        ],
-      };
-
-      if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
-        ephemeralActionsToSchedule--;
-        try {
-          await actionsClient.ephemeralEnqueuedExecution(enqueueOptions);
-        } catch (err) {
-          if (isEphemeralTaskRejectedDueToCapacityError(err)) {
-            await actionsClient.enqueueExecution(enqueueOptions);
-          }
-        }
-      } else {
-        await actionsClient.enqueueExecution(enqueueOptions);
-      }
-
-      alertingEventLogger.logAction({
-        id: action.id,
-        typeId: actionTypeId,
-        alertId,
-        alertGroup: actionGroup,
-        alertSubgroup: actionSubgroup,
-      });
+    if (alertsToEnqueue.length > 0) {
+      await actionsClient.enqueueExecutions(alertsToEnqueue);
     }
   };
 }

@@ -245,12 +245,14 @@ export const generateRunnerResult = ({
   };
 };
 
-export const generateEnqueueFunctionInput = () => ({
+export const generateEnqueueFunctionInput = (
+  { id, isResolved }: GeneratorParams = { id: '1' }
+) => ({
   apiKey: 'MTIzOmFiYw==',
   executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-  id: '1',
+  id,
   params: {
-    foo: true,
+    ...(isResolved ? { isResolved: true } : { foo: true }),
   },
   consumer: 'bar',
   relatedSavedObjects: [

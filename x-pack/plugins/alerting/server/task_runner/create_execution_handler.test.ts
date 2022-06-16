@@ -133,49 +133,52 @@ describe('Create Execution Handler', () => {
 
   test('enqueues execution per selected action', async () => {
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-    await executionHandler({
-      actionGroup: 'default',
-      state: {},
-      context: {},
-      alertId: '2',
-      ruleRunMetricsStore,
-    });
+    await executionHandler(ruleRunMetricsStore, [
+      {
+        actionGroup: 'default',
+        state: {},
+        context: {},
+        alertId: '2',
+      },
+    ]);
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
     expect(mockActionsPlugin.getActionsClientWithRequest).toHaveBeenCalledWith(
       createExecutionHandlerParams.request
     );
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
-    expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(actionsClient.enqueueExecutions).toHaveBeenCalledTimes(1);
+    expect(actionsClient.enqueueExecutions.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
-      Object {
-        "apiKey": "MTIzOmFiYw==",
-        "consumer": "rule-consumer",
-        "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-        "id": "1",
-        "params": Object {
-          "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
-          "contextVal": "My  goes here",
-          "foo": true,
-          "stateVal": "My  goes here",
-        },
-        "relatedSavedObjects": Array [
-          Object {
-            "id": "1",
-            "namespace": "test1",
-            "type": "alert",
-            "typeId": "test",
+      Array [
+        Object {
+          "apiKey": "MTIzOmFiYw==",
+          "consumer": "rule-consumer",
+          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+          "id": "1",
+          "params": Object {
+            "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
+            "contextVal": "My  goes here",
+            "foo": true,
+            "stateVal": "My  goes here",
           },
-        ],
-        "source": Object {
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": "test1",
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
-            "id": "1",
-            "type": "alert",
+            "source": Object {
+              "id": "1",
+              "type": "alert",
+            },
+            "type": "SAVED_OBJECT",
           },
-          "type": "SAVED_OBJECT",
+          "spaceId": "test1",
         },
-        "spaceId": "test1",
-      },
+      ],
     ]
   `);
 
@@ -199,6 +202,159 @@ describe('Create Execution Handler', () => {
       },
     });
 
+    expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.COMPLETE);
+  });
+
+  test('enqueues execution once for multiple alerts', async () => {
+    const executionHandler = createExecutionHandler(createExecutionHandlerParams);
+    await executionHandler(ruleRunMetricsStore, [
+      {
+        actionGroup: 'default',
+        state: {},
+        context: {},
+        alertId: '2',
+      },
+      {
+        actionGroup: 'default',
+        state: {},
+        context: {},
+        alertId: '3',
+      },
+      {
+        actionGroup: 'default',
+        state: {},
+        context: {},
+        alertId: '4',
+      },
+      {
+        actionGroup: 'default',
+        state: {},
+        context: {},
+        alertId: '5',
+      },
+    ]);
+    expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(4);
+    expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(4);
+    expect(mockActionsPlugin.getActionsClientWithRequest).toHaveBeenCalledWith(
+      createExecutionHandlerParams.request
+    );
+    expect(actionsClient.enqueueExecutions).toHaveBeenCalledTimes(1);
+    expect(actionsClient.enqueueExecutions).toHaveBeenCalledWith([
+      {
+        apiKey: 'MTIzOmFiYw==',
+        consumer: 'rule-consumer',
+        executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+        id: '1',
+        params: {
+          alertVal: 'My 1 name-of-alert test1 tag-A,tag-B 2 goes here',
+          contextVal: 'My  goes here',
+          foo: true,
+          stateVal: 'My  goes here',
+        },
+        relatedSavedObjects: [
+          {
+            id: '1',
+            namespace: 'test1',
+            type: 'alert',
+            typeId: 'test',
+          },
+        ],
+        source: {
+          source: {
+            id: '1',
+            type: 'alert',
+          },
+          type: 'SAVED_OBJECT',
+        },
+        spaceId: 'test1',
+      },
+      {
+        apiKey: 'MTIzOmFiYw==',
+        consumer: 'rule-consumer',
+        executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+        id: '1',
+        params: {
+          alertVal: 'My 1 name-of-alert test1 tag-A,tag-B 3 goes here',
+          contextVal: 'My  goes here',
+          foo: true,
+          stateVal: 'My  goes here',
+        },
+        relatedSavedObjects: [
+          {
+            id: '1',
+            namespace: 'test1',
+            type: 'alert',
+            typeId: 'test',
+          },
+        ],
+        source: {
+          source: {
+            id: '1',
+            type: 'alert',
+          },
+          type: 'SAVED_OBJECT',
+        },
+        spaceId: 'test1',
+      },
+      {
+        apiKey: 'MTIzOmFiYw==',
+        consumer: 'rule-consumer',
+        executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+        id: '1',
+        params: {
+          alertVal: 'My 1 name-of-alert test1 tag-A,tag-B 4 goes here',
+          contextVal: 'My  goes here',
+          foo: true,
+          stateVal: 'My  goes here',
+        },
+        relatedSavedObjects: [
+          {
+            id: '1',
+            namespace: 'test1',
+            type: 'alert',
+            typeId: 'test',
+          },
+        ],
+        source: {
+          source: {
+            id: '1',
+            type: 'alert',
+          },
+          type: 'SAVED_OBJECT',
+        },
+        spaceId: 'test1',
+      },
+      {
+        apiKey: 'MTIzOmFiYw==',
+        consumer: 'rule-consumer',
+        executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+        id: '1',
+        params: {
+          alertVal: 'My 1 name-of-alert test1 tag-A,tag-B 5 goes here',
+          contextVal: 'My  goes here',
+          foo: true,
+          stateVal: 'My  goes here',
+        },
+        relatedSavedObjects: [
+          {
+            id: '1',
+            namespace: 'test1',
+            type: 'alert',
+            typeId: 'test',
+          },
+        ],
+        source: {
+          source: {
+            id: '1',
+            type: 'alert',
+          },
+          type: 'SAVED_OBJECT',
+        },
+        spaceId: 'test1',
+      },
+    ]);
+
+    expect(alertingEventLogger.logAction).toHaveBeenCalledTimes(4);
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.COMPLETE);
   });
 
@@ -232,43 +388,46 @@ describe('Create Execution Handler', () => {
         },
       ],
     });
-    await executionHandler({
-      actionGroup: 'default',
-      state: {},
-      context: {},
-      alertId: '2',
-      ruleRunMetricsStore,
-    });
+    await executionHandler(ruleRunMetricsStore, [
+      {
+        actionGroup: 'default',
+        state: {},
+        context: {},
+        alertId: '2',
+      },
+    ]);
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(2);
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledWith({
-      consumer: 'rule-consumer',
-      id: '2',
-      params: {
-        foo: true,
-        contextVal: 'My other  goes here',
-        stateVal: 'My other  goes here',
-      },
-      source: asSavedObjectExecutionSource({
-        id: '1',
-        type: 'alert',
-      }),
-      relatedSavedObjects: [
-        {
-          id: '1',
-          namespace: 'test1',
-          type: 'alert',
-          typeId: 'test',
+    expect(actionsClient.enqueueExecutions).toHaveBeenCalledTimes(1);
+    expect(actionsClient.enqueueExecutions).toHaveBeenCalledWith([
+      {
+        consumer: 'rule-consumer',
+        id: '2',
+        params: {
+          foo: true,
+          contextVal: 'My other  goes here',
+          stateVal: 'My other  goes here',
         },
-      ],
-      spaceId: 'test1',
-      apiKey: createExecutionHandlerParams.apiKey,
-      executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-    });
+        source: asSavedObjectExecutionSource({
+          id: '1',
+          type: 'alert',
+        }),
+        relatedSavedObjects: [
+          {
+            id: '1',
+            namespace: 'test1',
+            type: 'alert',
+            typeId: 'test',
+          },
+        ],
+        spaceId: 'test1',
+        apiKey: createExecutionHandlerParams.apiKey,
+        executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+      },
+    ]);
   });
 
-  test('trow error error message when action type is disabled', async () => {
+  test('throw error error message when action type is disabled', async () => {
     mockActionsPlugin.preconfiguredActions = [];
     mockActionsPlugin.isActionExecutable.mockReturnValue(false);
     mockActionsPlugin.isActionTypeEnabled.mockReturnValue(false);
@@ -296,147 +455,157 @@ describe('Create Execution Handler', () => {
       ],
     });
 
-    await executionHandler({
-      actionGroup: 'default',
-      state: {},
-      context: {},
-      alertId: '2',
-      ruleRunMetricsStore,
-    });
+    await executionHandler(ruleRunMetricsStore, [
+      {
+        actionGroup: 'default',
+        state: {},
+        context: {},
+        alertId: '2',
+      },
+    ]);
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(2);
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
+    expect(actionsClient.enqueueExecutions).toHaveBeenCalledTimes(0);
 
     mockActionsPlugin.isActionExecutable.mockImplementation(() => true);
     const executionHandlerForPreconfiguredAction = createExecutionHandler({
       ...createExecutionHandlerParams,
       actions: [...createExecutionHandlerParams.actions],
     });
-    await executionHandlerForPreconfiguredAction({
-      actionGroup: 'default',
-      state: {},
-      context: {},
-      alertId: '2',
-      ruleRunMetricsStore,
-    });
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+    await executionHandlerForPreconfiguredAction(ruleRunMetricsStore, [
+      {
+        actionGroup: 'default',
+        state: {},
+        context: {},
+        alertId: '2',
+      },
+    ]);
+    expect(actionsClient.enqueueExecutions).toHaveBeenCalledTimes(1);
   });
 
   test('limits actionsPlugin.execute per action group', async () => {
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-    await executionHandler({
-      actionGroup: 'other-group',
-      state: {},
-      context: {},
-      alertId: '2',
-      ruleRunMetricsStore,
-    });
+    await executionHandler(ruleRunMetricsStore, [
+      {
+        actionGroup: 'other-group',
+        state: {},
+        context: {},
+        alertId: '2',
+      },
+    ]);
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(0);
-    expect(actionsClient.enqueueExecution).not.toHaveBeenCalled();
+    expect(actionsClient.enqueueExecutions).not.toHaveBeenCalled();
   });
 
   test('context attribute gets parameterized', async () => {
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-    await executionHandler({
-      actionGroup: 'default',
-      context: { value: 'context-val' },
-      state: {},
-      alertId: '2',
-      ruleRunMetricsStore,
-    });
+    await executionHandler(ruleRunMetricsStore, [
+      {
+        actionGroup: 'default',
+        context: { value: 'context-val' },
+        state: {},
+        alertId: '2',
+      },
+    ]);
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
-    expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(actionsClient.enqueueExecutions).toHaveBeenCalledTimes(1);
+    expect(actionsClient.enqueueExecutions.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
-      Object {
-        "apiKey": "MTIzOmFiYw==",
-        "consumer": "rule-consumer",
-        "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-        "id": "1",
-        "params": Object {
-          "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
-          "contextVal": "My context-val goes here",
-          "foo": true,
-          "stateVal": "My  goes here",
-        },
-        "relatedSavedObjects": Array [
-          Object {
-            "id": "1",
-            "namespace": "test1",
-            "type": "alert",
-            "typeId": "test",
+      Array [
+        Object {
+          "apiKey": "MTIzOmFiYw==",
+          "consumer": "rule-consumer",
+          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+          "id": "1",
+          "params": Object {
+            "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
+            "contextVal": "My context-val goes here",
+            "foo": true,
+            "stateVal": "My  goes here",
           },
-        ],
-        "source": Object {
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": "test1",
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
-            "id": "1",
-            "type": "alert",
+            "source": Object {
+              "id": "1",
+              "type": "alert",
+            },
+            "type": "SAVED_OBJECT",
           },
-          "type": "SAVED_OBJECT",
+          "spaceId": "test1",
         },
-        "spaceId": "test1",
-      },
+      ],
     ]
   `);
   });
 
   test('state attribute gets parameterized', async () => {
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-    await executionHandler({
-      actionGroup: 'default',
-      context: {},
-      state: { value: 'state-val' },
-      alertId: '2',
-      ruleRunMetricsStore,
-    });
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
-    expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "apiKey": "MTIzOmFiYw==",
-        "consumer": "rule-consumer",
-        "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-        "id": "1",
-        "params": Object {
-          "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
-          "contextVal": "My  goes here",
-          "foo": true,
-          "stateVal": "My state-val goes here",
-        },
-        "relatedSavedObjects": Array [
-          Object {
-            "id": "1",
-            "namespace": "test1",
-            "type": "alert",
-            "typeId": "test",
-          },
-        ],
-        "source": Object {
-          "source": Object {
-            "id": "1",
-            "type": "alert",
-          },
-          "type": "SAVED_OBJECT",
-        },
-        "spaceId": "test1",
+    await executionHandler(ruleRunMetricsStore, [
+      {
+        actionGroup: 'default',
+        context: {},
+        state: { value: 'state-val' },
+        alertId: '2',
       },
+    ]);
+    expect(actionsClient.enqueueExecutions).toHaveBeenCalledTimes(1);
+    expect(actionsClient.enqueueExecutions.mock.calls[0]).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "apiKey": "MTIzOmFiYw==",
+          "consumer": "rule-consumer",
+          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+          "id": "1",
+          "params": Object {
+            "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
+            "contextVal": "My  goes here",
+            "foo": true,
+            "stateVal": "My state-val goes here",
+          },
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": "test1",
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
+          "source": Object {
+            "source": Object {
+              "id": "1",
+              "type": "alert",
+            },
+            "type": "SAVED_OBJECT",
+          },
+          "spaceId": "test1",
+        },
+      ],
     ]
   `);
   });
 
   test(`logs an error when action group isn't part of actionGroups available for the ruleType`, async () => {
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-    await executionHandler({
-      // we have to trick the compiler as this is an invalid type and this test checks whether we
-      // enforce this at runtime as well as compile time
-      actionGroup: 'invalid-group' as 'default' | 'other-group',
-      context: {},
-      state: {},
-      alertId: '2',
-      ruleRunMetricsStore,
-    });
+    await executionHandler(ruleRunMetricsStore, [
+      {
+        // we have to trick the compiler as this is an invalid type and this test checks whether we
+        // enforce this at runtime as well as compile time
+        actionGroup: 'invalid-group' as 'default' | 'other-group',
+        context: {},
+        state: {},
+        alertId: '2',
+      },
+    ]);
     expect(createExecutionHandlerParams.logger.error).toHaveBeenCalledWith(
       'Invalid action group "invalid-group" for rule "test".'
     );
@@ -490,19 +659,20 @@ describe('Create Execution Handler', () => {
 
     ruleRunMetricsStore = new RuleRunMetricsStore();
 
-    await executionHandler({
-      actionGroup: 'default',
-      context: {},
-      state: { value: 'state-val' },
-      alertId: '2',
-      ruleRunMetricsStore,
-    });
+    await executionHandler(ruleRunMetricsStore, [
+      {
+        actionGroup: 'default',
+        context: {},
+        state: { value: 'state-val' },
+        alertId: '2',
+      },
+    ]);
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(2);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(3);
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
     expect(createExecutionHandlerParams.logger.debug).toHaveBeenCalledTimes(1);
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
+    expect(actionsClient.enqueueExecutions).toHaveBeenCalledTimes(1);
   });
 
   test('Skips triggering actions for a specific action type when it reaches the limit for that specific action type', async () => {
@@ -563,13 +733,14 @@ describe('Create Execution Handler', () => {
 
     ruleRunMetricsStore = new RuleRunMetricsStore();
 
-    await executionHandler({
-      actionGroup: 'default',
-      context: {},
-      state: { value: 'state-val' },
-      alertId: '2',
-      ruleRunMetricsStore,
-    });
+    await executionHandler(ruleRunMetricsStore, [
+      {
+        actionGroup: 'default',
+        context: {},
+        state: { value: 'state-val' },
+        alertId: '2',
+      },
+    ]);
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(4);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(5);
@@ -582,6 +753,6 @@ describe('Create Execution Handler', () => {
         .numberOfTriggeredActions
     ).toBe(2);
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(4);
+    expect(actionsClient.enqueueExecutions).toHaveBeenCalledTimes(1);
   });
 });

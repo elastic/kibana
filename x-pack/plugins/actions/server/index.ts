@@ -49,7 +49,7 @@ export type {
   TeamsActionParams,
 } from './builtin_action_types';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
-
+export type { ExecuteOptions } from './create_execute_function';
 export { asSavedObjectExecutionSource, asHttpRequestExecutionSource } from './lib';
 export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 
