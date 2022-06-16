@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { ExecutionContextService, ExecutionContextSetup } from './execution_context_service';
-import type { AnalyticsServiceSetup } from '../analytics';
-import { analyticsServiceMock } from '../analytics/analytics_service.mock';
 
 describe('ExecutionContextService', () => {
   let execContext: ExecutionContextSetup;

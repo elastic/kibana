@@ -15,6 +15,8 @@ import {
 } from '@kbn/core-injected-metadata-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
@@ -32,8 +34,6 @@ import { DeprecationsService } from './deprecations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import { ExecutionContextService } from './execution_context';
-import type { AnalyticsServiceSetup } from './analytics';
-import { AnalyticsService } from './analytics';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 
 interface Params {

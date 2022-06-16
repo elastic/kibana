@@ -32,6 +32,7 @@ import type {
 } from '@kbn/core-injected-metadata-browser';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -65,7 +66,6 @@ import { ApplicationSetup, Capabilities, ApplicationStart } from './application'
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
 import { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
-import type { AnalyticsServiceSetup, AnalyticsServiceStart } from './analytics';
 
 export type {
   PackageInfo,
@@ -78,9 +78,8 @@ export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
 
+export type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 export type {
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
   AnalyticsClient,
   Event,
   EventContext,
@@ -91,8 +90,8 @@ export type {
   OptInConfig,
   ContextProviderOpts,
   TelemetryCounter,
-} from './analytics';
-export { TelemetryCounterType } from './analytics';
+} from '@kbn/analytics-client';
+export { TelemetryCounterType } from '@kbn/analytics-client';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {

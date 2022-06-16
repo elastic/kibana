@@ -6,20 +6,5 @@
  * Side Public License, v 1.
  */
 
+export type { AnalyticsServiceSetupDeps } from './analytics_service';
 export { AnalyticsService } from './analytics_service';
-export type { AnalyticsServiceSetup, AnalyticsServiceStart } from './analytics_service';
-
-export type {
-  AnalyticsClient,
-  Event,
-  EventContext,
-  EventType,
-  EventTypeOpts,
-  IShipper,
-  ShipperClassConstructor,
-  OptInConfig,
-  ContextProviderOpts,
-  TelemetryCounter,
-} from '@kbn/analytics-client';
-
-export { TelemetryCounterType } from '@kbn/analytics-client';

@@ -4,7 +4,6 @@
 
 ## CoreStart.analytics property
 
-[AnalyticsServiceStart](./kibana-plugin-core-public.analyticsservicestart.md)
 
 <b>Signature:</b>
 

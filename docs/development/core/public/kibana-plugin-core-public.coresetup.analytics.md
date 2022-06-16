@@ -4,7 +4,6 @@
 
 ## CoreSetup.analytics property
 
-[AnalyticsServiceSetup](./kibana-plugin-core-public.analyticsservicesetup.md)
 
 <b>Signature:</b>
 
