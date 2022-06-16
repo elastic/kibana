@@ -1773,4 +1773,124 @@ describe('import rules schema', () => {
       expect(message.schema).toEqual(expected);
     });
   });
+
+  describe('data_view_id', () => {
+    test('Defined data_view_id and empty index does validate', () => {
+      const payload: ImportRulesSchema = {
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        query: 'some query',
+        data_view_id: 'logs-*',
+        index: [],
+        interval: '5m',
+      };
+
+      const decoded = importRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: ImportRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        query: 'some query',
+        index: [],
+        data_view_id: 'logs-*',
+        interval: '5m',
+        references: [],
+        actions: [],
+        enabled: true,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        exceptions_list: [],
+        immutable: false,
+      };
+      expect(message.schema).toEqual(expected);
+    });
+
+    // Both can be defined, but if a data_view_id is defined, rule will use that one
+    test('Defined data_view_id and index does validate', () => {
+      const payload: ImportRulesSchema = {
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        query: 'some query',
+        data_view_id: 'logs-*',
+        index: ['auditbeat-*'],
+        interval: '5m',
+      };
+
+      const decoded = importRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: ImportRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        query: 'some query',
+        index: ['auditbeat-*'],
+        data_view_id: 'logs-*',
+        interval: '5m',
+        references: [],
+        actions: [],
+        enabled: true,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        exceptions_list: [],
+        immutable: false,
+      };
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('data_view_id cannot be a number', () => {
+      const payload: Omit<ImportRulesSchema, 'data_view_id'> & { data_view_id: number } = {
+        ...getImportRulesSchemaMock(),
+        data_view_id: 5,
+      };
+
+      const decoded = importRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "5" supplied to "data_view_id"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+  });
 });
