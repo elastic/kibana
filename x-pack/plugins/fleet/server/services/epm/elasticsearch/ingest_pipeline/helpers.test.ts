@@ -10,7 +10,12 @@ import path from 'path';
 
 import type { RegistryDataStream } from '../../../../types';
 
-import { getPipelineNameForInstallation, rewriteIngestPipeline } from './helpers';
+import {
+  addCustomPipelineProcessor,
+  getCustomPipelineNameForDatastream,
+  getPipelineNameForInstallation,
+  rewriteIngestPipeline,
+} from './helpers';
 
 test('a json-format pipeline with pipeline references is correctly rewritten', () => {
   const inputStandard = readFileSync(
@@ -136,4 +141,65 @@ test('getPipelineNameForInstallation gets correct name', () => {
   expect(pipelineRefNameForInstallation).toBe(
     `${dataStream.type}-${dataStream.dataset}-${packageVersion}-${pipelineRefName}`
   );
+});
+
+describe('addCustomPipelineProcessor', () => {
+  it('add custom pipeline processor at the end of the pipeline for yaml pipeline', () => {
+    const pipelineInstall = addCustomPipelineProcessor({
+      contentForInstallation: `
+processors:
+  - set:
+      field: test
+      value: toto
+      `,
+      extension: 'yml',
+      nameForInstallation: 'logs-test-1.0.0',
+      customIngestPipelineNameForInstallation: 'logs-test@custom',
+    });
+
+    expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(`
+      "---
+      processors:
+        - set:
+            field: test
+            value: toto
+        - pipeline:
+            name: logs-test@custom
+            ignore_missing_pipeline: true
+      "
+    `);
+  });
+
+  it('add custom pipeline processor at the end of the pipeline for json pipeline', () => {
+    const pipelineInstall = addCustomPipelineProcessor({
+      contentForInstallation: `{
+        "processors": [
+          {
+            "set": {
+              "field": "test",
+              "value": "toto"
+            }
+          }
+        ]
+      }`,
+      extension: 'json',
+      nameForInstallation: 'logs-test-1.0.0',
+      customIngestPipelineNameForInstallation: 'logs-test@custom',
+    });
+
+    expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(
+      `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true}}]}"`
+    );
+  });
+});
+
+describe('getCustomPipelineNameForDatastream', () => {
+  it('return the correct custom pipeline for datastream', () => {
+    const res = getCustomPipelineNameForDatastream({
+      type: 'logs',
+      dataset: 'test',
+    } as any);
+
+    expect(res).toBe('logs-test@custom');
+  });
 });
