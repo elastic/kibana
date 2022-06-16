@@ -90,9 +90,6 @@
 # Observability Shared
 /x-pack/plugins/observability/public/components/shared/date_picker/ @elastic/uptime
 
-# Exploratory View
-/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
-
 # Unified Observability - on hold due to team capacity shortage
 # For now, if you're changing these pages, get a review from someone who understand the changes
 # /x-pack/plugins/observability/public/context @elastic/unified-observability
