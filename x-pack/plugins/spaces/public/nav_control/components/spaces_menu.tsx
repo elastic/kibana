@@ -8,7 +8,7 @@
 import './spaces_menu.scss';
 
 import { EuiAvatar, EuiPopoverFooter, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable';
 import React, { Component } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
@@ -123,7 +123,7 @@ class SpacesMenuUI extends Component<Props, State> {
 
   private spaceSelectionChange = (
     newOptions: EuiSelectableOption[]
-    // event: KeyboardEvent | MouseEvent this (EuiSelectableOnChangeEvent) is not available yet (added to EUI 22 days ago)...may need to rebase
+    // event: KeyboardEvent | MouseEvent this (EuiSelectableOnChangeEvent) is not available yet (added to EUI 22 days ago)...waiting on 133927
   ) => {
     // newOptions.forEach((option) => {
     //   console.log(`**** ${option.label}, Checked: ${option.checked}`);
