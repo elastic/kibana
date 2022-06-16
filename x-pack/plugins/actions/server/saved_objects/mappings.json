@@ -45,6 +45,9 @@
       "relatedSavedObjects": {
         "enabled": false,
         "type": "object"
+      },
+      "spaceId": {
+        "type": "keyword"
       }
     }
   },
