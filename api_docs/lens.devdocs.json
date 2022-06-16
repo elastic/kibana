@@ -5323,6 +5323,26 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.XYArgs.xExtent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "xExtent",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxisExtentConfig",
+                "text": "AxisExtentConfig"
+              },
+              " & { type: \"axisExtentConfig\"; }"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.XYArgs.yLeftExtent",
             "type": "CompoundType",
             "tags": [],
@@ -6229,6 +6249,26 @@
                 "docId": "kibExpressionXYPluginApi",
                 "section": "def-common.EndValue",
                 "text": "EndValue"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYState.xExtent",
+            "type": "Object",
+            "tags": [],
+            "label": "xExtent",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxisExtentConfig",
+                "text": "AxisExtentConfig"
               },
               " | undefined"
             ],
@@ -9865,13 +9905,7 @@
             "text": "SerializedFieldFormat"
           },
           "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           "> | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -9901,13 +9935,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               "> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",

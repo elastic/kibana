@@ -16,7 +16,7 @@ export interface CoreStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [analytics](./kibana-plugin-core-public.corestart.analytics.md) | AnalyticsServiceStart | [AnalyticsServiceStart](./kibana-plugin-core-public.analyticsservicestart.md) |
+|  [analytics](./kibana-plugin-core-public.corestart.analytics.md) | AnalyticsServiceStart |  |
 |  [application](./kibana-plugin-core-public.corestart.application.md) | ApplicationStart | [ApplicationStart](./kibana-plugin-core-public.applicationstart.md) |
 |  [chrome](./kibana-plugin-core-public.corestart.chrome.md) | ChromeStart | [ChromeStart](./kibana-plugin-core-public.chromestart.md) |
 |  [deprecations](./kibana-plugin-core-public.corestart.deprecations.md) | DeprecationsServiceStart | [DeprecationsServiceStart](./kibana-plugin-core-public.deprecationsservicestart.md) |
@@ -29,6 +29,6 @@ export interface CoreStart
 |  [notifications](./kibana-plugin-core-public.corestart.notifications.md) | NotificationsStart | [NotificationsStart](./kibana-plugin-core-public.notificationsstart.md) |
 |  [overlays](./kibana-plugin-core-public.corestart.overlays.md) | OverlayStart | [OverlayStart](./kibana-plugin-core-public.overlaystart.md) |
 |  [savedObjects](./kibana-plugin-core-public.corestart.savedobjects.md) | SavedObjectsStart | [SavedObjectsStart](./kibana-plugin-core-public.savedobjectsstart.md) |
-|  [theme](./kibana-plugin-core-public.corestart.theme.md) | ThemeServiceStart | [ThemeServiceStart](./kibana-plugin-core-public.themeservicestart.md) |
+|  [theme](./kibana-plugin-core-public.corestart.theme.md) | ThemeServiceStart |  |
 |  [uiSettings](./kibana-plugin-core-public.corestart.uisettings.md) | IUiSettingsClient | [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) |
 
