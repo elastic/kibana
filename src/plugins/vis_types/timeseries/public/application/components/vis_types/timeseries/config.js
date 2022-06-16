@@ -27,6 +27,7 @@ import {
   EuiCode,
   EuiHorizontalRule,
   EuiFieldNumber,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
@@ -35,6 +36,7 @@ import { getCharts } from '../../../../services';
 import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
+import { tsvbEditorRowStyles } from '../../../styles/common.styles';
 
 export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
@@ -50,6 +52,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
   };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
+  const { euiTheme } = useEuiTheme();
   const { intl } = props;
   const stackedOptions = [
     {
@@ -369,7 +372,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
   };
 
   return (
-    <div className="tvbAggRow">
+    <div css={tsvbEditorRowStyles(euiTheme)}>
       <EuiFlexGroup gutterSize="s">
         <DataFormatPicker
           formatterValue={model.formatter}
