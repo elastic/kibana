@@ -6,9 +6,9 @@
  */
 
 import { set } from '@elastic/safer-lodash-set/fp';
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
+import { connect, ConnectedProps, useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
@@ -19,7 +19,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
 
-import { inputsActions } from '../../store/inputs';
+import { inputsActions, inputsSelectors } from '../../store/inputs';
 import { InputsRange } from '../../store/inputs/model';
 import { InputsModelId } from '../../store/inputs/constants';
 import { State, inputsModel } from '../../store';
@@ -39,8 +39,8 @@ import { useKibana } from '../../lib/kibana';
 import { usersActions } from '../../../users/store';
 import { hostsActions } from '../../../hosts/store';
 import { networkActions } from '../../../network/store';
-
-const APP_STATE_STORAGE_KEY = 'securitySolution.searchBar.appState';
+import { useUpdateUrlParam } from '../../utils/global_query_string';
+import { CONSTANTS } from '../url_state/constants';
 
 interface SiemSearchBarProps {
   id: InputsModelId;
@@ -79,7 +79,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           filterManager,
         },
       },
-      storage,
       unifiedSearch: {
         ui: { SearchBar },
       },
@@ -91,6 +90,13 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       dispatch(hostsActions.setHostTablesActivePageToZero());
       dispatch(networkActions.setNetworkTablesActivePageToZero());
     }, [dispatch]);
+    const getGlobalFiltersQuerySelector = useMemo(
+      () => inputsSelectors.globalFiltersQuerySelector(),
+      []
+    );
+    const filtersFromStore = useSelector(getGlobalFiltersQuerySelector);
+
+    useSyncSearchBarUrlParam();
 
     useEffect(() => {
       if (fromStr != null && toStr != null) {
@@ -268,16 +274,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       setTablesActivePageToZero,
     ]);
 
-    const saveAppStateToStorage = useCallback(
-      (filters: Filter[]) => storage.set(APP_STATE_STORAGE_KEY, filters),
-      [storage]
-    );
-
-    const getAppStateFromStorage = useCallback(
-      () => storage.get(APP_STATE_STORAGE_KEY) ?? [],
-      [storage]
-    );
-
     useEffect(() => {
       let isSubscribed = true;
       const subscriptions = new Subscription();
@@ -286,12 +282,9 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         filterManager.getUpdates$().subscribe({
           next: () => {
             if (isSubscribed) {
-              saveAppStateToStorage(filterManager.getAppFilters());
-              setSearchBarFilter({
-                id,
-                filters: filterManager.getFilters(),
-              });
+              const filters = filterManager.getFilters();
 
+              setSearchBarFilter({ id, filters });
               setTablesActivePageToZero();
             }
           },
@@ -299,11 +292,9 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       );
 
       // for the initial state
-      filterManager.setAppFilters(getAppStateFromStorage());
-      setSearchBarFilter({
-        id,
-        filters: filterManager.getFilters(),
-      });
+      if (filtersFromStore.length > 0) {
+        filterManager.setAppFilters(filtersFromStore);
+      }
 
       return () => {
         isSubscribed = false;
@@ -404,8 +395,8 @@ export const dispatchUpdateSearch =
     savedQuery,
     start,
     timelineId,
-    filterManager,
     updateTime = false,
+    filterManager,
     setTablesActivePageToZero,
   }: UpdateReduxSearchBar): void => {
     if (updateTime) {
@@ -464,6 +455,7 @@ export const dispatchUpdateSearch =
     if (filters != null) {
       filterManager.setFilters(filters);
     }
+
     if (savedQuery != null || resetSavedQuery) {
       dispatch(inputsActions.setSavedQuery({ id, savedQuery }));
     }
@@ -479,6 +471,41 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
+const useSyncSearchBarUrlParam = () => {
+  const updateSavedQueryUrlParam = useUpdateUrlParam<string>(CONSTANTS.savedQuery);
+  const updateAppQueryUrlParam = useUpdateUrlParam<Query>(CONSTANTS.appQuery);
+  const updateFilterUrlParam = useUpdateUrlParam<Filter[]>(CONSTANTS.filters);
+
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const getGlobalSavedQuerySelector = useMemo(() => inputsSelectors.globalSavedQuerySelector(), []);
+
+  const query = useSelector(getGlobalQuerySelector);
+  const filters = useSelector(getGlobalFiltersQuerySelector);
+  const savedQuery = useSelector(getGlobalSavedQuerySelector);
+
+  useEffect(() => {
+    if (savedQuery != null && savedQuery.id !== '') {
+      updateSavedQueryUrlParam(savedQuery?.id ?? null);
+      updateAppQueryUrlParam(null);
+      updateFilterUrlParam(null);
+    } else {
+      updateSavedQueryUrlParam(null);
+      updateAppQueryUrlParam(isEmpty(query.query) ? null : query);
+      updateFilterUrlParam(isEmpty(filters) ? null : filters);
+    }
+  }, [
+    savedQuery,
+    query,
+    filters,
+    updateSavedQueryUrlParam,
+    updateAppQueryUrlParam,
+    updateFilterUrlParam,
+  ]);
+};
 export const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;

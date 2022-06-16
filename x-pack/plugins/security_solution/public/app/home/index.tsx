@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
+import type { Filter, Query } from '@kbn/es-query';
+import { useDispatch } from 'react-redux';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HelpMenu } from '../../common/components/help_menu';
@@ -23,7 +25,14 @@ import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_secur
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
-import { useSyncGlobalQueryString } from '../../common/utils/global_query_string';
+import {
+  useInitializeUrlParam,
+  useSyncGlobalQueryString,
+} from '../../common/utils/global_query_string';
+import { CONSTANTS } from '../../common/components/url_state/constants';
+import { inputsActions } from '../../common/store/inputs';
+import { useKibana } from '../../common/lib/kibana';
+
 interface HomePageProps {
   children: React.ReactNode;
   onAppLeave: (handler: AppLeaveHandler) => void;
@@ -38,6 +47,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   const { pathname } = useLocation();
   useSyncGlobalQueryString();
   useInitSourcerer(getScopeFromPath(pathname));
+  useInitSearchBarUrlParams();
 
   const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
@@ -66,3 +76,64 @@ const HomePageComponent: React.FC<HomePageProps> = ({
 HomePageComponent.displayName = 'HomePage';
 
 export const HomePage = React.memo(HomePageComponent);
+
+const useInitSearchBarUrlParams = () => {
+  const dispatch = useDispatch();
+  const { filterManager, savedQueries } = useKibana().services.data.query;
+
+  const onInitializeAppQueryUrlParam = useCallback(
+    (initialState: Query | null) => {
+      if (initialState != null) {
+        dispatch(
+          inputsActions.setFilterQuery({
+            id: 'global',
+            query: initialState.query,
+            language: initialState.language,
+          })
+        );
+      }
+    },
+    [dispatch]
+  );
+
+  const onInitializeFiltersUrlParam = useCallback(
+    (initialState: Filter[] | null) => {
+      if (initialState != null) {
+        dispatch(
+          inputsActions.setSearchBarFilter({
+            id: 'global',
+            filters: initialState,
+          })
+        );
+
+        filterManager.setFilters(initialState);
+      } else {
+        // Clear filters to ensure that other App filters don't leak into security solution.
+        filterManager.setFilters([]);
+      }
+    },
+    [filterManager, dispatch]
+  );
+
+  const onInitializeSavedQueryUrlParam = useCallback(
+    (savedQueryId: string | null) => {
+      if (savedQueryId != null && savedQueryId !== '') {
+        savedQueries.getSavedQuery(savedQueryId).then((savedQueryData) => {
+          filterManager.setFilters(savedQueryData.attributes.filters || []);
+          dispatch(
+            inputsActions.setFilterQuery({
+              id: 'global',
+              ...savedQueryData.attributes.query,
+            })
+          );
+          dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
+        });
+      }
+    },
+    [dispatch, filterManager, savedQueries]
+  );
+
+  useInitializeUrlParam(CONSTANTS.appQuery, onInitializeAppQueryUrlParam);
+  useInitializeUrlParam(CONSTANTS.filters, onInitializeFiltersUrlParam);
+  useInitializeUrlParam(CONSTANTS.savedQuery, onInitializeSavedQueryUrlParam);
+};

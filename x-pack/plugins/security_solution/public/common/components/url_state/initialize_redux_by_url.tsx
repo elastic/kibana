@@ -10,7 +10,6 @@ import { Dispatch } from 'redux';
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import type { Filter, Query } from '@kbn/es-query';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
@@ -42,50 +41,10 @@ export const useSetInitialStateFromUrl = () => {
   );
 
   const setInitialStateFromUrl = useCallback(
-    ({
-      filterManager,
-      indexPattern,
-      pageName,
-      savedQueries,
-      urlStateToUpdate,
-    }: SetInitialStateFromUrl) => {
+    ({ urlStateToUpdate }: SetInitialStateFromUrl) => {
       urlStateToUpdate.forEach(({ urlKey, newUrlStateString }) => {
         if (urlKey === CONSTANTS.timerange) {
           updateTimerange(newUrlStateString, dispatch);
-        }
-
-        if (urlKey === CONSTANTS.appQuery && indexPattern != null) {
-          const appQuery = decodeRisonUrlState<Query>(newUrlStateString);
-          if (appQuery != null) {
-            dispatch(
-              inputsActions.setFilterQuery({
-                id: 'global',
-                query: appQuery.query,
-                language: appQuery.language,
-              })
-            );
-          }
-        }
-
-        if (urlKey === CONSTANTS.filters) {
-          const filters = decodeRisonUrlState<Filter[]>(newUrlStateString);
-          filterManager.setFilters(filters || []);
-        }
-
-        if (urlKey === CONSTANTS.savedQuery) {
-          const savedQueryId = decodeRisonUrlState<string>(newUrlStateString);
-          if (savedQueryId != null && savedQueryId !== '') {
-            savedQueries.getSavedQuery(savedQueryId).then((savedQueryData) => {
-              filterManager.setFilters(savedQueryData.attributes.filters || []);
-              dispatch(
-                inputsActions.setFilterQuery({
-                  id: 'global',
-                  ...savedQueryData.attributes.query,
-                })
-              );
-              dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
-            });
-          }
         }
 
         if (urlKey === CONSTANTS.timeline) {

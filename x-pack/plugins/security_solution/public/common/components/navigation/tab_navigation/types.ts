@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Filter, Query } from '@kbn/es-query';
 import { UrlInputsModel } from '../../../store/inputs/model';
 import { CONSTANTS } from '../../url_state/constants';
 import { TimelineUrl } from '../../../../timelines/store/timeline/model';
@@ -17,9 +16,6 @@ export interface TabNavigationProps extends SecuritySolutionTabNavigationProps {
   pathName: string;
   pageName: string;
   tabName: SiemRouteType | undefined;
-  [CONSTANTS.appQuery]?: Query;
-  [CONSTANTS.filters]?: Filter[];
-  [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timeline]: TimelineUrl;
 }

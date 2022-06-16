@@ -37,7 +37,6 @@ jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
 
 describe('useSecuritySolutionNavigation', () => {
   const mockUrlState = {
-    [CONSTANTS.appQuery]: { query: 'host.name:"security-solution-es"', language: 'kuery' },
     [CONSTANTS.savedQuery]: '',
     [CONSTANTS.timeline]: {
       activeTab: TimelineTabs.query,
