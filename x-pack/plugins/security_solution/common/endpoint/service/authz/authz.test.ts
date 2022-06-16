@@ -28,6 +28,7 @@ describe('Endpoint Authz service', () => {
         ['canAccessEndpointManagement'],
         ['canIsolateHost'],
         ['canUnIsolateHost'],
+        ['canKillProcess'],
       ])('should set `%s` to `true`', (authProperty) => {
         expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)[authProperty]).toBe(
           true
@@ -38,6 +39,14 @@ describe('Endpoint Authz service', () => {
         licenseService.isPlatinumPlus.mockReturnValue(false);
 
         expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canIsolateHost).toBe(
+          false
+        );
+      });
+
+      it('should set `canKillProcess` to false if not proper license', () => {
+        licenseService.isPlatinumPlus.mockReturnValue(false);
+
+        expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canKillProcess).toBe(
           false
         );
       });
@@ -62,6 +71,7 @@ describe('Endpoint Authz service', () => {
         ['canAccessEndpointManagement'],
         ['canIsolateHost'],
         ['canUnIsolateHost'],
+        ['canKillProcess'],
       ])('should set `%s` to `false`', (authProperty) => {
         expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)[authProperty]).toBe(
           false
@@ -86,6 +96,7 @@ describe('Endpoint Authz service', () => {
         canIsolateHost: false,
         canUnIsolateHost: true,
         canCreateArtifactsByPolicy: false,
+        canKillProcess: false,
       });
     });
   });
