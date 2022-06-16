@@ -73,7 +73,7 @@ export function rewriteIngestPipeline(
   return pipeline;
 }
 
-function _mutatePipelineContentWithNewProcessor(jsonPipelineContent: any, processor: any) {
+function mutatePipelineContentWithNewProcessor(jsonPipelineContent: any, processor: any) {
   if (!jsonPipelineContent.processors) {
     jsonPipelineContent.processors = [];
   }
@@ -95,7 +95,7 @@ export function addCustomPipelineProcessor(pipeline: PipelineInstall): PipelineI
 
   if (pipeline.extension === 'yml') {
     const parsedPipelineContent = safeLoad(pipeline.contentForInstallation);
-    _mutatePipelineContentWithNewProcessor(parsedPipelineContent, customPipelineProcessor);
+    mutatePipelineContentWithNewProcessor(parsedPipelineContent, customPipelineProcessor);
     return {
       ...pipeline,
       contentForInstallation: `---\n${safeDump(parsedPipelineContent)}`,
@@ -103,7 +103,7 @@ export function addCustomPipelineProcessor(pipeline: PipelineInstall): PipelineI
   }
 
   const parsedPipelineContent = JSON.parse(pipeline.contentForInstallation);
-  _mutatePipelineContentWithNewProcessor(parsedPipelineContent, customPipelineProcessor);
+  mutatePipelineContentWithNewProcessor(parsedPipelineContent, customPipelineProcessor);
 
   return {
     ...pipeline,
