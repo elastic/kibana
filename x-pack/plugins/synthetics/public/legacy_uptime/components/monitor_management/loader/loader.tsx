@@ -39,6 +39,7 @@ export const Loader = ({
           />
         </>
       ) : null}
+      <p data-test-subj="locationsError">{error}</p>
       {loading ? (
         <EuiEmptyPrompt
           color="subdued"
