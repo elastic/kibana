@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 
-import { NoDataElasticAgentCard, NoDataCard } from './no_data_card';
+import { ElasticAgentCard, NoDataCard } from './no_data_card';
 import { NoDataPageBody } from './no_data_page_body/no_data_page_body';
 
 export const NO_DATA_RECOMMENDED = i18n.translate(
@@ -96,7 +96,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
       const isAgent = actionsKeys[i] === 'elasticAgent' || actionsKeys[i] === 'beats';
       const key = isAgent ? 'empty-page-agent-action' : `empty-page-${actionsKeys[i]}-action`;
       return isAgent ? (
-        <NoDataElasticAgentCard key={key} solution={solution} {...action} />
+        <ElasticAgentCard key={key} solution={solution} {...action} />
       ) : (
         <NoDataCard key={key} {...action} />
       );
