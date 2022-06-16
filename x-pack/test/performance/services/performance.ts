@@ -13,12 +13,6 @@ import apm, { Span, Transaction } from 'elastic-apm-node';
 import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession } from 'playwright';
 import { FtrService, FtrProviderContext } from '../ftr_provider_context';
 
-apm.start({
-  serviceName: 'functional test runner',
-  serverUrl: 'https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es.io:443',
-  secretToken: 'CTs9y3cvcfq13bQqsB',
-});
-
 export interface StepCtx {
   page: Page;
   kibanaUrl: string;
@@ -37,6 +31,15 @@ export class PerformanceTestingService extends FtrService {
 
   constructor(ctx: FtrProviderContext) {
     super(ctx);
+
+    ctx.getService('lifecycle').beforeTests.add(() => {
+      apm.start({
+        serviceName: 'functional test runner',
+        serverUrl: this.config.get(`kbnTestServer.env`).ELASTIC_APM_SERVER_URL,
+        secretToken: this.config.get(`kbnTestServer.env`).ELASTIC_APM_SECRET_TOKEN,
+        globalLabels: this.config.get(`kbnTestServer.env`).ELASTIC_APM_GLOBAL_LABELS,
+      });
+    });
 
     ctx.getService('lifecycle').cleanup.add(async () => {
       await this.shutdownBrowser();
