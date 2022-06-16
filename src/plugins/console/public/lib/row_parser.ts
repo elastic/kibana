@@ -42,7 +42,14 @@ export default class RowParser {
     let line = (this.editor.getLineValue(lineNumber) || '').trim();
 
     if (line && /(\${\w+})/.test(line)) {
-      return MODE.REQUEST_START;
+      lineNumber++;
+      line = (this.editor.getLineValue(lineNumber) || '').trim();
+
+      if (line.startsWith('{')) {
+        return MODE.REQUEST_START;
+      }
+      // eslint-disable-next-line no-bitwise
+      return MODE.REQUEST_START | MODE.REQUEST_END;
     }
     if (!line || line.startsWith('#') || line.startsWith('//') || line.startsWith('/*')) {
       return MODE.BETWEEN_REQUESTS;

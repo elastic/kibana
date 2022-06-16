@@ -48,6 +48,26 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleSettingsButton');
   }
 
+  public async openVariablesModal() {
+    await this.testSubjects.click('consoleVariablesButton');
+  }
+
+  public async addNewVariable(name: string, value: string) {
+    await this.openVariablesModal();
+
+    await this.retry.try(async () => {
+      await this.testSubjects.click('variables-add-button');
+      const variableNameInput = await this.testSubjects.find('variables-name-input');
+      const variableValueInput = await this.testSubjects.find('variables-value-input');
+      await variableNameInput.click();
+      await variableNameInput.type(name);
+      await variableValueInput.click();
+      await variableValueInput.type(value);
+    });
+
+    await this.testSubjects.click('variables-save-button');
+  }
+
   public async setFontSizeSetting(newSize: number) {
     await this.openSettings();
 

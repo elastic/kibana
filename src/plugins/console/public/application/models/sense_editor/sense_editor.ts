@@ -319,7 +319,6 @@ export class SenseEditor {
     }
 
     const expandedRange = await this.expandRangeToRequestEdges(range);
-
     if (!expandedRange) {
       return [];
     }

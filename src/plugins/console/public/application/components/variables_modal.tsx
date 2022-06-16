@@ -86,6 +86,7 @@ export function DevToolsVariablesModal({ onClose, onSaveVariables, variablesServ
             rules={{ required: true }}
             render={({ field }) => (
               <EuiFieldText
+                data-test-subj="variables-name-input"
                 placeholder="Add a new variable"
                 fullWidth
                 {...field}
@@ -109,7 +110,9 @@ export function DevToolsVariablesModal({ onClose, onSaveVariables, variablesServ
           <Controller
             control={control}
             defaultValue={value}
-            render={({ field }) => <EuiFieldText fullWidth {...field} />}
+            render={({ field }) => (
+              <EuiFieldText data-test-subj="variables-value-input" fullWidth {...field} />
+            )}
             name={`variables.${index}.value`}
           />
         );
@@ -148,14 +151,18 @@ export function DevToolsVariablesModal({ onClose, onSaveVariables, variablesServ
       <EuiModalBody>
         <EuiForm id={formId} component="form" onSubmit={handleSubmit(onSubmit)}>
           <EuiBasicTable items={variables} columns={columns} />
-          <EuiButtonEmpty iconType="plus" onClick={addNewVariable}>
+          <EuiButtonEmpty
+            data-test-subj="variables-add-button"
+            iconType="plus"
+            onClick={addNewVariable}
+          >
             <FormattedMessage id="console.variablesPage.addButtonLabel" defaultMessage="Add" />
           </EuiButtonEmpty>
         </EuiForm>
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="variablesCancelButton" onClick={onClose}>
+        <EuiButtonEmpty data-test-subj="variables-cancel-button" onClick={onClose}>
           <FormattedMessage id="console.variablesPage.cancelButtonLabel" defaultMessage="Cancel" />
         </EuiButtonEmpty>
 

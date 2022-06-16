@@ -22,6 +22,7 @@ export function Variables({ onClose }: Props) {
 
   const onSaveVariables = (newVariables: DevToolsVariable[]) => {
     variables.update(newVariables);
+    onClose();
   };
   return (
     <DevToolsVariablesModal
