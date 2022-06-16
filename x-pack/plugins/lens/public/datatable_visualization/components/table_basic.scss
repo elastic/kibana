@@ -2,6 +2,10 @@
   height: 100%;
 }
 
+.lnsTableCell--multiline {
+  white-space: pre-wrap;
+}
+
 .lnsTableCell--left {
   text-align: left;
 }
