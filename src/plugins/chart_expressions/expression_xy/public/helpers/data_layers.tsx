@@ -18,12 +18,7 @@ import {
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import {
-  FieldFormat,
-  FieldFormatParams,
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '@kbn/field-formats-plugin/common';
+import { FieldFormat, IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin';
 import {
   getFormatByAccessor,
@@ -64,7 +59,7 @@ type GetSeriesNameFn = (
   config: {
     splitColumnId?: string;
     accessorsCount: number;
-    splitHint: SerializedFieldFormat<FieldFormatParams> | undefined;
+    splitHint: SerializedFieldFormat | undefined;
     splitFormatter: FieldFormat;
     alreadyFormattedColumns: Record<string, boolean>;
     columnToLabelMap: Record<string, string>;
@@ -155,28 +150,27 @@ export const getFormattedTable = (
     {}
   );
 
-  const formattedTableInfo = table.rows.reduce<{
+  const formattedTableInfo: {
     rows: Datatable['rows'];
     formattedColumns: Record<string, true>;
-  }>(
-    ({ rows: formattedRows, formattedColumns }, row) => {
-      const formattedRowInfo = getFormattedRow(
-        row,
-        table.columns,
-        columnsFormatters,
-        xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
-        xScaleType
-      );
-      return {
-        rows: [...formattedRows, formattedRowInfo.row],
-        formattedColumns: { ...formattedColumns, ...formattedRowInfo.formattedColumns },
-      };
-    },
-    {
-      rows: [],
-      formattedColumns: {},
-    }
-  );
+  } = {
+    rows: [],
+    formattedColumns: {},
+  };
+  for (const row of table.rows) {
+    const formattedRowInfo = getFormattedRow(
+      row,
+      table.columns,
+      columnsFormatters,
+      xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
+      xScaleType
+    );
+    formattedTableInfo.rows.push(formattedRowInfo.row);
+    formattedTableInfo.formattedColumns = {
+      ...formattedTableInfo.formattedColumns,
+      ...formattedRowInfo.formattedColumns,
+    };
+  }
 
   return {
     table: { ...table, rows: formattedTableInfo.rows },

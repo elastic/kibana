@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import React from 'react';
 import {
   noMetricIndicesPromptDescription,
@@ -39,7 +39,7 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
         solution: i18n.translate('xpack.infra.metrics.noDataConfig.solutionName', {
           defaultMessage: 'Observability',
         }),
-        actions: {
+        action: {
           beats: {
             title: noMetricIndicesPromptPrimaryActionTitle,
             description: noMetricIndicesPromptDescription,

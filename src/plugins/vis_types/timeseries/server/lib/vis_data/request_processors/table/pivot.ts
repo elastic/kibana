@@ -34,7 +34,7 @@ export const pivot: TableRequestProcessorsFunction =
         overwrite(doc, `aggs.pivot.${termsType}.field`, pivotIds[0]);
       }
 
-      overwrite(doc, `aggs.pivot.${termsType}.size`, panel.pivot_rows);
+      overwrite(doc, `aggs.pivot.${termsType}.size`, panel.pivot_rows ?? 10);
 
       if (sort) {
         const series = panel.series.find((item) => item.id === sort.column);

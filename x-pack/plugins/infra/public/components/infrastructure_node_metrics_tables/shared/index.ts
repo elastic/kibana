@@ -15,8 +15,12 @@ export {
   StepwisePagination,
   UptimeCell,
 } from './components';
-export { metricsToApiOptions, useInfrastructureNodeMetrics } from './hooks';
-export type { MetricsMap, SortState } from './hooks';
+export {
+  createMetricByFieldLookup,
+  metricsToApiOptions,
+  useInfrastructureNodeMetrics,
+} from './hooks';
+export type { MetricsMap, MetricsQueryOptions, SortState } from './hooks';
 export type {
   IntegratedNodeMetricsTableProps,
   NodeMetricsTableData,

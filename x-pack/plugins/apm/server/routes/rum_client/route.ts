@@ -6,7 +6,6 @@
  */
 import * as t from 'io-ts';
 import { Logger } from '@kbn/core/server';
-import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
 import { getClientMetrics } from './get_client_metrics';
 import { getLongTaskMetrics } from './get_long_task_metrics';
@@ -14,8 +13,6 @@ import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistBreakdown } from './get_pl_dist_breakdown';
 import { getVisitorBreakdown } from './get_visitor_breakdown';
-import { getWebCoreVitals } from './get_web_core_vitals';
-import { hasRumData } from './has_rum_data';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
 import { APMRouteHandlerResources } from '../typings';
@@ -214,41 +211,6 @@ const rumVisitorsBreakdownRoute = createApmServerRoute({
   },
 });
 
-const rumWebCoreVitals = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/web-core-vitals',
-  params: t.type({
-    query: uxQueryRt,
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    coreVitalPages: number;
-    cls: number | null;
-    fid: number | null | undefined;
-    lcp: number | null | undefined;
-    tbt: number;
-    fcp: number | null | undefined;
-    lcpRanks: number[];
-    fidRanks: number[];
-    clsRanks: number[];
-  }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { urlQuery, percentile, start, end },
-    } = resources.params;
-
-    return getWebCoreVitals({
-      setup,
-      urlQuery,
-      percentile: percentile ? Number(percentile) : undefined,
-      start,
-      end,
-    });
-  },
-});
-
 const rumLongTaskMetrics = createApmServerRoute({
   endpoint: 'GET /internal/apm/ux/long-task-metrics',
   params: t.type({
@@ -275,31 +237,6 @@ const rumLongTaskMetrics = createApmServerRoute({
       start,
       end,
     });
-  },
-});
-
-const rumHasDataRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/observability_overview/has_rum_data',
-  params: t.partial({
-    query: t.partial({
-      uiFilters: t.string,
-      start: isoToEpochRt,
-      end: isoToEpochRt,
-    }),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    indices: string;
-    hasData: boolean;
-    serviceName: string | number | undefined;
-  }> => {
-    const setup = await setupUXRequest(resources);
-    const {
-      query: { start, end },
-    } = resources.params;
-    return await hasRumData({ setup, start, end });
   },
 });
 
@@ -338,7 +275,5 @@ export const rumRouteRepository = {
   ...rumPageLoadDistBreakdownRoute,
   ...rumPageViewsTrendRoute,
   ...rumVisitorsBreakdownRoute,
-  ...rumWebCoreVitals,
   ...rumLongTaskMetrics,
-  ...rumHasDataRoute,
 };

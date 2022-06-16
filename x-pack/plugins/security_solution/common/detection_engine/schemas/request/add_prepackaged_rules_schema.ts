@@ -50,6 +50,7 @@ import {
   anomaly_threshold,
   filters,
   index,
+  data_view_id,
   saved_id,
   timeline_id,
   timeline_title,
@@ -114,6 +115,7 @@ export const addPrepackagedRulesSchema = t.intersection([
       filters, // defaults to undefined if not set during decode
       from: DefaultFromString, // defaults to "now-6m" if not set during decode
       index, // defaults to undefined if not set during decode
+      data_view_id, // defaults to undefined if not set during decode
       interval: DefaultIntervalString, // defaults to "5m" if not set during decode
       query, // defaults to undefined if not set during decode
       language, // defaults to undefined if not set during decode
