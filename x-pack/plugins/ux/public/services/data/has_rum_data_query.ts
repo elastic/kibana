@@ -10,6 +10,7 @@ import moment from 'moment';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { rangeQuery } from './range_query';
@@ -40,7 +41,10 @@ export function hasRumDataQuery({
       size: 0,
       query: {
         bool: {
-          filter: [{ term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } }],
+          filter: [
+            { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
+            { term: { [PROCESSOR_EVENT]: 'transaction' } },
+          ],
         },
       },
       aggs: {
