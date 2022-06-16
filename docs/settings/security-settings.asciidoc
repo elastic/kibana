@@ -272,7 +272,7 @@ TIP: We recommend using `json` format to allow ingesting {kib} audit logs into {
 
 [float]
 [[audit-logging-file-appender,file appender]]
-==== File appender
+===== File appender
 
 The `file` appender writes to a file and can be configured using the following settings:
 
@@ -281,7 +281,7 @@ Required. Full file path the log file should be written to.
 
 [float]
 [[audit-logging-rolling-file-appender, rolling file appender]]
-==== Rolling file appender
+===== Rolling file appender
 
 The `rolling-file` appender writes to a file and rotates it using a rolling strategy, when a particular policy is triggered:
 
@@ -300,7 +300,7 @@ Refer to <<audit-logging-numeric-strategy>> for strategy specific settings.
 
 [float]
 [[audit-logging-size-limit-policy, size limit policy]]
-==== Size limit triggering policy
+===== Size limit triggering policy
 
 The `size-limit` triggering policy will rotate the file when it reaches a certain size:
 
@@ -309,7 +309,7 @@ Maximum size the log file should reach before a rollover should be performed. *D
 
 [float]
 [[audit-logging-time-interval-policy, time interval policy]]
-==== Time interval triggering policy
+===== Time interval triggering policy
 
 The `time-interval` triggering policy will rotate the file every given interval of time:
 
@@ -321,7 +321,7 @@ Whether the interval should be adjusted to cause the next rollover to occur on t
 
 [float]
 [[audit-logging-numeric-strategy, numeric strategy]]
-==== Numeric rolling strategy
+===== Numeric rolling strategy
 
 The `numeric` rolling strategy will suffix the log file with a given pattern when rolling over, and will retain a fixed number of rolled files:
 
@@ -333,7 +333,7 @@ Maximum number of files to keep. Once this number is reached, oldest files will 
 
 [float]
 [[audit-logging-pattern-layout, pattern layout]]
-==== Pattern layout
+===== Pattern layout
 
 The `pattern` layout outputs a string, formatted using a pattern with special placeholders, which will be replaced with data from the actual log message:
 
@@ -345,7 +345,7 @@ Optional. Set to `true` to enable highlighting log messages with colors.
 
 [float]
 [[audit-logging-ignore-filters]]
-==== Ignore filters
+===== Ignore filters
 
 xpack.security.audit.ignore_filters[] {ess-icon}::
 List of filters that determine which events should be excluded from the audit log. An event will get filtered out if at least one of the provided filters matches.
