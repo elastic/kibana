@@ -33,13 +33,14 @@ const podMetricsMap: MetricsMap<PodMetricsField> = {
   },
 };
 
-const { options: podMetricsOptions, metricByField } = metricsToApiOptions(
-  podMetricsMap,
-  'kubernetes.pod.name'
-);
+const { options: podMetricsOptions, metricByField } = metricsToApiOptions(podMetricsMap, [
+  'kubernetes.pod.uid',
+  'kubernetes.pod.name',
+]);
 export { metricByField };
 
 export interface PodNodeMetricsRow {
+  id: string;
   name: string;
   uptime: number | null;
   averageCpuUsagePercent: number | null;
@@ -79,18 +80,21 @@ export function usePodMetricsTable({ timerange, filterClauseDsl }: UseNodeMetric
 }
 
 function seriesToPodNodeMetricsRow(series: MetricsExplorerSeries): PodNodeMetricsRow {
+  const [id, name] = series.keys ?? [];
   if (series.rows.length === 0) {
-    return rowWithoutMetrics(series.id);
+    return rowWithoutMetrics(id, name);
   }
 
   return {
-    name: series.id,
+    id,
+    name,
     ...calculateMetricAverages(series.rows),
   };
 }
 
-function rowWithoutMetrics(name: string) {
+function rowWithoutMetrics(id: string, name: string) {
   return {
+    id,
     name,
     uptime: null,
     averageCpuUsagePercent: null,
@@ -154,7 +158,7 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
   };
 }
 
-function unpackMetrics(row: MetricsExplorerRow): Omit<PodNodeMetricsRow, 'name'> {
+function unpackMetrics(row: MetricsExplorerRow): Omit<PodNodeMetricsRow, 'id' | 'name'> {
   return {
     uptime: row[metricByField['kubernetes.pod.start_time']] as number | null,
     averageCpuUsagePercent: row[metricByField['kubernetes.pod.cpu.usage.node.pct']] as
