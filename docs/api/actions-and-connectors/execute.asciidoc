@@ -34,17 +34,32 @@ If you use an index connector, you must also have `all`, `create`, `index`, or
 === {api-path-parms-title}
 
 `id`::
-  (Required, string) The ID of the connector.
+(Required, string) The ID of the connector.
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+(Optional, string) An identifier for the space. If `space_id` is not provided in
+the URL, the default space is used.
 
 [[execute-connector-api-request-body]]
 === {api-request-body-title}
 
 `params`::
-  (Required, object) The parameters of the connector. Parameter properties vary depending on
-  the connector type. For information about the parameter properties, refer to <<action-types,Action and connector types>>.
+(Required, object) The parameters of the connector. Parameter properties vary
+depending on the connector type. For information about the parameter properties,
+refer to <<action-types>>.
++
+--
+.Server log connectors
+[%collapsible%open]
+====
+`level`::
+(Optional, string) The log level of the message: `trace`, `debug`, `info`,
+`warn`, `error`, or `fatal`. Defaults to `info`.
+
+`message`::
+(Required, string) The message to log.
+====
+--
 
 [[execute-connector-api-codes]]
 === {api-response-codes-title}
@@ -104,4 +119,25 @@ The API returns the following:
   },
   "connector_id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad"
 }
+--------------------------------------------------
+
+Run a server log connector:
+
+[source,sh]
+--------------------------------------------------
+POST api/actions/connector/7fc7b9a0-ecc9-11ec-8736-e7d63118c907/_execute
+{
+  "params": {
+    "level": "warn",
+    "message": "Test warning message"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{"status":"ok","connector_id":"7fc7b9a0-ecc9-11ec-8736-e7d63118c907"}
 --------------------------------------------------
