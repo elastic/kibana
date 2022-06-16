@@ -219,4 +219,47 @@ describe('when on the policy response', () => {
     const component = await renderOpenedTree();
     expect(component.getByText('A New Unknown Action')).not.toBeNull();
   });
+
+  it('should not display error callout if status success', async () => {
+    const policyResponse = createPolicyResponse();
+    policyResponse.Endpoint.policy.applied.actions.forEach(
+      (action) => (action.status = HostPolicyResponseActionStatus.success)
+    );
+    runMock(policyResponse);
+    const component = await renderOpenedTree();
+    expect(component.queryAllByTestId('endpointPolicyResponseErrorCallOut')).toHaveLength(0);
+  });
+
+  describe('error callout', () => {
+    let policyResponse: HostPolicyResponse;
+
+    beforeEach(() => {
+      policyResponse = createPolicyResponse(HostPolicyResponseActionStatus.failure);
+      runMock(policyResponse);
+    });
+
+    it('should not display link if type is NOT mapped', async () => {
+      const component = await renderOpenedTree();
+      const calloutLink = component.queryByTestId('endpointPolicyResponseErrorCallOutLink');
+      expect(calloutLink).toBeNull();
+    });
+
+    it('should display link if type is mapped', async () => {
+      const action = {
+        name: 'full_disk_access',
+        message:
+          'You must enable full disk access for Elastic Endpoint on your machine. See our troubleshooting documentation for more information',
+        status: HostPolicyResponseActionStatus.failure,
+      };
+
+      policyResponse.Endpoint.policy.applied.actions.push(action);
+      policyResponse.Endpoint.policy.applied.response.configurations.malware.concerned_actions.push(
+        'full_disk_access'
+      );
+
+      const component = await renderOpenedTree();
+      const calloutLinks = component.queryAllByTestId('endpointPolicyResponseErrorCallOutLink');
+      expect(calloutLinks.length).toEqual(2);
+    });
+  });
 });

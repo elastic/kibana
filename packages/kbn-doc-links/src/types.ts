@@ -248,6 +248,9 @@ export interface DocLinks {
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly blocklist: string;
+    readonly policyResponseTroubleshooting: {
+      full_disk_access: string;
+    };
   };
   readonly query: {
     readonly eql: string;
