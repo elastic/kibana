@@ -11,11 +11,16 @@ import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
 import { SolutionNavPanel, SolutionNavPanelProps } from './solution_grouped_nav_panel';
 import { DefaultSideNavItem } from './types';
+import { bottomNavOffset } from '../../../lib/helpers';
 
-const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
-jest.mock('../../../utils/timeline/use_show_timeline', () => ({
-  useShowTimeline: () => mockUseShowTimeline(),
-}));
+const mockUseIsWithinBreakpoints = jest.fn(() => true);
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useIsWithinBreakpoints: () => mockUseIsWithinBreakpoints(),
+  };
+});
 
 const mockItems: DefaultSideNavItem[] = [
   {
@@ -97,6 +102,22 @@ describe('SolutionGroupedNav', () => {
       const result = renderNavPanel({ items });
       result.getByTestId(`groupedNavPanelLink-${SecurityPageName.users}`).click();
       expect(mockOnClick).toHaveBeenCalled();
+    });
+  });
+
+  describe('bottom offset', () => {
+    it('should add bottom offset', () => {
+      mockUseIsWithinBreakpoints.mockReturnValueOnce(true);
+      const result = renderNavPanel({ bottomOffset: bottomNavOffset });
+
+      expect(result.getByTestId('groupedNavPanel')).toHaveStyle({ bottom: bottomNavOffset });
+    });
+
+    it('should not add bottom offset if not large screen', () => {
+      mockUseIsWithinBreakpoints.mockReturnValueOnce(false);
+      const result = renderNavPanel({ bottomOffset: bottomNavOffset });
+
+      expect(result.getByTestId('groupedNavPanel')).not.toHaveStyle({ bottom: bottomNavOffset });
     });
   });
 

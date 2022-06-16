@@ -10,7 +10,6 @@
 import React from 'react';
 import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import { AppLeaveHandler } from '@kbn/core/public';
-import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
 import { Flyout } from '../../../../timelines/components/flyout';
@@ -20,15 +19,13 @@ export const BOTTOM_BAR_CLASSNAME = 'timeline-bottom-bar';
 
 export const SecuritySolutionBottomBar = React.memo(
   ({ onAppLeave }: { onAppLeave: (handler: AppLeaveHandler) => void }) => {
-    const [showTimeline] = useShowTimeline();
-
     useResolveRedirect();
-    return showTimeline ? (
+    return (
       <>
         <AutoSaveWarningMsg />
         <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
       </>
-    ) : null;
+    );
   }
 );
 
