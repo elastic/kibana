@@ -309,21 +309,23 @@ export function defineRoutes(
             role_descriptors: {},
           }));
 
-        await actionsClient.enqueueExecutions({
-          id: req.params.id,
-          spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
-          executionId: uuid.v4(),
-          apiKey: createAPIKeyResult
-            ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
-                'base64'
-              )
-            : null,
-          params: req.body.params,
-          source: {
-            type: 'HTTP_REQUEST' as any,
-            source: req,
+        await actionsClient.enqueueExecutions([
+          {
+            id: req.params.id,
+            spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
+            executionId: uuid.v4(),
+            apiKey: createAPIKeyResult
+              ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
+                  'base64'
+                )
+              : null,
+            params: req.body.params,
+            source: {
+              type: 'HTTP_REQUEST' as any,
+              source: req,
+            },
           },
-        });
+        ]);
         return res.noContent();
       } catch (err) {
         return res.badRequest({ body: err });

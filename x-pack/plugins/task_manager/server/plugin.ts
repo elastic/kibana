@@ -241,6 +241,7 @@ export class TaskManagerPlugin
       remove: (id: string) => taskStore.remove(id),
       removeIfExists: (id: string) => removeIfExists(taskStore, id),
       schedule: (...args) => taskScheduling.schedule(...args),
+      bulkSchedule: (...args) => taskScheduling.bulkSchedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),
       bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
