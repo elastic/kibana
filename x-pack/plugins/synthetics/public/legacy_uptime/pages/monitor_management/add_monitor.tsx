@@ -24,28 +24,24 @@ export const AddMonitorPage: React.FC = () => {
   useMonitorManagementBreadcrumbs({ isAddMonitor: true });
 
   return (
-    <>
-      <p data-test-subj="addMonitorError">{error}</p>
-      <p data-test-subj="locationsCount">{locations.length}</p>
-      <Loader
-        error={Boolean(error) || (locations && locations.length === 0)}
-        loading={loading}
-        loadingTitle={LOADING_LABEL}
-        errorTitle={ERROR_HEADING_LABEL}
-        errorBody={ERROR_BODY_LABEL}
+    <Loader
+      error={Boolean(error) || (locations && locations.length === 0)}
+      loading={loading}
+      loadingTitle={LOADING_LABEL}
+      errorTitle={ERROR_HEADING_LABEL}
+      errorBody={ERROR_BODY_LABEL}
+    >
+      <SyntheticsProviders
+        policyDefaultValues={{
+          throttling,
+          runsOnService: true,
+          isZipUrlSourceEnabled: false,
+          allowedScheduleUnits: [ScheduleUnit.MINUTES],
+        }}
       >
-        <SyntheticsProviders
-          policyDefaultValues={{
-            throttling,
-            runsOnService: true,
-            isZipUrlSourceEnabled: false,
-            allowedScheduleUnits: [ScheduleUnit.MINUTES],
-          }}
-        >
-          <MonitorConfig isEdit={false} />
-        </SyntheticsProviders>
-      </Loader>
-    </>
+        <MonitorConfig isEdit={false} />
+      </SyntheticsProviders>
+    </Loader>
   );
 };
 
