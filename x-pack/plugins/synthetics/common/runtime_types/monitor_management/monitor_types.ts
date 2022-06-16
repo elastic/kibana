@@ -349,6 +349,7 @@ export const MonitorManagementListResultCodec = t.type({
   page: t.number,
   perPage: t.number,
   total: t.union([t.number, t.null]),
+  absoluteTotal: t.union([t.number, t.null]),
   syncErrors: t.union([ServiceLocationErrors, t.null]),
 });
 
