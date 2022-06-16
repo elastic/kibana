@@ -90,12 +90,17 @@
 # Observability Shared
 /x-pack/plugins/observability/public/components/shared/date_picker/ @elastic/uptime
 
-# Unified Observability
-/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/unified-observability
-/x-pack/plugins/observability/public/context @elastic/unified-observability
-/x-pack/plugins/observability/public/pages/home @elastic/unified-observability
-/x-pack/plugins/observability/public/pages/landing @elastic/unified-observability
-/x-pack/plugins/observability/public/pages/overview @elastic/unified-observability
+# Exploratory View
+/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
+
+# Unified Observability - on hold due to team capacity shortage
+# For now, if you're changing these pages, get a review from someone who understand the changes
+# /x-pack/plugins/observability/public/context @elastic/unified-observability
+
+# Home/Overview/Landing Pages
+/x-pack/plugins/observability/public/pages/home @elastic/observability-design
+/x-pack/plugins/observability/public/pages/landing @elastic/observability-design
+/x-pack/plugins/observability/public/pages/overview @elastic/observability-design
 
 # Actionable Observability
 /x-pack/plugins/observability/common/rules @elastic/actionable-observability
