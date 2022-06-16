@@ -22,10 +22,11 @@ Warsaw OR Venice OR Clear
 +
 At this point, you're sorting by the`timestamp` field.
 . To turn off sorting by the `timestamp` field, click the *field sorted* option, and then click *Clear sorting.*
-. To turn on sorting by the `_score` field in descending order, open the dropdown menu and click *_score*, and then select *High-Low*.
+. Open the *Pick fields to sort by* menu, and then click *_score*.
+. Select *High-Low*.
 +
 [role="screenshot"]
-image::images/sort-by-relevance.png["Field sorting popover", width=75%]
+image::images/field-sorting-popover.png["Field sorting popover", width=60%]
 
 +
 Your table now sorts documents from most to least relevant.
