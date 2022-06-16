@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import 'gridstack/dist/h5/gridstack-dd-native';
 import { Grid } from '../components/grid';
+import { smallGridData, mediumGridData, largeGridData } from './fixtures';
 
 const Item = ({ id }) => <div>I am item: {id}</div>;
 
@@ -23,8 +24,16 @@ export const UncontrolledExample = () => {
   return <Grid />;
 };
 
-export const Columns12Example = () => {
-  return <Grid columns={12} />;
+export const SmallGridExample = () => {
+  return <Grid columns={12} gridData={smallGridData} />;
+};
+
+export const MediumGridExample = () => {
+  return <Grid columns={24} gridData={mediumGridData} />;
+};
+
+export const LargeGridExample = () => {
+  return <Grid columns={48} gridData={largeGridData} />;
 };
 
 export const LogsDashboardExample = () => {
@@ -119,5 +128,5 @@ export const LogsDashboardExample = () => {
     },
   ];
 
-  return <Grid test={3} gridData={gridData} />;
+  return <Grid gridData={gridData} />;
 };
