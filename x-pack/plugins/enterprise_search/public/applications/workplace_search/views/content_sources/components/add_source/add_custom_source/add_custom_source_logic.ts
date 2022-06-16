@@ -7,10 +7,13 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ApiStatus } from '../../../../../../../../common/types/api';
 import { CustomSource } from '../../../../../types';
 
-import { AddCustomSourceApiLogic } from './add_custom_source_api.logic';
+import {
+  AddCustomSourceApiActions,
+  AddCustomSourceApiLogic,
+  AddCustomSourceApiValues,
+} from './add_custom_source_api_logic';
 
 export interface AddCustomSourceProps {
   baseServiceType?: string;
@@ -23,7 +26,8 @@ export enum AddCustomSourceSteps {
 }
 
 export interface AddCustomSourceActions {
-  addSource(name: string, baseServiceType?: string): { name: string; baseServiceType: string };
+  addSource: AddCustomSourceApiActions['addSource'];
+  addSourceSuccess: AddCustomSourceApiActions['addSourceSuccess'];
   createContentSource(): void;
   setCustomSourceNameValue(customSourceNameValue: string): string;
   setNewCustomSource(data: CustomSource): CustomSource;
@@ -34,7 +38,7 @@ interface AddCustomSourceValues {
   currentStep: AddCustomSourceSteps;
   customSourceNameValue: string;
   newCustomSource: CustomSource;
-  sourceApi: ApiStatus<CustomSource>;
+  sourceApi: AddCustomSourceApiValues['sourceApi'];
 }
 
 /**
@@ -89,8 +93,8 @@ export const AddCustomSourceLogic = kea<
       const { baseServiceType } = props;
       actions.addSource(customSourceNameValue, baseServiceType);
     },
-    addSourceSuccess: (customSource: CustomSource) => {
-      actions.setNewCustomSource(customSource);
+    addSourceSuccess: ({ source }) => {
+      actions.setNewCustomSource(source);
     },
   }),
   selectors: {
