@@ -6,9 +6,12 @@
  */
 
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  TRANSACTION_TYPE,
+  PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { Environment } from '../../../common/environment_rt';
@@ -56,10 +59,15 @@ export function getEnvironments({
             },
             {
               term: {
-                'transaction.type': 'page-load',
+                [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
               },
             },
-            ...(serviceName === undefined && serviceName === null
+            {
+              term: {
+                [PROCESSOR_EVENT]: 'transaction',
+              },
+            },
+            ...(serviceName === undefined || serviceName === null
               ? []
               : [{ term: { [SERVICE_NAME]: serviceName } }]),
           ],
