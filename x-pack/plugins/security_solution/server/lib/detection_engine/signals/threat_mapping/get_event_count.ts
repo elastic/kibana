@@ -26,6 +26,7 @@ export const getEventList = async ({
   logger,
   tuple,
   timestampOverride,
+  runtimeMappings,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -53,6 +54,7 @@ export const getEventList = async ({
     timestampOverride,
     sortOrder: 'desc',
     trackTotalHits: false,
+    runtimeMappings,
   });
 
   logger.debug(
@@ -80,6 +82,7 @@ export const getEventCount = async ({
     size: 0,
     timestampOverride,
     searchAfterSortIds: undefined,
+    runtimeMappings: undefined,
   }).body.query;
   const response = await esClient.count({
     body: { query: eventSearchQueryBodyQuery },
