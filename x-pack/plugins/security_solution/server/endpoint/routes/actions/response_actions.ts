@@ -16,7 +16,8 @@ import { CommentType } from '@kbn/cases-plugin/common';
 
 import {
   HostIsolationRequestSchema,
-  responseActionBodySchemas,
+  KillOrSuspendProcessRequestSchema,
+  ResponseActionBodySchema,
 } from '../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../common/constants';
 import {
@@ -25,6 +26,8 @@ import {
   ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTION_RESPONSES_DS,
   failedFleetActionErrorCode,
+  KILL_PROCESS_ROUTE,
+  SUSPEND_PROCESS_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -34,15 +37,17 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActions,
+  ResponseActionParametersWithPidOrEntityId,
 } from '../../../../common/endpoint/types';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import { EndpointAppContext } from '../../types';
-import { getMetadataForEndpoints, FeatureKeys, getActionDetailsById } from '../../services';
+import { getMetadataForEndpoints, getActionDetailsById } from '../../services';
 import { doLogsEndpointActionDsExists } from '../../utils';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import type { FeatureKeys } from '../../services/feature_usage/service';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -75,28 +80,56 @@ export function registerResponseActionRoutes(
       responseActionRequestHandler(endpointContext, 'unisolate')
     )
   );
+
+  router.post(
+    {
+      path: KILL_PROCESS_ROUTE,
+      validate: KillOrSuspendProcessRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canKillProcess'] },
+      logger,
+      responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        endpointContext,
+        'kill-process'
+      )
+    )
+  );
+
+  router.post(
+    {
+      path: SUSPEND_PROCESS_ROUTE,
+      validate: KillOrSuspendProcessRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canSuspendProcess'] },
+      logger,
+      responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        endpointContext,
+        'suspend-process'
+      )
+    )
+  );
 }
 
 const commandToFeatureKeyMap = new Map<ResponseActions, FeatureKeys>([
   ['isolate', 'HOST_ISOLATION'],
   ['unisolate', 'HOST_ISOLATION'],
+  ['kill-process', 'KILL_PROCESS'],
+  ['suspend-process', 'SUSPEND_PROCESS'],
 ]);
 
-const endpointActionParametersTypesMap: Map<ResponseActions, EndpointActionDataParameterTypes> =
-  new Map([
-    ['isolate', undefined],
-    ['unisolate', undefined],
-  ]);
+const returnActionIdCommands: ResponseActions[] = ['isolate', 'unisolate'];
 
-const returnActionIdCommands = ['isolate', 'unisolate'] as const;
-
-function responseActionRequestHandler(
+function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
   endpointContext: EndpointAppContext,
   command: ResponseActions
 ): RequestHandler<
   unknown,
   unknown,
-  TypeOf<typeof responseActionBodySchemas>,
+  TypeOf<typeof ResponseActionBodySchema>,
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
@@ -137,7 +170,6 @@ function responseActionRequestHandler(
     let logsEndpointActionsResult;
 
     const agents = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
-    const parametersType = endpointActionParametersTypesMap.get(command);
     const doc = {
       '@timestamp': moment().toISOString(),
       agent: {
@@ -152,7 +184,7 @@ function responseActionRequestHandler(
           command,
           comment: req.body.comment ?? undefined,
           parameters: req.body.parameters ?? undefined,
-        } as EndpointActionData<typeof parametersType>,
+        } as EndpointActionData<T>,
       } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,
       user: {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
