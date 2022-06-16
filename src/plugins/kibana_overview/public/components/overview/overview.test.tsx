@@ -15,7 +15,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
-import { AnalyticsNoDataPage } from '@kbn/shared-ux-page-analytics-no-data';
+import { AnalyticsNoDataPageKibanaProvider } from '@kbn/shared-ux-page-analytics-no-data';
 import { hasESData, hasUserDataView } from './overview.test.mocks';
 import { Overview } from './overview';
 
@@ -34,7 +34,7 @@ jest.mock('@kbn/shared-ux-page-analytics-no-data', () => {
   const MockedComponent: string = 'MockedAnalyticsNoDataPage';
   return {
     ...jest.requireActual('@kbn/shared-ux-page-analytics-no-data'),
-    AnalyticsNoDataPage: () => {
+    AnalyticsNoDataPageKibanaProvider: () => {
       return <MockedComponent />;
     },
   };
@@ -216,7 +216,7 @@ describe('Overview', () => {
     await updateComponent(component);
 
     expect(component).toMatchSnapshot();
-    expect(component.find(AnalyticsNoDataPage).length).toBe(1);
+    expect(component.find(AnalyticsNoDataPageKibanaProvider).length).toBe(1);
     expect(component.find(KibanaPageTemplate).length).toBe(0);
     expect(component.find(EuiLoadingSpinner).length).toBe(0);
   });
@@ -236,7 +236,7 @@ describe('Overview', () => {
     await updateComponent(component);
 
     expect(component.render()).toMatchSnapshot();
-    expect(component.find(AnalyticsNoDataPage).length).toBe(0);
+    expect(component.find(AnalyticsNoDataPageKibanaProvider).length).toBe(0);
     expect(component.find(KibanaPageTemplate).length).toBe(0);
     expect(component.find(EuiLoadingSpinner).length).toBe(1);
   });

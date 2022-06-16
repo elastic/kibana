@@ -727,17 +727,7 @@ exports[`Overview when there is no user data view 1`] = `
         "IndexPatternEditorComponent": [MockFunction],
         "openEditor": [MockFunction],
         "userPermissions": Object {
-          "editDataView": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
+          "editDataView": [MockFunction],
         },
       }
     }
@@ -751,11 +741,7 @@ exports[`Overview when there is no user data view 1`] = `
       }
     }
   >
-    <AnalyticsNoDataPage
-      onDataViewCreated={[Function]}
-    >
-      <MockedAnalyticsNoDataPage />
-    </AnalyticsNoDataPage>
+    <MockedAnalyticsNoDataPage />
   </AnalyticsNoDataPageKibanaProvider>
 </Overview>
 `;
