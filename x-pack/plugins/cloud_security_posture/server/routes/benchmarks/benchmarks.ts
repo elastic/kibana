@@ -19,11 +19,11 @@ import type {
   AgentPolicy,
   ListResult,
 } from '@kbn/fleet-plugin/common';
-import { CspRuleSchema } from '../../../common/schemas/csp_rule';
+import { RuleSchema } from '../../../common/schemas/csp_rule';
 import {
   BENCHMARKS_ROUTE_PATH,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  cspRuleAssetSavedObjectType,
+  CSP_RULE_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
@@ -104,15 +104,15 @@ export interface RulesStatusAggregation {
 export const getCspRulesStatus = (
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy
-): Promise<SavedObjectsFindResponse<CspRuleSchema, RulesStatusAggregation>> => {
-  const cspRules = soClient.find<CspRuleSchema, RulesStatusAggregation>({
-    type: cspRuleAssetSavedObjectType,
-    filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${packagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${packagePolicy.policy_id}`,
+): Promise<SavedObjectsFindResponse<RuleSchema, RulesStatusAggregation>> => {
+  const cspRules = soClient.find<RuleSchema, RulesStatusAggregation>({
+    type: CSP_RULE_SAVED_OBJECT_TYPE,
+    filter: `${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.package_policy_id: ${packagePolicy.id} AND ${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.policy_id: ${packagePolicy.policy_id}`,
     aggs: {
       enabled_status: {
         filter: {
           term: {
-            [`${cspRuleAssetSavedObjectType}.attributes.enabled`]: true,
+            [`${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.enabled`]: 'true',
           },
         },
       },

@@ -25,8 +25,8 @@ import { CspAppContext } from '../../plugin';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 
-import { cspRuleAssetSavedObjectType } from '../../../common/constants';
-import { CspRuleSchema } from '../../../common/schemas/csp_rule';
+import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { RuleSchema } from '../../../common/schemas/csp_rule';
 
 import {
   ElasticsearchClient,
@@ -123,7 +123,7 @@ describe('Update rules configuration API', () => {
     await getCspRules(mockSoClient, packagePolicy);
     expect(mockSoClient.find).toBeCalledTimes(1);
     expect(mockSoClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({ type: cspRuleAssetSavedObjectType })
+      expect.objectContaining({ type: CSP_RULE_SAVED_OBJECT_TYPE })
     );
   });
 
@@ -147,7 +147,7 @@ describe('Update rules configuration API', () => {
           attributes: { enabled: true, rego_rule_id: 'cis_1_1_3' },
         },
       ],
-    } as unknown as SavedObjectsFindResponse<CspRuleSchema>;
+    } as unknown as SavedObjectsFindResponse<RuleSchema>;
     const cspConfig = await createRulesConfig(cspRules);
     expect(cspConfig).toMatchObject({
       data_yaml: { activated_rules: { cis_k8s: ['cis_1_1_1', 'cis_1_1_3'] } },
@@ -174,7 +174,7 @@ describe('Update rules configuration API', () => {
           attributes: { enabled: false, rego_rule_id: 'cis_1_1_3' },
         },
       ],
-    } as unknown as SavedObjectsFindResponse<CspRuleSchema>;
+    } as unknown as SavedObjectsFindResponse<RuleSchema>;
     const cspConfig = await createRulesConfig(cspRules);
     expect(cspConfig).toMatchObject({ data_yaml: { activated_rules: { cis_k8s: [] } } });
   });
@@ -232,7 +232,7 @@ describe('Update rules configuration API', () => {
           attributes: { enabled: false, rego_rule_id: 'cis_1_1_3' },
         },
       ],
-    } as unknown as SavedObjectsFindResponse<CspRuleSchema>);
+    } as unknown as SavedObjectsFindResponse<RuleSchema>);
 
     const mockPackagePolicy = createPackagePolicyMock();
     mockPackagePolicy.vars = { dataYaml: { type: 'foo' } };
@@ -279,7 +279,7 @@ describe('Update rules configuration API', () => {
           attributes: { enabled: false, rego_rule_id: 'cis_1_1_3' },
         },
       ],
-    } as unknown as SavedObjectsFindResponse<CspRuleSchema>);
+    } as unknown as SavedObjectsFindResponse<RuleSchema>);
 
     const mockPackagePolicy = createPackagePolicyMock();
     const packagePolicyId1 = chance.guid();
@@ -330,7 +330,7 @@ describe('Update rules configuration API', () => {
           attributes: { enabled: false, rego_rule_id: 'cis_1_1_1' },
         },
       ],
-    } as unknown as SavedObjectsFindResponse<CspRuleSchema>);
+    } as unknown as SavedObjectsFindResponse<RuleSchema>);
 
     mockPackagePolicy.vars = { dataYaml: { type: 'yaml' } };
 

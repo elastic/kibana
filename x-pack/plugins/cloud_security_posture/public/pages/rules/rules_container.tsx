@@ -7,7 +7,7 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { type EuiBasicTable, EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { cspRuleAssetSavedObjectType } from '../../../common/constants';
+import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesBottomBar } from './rules_bottom_bar';
@@ -34,9 +34,6 @@ interface RulesPageData {
 }
 
 export type RulesState = RulesPageData & RulesQuery;
-
-const getSimpleQueryString = (searchValue?: string): string =>
-  searchValue ? `${searchValue}*` : '';
 
 const getChangedRules = (
   baseRules: ReadonlyMap<string, RuleSavedObject>,
@@ -100,7 +97,7 @@ export const RulesContainer = () => {
   const [isAllSelected, setIsAllSelected] = useState<boolean>(false);
   const [visibleSelectedRulesIds, setVisibleSelectedRulesIds] = useState<string[]>([]);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
-    filter: `${cspRuleAssetSavedObjectType}.attributes.policy_id: "${params.policyId}" and ${cspRuleAssetSavedObjectType}.attributes.package_policy_id: "${params.packagePolicyId}"`,
+    filter: `${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.policy_id: "${params.policyId}" and ${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.package_policy_id: "${params.packagePolicyId}"`,
     search: '',
     page: 0,
     perPage: 10,
@@ -108,7 +105,7 @@ export const RulesContainer = () => {
 
   const { data, status, error, refetch } = useFindCspRules({
     filter: rulesQuery.filter,
-    search: getSimpleQueryString(rulesQuery.search),
+    search: rulesQuery.search,
     page: 1,
     perPage: MAX_ITEMS_PER_PAGE,
   });

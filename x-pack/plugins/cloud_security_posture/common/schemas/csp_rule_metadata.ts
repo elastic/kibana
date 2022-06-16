@@ -5,23 +5,18 @@
  * 2.0.
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
-import { ruleMetadata } from './csp_rule_metadata';
 
-export const ruleSchemaV830 = rt.object({
+export const ruleMetadata = rt.object({
   audit: rt.string(),
   benchmark: rt.object({ name: rt.string(), version: rt.string() }),
-  default_value: rt.string(),
+  default_value: rt.maybe(rt.nullable(rt.string())),
   description: rt.string(),
-  enabled: rt.boolean(),
   id: rt.string(),
-  impact: rt.maybe(rt.string()),
-  muted: rt.boolean(),
+  impact: rt.maybe(rt.nullable(rt.string())),
   name: rt.string(),
-  package_policy_id: rt.string(),
-  policy_id: rt.string(),
   profile_applicability: rt.string(),
   rationale: rt.string(),
-  references: rt.maybe(rt.string()),
+  references: rt.maybe(rt.nullable(rt.string())),
   rego_rule_id: rt.string(),
   remediation: rt.string(),
   section: rt.string(),
@@ -29,14 +24,4 @@ export const ruleSchemaV830 = rt.object({
   version: rt.string(),
 });
 
-export const ruleSchemaV840 = rt.object({
-  enabled: rt.boolean(),
-  metadata: ruleMetadata,
-  muted: rt.boolean(),
-  package_policy_id: rt.string(),
-  policy_id: rt.string(),
-});
-
-export type RuleSchemaV830 = TypeOf<typeof ruleSchemaV830>;
-export type RuleSchemaV840 = TypeOf<typeof ruleSchemaV840>;
-export type RuleSchema = RuleSchemaV840;
+export type RuleMetadataSchema = TypeOf<typeof ruleMetadata>;
