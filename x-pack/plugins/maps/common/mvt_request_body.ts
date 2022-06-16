@@ -84,7 +84,7 @@ export function getHitsTileRequest({
       query: requestBody.query,
       fields: requestBody.fields ? requestBody.fields : [],
       runtime_mappings: requestBody.runtime_mappings,
-      sort: requestBody.sort,
+      sort: requestBody.sort ? requestBody.sort : [],
       track_total_hits: typeof requestBody.size === 'number' ? requestBody.size + 1 : false,
       with_labels: hasLabels,
     },
