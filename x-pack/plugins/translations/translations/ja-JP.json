@@ -30306,7 +30306,6 @@
     "xpack.synthetics.overview.pageHeader.syntheticsCallout.content": "アップタイムは、スクリプト化された複数ステップの可用性チェックのサポートをプレビューしています。つまり、単に単一のページのアップ/ダウンのチェックだけではなく、Webページの要素を操作したり、全体的な可用性を確認したりできます（購入やシステムへのサインインなど）。詳細については以下をクリックしてください。これらの機能を先駆けて使用したい場合は、プレビュー合成エージェントをダウンロードし、アップタイムでチェックを表示できます。",
     "xpack.synthetics.overview.pageHeader.syntheticsCallout.dismissButtonText": "閉じる",
     "xpack.synthetics.overview.pageHeader.syntheticsCallout.title": "Elastic Synthetics",
-    "xpack.synthetics.overviewPage.headerText": "概要",
     "xpack.synthetics.overviewPageLink.disabled.ariaLabel": "無効になったページ付けボタンです。モニターリストがこれ以上ナビゲーションできないことを示しています。",
     "xpack.synthetics.overviewPageLink.next.ariaLabel": "次の結果ページ",
     "xpack.synthetics.overviewPageLink.prev.ariaLabel": "前の結果ページ",

@@ -30340,7 +30340,6 @@
     "xpack.synthetics.overview.pageHeader.syntheticsCallout.content": "Uptime 现在正在预览对脚本化多步骤可用性检查的支持。这意味着您可以与网页元素进行交互，并检查整个过程（例如购买或登录系统）的可用性，而不仅仅是简单的单个页面启动/关闭检查。请单击下面的内容以了解详情，如果您想率先使用这些功能，则可以下载我们的预览组合代理，并在 Uptime 中查看组合检查。",
     "xpack.synthetics.overview.pageHeader.syntheticsCallout.dismissButtonText": "关闭",
     "xpack.synthetics.overview.pageHeader.syntheticsCallout.title": "Elastic Synthetics",
-    "xpack.synthetics.overviewPage.headerText": "概览",
     "xpack.synthetics.overviewPageLink.disabled.ariaLabel": "禁用的分页按钮表示在监测列表中无法进行进一步导航。",
     "xpack.synthetics.overviewPageLink.next.ariaLabel": "下页结果",
     "xpack.synthetics.overviewPageLink.prev.ariaLabel": "上页结果",
