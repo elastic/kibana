@@ -669,7 +669,7 @@ export const LensTopNavMenu = ({
   );
 
   const createNewDataView = useCallback(() => {
-    const dataViewEditPermission = dataViewEditor.userPermissions.editDataView;
+    const dataViewEditPermission = dataViewEditor.userPermissions.editDataView();
     if (!dataViewEditPermission) {
       return;
     }

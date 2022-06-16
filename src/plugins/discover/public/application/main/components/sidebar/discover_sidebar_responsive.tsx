@@ -238,8 +238,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
 
   const createNewDataView = useCallback(() => {
-    const indexPatternFieldEditPermission = dataViewEditor.userPermissions.editDataView;
-    if (!indexPatternFieldEditPermission) {
+    const dataViewEditPermission = dataViewEditor.userPermissions.editDataView();
+    if (!dataViewEditPermission) {
       return;
     }
     const ref = dataViewEditor.openEditor({

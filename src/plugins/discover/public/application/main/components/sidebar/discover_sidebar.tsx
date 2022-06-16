@@ -498,18 +498,20 @@ export function DiscoverSidebarComponent({
             )}
           </div>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            iconType="indexOpen"
-            data-test-subj="indexPattern-add-field_btn"
-            onClick={() => editField()}
-            size="s"
-          >
-            {i18n.translate('discover.fieldChooser.addField.label', {
-              defaultMessage: 'Add a field',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
+        {canEditDataViewField && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="indexOpen"
+              data-test-subj="indexPattern-add-field_btn"
+              onClick={() => editField()}
+              size="s"
+            >
+              {i18n.translate('discover.fieldChooser.addField.label', {
+                defaultMessage: 'Add a field',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPageSideBar>
   );
