@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { handleInputAreaState } from './state_update_handlers/handle_input_area_state';
+import {
+  handleInputAreaState,
+  INPUT_DEFAULT_PLACEHOLDER_TEXT,
+} from './state_update_handlers/handle_input_area_state';
 import { handleSidePanel } from './state_update_handlers/handle_side_panel';
 import { handleUpdateCommandState } from './state_update_handlers/handle_update_command_state';
 import type { ConsoleDataState, ConsoleStoreReducer } from './types';
@@ -29,6 +32,7 @@ export const initiateState = (
     sidePanel: { show: null },
     input: {
       textEntered: '',
+      placeholder: INPUT_DEFAULT_PLACEHOLDER_TEXT,
       showPopover: undefined,
       history: [],
     },
@@ -74,6 +78,7 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
     case 'updateInputPopoverState':
     case 'updateInputHistoryState':
     case 'updateInputTextEnteredState':
+    case 'updateInputPlaceholderState':
       return handleInputAreaState(state, action);
 
     case 'clear':

@@ -5,11 +5,21 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import { ConsoleDataAction, ConsoleStoreReducer } from '../types';
 
+export const INPUT_DEFAULT_PLACEHOLDER_TEXT = i18n.translate(
+  'xpack.securitySolution.handleInputAreaState.inputPlaceholderText',
+  { defaultMessage: 'Enter a response action or type "help" assistance' }
+);
+
 type InputAreaStateAction = ConsoleDataAction & {
-  type: 'updateInputPopoverState' | 'updateInputHistoryState' | 'updateInputTextEnteredState';
+  type:
+    | 'updateInputPopoverState'
+    | 'updateInputHistoryState'
+    | 'updateInputTextEnteredState'
+    | 'updateInputPlaceholderState';
 };
 
 export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
@@ -34,7 +44,8 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         ...state,
         input: {
           ...state.input,
-          history: [{ id: uuidV4(), input: payload.command }, ...state.input.history],
+          // Keeping the last 100 entries only for now
+          history: [{ id: uuidV4(), input: payload.command }, ...state.input.history.slice(0, 99)],
         },
       };
 
@@ -48,7 +59,19 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           },
         };
       }
+
+    case 'updateInputPlaceholderState':
+      if (state.input.placeholder !== payload.placeholder) {
+        return {
+          ...state,
+          input: {
+            ...state.input,
+            placeholder: payload.placeholder || INPUT_DEFAULT_PLACEHOLDER_TEXT,
+          },
+        };
+      }
   }
 
+  // No updates needed. Just return original state
   return state;
 };

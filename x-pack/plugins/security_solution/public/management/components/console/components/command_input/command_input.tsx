@@ -9,6 +9,7 @@ import React, { memo, MouseEventHandler, useCallback, useMemo, useRef, useState 
 import { CommonProps, EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { InputPlaceholder } from './components/input_placeholder';
 import { useWithInputTextEntered } from '../../hooks/state_selectors/use_with_input_text_entered';
 import { InputAreaPopover } from './components/input_area_popover';
 import { KeyCapture, KeyCaptureProps } from './key_capture';
@@ -60,115 +61,115 @@ export interface CommandInputProps extends CommonProps {
   focusRef?: KeyCaptureProps['focusRef'];
 }
 
-export const CommandInput = memo<CommandInputProps>(
-  ({ prompt = '>', focusRef, ...commonProps }) => {
-    const dispatch = useConsoleStateDispatch();
-    const textEntered = useWithInputTextEntered();
-    const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
-    const getTestId = useTestIdGenerator(useDataTestSubj());
+export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ...commonProps }) => {
+  const dispatch = useConsoleStateDispatch();
+  const textEntered = useWithInputTextEntered();
+  const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
+  const getTestId = useTestIdGenerator(useDataTestSubj());
 
-    const containerRef = useRef<HTMLDivElement | null>(null);
-    const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
-    const textDisplayRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
+  const textDisplayRef = useRef<HTMLDivElement | null>(null);
 
-    const dimensions = useResizeObserver(containerRef.current);
+  const dimensions = useResizeObserver(containerRef.current);
 
-    const keyCaptureFocusRef = focusRef || _focusRef;
+  const keyCaptureFocusRef = focusRef || _focusRef;
 
-    const popoverWidth = useMemo(() => {
-      return dimensions.width ? `${dimensions.width}px` : '92vw';
-    }, [dimensions.width]);
+  const popoverWidth = useMemo(() => {
+    return dimensions.width ? `${dimensions.width}px` : '92vw';
+  }, [dimensions.width]);
 
-    const cursorClassName = useMemo(() => {
-      return classNames({
-        cursor: true,
-        inactive: !isKeyInputBeingCaptured,
-      });
-    }, [isKeyInputBeingCaptured]);
+  const cursorClassName = useMemo(() => {
+    return classNames({
+      cursor: true,
+      inactive: !isKeyInputBeingCaptured,
+    });
+  }, [isKeyInputBeingCaptured]);
 
-    const handleKeyCaptureOnStateChange = useCallback<
-      NonNullable<KeyCaptureProps['onStateChange']>
-    >((isCapturing) => {
+  const handleKeyCaptureOnStateChange = useCallback<NonNullable<KeyCaptureProps['onStateChange']>>(
+    (isCapturing) => {
       setIsKeyInputBeingCaptured(isCapturing);
-    }, []);
+    },
+    []
+  );
 
-    const handleTypingAreaClick = useCallback<MouseEventHandler>(
-      (ev) => {
-        if (keyCaptureFocusRef.current) {
-          keyCaptureFocusRef.current.focus();
-        }
-      },
-      [keyCaptureFocusRef]
-    );
+  const handleTypingAreaClick = useCallback<MouseEventHandler>(
+    (ev) => {
+      if (keyCaptureFocusRef.current) {
+        keyCaptureFocusRef.current.focus();
+      }
+    },
+    [keyCaptureFocusRef]
+  );
 
-    const handleKeyCapture = useCallback<KeyCaptureProps['onCapture']>(
-      ({ value, eventDetails }) => {
-        let updatedTextEnteredState = textEntered + value;
+  const handleKeyCapture = useCallback<KeyCaptureProps['onCapture']>(
+    ({ value, eventDetails }) => {
+      let updatedTextEnteredState = textEntered + value;
 
-        switch (eventDetails.keyCode) {
-          // BACKSPACE
-          // remove the last character from the text entered
-          case 8:
-            if (updatedTextEnteredState.length) {
-              updatedTextEnteredState = updatedTextEnteredState.replace(/.$/, '');
-            }
-            break;
+      switch (eventDetails.keyCode) {
+        // BACKSPACE
+        // remove the last character from the text entered
+        case 8:
+          if (updatedTextEnteredState.length) {
+            updatedTextEnteredState = updatedTextEnteredState.replace(/.$/, '');
+          }
+          break;
 
-          // ENTER
-          // Execute command and blank out the input area
-          case 13:
-            dispatch({ type: 'executeCommand', payload: { input: updatedTextEnteredState } });
-            updatedTextEnteredState = '';
-            break;
+        // ENTER
+        // Execute command and blank out the input area
+        case 13:
+          dispatch({ type: 'executeCommand', payload: { input: updatedTextEnteredState } });
+          updatedTextEnteredState = '';
+          break;
 
-          // ARROW UP
-          case 38:
-            dispatch({ type: 'removeFocusFromKeyCapture' });
-            dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
-            break;
-        }
+        // ARROW UP
+        case 38:
+          dispatch({ type: 'removeFocusFromKeyCapture' });
+          dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
+          break;
+      }
 
-        dispatch({
-          type: 'updateInputTextEnteredState',
-          payload: { textEntered: updatedTextEnteredState },
-        });
-      },
-      [dispatch, textEntered]
-    );
+      dispatch({
+        type: 'updateInputTextEnteredState',
+        payload: { textEntered: updatedTextEnteredState },
+      });
+    },
+    [dispatch, textEntered]
+  );
 
-    return (
-      <InputAreaPopover width={popoverWidth}>
-        <CommandInputContainer {...commonProps} onClick={handleTypingAreaClick} ref={containerRef}>
-          <EuiFlexGroup
-            wrap={true}
-            responsive={false}
-            alignItems="flexStart"
-            gutterSize="none"
-            justifyContent="flexStart"
-            ref={textDisplayRef}
+  return (
+    <InputAreaPopover width={popoverWidth}>
+      <CommandInputContainer {...commonProps} onClick={handleTypingAreaClick} ref={containerRef}>
+        <EuiFlexGroup
+          wrap={true}
+          responsive={false}
+          alignItems="flexStart"
+          gutterSize="none"
+          justifyContent="flexStart"
+          ref={textDisplayRef}
+        >
+          <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-prompt')}>
+            <span className="eui-displayInlineBlock prompt">{prompt}</span>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="textEntered"
+            grow={false}
+            data-test-subj={getTestId('cmdInput-userTextInput')}
           >
-            <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-prompt')}>
-              <span className="eui-displayInlineBlock prompt">{prompt}</span>
-            </EuiFlexItem>
-            <EuiFlexItem
-              className="textEntered"
-              grow={false}
-              data-test-subj={getTestId('cmdInput-userTextInput')}
-            >
-              {textEntered}
-            </EuiFlexItem>
-            <EuiFlexItem grow>
-              <span className={cursorClassName} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <KeyCapture
-            onCapture={handleKeyCapture}
-            focusRef={keyCaptureFocusRef}
-            onStateChange={handleKeyCaptureOnStateChange}
-          />
-        </CommandInputContainer>
-      </InputAreaPopover>
-    );
-  }
-);
+            <div>{textEntered}</div>
+            <InputPlaceholder />
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <span className={cursorClassName} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <KeyCapture
+          onCapture={handleKeyCapture}
+          focusRef={keyCaptureFocusRef}
+          onStateChange={handleKeyCaptureOnStateChange}
+        />
+      </CommandInputContainer>
+    </InputAreaPopover>
+  );
+});
 CommandInput.displayName = 'CommandInput';

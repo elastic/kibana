@@ -44,6 +44,9 @@ export interface ConsoleDataState {
     /** The text the user is typing into the console input area */
     textEntered: string;
 
+    /** Placeholder text for the input area **/
+    placeholder: string;
+
     /** A history of commands entered by the user */
     history: InputHistoryItem[];
 
@@ -99,6 +102,12 @@ export type ConsoleDataAction =
       type: 'updateInputPopoverState';
       payload: {
         show: ConsoleDataState['input']['showPopover'];
+      };
+    }
+  | {
+      type: 'updateInputPlaceholderState';
+      payload: {
+        placeholder: string;
       };
     }
   | {
