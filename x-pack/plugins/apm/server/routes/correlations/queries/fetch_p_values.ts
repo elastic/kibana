@@ -5,43 +5,61 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-
-import type { CorrelationsParams } from '../../../../common/correlations/types';
-import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
+import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 
+import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { Setup } from '../../../lib/helpers/setup_request';
 import { splitAllSettledPromises } from '../utils';
+import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
+import { fetchFailedEventsCorrelationPValues } from './fetch_failed_events_correlation_p_values';
 
-import {
-  fetchFailedTransactionsCorrelationPValues,
-  fetchTransactionDurationHistogramRangeSteps,
-} from '.';
-
-export const fetchPValues = async (
-  esClient: ElasticsearchClient,
-  paramsWithIndex: CorrelationsParams,
-  fieldCandidates: string[]
-) => {
-  const histogramRangeSteps = await fetchTransactionDurationHistogramRangeSteps(
-    esClient,
-    paramsWithIndex
-  );
+export const fetchPValues = async ({
+  setup,
+  eventType,
+  start,
+  end,
+  environment,
+  kuery,
+  query,
+  fieldCandidates,
+}: CommonCorrelationsQueryParams & {
+  setup: Setup;
+  eventType: ProcessorEvent;
+  fieldCandidates: string[];
+}) => {
+  const rangeSteps = await fetchDurationHistogramRangeSteps({
+    setup,
+    eventType,
+    start,
+    end,
+    environment,
+    kuery,
+    query,
+  });
 
   const { fulfilled, rejected } = splitAllSettledPromises(
     await Promise.allSettled(
       fieldCandidates.map((fieldName) =>
-        fetchFailedTransactionsCorrelationPValues(
-          esClient,
-          paramsWithIndex,
-          histogramRangeSteps,
-          fieldName
-        )
+        fetchFailedEventsCorrelationPValues({
+          setup,
+          eventType,
+          start,
+          end,
+          environment,
+          kuery,
+          query,
+          fieldName,
+          rangeSteps,
+        })
       )
     )
   );
 
   const flattenedResults = fulfilled.flat();
+
+  console.log('flattenedResults', flattenedResults.length);
 
   const failedTransactionsCorrelations: FailedTransactionsCorrelation[] = [];
   let fallbackResult: FailedTransactionsCorrelation | undefined;
@@ -72,8 +90,9 @@ export const fetchPValues = async (
     }
   });
 
-  const ccsWarning =
-    rejected.length > 0 && paramsWithIndex?.index.includes(':');
+  const index = setup.indices[eventType as keyof typeof setup.indices];
+
+  const ccsWarning = rejected.length > 0 && index.includes(':');
 
   return { failedTransactionsCorrelations, ccsWarning, fallbackResult };
 };

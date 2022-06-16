@@ -13,6 +13,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useBackendDetailOperationsBreadcrumb } from '../../../hooks/use_backend_detail_operations_breadcrumb';
 import { BackendMetricCharts } from '../../shared/backend_metric_charts';
 import { DetailViewHeader } from '../../shared/detail_view_header';
+import { BackendOperationDistributionChart } from './backend_operation_distribution_chart';
 
 export function BackendOperationDetailView() {
   const router = useApmRouter();
@@ -40,6 +41,9 @@ export function BackendOperationDetailView() {
         <ChartPointerEventContextProvider>
           <BackendMetricCharts />
         </ChartPointerEventContextProvider>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <BackendOperationDistributionChart />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
