@@ -293,12 +293,27 @@ export class VisualizeEmbeddable
 
   onContainerLoading = () => {
     this.renderComplete.dispatchInProgress();
-    this.updateOutput({ loading: true, error: undefined });
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: true,
+      rendered: false,
+      error: undefined,
+    });
+  };
+
+  onContainerData = () => {
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: false,
+    });
   };
 
   onContainerRender = () => {
     this.renderComplete.dispatchComplete();
-    this.updateOutput({ loading: false, error: undefined });
+    this.updateOutput({
+      ...this.getOutput(),
+      rendered: true,
+    });
   };
 
   onContainerError = (error: ExpressionRenderError) => {
@@ -306,7 +321,11 @@ export class VisualizeEmbeddable
       this.abortController.abort();
     }
     this.renderComplete.dispatchError();
-    this.updateOutput({ loading: false, error });
+    this.updateOutput({
+      ...this.getOutput(),
+      rendered: true,
+      error,
+    });
   };
 
   /**
@@ -390,6 +409,7 @@ export class VisualizeEmbeddable
     div.setAttribute('data-shared-item', '');
 
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
+    this.subscriptions.push(this.handler.data$.subscribe(this.onContainerData));
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
     this.subscriptions.push(

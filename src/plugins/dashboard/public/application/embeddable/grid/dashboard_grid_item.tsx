@@ -12,7 +12,7 @@ import classNames from 'classnames';
 
 import {
   EmbeddableChildPanel,
-  EmbeddableLoadedEvent,
+  EmbeddableRenderedEvent,
   ViewMode,
 } from '../../../services/embeddable';
 import { useLabs } from '../../../services/presentation_util';
@@ -31,7 +31,7 @@ interface Props extends PanelProps, DivProps {
   expandedPanelId?: string;
   key: string;
   isRenderable?: boolean;
-  onPanelStatusChange?: (info: EmbeddableLoadedEvent) => void;
+  onPanelStatusChange?: (info: EmbeddableRenderedEvent) => void;
 }
 
 const Item = React.forwardRef<HTMLDivElement, Props>(

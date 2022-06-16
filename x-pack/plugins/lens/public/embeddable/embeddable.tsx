@@ -479,6 +479,10 @@ export class Embeddable
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
     this.renderComplete.dispatchComplete();
+    this.updateOutput({
+      ...this.getOutput(),
+      rendered: true,
+    });
   };
 
   /**

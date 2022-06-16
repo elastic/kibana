@@ -138,24 +138,28 @@ export class MapEmbeddable
     this._initializeSaveMap();
     this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
     this.setEventHandlers({
-      onDataLoad: (_) => {
+      onDataLoad: () => {
         this.updateOutput({
           ...this.getOutput(),
           loading: true,
+          rendered: false,
           error: undefined,
         });
       },
-      onDataLoadEnd: (_) => {
+      onDataLoadEnd: () => {
         this.updateOutput({
           ...this.getOutput(),
           loading: false,
-          error: undefined,
+          // TODO: rendering happens later - separate the rendered and loading events
+          rendered: true,
         });
       },
       onDataLoadError: (e) => {
         this.updateOutput({
           ...this.getOutput(),
           loading: false,
+          // TODO: rendering happens later - separate the rendered and loading events
+          rendered: true,
           error: {
             name: 'EmbeddableError',
             message: e.errorMessage,

@@ -11,17 +11,18 @@ import React from 'react';
 
 import { EuiLoadingChart } from '@elastic/eui';
 import { Subscription } from 'rxjs';
-import { distinct, filter, map } from 'rxjs/operators';
+import { distinct, tap, map } from 'rxjs/operators';
 import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
 import { IContainer } from './i_container';
 import { EmbeddableStart } from '../../plugin';
-import { EmbeddableError } from '../embeddables/i_embeddable';
+import { EmbeddableError, EmbeddableOutput } from '../embeddables/i_embeddable';
 
-export interface EmbeddableLoadedEvent {
+export type EmbeddableRenderStatus = 'loading' | 'loaded' | 'rendered' | 'error';
+export interface EmbeddableRenderedEvent {
   id: string;
-  status: string;
+  status: EmbeddableRenderStatus;
   error?: EmbeddableError;
-  timeTookMs: number;
+  timeToEvent: number;
 }
 
 export interface EmbeddableChildPanelProps {
@@ -30,7 +31,7 @@ export interface EmbeddableChildPanelProps {
   className?: string;
   container: IContainer;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
-  onPanelStatusChange?: (info: EmbeddableLoadedEvent) => void;
+  onPanelStatusChange?: (info: EmbeddableRenderedEvent) => void;
 }
 interface State {
   firstTimeLoading: boolean;
@@ -56,13 +57,26 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
     this.mounted = false;
   }
 
+  private getEventStatus(output: EmbeddableOutput): EmbeddableRenderStatus {
+    if (output.rendered === true) {
+      return 'rendered';
+    } else if (output.loading === false) {
+      return 'loaded';
+    } else if (output.error !== undefined) {
+      return 'error';
+    } else {
+      return 'loading';
+    }
+  }
+
   public async componentDidMount() {
     this.mounted = true;
     const { container } = this.props;
 
     this.embeddable = await container.untilEmbeddableLoaded(this.props.embeddableId);
 
-    let startTime = 0;
+    let loadingTime = 0;
+
     this.embeddable
       .getOutput$()
       .pipe(
@@ -70,20 +84,19 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
          * Record start time if loading === true
          * Forward events only if loading === false
          */
-        filter((output) => {
+        tap((output) => {
           if (output.loading === true) {
             // Record start time
-            startTime = performance.now();
+            loadingTime = performance.now();
           }
-          return output.loading === false;
         }),
         // Map loaded event properties
-        map((output) => {
+        map((output): EmbeddableRenderedEvent => {
           return {
             id: this.embeddable.id,
-            status: output.error ? 'error' : 'loaded',
+            status: this.getEventStatus(output),
             error: output.error,
-            timeTookMs: performance.now() - startTime,
+            timeToEvent: performance.now() - loadingTime,
           };
         }),
         // Dedupe

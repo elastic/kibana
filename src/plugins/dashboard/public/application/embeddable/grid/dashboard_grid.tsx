@@ -19,17 +19,22 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import { GridData } from '../../../../common';
-import { ViewMode, EmbeddableLoadedEvent } from '../../../services/embeddable';
+import { ViewMode, EmbeddableRenderedEvent } from '../../../services/embeddable';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import { withKibana } from '../../../services/kibana_react';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGridItem } from './dashboard_grid_item';
 
+export type DashboardDataEventStatus = 'done' | 'error';
+
 export interface DashboardDataLoadedEvent extends Record<string, unknown> {
-  timeTookMs: number;
+  // Time from start to when data is loaded
+  timeToData: number;
+  // Time from start until render or error
+  timeToDone: number;
   numOfPanels: number;
-  status: string;
+  status: DashboardDataEventStatus;
 }
 
 let lastValidGridSize = 0;
@@ -237,9 +242,9 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     const isViewMode = viewMode === ViewMode.VIEW;
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
-    const panelsInOrder = Object.keys(panels).map(
-      (key: string) => panels[key] as DashboardPanelState
-    );
+    const panelsInOrder = Object.keys(panels).map((key: string) => {
+      return panels[key] as DashboardPanelState;
+    });
 
     panelsInOrder.sort((panelA, panelB) => {
       if (panelA.gridData.y === panelB.gridData.y) {
@@ -249,21 +254,43 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       }
     });
 
-    const panelIds = [];
+    const panelIds: Record<string, Record<string, number>> = {};
     const loadStartTime = performance.now();
-    let loadStatus: string = 'ok';
+    let lastTimeToData = 0;
+    let status: DashboardDataEventStatus = 'done';
+    let doneCount = 0;
 
-    const onPanelStatusChange = (info: EmbeddableLoadedEvent) => {
-      panelIds.push(info);
-      if (info.error !== undefined) {
-        loadStatus = 'error';
+    /**
+     * Sends an event
+     *
+     * @param info
+     * @returns
+     */
+    const onPanelStatusChange = (info: EmbeddableRenderedEvent) => {
+      if (!this.props.onDataLoaded) return;
+
+      if (panelIds[info.id] === undefined || info.status === 'loading') {
+        panelIds[info.id] = {};
+      } else if (info.status === 'error') {
+        status = 'error';
+      } else if (info.status === 'loaded') {
+        lastTimeToData = performance.now();
       }
-      if (panelIds.length === panelsInOrder.length && this.props.onDataLoaded) {
-        this.props.onDataLoaded({
-          timeTookMs: performance.now() - loadStartTime,
-          numOfPanels: panelIds.length,
-          status: loadStatus,
-        });
+
+      panelIds[info.id][info.status] = performance.now();
+
+      if (info.status === 'error' || info.status === 'rendered') {
+        doneCount++;
+        if (doneCount === panelsInOrder.length) {
+          const doneTime = performance.now();
+          const data: DashboardDataLoadedEvent = {
+            timeToData: (lastTimeToData || doneTime) - loadStartTime,
+            timeToDone: doneTime - loadStartTime,
+            numOfPanels: panelsInOrder.length,
+            status,
+          };
+          this.props.onDataLoaded(data);
+        }
       }
     };
 

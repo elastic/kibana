@@ -18,6 +18,8 @@ export type { EmbeddableInput };
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
   loading?: boolean;
+  // Whether the embeddable is rendered.
+  rendered?: boolean;
   // Whether the embeddable finished loading with an error.
   error?: EmbeddableError;
   editUrl?: string;

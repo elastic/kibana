@@ -163,7 +163,12 @@ export class SavedSearchEmbeddable
 
     this.searchProps!.isLoading = true;
 
-    this.updateOutput({ loading: true, error: undefined });
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: true,
+      rendered: false,
+      error: undefined,
+    });
 
     const parentContext = this.input.executionContext;
     const child: KibanaExecutionContext = {
@@ -199,14 +204,26 @@ export class SavedSearchEmbeddable
           executionContext,
         })
       );
-      this.updateOutput({ loading: false, error: undefined });
+
+      this.updateOutput({
+        ...this.getOutput(),
+        // TODO: rendering happens later - separate the rendered and loading events
+        rendered: true,
+        loading: false,
+      });
 
       this.searchProps!.rows = resp.hits.hits;
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {
       if (!this.destroyed) {
-        this.updateOutput({ loading: false, error });
+        // TODO: rendering happens later - separate the rendered and loading events
+        this.updateOutput({
+          ...this.getOutput(),
+          rendered: true,
+          loading: false,
+          error,
+        });
 
         this.searchProps!.isLoading = false;
       }
