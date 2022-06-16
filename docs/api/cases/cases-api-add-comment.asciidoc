@@ -4,7 +4,7 @@
 <titleabbrev>Add comment</titleabbrev>
 ++++
 
-Adds a comment to a case.
+Adds a comment or alert to a case.
 
 === {api-request-title}
 
