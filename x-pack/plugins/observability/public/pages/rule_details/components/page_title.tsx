@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import moment from 'moment';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiSpacer } from '@elastic/eui';
 import { PageHeaderProps } from '../types';
@@ -14,12 +14,7 @@ import { getHealthColor } from '../../rules/config';
 
 export function PageTitle({ rule }: PageHeaderProps) {
   const { triggersActionsUi } = useKibana().services;
-  const [isTagsPopoverOpen, setIsTagsPopoverOpen] = useState<boolean>(false);
-  const tagsClicked = () =>
-    setIsTagsPopoverOpen(
-      (oldStateIsTagsPopoverOpen) => rule.tags.length > 0 && !oldStateIsTagsPopoverOpen
-    );
-  const closeTagsPopover = () => setIsTagsPopoverOpen(false);
+
   return (
     <>
       <EuiFlexGroup alignItems="center">
@@ -49,12 +44,9 @@ export function PageTitle({ rule }: PageHeaderProps) {
         <EuiSpacer size="xs" />
       </EuiFlexGroup>
       {rule.tags.length > 0 &&
-        triggersActionsUi.getRuleTagBadge({
-          spread: true,
-          isOpen: isTagsPopoverOpen,
+        triggersActionsUi.getRuleTagBadge<'all'>({
+          showAllTags: true,
           tags: rule.tags,
-          onClick: () => tagsClicked(),
-          onClose: () => closeTagsPopover(),
         })}
       <EuiSpacer size="xs" />
     </>
