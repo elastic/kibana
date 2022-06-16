@@ -16,8 +16,8 @@ import {
 } from './embeddable';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { Filter } from '@kbn/es-query';
-import { Query, TimeRange, FilterManager } from '@kbn/data-plugin/public';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { Document } from '../persistence';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';

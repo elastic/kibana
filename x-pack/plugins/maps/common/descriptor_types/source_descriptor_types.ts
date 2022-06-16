@@ -9,7 +9,7 @@
 
 import { FeatureCollection } from 'geojson';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
   AGG_TYPE,
