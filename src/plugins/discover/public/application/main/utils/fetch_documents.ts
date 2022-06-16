@@ -12,6 +12,8 @@ import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { FetchDeps } from './fetch_all';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * Requests the documents for Discover. This will return a promise that will resolve
  * with the documents.
@@ -36,7 +38,7 @@ export const fetchDocuments = (
     description: 'fetch documents',
   };
 
-  const _flattenHits = (hits, sequenceKeys = []) => {
+  const _flattenHits = (hits: any, sequenceKeys = []) => {
     const flat: any = {};
     const _flatten = (_hits: any, path: string[] = []) => {
       Object.keys(_hits).forEach((key) => {
@@ -53,9 +55,9 @@ export const fetchDocuments = (
     return flat;
   };
 
-  const flattenHits = (hits) => {
+  const flattenHits = (hits: any) => {
     if (!hits.sequences) {
-      return hits.events.map((event) => {
+      return hits.events.map((event: any) => {
         return {
           ...event,
           _source: _flattenHits(event._source),
@@ -63,8 +65,8 @@ export const fetchDocuments = (
       });
     }
 
-    return hits.sequences.flatMap((sequence) => {
-      return sequence.events.map((event) => {
+    return hits.sequences.flatMap((sequence: any) => {
+      return sequence.events.map((event: any) => {
         return {
           ...event,
           sequence: sequence.join_keys.join('.'),
@@ -93,7 +95,9 @@ export const fetchDocuments = (
       filter((res) => isCompleteResponse(res)),
       map((res) => {
         const { rawResponse } = res;
-        return rawResponse.hits ? rawResponse.hits.hits : flattenHits(rawResponse.body.hits);
+        return rawResponse.hits
+          ? rawResponse.hits.hits
+          : flattenHits((rawResponse as any).body.hits);
       })
     );
 
