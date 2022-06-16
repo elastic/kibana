@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
       const newMonitor = {
         name: 'Sample name',
         type: 'http',
-        url: 'https://elastic.co',
+        urls: 'https://elastic.co',
         locations: [
           {
             id: 'eu-west-01',
