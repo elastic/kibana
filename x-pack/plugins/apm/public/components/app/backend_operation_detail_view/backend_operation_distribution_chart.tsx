@@ -72,16 +72,22 @@ export function BackendOperationDistributionChart() {
     {
       areaSeriesColor: euiTheme.eui.euiColorVis1,
       histogram: data?.allSpansDistribution.overallHistogram ?? [],
-      id: i18n.translate('xpack.apm.backendOperationDistributionChart', {
-        defaultMessage: 'All spans',
-      }),
+      id: i18n.translate(
+        'xpack.apm.backendOperationDistributionChart.allSpansLegendLabel',
+        {
+          defaultMessage: 'All spans',
+        }
+      ),
     },
     {
       areaSeriesColor: euiTheme.eui.euiColorVis7,
       histogram: data?.failedSpansDistribution?.overallHistogram ?? [],
-      id: i18n.translate('xpack.apm.backendOperationDistributionChart', {
-        defaultMessage: 'Failed spans',
-      }),
+      id: i18n.translate(
+        'xpack.apm.backendOperationDistributionChart.failedSpansLegendLabel',
+        {
+          defaultMessage: 'Failed spans',
+        }
+      ),
     },
   ];
 

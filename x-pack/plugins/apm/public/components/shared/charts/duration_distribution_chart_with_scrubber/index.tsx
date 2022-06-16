@@ -104,7 +104,7 @@ export function DurationDistributionChartWithScrubber({
           <EuiTitle size="xs">
             <h5 data-test-subj="apmDurationDistributionChartWithScrubberTitle">
               {i18n.translate(
-                'xpack.apm.durationDistributionChartWithScrubber.distribution.panelTitle',
+                'xpack.apm.durationDistributionChartWithScrubber.panelTitle',
                 {
                   defaultMessage: 'Latency distribution',
                 }
@@ -135,7 +135,7 @@ export function DurationDistributionChartWithScrubber({
                   data-test-sub="apmDurationDistributionChartWithScrubberTitleClearSelectionBadge"
                 >
                   {i18n.translate(
-                    'xpack.apm.durationDistributionChartWithScrubber.distribution.selectionText',
+                    'xpack.apm.durationDistributionChartWithScrubber.selectionText',
                     {
                       defaultMessage: `Selection: {formattedSelection}`,
                       values: {
