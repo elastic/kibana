@@ -215,4 +215,84 @@ describe('xyVis', () => {
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
+
+  test('throws the error if the x axis extent is enabled for a date histogram', async () => {
+    const {
+      data,
+      args: { layers, ...rest },
+    } = sampleArgs();
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    sampleLayer.xScaleType = 'time';
+    sampleLayer.isHistogram = true;
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
+          annotationLayers: [],
+          isHistogram: true,
+          xScaleType: 'time',
+          xExtent: { type: 'axisExtentConfig', mode: 'dataBounds', lowerBound: 5, upperBound: 10 },
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws the error if the x axis extent is enabled with the full mode', async () => {
+    const {
+      data,
+      args: { layers, ...rest },
+    } = sampleArgs();
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
+          annotationLayers: [],
+          xExtent: {
+            type: 'axisExtentConfig',
+            mode: 'full',
+            lowerBound: undefined,
+            upperBound: undefined,
+          },
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws the error if the x axis extent is enabled without a histogram defined', async () => {
+    const {
+      data,
+      args: { layers, ...rest },
+    } = sampleArgs();
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
+          annotationLayers: [],
+          xExtent: {
+            type: 'axisExtentConfig',
+            mode: 'dataBounds',
+            lowerBound: 0,
+            upperBound: 10,
+          },
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
 });
