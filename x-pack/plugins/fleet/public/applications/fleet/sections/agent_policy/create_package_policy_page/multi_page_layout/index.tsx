@@ -48,7 +48,7 @@ const confirmDataStep = {
 
 const fleetManagedSteps = [installAgentStep, addIntegrationStep, confirmDataStep];
 
-const standaloneSteps = [addIntegrationStep, installAgentStep];
+const standaloneSteps = [addIntegrationStep, installAgentStep, confirmDataStep];
 
 export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   from,

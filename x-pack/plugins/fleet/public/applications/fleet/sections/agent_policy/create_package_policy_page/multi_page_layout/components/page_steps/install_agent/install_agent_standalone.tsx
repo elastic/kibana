@@ -13,7 +13,7 @@ import { safeDump } from 'js-yaml';
 import type { FullAgentPolicy } from '../../../../../../../../../../common/types/models/agent_policy';
 
 import {
-  CreatePackagePolicyFinalBottomBar,
+  AgentStandaloneBottomBar,
   StandaloneModeWarningCallout,
   NotObscuredByBottomBar,
 } from '../..';
@@ -37,7 +37,7 @@ import { StandaloneInstructions } from '../../../../../../../../../components/en
 import type { InstallAgentPageProps } from './types';
 
 export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPageProps> = (props) => {
-  const { setIsManaged, agentPolicy, packageInfo } = props;
+  const { setIsManaged, agentPolicy, cancelUrl, onNext, cancelClickHandler } = props;
   const core = useStartServices();
   const kibanaVersion = useKibanaVersion();
   const [yaml, setYaml] = useState<any | undefined>('');
@@ -121,8 +121,10 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       {commandCopied && (
         <>
           <NotObscuredByBottomBar />
-          <CreatePackagePolicyFinalBottomBar
-            pkgkey={`${packageInfo.name}-${packageInfo.version}`}
+          <AgentStandaloneBottomBar
+            cancelUrl={cancelUrl}
+            onNext={onNext}
+            cancelClickHandler={cancelClickHandler}
           />
         </>
       )}
