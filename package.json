@@ -990,6 +990,7 @@
     "pretty-format": "^27.5.1",
     "q": "^1.5.1",
     "react-test-renderer": "^16.14.0",
+    "react-textarea-autosize": "^8.3.4",
     "read-pkg": "^5.2.0",
     "regenerate": "^1.4.0",
     "resolve": "^1.22.0",
