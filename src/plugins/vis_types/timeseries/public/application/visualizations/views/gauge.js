@@ -18,6 +18,8 @@ import { getValueBy } from '../lib/get_value_by';
 import { GaugeVis } from './gauge_vis';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 
+import './_gauge.scss';
+
 export class Gauge extends Component {
   constructor(props) {
     super(props);
