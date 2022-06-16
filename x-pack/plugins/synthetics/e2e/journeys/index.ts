@@ -14,6 +14,6 @@ export * from './alerts';
 export * from './monitor_details.journey'; // TODO: Enable these in a follow up PR
 export * from './monitor_name.journey'; // TODO: Enable these in a follow up PR
 export * from './monitor_management.journey'; // TODO: Enable these in a follow up PR
-export * from './monitor_management_enablement.journey'; // TODO: Enable these in a follow up PR
+// export * from './monitor_management_enablement.journey'; // TODO: Enable these in a follow up PR
 export * from './monitor_details';
 export * from './locations';
