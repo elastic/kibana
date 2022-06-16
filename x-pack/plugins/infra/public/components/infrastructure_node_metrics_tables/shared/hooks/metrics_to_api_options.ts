@@ -47,7 +47,7 @@ Then this code would no longer be needed.
 // e.g: { 'source.module': 'system' }
 export interface MetricsQueryOptions<T extends string> {
   sourceFilter: QueryDslQueryContainer;
-  groupByField: string;
+  groupByField: string | string[];
   metricsMap: MetricsMap<T>;
 }
 
