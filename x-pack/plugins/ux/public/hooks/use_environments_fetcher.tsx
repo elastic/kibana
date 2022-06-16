@@ -5,12 +5,19 @@
  * 2.0.
  */
 
+import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useMemo } from 'react';
-import { useFetcher } from './use_fetcher';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../common/environment_filter_values';
+import { useDataView } from '../components/app/rum_dashboard/local_uifilters/use_data_view';
+import {
+  getEnvironments,
+  transformEnvironmentsResponse,
+} from '../services/data/environments_query';
+import { callDateMath } from '../services/data/call_date_math';
+import { useKibanaServices } from './use_kibana_services';
 
 function getEnvironmentOptions(environments: string[]) {
   const environmentOptions = environments
@@ -23,8 +30,6 @@ function getEnvironmentOptions(environments: string[]) {
   return [ENVIRONMENT_ALL, ...environmentOptions];
 }
 
-const INITIAL_DATA = { environments: [] };
-
 export function useEnvironmentsFetcher({
   serviceName,
   start,
@@ -34,27 +39,34 @@ export function useEnvironmentsFetcher({
   start?: string;
   end?: string;
 }) {
-  const { data = INITIAL_DATA, status = 'loading' } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi('GET /internal/apm/environments', {
-          params: {
-            query: {
-              start,
-              end,
-              serviceName,
-            },
-          },
-        });
-      }
+  const { dataViewTitle } = useDataView();
+  const kibana = useKibanaServices();
+  const size =
+    // @ts-ignore defaults field should exist and contain this value
+    kibana.uiSettings?.defaults?.['observability:maxSuggestions']?.value ?? 100;
+  const { data: esQueryResponse, loading } = useEsSearch(
+    {
+      index: dataViewTitle,
+      ...getEnvironments({
+        serviceName,
+        start: callDateMath(start),
+        end: callDateMath(end),
+        size,
+      }),
     },
-    [start, end, serviceName]
+    [dataViewTitle, serviceName, start, end, size],
+    { name: 'UxEnvironments' }
+  );
+
+  const environments = useMemo(
+    () => transformEnvironmentsResponse(esQueryResponse) ?? [],
+    [esQueryResponse]
   );
 
   const environmentOptions = useMemo(
-    () => getEnvironmentOptions(data.environments),
-    [data?.environments]
+    () => getEnvironmentOptions(environments),
+    [environments]
   );
 
-  return { environments: data.environments, status, environmentOptions };
+  return { environments, loading, environmentOptions };
 }
