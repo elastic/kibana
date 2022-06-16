@@ -43,7 +43,9 @@ describe('build query', () => {
 
       const expectedESQueries = [{ match_all: {} }, { exists: { field: 'foo' } }];
 
-      const result = buildQueryFromFilters(filters, indexPattern, false);
+      const result = buildQueryFromFilters(filters, indexPattern, {
+        ignoreFilterIfFieldNotInIndex: false,
+      });
 
       expect(result.filter).toEqual(expectedESQueries);
     });
@@ -55,14 +57,18 @@ describe('build query', () => {
           meta: { type: 'match_all', negate: true, disabled: true },
         } as MatchAllFilter,
       ] as Filter[];
-      const result = buildQueryFromFilters(filters, indexPattern, false);
+      const result = buildQueryFromFilters(filters, indexPattern, {
+        ignoreFilterIfFieldNotInIndex: false,
+      });
 
       expect(result.must_not).toEqual([]);
     });
 
     test('should remove falsy filters', () => {
       const filters = [null, undefined] as unknown as Filter[];
-      const result = buildQueryFromFilters(filters, indexPattern, false);
+      const result = buildQueryFromFilters(filters, indexPattern, {
+        ignoreFilterIfFieldNotInIndex: false,
+      });
 
       expect(result.must_not).toEqual([]);
       expect(result.must).toEqual([]);
@@ -78,7 +84,9 @@ describe('build query', () => {
 
       const expectedESQueries = [{ match_all: {} }];
 
-      const result = buildQueryFromFilters(filters, indexPattern, false);
+      const result = buildQueryFromFilters(filters, indexPattern, {
+        ignoreFilterIfFieldNotInIndex: false,
+      });
 
       expect(result.must_not).toEqual(expectedESQueries);
     });
@@ -97,7 +105,9 @@ describe('build query', () => {
         },
       ];
 
-      const result = buildQueryFromFilters(filters, indexPattern, false);
+      const result = buildQueryFromFilters(filters, indexPattern, {
+        ignoreFilterIfFieldNotInIndex: false,
+      });
 
       expect(result.filter).toEqual(expectedESQueries);
     });
@@ -116,7 +126,9 @@ describe('build query', () => {
         },
       ];
 
-      const result = buildQueryFromFilters(filters, indexPattern, false);
+      const result = buildQueryFromFilters(filters, indexPattern, {
+        ignoreFilterIfFieldNotInIndex: false,
+      });
 
       expect(result.filter).toEqual(expectedESQueries);
     });
@@ -130,7 +142,9 @@ describe('build query', () => {
       ] as Filter[];
 
       const expectedESQueries = [{ query_string: { query: 'foo' } }];
-      const result = buildQueryFromFilters(filters, indexPattern, false);
+      const result = buildQueryFromFilters(filters, indexPattern, {
+        ignoreFilterIfFieldNotInIndex: false,
+      });
 
       expect(result.filter).toEqual(expectedESQueries);
     });
@@ -157,6 +171,32 @@ describe('build query', () => {
       ];
 
       const result = buildQueryFromFilters(filters, indexPattern);
+      expect(result.filter).toEqual(expectedESQueries);
+    });
+
+    test('should allow to configure ignore_unmapped for filters targeting nested fields in a nested query', () => {
+      const filters = [
+        {
+          query: { exists: { field: 'nestedField.child' } },
+          meta: { type: 'exists', alias: '', disabled: false, negate: false },
+        },
+      ];
+
+      const expectedESQueries = [
+        {
+          nested: {
+            path: 'nestedField',
+            query: {
+              exists: {
+                field: 'nestedField.child',
+              },
+            },
+            ignore_unmapped: true,
+          },
+        },
+      ];
+
+      const result = buildQueryFromFilters(filters, indexPattern, { nestedIgnoreUnmapped: true });
       expect(result.filter).toEqual(expectedESQueries);
     });
   });
