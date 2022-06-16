@@ -21,6 +21,7 @@ import {
   EuiCheckbox,
   EuiFlexItem,
   EuiFlexGroup,
+  useEuiTheme,
 } from '@elastic/eui';
 
 export interface TextBasedLanguagesTransitionModalProps {
@@ -38,6 +39,8 @@ export default function TextBasedLanguagesTransitionModal({
   const onTransitionModalDismiss = useCallback((e) => {
     setDismissModalChecked(e.target.checked);
   }, []);
+
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiModal onClose={() => closeModal(dismissModalChecked)} style={{ width: 700 }}>
       <EuiModalHeader>
@@ -87,9 +90,13 @@ export default function TextBasedLanguagesTransitionModal({
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={() => closeModal(dismissModalChecked)}
-              fill
               color="warning"
               iconType="merge"
+              css={css`
+                color: ${euiTheme.colors.warning};
+                border: 1px solid ${euiTheme.colors.warning};
+                background-color: ${euiTheme.colors.emptyShade};
+              `}
             >
               {i18n.translate(
                 'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalCloseButton',
