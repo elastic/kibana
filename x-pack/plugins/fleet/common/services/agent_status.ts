@@ -34,7 +34,7 @@ export function getAgentStatus(agent: Agent): AgentStatus {
   if (agent.upgrade_started_at && !agent.upgraded_at) {
     return 'updating';
   }
-  if (intervalsSinceLastCheckIn >= 4) {
+  if (intervalsSinceLastCheckIn >= 10) {
     return 'offline';
   }
 
