@@ -9,8 +9,8 @@ import React from 'react';
 import {
   AllSeries,
   ALL_VALUES_SELECTED,
-  ENVIRONMENT_ALL,
 } from '@kbn/observability-plugin/public';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { BreakdownItem, UxUIFilters } from '../../../../../typings/ui_filters';
 import { useDataView } from '../local_uifilters/use_data_view';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
@@ -55,7 +55,8 @@ export function PageLoadDistChart({
       selectedMetricField: TRANSACTION_DURATION,
       reportDefinitions: {
         [SERVICE_ENVIRONMENT]:
-          !uiFilters?.environment || uiFilters.environment === ENVIRONMENT_ALL
+          !uiFilters?.environment ||
+          uiFilters.environment === ENVIRONMENT_ALL.value
             ? [ALL_VALUES_SELECTED]
             : [uiFilters.environment],
         [SERVICE_NAME]: uiFilters?.serviceName ?? [ALL_VALUES_SELECTED],

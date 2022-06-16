@@ -11,11 +11,11 @@ import { useHistory } from 'react-router-dom';
 import {
   AllSeries,
   ALL_VALUES_SELECTED,
-  ENVIRONMENT_ALL,
   fromQuery,
   RECORDS_FIELD,
   toQuery,
 } from '@kbn/observability-plugin/public';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { BreakdownItem, UxUIFilters } from '../../../../../typings/ui_filters';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
@@ -51,7 +51,8 @@ export function PageViewsChart({ breakdown, uiFilters }: Props) {
       selectedMetricField: RECORDS_FIELD,
       reportDefinitions: {
         [SERVICE_ENVIRONMENT]:
-          !uiFilters?.environment || uiFilters.environment === ENVIRONMENT_ALL
+          !uiFilters?.environment ||
+          uiFilters.environment === ENVIRONMENT_ALL.value
             ? [ALL_VALUES_SELECTED]
             : [uiFilters.environment],
         [SERVICE_NAME]: urlParams.serviceName
