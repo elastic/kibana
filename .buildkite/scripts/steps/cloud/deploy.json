@@ -213,8 +213,7 @@
           ],
           "kibana": {
             "version": null,
-            "docker_image": null,
-            "user_settings_yaml": "logging.root.level: all"
+            "docker_image": null
           }
         },
         "ref_id": "main-kibana"
