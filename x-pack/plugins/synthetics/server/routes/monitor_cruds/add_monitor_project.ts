@@ -19,26 +19,25 @@ export const addSyntheticsProjectMonitorRoute: UMRestApiRouteFactory = (libs: UM
   validate: {
     body: schema.object({
       project: schema.string(),
-      keep_stale: schema.boolean(),
       monitors: schema.arrayOf(schema.any()),
     }),
   },
   handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
     const monitors = (request.body?.monitors as ProjectBrowserMonitor[]) || [];
     const spaceId = server.spaces.spacesService.getSpaceId(request);
-    const { keep_stale: keepStale, project: projectId } = request.body || {};
+    const { project: projectId } = request.body || {};
     const locations: Locations = (await getServiceLocations(server)).locations;
     const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId,
       spaceId,
-      keepStale,
       locations,
       encryptedSavedObjectsClient,
       savedObjectsClient,
       monitors,
       server,
+      keepStale: true,
     });
 
     await pushMonitorFormatter.configureAllProjectMonitors();

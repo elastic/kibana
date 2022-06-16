@@ -243,7 +243,6 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send({
             ...projectMonitors,
-            keep_stale: false,
             monitors: testMonitors,
           })
           .expect(200);
@@ -251,7 +250,7 @@ export default function ({ getService }: FtrProviderContext) {
         const projectResponse = await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
           .set('kbn-xsrf', 'true')
-          .send({ ...projectMonitors, keep_stale: false })
+          .send({ ...projectMonitors })
           .expect(200);
 
         // expect monitor to have been deleted
@@ -291,7 +290,6 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send({
             ...projectMonitors,
-            keep_stale: false,
             monitors: testMonitors,
           })
           .expect(200);
@@ -299,7 +297,7 @@ export default function ({ getService }: FtrProviderContext) {
         const projectResponse = await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
           .set('kbn-xsrf', 'true')
-          .send({ ...projectMonitors, keep_stale: false, project: testprojectId })
+          .send({ ...projectMonitors, project: testprojectId })
           .expect(200);
 
         // expect monitor not to have been deleted
@@ -366,7 +364,6 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send({
             ...projectMonitors,
-            keep_stale: false,
             monitors: testMonitors,
           })
           .expect(200);
@@ -374,7 +371,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT}`)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
-          .send({ ...projectMonitors, keep_stale: false })
+          .send({ ...projectMonitors })
           .expect(200);
         // expect monitor not to have been deleted
         const getResponse = await supertest
