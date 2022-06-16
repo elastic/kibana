@@ -40,33 +40,31 @@ const getTagItemDataTestSubj = (tag: string) => `ruleTagBadgeItem-${tag}`;
 
 export const RuleTagBadge = (props: RuleTagBadgeProps) => {
   const {
-    isOpen = false,
     tags = [],
-    onClick,
-    onClose,
-    spread,
     badgeDataTestSubj = 'ruleTagBadge',
     titleDataTestSubj = 'ruleTagPopoverTitle',
     tagItemDataTestSubj = getTagItemDataTestSubj,
   } = props;
 
   const badge = useMemo(() => {
-    return (
-      <EuiBadge
-        data-test-subj={badgeDataTestSubj}
-        color="hollow"
-        iconType="tag"
-        iconSide="left"
-        tabIndex={-1}
-        onClick={onClick}
-        onClickAriaLabel="Tags"
-        iconOnClick={onClick}
-        iconOnClickAriaLabel="Tags"
-      >
-        {tags.length}
-      </EuiBadge>
-    );
-  }, [tags, badgeDataTestSubj, onClick]);
+    if ('onClick' in props) {
+      return (
+        <EuiBadge
+          data-test-subj={badgeDataTestSubj}
+          color="hollow"
+          iconType="tag"
+          iconSide="left"
+          tabIndex={-1}
+          onClick={props.onClick}
+          onClickAriaLabel="Tags"
+          iconOnClick={props.onClick}
+          iconOnClickAriaLabel="Tags"
+        >
+          {tags.length}
+        </EuiBadge>
+      );
+    }
+  }, [tags, badgeDataTestSubj, props]);
 
   const tagBadges = useMemo(
     () =>
@@ -83,13 +81,22 @@ export const RuleTagBadge = (props: RuleTagBadgeProps) => {
       )),
     [tags, tagItemDataTestSubj]
   );
-  return spread ? (
-    // Put 0 to fix negative left margin value.
-    <EuiFlexGroup data-test-subj="spreadTags" style={{ marginLeft: 0 }} wrap={true}>
-      {tagBadges}
-    </EuiFlexGroup>
-  ) : (
-    <EuiPopover button={badge} anchorPosition="upCenter" isOpen={isOpen} closePopover={onClose}>
+  if ('spread' in props) {
+    return (
+      // Put 0 to fix negative left margin value.
+      <EuiFlexGroup data-test-subj="spreadTags" style={{ marginLeft: 0 }} wrap={true}>
+        {tagBadges}
+      </EuiFlexGroup>
+    );
+  }
+
+  return (
+    <EuiPopover
+      button={badge}
+      anchorPosition="upCenter"
+      isOpen={props.isOpen!} // The props exists as it's required in props types
+      closePopover={props.onClose!}
+    >
       <EuiPopoverTitle data-test-subj={titleDataTestSubj}>{tagTitle}</EuiPopoverTitle>
       <div style={containerStyle}>{tagBadges}</div>
     </EuiPopover>
