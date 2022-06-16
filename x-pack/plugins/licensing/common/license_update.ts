@@ -47,13 +47,13 @@ export function createLicenseUpdate(
   );
 
   // start periodic license fetch right away
-  const makeItHot = license$.subscribe();
+  const licenseSub = license$.subscribe();
 
   stop$
     .pipe(
       finalize(() => {
         manuallyRefresh$.complete();
-        makeItHot.unsubscribe();
+        licenseSub.unsubscribe();
       })
     )
     .subscribe();
