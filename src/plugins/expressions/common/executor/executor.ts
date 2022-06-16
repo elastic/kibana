@@ -10,6 +10,7 @@
 
 import { cloneDeep, mapValues } from 'lodash';
 import { Observable } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '@kbn/core/types';
 import {
@@ -87,9 +88,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   implements PersistableStateService<ExpressionAstExpression>
 {
   static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
+    logger?: Logger,
     state?: ExecutorState<Ctx>
   ): Executor<Ctx> {
-    const executor = new Executor<Ctx>(state);
+    const executor = new Executor<Ctx>(logger, state);
     for (const type of typeSpecs) executor.registerType(type);
 
     return executor;
@@ -107,7 +109,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    */
   public readonly types: TypesRegistry;
 
-  constructor(state?: ExecutorState<Context>) {
+  constructor(private readonly logger?: Logger, state?: ExecutorState<Context>) {
     this.functions = new FunctionsRegistry(this as Executor);
     this.types = new TypesRegistry(this as Executor);
     this.container = createExecutorContainer<Context>(state);
@@ -192,7 +194,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     if (typeof ast === 'string') executionParams.expression = ast;
     else executionParams.ast = ast;
 
-    const execution = new Execution<Input, Output>(executionParams);
+    const execution = new Execution<Input, Output>(executionParams, this.logger);
 
     return execution;
   }

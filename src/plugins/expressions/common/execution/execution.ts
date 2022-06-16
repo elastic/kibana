@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/logging';
 import { isPromise } from '@kbn/std';
 import { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
@@ -187,7 +188,7 @@ export class Execution<
     return this.context.inspectorAdapters;
   }
 
-  constructor(public readonly execution: ExecutionParams) {
+  constructor(public readonly execution: ExecutionParams, private readonly logger?: Logger) {
     const { executor } = execution;
 
     this.contract = new ExecutionContract<Input, Output, InspectorAdapters>(this);
