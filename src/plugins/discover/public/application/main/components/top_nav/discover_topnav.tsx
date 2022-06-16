@@ -180,7 +180,9 @@ export const DiscoverTopNav = ({
     },
     currentDataViewId: indexPattern?.id,
     onAddField: addField,
-    onDataViewCreated: createNewDataView,
+    onDataViewCreated: dataViewEditor.userPermissions.editDataView()
+      ? createNewDataView
+      : undefined,
     onChangeDataView: (newIndexPatternId: string) => onChangeIndexPattern(newIndexPatternId),
   };
 
