@@ -148,8 +148,10 @@ export const percentileOperation: OperationDefinition<
       }
     ).toAst();
   },
-  // TODO - there may be a way to get around including aggExpressionToEsAggsIdMap
-  optimizeEsAggs: (aggs, esAggsIdMap, aggExpressionToEsAggsIdMap) => {
+  optimizeEsAggs: (_aggs, _esAggsIdMap, aggExpressionToEsAggsIdMap) => {
+    let aggs = [..._aggs];
+    const esAggsIdMap = { ..._esAggsIdMap };
+
     const percentileExpressionsByArgs: Record<string, ExpressionAstExpressionBuilder[]> = {};
 
     // group percentile dimensions by differentiating parameters
@@ -171,8 +173,8 @@ export const percentileOperation: OperationDefinition<
 
     // collapse them into a single esAggs expression builder
     Object.values(percentileExpressionsByArgs).forEach((expressionBuilders) => {
-      if (!(expressionBuilders.length > 1)) {
-        // don't need to optimize if there's only one
+      if (expressionBuilders.length <= 1) {
+        // don't need to optimize if there aren't more than one
         return;
       }
 
@@ -203,17 +205,14 @@ export const percentileOperation: OperationDefinition<
 
           const duplicateExpressionBuilder = percentileToBuilder[percentile];
 
-          if (
-            !aggExpressionToEsAggsIdMap.has(builder) ||
-            !aggExpressionToEsAggsIdMap.has(duplicateExpressionBuilder)
-          ) {
+          const idForDuplicate = aggExpressionToEsAggsIdMap.get(duplicateExpressionBuilder);
+          const idForThisOne = aggExpressionToEsAggsIdMap.get(builder);
+
+          if (!idForDuplicate || !idForThisOne) {
             throw new Error(
               "Couldn't find esAggs ID for percentile expression builder... this should never happen."
             );
           }
-
-          const idForDuplicate = aggExpressionToEsAggsIdMap.get(duplicateExpressionBuilder)!;
-          const idForThisOne = aggExpressionToEsAggsIdMap.get(builder)!;
 
           esAggsIdMap[idForDuplicate].push(...esAggsIdMap[idForThisOne]);
 

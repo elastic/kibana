@@ -383,7 +383,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    */
   helpComponentTitle?: string;
   /**
-   * Optimizes EsAggs expression. Invoked only once per operation type. May mutate arguments.
+   * Optimizes EsAggs expression. Invoked only once per operation type.
    */
   optimizeEsAggs?: (
     aggs: ExpressionAstExpressionBuilder[],
