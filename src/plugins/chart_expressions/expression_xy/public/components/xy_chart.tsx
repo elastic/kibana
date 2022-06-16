@@ -454,7 +454,7 @@ export function XYChart({
         ? formatFactory(xFormat)
         : xAxisFormatter;
 
-    const rowIndex = table.rows.findIndex((row) => {
+    let rowIndex = table.rows.findIndex((row) => {
       if (xAccessor) {
         if (formattedDatatables[layer.layerId]?.formattedColumns[xAccessor]) {
           // stringify the value to compare with the chart value
@@ -474,7 +474,7 @@ export function XYChart({
 
     if (xySeries.seriesKeys.length > 1) {
       xySeries.splitAccessors.forEach((value, key) => {
-        const rowIndex = table.rows.findIndex((row) => {
+        rowIndex = table.rows.findIndex((row) => {
           return row[key] === value;
         });
         points.push({
