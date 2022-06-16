@@ -35,7 +35,7 @@ export const getMetricVisRenderer = (
             showNoResult={!visData.rows?.length}
             handlers={handlers}
           >
-            <div>Hi there</div>
+            {JSON.stringify(visConfig)}
           </VisualizationContainer>
         </KibanaThemeProvider>,
         domNode
