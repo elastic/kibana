@@ -157,7 +157,7 @@ export const LogsDashboardExample = () => {
       h: 13,
       id: '10',
       content: renderToString(
-        <GraphPanel title="[Logs] Bytes distribution" graph={BYTES_BAR_GRAPH} height="93%" />
+        <GraphPanel title="[Logs] Bytes distribution" graph={BYTES_BAR_GRAPH} />
       ),
     },
   ];

@@ -157,7 +157,7 @@ export const ResponseCodesPanel = () => {
       <GraphPanel
         title="[Logs] Response Codes Over Time + Annotations"
         graph={RESPONSE_CODE_GRAPH}
-        height="84%"
+        height="88%"
       />
       <EuiText size="xs">
         <EuiFlexGroup>
@@ -173,7 +173,7 @@ export const ResponseCodesPanel = () => {
 export const GraphPanel = ({
   title,
   graph,
-  height = '94%',
+  height = '95%',
 }: {
   title: string;
   graph: string;

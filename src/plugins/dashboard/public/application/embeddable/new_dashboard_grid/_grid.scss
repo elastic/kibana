@@ -28,4 +28,5 @@ h1 {
   box-shadow: 0 0.9px 4px -1px rgba(0, 0, 0, 0.08), 0 2.6px 8px -1px rgba(0, 0, 0, 0.06), 0 5.7px 12px -1px rgba(0, 0, 0, 0.05), 0 15px 15px -1px rgba(0, 0, 0, 0.04);
   border-radius: 6px;
   padding: 16px;
+  overflow-y: hidden !important;
 }
