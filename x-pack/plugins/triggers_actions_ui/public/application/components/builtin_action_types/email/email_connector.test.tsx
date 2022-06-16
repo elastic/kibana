@@ -577,5 +577,115 @@ describe('EmailActionConnectorFields', () => {
         isValid: false,
       });
     });
+
+    it.each([[123.5], ['123.5']])(
+      'connector validation fails when port is not an integer: %p',
+      async (port) => {
+        const actionConnector = {
+          secrets: {
+            user: 'user',
+            password: 'pass',
+          },
+          id: 'test',
+          actionTypeId: '.email',
+          name: 'email',
+          config: {
+            from: 'test@notallowed.com',
+            hasAuth: true,
+            service: 'other',
+            host: 'my-host',
+            port,
+          },
+          isDeprecated: false,
+        };
+
+        const { getByTestId } = appMockRenderer.render(
+          <ConnectorFormTestProvider
+            connector={actionConnector}
+            onSubmit={onSubmit}
+            connectorServices={{ validateEmailAddresses }}
+          >
+            <EmailActionConnectorFields
+              readOnly={false}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+            />
+          </ConnectorFormTestProvider>
+        );
+
+        await waitForComponentToUpdate();
+
+        await act(async () => {
+          userEvent.click(getByTestId('form-test-provide-submit'));
+        });
+
+        expect(onSubmit).toBeCalledWith({
+          data: {},
+          isValid: false,
+        });
+      }
+    );
+
+    it.each([[123], ['123']])('connector validation pass when port is valid: %p', async (port) => {
+      const actionConnector = {
+        secrets: {
+          user: 'user',
+          password: 'pass',
+        },
+        id: 'test',
+        actionTypeId: '.email',
+        name: 'email',
+        config: {
+          from: 'test@notallowed.com',
+          hasAuth: true,
+          service: 'other',
+          host: 'my-host',
+          port,
+        },
+        isDeprecated: false,
+      };
+
+      const { getByTestId } = appMockRenderer.render(
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          connectorServices={{ validateEmailAddresses }}
+        >
+          <EmailActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await waitForComponentToUpdate();
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          actionTypeId: '.email',
+          config: {
+            from: 'test@notallowed.com',
+            hasAuth: true,
+            host: 'my-host',
+            port,
+            secure: false,
+            service: 'other',
+          },
+          id: 'test',
+          isDeprecated: false,
+          name: 'email',
+          secrets: {
+            password: 'pass',
+            user: 'user',
+          },
+        },
+        isValid: true,
+      });
+    });
   });
 });

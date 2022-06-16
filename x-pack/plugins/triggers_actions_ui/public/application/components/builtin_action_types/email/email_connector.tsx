@@ -74,6 +74,24 @@ const getEmailConfig = (
   ],
 });
 
+const portConfig: FieldConfig<string> = {
+  label: i18n.PORT_LABEL,
+  validations: [
+    {
+      validator: emptyField(i18n.PORT_REQUIRED),
+    },
+    {
+      validator: ({ value }) => {
+        const port = Number.parseFloat(value);
+
+        if (!Number.isInteger(port)) {
+          return { message: i18n.PORT_INVALID };
+        }
+      },
+    },
+  ],
+};
+
 export const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
@@ -199,14 +217,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                   <UseField
                     path="config.port"
                     component={NumericField}
-                    config={{
-                      label: i18n.PORT_LABEL,
-                      validations: [
-                        {
-                          validator: emptyField(i18n.PORT_REQUIRED),
-                        },
-                      ],
-                    }}
+                    config={portConfig}
                     componentProps={{
                       euiFieldProps: {
                         'data-test-subj': 'emailPortInput',
