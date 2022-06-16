@@ -10,7 +10,7 @@ import path from 'path';
 
 import type { RegistryDataStream } from '../../../../types';
 
-import { rewriteIngestPipeline, getPipelineNameForInstallation } from './install';
+import { getPipelineNameForInstallation, rewriteIngestPipeline } from './helpers';
 
 test('a json-format pipeline with pipeline references is correctly rewritten', () => {
   const inputStandard = readFileSync(

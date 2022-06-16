@@ -9,6 +9,7 @@
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
@@ -21,13 +22,12 @@ import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { renderingServiceMock } from './rendering/rendering_service.mock';
 import { integrationsServiceMock } from './integrations/integrations_service.mock';
 import { coreAppMock } from './core_app/core_app.mock';
-import { analyticsServiceMock } from './analytics/analytics_service.mock';
 
 export const analyticsServiceStartMock = analyticsServiceMock.createAnalyticsServiceStart();
 export const MockAnalyticsService = analyticsServiceMock.create();
 MockAnalyticsService.start.mockReturnValue(analyticsServiceStartMock);
 export const AnalyticsServiceConstructor = jest.fn().mockReturnValue(MockAnalyticsService);
-jest.doMock('./analytics', () => ({
+jest.doMock('@kbn/core-analytics-browser-internal', () => ({
   AnalyticsService: AnalyticsServiceConstructor,
 }));
 
