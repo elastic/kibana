@@ -101,10 +101,6 @@ export class HeadlessChromiumDriver {
     });
   }
 
-  public get pageScreenshottingError$() {
-    return this.screenshottingError$;
-  }
-
   /*
    * Call Page.goto and wait to see the Kibana DOM content
    */
@@ -311,7 +307,7 @@ export class HeadlessChromiumDriver {
         });
         this.page.browser().close();
         const error = getDisallowedOutgoingUrlError(interceptedUrl);
-        this.screenshottingError$.next(error);
+        this.screenshottingErrorSubject.next(error);
         logger.error(error);
         return;
       }
@@ -363,7 +359,7 @@ export class HeadlessChromiumDriver {
       if (!allowed || !this.allowRequest(interceptedUrl)) {
         this.page.browser().close();
         const error = getDisallowedOutgoingUrlError(interceptedUrl);
-        this.screenshottingError$.next(error);
+        this.screenshottingErrorSubject.next(error);
         logger.error(error);
         return;
       }

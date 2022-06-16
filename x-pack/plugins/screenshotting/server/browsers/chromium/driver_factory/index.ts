@@ -258,10 +258,9 @@ export class HeadlessChromiumDriverFactory {
           page
         );
 
-        const error$ = Rx.concat(
-          driver.pageScreenshottingError$,
-          this.getPageExit(browser, page)
-        ).pipe(mergeMap((err) => Rx.throwError(err)));
+        const error$ = Rx.concat(driver.screenshottingError$, this.getPageExit(browser, page)).pipe(
+          mergeMap((err) => Rx.throwError(err))
+        );
 
         const close = () => Rx.from(childProcess.kill());
 
