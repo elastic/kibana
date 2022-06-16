@@ -102,7 +102,7 @@ export const bucketTransform = {
   std_deviation: extendStats,
 
   top_hit: (bucket) => {
-    checkMetric(bucket, ['type', 'field', 'size']);
+    checkMetric(bucket, ['type', 'field']);
     const body = {
       filter: {
         exists: { field: bucket.field },
@@ -110,7 +110,7 @@ export const bucketTransform = {
       aggs: {
         docs: {
           top_hits: {
-            size: bucket.size,
+            size: bucket.size ?? 1,
             fields: [bucket.field],
           },
         },
