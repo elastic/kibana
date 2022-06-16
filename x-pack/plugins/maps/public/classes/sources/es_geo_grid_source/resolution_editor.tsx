@@ -51,34 +51,35 @@ export class ResolutionEditor extends Component<Props, State> {
 
   _getTicks() {
     const scale = this._getScale();
-    const unlabeledTicks = [
+    const ticks = [
       {
-        label: '',
+        label: i18n.translate('xpack.maps.source.esGrid.largeSizeLabel', {
+          defaultMessage: `large`,
+        }),
+        value: scale[GRID_RESOLUTION.COARSE],
+      },
+      {
+        label: i18n.translate('xpack.maps.source.esGrid.mediumSizeLabel', {
+          defaultMessage: `medium`,
+        }),
         value: scale[GRID_RESOLUTION.FINE],
       },
     ];
     if (scale[GRID_RESOLUTION.FINE] !== scale[GRID_RESOLUTION.MOST_FINE]) {
-      unlabeledTicks.push({
-        label: '',
+      ticks.push({
+        label: i18n.translate('xpack.maps.source.esGrid.mediumSmallSizeLabel', {
+          defaultMessage: `medium-small`,
+        }),
         value: scale[GRID_RESOLUTION.MOST_FINE],
       });
     }
-
-    return [
-      {
-        label: i18n.translate('xpack.maps.source.esGrid.lowLabel', {
-          defaultMessage: `low`,
-        }),
-        value: scale[GRID_RESOLUTION.COARSE],
-      },
-      ...unlabeledTicks,
-      {
-        label: i18n.translate('xpack.maps.source.esGrid.highLabel', {
-          defaultMessage: `high`,
-        }),
-        value: scale[GRID_RESOLUTION.SUPER_FINE],
-      },
-    ];
+    ticks.push({
+      label: i18n.translate('xpack.maps.source.esGrid.smallSizeLabel', {
+        defaultMessage: `small`,
+      }),
+      value: scale[GRID_RESOLUTION.SUPER_FINE],
+    });
+    return ticks;
   }
 
   _resolutionToSliderValue(resolution: GRID_RESOLUTION): number {
@@ -150,7 +151,7 @@ export class ResolutionEditor extends Component<Props, State> {
         <p>
           <FormattedMessage
             id="xpack.maps.source.esGrid.vectorTileModal.message"
-            defaultMessage="High resolution uses vector tiles from the Elasticsearch vector tile API. Elasticsearch vector tile API does not support 'Top terms' metric. Switching to super fine grid resolution will remove all 'Top terms' metrics from your layer configuration."
+            defaultMessage="Small size uses vector tiles from the Elasticsearch vector tile API. Elasticsearch vector tile API does not support 'Top terms' metric. Switching to small size will remove all 'Top terms' metrics from your layer configuration."
           />
         </p>
       </EuiConfirmModal>
@@ -158,22 +159,14 @@ export class ResolutionEditor extends Component<Props, State> {
   }
 
   render() {
-    const helpText =
-      (this.props.renderAs === RENDER_AS.POINT || this.props.renderAs === RENDER_AS.GRID) &&
-      this.props.resolution === GRID_RESOLUTION.SUPER_FINE
-        ? i18n.translate('xpack.maps.source.esGrid.superFineHelpText', {
-            defaultMessage: 'High resolution uses vector tiles.',
-          })
-        : undefined;
     const ticks = this._getTicks();
     return (
       <>
         {this._renderModal()}
         <EuiFormRow
           label={i18n.translate('xpack.maps.geoGrid.resolutionLabel', {
-            defaultMessage: 'Resolution',
+            defaultMessage: 'Size',
           })}
-          helpText={helpText}
           display="columnCompressed"
         >
           <EuiRange
