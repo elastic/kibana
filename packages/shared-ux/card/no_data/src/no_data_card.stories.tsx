@@ -7,12 +7,18 @@
  */
 
 import React from 'react';
+
+import { Params, getStoryArgTypes, getStoryServices } from './mocks';
+
+import { NoDataCard as NoDataCardComponent } from './no_data_card.component';
 import { NoDataCard } from './no_data_card';
+import { NoDataCardProvider } from './services';
+
 import mdx from '../README.mdx';
 
 export default {
-  title: 'Card',
-  description: 'A wrapper around EuiCard, to be used on NoData page',
+  title: 'Card/No Data Card',
+  description: 'A solution-specific wrapper around `EuiCard`, to be used on `NoData` page',
   parameters: {
     docs: {
       page: mdx,
@@ -20,31 +26,20 @@ export default {
   },
 };
 
-const argTypes = {
-  title: {
-    control: {
-      type: 'text',
-    },
-    defaultValue: 'Add data',
-  },
-  button: {
-    control: {
-      type: 'text',
-    },
-    defaultValue: '',
-  },
-  description: {
-    control: {
-      type: 'text',
-    },
-    defaultValue: '',
-  },
+const argTypes = getStoryArgTypes();
+
+export const Component = (params: Params) => {
+  return <NoDataCardComponent {...params} />;
 };
 
-type Params = Record<keyof typeof argTypes, any>;
+Component.argTypes = argTypes;
 
-export const NoData = (params: Params) => {
-  return <NoDataCard {...params} />;
+export const ConnectedComponent = (params: Params) => {
+  return (
+    <NoDataCardProvider {...getStoryServices(params)}>
+      <NoDataCard {...params} />
+    </NoDataCardProvider>
+  );
 };
 
-NoData.argTypes = argTypes;
+ConnectedComponent.argTypes = argTypes;

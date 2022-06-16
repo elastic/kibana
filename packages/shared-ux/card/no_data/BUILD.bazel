@@ -10,6 +10,7 @@ SOURCE_FILES = glob(
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.mdx",
+    "src/**/*.svg",
   ],
   exclude = [
     "**/*.test.*",
@@ -44,6 +45,7 @@ RUNTIME_DEPS = [
   "@npm//react",
   "//packages/kbn-i18n-react",
   "//packages/kbn-i18n",
+  "//packages/shared-ux/link/redirect_app",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -65,6 +67,7 @@ TYPES_DEPS = [
   "//packages/kbn-ambient-ui-types",
   "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
+  "//packages/shared-ux/link/redirect_app:npm_module_types",
 ]
 
 jsts_transpiler(
@@ -78,6 +81,10 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   web = True,
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 ts_config(

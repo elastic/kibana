@@ -16,7 +16,7 @@ import { Services } from './services';
 export type Params = Record<keyof ReturnType<typeof getStoryArgTypes>, any>;
 
 /**
- * Returns Storybook-compatible service abstractions for the `NoDataElasticAgentCard` Provider.
+ * Returns Storybook-compatible service abstractions for the `NoDataCard` Provider.
  */
 export const getStoryServices = () => {
   const services: Services = {
@@ -28,13 +28,13 @@ export const getStoryServices = () => {
 };
 
 /**
- * Returns the Storybook arguments for `NoDataElasticAgentCard`, for its stories and for
+ * Returns the Storybook arguments for `NoDataCard`, for its stories and for
  * consuming component stories.
  */
 export const getStoryArgTypes = () => ({});
 
 /**
- * Returns the Jest-compatible service abstractions for the `NoDataElasticAgentCard` Provider.
+ * Returns the Jest-compatible service abstractions for the `NoDataCard` Provider.
  */
 export const getMockServices = () => {
   const services: Services = {

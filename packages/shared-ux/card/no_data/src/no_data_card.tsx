@@ -6,79 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { MouseEventHandler, ReactNode } from 'react';
-import { EuiButton, EuiCard, EuiScreenReaderOnly, EuiCardProps } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { RedirectAppLinksContainer } from '@kbn/shared-ux-link-redirect-app';
 
-import { NoDataCardStyles } from './no_data_card.styles';
+import { NoDataCard as Component, Props as ComponentProps } from './no_data_card.component';
 
-const defaultDescription = i18n.translate('sharedUXPackages.card.noData.description', {
-  defaultMessage: `Proceed without collecting data`,
-});
+import { useServices } from './services';
 
-/**
- * Props for the `NoDataCard` component.
- */
-export type Props = Partial<Omit<EuiCardProps, 'layout'>> & {
-  /**
-   * Provide just a string for the button's label, or a whole component;
-   * The button will be hidden completely if `isDisabled=true`
-   */
-  button?: string | ReactNode;
-  /** Remapping `onClick` to any element */
-  onClick?: MouseEventHandler<HTMLElement>;
-  /**
-   * Description for the card;
-   * If not provided, the default will be used
-   */
-  description?: string | ReactNode;
-};
+export type Props = Omit<ComponentProps, 'canAccessFleet'>;
 
-/**
- * A card that displays a message and a button when there is no data in Kibana.
- */
-export const NoDataCard = ({
-  title: titleProp,
-  button,
-  description,
-  isDisabled,
-  ...props
-}: Props) => {
-  const styles = NoDataCardStyles();
+export const NoDataCard = ({ href: srcHref, category, description, ...props }: Props) => {
+  const { canAccessFleet, addBasePath } = useServices();
 
-  const footer = () => {
-    // Don't render the footer action if disabled
-    if (isDisabled) {
-      return;
+  const href = useMemo(() => {
+    if (srcHref) {
+      return srcHref;
     }
 
-    // Render a custom footer action if the button is not a simple string
-    if (button && typeof button !== 'string') {
-      return button;
+    // TODO: get this URL from a locator
+    const prefix = '/app/integrations/browse';
+
+    if (category) {
+      return addBasePath(`${prefix}/${category}`);
     }
 
-    // Default footer action is a button with the provided or default string
-    return <EuiButton fill>{button || titleProp}</EuiButton>;
-  };
-
-  const cardDescription = description || defaultDescription;
-
-  // Fix the need for an a11y title even though the button exists by setting to screen reader only
-  const title = titleProp ? (
-    <EuiScreenReaderOnly>
-      <span>{titleProp}</span>
-    </EuiScreenReaderOnly>
-  ) : null;
+    return addBasePath(prefix);
+  }, [addBasePath, srcHref, category]);
 
   return (
-    <EuiCard
-      css={styles}
-      paddingSize="l"
-      title={title!}
-      description={cardDescription}
-      footer={footer()}
-      isDisabled={isDisabled}
-      {...props}
-    />
+    <RedirectAppLinksContainer>
+      <Component {...{ ...props, href, canAccessFleet, description }} />
+    </RedirectAppLinksContainer>
   );
 };

@@ -9,34 +9,27 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { NoDataCard } from '@kbn/shared-ux-card-no-data';
+import { NoDataCard } from './no_data_card.component';
 
-import { NoDataElasticAgentCard } from './no_data_elastic_agent_card.component';
-
-describe('ElasticAgentCardComponent', () => {
+describe('NoDataCardComponent', () => {
   test('renders', () => {
-    const component = shallow(<NoDataElasticAgentCard canAccessFleet={true} />);
+    const component = shallow(<NoDataCard canAccessFleet={true} />);
     expect(component).toMatchSnapshot();
   });
 
   test('renders with canAccessFleet false', () => {
-    const component = shallow(<NoDataElasticAgentCard canAccessFleet={false} />);
-    expect(component.find(NoDataCard).props().isDisabled).toBe(true);
+    const component = shallow(<NoDataCard canAccessFleet={false} />);
     expect(component).toMatchSnapshot();
   });
 
   describe('props', () => {
     test('button', () => {
-      const component = shallow(<NoDataElasticAgentCard button="Button" canAccessFleet={true} />);
-      expect(component.find(NoDataCard).props().button).toBe('Button');
+      const component = shallow(<NoDataCard button="Button" canAccessFleet={true} />);
       expect(component).toMatchSnapshot();
     });
 
     test('href', () => {
-      const component = shallow(
-        <NoDataElasticAgentCard canAccessFleet={true} href={'some path'} />
-      );
-      expect(component.find(NoDataCard).props().href).toBe('some path');
+      const component = shallow(<NoDataCard canAccessFleet={true} href={'some path'} />);
       expect(component).toMatchSnapshot();
     });
   });

@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 
-import { NoDataElasticAgentCard } from '@kbn/shared-ux-card-no-data-elastic-agent';
+import { NoDataCard } from '@kbn/shared-ux-card-no-data';
 import { NoDataPageProps } from './types';
 
 export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
@@ -34,7 +34,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
     const actionKey = actionKeys[0];
     const key =
       actionKey === 'elasticAgent' ? 'empty-page-agent-action' : `empty-page-${actionKey}-action`;
-    return <NoDataElasticAgentCard key={key} {...action[actionKey]} />;
+    return <NoDataCard key={key} {...action[actionKey]} />;
   }, [action, actionKeys]);
 
   const title =

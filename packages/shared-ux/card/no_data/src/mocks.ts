@@ -13,7 +13,7 @@ import {
   getRedirectAppLinksStoryServices,
 } from '@kbn/shared-ux-link-redirect-app';
 
-import { NoDataElasticAgentCardServices } from './services';
+import { NoDataCardServices } from './services';
 
 /**
  * Parameters drawn from the Storybook arguments collection that customize a component story.
@@ -21,10 +21,10 @@ import { NoDataElasticAgentCardServices } from './services';
 export type Params = Record<keyof ReturnType<typeof getStoryArgTypes>, any>;
 
 /**
- * Returns Storybook-compatible service abstractions for the `NoDataElasticAgentCard` Provider.
+ * Returns Storybook-compatible service abstractions for the `NoDataCard` Provider.
  */
 export const getStoryServices = (params: Params) => {
-  const services: NoDataElasticAgentCardServices = {
+  const services: NoDataCardServices = {
     ...getRedirectAppLinksStoryServices(),
     ...params,
     addBasePath: (path) => {
@@ -37,7 +37,7 @@ export const getStoryServices = (params: Params) => {
 };
 
 /**
- * Returns the Storybook arguments for `NoDataElasticAgentCard`, for its stories and for
+ * Returns the Storybook arguments for `NoDataCard`, for its stories and for
  * consuming component stories.
  */
 export const getStoryArgTypes = () => ({
@@ -46,13 +46,25 @@ export const getStoryArgTypes = () => ({
     control: 'boolean',
     defaultValue: true,
   },
+  category: {
+    control: {
+      type: 'text',
+    },
+    defaultValue: '',
+  },
+  title: {
+    control: {
+      type: 'text',
+    },
+    defaultValue: '',
+  },
   description: {
     control: {
       type: 'text',
     },
     defaultValue: '',
   },
-  category: {
+  button: {
     control: {
       type: 'text',
     },
@@ -61,12 +73,12 @@ export const getStoryArgTypes = () => ({
 });
 
 /**
- * Returns the Jest-compatible service abstractions for the `NoDataElasticAgentCard` Provider.
+ * Returns the Jest-compatible service abstractions for the `NoDataCard` Provider.
  */
 export const getMockServices = (params?: Params) => {
   const { canAccessFleet } = params || { canAccessFleet: true };
 
-  const services: NoDataElasticAgentCardServices = {
+  const services: NoDataCardServices = {
     ...getRedirectAppLinksMockServices(),
     canAccessFleet,
     addBasePath: (path) => path,

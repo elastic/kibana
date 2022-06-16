@@ -3323,10 +3323,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-card-no-data-elastic-agent@link:bazel-bin/packages/shared-ux/card/no_data_elastic_agent":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data":
   version "0.0.0"
   uid ""
@@ -6667,10 +6663,6 @@
   uid ""
 
 "@types/kbn__shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__shared-ux-card-no-data-elastic-agent@link:bazel-bin/packages/shared-ux/card/no_data_elastic_agent/npm_module_types":
   version "0.0.0"
   uid ""
 

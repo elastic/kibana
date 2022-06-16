@@ -27,15 +27,12 @@ const Context = React.createContext<Services | null>(null);
 /**
  * Services that are consumed by this component and its dependencies.
  */
-export type NoDataElasticAgentCardServices = Services & RedirectAppLinksServices;
+export type NoDataCardServices = Services & RedirectAppLinksServices;
 
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const NoDataElasticAgentCardProvider: FC<NoDataElasticAgentCardServices> = ({
-  children,
-  ...services
-}) => {
+export const NoDataCardProvider: FC<NoDataCardServices> = ({ children, ...services }) => {
   const { addBasePath, canAccessFleet, ...props } = services;
 
   return (
@@ -63,13 +60,12 @@ interface KibanaDependencies {
  * An interface containing a collection of Kibana plugins and services required to
  * render this component as well as its dependencies.
  */
-export type NoDataElasticAgentCardKibanaDependencies = KibanaDependencies &
-  RedirectAppLinksKibanaDependencies;
+export type NoDataCardKibanaDependencies = KibanaDependencies & RedirectAppLinksKibanaDependencies;
 
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const NoDataElasticAgentCardKibanaProvider: FC<NoDataElasticAgentCardKibanaDependencies> = ({
+export const NoDataCardKibanaProvider: FC<NoDataCardKibanaDependencies> = ({
   children,
   ...dependencies
 }) => {
@@ -93,7 +89,7 @@ export function useServices() {
 
   if (!context) {
     throw new Error(
-      'NoDataElasticAgentCard Context is missing.  Ensure your component or React root is wrapped with NoDataElasticAgentCardContext.'
+      'NoDataCard Context is missing.  Ensure your component or React root is wrapped with NoDataCardContext.'
     );
   }
 

@@ -9,7 +9,7 @@
 import React from 'react';
 import { NoDataPage } from './no_data_page';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { NoDataElasticAgentCard } from '@kbn/shared-ux-card-no-data-elastic-agent';
+import { NoDataCard } from '@kbn/shared-ux-card-no-data';
 
 describe('NoDataPage', () => {
   test('render', () => {
@@ -25,6 +25,6 @@ describe('NoDataPage', () => {
     );
     expect(component).toMatchSnapshot();
     expect(component.find('h1').html()).toContain('Welcome to Elastic Analytics!');
-    expect(component.find(NoDataElasticAgentCard).length).toBe(1);
+    expect(component.find(NoDataCard).length).toBe(1);
   });
 });
