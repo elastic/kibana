@@ -16,17 +16,22 @@ const tagTitle = i18n.translate(
   }
 );
 
-export interface RuleTagBadgeProps {
-  isOpen: boolean;
+export interface RuleTagBadgeCommonProps {
   tags: string[];
-  onClick: React.MouseEventHandler<HTMLButtonElement>;
-  onClose: () => void;
   badgeDataTestSubj?: string;
   titleDataTestSubj?: string;
   tagItemDataTestSubj?: (tag: string) => string;
-  spread?: boolean;
 }
-
+export type RuleTagBadgeConditionalProps =
+  | {
+      isOpen: boolean;
+      onClick: React.MouseEventHandler<HTMLButtonElement>;
+      onClose: () => void;
+    }
+  | {
+      spread: boolean;
+    };
+export type RuleTagBadgeProps = RuleTagBadgeCommonProps & RuleTagBadgeConditionalProps;
 const containerStyle = {
   width: '300px',
 };
