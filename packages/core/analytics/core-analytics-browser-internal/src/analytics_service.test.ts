@@ -7,15 +7,16 @@
  */
 
 import { firstValueFrom, Observable } from 'rxjs';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { analyticsClientMock } from './analytics_service.test.mocks';
-import { coreMock, injectedMetadataServiceMock } from '../mocks';
 import { AnalyticsService } from './analytics_service';
 
 describe('AnalyticsService', () => {
   let analyticsService: AnalyticsService;
   beforeEach(() => {
     jest.clearAllMocks();
-    analyticsService = new AnalyticsService(coreMock.createCoreContext());
+    analyticsService = new AnalyticsService(coreContextMock.create());
   });
   test('should register some context providers on creation', async () => {
     expect(analyticsClientMock.registerContextProvider).toHaveBeenCalledTimes(3);

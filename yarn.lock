@@ -3015,7 +3015,23 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-analytics-browser-internal@link:bazel-bin/packages/core/analytics/core-analytics-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-analytics-browser-mocks@link:bazel-bin/packages/core/analytics/core-analytics-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-analytics-browser@link:bazel-bin/packages/core/analytics/core-analytics-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-base-browser-mocks@link:bazel-bin/packages/core/base/core-base-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -6362,7 +6378,23 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-analytics-browser-internal@link:bazel-bin/packages/core/analytics/core-analytics-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-analytics-browser-mocks@link:bazel-bin/packages/core/analytics/core-analytics-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-analytics-browser@link:bazel-bin/packages/core/analytics/core-analytics-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-browser-mocks@link:bazel-bin/packages/core/base/core-base-browser-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
