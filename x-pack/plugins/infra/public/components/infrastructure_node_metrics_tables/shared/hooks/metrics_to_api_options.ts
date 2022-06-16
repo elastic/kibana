@@ -57,7 +57,10 @@ export interface NodeMetricsExplorerOptionsMetric<Field extends string>
   field: Field;
 }
 
-export function metricsToApiOptions<T extends string>(metricsMap: MetricsMap<T>, groupBy: string) {
+export function metricsToApiOptions<T extends string>(
+  metricsMap: MetricsMap<T>,
+  groupBy: string | string[]
+) {
   const metrics = Object.values(metricsMap) as Array<NodeMetricsExplorerOptionsMetric<T>>;
 
   const options: MetricsExplorerOptions = {

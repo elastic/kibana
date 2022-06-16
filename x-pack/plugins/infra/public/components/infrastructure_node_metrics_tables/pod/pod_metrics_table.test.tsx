@@ -17,6 +17,7 @@ import { createStartServicesAccessorMock } from '../test_helpers';
 import { createLazyPodMetricsTable } from './create_lazy_pod_metrics_table';
 import IntegratedPodMetricsTable from './integrated_pod_metrics_table';
 import { metricByField } from './use_pod_metrics_table';
+import type { MetricsExplorerSeries } from '../../../../common/http_api';
 
 describe('PodMetricsTable', () => {
   const timerange = {
@@ -91,8 +92,8 @@ function createFetchMock(): NodeMetricsTableFetchMock {
 
   const mockData: DataResponseMock = {
     series: [
-      createPod('some-pod', 23000000, 76, 3671700000),
-      createPod('some-other-pod', 32000000, 67, 716300000),
+      createPod('358d96e3-026f-4440-a487-f6c2301884c0', 'some-pod', 23000000, 76, 3671700000),
+      createPod('358d96e3-026f-4440-a487-f6c2301884c1', 'some-other-pod', 32000000, 67, 716300000),
     ],
   };
 
@@ -108,15 +109,22 @@ function createFetchMock(): NodeMetricsTableFetchMock {
   };
 }
 
-function createPod(name: string, uptimeMs: number, cpuUsagePct: number, memoryUsageBytes: number) {
+function createPod(
+  id: string,
+  name: string,
+  uptimeMs: number,
+  cpuUsagePct: number,
+  memoryUsageBytes: number
+): Partial<MetricsExplorerSeries> {
   return {
-    id: name,
+    id: `${id} / ${name}`,
+    keys: [id, name],
     rows: [
       {
         [metricByField['kubernetes.pod.start_time']]: uptimeMs,
         [metricByField['kubernetes.pod.cpu.usage.node.pct']]: cpuUsagePct,
         [metricByField['kubernetes.pod.memory.usage.bytes']]: memoryUsageBytes,
-      },
+      } as MetricsExplorerSeries['rows'][number],
     ],
   };
 }

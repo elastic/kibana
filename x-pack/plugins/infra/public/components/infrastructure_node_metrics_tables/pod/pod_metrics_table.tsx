@@ -108,8 +108,10 @@ function podNodeColumns(
       field: 'name',
       truncateText: true,
       textOnly: true,
-      render: (name: string) => {
-        return <MetricsNodeDetailsLink id={name} nodeType={'pod'} timerange={timerange} />;
+      render: (_, { id, name }) => {
+        return (
+          <MetricsNodeDetailsLink id={id} label={name} nodeType={'pod'} timerange={timerange} />
+        );
       },
     },
     {
