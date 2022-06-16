@@ -22,8 +22,8 @@ import type { EsQueryFiltersConfig } from './from_filters';
  */
 export type EsQueryConfig = KueryQueryOptions &
   EsQueryFiltersConfig & {
-    allowLeadingWildcards: boolean;
-    queryStringOptions: SerializableRecord;
+    allowLeadingWildcards?: boolean;
+    queryStringOptions?: SerializableRecord;
   };
 
 function removeMatchAll<T>(filters: T[]) {
@@ -69,7 +69,7 @@ export function buildEsQuery(
   );
   const luceneQuery = buildQueryFromLucene(
     queriesByLanguage.lucene,
-    config.queryStringOptions,
+    config.queryStringOptions ?? {},
     config.dateFormatTZ
   );
 

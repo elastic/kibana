@@ -20,8 +20,8 @@ import { BoolQuery, DataViewBase } from './types';
 export function buildQueryFromKuery(
   indexPattern: DataViewBase | undefined,
   queries: Query[] = [],
-  parseConfig: { allowLeadingWildcards: boolean } = { allowLeadingWildcards: false },
-  queryConfig: KueryQueryOptions
+  parseConfig: { allowLeadingWildcards?: boolean } = { allowLeadingWildcards: false },
+  queryConfig: KueryQueryOptions = {}
 ): BoolQuery {
   const queryASTs = queries.map((query) => {
     return fromKueryExpression(query.query, parseConfig);

@@ -19,7 +19,9 @@ describe('build query', () => {
 
   describe('buildQueryFromFilters', () => {
     test('should return the parameters of an Elasticsearch bool query', () => {
-      const result = buildQueryFromFilters([], indexPattern, false);
+      const result = buildQueryFromFilters([], indexPattern, {
+        ignoreFilterIfFieldNotInIndex: false,
+      });
       const expected = {
         must: [],
         filter: [],
