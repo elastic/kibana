@@ -11,8 +11,11 @@ import type {
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
 import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
-import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
-import { createMetricByFieldLookup } from '../shared/hooks/metrics_to_api_options';
+import {
+  metricsToApiOptions,
+  useInfrastructureNodeMetrics,
+  createMetricByFieldLookup,
+} from '../shared';
 
 type ContainerMetricsField =
   | 'kubernetes.container.start_time'
