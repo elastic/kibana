@@ -241,7 +241,9 @@ describe('getLegendAction', function () {
     };
     wrapper = mountWithIntl(<Component {...newProps} />);
     expect(wrapper.find(EuiPopover).length).toBe(1);
-    expect(wrapper.find(EuiPopover).prop('title')).toEqual("Women's Accessories - Label B, filter options");
+    expect(wrapper.find(EuiPopover).prop('title')).toEqual(
+      "Women's Accessories - Label B, filter options"
+    );
     expect(wrapper.find(LegendActionPopover).prop('context')).toEqual({
       data: [
         {
