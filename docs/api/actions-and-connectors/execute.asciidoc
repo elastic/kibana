@@ -40,6 +40,7 @@ If you use an index connector, you must also have `all`, `create`, `index`, or
 (Optional, string) An identifier for the space. If `space_id` is not provided in
 the URL, the default space is used.
 
+[role="child_attributes"]
 [[execute-connector-api-request-body]]
 === {api-request-body-title}
 
