@@ -87,6 +87,7 @@ jest.mock('../lib/wrap_scoped_cluster_client', () => ({
 jest.mock('../lib/alerting_event_logger/alerting_event_logger');
 
 let fakeTimer: sinon.SinonFakeTimers;
+const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
@@ -139,7 +140,7 @@ describe('Task Runner', () => {
     actionsPlugin: actionsMock.createStart(),
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     encryptedSavedObjectsClient,
-    logger: loggingSystemMock.create().get(),
+    logger,
     executionContext: executionContextServiceMock.createInternalStartContract(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     basePathService: httpServiceMock.createBasePath(),
@@ -258,7 +259,6 @@ describe('Task Runner', () => {
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
 
-    const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(4);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
@@ -331,7 +331,6 @@ describe('Task Runner', () => {
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput());
 
-      const logger = customTaskRunnerFactoryInitializerParams.logger;
       expect(logger.debug).toHaveBeenCalledTimes(5);
       expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
       expect(logger.debug).nthCalledWith(
@@ -415,7 +414,6 @@ describe('Task Runner', () => {
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
-    const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(6);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
@@ -541,7 +539,6 @@ describe('Task Runner', () => {
       expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(expectedExecutions);
       expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
-      const logger = taskRunnerFactoryInitializerParams.logger;
       const expectedMessage = `no scheduling of actions for rule test:1: '${RULE_NAME}': rule is snoozed.`;
       if (expectedExecutions) {
         expect(logger.debug).not.toHaveBeenCalledWith(expectedMessage);
@@ -591,7 +588,6 @@ describe('Task Runner', () => {
       await taskRunner.run();
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
 
-      const logger = customTaskRunnerFactoryInitializerParams.logger;
       expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
       expect(logger.debug).nthCalledWith(
@@ -671,7 +667,6 @@ describe('Task Runner', () => {
       await taskRunner.run();
       // expect(enqueueFunction).toHaveBeenCalledTimes(1);
 
-      const logger = customTaskRunnerFactoryInitializerParams.logger;
       // expect(logger.debug).toHaveBeenCalledTimes(5);
       expect(logger.debug).nthCalledWith(
         3,
@@ -716,7 +711,6 @@ describe('Task Runner', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       await taskRunner.run();
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      const logger = customTaskRunnerFactoryInitializerParams.logger;
       expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(
         3,
@@ -1099,7 +1093,6 @@ describe('Task Runner', () => {
         generateAlertInstance({ id: 1, duration: MOCK_DURATION, start: DATE_1969 })
       );
 
-      const logger = customTaskRunnerFactoryInitializerParams.logger;
       expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
       expect(logger.debug).nthCalledWith(
@@ -1210,7 +1203,6 @@ describe('Task Runner', () => {
       const runnerResult = await taskRunner.run();
       expect(runnerResult.state.alertInstances).toEqual(generateAlertInstance());
 
-      const logger = customTaskRunnerFactoryInitializerParams.logger;
       expect(logger.debug).toHaveBeenCalledWith(
         `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
       );
@@ -1455,9 +1447,13 @@ describe('Task Runner', () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0 }));
-    expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
-      `Executing Rule foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]`
+    const loggerCall = logger.error.mock.calls[0][0];
+    const loggerMeta = logger.error.mock.calls[0][1];
+    expect(loggerCall as string).toMatchInlineSnapshot(
+      `"Executing Rule foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
+    expect(loggerMeta?.tags).toEqual(['test', '1', 'rule-run-failed']);
+    expect(loggerMeta?.error?.stack_trace).toBeDefined();
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
@@ -1583,6 +1579,12 @@ describe('Task Runner', () => {
     });
 
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+
+    const loggerCall = logger.error.mock.calls[0][0];
+    const loggerMeta = logger.error.mock.calls[0][1];
+    expect(loggerCall as string).toMatchInlineSnapshot(`[Error: GENERIC ERROR MESSAGE]`);
+    expect(loggerMeta?.tags).toEqual(['test', '1', 'rule-run-failed']);
+    expect(loggerMeta?.error?.stack_trace).toBeDefined();
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when fetching the encrypted attributes', async () => {
@@ -1789,12 +1791,13 @@ describe('Task Runner', () => {
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
 
-    const logger = taskRunnerFactoryInitializerParams.logger;
     return taskRunner.run().catch((ex) => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
-      expect(logger.debug).toHaveBeenCalledWith(
-        `Executing Rule foo:test:1 has resulted in Error: Saved object [alert/1] not found`
+      const executeRuleDebugLogger = logger.debug.mock.calls[3][0];
+      expect(executeRuleDebugLogger as string).toMatchInlineSnapshot(
+        `"Executing Rule foo:test:1 has resulted in Error: Saved object [alert/1] not found"`
       );
+      expect(logger.error).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
         1,
@@ -1870,12 +1873,13 @@ describe('Task Runner', () => {
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
 
-    const logger = taskRunnerFactoryInitializerParams.logger;
     return taskRunner.run().catch((ex) => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
-      expect(logger.debug).toHaveBeenCalledWith(
-        `Executing Rule test space:test:1 has resulted in Error: Saved object [alert/1] not found`
+      const ruleExecuteDebugLog = logger.debug.mock.calls[3][0];
+      expect(ruleExecuteDebugLog as string).toMatchInlineSnapshot(
+        `"Executing Rule test space:test:1 has resulted in Error: Saved object [alert/1] not found"`
       );
+      expect(logger.error).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
         1,
@@ -2325,7 +2329,6 @@ describe('Task Runner', () => {
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
 
-    const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(4);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
@@ -2584,7 +2587,6 @@ describe('Task Runner', () => {
       })
     );
 
-    const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(6);
 
     expect(logger.debug).nthCalledWith(
@@ -2750,7 +2752,6 @@ describe('Task Runner', () => {
       })
     );
 
-    const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(6);
 
     expect(logger.debug).nthCalledWith(
