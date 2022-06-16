@@ -39,6 +39,9 @@ export interface ConsoleDataState {
   /** The key for the console when it is under ConsoleManager control */
   managedKey?: symbol;
 
+  /** content for the console's footer area */
+  footerContent: string;
+
   /** state for the command input area */
   input: {
     /** The text the user is typing into the console input area */
@@ -80,6 +83,10 @@ export type ConsoleDataAction =
   | {
       type: 'showSidePanel';
       payload: { show: ConsoleDataState['sidePanel']['show'] };
+    }
+  | {
+      type: 'updateFooterContent';
+      payload: { value: string };
     }
   | {
       type: 'updateCommandStoreState';

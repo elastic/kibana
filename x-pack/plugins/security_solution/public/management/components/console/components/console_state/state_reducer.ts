@@ -30,6 +30,7 @@ export const initiateState = (
     ...otherOptions,
     commandHistory: [],
     sidePanel: { show: null },
+    footerContent: '',
     input: {
       textEntered: '',
       placeholder: INPUT_DEFAULT_PLACEHOLDER_TEXT,
@@ -64,6 +65,12 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
     case 'removeFocusFromKeyCapture':
       state.keyCapture?.current?.blur();
       return state;
+
+    case 'updateFooterContent':
+      if (state.footerContent !== action.payload.value) {
+        return { ...state, footerContent: action.payload.value };
+      }
+      break;
 
     case 'executeCommand':
       return handleExecuteCommand(state, action);

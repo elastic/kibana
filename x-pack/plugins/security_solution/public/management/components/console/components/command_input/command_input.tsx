@@ -148,9 +148,11 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
           justifyContent="flexStart"
           ref={textDisplayRef}
         >
-          <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-prompt')}>
-            <span className="eui-displayInlineBlock prompt">{prompt}</span>
-          </EuiFlexItem>
+          {prompt && (
+            <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-prompt')}>
+              <span className="eui-displayInlineBlock prompt">{prompt}</span>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem
             className="textEntered"
             grow={false}

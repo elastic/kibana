@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { ConsoleFooter } from './components/console_footer';
 import { ConsoleHeader } from './components/console_header';
 import { CommandInput, CommandInputProps } from './components/command_input';
 import { ConsoleProps } from './types';
@@ -44,6 +45,10 @@ const ConsoleWindow = styled.div`
       border-bottom: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
     }
 
+    &-footer {
+      padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
+    }
+
     &-rightPanel {
       width: 35%;
       background-color: ${({ theme: { eui } }) => eui.euiColorGhost};
@@ -71,6 +76,10 @@ const ConsoleWindow = styled.div`
 
   .font-family-code {
     font-family: ${({ theme: { eui } }) => eui.euiCodeFontFamily};
+  }
+
+  .font-style-italic {
+    font-style: italic;
   }
 
   .descriptionList-20_80 {
@@ -159,6 +168,9 @@ export const Console = memo<ConsoleProps>(
                     </EuiFlexItem>
                     <EuiFlexItem grow={false} className="layout-container layout-commandInput">
                       <CommandInput prompt={prompt} focusRef={inputFocusRef} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} className="layout-container layout-footer">
+                      <ConsoleFooter />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
