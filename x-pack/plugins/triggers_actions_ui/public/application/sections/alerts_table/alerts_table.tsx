@@ -22,6 +22,7 @@ import {
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
   ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
 } from './translations';
+import { getActionsColumnSize } from './actions_column';
 import './alerts_table.scss';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
@@ -77,16 +78,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   } = props.alertsTableConfiguration;
   const { actionsColumn } = useActionsColumn();
   const leadingControlColumns = useMemo(() => {
-    const MIN_ACTION_COLUMN_WIDTH = 75;
-    const ITEM_SIZE = 32;
-    const BORDER_SIZE = 1;
-    const PADDING_SIZE = 6 * 2;
-    const width =
-      ITEM_SIZE * (actionsColumn.props.children.length + 1) + PADDING_SIZE + BORDER_SIZE;
     return [
       {
         id: 'expandColumn',
-        width: width > MIN_ACTION_COLUMN_WIDTH ? width : MIN_ACTION_COLUMN_WIDTH,
+        width: getActionsColumnSize(actionsColumn.props?.children?.length),
         headerCellRender: () => {
           return (
             <span data-test-subj="expandColumnHeaderLabel">
@@ -118,13 +113,16 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
               )}
               {actionsColumn &&
                 React.Children.map(actionsColumn.props.children, function (child) {
+                  if (child.props.size !== 's') {
+                    // eslint-disable-next-line no-console
+                    console.warn("AlertsTable requires the actionColumn to use icons of size 's'");
+                  }
                   return <EuiFlexItem grow={false}>{child}</EuiFlexItem>;
                 })}
             </EuiFlexGroup>
           );
         },
       },
-
       ...props.leadingControlColumns,
     ];
   }, [props.leadingControlColumns, props.showExpandToDetails, setFlyoutAlertIndex, actionsColumn]);
