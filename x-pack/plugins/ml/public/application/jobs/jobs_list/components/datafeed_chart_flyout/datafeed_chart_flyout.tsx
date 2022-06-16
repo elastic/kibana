@@ -194,9 +194,9 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
       const job: CombinedJobWithStats = await loadFullJob(jobId);
       const modelSnapshotResultsLine: LineAnnotationDatumWithModelSnapshot[] = [];
       const modelSnapshotsResp = await getModelSnapshots(jobId);
-      const modelSnapshots = modelSnapshotsResp?.model_snapshots ?? [];
+      const modelSnapshots = modelSnapshotsResp.model_snapshots ?? [];
       modelSnapshots.forEach((modelSnapshot) => {
-        const timestamp = Number(modelSnapshot?.latest_record_time_stamp);
+        const timestamp = Number(modelSnapshot.latest_record_time_stamp);
 
         modelSnapshotResultsLine.push({
           dataValue: timestamp,
