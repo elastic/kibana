@@ -13,10 +13,14 @@ tags: ['kibana', 'onboarding', 'setup', 'windows', 'development', 'wsl']
 Development on Windows is recommended through WSL2.  WSL lets users run a Linux environment on Windows, providing a supported development environment for Kibana.
 
 <DocCallOut title="Prerequisites">
-  For a basic WSL usage you must be running Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11.
   
-  However, in order to fully complete the guide and have a full development experience like running GUI apps as suggested bellow you must be running **Windows 11 (Build 22000 and higher)**.
-  In addition to that installing a **vGPU driver** is also required. Please choose the one compatible with your hardware: 
+  ### Basic Experience
+  For a basic WSL usage you must be running Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11. Note that in a basic setup you won't be able to use 
+  the browser to run and/or debug functional tests. It's highly advisable to make sure you install the prerequisites for a default usage listed below. 
+  
+  ### Default Experience
+  For a default experience and a completion of the entire guide which will make you able to run GUI apps as suggested bellow you must be running **Windows 11 (Build 22000 and higher)**.
+  In addition to that, installing a **vGPU driver** is also required. Please choose the one compatible with your hardware: 
 
   - [Intel GPU driver for WSL](https://www.intel.com/content/www/us/en/download/19344/intel-graphics-windows-dch-drivers.html?)
   - [AMD GPU driver for WSL](https://www.amd.com/en/support/kb/release-notes/rn-rad-win-wsl-support)
@@ -50,7 +54,7 @@ The latest setup instructions can be found at https://docs.microsoft.com/en-us/w
    wsl --set-default Ubuntu 
    ```  
 
-4) Install support for Google Chrome by running the following inside WSL shell (**Windows 11 Build 22000 and higher only**)
+4) Install support for Google Chrome by running the following inside WSL shell (**Default Experience Only - Windows 11 Build 22000+ and vGPU driver**)
 
    ```
    sudo apt update && sudo apt -y upgrade && sudo apt -y autoremove 
