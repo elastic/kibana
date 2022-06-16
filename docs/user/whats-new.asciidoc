@@ -1,12 +1,182 @@
 [[whats-new]]
 == What's new in 8.0
 
-This section summarizes the most important changes in each release. For the 
-full list, see <<release-notes>> and <<breaking-changes-8.3.0>>. 
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check the <<release-notes, release notes>>.
+
+Previous versions: {kibana-ref-all}/8.2/whats-new.html[8.2] | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+[float]
+=== Alerts available from Discover
+
+You can now create search threshold rules from *Discover*,
+making it easy to be notified when documents change so you can turn your data into action.
+Start by defining the data view, query, and filter conditions for when you want to be alerted.
+Then choose the messaging services where you want to be notified when your alert conditions are met,
+and finally, trigger workflows across third-party integrations such as ServiceNow and Slack.
+For information about alerts, check <<alerting-getting-started, Alerting>>.
+
+[role="screenshot"]
+image::images/highlights-discover.png[A view of the Create rule form opened from Discover]
+
+[float]
+=== New controls for filtering dashboard data
+
+Dashboard controls bring interactive inputs in an easy drag and drop editing experience.
+Controls chain, disable when they need to, and offer several filtering form
+factors that make filtering fast. Now, you can make filtering on popular fields
+easy for all your dashboard users.
+
+[role="screenshot"]
+image::images/highlights-controls.png[A dashboard view showing the new Controls menu]
+
+[float]
+=== Query bar refreshed across {kib}
+
+8.3 brings a modern and responsive query and search experience to Kibana, which
+makes more room for your data and content.
+
+[float]
+==== Data view menu
+
+The new data view menu consolidates all of the options you need to
+create, find, and edit your data views in a single location. Need to add a field to your data view?
+Changed your mind and need to create a data view? No problem. These options
+are all in the simplified menu.
+
+[role="screenshot"]
+image::discover/images/discover-data-view.png[How to set the {data-source}, width=50%]
+
+[float]
+==== Saved query and Add filter menus
+
+Querying and filtering your Elastic data just got easier with the improved *Saved query*
+and *Add filter* menus. In the *Saved query* menu, we’ve consolidated all of your
+query and filter needs, including the option to change your filtering language.
+
+[role="screenshot"]
+image::images/highlights-saved-query-menu.png[Menu for saving queries and adding filters, width=50%]
+
+You can choose to add a filter directly from the *Saved query* menu or use the
+*Add filter* plus for a one click shortcut to the add filter experience.
+
+[role="screenshot"]
+image::images/highlights-add-filter.png[Menu for saving queries and adding filters]
+
+For more information, check <<kibana-concepts-analysts, Kibana concepts>>.
+
+[float]
+=== Enhancements to visualization editors
+
+[float]
+=== Range annotations in Lens
+
+Unlock insights by visualizing event data directly on your *Lens* visualizations.
+With range annotations, you can show windows of time such as releases,
+maintenance windows, holidays, and more to provide context to metric performance.
+
+Range annotation inside a visualization
+
+[role="screenshot"]
+image::images/highlights-lens-range-inside.png[Range annotation inside of the visualization]
+
+Range annotation outside of the visualization
+
+[role="screenshot"]
+image::images/highlights-lens-range-outside.png[Range annotation outside of the visualization]
+
+For information about *Lens* annotations, check <<add-annotations, Add annotations>>.
+
+[float]
+=== Create anomaly jobs from Lens visualizations
+See something interesting on a visualization on your dashboard?
+Turn any *Lens* panel into a new anomaly detection job with
+the *Create anomaly detection job* menu option in your dashboards.
+
+This images shows the
+*Create anomaly detection job* option and transition to create job wizard.
+
+[role="screenshot"]
+image::images/highlights-lens-anomaly.png[Create anomaly detection job option and transition to create job wizard]
+
+
+[float]
+=== New accuracy mode in Lens
+When creating *Lens* visualizations with the *Top values* function,
+you can now enable accuracy mode, improving the accuracy of results for
+high-cardinality data by using more resources in your {es} cluster.
+
+[role="screenshot"]
+image::images/highlights-lens-accuracy.png[Accuracy mode in Lens]
+
+For information about Lens, check <<lens,Lens>>.
+
+[float]
+=== Synchronized tooltips for Lens dashboard panels
+
+To make it easier to compare multiple time series visualizations,
+dashboards now include a *Sync tooltips across panels* option.
+When enabled and you hover your cursor over a chart, the tooltips on all
+other related dashboard charts automatically appear at the same data point or moment in time.
+
+[role="screenshot"]
+image::images/highlights-lens-sync.png[Sync tooltip across panels option]
+
+For information, check <<dashboard, Dashboard>>.
+
+[float]
+=== Collapse your break down by
+
+When creating *Lens* tables and XY visualizations, you can now collapse the breakdown dimension,
+allowing you to summarize aggregated data.
+
+For information, check <<create-custom-tables, Create custom tables>>.
+
+[float]
+=== Language selector in Maps
+
+You can now select Arabic, German, English, Spanish,
+French, Hindi, Italian, Japanese, Portuguese, Russian, and Chinese for country
+and region labels. By default, new maps use the {kib} locale setting to determine
+the language for basemap labels.
+
+[role="screenshot"]
+image::images/highlights-maps-labels.gif[Menu for selecting a language for country and region lables]
+
+Are you using vector tiles? Good news. You are now able to make <<maps-aggregations,joins>>.
+
+[role="screenshot"]
+image::images/highlights-maps-vector-tiles.png[Joins for vector tiles in Maps]
+
+[float]
+=== Improved Content Security Policy
+
+{kib} now has experimental support for a more restrictive Content Security Policy.
+Specifically, we have removed the need for script-src ‘unsafe-eval’,
+which provides an additional level of protection against Cross-Site Scripting (“XSS”) attacks.
+
+You can enable this feature by configuring csp.disableUnsafeEval: true in your kibana.yml:
+
+[role="screenshot"]
+​​image::images/highlights-security.png[Setting csp.disableUnsafeEval to true in your kibana.yml]
+
+[float]
+=== Support for {kib} APIs in Console
+
+**Dev Tools > Console** now supports sending requests to {kib} APIs.
+Prepend any {kib} API endpoint with `kbn:`
+and send the request.
+
+[role="screenshot"]
+​​image::images/highlights-console.png[Console showing GET kbn:api/index_management/indices]
+
+
+
 
 // end::notable-highlights[]
