@@ -309,7 +309,7 @@ export function defineRoutes(
             role_descriptors: {},
           }));
 
-        await actionsClient.enqueueExecution({
+        await actionsClient.enqueueExecutions({
           id: req.params.id,
           spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
           executionId: uuid.v4(),

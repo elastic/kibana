@@ -461,24 +461,26 @@ describe('create()', () => {
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
                                                                         Array [
                                                                           Object {
-                                                                            "id": "1",
-                                                                            "params": Object {
-                                                                              "alertId": "1",
-                                                                              "consumer": "bar",
-                                                                              "spaceId": "default",
+                                                                            "taskInstance": Object {
+                                                                              "id": "1",
+                                                                              "params": Object {
+                                                                                "alertId": "1",
+                                                                                "consumer": "bar",
+                                                                                "spaceId": "default",
+                                                                              },
+                                                                              "schedule": Object {
+                                                                                "interval": "1m",
+                                                                              },
+                                                                              "scope": Array [
+                                                                                "alerting",
+                                                                              ],
+                                                                              "state": Object {
+                                                                                "alertInstances": Object {},
+                                                                                "alertTypeState": Object {},
+                                                                                "previousStartedAt": null,
+                                                                              },
+                                                                              "taskType": "alerting:123",
                                                                             },
-                                                                            "schedule": Object {
-                                                                              "interval": "1m",
-                                                                            },
-                                                                            "scope": Array [
-                                                                              "alerting",
-                                                                            ],
-                                                                            "state": Object {
-                                                                              "alertInstances": Object {},
-                                                                              "alertTypeState": Object {},
-                                                                              "previousStartedAt": null,
-                                                                            },
-                                                                            "taskType": "alerting:123",
                                                                           },
                                                                         ]
                                                 `);

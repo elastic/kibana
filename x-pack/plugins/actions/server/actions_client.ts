@@ -38,6 +38,7 @@ import { PreconfiguredActionDisabledModificationError } from './lib/errors/preco
 import { ExecuteOptions } from './lib/action_executor';
 import {
   ExecutionEnqueuer,
+  BulkExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
 } from './create_execute_function';
 import { ActionsAuthorization } from './authorization/actions_authorization';
@@ -92,7 +93,7 @@ interface ConstructorOptions {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
-  executionEnqueuer: ExecutionEnqueuer<void>;
+  executionEnqueuer: BulkExecutionEnqueuer<void>;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
@@ -116,7 +117,7 @@ export class ActionsClient {
   private readonly actionExecutor: ActionExecutorContract;
   private readonly request: KibanaRequest;
   private readonly authorization: ActionsAuthorization;
-  private readonly executionEnqueuer: ExecutionEnqueuer<void>;
+  private readonly executionEnqueuer: BulkExecutionEnqueuer<void>;
   private readonly ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   private readonly auditLogger?: AuditLogger;
   private readonly usageCounter?: UsageCounter;
@@ -643,17 +644,21 @@ export class ActionsClient {
     });
   }
 
-  public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
-    const { source } = options;
-    if (
-      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
-      AuthorizationMode.RBAC
-    ) {
-      await this.authorization.ensureAuthorized('execute');
-    } else {
-      trackLegacyRBACExemption('enqueueExecution', this.usageCounter);
-    }
-    return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
+  public async enqueueExecutions(options: EnqueueExecutionOptions[]): Promise<void> {
+    const sources = [...new Set(options.map((option) => option.source))];
+    await Promise.all(
+      sources.map(async (source) => {
+        if (
+          (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+          AuthorizationMode.RBAC
+        ) {
+          await this.authorization.ensureAuthorized('execute');
+        } else {
+          trackLegacyRBACExemption('enqueueExecution', this.usageCounter);
+        }
+      })
+    );
+    return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options, this.logger);
   }
 
   public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {

@@ -22,6 +22,7 @@ const createStartMock = () => {
     get: jest.fn(),
     remove: jest.fn(),
     schedule: jest.fn(),
+    bulkSchedule: jest.fn(),
     runNow: jest.fn(),
     ephemeralRunNow: jest.fn(),
     ensureScheduled: jest.fn(),

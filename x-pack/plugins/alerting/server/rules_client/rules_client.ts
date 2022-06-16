@@ -2557,7 +2557,7 @@ export class RulesClient {
       scope: ['alerting'],
     };
     try {
-      return await this.taskManager.schedule(taskInstance);
+      return await this.taskManager.schedule({ taskInstance });
     } catch (err) {
       if (err.statusCode === 409 && !throwOnConflict) {
         return taskInstance;

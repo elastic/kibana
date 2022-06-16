@@ -2238,19 +2238,21 @@ describe('execute()', () => {
   });
 });
 
-describe('enqueueExecution()', () => {
+describe('enqueueExecutions()', () => {
   describe('authorization', () => {
-    test('ensures user is authorised to excecute actions', async () => {
+    test('ensures user is authorised to execute actions', async () => {
       (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
         return AuthorizationMode.RBAC;
       });
-      await actionsClient.enqueueExecution({
-        id: uuid.v4(),
-        params: {},
-        spaceId: 'default',
-        executionId: '123abc',
-        apiKey: null,
-      });
+      await actionsClient.enqueueExecutions([
+        {
+          id: uuid.v4(),
+          params: {},
+          spaceId: 'default',
+          executionId: '123abc',
+          apiKey: null,
+        },
+      ]);
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
     });
 
@@ -2263,13 +2265,15 @@ describe('enqueueExecution()', () => {
       );
 
       await expect(
-        actionsClient.enqueueExecution({
-          id: uuid.v4(),
-          params: {},
-          spaceId: 'default',
-          executionId: '123abc',
-          apiKey: null,
-        })
+        actionsClient.enqueueExecutions([
+          {
+            id: uuid.v4(),
+            params: {},
+            spaceId: 'default',
+            executionId: '123abc',
+            apiKey: null,
+          },
+        ])
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
@@ -2280,13 +2284,15 @@ describe('enqueueExecution()', () => {
         return AuthorizationMode.Legacy;
       });
 
-      await actionsClient.enqueueExecution({
-        id: uuid.v4(),
-        params: {},
-        spaceId: 'default',
-        executionId: '123abc',
-        apiKey: null,
-      });
+      await actionsClient.enqueueExecutions([
+        {
+          id: uuid.v4(),
+          params: {},
+          spaceId: 'default',
+          executionId: '123abc',
+          apiKey: null,
+        },
+      ]);
 
       expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith(
         'enqueueExecution',
@@ -2296,14 +2302,16 @@ describe('enqueueExecution()', () => {
   });
 
   test('calls the executionEnqueuer with the appropriate parameters', async () => {
-    const opts = {
-      id: uuid.v4(),
-      params: { baz: false },
-      spaceId: 'default',
-      executionId: '123abc',
-      apiKey: Buffer.from('123:abc').toString('base64'),
-    };
-    await expect(actionsClient.enqueueExecution(opts)).resolves.toMatchInlineSnapshot(`undefined`);
+    const opts = [
+      {
+        id: uuid.v4(),
+        params: { baz: false },
+        spaceId: 'default',
+        executionId: '123abc',
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+    ];
+    await expect(actionsClient.enqueueExecutions(opts)).resolves.toMatchInlineSnapshot(`undefined`);
 
     expect(executionEnqueuer).toHaveBeenCalledWith(unsecuredSavedObjectsClient, opts);
   });

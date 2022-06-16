@@ -48,7 +48,12 @@ export interface TaskManagerSetupContract {
 
 export type TaskManagerStartContract = Pick<
   TaskScheduling,
-  'schedule' | 'runNow' | 'ephemeralRunNow' | 'ensureScheduled' | 'bulkUpdateSchedules'
+  | 'schedule'
+  | 'runNow'
+  | 'ephemeralRunNow'
+  | 'ensureScheduled'
+  | 'bulkUpdateSchedules'
+  | 'bulkSchedule'
 > &
   Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
