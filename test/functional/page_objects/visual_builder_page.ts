@@ -647,7 +647,9 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async clickColorPicker(nth: number = 0): Promise<void> {
-    const picker = (await this.find.allByCssSelector('.tvbColorPicker button'))[nth];
+    const picker = (await this.find.allByCssSelector('[data-test-subj="tvbColorPicker"] button'))[
+      nth
+    ];
     await picker.clickMouseButton();
   }
 
