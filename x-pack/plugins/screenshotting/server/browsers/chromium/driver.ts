@@ -80,7 +80,8 @@ const WAIT_FOR_DELAY_MS: number = 100;
 export class HeadlessChromiumDriver {
   private listenersAttached = false;
   private interceptedCount = 0;
-  private screenshottingError$ = new Subject<Error>();
+  private screenshottingErrorSubject = new Subject<Error>();
+  readonly screenshottingError$ = this.screenshottingErrorSubject.asObservable();
 
   constructor(
     private screenshotMode: ScreenshotModePluginSetup,
