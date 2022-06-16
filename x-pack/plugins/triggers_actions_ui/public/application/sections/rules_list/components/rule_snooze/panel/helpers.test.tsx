@@ -18,17 +18,12 @@ const THIRTY_SIX_MONTHS_FROM_NOW = '2023-07-03T10:10:00.000Z';
 
 describe('Snooze panel helpers', () => {
   let timers: sinon.SinonFakeTimers;
-  let setItemMock: jest.SpyInstance;
-  let getItemMock: jest.SpyInstance;
 
   beforeAll(() => {
     timers = sinon.useFakeTimers(new Date(NOW));
-    setItemMock = jest.spyOn(window.localStorage.__proto__, 'setItem');
-    getItemMock = jest.spyOn(window.localStorage.__proto__, 'getItem');
   });
   afterAll(() => {
     timers.restore();
-    jest.resetAllMocks();
   });
 
   describe('futureTimeToInterval', () => {
