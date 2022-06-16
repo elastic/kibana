@@ -111,7 +111,7 @@ export function DiscoverSidebarComponent({
   createNewDataView,
   showDataViewPicker,
 }: DiscoverSidebarProps) {
-  const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
+  const { uiSettings, dataViewFieldEditor, dataViewEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
 
   const dataViewFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
@@ -320,8 +320,10 @@ export function DiscoverSidebarComponent({
           <DataViewPicker
             currentDataViewId={selectedIndexPattern.id}
             onChangeDataView={onChangeIndexPattern}
-            onAddField={editField}
-            onDataViewCreated={createNewDataView}
+            onAddField={canEditDataViewField ? editField : undefined}
+            onDataViewCreated={
+              dataViewEditor.userPermissions.editDataView() ? createNewDataView : undefined
+            }
             trigger={{
               label: selectedIndexPattern?.getName() || '',
               'data-test-subj': 'indexPattern-switch-link',
