@@ -88,7 +88,7 @@ async function updateUser({
   const hasAllRoles = difference(allRoles, existingUser.roles).length === 0;
   if (hasAllRoles) {
     console.log(
-      `Skipping: User "${username}" already has neccesarry roles: "${newUser.roles}"`
+      `Skipping: User "${username}" already has necessary roles: "${newUser.roles}"`
     );
     return;
   }
