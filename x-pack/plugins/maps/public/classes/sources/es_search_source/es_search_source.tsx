@@ -865,7 +865,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     // Remove keys not supported by elasticsearch vector tile search API
     delete requestBody.script_fields;
     delete requestBody.stored_fields;
-    
+
     return `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
