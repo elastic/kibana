@@ -19,14 +19,14 @@ high-level visibility into how a service is performing across your infrastructur
 Comparing how a service performs relative to a previous time frame or to the 
 expected bounds from the corresponding {anomaly-job} can offer additional 
 insight into the health of your services. For example, has latency been slowly 
-increasing over time, did the service experience a sudden spike, is the actual 
-throughput similar to what the {ml} job expects – enabling the respective 
+increasing over time, did the service experience a sudden spike, is the 
+throughput similar to what the {ml} job expects – enabling a
 comparison can provide the answer.
 
 [role="screenshot"]
 image::apm/images/time-series-expected-bounds-comparison.png[Time series and expected bounds comparison]
 
-Select the *Comparison* box to apply time-based or expected bounds comparison.
+Select the *Comparison* box to apply a time-based or expected bounds comparison.
 The time-based comparison options are based on the selected time filter range:
 
 [options="header"]
