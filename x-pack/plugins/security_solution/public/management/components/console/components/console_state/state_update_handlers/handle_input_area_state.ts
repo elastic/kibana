@@ -11,7 +11,10 @@ import { ConsoleDataAction, ConsoleStoreReducer } from '../types';
 
 export const INPUT_DEFAULT_PLACEHOLDER_TEXT = i18n.translate(
   'xpack.securitySolution.handleInputAreaState.inputPlaceholderText',
-  { defaultMessage: 'Enter a response action or type "help" assistance' }
+  {
+    defaultMessage:
+      'Click here to type and submit an action. For assistance, use the "help" action',
+  }
 );
 
 type InputAreaStateAction = ConsoleDataAction & {

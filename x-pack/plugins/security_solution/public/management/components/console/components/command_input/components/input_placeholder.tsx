@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiTextColor } from '@elastic/eui';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useWithInputPlaceholder } from '../../../hooks/state_selectors/use_with_input_placeholder';
 
@@ -15,6 +15,7 @@ const InputPlaceholderContainer = styled(EuiText)`
   position: absolute;
   pointer-events: none;
   padding-left: 1em;
+  width: 96%;
 `;
 
 export const InputPlaceholder = memo(() => {
@@ -22,8 +23,10 @@ export const InputPlaceholder = memo(() => {
   const placeholder = useWithInputPlaceholder();
 
   return (
-    <InputPlaceholderContainer size="s" color="subdued">
-      {textEntered ? '' : placeholder}
+    <InputPlaceholderContainer size="s" className="eui-textTruncate">
+      <EuiTextColor color="subdued" className="eui-textTruncate">
+        {textEntered ? '' : placeholder}
+      </EuiTextColor>
     </InputPlaceholderContainer>
   );
 });
