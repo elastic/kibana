@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import { debounce } from 'lodash';
 import {
   GridItemHTMLElement,
@@ -24,7 +24,7 @@ const GRID_CLASS = 'dshGrid';
 const HANDLE_CLASS = 'dshPanel__wrapper';
 const PANEL_CLASS = 'dshPanel';
 const NUM_COLUMNS = 48;
-const DEFAULT_CELL_HEIGHT = 32;
+const DEFAULT_CELL_HEIGHT = 20;
 const DEFAULT_GROUP_HEIGHT = NUM_COLUMNS / 3;
 const DEFAULT_GUTTERSIZE = 4;
 
@@ -42,13 +42,6 @@ interface Props {
   guttersize?: number; // in pixels
 }
 
-const SHARED_GRID_PARAMS = {
-  float: false,
-  acceptWidgets: true,
-  handleClass: HANDLE_CLASS,
-  itemClass: PANEL_CLASS,
-};
-
 export const Grid: FC<Props> = ({
   gridData = [],
   columns = NUM_COLUMNS,
@@ -58,13 +51,24 @@ export const Grid: FC<Props> = ({
   const [info, setInfo] = useState<string>('');
   const [panels, setPanels] = useState<GridStackNode[]>(gridData);
 
+  const SHARED_GRID_PARAMS = useMemo(
+    () => ({
+      float: false,
+      acceptWidgets: true,
+      handleClass: HANDLE_CLASS,
+      itemClass: PANEL_CLASS,
+      column: columns,
+      cellHeight: `${GRID_CONFIG[columns].cellHeight}px`,
+      margin: guttersize,
+      minRow: columns / 3,
+    }),
+    [columns, guttersize]
+  );
+
   useEffect(() => {
     grid = GridStack.init({
       ...SHARED_GRID_PARAMS,
-      column: columns,
       class: GRID_CLASS,
-      margin: guttersize,
-      cellHeight: `${GRID_CONFIG[columns].cellHeight}px`,
     });
 
     if (gridData.length) {
@@ -125,11 +129,8 @@ export const Grid: FC<Props> = ({
       subGrid: {
         ...SHARED_GRID_PARAMS,
         acceptWidgets: true,
-        cellHeight: `${GRID_CONFIG[columns].cellHeight}px`,
         children: [],
         class: 'nested1',
-        column: columns,
-        minRow: columns / 3,
       },
     });
 

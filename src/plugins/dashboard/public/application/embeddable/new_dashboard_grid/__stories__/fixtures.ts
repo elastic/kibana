@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+// This was used to generate the data below:
+//
 // const generateSamplePanels = (columns: 12 | 24 | 48) => {
 //   const samplePanels = [];
-
+//
 //   let currentRow = 0;
 //   times(columns, (index) => {
 //     const n = index + 1;
@@ -26,10 +28,10 @@
 //     }
 //     currentRow += n;
 //   });
-
+//
 //   return samplePanels;
 // };
-
+//
 // const smallGridData = generateSamplePanels(12);
 // const mediumGridData = generateSamplePanels(24);
 // const largeGridData = generateSamplePanels(48);
