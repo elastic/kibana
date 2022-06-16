@@ -8,11 +8,8 @@
 
 import { Subject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
-  AnalyticsService,
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
-} from './analytics_service';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 
 type AnalyticsServiceContract = PublicMethodsOf<AnalyticsService>;
 
