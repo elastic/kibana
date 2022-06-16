@@ -62,7 +62,9 @@ export function getAccessors<
     !markSizeAccessor
   ) {
     const y = table.columns.find((column) => column.id === PointSeriesColumnNames.Y)?.id;
-    const splitColumnId = table.columns.find((column) => column.id === PointSeriesColumnNames.COLOR)?.id;
+    const splitColumnId = table.columns.find(
+      (column) => column.id === PointSeriesColumnNames.COLOR
+    )?.id;
     xAccessor = table.columns.find((column) => column.id === PointSeriesColumnNames.X)?.id;
     splitAccessors = splitColumnId ? [splitColumnId] : [];
     accessors = y ? [y] : [];
