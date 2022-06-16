@@ -29,7 +29,7 @@ export function RumHome() {
 
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
-  const { data: rumHasData, status } = useHasRumData();
+  const { data: rumHasData, loading: isLoading } = useHasRumData();
 
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] =
     !rumHasData?.hasData
@@ -55,8 +55,6 @@ export function RumHome() {
           docsLink: docLinks.links.observability.guide,
         }
       : undefined;
-
-  const isLoading = status === 'loading';
 
   return (
     <Fragment>
