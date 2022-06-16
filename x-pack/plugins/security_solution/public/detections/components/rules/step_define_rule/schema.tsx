@@ -96,13 +96,11 @@ export const schema: FormSchema<DefineStepRule> = {
           const [{ path, formData }] = args;
           // the dropdown defaults the dataViewId to an empty string somehow on render..
           // need to figure this out.
-          const dataViewIdExists = formData.dataViewId != null && formData.dataViewId !== '';
-
+          const notEmptyDataViewId = formData.dataViewId != null && formData.dataViewId !== '';
           const skipValidation =
             isMlRule(formData.ruleType) ||
-            dataViewIdExists ||
-            formData.index != null ||
-            formData.index.length > 0;
+            ((formData.index != null || notEmptyDataViewId) &&
+              !(formData.index != null && notEmptyDataViewId));
 
           if (skipValidation) {
             return;
