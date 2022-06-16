@@ -486,6 +486,12 @@ export class SearchSource {
       getConfig,
     });
 
+    if (searchRequest.eql) {
+      options.strategy = 'eql';
+      delete params.track_total_hits;
+      delete params.preference;
+    }
+
     return search({ params, indexType: searchRequest.indexType }, options).pipe(
       switchMap((response) => {
         return new Observable<IKibanaSearchResponse<any>>((obs) => {
@@ -857,7 +863,22 @@ export class SearchSource {
       ...getEsQueryConfig({ get: getConfig }),
       filtersInMustClause,
     };
-    body.query = buildEsQuery(index, query, filters, esQueryConfigs);
+
+    if (!body.aggs && query.length && query[0].language === 'eql') {
+      return {
+        body: {
+          query: query[0].query,
+          filter: buildEsQuery(index, [], filters, esQueryConfigs),
+          size: body.size,
+          runtime_mappings: body.runtime_mappings,
+        },
+        index: searchRequest.index,
+        eql: true,
+      };
+    } else {
+      body.query =
+        query.langugage === 'eql' ? undefined : buildEsQuery(index, query, filters, esQueryConfigs);
+    }
 
     if (highlightAll && body.query) {
       body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));

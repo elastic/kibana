@@ -74,6 +74,16 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       >
         {toSentenceCase(nonKqlMode)}
       </EuiContextMenuItem>
+      <EuiContextMenuItem
+        key="EQL"
+        icon={language === 'eql' ? 'check' : 'empty'}
+        data-test-subj="eqlLanguageMenuItem"
+        onClick={() => {
+          onSelectLanguage('eql');
+        }}
+      >
+        EQL
+      </EuiContextMenuItem>
       <EuiHorizontalRule margin="none" />
       <EuiContextMenuItem
         key={'documentation'}

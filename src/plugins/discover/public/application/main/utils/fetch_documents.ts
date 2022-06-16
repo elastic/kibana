@@ -36,6 +36,44 @@ export const fetchDocuments = (
     description: 'fetch documents',
   };
 
+  const _flattenHits = (hits, sequenceKeys = []) => {
+    const flat: any = {};
+    const _flatten = (_hits: any, path: string[] = []) => {
+      Object.keys(_hits).forEach((key) => {
+        const newPath = [...path, key];
+        if (_hits[key] !== null && typeof _hits[key] === 'object') {
+          _flatten(_hits[key], newPath);
+        } else {
+          flat[newPath.join('.')] = _hits[key];
+        }
+      });
+    };
+    _flatten(hits);
+    flat.sequence = sequenceKeys.join('.');
+    return flat;
+  };
+
+  const flattenHits = (hits) => {
+    if (!hits.sequences) {
+      return hits.events.map((event) => {
+        return {
+          ...event,
+          _source: _flattenHits(event._source),
+        };
+      });
+    }
+
+    return hits.sequences.flatMap((sequence) => {
+      return sequence.events.map((event) => {
+        return {
+          ...event,
+          sequence: sequence.join_keys.join('.'),
+          _source: _flattenHits(event._source, sequence.join_keys),
+        };
+      });
+    });
+  };
+
   const fetch$ = searchSource
     .fetch$({
       abortSignal: abortController.signal,
@@ -53,7 +91,10 @@ export const fetchDocuments = (
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),
-      map((res) => res.rawResponse.hits.hits)
+      map((res) => {
+        const { rawResponse } = res;
+        return rawResponse.hits ? rawResponse.hits.hits : flattenHits(rawResponse.body.hits);
+      })
     );
 
   return lastValueFrom(fetch$);
