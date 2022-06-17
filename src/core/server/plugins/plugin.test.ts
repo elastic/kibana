@@ -480,7 +480,7 @@ test('`stop` completes `startDependencies$` Observable, unblocking dependant pro
   await plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {});
   await plugin.stop();
 
-  await expect(plugin.startDependencies).resolves.toEqual({});
+  await expect(plugin.startDependencies).resolves.toBeUndefined();
 });
 
 describe('#getConfigSchema()', () => {
