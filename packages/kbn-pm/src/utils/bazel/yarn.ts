@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { isFile, tryRealpath, unlink } from '../fs';
 
+// yarn integrity file checker
 export async function removeYarnIntegrityFileIfExists(nodeModulesPath: string) {
   try {
     const nodeModulesRealPath = await tryRealpath(nodeModulesPath);
@@ -21,4 +22,32 @@ export async function removeYarnIntegrityFileIfExists(nodeModulesPath: string) {
   } catch {
     // no-op
   }
+}
+
+// yarn and bazel integration checkers
+async function areNodeModulesPresent(kbnRootPath: string) {
+  try {
+    await tryRealpath(resolve(kbnRootPath, 'node_modules'));
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function haveBazelBinPackagesBeenBuiltBefore(kbnRootPath: string) {
+  try {
+    await tryRealpath(resolve(kbnRootPath, 'bazel-bin', 'packages'));
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function haveNodeModulesBeenManuallyDeleted(kbnRootPath: string) {
+  return (
+    !(await areNodeModulesPresent(kbnRootPath)) &&
+    (await haveBazelBinPackagesBeenBuiltBefore(kbnRootPath))
+  );
 }
