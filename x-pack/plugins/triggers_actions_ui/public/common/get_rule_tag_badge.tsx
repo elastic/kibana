@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { RuleTagBadge } from '../application/sections';
-import type { RuleTagBadgeProps } from '../application/sections/rules_list/components/rule_tag_badge';
+import { lazy, ReactElement } from 'react';
+import { suspendedComponentWithProps } from '../application/lib/suspended_component_with_props';
+import type {
+  RuleTagBadgeProps,
+  RuleTagBadgeOptions,
+} from '../application/sections/rules_list/components/rule_tag_badge';
 
-export const getRuleTagBadgeLazy = (props: RuleTagBadgeProps) => {
-  return <RuleTagBadge {...props} />;
+export const getRuleTagBadgeLazy = <T extends RuleTagBadgeOptions = 'default'>(
+  props: RuleTagBadgeProps<T>
+) => {
+  return suspendedComponentWithProps<RuleTagBadgeProps<T>>(
+    lazy(() => import('../application/sections/rules_list/components/rule_tag_badge'))
+  ) as unknown as ReactElement<RuleTagBadgeProps<T>>;
 };

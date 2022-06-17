@@ -16,55 +16,61 @@ const tagTitle = i18n.translate(
   }
 );
 
+export type RuleTagBadgeOptions = 'all' | 'default';
+
+interface RuleTagBadgeBasicOptions {
+  isOpen: boolean;
+  onClick: React.MouseEventHandler<HTMLButtonElement>;
+  onClose: () => void;
+}
+
 export interface RuleTagBadgeCommonProps {
+  showAllTags?: boolean;
   tags: string[];
   badgeDataTestSubj?: string;
   titleDataTestSubj?: string;
   tagItemDataTestSubj?: (tag: string) => string;
 }
-export type RuleTagBadgeConditionalProps =
-  | {
-      isOpen: boolean;
-      onClick: React.MouseEventHandler<HTMLButtonElement>;
-      onClose: () => void;
-    }
-  | {
-      spread: boolean;
-    };
-export type RuleTagBadgeProps = RuleTagBadgeCommonProps & RuleTagBadgeConditionalProps;
+
+export type RuleTagBadgeProps<T extends RuleTagBadgeOptions = 'default'> = T extends 'default'
+  ? RuleTagBadgeBasicOptions & RuleTagBadgeCommonProps
+  : T extends 'all'
+  ? RuleTagBadgeCommonProps
+  : never;
+
 const containerStyle = {
   width: '300px',
 };
 
 const getTagItemDataTestSubj = (tag: string) => `ruleTagBadgeItem-${tag}`;
 
-export const RuleTagBadge = (props: RuleTagBadgeProps) => {
+export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeProps<T>) => {
   const {
+    showAllTags = false,
     tags = [],
     badgeDataTestSubj = 'ruleTagBadge',
     titleDataTestSubj = 'ruleTagPopoverTitle',
     tagItemDataTestSubj = getTagItemDataTestSubj,
   } = props;
+  const { isOpen, onClose, onClick } = props as RuleTagBadgeBasicOptions;
 
   const badge = useMemo(() => {
-    if ('onClick' in props) {
-      return (
-        <EuiBadge
-          data-test-subj={badgeDataTestSubj}
-          color="hollow"
-          iconType="tag"
-          iconSide="left"
-          tabIndex={-1}
-          onClick={props.onClick}
-          onClickAriaLabel="Tags"
-          iconOnClick={props.onClick}
-          iconOnClickAriaLabel="Tags"
-        >
-          {tags.length}
-        </EuiBadge>
-      );
-    }
-  }, [tags, badgeDataTestSubj, props]);
+    return (
+      <EuiBadge
+        data-test-subj={badgeDataTestSubj}
+        color="hollow"
+        iconType="tag"
+        iconSide="left"
+        tabIndex={-1}
+        onClick={onClick}
+        onClickAriaLabel="Tags"
+        iconOnClick={onClick}
+        iconOnClickAriaLabel="Tags"
+      >
+        {tags.length}
+      </EuiBadge>
+    );
+  }, [badgeDataTestSubj, onClick, tags.length]);
 
   const tagBadges = useMemo(
     () =>
@@ -81,7 +87,7 @@ export const RuleTagBadge = (props: RuleTagBadgeProps) => {
       )),
     [tags, tagItemDataTestSubj]
   );
-  if ('spread' in props) {
+  if (showAllTags) {
     return (
       // Put 0 to fix negative left margin value.
       <EuiFlexGroup data-test-subj="spreadTags" style={{ marginLeft: 0 }} wrap={true}>
@@ -94,8 +100,8 @@ export const RuleTagBadge = (props: RuleTagBadgeProps) => {
     <EuiPopover
       button={badge}
       anchorPosition="upCenter"
-      isOpen={props.isOpen!} // The props exists as it's required in props types
-      closePopover={props.onClose!}
+      isOpen={isOpen} // The props exists as it's required in props types
+      closePopover={onClose}
     >
       <EuiPopoverTitle data-test-subj={titleDataTestSubj}>{tagTitle}</EuiPopoverTitle>
       <div style={containerStyle}>{tagBadges}</div>

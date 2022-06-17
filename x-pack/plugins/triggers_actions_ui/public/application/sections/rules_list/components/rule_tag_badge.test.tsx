@@ -58,7 +58,7 @@ describe('RuleTagBadge', () => {
   });
 
   it('shows all the tags without clicking when passing "spread" props with "true"', () => {
-    const wrapper = mountWithIntl(<RuleTagBadge tags={tags} spread={true} />);
+    const wrapper = mountWithIntl(<RuleTagBadge tags={tags} showAllTags={true} />);
     expect(wrapper.find('[data-test-subj="spreadTags"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-a"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-b"]').exists()).toBeTruthy();

@@ -55,6 +55,7 @@ import type {
   RuleTagFilterProps,
   RuleStatusFilterProps,
   RuleTagBadgeProps,
+  RuleTagBadgeOptions,
   RuleEventLogListProps,
   RulesListNotifyBadgeProps,
   AlertsTableConfigurationRegistry,
@@ -92,7 +93,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
   getRuleTagFilter: (props: RuleTagFilterProps) => ReactElement<RuleTagFilterProps>;
   getRuleStatusFilter: (props: RuleStatusFilterProps) => ReactElement<RuleStatusFilterProps>;
-  getRuleTagBadge: (props: RuleTagBadgeProps) => ReactElement<RuleTagBadgeProps>;
+  getRuleTagBadge: <T extends RuleTagBadgeOptions>(
+    props: RuleTagBadgeProps<T>
+  ) => ReactElement<RuleTagBadgeProps<T>>;
   getRuleEventLogList: (props: RuleEventLogListProps) => ReactElement<RuleEventLogListProps>;
   getRulesListNotifyBadge: (
     props: RulesListNotifyBadgeProps
@@ -280,7 +283,7 @@ export class Plugin
       getRuleStatusFilter: (props: RuleStatusFilterProps) => {
         return getRuleStatusFilterLazy(props);
       },
-      getRuleTagBadge: (props: RuleTagBadgeProps) => {
+      getRuleTagBadge: <T extends RuleTagBadgeOptions>(props: RuleTagBadgeProps<T>) => {
         return getRuleTagBadgeLazy(props);
       },
       getRuleEventLogList: (props: RuleEventLogListProps) => {
