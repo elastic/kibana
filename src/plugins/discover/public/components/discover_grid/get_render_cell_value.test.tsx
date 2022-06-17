@@ -25,8 +25,8 @@ const mockServices = {
   },
 };
 
-jest.mock('../../utils/use_discover_services', () => {
-  const originalModule = jest.requireActual('../../utils/use_discover_services');
+jest.mock('../../hooks/use_discover_services', () => {
+  const originalModule = jest.requireActual('../../hooks/use_discover_services');
   return {
     ...originalModule,
     useDiscoverServices: () => mockServices,
