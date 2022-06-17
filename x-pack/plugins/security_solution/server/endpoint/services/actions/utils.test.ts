@@ -92,7 +92,7 @@ describe('When using Actions service utilities', () => {
         command: 'isolate',
         comment: expect.any(String),
         createdAt: '2022-04-27T16:08:47.449Z',
-        createdBy: 'Shanel',
+        createdBy: 'Ellamae',
         expiration: '2022-05-10T16:08:47.449Z',
         id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
         type: 'ACTION_REQUEST',

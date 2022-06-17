@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
+import faker from 'faker';
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -26,9 +28,7 @@ const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
   generate(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    const timeStamp = overrides['@timestamp']
-      ? new Date(overrides['@timestamp'])
-      : new Date(this.randomPastDate());
+    const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
     return merge(
       {
@@ -43,7 +43,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           input_type: 'endpoint',
           data: {
             command: this.randomIsolateCommand(),
-            comment: this.randomString(15),
+            comment: faker.lorem.sentence(),
           },
         },
         error: undefined,
@@ -77,6 +77,14 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   ): LogsEndpointActionResponse {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
+    const startedAtTimes = [2, 3, 5, 8, 13, 21].reduce<number[]>((acc, curr) => {
+      acc.push(
+        timeStamp.setMinutes(-this.randomN(curr)),
+        timeStamp.setSeconds(-this.randomN(curr))
+      );
+      return acc;
+    }, []);
+
     return merge(
       {
         '@timestamp': timeStamp.toISOString(),
@@ -90,7 +98,8 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             command: this.randomIsolateCommand(),
             comment: '',
           },
-          started_at: this.randomPastDate(),
+          // randomly before a few hours/minutes/seconds later
+          started_at: new Date(startedAtTimes[this.randomN(startedAtTimes.length)]).toISOString(),
         },
         error: undefined,
       },
