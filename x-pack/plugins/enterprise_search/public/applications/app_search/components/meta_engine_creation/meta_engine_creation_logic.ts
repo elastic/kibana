@@ -78,7 +78,8 @@ export const MetaEngineCreationLogic = kea<
     selectedIndexedEngineNames: [
       [],
       {
-        setSelectedIndexedEngineNames: (_, { selectedIndexedEngineNames }) => selectedIndexedEngineNames,
+        setSelectedIndexedEngineNames: (_, { selectedIndexedEngineNames }) =>
+          selectedIndexedEngineNames,
       },
     ],
   },
@@ -99,8 +100,7 @@ export const MetaEngineCreationLogic = kea<
       }
 
       if (response) {
-        const engineNames = response.results
-          .map((result) => result.name);
+        const engineNames = response.results.map((result) => result.name);
         actions.setIndexedEngineNames([...values.indexedEngineNames, ...engineNames]);
 
         if (page < response.meta.page.total_pages) {
