@@ -107,7 +107,7 @@ export const NewIndex: React.FC = () => {
         }
       ),
       description: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
+        'xpack.enterpriseSearch.content.newIndex.buttonGroup.customIntegration.description',
         {
           defaultMessage: 'Clone the connector package repo and start customizing.',
         }
