@@ -15,7 +15,7 @@ import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './hooks/use_update_policy';
 import { usePolicy } from './hooks/use_policy';
-import { validate } from '../../../apps/synthetics/components/monitor_add_edit/form/validation';
+import { validate } from './validation';
 
 export const defaultConfig: PolicyConfig = DEFAULT_FIELDS;
 
