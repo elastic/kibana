@@ -20,8 +20,14 @@ import {
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../common/constants';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import {
+  BulkAction,
+  BulkActionEditType,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  performBulkActionSchema,
+  performBulkActionQuerySchema,
+} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -248,6 +254,9 @@ export const performBulkActionRoute = (
       path: DETECTION_ENGINE_RULES_BULK_ACTION,
       validate: {
         body: buildRouteValidation<typeof performBulkActionSchema>(performBulkActionSchema),
+        query: buildRouteValidation<typeof performBulkActionQuerySchema>(
+          performBulkActionQuerySchema
+        ),
       },
       options: {
         tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
@@ -274,6 +283,7 @@ export const performBulkActionRoute = (
         });
       }
 
+      const isDryRun = request.query.dry_run === 'true';
       const abortController = new AbortController();
 
       // subscribing to completed$, because it handles both cases when request was completed and aborted.
@@ -304,7 +314,7 @@ export const performBulkActionRoute = (
 
         // handling this action before switch statement as bulkEditRules fetch rules within
         // rulesClient method, hence there is no need to use fetchRulesByQueryOrIds utility
-        if (body.action === BulkAction.edit) {
+        if (body.action === BulkAction.edit && !isDryRun) {
           const { rules, errors } = await bulkEditRules({
             rulesClient,
             filter: query,
@@ -359,6 +369,13 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                if (isDryRun) {
+                  if (!rule.enabled) {
+                    throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
+                  }
+                  return rule;
+                }
+
                 const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
@@ -386,6 +403,13 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                if (isDryRun) {
+                  if (rule.enabled) {
+                    throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
+                  }
+                  return rule;
+                }
+
                 const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
@@ -413,6 +437,9 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                if (isDryRun) {
+                  return rule;
+                }
                 const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
@@ -438,6 +465,11 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                if (isDryRun) {
+                  throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
+                  return rule;
+                }
+
                 const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
@@ -476,6 +508,36 @@ export const performBulkActionRoute = (
               },
               body: responseBody,
             });
+          // will be processed only when isDryRun === true
+          case BulkAction.edit:
+            bulkActionOutcome = await initPromisePool({
+              concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
+              items: rules,
+              executor: async (rule) => {
+                if (rule.params.immutable) {
+                  throw Error('Immutable');
+                }
+
+                // if rule is machine_learning, index pattern action can't be applied to it
+                if (
+                  rule.params.type === 'machine_learning' &&
+                  body.edit.find((action) =>
+                    [
+                      BulkActionEditType.add_index_patterns,
+                      BulkActionEditType.delete_index_patterns,
+                      BulkActionEditType.set_index_patterns,
+                    ].includes(action.type)
+                  )
+                ) {
+                  throw Error('ML rule cant have index');
+                }
+                return rule;
+              },
+              abortSignal: abortController.signal,
+            });
+            updated = bulkActionOutcome.results
+              .map(({ result }) => result)
+              .filter((rule): rule is RuleAlertType => rule !== null);
         }
 
         if (abortController.signal.aborted === true) {

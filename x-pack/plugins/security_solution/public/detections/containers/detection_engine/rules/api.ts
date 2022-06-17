@@ -216,6 +216,7 @@ export const performBulkAction = async <Action extends BulkAction>({
   query,
   edit,
   ids,
+  isDryRun,
 }: BulkActionProps<Action>): Promise<BulkActionResponseMap<Action>> =>
   KibanaServices.get().http.fetch<BulkActionResponseMap<Action>>(
     DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -227,6 +228,9 @@ export const performBulkAction = async <Action extends BulkAction>({
         ...(ids ? { ids } : {}),
         ...(query !== undefined ? { query } : {}),
       }),
+      query: {
+        ...(isDryRun ? { dry_run: isDryRun } : {}),
+      },
     }
   );
 

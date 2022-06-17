@@ -931,7 +931,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle updates to an alert schedule by setting the new schedule for the underlying task', async () => {
+        it.only('should handle updates to an alert schedule by setting the new schedule for the underlying task', async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')

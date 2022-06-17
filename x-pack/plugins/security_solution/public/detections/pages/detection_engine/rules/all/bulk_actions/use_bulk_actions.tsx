@@ -6,7 +6,7 @@
  */
 /* eslint-disable complexity */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useQueryClient } from 'react-query';
 import {
   EuiTextColor,
@@ -68,6 +68,8 @@ export const useBulkActions = ({
   const getIsMounted = useIsMounted();
   const filterQuery = convertRulesFilterToKQL(filterOptions);
   const { startTransaction } = useStartTransaction();
+  const [bulkAction, setBulkAction] = useState<BulkAction | undefined>(undefined);
+  const [bulkActionEdit, setBulkActionEdit] = useState<BulkActionEditType | undefined>(undefined);
 
   // refetch tags if edit action is related to tags: add_tags/delete_tags/set_tags
   const resolveTagsRefetch = useCallback(
@@ -88,7 +90,7 @@ export const useBulkActions = ({
     actions: { setLoadingRules, setIsRefreshOn },
   } = rulesTableContext;
 
-  return useCallback(
+  const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
       const selectedRules = rules.filter(({ id }) => selectedRuleIds.includes(id));
 
@@ -103,7 +105,9 @@ export const useBulkActions = ({
 
       const handleEnableAction = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.ENABLE });
+        setBulkAction(BulkAction.enable);
         closePopover();
+
         const disabledRules = selectedRules.filter(({ enabled }) => !enabled);
         const disabledRulesNoML = disabledRules.filter(({ type }) => !isMlRule(type));
 
@@ -128,7 +132,9 @@ export const useBulkActions = ({
 
       const handleDisableActions = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.DISABLE });
+        setBulkAction(BulkAction.disable);
         closePopover();
+
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
         await executeRulesBulkAction({
           visibleRuleIds: enabledIds,
@@ -142,7 +148,9 @@ export const useBulkActions = ({
 
       const handleDuplicateAction = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
+        setBulkAction(BulkAction.duplicate);
         closePopover();
+
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.duplicate,
@@ -162,7 +170,9 @@ export const useBulkActions = ({
           }
         }
 
+        setBulkAction(BulkAction.delete);
         startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
+
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.delete,
@@ -175,8 +185,9 @@ export const useBulkActions = ({
 
       const handleExportAction = async () => {
         closePopover();
-
+        setBulkAction(BulkAction.export);
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
+
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.export,
@@ -190,6 +201,8 @@ export const useBulkActions = ({
         let longTimeWarningToast: Toast;
         let isBulkEditFinished = false;
 
+        setBulkAction(BulkAction.edit);
+        setBulkActionEdit(bulkEditActionType);
         // disabling auto-refresh so user's selected rules won't disappear after table refresh
         setIsRefreshOn(false);
         closePopover();
@@ -441,4 +454,10 @@ export const useBulkActions = ({
       resolveTagsRefetch,
     ]
   );
+
+  return {
+    getBulkItemsPopoverContent,
+    bulkAction,
+    bulkActionEdit,
+  };
 };

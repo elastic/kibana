@@ -57,6 +57,7 @@ import {
   getNewRule,
   getNewThresholdRule,
   totalNumberOfPrebuiltRules,
+  getMachineLearningRule,
 } from '../../objects/rule';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
@@ -91,7 +92,39 @@ describe('Detection rules, bulk edit', () => {
     waitForRulesTableToBeLoaded();
   });
 
-  it('should show modal windows when Elastic rules selected and edit only custom rules', () => {
+  it.only('should show modal windows when Elastic rules selected and edit only custom rules', () => {
+    cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN)
+      .pipe(($el) => $el.trigger('click'))
+      .should('not.exist');
+
+    // select few Elastic rules, check if we can't proceed further, as ELastic rules are not editable
+    // filter rules, only Elastic rule to show
+    cy.get(ELASTIC_RULES_BTN).click();
+    waitForRulesTableToBeRefreshed();
+
+    // check modal window for few selected rules
+    selectNumberOfRules(5);
+    clickAddIndexPatternsMenuItem();
+    waitForElasticRulesBulkEditModal(5);
+    cy.get(MODAL_CONFIRMATION_BTN).click();
+
+    // Select Elastic rules and custom rules, check mixed rules warning modal window, proceed with editing custom rules
+    cy.get(ELASTIC_RULES_BTN).click();
+    selectAllRules();
+    clickAddIndexPatternsMenuItem();
+    waitForMixedRulesBulkEditModal(totalNumberOfPrebuiltRules, 6);
+    cy.get(MODAL_CONFIRMATION_BTN).should('have.text', 'Edit custom rules').click();
+
+    typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
+    confirmBulkEditForm();
+
+    // check if rule has been updated
+    cy.get(CUSTOM_RULES_BTN).click();
+    goToTheRuleDetailsOf(RULE_NAME);
+    hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
+  });
+
+  it.only('should show warning modal windows when machine learning rule getting updated with index pattern', () => {
     cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN)
       .pipe(($el) => $el.trigger('click'))
       .should('not.exist');

@@ -236,6 +236,7 @@ export interface BulkActionProps<Action extends BulkAction> {
   query?: string;
   ids?: string[];
   edit?: BulkActionEditPayload[];
+  isDryRun?: boolean;
 }
 
 export interface BulkActionSummary {

@@ -38,9 +38,9 @@ import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { AllRulesUtilityBar } from './utility_bar';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../../../../../../common/constants';
 import { useTags } from '../../../../containers/detection_engine/rules/use_tags';
-import { useCustomRulesCount } from './bulk_actions/use_custom_rules_count';
+import { useBulkActionsDryRun } from './bulk_actions/use_bulk_actions_dry_run';
 import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout';
-import { BulkEditConfirmation } from './bulk_actions/bulk_edit_confirmation';
+import { BulkEditDryRunConfirmation } from './bulk_actions/bulk_edit_dry_run_confirmation';
 import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
 import { useBulkActions } from './bulk_actions/use_bulk_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
@@ -142,10 +142,10 @@ export const RulesTables = React.memo<RulesTableProps>(
       onFinish: hideBulkEditConfirmation,
     });
 
-    const { customRulesCount, isCustomRulesCountLoading } = useCustomRulesCount({
-      enabled: isBulkEditConfirmationVisible && isAllSelected,
-      filterOptions,
-    });
+    // const { customRulesCount, isCustomRulesCountLoading } = useCustomRulesCount({
+    //   enabled: isBulkEditConfirmationVisible && isAllSelected,
+    //   filterOptions,
+    // });
 
     const {
       bulkEditActionType,
@@ -164,12 +164,19 @@ export const RulesTables = React.memo<RulesTableProps>(
       return partition(predicate, selectedRuleIds);
     }, [rules, selectedRuleIds]);
 
-    const getBulkItemsPopoverContent = useBulkActions({
+    const { getBulkItemsPopoverContent, bulkAction, bulkActionEdit } = useBulkActions({
       filterOptions,
       confirmDeletion,
       confirmBulkEdit,
       completeBulkEditForm,
       reFetchTags,
+    });
+
+    const { bulkActionsDryRunResult, isBulkActionsDryRunLoading } = useBulkActionsDryRun({
+      searchParams: isAllSelected ? { filterOptions } : { ids: selectedRuleIds },
+      editAction: bulkActionEdit,
+      enabled: isBulkEditConfirmationVisible,
+      action: bulkAction,
     });
 
     const paginationMemo = useMemo(
@@ -327,21 +334,20 @@ export const RulesTables = React.memo<RulesTableProps>(
             <p>{i18n.DELETE_CONFIRMATION_BODY}</p>
           </EuiConfirmModal>
         )}
-        {isBulkEditConfirmationVisible && !isCustomRulesCountLoading && (
-          <BulkEditConfirmation
-            customRulesCount={isAllSelected ? customRulesCount : selectedCustomRuleIds.length}
-            elasticRulesCount={
-              isAllSelected
-                ? Math.max((pagination.total ?? 0) - customRulesCount, 0)
-                : selectedElasticRuleIds.length
-            }
+        {isBulkEditConfirmationVisible && !isBulkActionsDryRunLoading && (
+          <BulkEditDryRunConfirmation
+            result={bulkActionsDryRunResult}
             onCancel={handleBulkEditCancel}
             onConfirm={handleBulkEditConfirm}
           />
         )}
         {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (
           <BulkEditFlyout
-            rulesCount={isAllSelected ? customRulesCount : selectedCustomRuleIds.length}
+            rulesCount={
+              isAllSelected
+                ? bulkActionsDryRunResult?.summary?.succeeded ?? 0
+                : selectedCustomRuleIds.length
+            }
             editAction={bulkEditActionType}
             onClose={handleBulkEditFormCancel}
             onConfirm={handleBulkEditFormConfirm}
@@ -361,7 +367,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               onRefreshSwitch={handleAutoRefreshSwitch}
               isAllSelected={isAllSelected}
               onToggleSelectAll={toggleSelectAll}
-              isBulkActionInProgress={isCustomRulesCountLoading || loadingRulesAction != null}
+              isBulkActionInProgress={false || loadingRulesAction != null}
               hasDisabledActions={loadingRulesAction != null}
               hasBulkActions
             />

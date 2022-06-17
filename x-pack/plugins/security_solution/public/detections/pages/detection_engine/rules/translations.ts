@@ -230,13 +230,22 @@ export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
   }
 );
 
-export const BULK_EDIT_CONFIRMATION_TITLE = (elasticRulesCount: number) =>
+export const BULK_EDIT_CONFIRMATION_DENIED_TITLE = (rulesCount: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationDeniedTitle',
     {
-      values: { elasticRulesCount },
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be edited',
+    }
+  );
+
+export const BULK_EDIT_CONFIRMATION_PARTLY_TITLE = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationPartlyTitle',
+    {
+      values: { customRulesCount },
       defaultMessage:
-        '{elasticRulesCount, plural, =1 {# Elastic rule} other {# Elastic rules}} cannot be edited',
+        "The action will only be applied to {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}} you've selected",
     }
   );
 
@@ -244,6 +253,13 @@ export const BULK_EDIT_CONFIRMATION_CANCEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationCancelButtonLabel',
   {
     defaultMessage: 'Cancel',
+  }
+);
+
+export const BULK_EDIT_CONFIRMATION_CLOSE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationCloseButtonLabel',
+  {
+    defaultMessage: 'Close',
   }
 );
 
