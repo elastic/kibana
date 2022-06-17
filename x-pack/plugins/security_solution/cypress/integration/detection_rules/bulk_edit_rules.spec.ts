@@ -57,7 +57,6 @@ import {
   getNewRule,
   getNewThresholdRule,
   totalNumberOfPrebuiltRules,
-  getMachineLearningRule,
 } from '../../objects/rule';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
