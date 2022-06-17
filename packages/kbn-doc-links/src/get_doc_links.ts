@@ -61,9 +61,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     dashboard: {
       guide: `${KIBANA_DOCS}dashboard.html`,
       drilldowns: `${KIBANA_DOCS}drilldowns.html`,
-      drilldownsTriggerPicker: `${KIBANA_DOCS}drilldowns.html#url-drilldowns`,
-      urlDrilldownTemplateSyntax: `${KIBANA_DOCS}url_templating-language.html`,
-      urlDrilldownVariables: `${KIBANA_DOCS}url_templating-language.html#url-template-variables`,
+      drilldownsTriggerPicker: `${KIBANA_DOCS}create-drilldowns.html#url-drilldowns`,
+      urlDrilldownTemplateSyntax: `${KIBANA_DOCS}create-drilldowns.html#url_templating-language`,
+      urlDrilldownVariables: `${KIBANA_DOCS}create-drilldowns.html#url-template-variables`,
     },
     discover: {
       guide: `${KIBANA_DOCS}discover.html`,
@@ -343,6 +343,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
       eventFilters: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/event-filters.html`,
       blocklist: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/blocklist.html`,
+      policyResponseTroubleshooting: {
+        full_disk_access: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/deploy-elastic-endpoint.html#enable-fda-endpoint`,
+      },
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,

@@ -10,8 +10,8 @@ import { Observable } from 'rxjs';
 import { History } from 'history';
 import { RecursiveReadonly } from '@kbn/utility-types';
 
+import type { CoreTheme } from '@kbn/core-theme-browser';
 import { MountPoint } from '../types';
-import { CoreTheme } from '../theme';
 import { Capabilities } from './capabilities';
 import { PluginOpaqueId } from '../plugins';
 import { AppCategory } from '../../types';

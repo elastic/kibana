@@ -25,7 +25,12 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
       setCellProps({
         className: 'dscDocsGrid__cell--highlight',
       });
-    } else if (expanded && current && expanded._id === current._id) {
+    } else if (
+      expanded &&
+      current &&
+      expanded._id === current._id &&
+      expanded._index === current._index
+    ) {
       setCellProps({
         style: {
           backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
@@ -41,6 +46,10 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
     defaultMessage: 'Toggle dialog with details',
   });
 
+  const testSubj = (current as EsHitRecord).isAnchor
+    ? 'docTableExpandToggleColumnAnchor'
+    : 'docTableExpandToggleColumn';
+
   return (
     <EuiToolTip content={buttonLabel} delay="long">
       <EuiButtonIcon
@@ -48,7 +57,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
         size="xs"
         iconSize="s"
         aria-label={buttonLabel}
-        data-test-subj="docTableExpandToggleColumn"
+        data-test-subj={testSubj}
         onClick={() => setExpanded(isCurrentRowExpanded ? undefined : current)}
         color={isCurrentRowExpanded ? 'primary' : 'text'}
         iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
