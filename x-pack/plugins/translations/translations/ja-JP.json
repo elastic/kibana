@@ -2918,7 +2918,6 @@
     "discover.docTable.tableHeader.sortByColumnDescendingAriaLabel": "{columnName}を降順に並べ替える",
     "discover.docTable.tableHeader.sortByColumnUnsortedAriaLabel": "{columnName}で並べ替えを止める",
     "discover.docTable.tableHeader.timeFieldIconTooltip": "このフィールドはイベントの発生時刻を表します。",
-    "discover.docTable.tableHeader.timeFieldIconTooltipAriaLabel": "プライマリ時間フィールド。",
     "discover.docTable.tableRow.detailHeading": "拡張ドキュメント",
     "discover.docTable.tableRow.filterForValueButtonAriaLabel": "値でフィルター",
     "discover.docTable.tableRow.filterForValueButtonTooltip": "値でフィルター",

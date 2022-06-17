@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridColumn, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiDataGridColumn, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
@@ -111,9 +111,13 @@ export function buildEuiGridColumn({
   };
 
   if (column.id === indexPattern.timeFieldName) {
+    const timeFieldName = indexPatternField?.customLabel ?? indexPattern.timeFieldName;
     const primaryTimeAriaLabel = i18n.translate(
       'discover.docTable.tableHeader.timeFieldIconTooltipAriaLabel',
-      { defaultMessage: 'Primary time field.' }
+      {
+        defaultMessage: '{timeFieldName} - this field represents the time that events occurred.',
+        values: { timeFieldName },
+      }
     );
     const primaryTimeTooltip = i18n.translate(
       'discover.docTable.tableHeader.timeFieldIconTooltip',
@@ -123,15 +127,13 @@ export function buildEuiGridColumn({
     );
 
     column.display = (
-      <Fragment>
-        {indexPatternField?.customLabel ?? indexPattern.timeFieldName}{' '}
-        <EuiIconTip
-          iconProps={{ tabIndex: -1 }}
-          type="clock"
-          aria-label={primaryTimeAriaLabel}
-          content={primaryTimeTooltip}
-        />
-      </Fragment>
+      <div aria-label={primaryTimeAriaLabel}>
+        <EuiToolTip content={primaryTimeTooltip}>
+          <>
+            {timeFieldName} <EuiIcon type="clock" />
+          </>
+        </EuiToolTip>
+      </div>
     );
     column.initialWidth = defaultTimeColumnWidth;
   }
