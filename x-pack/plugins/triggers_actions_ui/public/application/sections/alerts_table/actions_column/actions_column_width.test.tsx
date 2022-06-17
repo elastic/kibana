@@ -4,4 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { getActionsColumnWidth } from './actions_column_width';
+
+// Test the width module

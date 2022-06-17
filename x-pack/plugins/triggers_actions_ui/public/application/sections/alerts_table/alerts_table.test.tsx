@@ -135,5 +135,56 @@ describe('AlertsTable', () => {
         expect(wrapper.queryByTestId('testCell')).not.toBe(null);
       });
     });
+
+    describe('actions column', () => {
+      it('should load actions set in config', () => {
+        const customTableProps = {
+          ...tableProps,
+          alertsTableConfiguration: {
+            ...alertsTableConfiguration,
+            useActionsColumn: () => {
+              return {
+                actionsColumn: (
+                  <>
+                    <span data-test-subj="testActionColumn" />
+                    <span data-test-subj="testActionColumn2" />
+                  </>
+                ),
+              };
+            },
+          },
+        };
+
+        const { queryByTestId } = render(<AlertsTable {...customTableProps} />);
+        expect(queryByTestId('testActionColumn')).not.toBe(null);
+        expect(queryByTestId('testActionColumn2')).not.toBe(null);
+        expect(queryByTestId('expandColumnCellOpenFlyoutButton-0')).not.toBe(null);
+      });
+
+      it('should not add expansion action when not set', () => {
+        const customTableProps = {
+          ...tableProps,
+          showExpandToDetails: false,
+          alertsTableConfiguration: {
+            ...alertsTableConfiguration,
+            useActionsColumn: () => {
+              return {
+                actionsColumn: (
+                  <>
+                    <span data-test-subj="testActionColumn" />
+                    <span data-test-subj="testActionColumn2" />
+                  </>
+                ),
+              };
+            },
+          },
+        };
+
+        const { queryByTestId } = render(<AlertsTable {...customTableProps} />);
+        expect(queryByTestId('testActionColumn')).not.toBe(null);
+        expect(queryByTestId('testActionColumn2')).not.toBe(null);
+        expect(queryByTestId('expandColumnCellOpenFlyoutButton-0')).toBe(null);
+      });
+    });
   });
 });
