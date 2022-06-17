@@ -13,9 +13,10 @@ import { act } from '@testing-library/react';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { StepAboutRule } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
+import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
 import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
-import { stepAboutDefaultValue } from './default_value';
+import { stepAboutDefaultValue, stepDefineStepMLRule } from './default_value';
 import {
   AboutStepRule,
   RuleStepsFormHooks,
@@ -33,6 +34,7 @@ const mockTheme = getMockTheme({
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
+jest.mock('../../../../common/components/ml/hooks/use_get_jobs');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -46,6 +48,7 @@ jest.mock('@elastic/eui', () => {
 });
 
 describe('StepAboutRuleComponent', () => {
+  let useGetInstalledJobMock: jest.Mock;
   let formHook: RuleStepsFormHooks[RuleStep.aboutRule] | null = null;
   const setFormHook = <K extends keyof RuleStepsFormHooks>(
     step: K,
@@ -62,6 +65,9 @@ describe('StepAboutRuleComponent', () => {
         indexPatterns: stubIndexPattern,
       },
     ]);
+    useGetInstalledJobMock = (useGetInstalledJob as jest.Mock).mockImplementation(() => ({
+      jobs: [],
+    }));
   });
 
   it('it renders StepRuleDescription if isReadOnlyView is true and "name" property exists', () => {
@@ -358,5 +364,30 @@ describe('StepAboutRuleComponent', () => {
       expect(result2?.isValid).toEqual(true);
       expect(result2?.data?.riskScore.value).toEqual(47);
     });
+  });
+
+  it('should use index based on ML jobs when editing ML rule', async () => {
+    (useFetchIndex as jest.Mock).mockClear();
+    useGetInstalledJobMock.mockImplementation((jobIds: string[]) => {
+      expect(jobIds).toEqual(['auth_high_count_logon_events_for_a_source_ip']);
+      return { jobs: [{ results_index_name: 'shared' }] };
+    });
+
+    mount(
+      <ThemeProvider theme={mockTheme}>
+        <StepAboutRule
+          addPadding={true}
+          defaultValues={stepAboutDefaultValue}
+          defineRuleData={stepDefineStepMLRule}
+          descriptionColumns="multi"
+          isReadOnlyView={false}
+          setForm={setFormHook}
+          isLoading={false}
+        />
+      </ThemeProvider>
+    );
+
+    const indexNames = ['.ml-anomalies-shared'];
+    expect(useFetchIndex).lastCalledWith(indexNames);
   });
 });
