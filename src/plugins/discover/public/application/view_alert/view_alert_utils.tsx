@@ -106,11 +106,26 @@ export const getAlertUtils = (
     }
   };
 
+  const dataViewUpdatedWarn = async () => {
+    const warnTitle = i18n.translate('discover.viewAlert.dataViewChangedWarnTitle', {
+      defaultMessage: 'Data View has changed',
+    });
+    const warnDescription = i18n.translate('discover.viewAlert.dataViewChangedWarnDescription', {
+      defaultMessage: `The data view has been updated after the last update of the alert rule.`,
+    });
+
+    toastNotifications.addWarning({
+      title: warnTitle,
+      text: toMountPoint(<MarkdownSimple>{warnDescription}</MarkdownSimple>),
+    });
+  };
+
   return {
     displayRuleChangedWarn,
     displayPossibleDocsDiffInfoAlert,
     showDataViewFetchError,
     fetchAlert,
     fetchSearchSource,
+    dataViewUpdatedWarn,
   };
 };
