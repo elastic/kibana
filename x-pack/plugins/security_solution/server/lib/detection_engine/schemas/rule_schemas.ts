@@ -48,6 +48,7 @@ import {
   false_positives,
   rule_id,
   immutable,
+  dataViewIdOrUndefined,
   indexOrUndefined,
   licenseOrUndefined,
   output_index,
@@ -81,6 +82,7 @@ import {
 import { SERVER_APP_ID } from '../../../../common/constants';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
+
 export const baseRuleParams = t.exact(
   t.type({
     author,
@@ -125,6 +127,7 @@ const eqlSpecificRuleParams = t.type({
   filters: filtersOrUndefined,
   timestampField: timestampFieldOrUndefined,
   eventCategoryOverride: eventCategoryOverrideOrUndefined,
+  dataViewId: dataViewIdOrUndefined,
   tiebreakerField: tiebreakerFieldOrUndefined,
 });
 export const eqlRuleParams = t.intersection([baseRuleParams, eqlSpecificRuleParams]);
@@ -145,6 +148,7 @@ const threatSpecificRuleParams = t.type({
   threatIndicatorPath: threatIndicatorPathOrUndefined,
   concurrentSearches: concurrentSearchesOrUndefined,
   itemsPerSearch: itemsPerSearchOrUndefined,
+  dataViewId: dataViewIdOrUndefined,
 });
 export const threatRuleParams = t.intersection([baseRuleParams, threatSpecificRuleParams]);
 export type ThreatRuleParams = t.TypeOf<typeof threatRuleParams>;
@@ -157,6 +161,7 @@ const querySpecificRuleParams = t.exact(
     query,
     filters: filtersOrUndefined,
     savedId: savedIdOrUndefined,
+    dataViewId: dataViewIdOrUndefined,
   })
 );
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
@@ -168,6 +173,7 @@ const savedQuerySpecificRuleParams = t.type({
   // if the saved object gets deleted for some reason
   language: nonEqlLanguages,
   index: indexOrUndefined,
+  dataViewId: dataViewIdOrUndefined,
   query: queryOrUndefined,
   filters: filtersOrUndefined,
   savedId: saved_id,
@@ -183,6 +189,7 @@ const thresholdSpecificRuleParams = t.type({
   filters: filtersOrUndefined,
   savedId: savedIdOrUndefined,
   threshold: thresholdNormalized,
+  dataViewId: dataViewIdOrUndefined,
 });
 export const thresholdRuleParams = t.intersection([baseRuleParams, thresholdSpecificRuleParams]);
 export type ThresholdRuleParams = t.TypeOf<typeof thresholdRuleParams>;

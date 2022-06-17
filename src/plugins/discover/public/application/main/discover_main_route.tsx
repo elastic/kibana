@@ -30,7 +30,7 @@ import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
@@ -79,13 +79,12 @@ export function DiscoverMainRoute(props: Props) {
         const hasUserDataViewValue = await data.dataViews.hasData
           .hasUserDataView()
           .catch(() => false);
-
         const hasESDataValue =
           isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
         setHasUserDataView(hasUserDataViewValue);
         setHasESData(hasESDataValue);
 
-        if (!hasUserDataViewValue || !hasESDataValue) {
+        if (!hasUserDataViewValue) {
           setShowNoDataPage(true);
           return;
         }

@@ -4,7 +4,7 @@
 <titleabbrev>Delete comments</titleabbrev>
 ++++
 
-Deletes one or all comments from a case.
+Deletes one or all comments and alerts from a case.
 
 === {api-request-title}
 
