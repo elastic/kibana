@@ -35,9 +35,7 @@ export function appendLayerIds<T>(
 }
 
 export const getShowLines = (args: DataLayerArgs | ExtendedDataLayerArgs) =>
-  args.seriesType === SeriesTypes.LINE || args.seriesType !== SeriesTypes.AREA
-    ? args.showLines ?? true
-    : args.showLines;
+  args.showLines ?? (args.seriesType === SeriesTypes.LINE || args.seriesType !== SeriesTypes.AREA);
 
 export function getDataLayers(layers: XYExtendedLayerConfigResult[]) {
   return layers.filter<ExtendedDataLayerConfig>(
