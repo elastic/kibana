@@ -460,6 +460,29 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
   expect(mockPluginInstance.stop).toHaveBeenCalledTimes(1);
 });
 
+test('`stop` completes `startDependencies$` Observable, unblocking dependant promises', async () => {
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext(
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo
+    ),
+  });
+
+  const mockPluginInstance = { setup: jest.fn(), stop: jest.fn() };
+  mockPluginInitializer.mockReturnValue(mockPluginInstance);
+  await plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {});
+  await plugin.stop();
+
+  await expect(plugin.startDependencies).resolves.toEqual({});
+});
+
 describe('#getConfigSchema()', () => {
   it('reads config schema from plugin', () => {
     const pluginSchema = schema.any();

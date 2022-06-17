@@ -131,4 +131,10 @@ describe('PluginWrapper', () => {
     await plugin.setup({} as any, {} as any);
     expect(() => plugin.stop()).not.toThrow();
   });
+
+  test('`stop` completes `startDependencies$` Observable, unblocking dependant promises', async () => {
+    await plugin.setup({} as any, {} as any);
+    await plugin.stop();
+    await expect(plugin.startDependencies).resolves.toBeUndefined();
+  });
 });

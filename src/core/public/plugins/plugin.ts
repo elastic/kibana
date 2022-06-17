@@ -60,7 +60,9 @@ export class PluginWrapper<
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
-  public readonly startDependencies = firstValueFrom(this.startDependencies$);
+  public readonly startDependencies = firstValueFrom(this.startDependencies$, {
+    defaultValue: undefined,
+  });
 
   constructor(
     public readonly discoveredPlugin: DiscoveredPlugin,

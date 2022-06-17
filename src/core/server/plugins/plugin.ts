@@ -61,7 +61,9 @@ export class PluginWrapper<
     | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
-  public readonly startDependencies = firstValueFrom(this.startDependencies$);
+  public readonly startDependencies = firstValueFrom(this.startDependencies$, {
+    defaultValue: undefined,
+  });
 
   constructor(
     public readonly params: {
@@ -147,6 +149,9 @@ export class PluginWrapper<
     }
 
     this.instance = undefined;
+
+    // some plugins might be awaiting for core.getStartServices(); reject these promises
+    this.startDependencies$.complete();
   }
 
   public getConfigDescriptor(): PluginConfigDescriptor | null {
