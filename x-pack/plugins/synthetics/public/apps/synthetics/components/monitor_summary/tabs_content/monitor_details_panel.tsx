@@ -7,26 +7,73 @@
 
 import React from 'react';
 import {
+  EuiSwitch,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiBadge,
+  EuiSpacer,
+  EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useSelector } from 'react-redux';
+import { selectMonitorStatus } from '../../../state/monitor_summary';
 
-export const MonitorDetailsPanel = () => (
-  <>
-    <EuiDescriptionList type="responsiveColumn" style={{ maxWidth: '400px' }}>
-      <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
-        A videogame that I have spent way too much time on over the years.
-      </EuiDescriptionListDescription>
-      <EuiDescriptionListTitle>{MONITOR_TYPE_LABEL}</EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
-        The game that forced me to learn DOS.
-      </EuiDescriptionListDescription>
-    </EuiDescriptionList>
-  </>
-);
+export const MonitorDetailsPanel = () => {
+  const { data } = useSelector(selectMonitorStatus);
+
+  if (!data) {
+    return <EuiLoadingSpinner />;
+  }
+
+  return (
+    <>
+      <EuiSpacer />
+      <EuiDescriptionList type="responsiveColumn" style={{ maxWidth: '400px' }}>
+        <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <EuiSwitch checked={false} label={ENABLED_LABEL} onChange={() => {}} />
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{MONITOR_TYPE_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <EuiBadge>{data.monitor.type}</EuiBadge>
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>Every 10 mins</EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{LOCATIONS_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <EuiBadge iconType="dot" color="success">
+            US East
+          </EuiBadge>
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <EuiLink href={data.url?.full}>{data.url?.full}</EuiLink>
+        </EuiDescriptionListDescription>
+        <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>
+          <EuiBadge>DEV</EuiBadge>
+        </EuiDescriptionListDescription>
+      </EuiDescriptionList>
+    </>
+  );
+};
+
+const FREQUENCY_LABEL = i18n.translate('xpack.synthetics.management.monitorList.frequency', {
+  defaultMessage: 'Frequency',
+});
+const LOCATIONS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.locations', {
+  defaultMessage: 'Locations',
+});
+
+const URL_LABEL = i18n.translate('xpack.synthetics.management.monitorList.url', {
+  defaultMessage: 'URL',
+});
+
+const TAGS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.tags', {
+  defaultMessage: 'Tags',
+});
 
 const ENABLED_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails.enabled', {
   defaultMessage: 'Enabled',
