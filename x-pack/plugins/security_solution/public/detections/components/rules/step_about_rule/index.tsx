@@ -9,8 +9,8 @@ import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
 import { DataViewBase } from '@kbn/es-query';
+import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
 import {
   RuleStepProps,
   RuleStep,
@@ -119,7 +119,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
    * 3. useEffect if indexIndexPattern is updated and dataView from rule form is empty
    */
 
-  const [indexPatternLoading, { indexPatterns: indexIndexPattern }] = useFetchIndex(memoRuleIndices);
+  const [indexPatternLoading, { indexPatterns: indexIndexPattern }] =
+    useFetchIndex(memoRuleIndices);
 
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPattern);
 
