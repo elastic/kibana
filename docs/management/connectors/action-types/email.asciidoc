@@ -229,7 +229,7 @@ is considered `false`.  Typically, `port: 465` uses `secure: true`, and
 ==== Sending email from Elastic Cloud
 
 IMPORTANT: You need to 
-  link:{cloud}/ec-watcher.html#ec-watcher-whitelist[allowlist] the email 
+  link:{cloud}/ec-watcher.html#ec-watcher-allowlist[allowlist] the email 
   addresses that notifications get sent.
 
 Use the preconfigured email connector (`Elastic-Cloud-SMTP`) to send emails from 
