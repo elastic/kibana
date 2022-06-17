@@ -78,7 +78,6 @@ export function useContainerMetricsTable({
   });
 
   return {
-    currentPageIndex,
     data,
     isLoading,
     setCurrentPageIndex,

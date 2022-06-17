@@ -79,11 +79,6 @@ export const useInfrastructureNodeMetrics = <T>(
       onResolve: (response: MetricsExplorerResponse) => {
         setTransformedNodes(response.series.map(transform));
       },
-      onReject: (error) => {
-        // What to do about this?
-        // eslint-disable-next-line no-console
-        console.log(error);
-      },
       cancelPreviousOn: 'creation',
     },
     [source, metricsExplorerOptions, timerangeWithInterval]
