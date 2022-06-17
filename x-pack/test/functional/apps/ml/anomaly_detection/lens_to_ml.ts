@@ -20,6 +20,8 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
   const esArchiver = getService('esArchiver');
 
   const dashboardTitle = 'lens_to_ml';
+  const dashboardArchive =
+    'x-pack/test/functional/fixtures/kbn_archiver/ml/lens_to_ml_dashboard.json';
 
   async function retrySwitchTab(tabIndex: number, seconds: number) {
     await retry.tryForTime(seconds * 1000, async () => {
@@ -96,16 +98,12 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
       await ml.securityUI.loginAsMlPowerUser();
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/apps/ml/anomaly_detection/fixtures/lens_to_ml.json'
-      );
+      await kibanaServer.importExport.load(dashboardArchive);
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await kibanaServer.importExport.unload(
-        'x-pack/test/functional/apps/ml/anomaly_detection/fixtures/lens_to_ml.json'
-      );
+      await kibanaServer.importExport.unload(dashboardArchive);
     });
 
     beforeEach(async () => {
