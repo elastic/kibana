@@ -4383,13 +4383,7 @@
         "description": [],
         "signature": [
           "{ analytics?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.AnalyticsServiceStart",
-            "text": "AnalyticsServiceStart"
-          },
+          "AnalyticsServiceStart",
           " | undefined; application?: ",
           {
             "pluginId": "core",

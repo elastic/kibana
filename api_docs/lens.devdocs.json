@@ -6857,7 +6857,7 @@
             "section": "def-common.GaugeState",
             "text": "GaugeState"
           },
-          ", \"goal\" | \"min\" | \"max\" | \"metric\"> & { metricAccessor?: string | undefined; minAccessor?: string | undefined; maxAccessor?: string | undefined; goalAccessor?: string | undefined; } & { layerId: string; layerType: ",
+          ", \"goal\" | \"metric\" | \"min\" | \"max\"> & { metricAccessor?: string | undefined; minAccessor?: string | undefined; maxAccessor?: string | undefined; goalAccessor?: string | undefined; } & { layerId: string; layerType: ",
           {
             "pluginId": "lens",
             "scope": "common",
