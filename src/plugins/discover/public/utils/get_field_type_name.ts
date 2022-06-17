@@ -7,24 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
-
-export const KNOWN_FIELD_TYPES = {
-  BOOLEAN: KBN_FIELD_TYPES.BOOLEAN,
-  CONFLICT: KBN_FIELD_TYPES.CONFLICT,
-  DATE: KBN_FIELD_TYPES.DATE,
-  GEO_POINT: KBN_FIELD_TYPES.GEO_POINT,
-  GEO_SHAPE: KBN_FIELD_TYPES.GEO_SHAPE,
-  IP: KBN_FIELD_TYPES.IP,
-  KEYWORD: ES_FIELD_TYPES.KEYWORD,
-  MURMUR3: KBN_FIELD_TYPES.MURMUR3,
-  NUMBER: KBN_FIELD_TYPES.NUMBER,
-  NESTED: KBN_FIELD_TYPES.NESTED,
-  SOURCE: 'source',
-  STRING: KBN_FIELD_TYPES.STRING,
-  TEXT: ES_FIELD_TYPES.TEXT,
-  VERSION: ES_FIELD_TYPES.VERSION,
-};
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { KNOWN_FIELD_TYPES } from '../../common/field_types';
 
 export const UNKNOWN_FIELD_TYPE_MESSAGE = i18n.translate(
   'discover.fieldNameIcons.unknownFieldAriaLabel',
@@ -34,7 +18,21 @@ export const UNKNOWN_FIELD_TYPE_MESSAGE = i18n.translate(
 );
 
 export function getFieldTypeName(type?: string) {
-  switch (type) {
+  if (!type || type === KBN_FIELD_TYPES.UNKNOWN) {
+    return UNKNOWN_FIELD_TYPE_MESSAGE;
+  }
+
+  if (type === 'source') {
+    // TODO: check if we can remove this logic as outdated
+
+    // Note that this type is currently not provided, type for _source is undefined
+    return i18n.translate('discover.fieldNameIcons.sourceFieldAriaLabel', {
+      defaultMessage: 'Source field',
+    });
+  }
+
+  const knownType: KNOWN_FIELD_TYPES = type as KNOWN_FIELD_TYPES;
+  switch (knownType) {
     case KNOWN_FIELD_TYPES.BOOLEAN:
       return i18n.translate('discover.fieldNameIcons.booleanAriaLabel', {
         defaultMessage: 'Boolean field',
@@ -47,6 +45,10 @@ export function getFieldTypeName(type?: string) {
       return i18n.translate('discover.fieldNameIcons.dateFieldAriaLabel', {
         defaultMessage: 'Date field',
       });
+    case KNOWN_FIELD_TYPES.DATE_RANGE:
+      return i18n.translate('discover.fieldNameIcons.dateRangeFieldAriaLabel', {
+        defaultMessage: 'Date range field',
+      });
     case KNOWN_FIELD_TYPES.GEO_POINT:
       return i18n.translate('discover.fieldNameIcons.geoPointFieldAriaLabel', {
         defaultMessage: 'Geo point field',
@@ -55,9 +57,17 @@ export function getFieldTypeName(type?: string) {
       return i18n.translate('discover.fieldNameIcons.geoShapeFieldAriaLabel', {
         defaultMessage: 'Geo shape field',
       });
+    case KNOWN_FIELD_TYPES.HISTOGRAM:
+      return i18n.translate('discover.fieldNameIcons.histogramFieldAriaLabel', {
+        defaultMessage: 'Histogram field',
+      });
     case KNOWN_FIELD_TYPES.IP:
       return i18n.translate('discover.fieldNameIcons.ipAddressFieldAriaLabel', {
         defaultMessage: 'IP address field',
+      });
+    case KNOWN_FIELD_TYPES.IP_RANGE:
+      return i18n.translate('discover.fieldNameIcons.ipRangeFieldAriaLabel', {
+        defaultMessage: 'IP range field',
       });
     case KNOWN_FIELD_TYPES.MURMUR3:
       return i18n.translate('discover.fieldNameIcons.murmur3FieldAriaLabel', {
@@ -66,11 +76,6 @@ export function getFieldTypeName(type?: string) {
     case KNOWN_FIELD_TYPES.NUMBER:
       return i18n.translate('discover.fieldNameIcons.numberFieldAriaLabel', {
         defaultMessage: 'Number field',
-      });
-    case KNOWN_FIELD_TYPES.SOURCE:
-      // Note that this type is currently not provided, type for _source is undefined
-      return i18n.translate('discover.fieldNameIcons.sourceFieldAriaLabel', {
-        defaultMessage: 'Source field',
       });
     case KNOWN_FIELD_TYPES.STRING:
       return i18n.translate('discover.fieldNameIcons.stringFieldAriaLabel', {
@@ -93,6 +98,8 @@ export function getFieldTypeName(type?: string) {
         defaultMessage: 'Version field',
       });
     default:
-      return UNKNOWN_FIELD_TYPE_MESSAGE;
+      // If you see a typescript error here, that's a sign that there are missing switch cases ^^
+      const _exhaustiveCheck: never = knownType;
+      return knownType || _exhaustiveCheck;
   }
 }
