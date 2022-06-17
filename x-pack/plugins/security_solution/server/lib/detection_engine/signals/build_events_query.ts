@@ -15,7 +15,6 @@ import { getQueryFilter } from '../../../../common/detection_engine/get_query_fi
 
 interface BuildEventsSearchQuery {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
-  runtimeMappings?: estypes.MappingRuntimeFields;
   index: string[];
   from: string;
   to: string;
@@ -94,7 +93,6 @@ export const buildTimeRangeFilter = ({
 
 export const buildEventsSearchQuery = ({
   aggregations,
-  runtimeMappings,
   index,
   from,
   to,
