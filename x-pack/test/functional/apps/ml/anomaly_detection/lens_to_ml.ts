@@ -97,6 +97,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await kibanaServer.importExport.load(dashboardArchive);
+      await browser.setWindowSize(1920, 1080);
     });
 
     after(async () => {
