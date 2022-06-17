@@ -152,18 +152,9 @@ export function PanelHeader({
     );
   };
   
-  if (hidePanelTitle){
-    return (
-      <div data-test-subj="dashboardPanelTitle__wrapper" className={classes}>
-        <PanelOptionsMenu
-          getActionContextMenuPanel={getActionContextMenuPanel}
-          isViewMode={!isViewMode}
-          closeContextMenu={closeContextMenu}
-          title={title}
-          index={index}
-        />
-        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
-      </div>
+  if (hidePanelTitle) {
+   return (
+  <div data-test-subj="dashboardPanelTitle__wrapper" className={classes} style={{visibility:'collapse'}}></div> 
     );
   }
 
