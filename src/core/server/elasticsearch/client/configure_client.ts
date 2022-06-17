@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
+import { Client, UndiciConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
@@ -34,7 +34,7 @@ export const configureClient = (
   const client = new Client({
     ...clientOptions,
     Transport: KibanaTransport,
-    Connection: HttpConnection,
+    Connection: UndiciConnection,
     // using ClusterConnectionPool until https://github.com/elastic/elasticsearch-js/issues/1714 is addressed
     ConnectionPool: ClusterConnectionPool,
   });
