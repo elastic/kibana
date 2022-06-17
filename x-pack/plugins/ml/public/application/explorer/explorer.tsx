@@ -602,16 +602,14 @@ export const Explorer: FC<ExplorerUIProps> = ({
       {noInfluencersConfigured ? (
         <EuiFlexGroup gutterSize={'s'}>
           <EuiFlexItem grow={false}>
-            <div className="no-influencers-warning">
-              <EuiIconTip
-                content={i18n.translate('xpack.ml.explorer.noConfiguredInfluencersTooltip', {
-                  defaultMessage:
-                    'The Top Influencers list is hidden because no influencers have been configured for the selected jobs.',
-                })}
-                position="right"
-                type="iInCircle"
-              />
-            </div>
+            <EuiIconTip
+              content={i18n.translate('xpack.ml.explorer.noConfiguredInfluencersTooltip', {
+                defaultMessage:
+                  'The Top Influencers list is hidden because no influencers have been configured for the selected jobs.',
+              })}
+              position="right"
+              type="iInCircle"
+            />
           </EuiFlexItem>
           <EuiFlexItem>{mainPanelContent}</EuiFlexItem>
         </EuiFlexGroup>

@@ -1,18 +1,3 @@
-$borderRadius: $euiBorderRadius / 2;
-
-.ml-explorer {
-  .results-container {
-
-    .no-influencers-warning {
-      float: left;
-      padding-top: $euiSizeXS;
-      padding-left: $euiSize;
-      color: $euiColorDarkShade;
-      font-size: $euiFontSizeS;
-    }
-  }
-}
-
 .mlSwimLaneContainer {
   /* Override legend styles */
   .echLegendListContainer {
