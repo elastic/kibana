@@ -16,7 +16,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
-import { EuiButtonTo, EuiLinkTo } from '../react_router_helpers';
+import { EuiButtonTo } from '../react_router_helpers';
 
 import './error_state_prompt.scss';
 
@@ -95,14 +95,14 @@ const cloudError = (cloud: Partial<CloudSetup>) => {
         defaultMessage="Does your Cloud deployment have Enterprise Search nodes running? {deploymentSettingsLink}"
         values={{
           deploymentSettingsLink: (
-            <EuiLinkTo target="_blank" to={`${deploymentUrl}/edit`}>
+            <EuiLink target="_blank" href={`${deploymentUrl}/edit`}>
               {i18n.translate(
                 'xpack.enterpriseSearch.errorConnectingState.cloudErrorMessageLinkText',
                 {
                   defaultMessage: 'Check your deployment settings',
                 }
               )}
-            </EuiLinkTo>
+            </EuiLink>
           ),
         }}
       />
