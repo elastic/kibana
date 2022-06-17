@@ -227,7 +227,7 @@ exports[`Overview render 1`] = `
     ]
   }
 >
-  <mockConstructor
+  <KibanaPageTemplate
     pageHeader={
       Object {
         "iconType": "logoKibana",
@@ -240,7 +240,9 @@ exports[`Overview render 1`] = `
       }
     }
     template="empty"
-  />
+  >
+    <MockedKibanaPageTemplate />
+  </KibanaPageTemplate>
 </Overview>
 `;
 
@@ -455,35 +457,292 @@ exports[`Overview when there is no user data view 1`] = `
     ]
   }
 >
-  <mockConstructor
-    noDataConfig={
+  <AnalyticsNoDataPageKibanaProvider
+    coreStart={
       Object {
-        "actions": Object {
-          "elasticAgent": Object {
-            "data-test-subj": "kbnOverviewAddIntegrations",
-            "description": "Use Elastic Agent or Beats to collect data and build out Analytics solutions.",
-            "title": "Add integrations",
+        "application": Object {
+          "capabilities": Object {
+            "navLinks": Object {
+              "integrations": Object {
+                "canAccessFleet": false,
+              },
+            },
+          },
+          "currentAppId$": Observable {},
+          "navigateToUrl": [MockFunction],
+        },
+        "chrome": undefined,
+        "docLinks": Object {
+          "links": Object {
+            "kibana": Object {
+              "guide": "kibana_docs_url",
+            },
           },
         },
-        "docsLink": "kibana_docs_url",
-        "logo": "logoKibana",
-        "pageTitle": "Welcome to Analytics!",
-        "solution": "Analytics",
+        "http": Object {
+          "basePath": Object {
+            "prepend": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "kibana_landing_page",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                ],
+                Array [
+                  "path-to-solution-two",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                ],
+                Array [
+                  "path-to-solution-three",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                ],
+                Array [
+                  "path-to-solution-four",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "kibana_landing_page",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                ],
+                Array [
+                  "path-to-solution-two",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                ],
+                Array [
+                  "path-to-solution-three",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                ],
+                Array [
+                  "path-to-solution-four",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "kibana_landing_page",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-two",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-three",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-four",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "kibana_landing_page",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-two",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-three",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-four",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+              ],
+            },
+          },
+        },
       }
     }
-    pageHeader={
+    dataViewEditor={
       Object {
-        "iconType": "logoKibana",
-        "pageTitle": <FormattedMessage
-          defaultMessage="Analytics"
-          id="kibanaOverview.header.title"
-          values={Object {}}
-        />,
-        "rightSideItems": Array [],
+        "IndexPatternEditorComponent": [MockFunction],
+        "openEditor": [MockFunction],
+        "userPermissions": Object {
+          "editDataView": [MockFunction],
+        },
       }
     }
-    template="empty"
-  />
+    dataViews={
+      Object {
+        "hasData": Object {
+          "hasESData": [Function],
+          "hasUserDataView": [Function],
+        },
+        "hasUserDataView": [MockFunction],
+      }
+    }
+  >
+    <MockedAnalyticsNoDataPage />
+  </AnalyticsNoDataPageKibanaProvider>
 </Overview>
 `;
 
@@ -668,7 +927,7 @@ exports[`Overview without features 1`] = `
     ]
   }
 >
-  <mockConstructor
+  <KibanaPageTemplate
     pageHeader={
       Object {
         "iconType": "logoKibana",
@@ -681,7 +940,9 @@ exports[`Overview without features 1`] = `
       }
     }
     template="empty"
-  />
+  >
+    <MockedKibanaPageTemplate />
+  </KibanaPageTemplate>
 </Overview>
 `;
 
@@ -861,7 +1122,7 @@ exports[`Overview without solutions 1`] = `
   }
   solutions={Array []}
 >
-  <mockConstructor
+  <KibanaPageTemplate
     pageHeader={
       Object {
         "iconType": "logoKibana",
@@ -874,6 +1135,8 @@ exports[`Overview without solutions 1`] = `
       }
     }
     template="empty"
-  />
+  >
+    <MockedKibanaPageTemplate />
+  </KibanaPageTemplate>
 </Overview>
 `;

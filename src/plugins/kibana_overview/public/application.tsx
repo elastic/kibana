@@ -41,12 +41,7 @@ export const renderApp = (
         <KibanaContextProvider services={{ ...core, ...deps }}>
           <KibanaOverviewApp
             basename={appBasePath}
-            notifications={notifications}
-            http={http}
-            navigation={navigation}
-            newsfeed$={newsfeed$}
-            solutions={solutions}
-            features={features}
+            {...{ notifications, http, navigation, newsfeed$, solutions, features }}
           />
         </KibanaContextProvider>
       </KibanaThemeProvider>
