@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import reduceReducers from 'reduce-reducers';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { combineLatestWith, pluck } from 'rxjs/operators';
 import { AnyAction, Reducer } from 'redux';
 import {
@@ -49,7 +49,7 @@ import {
 } from '../common/constants';
 
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
-import { AppLinkItems, LinksPermissions, subscribeAppLinks, updateAppLinks } from './common/links';
+import { LinksPermissions, updateAppLinks } from './common/links';
 import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
@@ -175,12 +175,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
 
-        const subscription = subscribeAppLinks((links: AppLinkItems) => {
-          // It has to be called once after deep links are initialized
-          if (links.length > 0) {
-            manageOldSiemRoutes(coreStart);
-            subscription.unsubscribe();
-          }
+        const subscription = this.appUpdater$.subscribe(() => {
+          // wait for app initialization to set the links
+          manageOldSiemRoutes(coreStart);
+          subscription.unsubscribe();
         });
 
         return () => true;
@@ -466,11 +464,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
 
-    registerDeepLinksUpdater(this.appUpdater$);
-
     const { license$ } = plugins.licensing;
     const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, false);
 
+    let appLinksSubscription: Subscription | null = null;
     license$.pipe(combineLatestWith(newNavEnabled$)).subscribe(async ([license, newNavEnabled]) => {
       const linksPermissions: LinksPermissions = {
         experimentalFeatures: this.experimentalFeatures,
@@ -481,12 +478,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         linksPermissions.license = license;
       }
 
+      if (appLinksSubscription) {
+        appLinksSubscription.unsubscribe();
+        appLinksSubscription = null;
+      }
+
       if (newNavEnabled) {
-        // set initial links to not block rendering
-        updateAppLinks(links, linksPermissions);
-        // set filtered links asynchronously
-        const filteredLinks = await getFilteredLinks(core, plugins);
-        updateAppLinks(filteredLinks, linksPermissions);
+        appLinksSubscription = registerDeepLinksUpdater(this.appUpdater$);
       } else {
         // old nav links update
         this.appUpdater$.next(() => ({
@@ -498,6 +496,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ),
         }));
       }
+
+      // set initial links to not block rendering
+      updateAppLinks(links, linksPermissions);
+
+      // set filtered links asynchronously
+      const filteredLinks = await getFilteredLinks(core, plugins);
+      updateAppLinks(filteredLinks, linksPermissions);
     });
   }
 }
