@@ -244,7 +244,6 @@ export const LensTopNavMenu = ({
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
-  const canEditDataViewField = !!dataViewFieldEditor?.userPermissions.editIndexPattern();
   const canEditDataView = !!dataViewEditor?.userPermissions.editDataView();
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -645,7 +644,7 @@ export const LensTopNavMenu = ({
 
   const editField = useMemo(
     () =>
-      canEditDataViewField
+      canEditDataView
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             if (currentIndexPattern?.id) {
               const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
@@ -662,7 +661,7 @@ export const LensTopNavMenu = ({
           }
         : undefined,
     [
-      canEditDataViewField,
+      canEditDataView,
       currentIndexPattern?.id,
       data.dataViews,
       dataViewFieldEditor,
@@ -671,8 +670,8 @@ export const LensTopNavMenu = ({
   );
 
   const addField = useMemo(
-    () => (canEditDataViewField && editField ? () => editField(undefined, 'add') : undefined),
-    [editField, canEditDataViewField]
+    () => (canEditDataView && editField ? () => editField(undefined, 'add') : undefined),
+    [editField, canEditDataView]
   );
 
   const createNewDataView = useMemo(

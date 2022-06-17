@@ -27,7 +27,6 @@ export type DiscoverTopNavProps = Pick<
   resetSavedSearch: () => void;
   onChangeIndexPattern: (indexPattern: string) => void;
   onEditRuntimeField: () => void;
-  useNewFieldsApi?: boolean;
 };
 
 export const DiscoverTopNav = ({
@@ -43,7 +42,6 @@ export const DiscoverTopNav = ({
   resetSavedSearch,
   onChangeIndexPattern,
   onEditRuntimeField,
-  useNewFieldsApi = false,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
   const showDatePicker = useMemo(
@@ -53,8 +51,6 @@ export const DiscoverTopNav = ({
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
 
-  const canEditDataViewField =
-    !!dataViewFieldEditor?.userPermissions.editIndexPattern() && useNewFieldsApi;
   const canEditDataView = !!dataViewEditor?.userPermissions.editDataView();
 
   const closeFieldEditor = useRef<() => void | undefined>();
@@ -87,7 +83,7 @@ export const DiscoverTopNav = ({
 
   const editField = useMemo(
     () =>
-      canEditDataViewField
+      canEditDataView
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             if (indexPattern?.id) {
               const indexPatternInstance = await data.dataViews.get(indexPattern.id);
@@ -103,18 +99,12 @@ export const DiscoverTopNav = ({
             }
           }
         : undefined,
-    [
-      canEditDataViewField,
-      indexPattern?.id,
-      data.dataViews,
-      dataViewFieldEditor,
-      onEditRuntimeField,
-    ]
+    [canEditDataView, indexPattern?.id, data.dataViews, dataViewFieldEditor, onEditRuntimeField]
   );
 
   const addField = useMemo(
-    () => (canEditDataViewField && editField ? () => editField(undefined, 'add') : undefined),
-    [editField, canEditDataViewField]
+    () => (canEditDataView && editField ? () => editField(undefined, 'add') : undefined),
+    [editField, canEditDataView]
   );
 
   const createNewDataView = useMemo(

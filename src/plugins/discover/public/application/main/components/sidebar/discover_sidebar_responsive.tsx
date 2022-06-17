@@ -89,7 +89,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Read from the Fields API
    */
-  useNewFieldsApi?: boolean;
+  useNewFieldsApi: boolean;
   /**
    * callback to execute on edit runtime field
    */
@@ -115,7 +115,7 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
-  const { selectedIndexPattern, onEditRuntimeField, useNewFieldsApi, onDataViewCreated } = props;
+  const { selectedIndexPattern, onEditRuntimeField, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   /**
@@ -178,8 +178,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { dataViewFieldEditor, dataViewEditor } = services;
   const { availableFields$ } = props;
 
-  const canEditDataViewField =
-    !!dataViewFieldEditor?.userPermissions.editIndexPattern() && useNewFieldsApi;
   const canEditDataView = !!dataViewEditor?.userPermissions.editDataView();
 
   useEffect(
@@ -209,7 +207,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const editField = useMemo(
     () =>
-      canEditDataViewField && selectedIndexPattern
+      canEditDataView && selectedIndexPattern
         ? (fieldName?: string) => {
             const ref = dataViewFieldEditor.openEditor({
               ctx: {
@@ -229,7 +227,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           }
         : undefined,
     [
-      canEditDataViewField,
+      canEditDataView,
       closeFlyout,
       dataViewFieldEditor,
       selectedIndexPattern,
