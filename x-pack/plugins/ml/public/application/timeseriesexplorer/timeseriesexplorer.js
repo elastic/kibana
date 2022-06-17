@@ -1083,7 +1083,7 @@ export class TimeSeriesExplorer extends React.Component {
               <div className="results-container">
                 <EuiFlexGroup gutterSize="xs" alignItems="center">
                   <EuiTitle size={'xs'}>
-                    <h2 style={{ display: 'inline' }}>
+                    <h2>
                       <span>
                         {i18n.translate(
                           'xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle',
