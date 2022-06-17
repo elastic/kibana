@@ -72,6 +72,13 @@ export const syntheticsMonitor: SavedObjectsType = {
       tags: {
         type: 'keyword',
       },
+      schedule: {
+        properties: {
+          number: {
+            type: 'integer',
+          },
+        },
+      },
     },
   },
   management: {
