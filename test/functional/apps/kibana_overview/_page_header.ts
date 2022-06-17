@@ -18,7 +18,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('overview page - page header', function describeIndexTests() {
     before(async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
       await PageObjects.common.navigateToUrl('kibana_overview');
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
@@ -30,43 +32,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    describe('page header', () => {
-      it('click on integrations leads to integrations', async () => {
-        await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    it('click on integrations leads to integrations', async () => {
+      await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const headerItems = await find.byCssSelector('.euiPageHeaderContent__rightSideItems');
-        const items = await headerItems.findAllByCssSelector('.kbnRedirectCrossAppLinks');
-        expect(items!.length).to.be(3);
+      const headerItems = await find.byCssSelector('.euiPageHeaderContent__rightSideItems');
+      const items = await headerItems.findAllByCssSelector('.kbnRedirectCrossAppLinks');
+      expect(items!.length).to.be(3);
 
-        const integrations = await items!.at(0);
-        await integrations!.click();
-        await PageObjects.common.waitUntilUrlIncludes('app/integrations/browse');
-      });
+      const integrations = await items!.at(0);
+      await integrations!.click();
+      await PageObjects.common.waitUntilUrlIncludes('app/integrations/browse');
+    });
 
-      it('click on management leads to management', async () => {
-        await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    it('click on management leads to management', async () => {
+      await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const headerItems = await find.byCssSelector('.euiPageHeaderContent__rightSideItems');
-        const items = await headerItems.findAllByCssSelector('.kbnRedirectCrossAppLinks');
+      const headerItems = await find.byCssSelector('.euiPageHeaderContent__rightSideItems');
+      const items = await headerItems.findAllByCssSelector('.kbnRedirectCrossAppLinks');
 
-        const management = await items!.at(1);
-        await management!.click();
-        await PageObjects.common.waitUntilUrlIncludes('app/management');
-      });
+      const management = await items!.at(1);
+      await management!.click();
+      await PageObjects.common.waitUntilUrlIncludes('app/management');
+    });
 
-      it('click on dev tools leads to dev tools', async () => {
-        await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    it('click on dev tools leads to dev tools', async () => {
+      await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const headerItems = await find.byCssSelector('.euiPageHeaderContent__rightSideItems');
-        const items = await headerItems.findAllByCssSelector('.kbnRedirectCrossAppLinks');
+      const headerItems = await find.byCssSelector('.euiPageHeaderContent__rightSideItems');
+      const items = await headerItems.findAllByCssSelector('.kbnRedirectCrossAppLinks');
 
-        const devTools = await items!.at(2);
-        await devTools!.click();
-        await PageObjects.common.waitUntilUrlIncludes('app/dev_tools');
-      });
+      const devTools = await items!.at(2);
+      await devTools!.click();
+      await PageObjects.common.waitUntilUrlIncludes('app/dev_tools');
     });
   });
 }

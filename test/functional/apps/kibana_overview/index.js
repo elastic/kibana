@@ -18,5 +18,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_page_header'));
     loadTestFile(require.resolve('./_analytics'));
     loadTestFile(require.resolve('./_solutions'));
+    loadTestFile(require.resolve('./_footer'));
   });
 }

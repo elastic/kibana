@@ -14,12 +14,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'header', 'dashboard']);
+  const PageObjects = getPageObjects(['common', 'header']);
 
-  describe('overview page no data', function describeIndexTests() {
+  describe('overview page - no data', function describeIndexTests() {
     before(async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
+      kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
       await PageObjects.common.navigateToUrl('kibana_overview');
       await PageObjects.header.waitUntilLoadingHasFinished();
     });

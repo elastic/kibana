@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'header', 'dashboard']);
+  const PageObjects = getPageObjects(['common', 'header']);
 
   describe('overview page - solutions', function describeIndexTests() {
     before(async () => {
