@@ -18,7 +18,3 @@ export const FILE_KIND_API_ROUTES = {
   getListRoute: (fileKind: string) => `${API_BASE_PATH}/${fileKind}/list`,
   getFindRoute: (fileKind: string) => `${API_BASE_PATH}/${fileKind}/{fileId}`,
 };
-
-export function generateUploadPath(fileKind: string, fileId: string): string {
-  return `${API_BASE_PATH}/${fileKind}/${fileId}/upload`;
-}
