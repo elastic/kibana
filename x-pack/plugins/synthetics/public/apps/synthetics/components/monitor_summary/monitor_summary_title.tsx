@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MonitorSummaryLastRunInfo } from './last_run_info';
-import { getMonitorStatusAction, selectMonitorStatus } from '../../state/monitor_summary';
+import { getMonitorStatusAction, selectMonitorStatus } from '../../state';
 
 export const MonitorSummaryTitle = () => {
   const dispatch = useDispatch();

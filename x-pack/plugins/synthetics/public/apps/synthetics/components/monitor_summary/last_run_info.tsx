@@ -10,8 +10,10 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { Ping } from '../../../../../common/runtime_types';
+import { useSelectedLocation } from './hooks/use_selected_location';
 
 export const MonitorSummaryLastRunInfo = ({ ping }: { ping: Ping }) => {
+  const selectedLocation = useSelectedLocation();
   const isBrowserType = ping.monitor.type === 'browser';
 
   return (
@@ -31,7 +33,7 @@ export const MonitorSummaryLastRunInfo = ({ ping }: { ping: Ping }) => {
             defaultMessage: 'in {loc}.',
             values: {
               // empty value will be replaced with value from location select
-              loc: ping.observer?.geo?.name ?? '--',
+              loc: selectedLocation?.label ?? '--',
             },
           })}
         </EuiText>
