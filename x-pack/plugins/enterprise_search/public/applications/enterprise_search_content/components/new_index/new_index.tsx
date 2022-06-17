@@ -170,7 +170,7 @@ export const NewIndex: React.FC = () => {
                       handleMethodChange(item.id);
                     }}
                   >
-                    <EuiFlexGroup alignItems="center">
+                    <EuiFlexGroup alignItems="center" responsive={false}>
                       <EuiFlexItem grow>
                         <EuiFlexGroup direction="column" gutterSize="none">
                           <EuiFlexItem grow={false}>
@@ -185,8 +185,10 @@ export const NewIndex: React.FC = () => {
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false} className="rightArrow">
-                        <EuiIcon type="arrowRight" color="primary" />
+                      <EuiFlexItem grow={false}>
+                        <div className="rightArrow">
+                          <EuiIcon type="arrowRight" color="primary" />
+                        </div>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiPanel>
