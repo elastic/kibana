@@ -20,6 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiDataGridRefProps,
+  EuiLink,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { flattenHit } from '@kbn/data-plugin/public';
@@ -43,6 +44,7 @@ import {
 import { getDisplayedColumns } from '../../utils/columns';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
+  SAMPLE_SIZE_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
 } from '../../../common';
@@ -515,11 +517,26 @@ export const DiscoverGrid = ({
           />
         </div>
         {showDisclaimer && (
-          <p className="dscDiscoverGrid__footer">
+          <p className="dscDiscoverGrid__footer" data-test-subj="discoverTableFooter">
             <FormattedMessage
-              id="discover.howToSeeOtherHitsDescription"
-              defaultMessage="You're viewing the first {sampleSize} documents that match your search. To configure this value, go to Advanced Settings."
-              values={{ sampleSize }}
+              id="discover.gridSampleSize.description"
+              defaultMessage="You're viewing the first {sampleSize} documents that match your search. To change this value, go to {advancedSettingsLink}."
+              values={{
+                sampleSize,
+                advancedSettingsLink: (
+                  <EuiLink
+                    href={services.addBasePath(
+                      `/app/management/kibana/settings?query=${SAMPLE_SIZE_SETTING}`
+                    )}
+                    data-test-subj="discoverTableSampleSizeSettingsLink"
+                  >
+                    <FormattedMessage
+                      id="discover.gridSampleSize.advancedSettingsLinkLabel"
+                      defaultMessage="Advanced Settings"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
           </p>
         )}
