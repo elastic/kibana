@@ -20,11 +20,11 @@ import {
 import { EuiSpacer } from '@elastic/eui';
 import { EmbeddableStart, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import {
-  HELLO_WORLD_EMBEDDABLE,
   TODO_EMBEDDABLE,
   BOOK_EMBEDDABLE,
   MULTI_TASK_TODO_EMBEDDABLE,
   SearchableListContainerFactory,
+  KPI_HOSTS_EMBEDDABLE,
 } from '@kbn/embeddable-examples-plugin/public';
 
 interface Props {
@@ -38,7 +38,7 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
     title: 'My searchable todo list',
     panels: {
       '1': {
-        type: HELLO_WORLD_EMBEDDABLE,
+        type: KPI_HOSTS_EMBEDDABLE,
         explicitInput: {
           id: '1',
           title: 'Hello',

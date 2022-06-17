@@ -12,6 +12,7 @@ import { DashboardContainerInput, DashboardStart } from '@kbn/dashboard-plugin/p
 import { HELLO_WORLD_EMBEDDABLE } from '@kbn/embeddable-examples-plugin/public/hello_world';
 import { TODO_EMBEDDABLE } from '@kbn/embeddable-examples-plugin/public/todo';
 import { TODO_REF_EMBEDDABLE } from '@kbn/embeddable-examples-plugin/public/todo/todo_ref_embeddable';
+import { KPI_HOSTS_EMBEDDABLE } from '@kbn/embeddable-examples-plugin/public/kpi_hosts';
 import { InputEditor } from './input_editor';
 
 const initialInput: DashboardContainerInput = {
@@ -25,7 +26,7 @@ const initialInput: DashboardContainerInput = {
         y: 0,
         i: '1',
       },
-      type: HELLO_WORLD_EMBEDDABLE,
+      type: KPI_HOSTS_EMBEDDABLE,
       explicitInput: {
         id: '1',
       },

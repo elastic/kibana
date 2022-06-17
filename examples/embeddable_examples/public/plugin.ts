@@ -54,6 +54,8 @@ import {
   SimpleEmbeddableFactory,
   SimpleEmbeddableFactoryDefinition,
 } from './migrations';
+import { KpiHostsEmbeddableFactory, KpiHostsEmbeddableFactoryDefinition } from './kpi_hosts';
+import { KPI_HOSTS_EMBEDDABLE } from './kpi_hosts';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -74,6 +76,7 @@ interface ExampleEmbeddableFactories {
   getTodoRefEmbeddableFactory: () => TodoRefEmbeddableFactory;
   getBookEmbeddableFactory: () => BookEmbeddableFactory;
   getMigrationsEmbeddableFactory: () => SimpleEmbeddableFactory;
+  getKpiHostsEmbeddableFactory: () => KpiHostsEmbeddableFactory;
 }
 
 export interface EmbeddableExamplesStart {
@@ -96,6 +99,11 @@ export class EmbeddableExamplesPlugin
     core: CoreSetup<EmbeddableExamplesStartDependencies>,
     deps: EmbeddableExamplesSetupDependencies
   ) {
+    this.exampleEmbeddableFactories.getKpiHostsEmbeddableFactory =
+      deps.embeddable.registerEmbeddableFactory(
+        KPI_HOSTS_EMBEDDABLE,
+        new KpiHostsEmbeddableFactoryDefinition()
+      );
     this.exampleEmbeddableFactories.getHelloWorldEmbeddableFactory =
       deps.embeddable.registerEmbeddableFactory(
         HELLO_WORLD_EMBEDDABLE,

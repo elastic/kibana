@@ -16,6 +16,7 @@ export type { ListContainerFactory } from './list_container';
 export { ListContainer, LIST_CONTAINER } from './list_container';
 export type { TodoEmbeddableFactory } from './todo';
 export { TODO_EMBEDDABLE } from './todo';
+export { KPI_HOSTS_EMBEDDABLE } from './kpi_hosts';
 
 export { BOOK_EMBEDDABLE } from './book';
 
