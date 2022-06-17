@@ -179,7 +179,7 @@ describe('EsQueryAlertTypeExpression', () => {
     expect(wrapper.find('[data-test-subj="thresholdExpression"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="forLastExpression"]').exists()).toBeTruthy();
 
-    const testQueryButton = wrapper.find('EuiButtonEmpty[data-test-subj="testQuery"]');
+    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
     expect(testQueryButton.exists()).toBeTruthy();
     expect(testQueryButton.prop('disabled')).toBe(false);
   });
@@ -189,7 +189,7 @@ describe('EsQueryAlertTypeExpression', () => {
       ...defaultEsQueryExpressionParams,
       timeField: null,
     } as unknown as EsQueryAlertParams<SearchType.esQuery>);
-    const testQueryButton = wrapper.find('EuiButtonEmpty[data-test-subj="testQuery"]');
+    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
     expect(testQueryButton.exists()).toBeTruthy();
     expect(testQueryButton.prop('disabled')).toBe(true);
   });
@@ -204,7 +204,7 @@ describe('EsQueryAlertTypeExpression', () => {
     });
     dataMock.search.search.mockImplementation(() => searchResponseMock$);
     const wrapper = await setup(defaultEsQueryExpressionParams);
-    const testQueryButton = wrapper.find('EuiButtonEmpty[data-test-subj="testQuery"]');
+    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
 
     testQueryButton.simulate('click');
     expect(dataMock.search.search).toHaveBeenCalled();
@@ -225,7 +225,7 @@ describe('EsQueryAlertTypeExpression', () => {
       throw new Error('What is this query');
     });
     const wrapper = await setup(defaultEsQueryExpressionParams);
-    const testQueryButton = wrapper.find('EuiButtonEmpty[data-test-subj="testQuery"]');
+    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
 
     testQueryButton.simulate('click');
     expect(dataMock.search.search).toHaveBeenCalled();
