@@ -16,7 +16,7 @@ const tagTitle = i18n.translate(
   }
 );
 
-export type RuleTagBadgeOptions = 'all' | 'default';
+export type RuleTagBadgeOptions = 'tagsOutPopover' | 'default';
 
 interface RuleTagBadgeBasicOptions {
   isOpen: boolean;
@@ -25,7 +25,7 @@ interface RuleTagBadgeBasicOptions {
 }
 
 export interface RuleTagBadgeCommonProps {
-  showAllTags?: boolean;
+  tagsOutPopover?: boolean;
   tags: string[];
   badgeDataTestSubj?: string;
   titleDataTestSubj?: string;
@@ -34,7 +34,7 @@ export interface RuleTagBadgeCommonProps {
 
 export type RuleTagBadgeProps<T extends RuleTagBadgeOptions = 'default'> = T extends 'default'
   ? RuleTagBadgeBasicOptions & RuleTagBadgeCommonProps
-  : T extends 'all'
+  : T extends 'tagsOutPopover'
   ? RuleTagBadgeCommonProps
   : never;
 
@@ -46,7 +46,7 @@ const getTagItemDataTestSubj = (tag: string) => `ruleTagBadgeItem-${tag}`;
 
 export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeProps<T>) => {
   const {
-    showAllTags = false,
+    tagsOutPopover = false,
     tags = [],
     badgeDataTestSubj = 'ruleTagBadge',
     titleDataTestSubj = 'ruleTagPopoverTitle',
@@ -87,7 +87,7 @@ export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeP
       )),
     [tags, tagItemDataTestSubj]
   );
-  if (showAllTags) {
+  if (tagsOutPopover) {
     return (
       // Put 0 to fix negative left margin value.
       <EuiFlexGroup data-test-subj="spreadTags" style={{ marginLeft: 0 }} wrap={true}>

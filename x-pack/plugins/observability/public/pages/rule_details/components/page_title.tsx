@@ -44,8 +44,8 @@ export function PageTitle({ rule }: PageHeaderProps) {
         <EuiSpacer size="xs" />
       </EuiFlexGroup>
       {rule.tags.length > 0 &&
-        triggersActionsUi.getRuleTagBadge<'all'>({
-          showAllTags: true,
+        triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
+          tagsOutPopover: true,
           tags: rule.tags,
         })}
       <EuiSpacer size="xs" />
