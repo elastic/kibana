@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useLocation, Redirect } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import qs from 'query-string';
 import React from 'react';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { isRouteWithTimeRange } from '../is_route_with_time_range';
+import { isRouteWithComparison } from '../is_route_with_time_range';
 import {
   TimeRangeComparisonEnum,
   dayAndWeekBeforeToOffset,
@@ -24,9 +24,10 @@ export function RedirectWithOffset({
   children: React.ReactElement;
 }) {
   const { core } = useApmPluginContext();
+  const history = useHistory();
   const location = useLocation();
   const apmRouter = useApmRouter();
-  const matchesRoute = isRouteWithTimeRange({ apmRouter, location });
+  const matchesRoute = isRouteWithComparison({ apmRouter, location });
   const query = qs.parse(location.search);
 
   // Redirect when 'comparisonType' is set as we now use offset instead
@@ -54,18 +55,16 @@ export function RedirectWithOffset({
 
     const dayOrWeekOffset = dayAndWeekBeforeToOffset[comparisonTypeEnumValue];
 
-    return (
-      <Redirect
-        to={qs.stringifyUrl({
-          url: location.pathname,
-          query: {
-            comparisonEnabled,
-            ...(dayOrWeekOffset ? { offset: dayOrWeekOffset } : {}),
-            ...queryRest,
-          },
-        })}
-      />
-    );
+    history.replace({
+      ...location,
+      search: qs.stringify({
+        comparisonEnabled,
+        ...(dayOrWeekOffset ? { offset: dayOrWeekOffset } : {}),
+        ...queryRest,
+      }),
+    });
+
+    return null;
   }
 
   return children;
