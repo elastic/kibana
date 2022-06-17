@@ -15,10 +15,12 @@ A few indications your component does need Kea or complex state management:
 A few indications you do need Kea:
 - Your component has no logical parent to inherit its data from
 - Your component needs to pull data from a number of different APIs or data sources
+- Your component's input data had to travel down through multiple components that only passed it along
 - Your component's interactivity alters state that other components rely on
 - Your component directly interacts with APIs, particularly when fetching data
+- You're pushing events up or down through multiple components - avoid this and use Kea wherever possible
 
-Slicing up components into smaller chunks, designing clear interfaces for those components and lifting state up can help reduce reliance on Kea.
+Slicing up components into smaller chunks, designing clear interfaces for those components and lifting state up can be a better solution than making state global through Kea.
 
 ## Separate API calls from components
 
@@ -26,7 +28,7 @@ State management tools are most powerful when used to coordinate state across an
 
 This means API interactions and their data should live in their own logic files, and the resulting data and API status should be imported by other logic files or directly by components consuming that data. Those API logic files should contain all interactions with APIs, and the current status of those API requests. Our idiomatic way of doing this follows:
 
-```
+```typescript
 import { kea, MakeLogicType } from 'kea';
 
 import { ApiStatus, HttpError } from '../../../../../../../../common/types/api';
@@ -93,7 +95,7 @@ export const AddCustomSourceLogic = kea<
 ```
 
 The types used above can be found in our [common Enterprise Search types file](common/types/api.ts). While the above assumes a single, idempotent API, this approach can be easily extended to use a dictionary approach:
-```
+```typescript
 reducers: () => ({
     sourceApiStatus: [
       {
@@ -121,7 +123,9 @@ reducers: () => ({
 
 Once you have an API interactions file set up, components and other Kea logic files can import the values from those files to build their own logic. Use the Kea 'connect' functionality to do this, as the auto-connect functionality has a few bugs and was removed in Kea 3.0. This allows you to read the status and value of an API, react to any API events, and abstract those APIs away from the components. Those components can now become more functional and reactive to the current state of the application, rather than to directly responding to API events.
 
-```
+You can connect logic files by adding a `connect` property to your Kea logic function, specifying the specific actions and values you want to import into your own logic. You can be selective there, and don't need to import all actions and values--only the ones you'll actually use. You can then access those actions and values directly under their own name in your new logic function.
+
+```typescript
 export const AddCustomSourceLogic = kea<
   MakeLogicType<AddCustomSourceValues, AddCustomSourceActions, AddCustomSourceProps>
 >({
@@ -143,7 +147,7 @@ export const AddCustomSourceLogic = kea<
       },
     ],
     newCustomSource: [
-      {} as CustomSource,
+      undefined,
       {
         setNewCustomSource: (_, newCustomSource) => newCustomSource,
       },
@@ -166,6 +170,14 @@ export const AddCustomSourceLogic = kea<
     ],
   },
 });
+```
+
+You'll have to add the imported the actions and values types you're already using for your function, preferably by importing the types off the imported logic. Like so:
+```typescript
+export interface AddCustomSourceActions {
+  addSource: AddCustomSourceApiActions['addSource'];
+  addSourceSuccess: AddCustomSourceApiActions['addSourceSuccess'];
+}
 ```
 ## Keep your logic files small
 
