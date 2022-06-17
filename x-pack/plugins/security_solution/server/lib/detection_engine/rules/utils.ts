@@ -58,6 +58,7 @@ import {
   EventCategoryOverrideOrUndefined,
   TiebreakerFieldOrUndefined,
   NamespaceOrUndefined,
+  DataViewIdOrUndefined,
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
@@ -112,6 +113,7 @@ export interface UpdateProperties {
   machineLearningJobId: MachineLearningJobIdOrUndefined;
   filters: PartialFilter[] | undefined;
   index: IndexOrUndefined;
+  dataViewId: DataViewIdOrUndefined;
   interval: IntervalOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
   relatedIntegrations: RelatedIntegrationArray | undefined;
