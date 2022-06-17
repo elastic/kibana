@@ -153,6 +153,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.console.hasWarningBadge()).to.be(true);
         expect(await PageObjects.console.hasSuccessBadge()).to.be(true);
       });
+
+      it('should render the most severe response status code in status bar', async () => {
+        const errorRequest = '\n GET _search/test'; // 405
+        await sendMultipleRequests([errorRequest, '\n GET _search', '\n GET ok']);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const status = await PageObjects.console.getNetworkRequestStatus();
+        expect(status).to.eql(405);
+      });
     });
   });
 }

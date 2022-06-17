@@ -26,6 +26,20 @@ import { useDataInit } from '../../hooks';
 
 import { getTopNavConfig } from './get_top_nav';
 import type { SenseEditor } from '../../models/sense_editor';
+import type { RequestResult } from '../../hooks/use_send_current_request/send_request';
+
+/**
+ *  Sorts the request data by statusCode in increasing order and
+ *  returns the last one which will be rendered in network request status bar
+ */
+export const getLastDatum = (requestData: RequestResult[] | null) => {
+  if (requestData) {
+    return requestData
+      .slice()
+      .sort((a, b) => a.response.statusCode - b.response.statusCode)
+      .pop();
+  }
+};
 
 export function Main() {
   const {
@@ -62,7 +76,7 @@ export function Main() {
     );
   }
 
-  const lastDatum = requestData?.[requestData.length - 1] ?? requestError;
+  const lastDatum = getLastDatum(requestData) ?? requestError;
 
   return (
     <div id="consoleRoot">
