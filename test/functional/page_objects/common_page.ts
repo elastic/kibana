@@ -135,6 +135,8 @@ export class CommonPageObject extends FtrService {
       shouldUseHashForSubUrl = true,
     } = {}
   ) {
+    this.log.debug('======');
+    this.log.debug(appName);
     const appConfig: { pathname: string; hash?: string } = {
       pathname: `${basePath}${this.config.get(['apps', appName]).pathname}`,
     };
