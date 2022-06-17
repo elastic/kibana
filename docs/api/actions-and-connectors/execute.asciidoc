@@ -54,30 +54,37 @@ refer to <<action-types>>.
 [%collapsible%open]
 ====
 `subAction`::
-(Required, string) The action to test. For example, `pushToService`.
+(Required, string) The action to test. Valid values include: `fieldsByIssueType`,
+`getFields`, `getIncident`, `issue`, `issues`, `issueTypes`, and `pushToService`.
 
 `subActionParams`::
-(Required, object) TBD
+(Required^*^, object) The set of configuration properties, which vary depending
+on the `subAction` value.
 +
 .Properties of `subActionParams`
 [%collapsible%open]
 =====
 comments::
-(Optional, array of objects) TBD
+(Optional, array of objects) If `subAction` is `pushToService`, specifies
+additional information that is sent to Jira.
 +
 .Properties of `comments`
 [%collapsible%open]
 ======
 comment::
-(string) Additional information for the client, such as how to troubleshoot the
-issue.
+(string) A comment related to the incident. For example, describe how to
+troubleshoot the issue.
 
 commentId::
 (integer) A unique identifier for the comment.
 ======
 
+`id`::
+(Required^*^, string) If `subAction` is `issue`, specifies the issue identifier.
+
 incident::
-(object) TBD
+(Required^*^, object) If `subAction` is `pushToService`, specifies information
+necessary to create an incident in Jira.
 +
 .Properties of `incident`
 [%collapsible%open]
@@ -86,24 +93,31 @@ incident::
 (Optional, string) The details about the incident.
 
 `labels`::
-(Optional, array of strings) The labels for the incident. For example, `["LABEL1"]`.
+(Optional, array of strings) The labels for the incident. For example,
+`["LABEL1"]`.
 
 `issueType`::
-(Optional, integer) The type of issue. For example, `10006`.
+(Optional, integer) The type of incident. For example, `10006`. To obtain the
+list of valid values, set `subAction` to `issueTypes`.
 
 `parent`::
-(Optional, string) The ID or key of the parent issue. Only applies to `Subtask` types of issues.
+(Optional, string) The ID or key of the parent issue. Only applies to `Subtask`
+types of issues.
 
 `priority`::
-(Optional, string) The priority of the incident. For example, `Lowest`.
+(Optional, string) The incident priority level. For example, `Lowest`.
 
 `summary`::
-(Required, string) TBD
+(Required, string) A summary of the incident.
 
 `title`::
-(Optional, string) A title for the issue, used for searching the contents of the knowledge
-base.
+(Optional, string) A title for the incident, used for searching the contents of
+the knowledge base.
 ======
+
+`title`::
+(Required^*^, string) If `subAction` is `issues`, specifies the title of an issue.
+
 =====
 For more information, refer to
 {kibana-ref}/jira-action-type.html[{jira} connector and action].
