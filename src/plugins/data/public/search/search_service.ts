@@ -238,8 +238,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
-      onResponse: (request: SearchRequest, response: IKibanaSearchResponse) =>
-        handleResponse(request, response, theme),
+      onResponse: (request: SearchRequest, response: IKibanaSearchResponse, searchOptions) =>
+        handleResponse(request, response, searchOptions, theme),
     };
 
     const config = this.initializerContext.config.get();

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SearchSourceSearchOptions } from '../../..';
 import { GetConfigFn } from '../../../types';
 import { IKibanaSearchResponse } from '../../types';
 
@@ -24,7 +25,11 @@ export interface FetchHandlers {
    * Callback which can be used to hook into responses, modify them, or perform
    * side effects like displaying UI errors on the client.
    */
-  onResponse: (request: SearchRequest, response: IKibanaSearchResponse) => IKibanaSearchResponse;
+  onResponse: (
+    request: SearchRequest,
+    response: IKibanaSearchResponse,
+    searchOptions: SearchSourceSearchOptions
+  ) => IKibanaSearchResponse;
 }
 
 export interface SearchError {

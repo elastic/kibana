@@ -85,18 +85,13 @@ import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
 
-import {
-  AggConfigs,
-  EsQuerySortValue,
-  IEsSearchResponse,
-  ISearchGeneric,
-  ISearchOptions,
-} from '../..';
+import { AggConfigs, EsQuerySortValue, IEsSearchResponse, ISearchGeneric } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
   SearchSourceFields,
   SearchSourceOptions,
+  SearchSourceSearchOptions,
 } from './types';
 import { getSearchParamsFromRequest, RequestFailure } from './fetch';
 import type { FetchHandlers, SearchRequest } from './fetch';
@@ -154,7 +149,7 @@ export class SearchSource {
   private overwriteDataViewType?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
-    (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
+    (searchSource: SearchSource, options?: SearchSourceSearchOptions) => Promise<unknown>
   > = [];
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
@@ -314,7 +309,7 @@ export class SearchSource {
    * @param options
    */
   fetch$(
-    options: ISearchOptions = {}
+    options: SearchSourceSearchOptions = {}
   ): Observable<IKibanaSearchResponse<estypes.SearchResponse<any>>> {
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
       switchMap(() => {
@@ -343,7 +338,7 @@ export class SearchSource {
    * @deprecated Use the `fetch$` method instead
    * @removeBy 8.1
    */
-  fetch(options: ISearchOptions = {}) {
+  fetch(options: SearchSourceSearchOptions = {}) {
     return lastValueFrom(this.fetch$(options)).then((r) => {
       return r.rawResponse as estypes.SearchResponse<any>;
     });
@@ -355,7 +350,7 @@ export class SearchSource {
    *  @return {undefined}
    */
   onRequestStart(
-    handler: (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
+    handler: (searchSource: SearchSource, options?: SearchSourceSearchOptions) => Promise<unknown>
   ) {
     this.requestStartHandlers.push(handler);
   }
@@ -379,7 +374,10 @@ export class SearchSource {
    * PRIVATE APIS
    ******/
 
-  private inspectSearch(s$: Observable<IKibanaSearchResponse<any>>, options: ISearchOptions) {
+  private inspectSearch(
+    s$: Observable<IKibanaSearchResponse<any>>,
+    options: SearchSourceSearchOptions
+  ) {
     const { id, title, description, adapter } = options.inspector || { title: '' };
 
     const requestResponder = adapter?.start(title, {
@@ -455,7 +453,10 @@ export class SearchSource {
     }
   }
 
-  private async fetchOthers(response: estypes.SearchResponse<any>, options: ISearchOptions) {
+  private async fetchOthers(
+    response: estypes.SearchResponse<any>,
+    options: SearchSourceSearchOptions
+  ) {
     const aggs = this.getField('aggs');
     if (aggs instanceof AggConfigs) {
       for (const agg of aggs.aggs) {
@@ -479,7 +480,7 @@ export class SearchSource {
    * Run a search using the search service
    * @return {Observable<SearchResponse<any>>}
    */
-  private fetchSearch$(searchRequest: SearchRequest, options: ISearchOptions) {
+  private fetchSearch$(searchRequest: SearchRequest, options: SearchSourceSearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
@@ -526,7 +527,7 @@ export class SearchSource {
           }
         });
       }),
-      map((response) => onResponse(searchRequest, response))
+      map((response) => onResponse(searchRequest, response, options))
     );
   }
 
@@ -535,7 +536,7 @@ export class SearchSource {
    *  @param options
    *  @return {Promise<undefined>}
    */
-  private requestIsStarting(options: ISearchOptions = {}) {
+  private requestIsStarting(options: SearchSourceSearchOptions = {}) {
     const handlers = [...this.requestStartHandlers];
     // If callParentStartHandlers has been set to true, we also call all
     // handlers of parent search sources.

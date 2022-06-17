@@ -7,13 +7,13 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SerializableRecord } from '@kbn/utility-types';
-import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { Filter, Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AggConfigSerialized, IAggConfigs } from '../../../public';
-import { Query } from '../..';
-import { Filter } from '../../es_query';
+import { AggConfigSerialized, IAggConfigs, ISearchOptions } from '../../../public';
 import type { SearchSource } from './search_source';
 
 /**
@@ -226,4 +226,23 @@ export function isSerializedSearchSource(
     maybeSerializedSearchSource !== null &&
     !Array.isArray(maybeSerializedSearchSource)
   );
+}
+
+export interface IInspectorInfo {
+  adapter?: RequestAdapter;
+  title: string;
+  id?: string;
+  description?: string;
+}
+
+export interface SearchSourceSearchOptions extends ISearchOptions {
+  /**
+   * Inspector integration options
+   */
+  inspector?: IInspectorInfo;
+
+  /**
+   * Disable default warnings of shard failures
+   */
+  disableShardFailureWarning?: boolean;
 }
