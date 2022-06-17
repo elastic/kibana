@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import { createAction } from '@reduxjs/toolkit';
 import { Ping } from '../../../../../common/runtime_types';
 import { QueryParams } from './api';
 import { createAsyncAction } from '../utils/actions';
 
-export const getMonitorStatusAction = createAsyncAction<QueryParams, Ping>('[MONITOR STATUS] GET');
+export const setMonitorSummaryLocationAction = createAction<string>(
+  '[MONITOR SUMMARY] SET LOCATION'
+);
+
+export const getMonitorStatusAction = createAsyncAction<QueryParams, Ping>('[MONITOR SUMMARY] GET');
