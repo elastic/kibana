@@ -194,7 +194,6 @@ export const StatefulEditDataProvider = React.memo<Props>(
                 <EuiFormRow label={i18n.FIELD}>
                   <EuiComboBox
                     autoFocus
-                    data-test-subj="field"
                     isClearable={false}
                     onChange={onFieldSelected}
                     options={getCategorizedFieldNames(browserFields)}
@@ -209,7 +208,6 @@ export const StatefulEditDataProvider = React.memo<Props>(
               <EuiFlexItem grow={false}>
                 <EuiFormRow label={i18n.OPERATOR}>
                   <EuiComboBox
-                    data-test-subj="operator"
                     isClearable={false}
                     onChange={onOperatorSelected}
                     options={operatorLabels}
@@ -235,7 +233,6 @@ export const StatefulEditDataProvider = React.memo<Props>(
               <EuiFormRow label={i18n.VALUE_LABEL}>
                 <EuiFieldText
                   className={VALUE_INPUT_CLASS_NAME}
-                  data-test-subj="value"
                   onChange={onValueChange}
                   placeholder={i18n.VALUE}
                   value={sanatizeValue(updatedValue)}
