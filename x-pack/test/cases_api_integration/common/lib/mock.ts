@@ -18,6 +18,7 @@ import {
   CommentRequest,
   CommentRequestActionsType,
   CaseSeverity,
+  CommentRequestExternalReferenceType,
 } from '@kbn/cases-plugin/common/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
@@ -77,6 +78,15 @@ export const postCommentActionsReq: CommentRequestActionsType = {
     type: 'isolate',
   },
   type: CommentType.actions,
+  owner: 'securitySolutionFixture',
+};
+
+export const postExternalReferenceReq: CommentRequestExternalReferenceType = {
+  type: CommentType.externalReference,
+  externalReferenceId: 'my-id',
+  externalReferenceType: 'so',
+  externalReferenceAttachmentTypeId: '.test',
+  externalReferenceMetadata: null,
   owner: 'securitySolutionFixture',
 };
 

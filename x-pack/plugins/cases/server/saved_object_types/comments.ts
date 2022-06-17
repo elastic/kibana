@@ -63,6 +63,20 @@ export const createCaseCommentSavedObjectType = ({
           },
         },
       },
+      externalReferenceId: {
+        type: 'keyword',
+      },
+      externalReferenceType: {
+        type: 'keyword',
+      },
+      externalReferenceAttachmentTypeId: {
+        type: 'keyword',
+      },
+      externalReferenceMetadata: {
+        dynamic: false,
+        type: 'object',
+        enabled: false,
+      },
       pushed_at: {
         type: 'date',
       },

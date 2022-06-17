@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { jsonValueRt } from '../runtime_types';
 import { SavedObjectFindOptionsRt } from '../saved_object';
 
 import { UserRT } from '../user';
@@ -24,6 +25,7 @@ export enum CommentType {
   user = 'user',
   alert = 'alert',
   actions = 'actions',
+  externalReference = 'externalReference',
 }
 
 export enum IsolateHostActionType {
@@ -68,22 +70,38 @@ export const ActionsCommentRequestRt = rt.type({
   owner: rt.string,
 });
 
+export const ExternalReferenceRt = rt.type({
+  externalReferenceId: rt.string,
+  externalReferenceType: rt.union([rt.literal('so'), rt.literal('other')]),
+  externalReferenceAttachmentTypeId: rt.string,
+  externalReferenceMetadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
+  type: rt.literal(CommentType.externalReference),
+  owner: rt.string,
+});
+
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);
 const AttributesTypeAlertsRt = rt.intersection([AlertCommentRequestRt, CommentAttributesBasicRt]);
 const AttributesTypeActionsRt = rt.intersection([
   ActionsCommentRequestRt,
   CommentAttributesBasicRt,
 ]);
+const AttributesTypeExternalReferenceRt = rt.intersection([
+  ExternalReferenceRt,
+  CommentAttributesBasicRt,
+]);
+
 const CommentAttributesRt = rt.union([
   AttributesTypeUserRt,
   AttributesTypeAlertsRt,
   AttributesTypeActionsRt,
+  AttributesTypeExternalReferenceRt,
 ]);
 
 export const CommentRequestRt = rt.union([
   ContextTypeUserRt,
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
+  ExternalReferenceRt,
 ]);
 
 export const CommentResponseRt = rt.intersection([
@@ -112,6 +130,14 @@ export const CommentResponseTypeAlertsRt = rt.intersection([
 
 export const CommentResponseTypeActionsRt = rt.intersection([
   AttributesTypeActionsRt,
+  rt.type({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
+export const CommentResponseTypeExternalReferenceRt = rt.intersection([
+  AttributesTypeExternalReferenceRt,
   rt.type({
     id: rt.string,
     version: rt.string,
@@ -166,6 +192,9 @@ export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
 export type CommentResponseUserType = rt.TypeOf<typeof CommentResponseTypeUserRt>;
 export type CommentResponseAlertsType = rt.TypeOf<typeof CommentResponseTypeAlertsRt>;
 export type CommentResponseActionsType = rt.TypeOf<typeof CommentResponseTypeActionsRt>;
+export type CommentResponseExternalReferenceType = rt.TypeOf<
+  typeof CommentResponseTypeExternalReferenceRt
+>;
 export type AllCommentsResponse = rt.TypeOf<typeof AllCommentsResponseRt>;
 export type CommentsResponse = rt.TypeOf<typeof CommentsResponseRt>;
 export type CommentPatchRequest = rt.TypeOf<typeof CommentPatchRequestRt>;
@@ -173,3 +202,4 @@ export type CommentPatchAttributes = rt.TypeOf<typeof CommentPatchAttributesRt>;
 export type CommentRequestUserType = rt.TypeOf<typeof ContextTypeUserRt>;
 export type CommentRequestAlertType = rt.TypeOf<typeof AlertCommentRequestRt>;
 export type CommentRequestActionsType = rt.TypeOf<typeof ActionsCommentRequestRt>;
+export type CommentRequestExternalReferenceType = rt.TypeOf<typeof ExternalReferenceRt>;
