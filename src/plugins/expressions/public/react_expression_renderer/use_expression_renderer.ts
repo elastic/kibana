@@ -124,6 +124,7 @@ export function useExpressionRenderer(
     const subscription =
       onData$ &&
       expressionLoaderRef.current?.data$.subscribe(({ partial, result }) => {
+        setState({ isEmpty: false });
         onData$(result, expressionLoaderRef.current?.inspect(), partial);
       });
 
