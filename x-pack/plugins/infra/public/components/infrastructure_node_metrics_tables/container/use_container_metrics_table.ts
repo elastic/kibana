@@ -10,12 +10,20 @@ import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
-import type { MetricsMap, SortState, UseNodeMetricsTableOptions } from '../shared';
-import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
+import {
+  averageOfValues,
+  makeUnpackMetric,
+  MetricsMap,
+  metricsToApiOptions,
+  scaleUpPercentage,
+  SortState,
+  useInfrastructureNodeMetrics,
+  UseNodeMetricsTableOptions,
+} from '../shared';
 
 type ContainerMetricsField =
   | 'kubernetes.container.start_time'
-  | 'kubernetes.container.cpu.usage.node.pct'
+  | 'kubernetes.container.cpu.usage.limit.pct'
   | 'kubernetes.container.memory.usage.bytes';
 
 const containerMetricsMap: MetricsMap<ContainerMetricsField> = {
@@ -23,9 +31,9 @@ const containerMetricsMap: MetricsMap<ContainerMetricsField> = {
     aggregation: 'max',
     field: 'kubernetes.container.start_time',
   },
-  'kubernetes.container.cpu.usage.node.pct': {
+  'kubernetes.container.cpu.usage.limit.pct': {
     aggregation: 'avg',
-    field: 'kubernetes.container.cpu.usage.node.pct',
+    field: 'kubernetes.container.cpu.usage.limit.pct',
   },
   'kubernetes.container.memory.usage.bytes': {
     aggregation: 'avg',
@@ -37,6 +45,7 @@ const { options: containerMetricsOptions, metricByField } = metricsToApiOptions(
   containerMetricsMap,
   'container.id'
 );
+const unpackMetric = makeUnpackMetric(metricByField);
 export { metricByField };
 
 export interface ContainerNodeMetricsRow {
@@ -102,17 +111,18 @@ function rowWithoutMetrics(name: string) {
 }
 
 function calculateMetricAverages(rows: MetricsExplorerRow[]) {
-  const { uptimeValues, averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } =
+  const { startTimeValues, averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } =
     collectMetricValues(rows);
 
   let uptime = null;
-  if (uptimeValues.length !== 0) {
-    uptime = averageOfValues(uptimeValues);
+  if (startTimeValues.length !== 0) {
+    const startTime = startTimeValues.at(-1);
+    uptime = Date.now() - startTime!;
   }
 
   let averageCpuUsagePercent = null;
   if (averageCpuUsagePercentValues.length !== 0) {
-    averageCpuUsagePercent = averageOfValues(averageCpuUsagePercentValues);
+    averageCpuUsagePercent = scaleUpPercentage(averageOfValues(averageCpuUsagePercentValues));
   }
 
   let averageMemoryUsageMegabytes = null;
@@ -130,15 +140,15 @@ function calculateMetricAverages(rows: MetricsExplorerRow[]) {
 }
 
 function collectMetricValues(rows: MetricsExplorerRow[]) {
-  const uptimeValues: number[] = [];
+  const startTimeValues: number[] = [];
   const averageCpuUsagePercentValues: number[] = [];
   const averageMemoryUsageMegabytesValues: number[] = [];
 
   rows.forEach((row) => {
-    const { uptime, averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
+    const { startTime, averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
 
-    if (uptime !== null) {
-      uptimeValues.push(uptime);
+    if (startTime !== null) {
+      startTimeValues.push(startTime);
     }
 
     if (averageCpuUsagePercent !== null) {
@@ -151,25 +161,18 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
   });
 
   return {
-    uptimeValues,
+    startTimeValues,
     averageCpuUsagePercentValues,
     averageMemoryUsageMegabytesValues,
   };
 }
 
-function unpackMetrics(row: MetricsExplorerRow): Omit<ContainerNodeMetricsRow, 'name'> {
+function unpackMetrics(
+  row: MetricsExplorerRow
+): Omit<ContainerNodeMetricsRow, 'name' | 'uptime'> & { startTime: number | null } {
   return {
-    uptime: row[metricByField['kubernetes.container.start_time']] as number | null,
-    averageCpuUsagePercent: row[metricByField['kubernetes.container.cpu.usage.node.pct']] as
-      | number
-      | null,
-    averageMemoryUsageMegabytes: row[metricByField['kubernetes.container.memory.usage.bytes']] as
-      | number
-      | null,
+    startTime: unpackMetric(row, 'kubernetes.container.start_time'),
+    averageCpuUsagePercent: unpackMetric(row, 'kubernetes.container.cpu.usage.limit.pct'),
+    averageMemoryUsageMegabytes: unpackMetric(row, 'kubernetes.container.memory.usage.bytes'),
   };
-}
-
-function averageOfValues(values: number[]) {
-  const sum = values.reduce((acc, value) => acc + value, 0);
-  return sum / values.length;
 }
