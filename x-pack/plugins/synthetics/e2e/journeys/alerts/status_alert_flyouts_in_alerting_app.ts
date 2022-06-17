@@ -27,7 +27,7 @@ journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
   step('Open monitor status flyout', async () => {
     await page.click(byTestId('createFirstRuleButton'));
     await waitForLoadingToFinish({ page });
-    await page.click(byTestId('"xpack.synthetics.alerts.monitorStatus-SelectOption"'));
+    await page.click(byTestId('"xpack.uptime.alerts.monitorStatus-SelectOption"'));
     await waitForLoadingToFinish({ page });
     await assertText({ page, text: 'This alert will apply to approximately 0 monitors.' });
   });
@@ -61,7 +61,7 @@ journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
   step('Open tls alert flyout', async () => {
     await page.click(byTestId('createFirstRuleButton'));
     await waitForLoadingToFinish({ page });
-    await page.click(byTestId('"xpack.synthetics.alerts.tlsCertificate-SelectOption"'));
+    await page.click(byTestId('"xpack.uptime.alerts.tlsCertificate-SelectOption"'));
     await waitForLoadingToFinish({ page });
     await assertText({ page, text: 'has a certificate expiring within' });
   });

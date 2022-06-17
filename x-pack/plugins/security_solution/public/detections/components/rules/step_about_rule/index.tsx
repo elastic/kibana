@@ -10,6 +10,7 @@ import React, { FC, memo, useCallback, useEffect, useState, useMemo } from 'reac
 import styled from 'styled-components';
 
 import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
+import { DataViewBase } from '@kbn/es-query';
 import {
   RuleStepProps,
   RuleStep,
@@ -43,6 +44,7 @@ import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -74,6 +76,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   onSubmit,
   setForm,
 }) => {
+  const { data } = useKibana().services;
+
   const isThreatMatchRuleValue = useMemo(
     () => isThreatMatchRule(defineRuleData?.ruleType),
     [defineRuleData?.ruleType]
@@ -109,7 +113,35 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     }
   }, [jobs, defineRuleData]);
 
-  const [indexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
+  /**
+   * 1. if not null, fetch data view from id saved on rule form
+   * 2. Create a state to set the indexPattern to be used
+   * 3. useEffect if indexIndexPattern is updated and dataView from rule form is empty
+   */
+
+  const [indexPatternLoading, { indexPatterns: indexIndexPattern }] = useFetchIndex(memoRuleIndices);
+
+  const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPattern);
+
+  useEffect(() => {
+    if (
+      defineRuleData?.index != null &&
+      (defineRuleData?.dataViewId === '' || defineRuleData?.dataViewId == null)
+    ) {
+      setIndexPattern(indexIndexPattern);
+    }
+  }, [defineRuleData?.dataViewId, defineRuleData?.index, indexIndexPattern]);
+
+  useEffect(() => {
+    const fetchSingleDataView = async () => {
+      if (defineRuleData?.dataViewId != null && defineRuleData?.dataViewId !== '') {
+        const dv = await data.dataViews.get(defineRuleData?.dataViewId);
+        setIndexPattern(dv);
+      }
+    };
+
+    fetchSingleDataView();
+  }, [data.dataViews, defineRuleData, indexIndexPattern, setIndexPattern]);
 
   const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,
@@ -203,7 +235,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
                 isDisabled: isLoading || indexPatternLoading,
                 options: severityOptions,
-                indices: indexPatterns,
+                indices: indexPattern,
               }}
             />
           </EuiFlexItem>
@@ -216,7 +248,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleRiskScore',
                 idAria: 'detectionEngineStepAboutRuleRiskScore',
                 isDisabled: isLoading || indexPatternLoading,
-                indices: indexPatterns,
+                indices: indexPattern,
               }}
             />
           </EuiFlexItem>
@@ -358,7 +390,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
                 fieldType: 'string',
                 idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
-                indices: indexPatterns,
+                indices: indexPattern,
                 isDisabled: isLoading || indexPatternLoading,
                 placeholder: '',
               }}
@@ -371,7 +403,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleTimestampOverride',
                 fieldType: 'date',
                 idAria: 'detectionEngineStepAboutRuleTimestampOverride',
-                indices: indexPatterns,
+                indices: indexPattern,
                 isDisabled: isLoading || indexPatternLoading,
                 placeholder: '',
               }}
