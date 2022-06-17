@@ -13,4 +13,3 @@ export enum FetchStatus {
   COMPLETE = 'complete',
   ERROR = 'error',
 }
-
