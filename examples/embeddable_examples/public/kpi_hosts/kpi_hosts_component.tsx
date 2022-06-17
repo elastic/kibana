@@ -6,22 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, Fragment, useContext } from 'react';
-import {
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiColorPalettePicker,
-  euiPaletteColorBlind,
-  euiPaletteComplimentary,
-  euiPaletteForStatus,
-  euiPaletteForTemperature,
-  euiPaletteCool,
-  euiPaletteWarm,
-  euiPaletteNegative,
-  euiPalettePositive,
-  euiPaletteGray,
-} from '@elastic/eui';
+import React, { Fragment } from 'react';
+import { euiPalettePositive } from '@elastic/eui';
 import { Chart, Settings, Axis, LineSeries, BarSeries, DataGenerator } from '@elastic/charts';
 import { withEmbeddableSubscription, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { KpiHostsEmbeddable, KpiHostsInput } from './kpi_hosts_embeddable';

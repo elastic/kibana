@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { withEmbeddableSubscription, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import { withEmbeddableSubscription } from '@kbn/embeddable-plugin/public';
 
 import { MatrixHistogramComponent } from '.';
 

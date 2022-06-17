@@ -66,7 +66,7 @@ const DashboardEmbeddableExplorerApp = ({
   basename,
   DashboardContainerByValueRenderer,
   uiSettings,
-  savedDashboardLoader
+  savedDashboardLoader,
 }: Props) => {
   const pages: PageDef[] = [
     {

@@ -14,7 +14,6 @@ import {
   IContainer,
   EmbeddableOutput,
 } from '@kbn/embeddable-plugin/public';
-import { MatrixHistogram } from '.';
 
 export const MATRIX_HISTOGRAM_EMBEDDABLE = 'MATRIX_HISTOGRAM_EMBEDDABLE';
 
