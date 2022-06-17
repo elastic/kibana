@@ -462,10 +462,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
       {annotationsError !== undefined && (
         <>
-          <EuiTitle
-            className="panel-title"
-            data-test-subj="mlAnomalyExplorerAnnotationsPanel error"
-          >
+          <EuiTitle data-test-subj="mlAnomalyExplorerAnnotationsPanel error" size={'xs'}>
             <h2>
               <FormattedMessage
                 id="xpack.ml.explorer.annotationsErrorTitle"
@@ -500,10 +497,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
             <EuiAccordion
               id={htmlIdGen()}
               buttonContent={
-                <EuiTitle
-                  className="panel-title"
-                  data-test-subj="mlAnomalyExplorerAnnotationsPanelButton"
-                >
+                <EuiTitle data-test-subj="mlAnomalyExplorerAnnotationsPanelButton" size={'xs'}>
                   <h2>
                     <FormattedMessage
                       id="xpack.ml.explorer.annotationsTitle"
@@ -517,6 +511,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
               }
             >
               <>
+                <EuiSpacer size={'m'} />
                 <AnnotationsTable
                   jobIds={selectedJobIds}
                   annotations={annotationsData}
@@ -534,7 +529,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         <EuiPanel hasBorder hasShadow={false}>
           <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiTitle className="panel-title">
+              <EuiTitle size={'xs'}>
                 <h2>
                   <FormattedMessage
                     id="xpack.ml.explorer.anomaliesTitle"
@@ -650,7 +645,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                   >
                     <div data-test-subj="mlAnomalyExplorerInfluencerList">
                       <EuiSpacer size={'s'} />
-                      <EuiTitle className="panel-title">
+                      <EuiTitle size={'xs'}>
                         <h2>
                           <FormattedMessage
                             id="xpack.ml.explorer.topInfuencersTitle"

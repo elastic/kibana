@@ -1082,7 +1082,7 @@ export class TimeSeriesExplorer extends React.Component {
             <div>
               <div className="results-container">
                 <EuiFlexGroup gutterSize="xs" alignItems="center">
-                  <EuiTitle className="panel-title">
+                  <EuiTitle size={'xs'}>
                     <h2 style={{ display: 'inline' }}>
                       <span>
                         {i18n.translate(
@@ -1202,10 +1202,7 @@ export class TimeSeriesExplorer extends React.Component {
                 />
                 {focusAnnotationError !== undefined && (
                   <>
-                    <EuiTitle
-                      className="panel-title"
-                      data-test-subj="mlAnomalyExplorerAnnotations error"
-                    >
+                    <EuiTitle data-test-subj="mlAnomalyExplorerAnnotations error" size={'xs'}>
                       <h2>
                         <FormattedMessage
                           id="xpack.ml.timeSeriesExplorer.annotationsErrorTitle"
@@ -1231,49 +1228,51 @@ export class TimeSeriesExplorer extends React.Component {
                   </>
                 )}
                 {focusAnnotationData && focusAnnotationData.length > 0 && (
-                  <EuiAccordion
-                    id={'mlAnnotationsAccordion'}
-                    buttonContent={
-                      <EuiTitle className="panel-title">
-                        <h2>
-                          <FormattedMessage
-                            id="xpack.ml.timeSeriesExplorer.annotationsTitle"
-                            defaultMessage="Annotations {badge}"
-                            values={{
-                              badge: (
-                                <EuiBadge color={'hollow'}>
-                                  <FormattedMessage
-                                    id="xpack.ml.explorer.annotationsTitleTotalCount"
-                                    defaultMessage="Total: {count}"
-                                    values={{ count: focusAnnotationData.length }}
-                                  />
-                                </EuiBadge>
-                              ),
-                            }}
-                          />
-                        </h2>
-                      </EuiTitle>
-                    }
-                    data-test-subj="mlAnomalyExplorerAnnotations loaded"
-                  >
-                    <AnnotationsTable
-                      chartDetails={chartDetails}
-                      detectorIndex={selectedDetectorIndex}
-                      detectors={detectors}
-                      jobIds={[this.props.selectedJobId]}
-                      annotations={focusAnnotationData}
-                      isSingleMetricViewerLinkVisible={false}
-                      isNumberBadgeVisible={true}
-                    />
-                    <EuiSpacer size="l" />
-                  </EuiAccordion>
+                  <>
+                    <EuiAccordion
+                      id={'mlAnnotationsAccordion'}
+                      buttonContent={
+                        <EuiTitle size={'xs'}>
+                          <h2>
+                            <FormattedMessage
+                              id="xpack.ml.timeSeriesExplorer.annotationsTitle"
+                              defaultMessage="Annotations {badge}"
+                              values={{
+                                badge: (
+                                  <EuiBadge color={'hollow'}>
+                                    <FormattedMessage
+                                      id="xpack.ml.explorer.annotationsTitleTotalCount"
+                                      defaultMessage="Total: {count}"
+                                      values={{ count: focusAnnotationData.length }}
+                                    />
+                                  </EuiBadge>
+                                ),
+                              }}
+                            />
+                          </h2>
+                        </EuiTitle>
+                      }
+                      data-test-subj="mlAnomalyExplorerAnnotations loaded"
+                    >
+                      <AnnotationsTable
+                        chartDetails={chartDetails}
+                        detectorIndex={selectedDetectorIndex}
+                        detectors={detectors}
+                        jobIds={[this.props.selectedJobId]}
+                        annotations={focusAnnotationData}
+                        isSingleMetricViewerLinkVisible={false}
+                        isNumberBadgeVisible={true}
+                      />
+                    </EuiAccordion>
+                    <EuiSpacer size="m" />
+                  </>
                 )}
                 <AnnotationFlyout
                   chartDetails={chartDetails}
                   detectorIndex={selectedDetectorIndex}
                   detectors={detectors}
                 />
-                <EuiTitle className="panel-title">
+                <EuiTitle size={'xs'}>
                   <h2>
                     <FormattedMessage
                       id="xpack.ml.timeSeriesExplorer.anomaliesTitle"
@@ -1281,6 +1280,7 @@ export class TimeSeriesExplorer extends React.Component {
                     />
                   </h2>
                 </EuiTitle>
+                <EuiSpacer size="s" />
                 <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
                   <EuiFlexItem grow={false}>
                     <SelectSeverity />
