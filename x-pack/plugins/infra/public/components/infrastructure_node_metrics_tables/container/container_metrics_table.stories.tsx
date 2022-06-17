@@ -7,12 +7,12 @@
 
 import { EuiCard } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
-import { ContainerMetricsTable } from './container_metrics_table';
 import type { ContainerMetricsTableProps } from './container_metrics_table';
+import { ContainerMetricsTable } from './container_metrics_table';
 import { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
 const mockServices = {

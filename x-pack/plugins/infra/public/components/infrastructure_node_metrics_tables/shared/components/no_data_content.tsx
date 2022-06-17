@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import { EuiLoadingLogo } from '@elastic/eui';
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  COLOR_MODES_STANDARD,
+  EuiButton,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiEmptyPrompt,
+  EuiImage,
+  EuiLoadingLogo,
+  useEuiTheme,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLinkProps } from '@kbn/observability-plugin/public';
 import React from 'react';
@@ -15,6 +25,8 @@ import {
   noMetricIndicesPromptPrimaryActionTitle,
   noMetricIndicesPromptTitle,
 } from '../../../empty_states';
+import noResultsIllustrationDark from './assets/no-results--dark.svg';
+import noResultsIllustrationLight from './assets/no-results--light.svg';
 
 export const MetricsTableLoadingContent = () => (
   <EuiEmptyPrompt
@@ -49,16 +61,68 @@ export const MetricsTableNoIndicesContent = () => {
   );
 };
 
-export const MetricsTableEmptyIndicesContent = () => (
-  <EuiEmptyPrompt
-    data-test-subj="metricsTableEmptyIndicesContent"
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.infra.metricsTable.emptyIndicesContentTitle"
-          defaultMessage="Metric indices are empty"
-        />
-      </h2>
-    }
-  />
+export const MetricsTableEmptyIndicesContent = () => {
+  return (
+    <EuiEmptyPrompt
+      body={
+        <EuiDescriptionList compressed>
+          <EuiDescriptionListTitle>
+            <FormattedMessage
+              id="xpack.infra.metricsTable.emptyIndicesPromptTimeRangeHintTitle"
+              defaultMessage="Expand your time range"
+            />
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            <FormattedMessage
+              id="xpack.infra.metricsTable.emptyIndicesPromptTimeRangeHintDescription"
+              defaultMessage="Try searching over a longer period of time."
+            />
+          </EuiDescriptionListDescription>
+          <EuiDescriptionListTitle>
+            <FormattedMessage
+              id="xpack.infra.metricsTable.emptyIndicesPromptQueryHintTitle"
+              defaultMessage="Adjust your query"
+            />
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            <FormattedMessage
+              id="xpack.infra.metricsTable.emptyIndicesPromptQueryHintDescription"
+              defaultMessage="Try searching for a different combination of terms."
+            />
+          </EuiDescriptionListDescription>
+        </EuiDescriptionList>
+      }
+      color="subdued"
+      data-test-subj="metricsTableEmptyIndicesContent"
+      icon={<NoResultsIllustration />}
+      layout="horizontal"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.infra.metricsTable.emptyIndicesPromptTitle"
+            defaultMessage="No results match your search criteria"
+          />
+        </h2>
+      }
+      titleSize="m"
+    />
+  );
+};
+
+const NoResultsIllustration = () => {
+  const { colorMode } = useEuiTheme();
+
+  const illustration =
+    colorMode === COLOR_MODES_STANDARD.dark
+      ? noResultsIllustrationDark
+      : noResultsIllustrationLight;
+
+  return (
+    <EuiImage alt={noResultsIllustrationAlternativeText} size="fullWidth" src={illustration} />
+  );
+};
+
+const noResultsIllustrationAlternativeText = i18n.translate(
+  'xpack.infra.metricsTable.noResultsIllustrationAlternativeText',
+  { defaultMessage: 'A magnifying glass with an exclamation mark' }
 );
