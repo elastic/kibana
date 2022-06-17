@@ -86,6 +86,7 @@ export async function getIsUsingServiceDestinationMetrics({
                 ...rangeQuery(start, end),
                 ...kqlQuery(kuery),
                 ...getDocumentTypeFilterForServiceDestinationStatistics(true),
+                ...(query ? [query] : []),
               ],
             },
           },
