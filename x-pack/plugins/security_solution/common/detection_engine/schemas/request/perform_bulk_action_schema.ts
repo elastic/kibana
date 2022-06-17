@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { NonEmptyArray, DefaultEmptyString } from '@kbn/securitysolution-io-ts-types';
+import { NonEmptyArray } from '@kbn/securitysolution-io-ts-types';
 import { BulkAction, queryOrUndefined, bulkActionEditPayload } from '../common/schemas';
 
 export const performBulkActionSchema = t.intersection([
