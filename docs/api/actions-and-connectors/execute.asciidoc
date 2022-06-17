@@ -90,7 +90,7 @@ on the `subAction` value. This object is not required when `subAction` is
 (Required, string) The title of the Jira issue.
 =====
 +
-.Properties of `subActionParams` when `subAction` is `pushToService`
+.Properties when `subAction` is `pushToService`
 [%collapsible%open]
 =====
 comments:::
