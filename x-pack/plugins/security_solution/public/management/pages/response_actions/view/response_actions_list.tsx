@@ -40,6 +40,7 @@ import { ManagementEmptyStateWrapper } from '../../../components/management_empt
 import { useGetEndpointActionList } from '../../../hooks';
 import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 // Truncated usernames
 const StyledFacetButton = styled(EuiFacetButton)`
@@ -49,8 +50,20 @@ const StyledFacetButton = styled(EuiFacetButton)`
   }
 `;
 
-export const ResponseActionsList = memo<EndpointActionListRequestQuery & { hideHeader?: boolean }>(
-  ({ agentIds, commands, endDate, startDate, userIds, hideHeader }) => {
+export const ResponseActionsList = memo<
+  EndpointActionListRequestQuery & { hideHeader?: boolean; hideHostNameColumn?: boolean }
+>(
+  ({
+    agentIds,
+    commands,
+    endDate,
+    startDate,
+    userIds,
+    hideHeader = false,
+    hideHostNameColumn = false,
+  }) => {
+    const getTestId = useTestIdGenerator('response-actions-list');
+
     const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
       [k: ActionDetails['id']]: React.ReactNode;
     }>({});
@@ -175,7 +188,7 @@ export const ResponseActionsList = memo<EndpointActionListRequestQuery & { hideH
 
     // table column
     const responseActionListColumns = useMemo(() => {
-      return [
+      const columns = [
         {
           field: 'startedAt',
           name: TABLE_COLUMN_NAMES.placedAt,
@@ -198,12 +211,8 @@ export const ResponseActionsList = memo<EndpointActionListRequestQuery & { hideH
           truncateText: true,
           render: (command: ActionDetails['command']) => {
             return (
-              <EuiToolTip
-                content={command}
-                anchorClassName="eui-textTruncate"
-                data-test-subj="column-command"
-              >
-                <EuiBadge data-test-subj="column-command">
+              <EuiToolTip content={command} anchorClassName="eui-textTruncate">
+                <EuiBadge data-test-subj={getTestId('column-command')}>
                   <FormattedMessage
                     id="xpack.securitySolution.responseActionsList.list.item.command"
                     defaultMessage="{command}"
@@ -225,13 +234,19 @@ export const ResponseActionsList = memo<EndpointActionListRequestQuery & { hideH
                 .data.user.id || '-';
             return (
               <StyledFacetButton
-                icon={<EuiAvatar name={userId} data-test-subj="column-user-avatar" size="s" />}
+                icon={
+                  <EuiAvatar
+                    name={userId}
+                    data-test-subj={getTestId('column-user-avatar')}
+                    size="s"
+                  />
+                }
               >
                 <EuiToolTip content={userId} anchorClassName="eui-textTruncate">
                   <EuiText
                     size="s"
                     className="eui-textTruncate eui-fullWidth"
-                    data-test-subj="column-user-name"
+                    data-test-subj={getTestId('column-user-name')}
                   >
                     <p className="eui-displayInline eui-TextTruncate">{userId}</p>
                   </EuiText>
@@ -253,7 +268,7 @@ export const ResponseActionsList = memo<EndpointActionListRequestQuery & { hideH
                 <EuiText
                   size="s"
                   className="eui-textTruncate eui-fullWidth"
-                  data-test-subj="column-hostname"
+                  data-test-subj={getTestId('column-hostname')}
                 >
                   <p className="eui-displayInline eui-TextTruncate">{hostname}</p>
                 </EuiText>
@@ -261,6 +276,7 @@ export const ResponseActionsList = memo<EndpointActionListRequestQuery & { hideH
             );
           },
         },
+        // conditional hostname column
         {
           field: 'logEntries',
           name: TABLE_COLUMN_NAMES.comments,
@@ -275,7 +291,7 @@ export const ResponseActionsList = memo<EndpointActionListRequestQuery & { hideH
                 <EuiText
                   size="s"
                   className="eui-textTruncate eui-fullWidth"
-                  data-test-subj="column-comments"
+                  data-test-subj={getTestId('column-comments')}
                 >
                   <p className="eui-displayInline eui-TextTruncate">{comment}</p>
                 </EuiText>
@@ -300,7 +316,7 @@ export const ResponseActionsList = memo<EndpointActionListRequestQuery & { hideH
                 <EuiText
                   size="s"
                   className="eui-textTruncate eui-fullWidth"
-                  data-test-subj="column-duration"
+                  data-test-subj={getTestId('column-duration')}
                 >
                   <p className="eui-displayInline eui-TextTruncate">{duration}</p>
                 </EuiText>
@@ -324,7 +340,7 @@ export const ResponseActionsList = memo<EndpointActionListRequestQuery & { hideH
             return (
               <EuiToolTip content={status} anchorClassName="eui-textTruncate">
                 <EuiBadge
-                  data-test-subj="column-status"
+                  data-test-subj={getTestId('column-status')}
                   color={
                     data.isExpired
                       ? 'danger'
@@ -366,7 +382,11 @@ export const ResponseActionsList = memo<EndpointActionListRequestQuery & { hideH
           },
         },
       ];
-    }, [itemIdToExpandedRowMap, toggleDetails]);
+      if (hideHostNameColumn) {
+        columns.splice(3, 1);
+      }
+      return columns;
+    }, [getTestId, hideHostNameColumn, itemIdToExpandedRowMap, toggleDetails]);
 
     // table pagination
     const tablePagination = useMemo(() => {
@@ -399,7 +419,7 @@ export const ResponseActionsList = memo<EndpointActionListRequestQuery & { hideH
       >
         {isFetched && !totalItemCount ? (
           <ManagementEmptyStateWrapper>
-            <EuiFlexItem>
+            <EuiFlexItem data-test-subj={getTestId('empty-prompt')}>
               <EuiEmptyPrompt
                 iconType="editorUnorderedList"
                 titleSize="s"
@@ -425,7 +445,7 @@ export const ResponseActionsList = memo<EndpointActionListRequestQuery & { hideH
           </ManagementEmptyStateWrapper>
         ) : (
           <>
-            <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
+            <EuiText color="subdued" size="xs" data-test-subj={getTestId('endpointListTableTotal')}>
               <FormattedMessage
                 id="xpack.securitySolution.responseActionsList.list.totalCount"
                 defaultMessage="Showing {totalItemCount, plural, one {# response action} other {# response actions}}"
@@ -434,7 +454,7 @@ export const ResponseActionsList = memo<EndpointActionListRequestQuery & { hideH
             </EuiText>
             <EuiHorizontalRule margin="xs" />
             <EuiBasicTable
-              data-test-subj="responseActionList"
+              data-test-subj={getTestId('table-view')}
               items={actionList?.data || []}
               columns={responseActionListColumns}
               itemId="id"
