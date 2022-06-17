@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from '@kbn/es-query';
+export type { Query, TimeRange, Filter } from '@kbn/es-query';
 export * from '@kbn/data-plugin/public';
