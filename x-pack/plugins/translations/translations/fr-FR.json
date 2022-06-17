@@ -2952,7 +2952,6 @@
     "discover.hitCountSpinnerAriaLabel": "Nombre final de résultats toujours en chargement",
     "discover.hitsPluralTitle": "{formattedHits} {hits, plural, one {résultat} other {résultats}}",
     "discover.howToSeeOtherMatchingDocumentsDescription": "Voici les {sampleSize} premiers documents correspondant à votre recherche. Veuillez affiner celle-ci pour en voir plus.",
-    "discover.howToSeeOtherMatchingDocumentsDescriptionGrid": "Voici les {sampleSize} premiers documents correspondant à votre recherche. Veuillez affiner celle-ci pour en voir plus.",
     "discover.inspectorRequestDataTitleChart": "Données du graphique",
     "discover.inspectorRequestDataTitleDocuments": "Documents",
     "discover.inspectorRequestDataTitleTotalHits": "Nombre total de résultats",

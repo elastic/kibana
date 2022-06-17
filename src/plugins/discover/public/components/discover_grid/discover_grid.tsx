@@ -7,6 +7,7 @@
  */
 
 import React, { useCallback, useMemo, useState, useRef } from 'react';
+import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './discover_grid.scss';
 import {
@@ -19,6 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiDataGridRefProps,
+  EuiLink,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { flattenHit } from '@kbn/data-plugin/public';
@@ -42,6 +44,7 @@ import {
 import { getDisplayedColumns } from '../../utils/columns';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
+  SAMPLE_SIZE_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
 } from '../../../common';
@@ -484,44 +487,57 @@ export const DiscoverGrid = ({
         valueToStringConverter,
       }}
     >
-      <span
-        data-test-subj="discoverDocTable"
-        data-render-complete={!isLoading}
-        data-shared-item=""
-        data-title={searchTitle}
-        data-description={searchDescription}
-        data-document-number={displayedRows.length}
-        className={className}
-      >
-        <EuiDataGridMemoized
-          aria-describedby={randomId}
-          aria-labelledby={ariaLabelledBy}
-          columns={euiGridColumns}
-          columnVisibility={columnsVisibility}
-          data-test-subj="docTable"
-          leadingControlColumns={lead}
-          onColumnResize={onResize}
-          pagination={paginationObj}
-          renderCellValue={renderCellValue}
-          ref={dataGridRef}
-          rowCount={rowCount}
-          schemaDetectors={schemaDetectors}
-          sorting={sorting as EuiDataGridSorting}
-          toolbarVisibility={toolbarVisibility}
-          rowHeightsOptions={rowHeightsOptions}
-          gridStyle={GRID_STYLE}
-        />
-
+      <span className="dscDiscoverGrid__inner">
+        <div
+          data-test-subj="discoverDocTable"
+          data-render-complete={!isLoading}
+          data-shared-item=""
+          data-title={searchTitle}
+          data-description={searchDescription}
+          data-document-number={displayedRows.length}
+          className={classnames(className, 'dscDiscoverGrid__table')}
+        >
+          <EuiDataGridMemoized
+            aria-describedby={randomId}
+            aria-labelledby={ariaLabelledBy}
+            columns={euiGridColumns}
+            columnVisibility={columnsVisibility}
+            data-test-subj="docTable"
+            leadingControlColumns={lead}
+            onColumnResize={onResize}
+            pagination={paginationObj}
+            renderCellValue={renderCellValue}
+            ref={dataGridRef}
+            rowCount={rowCount}
+            schemaDetectors={schemaDetectors}
+            sorting={sorting as EuiDataGridSorting}
+            toolbarVisibility={toolbarVisibility}
+            rowHeightsOptions={rowHeightsOptions}
+            gridStyle={GRID_STYLE}
+          />
+        </div>
         {showDisclaimer && (
-          <p className="dscDiscoverGrid__footer">
+          <p className="dscDiscoverGrid__footer" data-test-subj="discoverTableFooter">
             <FormattedMessage
-              id="discover.howToSeeOtherMatchingDocumentsDescriptionGrid"
-              defaultMessage="These are the first {sampleSize} documents matching your search, refine your search to see others."
-              values={{ sampleSize }}
+              id="discover.gridSampleSize.description"
+              defaultMessage="You're viewing the first {sampleSize} documents that match your search. To change this value, go to {advancedSettingsLink}."
+              values={{
+                sampleSize,
+                advancedSettingsLink: (
+                  <EuiLink
+                    href={services.addBasePath(
+                      `/app/management/kibana/settings?query=${SAMPLE_SIZE_SETTING}`
+                    )}
+                    data-test-subj="discoverTableSampleSizeSettingsLink"
+                  >
+                    <FormattedMessage
+                      id="discover.gridSampleSize.advancedSettingsLinkLabel"
+                      defaultMessage="Advanced Settings"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
-            <a href={`#${ariaLabelledBy}`}>
-              <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
-            </a>
           </p>
         )}
         {searchTitle && (
