@@ -7,8 +7,13 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { registerUrlParam, updateUrlParam, useGlobalQueryString } from '.';
-import { globalUrlParamActions } from '../../store/global_url_param';
+import {
+  registerUrlParam,
+  updateUrlParam,
+  useGlobalQueryString,
+  useSyncGlobalQueryString,
+} from '.';
+import { GlobalUrlParam, globalUrlParamActions } from '../../store/global_url_param';
 import { mockHistory } from '../route/mocks';
 import {
   createSecuritySolutionStorageMock,
@@ -18,6 +23,8 @@ import {
   TestProviders,
 } from '../../mock';
 import { createStore } from '../../store';
+import { LinkInfo } from '../../links';
+import { SecurityPageName } from '../../../app/types';
 
 const mockGetState = jest.fn();
 const mockDispatch = jest.fn();
@@ -30,6 +37,25 @@ jest.mock('../../store', () => ({
   getStore: () => mockedStore,
 }));
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => mockHistory,
+}));
+
+const defaultLinkInfo: LinkInfo = {
+  id: SecurityPageName.alerts,
+  path: '/test',
+  title: 'test title',
+  skipUrlState: false,
+};
+
+const mockLinkInfo = jest.fn().mockResolvedValue(defaultLinkInfo);
+
+jest.mock('../../links', () => ({
+  ...jest.requireActual('../../links'),
+  getLinkInfo: () => mockLinkInfo(),
+}));
+
 describe('global query string', () => {
   beforeAll(() => {
     // allow window.location.search to be redefined
@@ -40,9 +66,7 @@ describe('global query string', () => {
     });
   });
   beforeEach(() => {
-    mockDispatch.mockRestore();
-    mockGetState.mockRestore();
-    mockHistory.replace.mockRestore();
+    jest.clearAllMocks();
     window.location.search = '?';
   });
   describe('registerUrlParam', () => {
@@ -72,28 +96,10 @@ describe('global query string', () => {
   });
 
   describe('updateUrlParam', () => {
-    it("doesn't update the URL if the params isn't registered", () => {
-      const urlParamKey = 'testKey';
-      const value = 123;
-      const history = mockHistory;
-
-      mockGetState.mockReturnValue({
-        globalUrlParam: {
-          [urlParamKey]: undefined,
-        },
-      });
-
-      updateUrlParam({ urlParamKey, value, history });
-
-      expect(mockDispatch).not.toHaveBeenCalled();
-      expect(history.replace).not.toHaveBeenCalled();
-    });
-
-    it('updates the URL', () => {
+    it('dispatch updateUrlParam action', () => {
       const urlParamKey = 'testKey';
       const value = { test: 123 };
       const encodedVaue = '(test:123)';
-      const history = mockHistory;
 
       mockGetState.mockReturnValue({
         globalUrlParam: {
@@ -101,7 +107,7 @@ describe('global query string', () => {
         },
       });
 
-      updateUrlParam({ urlParamKey, value, history });
+      updateUrlParam({ urlParamKey, value });
 
       expect(mockDispatch).toBeCalledWith(
         globalUrlParamActions.updateUrlParam({
@@ -109,49 +115,19 @@ describe('global query string', () => {
           value: encodedVaue,
         })
       );
-
-      expect(history.replace).toHaveBeenCalledWith({ search: `${urlParamKey}=${encodedVaue}` });
     });
 
-    it("doesn't delete other URL params when updating one", () => {
+    it('dispatch updateUrlParam action with null value', () => {
       const urlParamKey = 'testKey';
-      const value = 123;
-      window.location.search = `?firstKey=111&${urlParamKey}=oldValue&lastKey=999`;
 
-      mockGetState.mockReturnValue({
-        globalUrlParam: {
-          [urlParamKey]: 'oldValue',
-        },
-      });
-
-      updateUrlParam({ urlParamKey, value, history: mockHistory });
-
-      expect(mockHistory.replace).toHaveBeenCalledWith({
-        search: `firstKey=111&${urlParamKey}=${value}&lastKey=999`,
-      });
-    });
-
-    it('removes URL param when value is null', () => {
-      const urlParamKey = 'testKey';
-      const value = null;
-      const history = mockHistory;
-
-      mockGetState.mockReturnValue({
-        globalUrlParam: {
-          [urlParamKey]: 'oldValue',
-        },
-      });
-
-      updateUrlParam({ urlParamKey, value, history });
+      updateUrlParam({ urlParamKey, value: null });
 
       expect(mockDispatch).toBeCalledWith(
         globalUrlParamActions.updateUrlParam({
           key: urlParamKey,
-          value,
+          value: null,
         })
       );
-
-      expect(history.replace).toHaveBeenCalledWith({ search: `` });
     });
   });
 
@@ -179,6 +155,117 @@ describe('global query string', () => {
       const { result } = renderHook(() => useGlobalQueryString(), { wrapper });
 
       expect(result.current).toEqual('testNumber=123&testObject=(test:321)');
+    });
+  });
+
+  describe('useSyncGlobalQueryString', () => {
+    const { storage } = createSecuritySolutionStorageMock();
+    const makeStore = (globalUrlParam: GlobalUrlParam) =>
+      createStore(
+        {
+          ...mockGlobalState,
+          globalUrlParam,
+        },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+
+    const makeWrapper = (globalUrlParam: GlobalUrlParam) => {
+      const wrapper = ({ children }: { children: React.ReactElement }) => (
+        <TestProviders store={makeStore(globalUrlParam)}>{children}</TestProviders>
+      );
+      return wrapper;
+    };
+
+    it("doesn't delete other URL params when updating one", async () => {
+      const urlParamKey = 'testKey';
+      const value = '123';
+      const globalUrlParam = {
+        [urlParamKey]: value,
+      };
+      window.location.search = `?firstKey=111&${urlParamKey}=oldValue&lastKey=999`;
+
+      renderHook(() => useSyncGlobalQueryString(), { wrapper: makeWrapper(globalUrlParam) });
+
+      expect(mockHistory.replace).toHaveBeenCalledWith({
+        search: `firstKey=111&${urlParamKey}=${value}&lastKey=999`,
+      });
+    });
+
+    it('updates URL params', async () => {
+      const urlParamKey1 = 'testKey1';
+      const value1 = '1111';
+      const urlParamKey2 = 'testKey2';
+      const value2 = '2222';
+      const globalUrlParam = {
+        [urlParamKey1]: value1,
+        [urlParamKey2]: value2,
+      };
+      window.location.search = `?`;
+
+      renderHook(() => useSyncGlobalQueryString(), { wrapper: makeWrapper(globalUrlParam) });
+
+      expect(mockHistory.replace).toHaveBeenCalledWith({
+        search: `${urlParamKey1}=${value1}&${urlParamKey2}=${value2}`,
+      });
+    });
+
+    it('deletes URL param when value is null', async () => {
+      const urlParamKey = 'testKey';
+      const globalUrlParam = {
+        [urlParamKey]: null,
+      };
+      window.location.search = `?${urlParamKey}=oldValue`;
+
+      renderHook(() => useSyncGlobalQueryString(), { wrapper: makeWrapper(globalUrlParam) });
+
+      expect(mockHistory.replace).toHaveBeenCalledWith({
+        search: '',
+      });
+    });
+
+    it('deletes URL param when page has skipUrlState=true', async () => {
+      const urlParamKey = 'testKey';
+      const value = 'testValue';
+      const globalUrlParam = {
+        [urlParamKey]: value,
+      };
+      window.location.search = `?${urlParamKey}=${value}`;
+      mockLinkInfo.mockReturnValue({ ...defaultLinkInfo, skipUrlState: true });
+
+      renderHook(() => useSyncGlobalQueryString(), { wrapper: makeWrapper(globalUrlParam) });
+
+      expect(mockHistory.replace).toHaveBeenCalledWith({
+        search: '',
+      });
+    });
+
+    it('does not replace URL param when the value does not change', async () => {
+      const urlParamKey = 'testKey';
+      const value = 'testValue';
+      const globalUrlParam = {
+        [urlParamKey]: value,
+      };
+      window.location.search = `?${urlParamKey}=${value}`;
+
+      renderHook(() => useSyncGlobalQueryString(), { wrapper: makeWrapper(globalUrlParam) });
+
+      expect(mockHistory.replace).not.toHaveBeenCalledWith();
+    });
+
+    it('does not replace URL param when the page doe not exist', async () => {
+      const urlParamKey = 'testKey';
+      const value = 'testValue';
+      const globalUrlParam = {
+        [urlParamKey]: value,
+      };
+      window.location.search = `?${urlParamKey}=oldValue`;
+      mockLinkInfo.mockReturnValue(undefined);
+
+      renderHook(() => useSyncGlobalQueryString(), { wrapper: makeWrapper(globalUrlParam) });
+
+      expect(mockHistory.replace).not.toHaveBeenCalledWith();
     });
   });
 });

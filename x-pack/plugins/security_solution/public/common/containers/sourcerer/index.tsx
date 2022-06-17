@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { matchPath, useHistory } from 'react-router-dom';
+import { matchPath } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import {
   SelectedDataView,
@@ -90,7 +90,6 @@ export const useInitSourcerer = (
     missingPatterns: timelineMissingPatterns,
   } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
   const { indexFieldsSearch } = useDataView();
-  const history = useHistory();
 
   useEffect(() => {
     const sourcererInitialState = registerUrlParam<SourcererUrlState>({
@@ -123,7 +122,6 @@ export const useInitSourcerer = (
               selectedPatterns,
             },
           },
-          history,
         });
       }
     }

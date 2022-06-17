@@ -6,11 +6,12 @@
  */
 
 import * as H from 'history';
-import { parse, stringify } from 'query-string';
-import { useMemo } from 'react';
+import { parse, ParsedQuery, stringify } from 'query-string';
+import { useEffect, useMemo } from 'react';
 
 import { url } from '@kbn/kibana-utils-plugin/public';
 import { isEmpty, pickBy } from 'lodash/fp';
+import { useHistory } from 'react-router-dom';
 import {
   decodeRisonUrlState,
   encodeRisonUrlState,
@@ -20,11 +21,12 @@ import {
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { getStore } from '../../store';
 import { globalUrlParamActions, globalUrlParamSelectors } from '../../store/global_url_param';
-import { selectIsRegister } from '../../store/global_url_param/selectors';
+import { useRouteSpy } from '../route/use_route_spy';
+import { getLinkInfo } from '../../links';
+import { SecurityPageName } from '../../../app/types';
 
 interface RegisterUrlParams<State> {
   urlParamKey: string;
-  decodeUrlState?: (value: string | undefined) => State | null;
 }
 
 /**
@@ -49,27 +51,18 @@ export const registerUrlParam = <State>({
 interface UpdateUrlParams<State> {
   urlParamKey: string;
   value: State | null;
-  history: H.History;
 }
 
 /**
  * Updates URL parameters in the url.
+ *
  * Make sure to call `registerUrlParam` before calling this function.
  */
-export const updateUrlParam = <State>({ urlParamKey, value, history }: UpdateUrlParams<State>) => {
+export const updateUrlParam = <State>({ urlParamKey, value }: UpdateUrlParams<State>) => {
   const store = getStore();
-  if (!store) return;
-
   const encodedValue = value !== null ? encodeRisonUrlState(value) : null;
-  const isRegister = selectIsRegister(store.getState(), urlParamKey);
 
-  // Only update the URL after the URL param is register
-  if (isRegister) {
-    replaceUrlParams([{ key: urlParamKey, value: encodedValue }], history);
-    store?.dispatch(
-      globalUrlParamActions.updateUrlParam({ key: urlParamKey, value: encodedValue })
-    );
-  }
+  store?.dispatch(globalUrlParamActions.updateUrlParam({ key: urlParamKey, value: encodedValue }));
 };
 
 /**
@@ -79,16 +72,37 @@ export const useGlobalQueryString = (): string => {
   const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
 
   const globalQueryString = useMemo(
-    () =>
-      stringify(url.encodeQuery(pickBy((value) => !isEmpty(value), globalUrlParam)), {
-        sort: false,
-        encode: false,
-      }),
+    () => encodeQuerySrting(pickBy((value) => !isEmpty(value), globalUrlParam)),
     [globalUrlParam]
   );
 
   return globalQueryString;
 };
+
+/**
+ * - It hides / shows the global query depending on the page.
+ * - It updates the URL when globalUrlParam store updates.
+ */
+export const useSyncGlobalQueryString = () => {
+  const history = useHistory();
+  const [{ pageName }] = useRouteSpy();
+  const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
+
+  useEffect(() => {
+    const linkInfo = getLinkInfo(pageName as SecurityPageName) ?? { skipUrlState: true };
+    const params = Object.entries(globalUrlParam).map(([key, value]) => ({
+      key,
+      value: linkInfo.skipUrlState ? null : value,
+    }));
+
+    if (params.length > 0) {
+      replaceUrlParams(params, history);
+    }
+  }, [globalUrlParam, pageName, history]);
+};
+
+const encodeQuerySrting = (urlParams: ParsedQuery<string>): string =>
+  stringify(url.encodeQuery(urlParams), { sort: false, encode: false });
 
 const replaceUrlParams = (
   params: Array<{ key: string; value: string | null }>,
@@ -104,7 +118,9 @@ const replaceUrlParams = (
     }
   });
 
-  const search = stringify(url.encodeQuery(urlParams), { sort: false, encode: false });
+  const search = encodeQuerySrting(urlParams);
 
-  history.replace({ search });
+  if (getQueryStringFromLocation(window.location.search) !== search) {
+    history.replace({ search });
+  }
 };
