@@ -69,7 +69,7 @@ export function buildEsQuery(
   );
   const luceneQuery = buildQueryFromLucene(
     queriesByLanguage.lucene,
-    config.queryStringOptions ?? {},
+    config.queryStringOptions,
     config.dateFormatTZ
   );
 

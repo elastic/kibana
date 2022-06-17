@@ -66,7 +66,9 @@ export interface EsQueryFiltersConfig {
 export const buildQueryFromFilters = (
   filters: Filter[] = [],
   indexPattern: DataViewBase | undefined,
-  config: EsQueryFiltersConfig = {}
+  { ignoreFilterIfFieldNotInIndex = false, nestedIgnoreUnmapped }: EsQueryFiltersConfig = {
+    ignoreFilterIfFieldNotInIndex: false,
+  }
 ): BoolQuery => {
   filters = filters.filter((filter) => filter && !isFilterDisabled(filter));
 
@@ -75,14 +77,13 @@ export const buildQueryFromFilters = (
       .filter((f) => !!f)
       .filter(filterNegate(negate))
       .filter(
-        (filter) =>
-          !config.ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern)
+        (filter) => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern)
       )
       .map((filter) => {
         return migrateFilter(filter, indexPattern);
       })
       .map((filter) =>
-        handleNestedFilter(filter, indexPattern, { ignoreUnmapped: config.nestedIgnoreUnmapped })
+        handleNestedFilter(filter, indexPattern, { ignoreUnmapped: nestedIgnoreUnmapped })
       )
       .map(cleanFilter)
       .map(translateToQuery);

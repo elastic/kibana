@@ -20,14 +20,22 @@ import { BoolQuery, DataViewBase } from './types';
 export function buildQueryFromKuery(
   indexPattern: DataViewBase | undefined,
   queries: Query[] = [],
-  parseConfig: { allowLeadingWildcards?: boolean } = { allowLeadingWildcards: false },
-  queryConfig: KueryQueryOptions = {}
+  { allowLeadingWildcards = false }: { allowLeadingWildcards?: boolean } = {
+    allowLeadingWildcards: false,
+  },
+  { filtersInMustClause = false, dateFormatTZ, nestedIgnoreUnmapped }: KueryQueryOptions = {
+    filtersInMustClause: false,
+  }
 ): BoolQuery {
   const queryASTs = queries.map((query) => {
-    return fromKueryExpression(query.query, parseConfig);
+    return fromKueryExpression(query.query, { allowLeadingWildcards });
   });
 
-  return buildQuery(indexPattern, queryASTs, queryConfig);
+  return buildQuery(indexPattern, queryASTs, {
+    filtersInMustClause,
+    dateFormatTZ,
+    nestedIgnoreUnmapped,
+  });
 }
 
 function buildQuery(
