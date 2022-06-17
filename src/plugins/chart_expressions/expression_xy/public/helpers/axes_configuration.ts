@@ -10,17 +10,14 @@ import { Position } from '@elastic/charts';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
-import type { ExtendedReferenceLineDecorationConfig } from '../../common/types';
 import {
   AxisExtentConfig,
   CommonXYDataLayerConfig,
   DataDecorationConfig,
   YAxisConfig,
   ReferenceLineDecorationConfig,
-  ReferenceLineDecorationConfigResult,
 } from '../../common';
 import { LayersFieldFormats } from './layers';
-import { isReferenceLineDecorationConfig } from './visualization';
 
 export interface Series {
   layer: string;
