@@ -21,7 +21,7 @@ import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { ManagementPageLoader } from '../../../../../components/management_page_loader';
-import { useUrlParams } from '../../../../../components/hooks/use_url_params';
+import { useUrlParams } from '../../../../../hooks/use_url_params';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
@@ -32,7 +32,6 @@ import { PolicyArtifactsFlyout } from '../flyout';
 import { PolicyArtifactsPageLabels, policyArtifactsPageLabels } from '../translations';
 import { PolicyArtifactsDeleteModal } from '../delete_modal';
 import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
 import { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface PolicyArtifactsLayoutProps {
@@ -42,10 +41,7 @@ interface PolicyArtifactsLayoutProps {
   getExceptionsListApiClient: () => ExceptionsListApiClient;
   searchableFields: readonly string[];
   getArtifactPath: (
-    location?:
-      | Partial<EventFiltersPageLocation>
-      | Partial<TrustedAppsListPageLocation>
-      | Partial<ArtifactListPageUrlParams>
+    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
   ) => string;
   getPolicyArtifactsPath: (policyId: string) => string;
   /** A boolean to check extra privileges for restricted actions, true when it's allowed, false when not */

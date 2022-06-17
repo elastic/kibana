@@ -10,10 +10,10 @@ import type {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
-  SavedObjectsTypeMappingDefinition,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import mappings from './mappings.json';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { alertMappings } from './mappings';
 import { getMigrations } from './migrations';
 import { transformRulesForExport } from './transform_rule_for_export';
 import { RawRule } from '../types';
@@ -30,7 +30,8 @@ export const AlertAttributesExcludedFromAAD = [
   'updatedAt',
   'executionStatus',
   'monitoring',
-  'snoozeEndTime',
+  'snoozeSchedule',
+  'isSnoozedUntil',
 ];
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
@@ -45,22 +46,24 @@ export type AlertAttributesExcludedFromAADType =
   | 'updatedAt'
   | 'executionStatus'
   | 'monitoring'
-  | 'snoozeEndTime';
+  | 'snoozeSchedule'
+  | 'isSnoozedUntil';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   ruleTypeRegistry: RuleTypeRegistry,
   logger: Logger,
-  isPreconfigured: (connectorId: string) => boolean
+  isPreconfigured: (connectorId: string) => boolean,
+  getSearchSourceMigrations: () => MigrateFunctionsObject
 ) {
   savedObjects.registerType({
     name: 'alert',
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
-    migrations: getMigrations(encryptedSavedObjects, isPreconfigured),
-    mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
+    migrations: getMigrations(encryptedSavedObjects, getSearchSourceMigrations(), isPreconfigured),
+    mappings: alertMappings,
     management: {
       displayName: 'rule',
       importableAndExportable: true,

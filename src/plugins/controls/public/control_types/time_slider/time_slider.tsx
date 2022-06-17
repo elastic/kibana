@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useState, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { debounce } from 'lodash';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
@@ -57,11 +57,7 @@ export const TimeSlider: FC<TimeSliderProps> = ({
         max?: number;
       });
 
-  const { value } = useEmbeddableSelector((state) => state);
-
-  const [selectedValue, setSelectedValue] = useState<[number | null, number | null]>(
-    value || [null, null]
-  );
+  const { value, id } = useEmbeddableSelector((state) => state);
 
   const dispatchChange = useCallback(
     (range: [number | null, number | null]) => {
@@ -75,15 +71,15 @@ export const TimeSlider: FC<TimeSliderProps> = ({
   const onChangeComplete = useCallback(
     (range: [number | null, number | null]) => {
       debouncedDispatchChange(range);
-      setSelectedValue(range);
     },
-    [setSelectedValue, debouncedDispatchChange]
+    [debouncedDispatchChange]
   );
 
   return (
     <Component
+      id={id}
       onChange={onChangeComplete}
-      value={selectedValue}
+      value={value ?? [null, null]}
       range={[min, max]}
       dateFormat={dateFormat}
       timezone={timezone}

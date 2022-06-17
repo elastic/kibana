@@ -4,32 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
-import { UseQueryResult } from 'react-query';
 
-export type FindingsGroupByKind = 'none' | 'resource';
+export type FindingsGroupByKind = 'default' | 'resource';
 
 export interface FindingsBaseURLQuery {
-  groupBy: FindingsGroupByKind;
   query: Query;
   filters: Filter[];
 }
 
+export interface FindingsBaseProps {
+  dataView: DataView;
+}
+
 export interface FindingsBaseEsQuery {
-  index: string;
   query?: {
     bool: BoolQuery;
   };
-}
-
-export interface FindingsQueryStatus {
-  enabled: boolean;
-}
-
-export interface FindingsQueryResult<TData = unknown, TError = unknown> {
-  loading: UseQueryResult['isLoading'];
-  error: TError;
-  data: TData;
 }
 
 // TODO: this needs to be defined in a versioned schema
@@ -48,8 +40,14 @@ export interface CspFinding {
 
 interface CspRule {
   benchmark: { name: string; version: string };
+  section: string;
+  audit: string;
+  references: string;
+  profile_applicability: string;
   description: string;
   impact: string;
+  default_value: string;
+  rationale: string;
   name: string;
   remediation: string;
   tags: string[];
@@ -57,18 +55,17 @@ interface CspRule {
 
 interface CspFindingResult {
   evaluation: 'passed' | 'failed';
-  evidence: {
-    filemode: string;
-  };
+  expected?: Record<string, unknown>;
+  evidence: Record<string, unknown>;
 }
 
 interface CspFindingResource {
-  uid: string;
-  filename: string;
-  // gid: string;
-  mode: string;
-  path: string;
+  name: string;
+  sub_type: string;
+  raw: object;
+  id: string;
   type: string;
+  [other_keys: string]: unknown;
 }
 
 interface CspFindingHost {
@@ -88,6 +85,7 @@ interface CspFindingHost {
     family: string;
     name: string;
   };
+  [other_keys: string]: unknown;
 }
 
 interface CspFindingAgent {
@@ -96,4 +94,9 @@ interface CspFindingAgent {
   id: string;
   name: string;
   type: string;
+}
+
+export interface CspFindingsQueryData {
+  page: CspFinding[];
+  total: number;
 }

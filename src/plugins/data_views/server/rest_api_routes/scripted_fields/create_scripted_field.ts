@@ -42,10 +42,11 @@ export const registerCreateScriptedFieldRoute = (
     },
     router.handleLegacyErrors(
       handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await indexPatternsServiceFactory(
+        const core = await ctx.core;
+        const savedObjectsClient = core.savedObjects.client;
+        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+        const [, , { dataViewsServiceFactory }] = await getStartServices();
+        const indexPatternsService = await dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
           req

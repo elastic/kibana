@@ -15,8 +15,10 @@ import type {
   HttpSetup,
   CoreStart,
 } from '@kbn/core/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
@@ -58,6 +60,8 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
   // need to provide the terms operation as some helpers use operation specific features
@@ -220,6 +224,42 @@ describe('terms', () => {
           arguments: expect.objectContaining({
             field: ['source'],
             max_doc_count: [3],
+          }),
+        })
+      );
+    });
+
+    it('should default percentile rank with non integer value to alphabetical sort', () => {
+      const newLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col2: {
+            ...layer.columns.col2,
+            operationType: 'percentile_rank',
+            params: {
+              value: 100.2,
+            },
+          },
+        },
+      };
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const esAggsFn = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: { ...termsColumn.params, orderBy: { type: 'column', columnId: 'col2' } },
+        },
+        'col1',
+        {} as IndexPattern,
+        newLayer,
+        uiSettingsMock,
+        ['col1', 'col2']
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggTerms',
+          arguments: expect.objectContaining({
+            orderBy: ['_key'],
           }),
         })
       );

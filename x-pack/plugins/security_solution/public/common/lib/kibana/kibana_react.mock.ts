@@ -10,6 +10,7 @@
 import React from 'react';
 
 import { RecursivePartial } from '@elastic/eui/src/components/common';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -95,6 +96,7 @@ export const createStartServicesMock = (
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
   const fleet = fleetMock.createStartMock();
+  const unifiedSearch = unifiedSearchPluginMock.createStartContract();
 
   return {
     ...core,
@@ -105,6 +107,7 @@ export const createStartServicesMock = (
       getCreateCase: jest.fn(),
       getRecentCases: jest.fn(),
     },
+    unifiedSearch,
     data: {
       ...data,
       query: {
@@ -153,6 +156,10 @@ export const createStartServicesMock = (
     },
     theme: {
       theme$: themeServiceMock.createTheme$(),
+    },
+    timelines: {
+      getLastUpdated: jest.fn(),
+      getFieldBrowser: jest.fn(),
     },
   } as unknown as StartServices;
 };

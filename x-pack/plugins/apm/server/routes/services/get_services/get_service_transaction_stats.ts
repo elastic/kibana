@@ -31,6 +31,7 @@ import {
 import { ServicesItemsSetup } from './get_services_items';
 import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 interface AggregationParams {
   environment: string;
@@ -41,6 +42,7 @@ interface AggregationParams {
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
+  randomSampler: RandomSampler;
 }
 
 export async function getServiceTransactionStats({
@@ -52,6 +54,7 @@ export async function getServiceTransactionStats({
   start,
   end,
   serviceGroup,
+  randomSampler,
 }: AggregationParams) {
   const { apmEventClient } = setup;
 
@@ -90,28 +93,33 @@ export async function getServiceTransactionStats({
           },
         },
         aggs: {
-          services: {
-            terms: {
-              field: SERVICE_NAME,
-              size: maxNumServices,
-            },
+          sample: {
+            random_sampler: randomSampler,
             aggs: {
-              transactionType: {
+              services: {
                 terms: {
-                  field: TRANSACTION_TYPE,
+                  field: SERVICE_NAME,
+                  size: maxNumServices,
                 },
                 aggs: {
-                  ...metrics,
-                  environments: {
+                  transactionType: {
                     terms: {
-                      field: SERVICE_ENVIRONMENT,
+                      field: TRANSACTION_TYPE,
                     },
-                  },
-                  sample: {
-                    top_metrics: {
-                      metrics: [{ field: AGENT_NAME } as const],
-                      sort: {
-                        '@timestamp': 'desc' as const,
+                    aggs: {
+                      ...metrics,
+                      environments: {
+                        terms: {
+                          field: SERVICE_ENVIRONMENT,
+                        },
+                      },
+                      sample: {
+                        top_metrics: {
+                          metrics: [{ field: AGENT_NAME } as const],
+                          sort: {
+                            '@timestamp': 'desc' as const,
+                          },
+                        },
                       },
                     },
                   },
@@ -125,7 +133,7 @@ export async function getServiceTransactionStats({
   );
 
   return (
-    response.aggregations?.services.buckets.map((bucket) => {
+    response.aggregations?.sample.services.buckets.map((bucket) => {
       const topTransactionTypeBucket =
         bucket.transactionType.buckets.find(
           ({ key }) =>

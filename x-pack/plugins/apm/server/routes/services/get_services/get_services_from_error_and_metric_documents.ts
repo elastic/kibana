@@ -17,6 +17,7 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 export async function getServicesFromErrorAndMetricDocuments({
   environment,
@@ -26,6 +27,7 @@ export async function getServicesFromErrorAndMetricDocuments({
   start,
   end,
   serviceGroup,
+  randomSampler,
 }: {
   setup: Setup;
   environment: string;
@@ -34,6 +36,7 @@ export async function getServicesFromErrorAndMetricDocuments({
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
+  randomSampler: RandomSampler;
 }) {
   const { apmEventClient } = setup;
 
@@ -56,21 +59,26 @@ export async function getServicesFromErrorAndMetricDocuments({
           },
         },
         aggs: {
-          services: {
-            terms: {
-              field: SERVICE_NAME,
-              size: maxNumServices,
-            },
+          sample: {
+            random_sampler: randomSampler,
             aggs: {
-              environments: {
+              services: {
                 terms: {
-                  field: SERVICE_ENVIRONMENT,
+                  field: SERVICE_NAME,
+                  size: maxNumServices,
                 },
-              },
-              latest: {
-                top_metrics: {
-                  metrics: [{ field: AGENT_NAME } as const],
-                  sort: { '@timestamp': 'desc' },
+                aggs: {
+                  environments: {
+                    terms: {
+                      field: SERVICE_ENVIRONMENT,
+                    },
+                  },
+                  latest: {
+                    top_metrics: {
+                      metrics: [{ field: AGENT_NAME } as const],
+                      sort: { '@timestamp': 'desc' },
+                    },
+                  },
                 },
               },
             },
@@ -81,7 +89,7 @@ export async function getServicesFromErrorAndMetricDocuments({
   );
 
   return (
-    response.aggregations?.services.buckets.map((bucket) => {
+    response.aggregations?.sample.services.buckets.map((bucket) => {
       return {
         serviceName: bucket.key as string,
         environments: bucket.environments.buckets.map(

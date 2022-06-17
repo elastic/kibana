@@ -44,7 +44,7 @@ import {
   validateFilePathInput,
 } from '@kbn/securitysolution-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import type { AutocompleteStart } from '@kbn/data-plugin/public';
+import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { HttpStart } from '@kbn/core/public';
 
 import { getEmptyValue } from '../../../common/empty_value';
@@ -118,10 +118,10 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   const handleOperatorChange = useCallback(
     ([newOperator]: OperatorOption[]): void => {
       const { updatedEntry, index } = getEntryOnOperatorChange(entry, newOperator);
-
+      handleError(false);
       onChange(updatedEntry, index);
     },
-    [onChange, entry]
+    [onChange, entry, handleError]
   );
 
   const handleFieldMatchValueChange = useCallback(

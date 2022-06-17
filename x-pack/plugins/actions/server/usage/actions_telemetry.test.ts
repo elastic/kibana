@@ -7,7 +7,10 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getExecutionsPerDayCount, getInUseTotalCount, getTotalCount } from './actions_telemetry';
+
+const mockLogger = loggingSystemMock.create().get();
 
 describe('actions telemetry', () => {
   test('getTotalCount should replace first symbol . to __ for action types names', async () => {
@@ -97,7 +100,7 @@ describe('actions telemetry', () => {
         },
       }
     );
-    const telemetry = await getTotalCount(mockEsClient, 'test');
+    const telemetry = await getTotalCount(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -110,6 +113,24 @@ Object {
     "some.type": 1,
   },
   "countTotal": 4,
+}
+`);
+  });
+
+  test('getTotalCount should return empty results if query throws error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValue(new Error('oh no'));
+
+    const telemetry = await getTotalCount(mockEsClient, 'test', mockLogger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Error executing actions telemetry task: getTotalCount - {}`
+    );
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "countByType": Object {},
+  "countTotal": 0,
 }
 `);
   });
@@ -161,7 +182,7 @@ Object {
         ],
       },
     });
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test');
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
@@ -238,12 +259,13 @@ Object {
         ],
       },
     });
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test', undefined, [
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger, undefined, [
       {
         id: 'test',
         actionTypeId: '.email',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         config: {
           tenantId: 'sdsd',
           clientId: 'sdfsdf',
@@ -257,6 +279,7 @@ Object {
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         secrets: {},
       },
     ]);
@@ -273,6 +296,27 @@ Object {
   "countEmailByService": Object {},
   "countNamespaces": 1,
   "countTotal": 4,
+}
+`);
+  });
+
+  test('getInUseTotalCount should return empty results if query throws error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValue(new Error('oh no'));
+
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Error executing actions telemetry task: getInUseTotalCount - {}`
+    );
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "countByAlertHistoryConnectorType": 0,
+  "countByType": Object {},
+  "countEmailByService": Object {},
+  "countNamespaces": 0,
+  "countTotal": 0,
 }
 `);
   });
@@ -364,12 +408,13 @@ Object {
         },
       }
     );
-    const telemetry = await getTotalCount(mockEsClient, 'test', [
+    const telemetry = await getTotalCount(mockEsClient, 'test', mockLogger, [
       {
         id: 'test',
         actionTypeId: '.test',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         secrets: {},
       },
       {
@@ -377,6 +422,7 @@ Object {
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         secrets: {},
       },
     ]);
@@ -475,12 +521,13 @@ Object {
         ],
       },
     });
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test', undefined, [
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger, undefined, [
       {
         id: 'anotherServerLog',
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         secrets: {},
       },
     ]);
@@ -582,7 +629,7 @@ Object {
         ],
       },
     });
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test');
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
@@ -678,7 +725,7 @@ Object {
         },
       }
     );
-    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test');
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(telemetry).toStrictEqual({
@@ -699,5 +746,27 @@ Object {
       },
       countTotal: 120,
     });
+  });
+
+  test('getExecutionsPerDayCount should return empty results if query throws error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValue(new Error('oh no'));
+
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test', mockLogger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Error executing actions telemetry task: getExecutionsPerDayCount - {}`
+    );
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "avgExecutionTime": 0,
+  "avgExecutionTimeByType": Object {},
+  "countByType": Object {},
+  "countFailed": 0,
+  "countFailedByType": Object {},
+  "countTotal": 0,
+}
+`);
   });
 });

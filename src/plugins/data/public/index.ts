@@ -21,8 +21,8 @@ export * from './deprecated';
 export { getEsQueryConfig, FilterStateStore } from '../common';
 export {
   getDisplayValueFromFilter,
+  getFieldDisplayValueFromFilter,
   generateFilters,
-  extractTimeRange,
   getIndexPatternFromFilter,
 } from './query';
 
@@ -58,8 +58,6 @@ import {
   validateDataView,
 } from './data_views';
 
-export type { IndexPatternsService } from './data_views';
-
 // Index patterns namespace:
 export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
@@ -74,13 +72,9 @@ export const indexPatterns = {
   validate: validateDataView,
 };
 
-export type { IndexPatternsContract, DataViewsContract, TypeMeta } from './data_views';
-export { IndexPattern, IndexPatternField } from './data_views';
+export type { DataViewsContract, TypeMeta } from './data_views';
 
 export type {
-  IIndexPattern,
-  IFieldType,
-  IndexPatternAttributes,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternLoadExpressionFunctionDefinition,
   GetFieldsOptions,
@@ -95,20 +89,6 @@ export {
   DuplicateDataViewError,
 } from '../common';
 
-/*
- * Autocomplete query suggestions:
- */
-
-export type {
-  QuerySuggestion,
-  QuerySuggestionGetFn,
-  QuerySuggestionGetFnArgs,
-  QuerySuggestionBasic,
-  QuerySuggestionField,
-  AutocompleteStart,
-} from './autocomplete';
-
-export { QuerySuggestionTypes } from './autocomplete';
 /*
  * Search:
  */
@@ -268,15 +248,21 @@ export {
   createSavedQueryService,
   connectToQueryState,
   syncQueryStateWithUrl,
+  syncGlobalQueryStateWithUrl,
   getDefaultQuery,
   FilterManager,
   TimeHistory,
   getQueryLog,
   mapAndFlattenFilters,
+  QueryService,
 } from './query';
+
+export { NowProvider } from './now_provider';
+export type { NowProviderInternalContract, NowProviderPublicContract } from './now_provider';
 
 export type {
   QueryState,
+  QueryState$,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
@@ -288,6 +274,8 @@ export type {
   PersistedLog,
   QueryStringContract,
   QuerySetup,
+  TimefilterSetup,
+  GlobalQueryStateFromUrl,
 } from './query';
 
 export type { AggsStart } from './search/aggs';

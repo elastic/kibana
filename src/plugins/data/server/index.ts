@@ -16,6 +16,8 @@ import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 export * from './deprecated';
 export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '../common';
 
+export { getRequestAbortedSignal } from './lib';
+
 /**
  * Exporters (CSV)
  */
@@ -27,31 +29,17 @@ export const exporters = {
 };
 
 /*
- * Field Formats:
- */
-
-export { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
-
-/*
  * Index patterns:
  */
 
-export type { FieldDescriptor, IndexPatternsServiceStart } from './data_views';
-export {
-  IndexPatternsFetcher,
-  shouldReadFieldFromDocValues,
-  getCapabilitiesForRollupIndices,
-} from './data_views';
+export type { FieldDescriptor, DataViewsServerPluginStart } from './data_views';
+export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './data_views';
 
-export type { IndexPatternAttributes } from '../common';
 export {
-  IndexPatternField,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   UI_SETTINGS,
-  IndexPattern,
-  IndexPatternsService,
-  IndexPatternsService as IndexPatternsCommonService,
+  DataViewsService as DataViewsCommonService,
   DataView,
 } from '../common';
 
@@ -68,7 +56,7 @@ import {
   // tabify
   calcAutoIntervalLessThan,
 } from '../common';
-import { autocompleteConfigDeprecationProvider } from './config_deprecations';
+import { configDeprecationProvider } from './config_deprecations';
 
 export type {
   ParsedInterval,
@@ -121,9 +109,8 @@ export type { DataPluginSetup as PluginSetup, DataPluginStart as PluginStart };
 export { DataServerPlugin as Plugin };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
-  deprecations: autocompleteConfigDeprecationProvider,
+  deprecations: configDeprecationProvider,
   exposeToBrowser: {
-    autocomplete: true,
     search: true,
   },
   schema: configSchema,

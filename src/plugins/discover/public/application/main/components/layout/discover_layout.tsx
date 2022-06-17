@@ -24,7 +24,7 @@ import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { InspectorSession } from '@kbn/inspector-plugin/public';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
@@ -36,11 +36,11 @@ import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types'
 import { DiscoverChart } from '../chart';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg } from '../../utils/use_saved_search';
-import { useColumns } from '../../../../utils/use_data_grid_columns';
+import { DataMainMsg } from '../../hooks/use_saved_search';
+import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../types';
-import { useDataState } from '../../utils/use_data_state';
+import { useDataState } from '../../hooks/use_data_state';
 import {
   SavedSearchURLConflictCallout,
   useSavedSearchAliasMatchRedirect,
@@ -213,8 +213,31 @@ export function DiscoverLayout({
     [onChangeIndexPattern]
   );
 
+  const savedSearchTitle = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    savedSearchTitle.current?.focus();
+  }, []);
+
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
+      <h1
+        id="savedSearchTitle"
+        className="euiScreenReaderOnly"
+        data-test-subj="discoverSavedSearchTitle"
+        tabIndex={-1}
+        ref={savedSearchTitle}
+      >
+        {savedSearch.title
+          ? i18n.translate('discover.pageTitleWithSavedSearch', {
+              defaultMessage: 'Discover - {savedSearchTitle}',
+              values: {
+                savedSearchTitle: savedSearch.title,
+              },
+            })
+          : i18n.translate('discover.pageTitleWithoutSavedSearch', {
+              defaultMessage: 'Discover - Search not yet saved',
+            })}
+      </h1>
       <TopNavMemoized
         indexPattern={indexPattern}
         onOpenInspector={onOpenInspector}
@@ -226,6 +249,9 @@ export function DiscoverLayout({
         stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
+        onChangeIndexPattern={onChangeIndexPattern}
+        onEditRuntimeField={onEditRuntimeField}
+        useNewFieldsApi={useNewFieldsApi}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -233,19 +259,7 @@ export function DiscoverLayout({
           spaces={spaces}
           history={history}
         />
-        <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
-          {savedSearch.title
-            ? i18n.translate('discover.pageTitleWithSavedSearch', {
-                defaultMessage: 'Discover - {savedSearchTitle}',
-                values: {
-                  savedSearchTitle: savedSearch.title,
-                },
-              })
-            : i18n.translate('discover.pageTitleWithoutSavedSearch', {
-                defaultMessage: 'Discover - Search not yet saved',
-              })}
-        </h1>
-        <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
+        <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
           <EuiFlexItem grow={false}>
             <SidebarMemoized
               columns={columns}

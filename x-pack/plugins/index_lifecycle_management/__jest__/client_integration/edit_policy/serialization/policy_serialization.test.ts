@@ -7,7 +7,9 @@
 
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../helpers';
+import { API_BASE_PATH } from '../../../../common/constants';
 import {
   getDefaultHotPhasePolicy,
   POLICY_WITH_INCLUDE_EXCLUDE,
@@ -17,17 +19,13 @@ import { SerializationTestBed, setupSerializationTestBed } from './policy_serial
 
 describe('<EditPolicy /> serialization', () => {
   let testBed: SerializationTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setupSerializationTestBed();
+      testBed = await setupSerializationTestBed(httpSetup);
     });
 
     const { component } = testBed;
@@ -35,6 +33,16 @@ describe('<EditPolicy /> serialization', () => {
   });
 
   describe('top level form', () => {
+    afterAll(async () => {
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup, {
+          appServicesContext: {
+            license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
+          },
+        });
+      });
+    });
+
     /**
      * We assume that policies that populate this form are loaded directly from ES and so
      * are valid according to ES. There may be settings in the policy created through the ILM
@@ -44,7 +52,7 @@ describe('<EditPolicy /> serialization', () => {
     it('preserves policy settings it did not configure', async () => {
       httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS]);
       await act(async () => {
-        testBed = await setupSerializationTestBed();
+        testBed = await setupSerializationTestBed(httpSetup);
       });
 
       const { component, actions } = testBed;
@@ -56,42 +64,44 @@ describe('<EditPolicy /> serialization', () => {
       await actions.togglePhase('delete');
       await actions.savePolicy();
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-
-      expect(entirePolicy).toEqual({
-        foo: 'bar', // Made up value
-        name: 'my_policy',
-        phases: {
-          hot: {
-            actions: {
-              rollover: {
-                max_docs: 1000,
-                max_size: '50gb',
-                unknown_setting: 123, // Made up setting that should stay preserved
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/policies`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            foo: 'bar', // Made up value
+            phases: {
+              hot: {
+                min_age: '0ms',
+                actions: {
+                  rollover: {
+                    unknown_setting: 123, // Made up setting that should stay preserved
+                    max_size: '50gb',
+                    max_docs: 1000,
+                  },
+                },
+              },
+              warm: {
+                min_age: '10d',
+                actions: {
+                  my_unfollow_action: {}, // Made up action
+                  set_priority: {
+                    priority: 22,
+                    unknown_setting: true,
+                  },
+                },
               },
             },
-            min_age: '0ms',
-          },
-          warm: {
-            actions: {
-              my_unfollow_action: {}, // Made up action
-              set_priority: {
-                priority: 22,
-                unknown_setting: true,
-              },
-            },
-            min_age: '10d',
-          },
-        },
-      });
+            name: 'my_policy',
+          }),
+        })
+      );
     });
 
     it('default policy (only policy name input) on enterprise license', async () => {
       httpRequestsMockHelpers.setLoadPolicies([]);
 
       await act(async () => {
-        testBed = await setupSerializationTestBed();
+        testBed = await setupSerializationTestBed(httpSetup);
       });
 
       const { component, actions } = testBed;
@@ -99,33 +109,35 @@ describe('<EditPolicy /> serialization', () => {
       await actions.setPolicyName('test_policy');
       await actions.savePolicy();
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-
-      expect(entirePolicy).toEqual({
-        name: 'test_policy',
-        phases: {
-          hot: {
-            actions: {
-              rollover: {
-                max_age: '30d',
-                max_primary_shard_size: '50gb',
-              },
-              set_priority: {
-                priority: 100,
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/policies`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'test_policy',
+            phases: {
+              hot: {
+                actions: {
+                  rollover: {
+                    max_age: '30d',
+                    max_primary_shard_size: '50gb',
+                  },
+                  set_priority: {
+                    priority: 100,
+                  },
+                },
+                min_age: '0ms',
               },
             },
-            min_age: '0ms',
-          },
-        },
-      });
+          }),
+        })
+      );
     });
 
     it('default policy (only policy name input) on basic license', async () => {
       httpRequestsMockHelpers.setLoadPolicies([]);
 
       await act(async () => {
-        testBed = await setupSerializationTestBed({
+        testBed = await setupSerializationTestBed(httpSetup, {
           appServicesContext: {
             license: licensingMock.createLicense({ license: { type: 'basic' } }),
           },
@@ -137,30 +149,44 @@ describe('<EditPolicy /> serialization', () => {
       await actions.setPolicyName('test_policy');
       await actions.savePolicy();
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-
-      expect(entirePolicy).toEqual({
-        name: 'test_policy',
-        phases: {
-          hot: {
-            actions: {
-              rollover: {
-                max_age: '30d',
-                max_primary_shard_size: '50gb',
-              },
-              set_priority: {
-                priority: 100,
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/policies`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'test_policy',
+            phases: {
+              hot: {
+                actions: {
+                  rollover: {
+                    max_age: '30d',
+                    max_primary_shard_size: '50gb',
+                  },
+                  set_priority: {
+                    priority: 100,
+                  },
+                },
+                min_age: '0ms',
               },
             },
-            min_age: '0ms',
-          },
-        },
-      });
+          }),
+        })
+      );
     });
   });
 
   describe('hot phase', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup);
+      });
+
+      const { component } = testBed;
+
+      component.update();
+    });
+
     test('setting all values', async () => {
       const { actions } = testBed;
 
@@ -176,61 +202,72 @@ describe('<EditPolicy /> serialization', () => {
       await actions.hot.setIndexPriority('123');
 
       await actions.savePolicy();
-      const latestRequest = server.requests[server.requests.length - 1];
-      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-      expect(entirePolicy).toMatchInlineSnapshot(`
-        Object {
-          "name": "my_policy",
-          "phases": Object {
-            "hot": Object {
-              "actions": Object {
-                "forcemerge": Object {
-                  "index_codec": "best_compression",
-                  "max_num_segments": 123,
-                },
-                "readonly": Object {},
-                "rollover": Object {
-                  "max_age": "123h",
-                  "max_docs": 123,
-                  "max_primary_shard_size": "50gb",
-                  "max_size": "123mb",
-                },
-                "set_priority": Object {
-                  "priority": 123,
-                },
-                "shrink": Object {
-                  "number_of_shards": 2,
+
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/policies`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'my_policy',
+            phases: {
+              hot: {
+                min_age: '0ms',
+                actions: {
+                  rollover: {
+                    max_age: '123h',
+                    max_primary_shard_size: '50gb',
+                    max_docs: 123,
+                    max_size: '123mb',
+                  },
+                  forcemerge: {
+                    max_num_segments: 123,
+                    index_codec: 'best_compression',
+                  },
+                  shrink: {
+                    number_of_shards: 2,
+                  },
+                  set_priority: {
+                    priority: 123,
+                  },
+                  readonly: {},
                 },
               },
-              "min_age": "0ms",
             },
-          },
-        }
-      `);
+          }),
+        })
+      );
     });
 
     test('setting searchable snapshot', async () => {
       const { actions } = testBed;
 
-      await actions.hot.setSearchableSnapshot('my-repo');
+      await actions.hot.setSearchableSnapshot('abc');
 
       await actions.savePolicy();
-      const latestRequest = server.requests[server.requests.length - 1];
-      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-      expect(entirePolicy.phases.hot.actions.searchable_snapshot.snapshot_repository).toBe(
-        'my-repo'
-      );
+
+      const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+      const [requestUrl, requestBody] = lastReq;
+      const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+      expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+      expect(parsedReqBody.phases.hot.actions.searchable_snapshot.snapshot_repository).toBe('abc');
     });
 
     test('disabling rollover', async () => {
       const { actions } = testBed;
+
       await actions.rollover.toggleDefault();
       await actions.rollover.toggle();
+
       await actions.savePolicy();
-      const latestRequest = server.requests[server.requests.length - 1];
-      const policy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-      const hotActions = policy.phases.hot.actions;
+
+      const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+      const [requestUrl, requestBody] = lastReq;
+      const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+      const hotActions = parsedReqBody.phases.hot.actions;
       const rolloverAction = hotActions.rollover;
+
+      expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
       expect(rolloverAction).toBe(undefined);
       expect(hotActions).toMatchInlineSnapshot(`Object {}`);
     });
@@ -241,7 +278,7 @@ describe('<EditPolicy /> serialization', () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {
-        testBed = await setupSerializationTestBed();
+        testBed = await setupSerializationTestBed(httpSetup);
       });
 
       const { component } = testBed;
@@ -253,9 +290,13 @@ describe('<EditPolicy /> serialization', () => {
       await actions.togglePhase('warm');
       await actions.warm.setMinAgeValue('11');
       await actions.savePolicy();
-      const latestRequest = server.requests[server.requests.length - 1];
-      const warmPhase = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm;
-      expect(warmPhase).toMatchInlineSnapshot(`
+
+      const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+      const [requestUrl, requestBody] = lastReq;
+      const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+      expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+      expect(parsedReqBody.phases.warm).toMatchInlineSnapshot(`
           Object {
             "actions": Object {
               "set_priority": Object {
@@ -281,47 +322,48 @@ describe('<EditPolicy /> serialization', () => {
       await actions.warm.toggleReadonly();
       await actions.warm.setIndexPriority('123');
       await actions.savePolicy();
-      const latestRequest = server.requests[server.requests.length - 1];
-      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-      // Check shape of entire policy
-      expect(entirePolicy).toMatchInlineSnapshot(`
-        Object {
-          "name": "my_policy",
-          "phases": Object {
-            "hot": Object {
-              "actions": Object {
-                "rollover": Object {
-                  "max_age": "30d",
-                  "max_primary_shard_size": "50gb",
-                },
-              },
-              "min_age": "0ms",
-            },
-            "warm": Object {
-              "actions": Object {
-                "allocate": Object {
-                  "number_of_replicas": 123,
-                  "require": Object {
-                    "test": "123",
+
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/policies`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'my_policy',
+            phases: {
+              hot: {
+                min_age: '0ms',
+                actions: {
+                  rollover: {
+                    max_age: '30d',
+                    max_primary_shard_size: '50gb',
                   },
                 },
-                "forcemerge": Object {
-                  "index_codec": "best_compression",
-                  "max_num_segments": 123,
-                },
-                "readonly": Object {},
-                "set_priority": Object {
-                  "priority": 123,
-                },
-                "shrink": Object {
-                  "number_of_shards": 123,
+              },
+              warm: {
+                min_age: '11d',
+                actions: {
+                  set_priority: {
+                    priority: 123,
+                  },
+                  shrink: {
+                    number_of_shards: 123,
+                  },
+                  forcemerge: {
+                    max_num_segments: 123,
+                    index_codec: 'best_compression',
+                  },
+                  allocate: {
+                    require: {
+                      test: '123',
+                    },
+                    number_of_replicas: 123,
+                  },
+                  readonly: {},
                 },
               },
-              "min_age": "11d",
             },
-          },
-        }
-      `);
+          }),
+        })
+      );
     });
 
     describe('policy with include and exclude', () => {
@@ -335,7 +377,7 @@ describe('<EditPolicy /> serialization', () => {
         httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
         await act(async () => {
-          testBed = await setupSerializationTestBed();
+          testBed = await setupSerializationTestBed(httpSetup);
         });
 
         const { component } = testBed;
@@ -347,9 +389,14 @@ describe('<EditPolicy /> serialization', () => {
         await actions.warm.setDataAllocation('node_attrs');
         await actions.warm.setSelectedNodeAttribute('test:123');
         await actions.savePolicy();
-        const latestRequest = server.requests[server.requests.length - 1];
-        const warmPhaseAllocate = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
-          .actions.allocate;
+
+        const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+        const [requestUrl, requestBody] = lastReq;
+        const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+        const warmPhaseAllocate = parsedReqBody.phases.warm.actions.allocate;
+
+        expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
         expect(warmPhaseAllocate).toMatchInlineSnapshot(`
           Object {
             "exclude": Object {
@@ -372,7 +419,7 @@ describe('<EditPolicy /> serialization', () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {
-        testBed = await setupSerializationTestBed();
+        testBed = await setupSerializationTestBed(httpSetup);
       });
 
       const { component } = testBed;
@@ -385,9 +432,13 @@ describe('<EditPolicy /> serialization', () => {
       await actions.togglePhase('cold');
       await actions.cold.setMinAgeValue('11');
       await actions.savePolicy();
-      const latestRequest = server.requests[server.requests.length - 1];
-      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-      expect(entirePolicy.phases.cold).toMatchInlineSnapshot(`
+
+      const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+      const [requestUrl, requestBody] = lastReq;
+      const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+      expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+      expect(parsedReqBody.phases.cold).toMatchInlineSnapshot(`
           Object {
             "actions": Object {
               "set_priority": Object {
@@ -412,40 +463,41 @@ describe('<EditPolicy /> serialization', () => {
       await actions.cold.setIndexPriority('123');
 
       await actions.savePolicy();
-      const latestRequest = server.requests[server.requests.length - 1];
-      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
 
-      expect(entirePolicy).toMatchInlineSnapshot(`
-        Object {
-          "name": "my_policy",
-          "phases": Object {
-            "cold": Object {
-              "actions": Object {
-                "allocate": Object {
-                  "number_of_replicas": 123,
-                  "require": Object {
-                    "test": "123",
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/policies`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'my_policy',
+            phases: {
+              hot: {
+                min_age: '0ms',
+                actions: {
+                  rollover: {
+                    max_age: '30d',
+                    max_primary_shard_size: '50gb',
                   },
                 },
-                "readonly": Object {},
-                "set_priority": Object {
-                  "priority": 123,
+              },
+              cold: {
+                min_age: '123s',
+                actions: {
+                  set_priority: {
+                    priority: 123,
+                  },
+                  allocate: {
+                    require: {
+                      test: '123',
+                    },
+                    number_of_replicas: 123,
+                  },
+                  readonly: {},
                 },
               },
-              "min_age": "123s",
             },
-            "hot": Object {
-              "actions": Object {
-                "rollover": Object {
-                  "max_age": "30d",
-                  "max_primary_shard_size": "50gb",
-                },
-              },
-              "min_age": "0ms",
-            },
-          },
-        }
-      `);
+          }),
+        })
+      );
     });
 
     // Setting searchable snapshot field disables setting replicas so we test this separately
@@ -455,15 +507,30 @@ describe('<EditPolicy /> serialization', () => {
       await actions.cold.setMinAgeValue('10');
       await actions.cold.setSearchableSnapshot('my-repo');
       await actions.savePolicy();
-      const latestRequest2 = server.requests[server.requests.length - 1];
-      const entirePolicy2 = JSON.parse(JSON.parse(latestRequest2.requestBody).body);
-      expect(entirePolicy2.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
+
+      const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+      const [requestUrl, requestBody] = lastReq;
+      const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+      expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+      expect(parsedReqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
         'my-repo'
       );
     });
   });
 
   describe('frozen phase', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup);
+      });
+
+      const { component } = testBed;
+      component.update();
+    });
+
     test('default value', async () => {
       const { actions } = testBed;
       await actions.togglePhase('frozen');
@@ -472,9 +539,12 @@ describe('<EditPolicy /> serialization', () => {
 
       await actions.savePolicy();
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-      expect(entirePolicy.phases.frozen).toEqual({
+      const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+      const [requestUrl, requestBody] = lastReq;
+      const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+      expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+      expect(parsedReqBody.phases.frozen).toEqual({
         min_age: '13d',
         actions: {
           searchable_snapshot: { snapshot_repository: 'myRepo' },
@@ -499,7 +569,7 @@ describe('<EditPolicy /> serialization', () => {
         });
 
         await act(async () => {
-          testBed = await setupSerializationTestBed();
+          testBed = await setupSerializationTestBed(httpSetup);
         });
 
         const { component } = testBed;
@@ -511,9 +581,12 @@ describe('<EditPolicy /> serialization', () => {
 
         await actions.savePolicy();
 
-        const latestRequest = server.requests[server.requests.length - 1];
-        const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-        expect(entirePolicy.phases.frozen).toEqual({
+        const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+        const [requestUrl, requestBody] = lastReq;
+        const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+        expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+        expect(parsedReqBody.phases.frozen).toEqual({
           min_age: '1234m',
           actions: {
             searchable_snapshot: {
@@ -531,9 +604,13 @@ describe('<EditPolicy /> serialization', () => {
       await actions.togglePhase('delete');
       await actions.delete.setSnapshotPolicy('test');
       await actions.savePolicy();
-      const latestRequest = server.requests[server.requests.length - 1];
-      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-      expect(entirePolicy.phases.delete).toEqual({
+
+      const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+      const [requestUrl, requestBody] = lastReq;
+      const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+      expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+      expect(parsedReqBody.phases.delete).toEqual({
         min_age: '365d',
         actions: {
           delete: {},
@@ -555,38 +632,40 @@ describe('<EditPolicy /> serialization', () => {
       await actions.warm.setShrinkSize('100');
 
       await actions.savePolicy();
-      const latestRequest = server.requests[server.requests.length - 1];
-      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-      expect(entirePolicy).toMatchInlineSnapshot(`
-        Object {
-          "name": "my_policy",
-          "phases": Object {
-            "hot": Object {
-              "actions": Object {
-                "rollover": Object {
-                  "max_age": "30d",
-                  "max_primary_shard_size": "50gb",
-                },
-                "shrink": Object {
-                  "max_primary_shard_size": "50gb",
-                },
-              },
-              "min_age": "0ms",
-            },
-            "warm": Object {
-              "actions": Object {
-                "set_priority": Object {
-                  "priority": 50,
-                },
-                "shrink": Object {
-                  "max_primary_shard_size": "100gb",
+
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/policies`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'my_policy',
+            phases: {
+              hot: {
+                min_age: '0ms',
+                actions: {
+                  rollover: {
+                    max_age: '30d',
+                    max_primary_shard_size: '50gb',
+                  },
+                  shrink: {
+                    max_primary_shard_size: '50gb',
+                  },
                 },
               },
-              "min_age": "11d",
+              warm: {
+                min_age: '11d',
+                actions: {
+                  set_priority: {
+                    priority: 50,
+                  },
+                  shrink: {
+                    max_primary_shard_size: '100gb',
+                  },
+                },
+              },
             },
-          },
-        }
-      `);
+          }),
+        })
+      );
     });
   });
 });

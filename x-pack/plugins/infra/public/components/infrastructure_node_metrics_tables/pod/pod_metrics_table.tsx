@@ -66,7 +66,11 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
   };
 
   if (isLoading) {
-    return <EuiLoadingSpinner size="xl" data-test-subj="podMetricsTableLoader" />;
+    return (
+      <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
+        <EuiLoadingSpinner size="xl" data-test-subj="podMetricsTableLoader" />
+      </EuiFlexGroup>
+    );
   }
 
   return (
@@ -103,8 +107,11 @@ function podNodeColumns(
       name: 'Name',
       field: 'name',
       truncateText: true,
-      render: (name: string) => {
-        return <MetricsNodeDetailsLink id={name} nodeType={'pod'} timerange={timerange} />;
+      textOnly: true,
+      render: (_, { id, name }) => {
+        return (
+          <MetricsNodeDetailsLink id={id} label={name} nodeType={'pod'} timerange={timerange} />
+        );
       },
     },
     {

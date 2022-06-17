@@ -16,6 +16,8 @@ import {
   EuiSelect,
   EuiButtonIcon,
 } from '@elastic/eui';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   IndexPatternDimensionEditorComponent,
@@ -208,6 +210,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       uiSettings: {} as IUiSettingsClient,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      dataViews: dataViewPluginMocks.createStartContract(),
       data: {
         fieldFormats: {
           getType: jest.fn().mockReturnValue({
@@ -633,7 +637,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     act(() => {
       wrapper
-        .find('input[data-test-subj="indexPattern-label-edit"]')
+        .find('input[data-test-subj="column-label-edit"]')
         .simulate('change', { target: { value: 'New Label' } });
     });
 
@@ -737,7 +741,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     act(() => {
       wrapper
-        .find('input[data-test-subj="indexPattern-label-edit"]')
+        .find('input[data-test-subj="column-label-edit"]')
         .simulate('change', { target: { value: 'Sum of bytes' } });
     });
 
@@ -1940,9 +1944,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
       'Minimum',
       'Moving average',
       'Percentile',
+      'Percentile rank',
       'Sum',
       'Unique count',
-      '\u00a0',
     ]);
   });
 

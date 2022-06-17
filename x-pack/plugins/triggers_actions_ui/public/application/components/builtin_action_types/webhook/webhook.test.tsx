@@ -8,14 +8,14 @@
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '..';
 import { ActionTypeModel } from '../../../../types';
-import { WebhookActionConnector } from '../types';
+import { registrationServicesMock } from '../../../../mocks';
 
 const ACTION_TYPE_ID = '.webhook';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry });
+  registerBuiltInActionTypes({ actionTypeRegistry, services: registrationServicesMock });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
@@ -26,138 +26,6 @@ describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
     expect(actionTypeModel.iconClass).toEqual('logoWebhook');
-  });
-});
-
-describe('webhook connector validation', () => {
-  test('connector validation succeeds when hasAuth is true and connector config is valid', async () => {
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.webhook',
-      name: 'webhook',
-      isPreconfigured: false,
-      config: {
-        method: 'PUT',
-        url: 'http://test.com',
-        headers: { 'content-type': 'text' },
-        hasAuth: true,
-      },
-    } as WebhookActionConnector;
-
-    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
-      config: {
-        errors: {
-          url: [],
-          method: [],
-        },
-      },
-      secrets: {
-        errors: {
-          user: [],
-          password: [],
-        },
-      },
-    });
-  });
-
-  test('connector validation succeeds when hasAuth is false and connector config is valid', async () => {
-    const actionConnector = {
-      secrets: {
-        user: '',
-        password: '',
-      },
-      id: 'test',
-      actionTypeId: '.webhook',
-      name: 'webhook',
-      isPreconfigured: false,
-      config: {
-        method: 'PUT',
-        url: 'http://test.com',
-        headers: { 'content-type': 'text' },
-        hasAuth: false,
-      },
-    } as WebhookActionConnector;
-
-    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
-      config: {
-        errors: {
-          url: [],
-          method: [],
-        },
-      },
-      secrets: {
-        errors: {
-          user: [],
-          password: [],
-        },
-      },
-    });
-  });
-
-  test('connector validation fails when connector config is not valid', async () => {
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-      },
-      id: 'test',
-      actionTypeId: '.webhook',
-      name: 'webhook',
-      config: {
-        method: 'PUT',
-        hasAuth: true,
-      },
-    } as WebhookActionConnector;
-
-    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
-      config: {
-        errors: {
-          url: ['URL is required.'],
-          method: [],
-        },
-      },
-      secrets: {
-        errors: {
-          user: [],
-          password: ['Password is required when username is used.'],
-        },
-      },
-    });
-  });
-
-  test('connector validation fails when url in config is not valid', async () => {
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.webhook',
-      name: 'webhook',
-      config: {
-        method: 'PUT',
-        url: 'invalid.url',
-        hasAuth: true,
-      },
-    } as WebhookActionConnector;
-
-    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
-      config: {
-        errors: {
-          url: ['URL is invalid.'],
-          method: [],
-        },
-      },
-      secrets: {
-        errors: {
-          user: [],
-          password: [],
-        },
-      },
-    });
   });
 });
 

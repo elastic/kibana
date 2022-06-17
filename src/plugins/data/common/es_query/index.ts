@@ -17,7 +17,6 @@ import {
   disableFilter as oldDisableFilter,
   fromKueryExpression as oldFromKueryExpression,
   toElasticsearchQuery as oldToElasticsearchQuery,
-  nodeTypes as oldNodeTypes,
   buildEsQuery as oldBuildEsQuery,
   buildQueryFromFilters as oldBuildQueryFromFilters,
   luceneStringToDsl as oldLuceneStringToDsl,
@@ -49,6 +48,7 @@ import {
   MatchAllFilter as oldMatchAllFilter,
   RangeFilter as oldRangeFilter,
   KueryNode as oldKueryNode,
+  TimeRange as oldTimeRange,
   FilterMeta as oldFilterMeta,
   FILTERS as oldFILTERS,
   EsQueryConfig as oldEsQueryConfig,
@@ -80,11 +80,6 @@ const fromKueryExpression = oldFromKueryExpression;
  * @removeBy 8.1
  */
 const toElasticsearchQuery = oldToElasticsearchQuery;
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
-const nodeTypes = oldNodeTypes;
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
  * @removeBy 8.1
@@ -339,6 +334,12 @@ type EsQueryConfig = oldEsQueryConfig;
  * @removeBy 8.1
  */
 
+/**
+ * @deprecated Import from the "@kbn/es-query" package directly instead.
+ * @removeBy 8.3
+ */
+type TimeRange = oldTimeRange;
+
 export type {
   Filter,
   RangeFilterParams,
@@ -349,6 +350,7 @@ export type {
   KueryNode,
   FilterMeta,
   EsQueryConfig,
+  TimeRange,
 };
 export {
   COMPARE_ALL_OPTIONS,
@@ -359,7 +361,6 @@ export {
   disableFilter,
   fromKueryExpression,
   toElasticsearchQuery,
-  nodeTypes,
   buildEsQuery,
   buildQueryFromFilters,
   luceneStringToDsl,

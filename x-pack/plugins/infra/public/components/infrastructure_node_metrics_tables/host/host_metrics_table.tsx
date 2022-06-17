@@ -68,7 +68,11 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
   );
 
   if (isLoading) {
-    return <EuiLoadingSpinner size="xl" data-test-subj="hostMetricsTableLoader" />;
+    return (
+      <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
+        <EuiLoadingSpinner size="xl" data-test-subj="hostMetricsTableLoader" />
+      </EuiFlexGroup>
+    );
   }
 
   return (
@@ -105,8 +109,9 @@ function hostMetricsColumns(
       name: 'Name',
       field: 'name',
       truncateText: true,
+      textOnly: true,
       render: (name: string) => (
-        <MetricsNodeDetailsLink id={name} nodeType={'host'} timerange={timerange} />
+        <MetricsNodeDetailsLink id={name} label={name} nodeType={'host'} timerange={timerange} />
       ),
     },
     {

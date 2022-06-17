@@ -17,6 +17,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   htmlIdGenerator,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -29,7 +30,10 @@ import { FieldSelect } from './aggs/field_select';
 import { IndexPatternSelect, IndexPatternSelectProps } from './lib/index_pattern_select';
 import { QueryBarWrapper } from './query_bar_wrapper';
 import { YesNo } from './yes_no';
-import { fetchIndexPattern } from '../../../common/index_patterns_utils';
+import {
+  fetchIndexPattern,
+  isDataViewTypeIndexPattern,
+} from '../../../common/index_patterns_utils';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
 // @ts-expect-error not typed yet
@@ -37,6 +41,7 @@ import { IconSelect } from './icon_select/icon_select';
 
 import type { Annotation, IndexPatternValue } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
+import { aggRowChildrenStyles } from '../styles/common.styles';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
@@ -70,6 +75,8 @@ export const AnnotationRow = ({
 
   const [fetchedIndex, setFetchedIndex] = useState<IndexPatternSelectProps['fetchedIndex']>(null);
 
+  const { euiTheme } = useEuiTheme();
+
   useEffect(() => {
     const updateFetchedIndex = async (index: IndexPatternValue) => {
       const dataViews = getDataViewsStart();
@@ -88,7 +95,9 @@ export const AnnotationRow = ({
               defaultIndex: await dataViews.getDefault(),
             };
       } catch {
-        // nothing to be here
+        if (isDataViewTypeIndexPattern(index)) {
+          fetchedIndexPattern.missedIndex = index.id;
+        }
       }
 
       setFetchedIndex(fetchedIndexPattern);
@@ -129,7 +138,7 @@ export const AnnotationRow = ({
           <ColorPicker disableTrash={true} onChange={onChange} name="color" value={model.color} />
         </EuiFlexItem>
 
-        <EuiFlexItem className="tvbAggRow__children">
+        <EuiFlexItem css={aggRowChildrenStyles(euiTheme)}>
           <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
             <EuiFlexItem>
               <IndexPatternSelect

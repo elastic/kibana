@@ -77,7 +77,7 @@ export class ImportView extends Component {
     super(props);
 
     this.state = getDefaultState(DEFAULT_STATE, this.props.results, this.props.capabilities);
-    this.savedObjectsClient = props.savedObjectsClient;
+    this.dataViewsContract = props.dataViewsContract;
   }
 
   componentDidMount() {
@@ -417,14 +417,7 @@ export class ImportView extends Component {
 
   async loadDataViewNames() {
     try {
-      const dataViewNames = (
-        await this.savedObjectsClient.find({
-          type: 'index-pattern',
-          fields: ['title'],
-          perPage: 10000,
-        })
-      ).savedObjects.map(({ attributes }) => attributes && attributes.title);
-
+      const dataViewNames = await this.dataViewsContract.getTitles();
       this.setState({ dataViewNames });
     } catch (error) {
       console.error('failed to load data views', error);
@@ -585,7 +578,7 @@ export class ImportView extends Component {
                       timeFieldName={timeFieldName}
                       createDataView={createDataView}
                       showFilebeatFlyout={this.showFilebeatFlyout}
-                      additionalLinks={this.props.resultsLinks ?? []}
+                      getAdditionalLinks={this.props.getAdditionalLinks ?? []}
                     />
 
                     {isFilebeatFlyoutVisible && (

@@ -124,7 +124,7 @@ export class KibanaFramework {
     endpoint: string,
     params: CallWithRequestParams
   ) {
-    const { elasticsearch, uiSettings } = requestContext.core;
+    const { elasticsearch, uiSettings } = await requestContext.core;
 
     const includeFrozen = await uiSettings.client.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
     if (endpoint === 'msearch') {
@@ -200,9 +200,10 @@ export class KibanaFramework {
   public async getIndexPatternsServiceWithRequestContext(
     requestContext: InfraPluginRequestHandlerContext
   ) {
+    const { savedObjects, elasticsearch } = await requestContext.core;
     return await this.createIndexPatternsService(
-      requestContext.core.savedObjects.client,
-      requestContext.core.elasticsearch.client.asCurrentUser
+      savedObjects.client,
+      elasticsearch.client.asCurrentUser
     );
   }
 
@@ -218,7 +219,7 @@ export class KibanaFramework {
     elasticsearchClient: ElasticsearchClient
   ) {
     const [, startPlugins] = await this.core.getStartServices();
-    return startPlugins.data.indexPatterns.indexPatternsServiceFactory(
+    return startPlugins.data.indexPatterns.dataViewsServiceFactory(
       savedObjectsClient,
       elasticsearchClient
     );

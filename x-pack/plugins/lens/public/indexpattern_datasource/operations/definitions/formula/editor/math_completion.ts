@@ -16,7 +16,11 @@ import {
   TinymathVariable,
   TinymathNamedArgument,
 } from '@kbn/tinymath';
-import type { DataPublicPluginStart, QuerySuggestion } from '@kbn/data-plugin/public';
+import type {
+  UnifiedSearchPublicPluginStart,
+  QuerySuggestion,
+} from '@kbn/unified-search-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { IndexPattern } from '../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
@@ -117,7 +121,8 @@ export async function suggest({
   context,
   indexPattern,
   operationDefinitionMap,
-  data,
+  dataViews,
+  unifiedSearch,
   dateHistogramInterval,
 }: {
   expression: string;
@@ -125,7 +130,8 @@ export async function suggest({
   context: monaco.languages.CompletionContext;
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
-  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   dateHistogramInterval?: number;
 }): Promise<LensMathSuggestions> {
   const text =
@@ -145,7 +151,8 @@ export async function suggest({
     if (tokenInfo?.parent && (context.triggerCharacter === '=' || isNamedArgument)) {
       return await getNamedArgumentSuggestions({
         ast: tokenAst as TinymathNamedArgument,
-        data,
+        unifiedSearch,
+        dataViews,
         indexPattern,
         dateHistogramInterval,
       });
@@ -328,13 +335,15 @@ function getArgumentSuggestions(
 
 export async function getNamedArgumentSuggestions({
   ast,
-  data,
+  unifiedSearch,
+  dataViews,
   indexPattern,
   dateHistogramInterval,
 }: {
   ast: TinymathNamedArgument;
   indexPattern: IndexPattern;
-  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   dateHistogramInterval?: number;
 }) {
   if (ast.name === 'shift') {
@@ -356,19 +365,19 @@ export async function getNamedArgumentSuggestions({
   if (ast.name !== 'kql' && ast.name !== 'lucene') {
     return { list: [], type: SUGGESTION_TYPE.KQL };
   }
-  if (!data.autocomplete.hasQuerySuggestions(ast.name === 'kql' ? 'kuery' : 'lucene')) {
+  if (!unifiedSearch.autocomplete.hasQuerySuggestions(ast.name === 'kql' ? 'kuery' : 'lucene')) {
     return { list: [], type: SUGGESTION_TYPE.KQL };
   }
 
   const query = ast.value.split(MARKER)[0];
   const position = ast.value.indexOf(MARKER) + 1;
 
-  const suggestions = await data.autocomplete.getQuerySuggestions({
+  const suggestions = await unifiedSearch.autocomplete.getQuerySuggestions({
     language: ast.name === 'kql' ? 'kuery' : 'lucene',
     query,
     selectionStart: position,
     selectionEnd: position,
-    indexPatterns: [indexPattern],
+    indexPatterns: [await dataViews.get(indexPattern.id)],
     boolFilter: [],
   });
   return {

@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { isRight } from 'fp-ts/lib/Either';
-import { DynamicSettingsType, DynamicSettings } from '@kbn/uptime-plugin/common/runtime_types';
-import { DYNAMIC_SETTINGS_DEFAULTS, API_URLS } from '@kbn/uptime-plugin/common/constants';
+import { DynamicSettingsType, DynamicSettings } from '@kbn/synthetics-plugin/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS, API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

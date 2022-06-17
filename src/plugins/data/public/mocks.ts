@@ -11,27 +11,14 @@ import { createDatatableUtilitiesMock } from '../common/mocks';
 import { DataPlugin, DataViewsContract } from '.';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
-import { AutocompleteStart, AutocompleteSetup } from './autocomplete';
 import { createNowProviderMock } from './now_provider/mocks';
 
 export type Setup = jest.Mocked<ReturnType<DataPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataPlugin['start']>>;
 
-const autocompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
-  getQuerySuggestions: jest.fn(),
-  getAutocompleteSettings: jest.fn(),
-};
-
-const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
-  getValueSuggestions: jest.fn(),
-  getQuerySuggestions: jest.fn(),
-  hasQuerySuggestions: jest.fn(),
-};
-
 const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
   return {
-    autocomplete: autocompleteSetupMock,
     search: searchServiceMock.createSetupContract(),
     query: querySetupMock,
   };
@@ -51,6 +38,7 @@ const createStartContract = (): Start => {
     }),
     get: jest.fn().mockReturnValue(Promise.resolve({})),
     clearCache: jest.fn(),
+    getIdsWithTitle: jest.fn(),
   } as unknown as DataViewsContract;
 
   return {
@@ -58,7 +46,6 @@ const createStartContract = (): Start => {
       createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
       createFiltersFromRangeSelectAction: jest.fn(),
     },
-    autocomplete: autocompleteStartMock,
     datatableUtilities: createDatatableUtilitiesMock(),
     search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),

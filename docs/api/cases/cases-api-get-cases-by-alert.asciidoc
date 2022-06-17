@@ -43,7 +43,7 @@ cases that the user has access to read.
 `200`::
    Indicates a successful call.
 
-=== {api-example-title}
+=== {api-examples-title}
 
 Return cases associated with the alert ID
 `09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540`:
@@ -61,12 +61,8 @@ For example:
 --------------------------------------------------
 [
     {
-        "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
-        "title": "Case 1"
-    },
-    {
-        "id": "a18b38a0-71b0-11ea-a0b2-c51ea50a58e2",
-        "title": "Case 2"
+        "id": "06116b80-e1c3-11ec-be9b-9b1838238ee6",
+        "title":"security_case"
     }
 ]
 --------------------------------------------------

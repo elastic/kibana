@@ -5,17 +5,9 @@
  * 2.0.
  */
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  type EuiBasicTable,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { type EuiBasicTable, EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { cspRuleAssetSavedObjectType } from '../../../common/constants';
 import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesBottomBar } from './rules_bottom_bar';
@@ -29,7 +21,7 @@ import {
 } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
-import { useKibana } from '../../common/hooks/use_kibana';
+import { DATA_UPDATE_INFO } from './translations';
 
 interface RulesPageData {
   rules_page: RuleSavedObject[];
@@ -81,7 +73,7 @@ const getRulesPageData = (
     error: error ? extractErrorMessage(error) : undefined,
     all_rules: rules,
     rules_map: new Map(rules.map((rule) => [rule.id, rule])),
-    rules_page: page.map((rule) => changedRules.get(rule.attributes.id) || rule),
+    rules_page: page.map((rule) => changedRules.get(rule.id) || rule),
     total: data?.total || 0,
     lastModified: getLastModified(rules) || null,
   };
@@ -107,9 +99,15 @@ export const RulesContainer = () => {
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const [isAllSelected, setIsAllSelected] = useState<boolean>(false);
   const [visibleSelectedRulesIds, setVisibleSelectedRulesIds] = useState<string[]>([]);
-  const [rulesQuery, setRulesQuery] = useState<RulesQuery>({ page: 0, perPage: 5, search: '' });
+  const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
+    filter: `${cspRuleAssetSavedObjectType}.attributes.policy_id: "${params.policyId}" and ${cspRuleAssetSavedObjectType}.attributes.package_policy_id: "${params.packagePolicyId}"`,
+    search: '',
+    page: 0,
+    perPage: 10,
+  });
 
   const { data, status, error, refetch } = useFindCspRules({
+    filter: rulesQuery.filter,
     search: getSimpleQueryString(rulesQuery.search),
     page: 1,
     perPage: MAX_ITEMS_PER_PAGE,
@@ -152,7 +150,11 @@ export const RulesContainer = () => {
 
   const toggleRule = (rule: RuleSavedObject) => toggleRules([rule], !rule.attributes.enabled);
 
-  const bulkUpdateRules = () => bulkUpdate([...changedRules].map(([, rule]) => rule.attributes));
+  const bulkUpdateRules = () =>
+    bulkUpdate({
+      savedObjectRules: [...changedRules].map(([, savedObjectRule]) => savedObjectRule),
+      packagePolicyId: params.packagePolicyId,
+    });
 
   const discardChanges = useCallback(() => setChangedRules(new Map()), []);
 
@@ -167,7 +169,7 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
-      <ManageIntegrationButton {...params} />
+      <EuiCallOut size="m" title={DATA_UPDATE_INFO} iconType="iInCircle" />
       <EuiSpacer />
       <EuiPanel hasBorder hasShadow={false}>
         <RulesTableHeader
@@ -220,32 +222,5 @@ export const RulesContainer = () => {
         />
       )}
     </div>
-  );
-};
-
-const ManageIntegrationButton = ({ policyId, packagePolicyId }: PageUrlParams) => {
-  const { http } = useKibana().services;
-  return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1} style={{ alignItems: 'flex-end' }}>
-        <EuiButtonEmpty
-          href={http.basePath.prepend(
-            pagePathGetters
-              .edit_integration({
-                policyId,
-                packagePolicyId,
-              })
-              .join('')
-          )}
-          iconType="gear"
-          size="xs"
-        >
-          <FormattedMessage
-            id="xpack.csp.rules.manageIntegrationButtonLabel"
-            defaultMessage="Manage Integration"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 };

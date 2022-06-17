@@ -97,7 +97,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
             Status
           </div>
           <div
-            class="euiSpacer euiSpacer--s"
+            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
             class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -194,7 +194,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
             Risk Score
           </div>
           <div
-            class="euiSpacer euiSpacer--s"
+            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
             class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -253,7 +253,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
       </div>
     </div>
     <div
-      class="euiSpacer euiSpacer--s"
+      class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
     />
     <div
       class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive c0"
@@ -270,7 +270,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
             Rule
           </div>
           <div
-            class="euiSpacer euiSpacer--s"
+            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
             class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -279,7 +279,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
               class="c2"
             >
               <button
-                class="euiLink euiLink--primary"
+                class="euiLink css-102pf9n-euiLink-primary"
                 data-test-subj="ruleName"
                 type="button"
               >

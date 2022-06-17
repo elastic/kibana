@@ -5,6 +5,7 @@
   "requiredPlugins": [
     "features",
     "data",
+    "dataViews",
     "licensing",
     "triggersActionsUi",
     "embeddable",

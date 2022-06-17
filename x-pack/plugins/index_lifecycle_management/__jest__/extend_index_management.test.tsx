@@ -6,9 +6,8 @@
  */
 
 import moment from 'moment-timezone';
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
+import { init } from './client_integration/helpers/http_requests';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { Index } from '../common/types';
@@ -23,12 +22,9 @@ import {
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 
-// We need to init the http with a mock for any tests that depend upon the http service.
-// For example, add_lifecycle_confirm_modal makes an API request in its componentDidMount
-// lifecycle method. If we don't mock this, CI will fail with "Call retries were exceeded".
-// This expects HttpSetup but we're giving it AxiosInstance.
-// @ts-ignore
-initHttp(axios.create({ adapter: axiosXhrAdapter }));
+const { httpSetup } = init();
+
+initHttp(httpSetup);
 initUiMetric(usageCollectionPluginMock.createSetupContract());
 
 jest.mock('@kbn/index-management-plugin/public', async () => {
@@ -256,14 +252,14 @@ describe('extend index management', () => {
       const extension = ilmSummaryExtension(indexWithLifecyclePolicy, getUrlForApp);
       expect(extension).toBeDefined();
       const rendered = mountWithIntl(extension);
-      expect(rendered).toMatchSnapshot();
+      expect(rendered.render()).toMatchSnapshot();
     });
 
     test('should return extension when index has lifecycle error', () => {
       const extension = ilmSummaryExtension(indexWithLifecycleError, getUrlForApp);
       expect(extension).toBeDefined();
       const rendered = mountWithIntl(extension);
-      expect(rendered).toMatchSnapshot();
+      expect(rendered.render()).toMatchSnapshot();
     });
   });
 

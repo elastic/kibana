@@ -38,7 +38,9 @@ const agentConfigurationRoute = createApmServerRoute({
     >;
   }> => {
     const setup = await setupRequest(resources);
+
     const configurations = await listConfigurations({ setup });
+
     return { configurations };
   },
 });
@@ -71,7 +73,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
       throw Boom.notFound();
     }
 
-    return config._source;
+    return config;
   },
 });
 
@@ -102,11 +104,11 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
     }
 
     logger.info(
-      `Deleting config ${service.name}/${service.environment} (${config._id})`
+      `Deleting config ${service.name}/${service.environment} (${config.id})`
     );
 
     const deleteConfigurationResult = await deleteConfiguration({
-      configurationId: config._id,
+      configurationId: config.id,
       setup,
     });
 
@@ -162,7 +164,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
     );
 
     await createOrUpdateConfiguration({
-      configurationId: config?._id,
+      configurationId: config?.id,
       configurationIntake: body,
       setup,
     });
@@ -269,6 +271,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { context, params } = resources;
+    const coreContext = await context.core;
 
     const { serviceName, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -278,7 +281,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
       start,
       end,
     });
-    const size = await context.core.uiSettings.client.get<number>(
+    const size = await coreContext.uiSettings.client.get<number>(
       maxSuggestions
     );
     const environments = await getEnvironments({

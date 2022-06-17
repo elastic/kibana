@@ -9,7 +9,8 @@
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService, RuntimeField } from '../../../common';
+import { DataViewsService } from '../../../common/data_views';
+import { RuntimeField } from '../../../common/types';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSchema } from '../util/schemas';
 import type {
@@ -92,8 +93,9 @@ const runtimeCreateFieldRouteFactory =
         },
       },
       handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const core = await ctx.core;
+        const savedObjectsClient = core.savedObjects.client;
+        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
         const [, , { dataViewsServiceFactory }] = await getStartServices();
         const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,

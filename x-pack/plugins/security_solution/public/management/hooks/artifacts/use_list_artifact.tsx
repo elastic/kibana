@@ -31,9 +31,7 @@ export function useListArtifact(
     excludedPolicies: string[];
   }> = DEFAULT_OPTIONS,
   searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
-  customQueryOptions: Partial<
-    UseQueryOptions<FoundExceptionListItemSchema, HttpFetchError>
-  > = DEFAULT_OPTIONS,
+  customQueryOptions?: Partial<UseQueryOptions<FoundExceptionListItemSchema, HttpFetchError>>,
   customQueryIds: string[] = []
 ): QueryObserverResult<FoundExceptionListItemSchema, HttpFetchError> {
   const {
@@ -64,12 +62,6 @@ export function useListArtifact(
 
       return result;
     },
-    {
-      refetchIntervalInBackground: false,
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-      keepPreviousData: true,
-      ...customQueryOptions,
-    }
+    customQueryOptions
   );
 }

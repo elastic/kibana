@@ -16,6 +16,17 @@ export interface ActionType {
   minimumLicenseRequired: LicenseType;
 }
 
+export enum InvalidEmailReason {
+  invalid = 'invalid',
+  notAllowed = 'notAllowed',
+}
+
+export interface ValidatedEmail {
+  address: string;
+  valid: boolean;
+  reason?: InvalidEmailReason;
+}
+
 export interface ActionResult {
   id: string;
   actionTypeId: string;
@@ -39,6 +50,10 @@ export interface ActionTypeExecutorResult<Data> {
   retry?: null | boolean | Date;
 }
 
+export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {
+  error?: Error;
+};
+
 export function isActionTypeExecutorResult(
   result: unknown
 ): result is ActionTypeExecutorResult<unknown> {
@@ -48,4 +63,8 @@ export function isActionTypeExecutorResult(
     typeof unsafeResult?.actionId === 'string' &&
     ActionTypeExecutorResultStatusValues.includes(unsafeResult?.status)
   );
+}
+
+export interface ActionsPublicConfigType {
+  allowedEmailDomains: string[];
 }

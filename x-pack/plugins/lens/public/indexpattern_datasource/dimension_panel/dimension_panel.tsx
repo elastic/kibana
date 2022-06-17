@@ -9,6 +9,8 @@ import React, { memo, useMemo } from 'react';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
 import { GenericIndexPatternColumn } from '../indexpattern';
 import { isColumnInvalid } from '../utils';
@@ -31,6 +33,8 @@ export type IndexPatternDimensionEditorProps =
     layerId: string;
     http: HttpSetup;
     data: DataPublicPluginStart;
+    unifiedSearch: UnifiedSearchPublicPluginStart;
+    dataViews: DataViewsPublicPluginStart;
     uniqueLabel: string;
     dateRange: DateRange;
   };

@@ -24,14 +24,6 @@ const customSource = {
   name: 'name',
 };
 
-const preconfiguredSourceData = {
-  ...staticCustomSourceData,
-  serviceType: 'sharepoint-server',
-  configuration: {
-    ...staticCustomSourceData.configuration,
-    githubRepository: 'elastic/sharepoint-server-connector',
-  },
-};
 const mockValues = {
   sourceData: staticCustomSourceData,
 };
@@ -44,9 +36,7 @@ describe('CustomSourceDeployment', () => {
       jest.clearAllMocks();
       setMockValues(mockValues);
 
-      wrapper = shallow(
-        <CustomSourceDeployment source={customSource} sourceData={staticCustomSourceData} />
-      );
+      wrapper = shallow(<CustomSourceDeployment source={customSource} />);
     });
 
     it('contains a source identifier', () => {
@@ -69,7 +59,7 @@ describe('CustomSourceDeployment', () => {
       });
 
       wrapper = shallow(
-        <CustomSourceDeployment source={customSource} sourceData={preconfiguredSourceData} />
+        <CustomSourceDeployment source={customSource} baseServiceType={'share_point_server'} />
       );
     });
 
@@ -86,9 +76,7 @@ describe('CustomSourceDeployment', () => {
     jest.clearAllMocks();
     setMockValues(mockValues);
 
-    const wrapper = shallow(
-      <CustomSourceDeployment small source={customSource} sourceData={staticCustomSourceData} />
-    );
+    const wrapper = shallow(<CustomSourceDeployment small source={customSource} />);
 
     expect(wrapper.find(EuiPanel).prop('paddingSize')).toEqual('m');
 

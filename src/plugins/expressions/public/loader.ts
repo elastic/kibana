@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, Observable, Subject, Subscription, asyncScheduler, identity } from 'rxjs';
-import { filter, map, delay, shareReplay, throttleTime } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, Subscription, identity, timer } from 'rxjs';
+import { delay, filter, finalize, map, shareReplay, takeWhile } from 'rxjs/operators';
 import { defaults } from 'lodash';
 import { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
 import { Adapters } from '@kbn/inspector-plugin/public';
@@ -19,6 +19,61 @@ import { ExpressionRenderHandler } from './render';
 import { getExpressionsService } from './services';
 
 type Data = unknown;
+
+/**
+ * RxJS' `throttle` operator does not emit the last value immediately when the source observable is completed.
+ * Instead, it waits for the next throttle period to emit that.
+ * It might cause delays until we get the final value, even though it is already there.
+ * @see https://github.com/ReactiveX/rxjs/blob/master/src/internal/operators/throttle.ts#L121
+ */
+function throttle<T>(timeout: number) {
+  return (source: Observable<T>): Observable<T> =>
+    new Observable((subscriber) => {
+      let latest: T | undefined;
+      let hasValue = false;
+
+      const emit = () => {
+        if (hasValue) {
+          subscriber.next(latest);
+          hasValue = false;
+          latest = undefined;
+        }
+      };
+
+      let throttled: Subscription | undefined;
+      const timer$ = timer(0, timeout).pipe(
+        takeWhile(() => hasValue),
+        finalize(() => {
+          subscriber.remove(throttled!);
+          throttled = undefined;
+        })
+      );
+
+      subscriber.add(
+        source.subscribe({
+          next: (value) => {
+            latest = value;
+            hasValue = true;
+
+            if (!throttled) {
+              throttled = timer$.subscribe(emit);
+              subscriber.add(throttled);
+            }
+          },
+          error: (error) => subscriber.error(error),
+          complete: () => {
+            emit();
+            subscriber.complete();
+          },
+        })
+      );
+
+      subscriber.add(() => {
+        hasValue = false;
+        latest = undefined;
+      });
+    });
+}
 
 export class ExpressionLoader {
   data$: ReturnType<ExecutionContract['getData']>;
@@ -58,6 +113,7 @@ export class ExpressionLoader {
       onRenderError: params && params.onRenderError,
       renderMode: params?.renderMode,
       syncColors: params?.syncColors,
+      syncTooltips: params?.syncTooltips,
       hasCompatibleActions: params?.hasCompatibleActions,
     });
     this.render$ = this.renderHandler.render$;
@@ -142,6 +198,7 @@ export class ExpressionLoader {
       searchSessionId: params.searchSessionId,
       debug: params.debug,
       syncColors: params.syncColors,
+      syncTooltips: params.syncTooltips,
       executionContext: params.executionContext,
     });
     this.subscription = this.execution
@@ -149,9 +206,7 @@ export class ExpressionLoader {
       .pipe(
         delay(0), // delaying until the next tick since we execute the expression in the constructor
         filter(({ partial }) => params.partial || !partial),
-        params.partial && params.throttle
-          ? throttleTime(params.throttle, asyncScheduler, { leading: true, trailing: true })
-          : identity
+        params.partial && params.throttle ? throttle(params.throttle) : identity
       )
       .subscribe((value) => this.dataSubject.next(value));
   };
@@ -182,6 +237,7 @@ export class ExpressionLoader {
       this.params.searchSessionId = params.searchSessionId;
     }
     this.params.syncColors = params.syncColors;
+    this.params.syncTooltips = params.syncTooltips;
     this.params.debug = Boolean(params.debug);
     this.params.partial = Boolean(params.partial);
     this.params.throttle = Number(params.throttle ?? 1000);

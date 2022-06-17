@@ -16,17 +16,21 @@ import { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public'
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
 import {
   xyVisFunction,
+  layeredXyVisFunction,
+  extendedDataLayerFunction,
   yAxisConfigFunction,
+  extendedYAxisConfigFunction,
   legendConfigFunction,
   gridlinesConfigFunction,
-  dataLayerConfigFunction,
   axisExtentConfigFunction,
   tickLabelsConfigFunction,
-  annotationLayerConfigFunction,
+  referenceLineFunction,
+  referenceLineLayerFunction,
+  annotationLayerFunction,
   labelsOrientationConfigFunction,
-  referenceLineLayerConfigFunction,
   axisTitlesVisibilityConfigFunction,
-} from '../common';
+  extendedAnnotationLayerFunction,
+} from '../common/expression_functions';
 import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
 
 export interface XYPluginStartDependencies {
@@ -51,16 +55,20 @@ export class ExpressionXyPlugin {
     { expressions, charts }: SetupDeps
   ): ExpressionXyPluginSetup {
     expressions.registerFunction(yAxisConfigFunction);
+    expressions.registerFunction(extendedYAxisConfigFunction);
     expressions.registerFunction(legendConfigFunction);
     expressions.registerFunction(gridlinesConfigFunction);
-    expressions.registerFunction(dataLayerConfigFunction);
+    expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(tickLabelsConfigFunction);
-    expressions.registerFunction(annotationLayerConfigFunction);
+    expressions.registerFunction(annotationLayerFunction);
+    expressions.registerFunction(extendedAnnotationLayerFunction);
     expressions.registerFunction(labelsOrientationConfigFunction);
-    expressions.registerFunction(referenceLineLayerConfigFunction);
+    expressions.registerFunction(referenceLineFunction);
+    expressions.registerFunction(referenceLineLayerFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyVisFunction);
+    expressions.registerFunction(layeredXyVisFunction);
 
     const getStartDeps: GetStartDepsFn = async () => {
       const [coreStart, deps] = await core.getStartServices();

@@ -23,7 +23,7 @@ import {
   createControlGroupExtract,
   createControlGroupInject,
 } from '../../../common/control_group/control_group_persistable_state';
-import { getDefaultControlGroupInput } from '../../../common/control_group/control_group_constants';
+import { getDefaultControlGroupInput } from '../../../common';
 
 export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition {
   public readonly isContainerType = true;

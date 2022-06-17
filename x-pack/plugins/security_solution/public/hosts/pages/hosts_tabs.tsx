@@ -6,7 +6,8 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { HostsTabsProps } from './types';
 import { scoreIntervalToDateTime } from '../../common/components/ml/score/score_interval_to_datetime';
@@ -21,7 +22,6 @@ import { HOSTS_PATH } from '../../../common/constants';
 import {
   HostsQueryTabBody,
   HostRiskScoreQueryTabBody,
-  AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
   SessionsTabBody,
 } from './navigation';
@@ -31,7 +31,6 @@ import { TimelineId } from '../../../common/types';
 export const HostsTabs = memo<HostsTabsProps>(
   ({
     deleteQuery,
-    docValueFields,
     filterQuery,
     pageFilters,
     from,
@@ -85,10 +84,7 @@ export const HostsTabs = memo<HostsTabsProps>(
     return (
       <Switch>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.hosts})`}>
-          <HostsQueryTabBody docValueFields={docValueFields} {...tabProps} />
-        </Route>
-        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
+          <HostsQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.risk})`}>
           <HostRiskScoreQueryTabBody {...tabProps} />

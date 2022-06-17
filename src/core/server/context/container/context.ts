@@ -7,9 +7,10 @@
  */
 
 import { flatten } from 'lodash';
-import { ShallowPromise } from '@kbn/utility-types';
-import { pick } from 'lodash';
-import type { CoreId, PluginOpaqueId, RequestHandler, RequestHandlerContext } from '../..';
+import { ShallowPromise, MaybePromise } from '@kbn/utility-types';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { CoreId } from '@kbn/core-base-common-internal';
+import type { RequestHandler, RequestHandlerContext } from '../..';
 
 /**
  * A function that returns a context value for a specific key of given context type.
@@ -31,7 +32,7 @@ export type IContextProvider<
   // context.core will always be available, but plugin contexts are typed as optional
   context: Omit<Context, ContextName>,
   ...rest: HandlerParameters<RequestHandler>
-) => Promise<Context[ContextName]> | Context[ContextName];
+) => MaybePromise<Awaited<Context[ContextName]>>;
 
 /**
  * A function that accepts a context object and an optional number of additional arguments. Used for the generic types
@@ -202,6 +203,9 @@ export class ContextContainer implements IContextContainer {
     provider: IContextProvider<Context, ContextName>
   ): this => {
     const contextName = name as string;
+    if (contextName === 'resolve') {
+      throw new Error(`Cannot register a provider for ${contextName}, it is a reserved keyword.`);
+    }
     if (this.contextProviders.has(contextName)) {
       throw new Error(`Context provider for ${contextName} has already been registered.`);
     }
@@ -224,36 +228,51 @@ export class ContextContainer implements IContextContainer {
     }
 
     return (async (...args: HandlerParameters<RequestHandler>) => {
-      const context = await this.buildContext(source, ...args);
+      const context = this.buildContext(source, ...args);
       return handler(context, ...args);
     }) as (
       ...args: HandlerParameters<RequestHandler>
     ) => ShallowPromise<ReturnType<RequestHandler>>;
   };
 
-  private async buildContext(
+  private buildContext(
     source: symbol,
     ...contextArgs: HandlerParameters<RequestHandler>
-  ): Promise<HandlerContextType<RequestHandler>> {
+  ): HandlerContextType<RequestHandler> {
     const contextsToBuild = new Set(this.getContextNamesForSource(source));
+    const builtContextPromises: Record<string, Promise<unknown>> = {};
+
+    const builtContext = {} as HandlerContextType<RequestHandler>;
+    (builtContext as unknown as RequestHandlerContext).resolve = async (keys) => {
+      const resolved = await Promise.all(
+        keys.map(async (key) => {
+          return [key, await builtContext[key]];
+        })
+      );
+      return Object.fromEntries(resolved);
+    };
 
     return [...this.contextProviders]
       .sort(sortByCoreFirst(this.coreId))
       .filter(([contextName]) => contextsToBuild.has(contextName))
-      .reduce(async (contextPromise, [contextName, { provider, source: providerSource }]) => {
-        const resolvedContext = await contextPromise;
+      .reduce((contextAccessors, [contextName, { provider, source: providerSource }]) => {
+        const exposedContext = createExposedContext({
+          currentContextName: contextName,
+          exposedContextNames: [...this.getContextNamesForSource(providerSource)],
+          contextAccessors,
+        });
+        Object.defineProperty(contextAccessors, contextName, {
+          get: async () => {
+            const contextKey = contextName as keyof HandlerContextType<RequestHandler>;
+            if (!builtContextPromises[contextKey]) {
+              builtContextPromises[contextKey] = provider(exposedContext, ...contextArgs);
+            }
+            return await builtContextPromises[contextKey];
+          },
+        });
 
-        // For the next provider, only expose the context available based on the dependencies of the plugin that
-        // registered that provider.
-        const exposedContext = pick(resolvedContext, [
-          ...this.getContextNamesForSource(providerSource),
-        ]);
-
-        return {
-          ...resolvedContext,
-          [contextName]: await provider(exposedContext, ...contextArgs),
-        };
-      }, Promise.resolve({}) as Promise<HandlerContextType<RequestHandler>>);
+        return contextAccessors;
+      }, builtContext);
   }
 
   private getContextNamesForSource(source: symbol): ReadonlySet<string> {
@@ -299,3 +318,28 @@ const sortByCoreFirst =
       return rightProvider.source === coreId ? 1 : 0;
     }
   };
+
+const createExposedContext = ({
+  currentContextName,
+  exposedContextNames,
+  contextAccessors,
+}: {
+  currentContextName: string;
+  exposedContextNames: string[];
+  contextAccessors: Partial<HandlerContextType<RequestHandler>>;
+}) => {
+  const exposedContext: Partial<HandlerContextType<RequestHandler>> = {};
+  exposedContext.resolve = contextAccessors.resolve;
+
+  for (const contextName of exposedContextNames) {
+    if (contextName === currentContextName) {
+      continue;
+    }
+    const descriptor = Object.getOwnPropertyDescriptor(contextAccessors, contextName);
+    if (descriptor) {
+      Object.defineProperty(exposedContext, contextName, descriptor);
+    }
+  }
+
+  return exposedContext;
+};

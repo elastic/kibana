@@ -8,7 +8,7 @@
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '..';
 import { ActionTypeModel } from '../../../../types';
-import { ServiceNowActionConnector } from './types';
+import { registrationServicesMock } from '../../../../mocks';
 
 const SERVICENOW_ITSM_ACTION_TYPE_ID = '.servicenow';
 const SERVICENOW_SIR_ACTION_TYPE_ID = '.servicenow-sir';
@@ -17,7 +17,7 @@ let actionTypeRegistry: TypeRegistry<ActionTypeModel>;
 
 beforeAll(() => {
   actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry });
+  registerBuiltInActionTypes({ actionTypeRegistry, services: registrationServicesMock });
 });
 
 describe('actionTypeRegistry.get() works', () => {
@@ -29,75 +29,6 @@ describe('actionTypeRegistry.get() works', () => {
     test(`${id}: action type static data is as expected`, () => {
       const actionTypeModel = actionTypeRegistry.get(id);
       expect(actionTypeModel.id).toEqual(id);
-    });
-  });
-});
-
-describe('servicenow connector validation', () => {
-  [
-    SERVICENOW_ITSM_ACTION_TYPE_ID,
-    SERVICENOW_SIR_ACTION_TYPE_ID,
-    SERVICENOW_ITOM_ACTION_TYPE_ID,
-  ].forEach((id) => {
-    test(`${id}: connector validation succeeds when connector config is valid`, async () => {
-      const actionTypeModel = actionTypeRegistry.get(id);
-      const actionConnector = {
-        secrets: {
-          username: 'user',
-          password: 'pass',
-        },
-        id: 'test',
-        actionTypeId: id,
-        name: 'ServiceNow',
-        isPreconfigured: false,
-        config: {
-          apiUrl: 'https://dev94428.service-now.com/',
-          usesTableApi: false,
-        },
-      } as ServiceNowActionConnector;
-
-      expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
-        config: {
-          errors: {
-            apiUrl: [],
-            usesTableApi: [],
-          },
-        },
-        secrets: {
-          errors: {
-            username: [],
-            password: [],
-          },
-        },
-      });
-    });
-
-    test(`${id}: connector validation fails when connector config is not valid`, async () => {
-      const actionTypeModel = actionTypeRegistry.get(id);
-      const actionConnector = {
-        secrets: {
-          username: 'user',
-        },
-        id,
-        actionTypeId: id,
-        name: 'servicenow',
-        config: {},
-      } as unknown as ServiceNowActionConnector;
-
-      expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
-        config: {
-          errors: {
-            apiUrl: ['URL is required.'],
-            usesTableApi: [],
-          },
-        },
-        secrets: {
-          errors: {
-            username: [],
-            password: ['Password is required.'],
-          },
-        },
-      });
     });
   });
 });

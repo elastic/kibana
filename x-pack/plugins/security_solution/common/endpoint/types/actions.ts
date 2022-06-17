@@ -6,9 +6,15 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { ActionStatusRequestSchema, HostIsolationRequestSchema } from '../schema/actions';
+import {
+  ActionStatusRequestSchema,
+  HostIsolationRequestSchema,
+  ResponseActionBodySchema,
+} from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
+
+export type ResponseActions = ISOLATION_ACTIONS | 'kill-process' | 'suspend-process';
 
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
@@ -40,6 +46,11 @@ interface ActionResponseFields {
   completed_at: string;
   started_at: string;
 }
+
+/**
+ * An endpoint Action created in the Endpoint's `.logs-endpoint.actions-default` index.
+ * @since v7.16
+ */
 export interface LogsEndpointAction {
   '@timestamp': string;
   agent: {
@@ -52,6 +63,10 @@ export interface LogsEndpointAction {
   };
 }
 
+/**
+ * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
+ * @since v7.16
+ */
 export interface LogsEndpointActionResponse {
   '@timestamp': string;
   agent: {
@@ -61,9 +76,28 @@ export interface LogsEndpointActionResponse {
   error?: EcsError;
 }
 
-export interface EndpointActionData {
-  command: ISOLATION_ACTIONS;
+interface ResponseActionParametersWithPid {
+  pid: number;
+  entity_id?: never;
+}
+
+interface ResponseActionParametersWithEntityId {
+  pid?: never;
+  entity_id: number;
+}
+
+export type ResponseActionParametersWithPidOrEntityId =
+  | ResponseActionParametersWithPid
+  | ResponseActionParametersWithEntityId;
+
+export type EndpointActionDataParameterTypes =
+  | undefined
+  | ResponseActionParametersWithPidOrEntityId;
+
+export interface EndpointActionData<T extends EndpointActionDataParameterTypes = undefined> {
+  command: ResponseActions;
   comment?: string;
+  parameters?: T;
 }
 
 export interface FleetActionResponseData {
@@ -72,12 +106,12 @@ export interface FleetActionResponseData {
   };
 }
 
-export interface EndpointAction {
+/**
+ * And endpoint action created in Fleet's `.fleet-actions`
+ */
+export interface EndpointAction extends ActionRequestFields {
   action_id: string;
   '@timestamp': string;
-  expiration: string;
-  type: 'INPUT_ACTION';
-  input_type: 'endpoint';
   agents: string[];
   user_id: string;
   // the number of seconds Elastic Agent (on the host) should
@@ -136,11 +170,17 @@ export interface ActivityLogActionResponse {
     data: EndpointActionResponse;
   };
 }
+
+/**
+ * One of the possible Response Action Log entry - Either a Fleet Action request, Fleet action response,
+ * Endpoint action request and/or endpoint action response.
+ */
 export type ActivityLogEntry =
   | ActivityLogAction
   | ActivityLogActionResponse
   | EndpointActivityLogAction
   | EndpointActivityLogActionResponse;
+
 export interface ActivityLog {
   page: number;
   pageSize: number;
@@ -151,8 +191,15 @@ export interface ActivityLog {
 
 export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
 
+export type ResponseActionRequestBody = TypeOf<typeof ResponseActionBodySchema>;
+
 export interface HostIsolationResponse {
   action: string;
+}
+
+export interface ResponseActionApiResponse {
+  action?: string; // only if command is isolate or release
+  data: ActionDetails;
 }
 
 export interface EndpointPendingActions {
@@ -168,3 +215,52 @@ export interface PendingActionsResponse {
 }
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
+
+export interface ActionDetails {
+  /** The action id */
+  id: string;
+  /**
+   * The Endpoint ID (and fleet agent ID - they are the same) for which the action was created for.
+   * This is an Array because the action could have been sent to multiple endpoints.
+   */
+  agents: string[];
+  /**
+   * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
+   * performed on the endpoint
+   */
+  command: string;
+  /**
+   * Will be set to true only if action is not yet completed and elapsed time has exceeded
+   * the request's expiration date
+   */
+  isExpired: boolean;
+  /** Action has been completed */
+  isCompleted: boolean;
+  /** If the action was successful */
+  wasSuccessful: boolean;
+  /** Any errors encountered if `wasSuccessful` is `false` */
+  errors: undefined | string[];
+  /** The date when the initial action request was submitted */
+  startedAt: string;
+  /** The date when the action was completed (a response by the endpoint (not fleet) was received) */
+  completedAt: string | undefined;
+  /**
+   * The list of action log items (actions and responses) received thus far for the action.
+   */
+  logEntries: ActivityLogEntry[];
+}
+
+export interface ActionDetailsApiResponse {
+  data: ActionDetails;
+}
+export interface ActionListApiResponse {
+  page: number | undefined;
+  pageSize: number | undefined;
+  startDate: string | undefined;
+  elasticAgentIds: string[] | undefined;
+  endDate: string | undefined;
+  userIds: string[] | undefined; // users that requested the actions
+  commands: string[] | undefined; // type of actions
+  data: ActionDetails[];
+  total: number;
+}

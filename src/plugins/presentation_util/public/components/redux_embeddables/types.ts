@@ -63,6 +63,10 @@ export type ReduxContainerContextServices<
 > = ReduxEmbeddableContextServices<InputType, ReducerType> & {
   containerActions: Pick<
     IContainer,
-    'untilEmbeddableLoaded' | 'removeEmbeddable' | 'addNewEmbeddable' | 'updateInputForChild'
+    | 'untilEmbeddableLoaded'
+    | 'removeEmbeddable'
+    | 'addNewEmbeddable'
+    | 'updateInputForChild'
+    | 'replaceEmbeddable'
   >;
 };

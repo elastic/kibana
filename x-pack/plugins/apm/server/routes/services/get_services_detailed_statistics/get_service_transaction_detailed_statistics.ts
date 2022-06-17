@@ -29,6 +29,7 @@ import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 export async function getServiceTransactionDetailedStatistics({
   serviceNames,
@@ -39,6 +40,7 @@ export async function getServiceTransactionDetailedStatistics({
   offset,
   start,
   end,
+  randomSampler,
 }: {
   serviceNames: string[];
   environment: string;
@@ -48,6 +50,7 @@ export async function getServiceTransactionDetailedStatistics({
   offset?: string;
   start: number;
   end: number;
+  randomSampler: RandomSampler;
 }) {
   const { apmEventClient } = setup;
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
@@ -91,33 +94,40 @@ export async function getServiceTransactionDetailedStatistics({
           },
         },
         aggs: {
-          services: {
-            terms: {
-              field: SERVICE_NAME,
-            },
+          sample: {
+            random_sampler: randomSampler,
             aggs: {
-              transactionType: {
+              services: {
                 terms: {
-                  field: TRANSACTION_TYPE,
+                  field: SERVICE_NAME,
+                  size: serviceNames.length,
                 },
                 aggs: {
-                  ...metrics,
-                  timeseries: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      fixed_interval: getBucketSizeForAggregatedTransactions({
-                        start: startWithOffset,
-                        end: endWithOffset,
-                        numBuckets: 20,
-                        searchAggregatedTransactions,
-                      }).intervalString,
-                      min_doc_count: 0,
-                      extended_bounds: {
-                        min: startWithOffset,
-                        max: endWithOffset,
+                  transactionType: {
+                    terms: {
+                      field: TRANSACTION_TYPE,
+                    },
+                    aggs: {
+                      ...metrics,
+                      timeseries: {
+                        date_histogram: {
+                          field: '@timestamp',
+                          fixed_interval:
+                            getBucketSizeForAggregatedTransactions({
+                              start: startWithOffset,
+                              end: endWithOffset,
+                              numBuckets: 20,
+                              searchAggregatedTransactions,
+                            }).intervalString,
+                          min_doc_count: 0,
+                          extended_bounds: {
+                            min: startWithOffset,
+                            max: endWithOffset,
+                          },
+                        },
+                        aggs: metrics,
                       },
                     },
-                    aggs: metrics,
                   },
                 },
               },
@@ -129,7 +139,7 @@ export async function getServiceTransactionDetailedStatistics({
   );
 
   return keyBy(
-    response.aggregations?.services.buckets.map((bucket) => {
+    response.aggregations?.sample.services.buckets.map((bucket) => {
       const topTransactionTypeBucket =
         bucket.transactionType.buckets.find(
           ({ key }) =>

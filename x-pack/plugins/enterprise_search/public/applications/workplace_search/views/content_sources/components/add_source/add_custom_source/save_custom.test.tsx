@@ -25,18 +25,21 @@ const mockValues = {
     accessToken: 'token',
     name: 'name',
   },
-  sourceData: staticCustomSourceData,
 };
 
+const sourceData = staticCustomSourceData;
+
 describe('SaveCustom', () => {
+  beforeAll(() => {
+    jest.clearAllMocks();
+    setMockValues(mockValues);
+  });
+
   describe('default behavior', () => {
     let wrapper: ShallowWrapper;
 
     beforeAll(() => {
-      jest.clearAllMocks();
-      setMockValues(mockValues);
-
-      wrapper = shallow(<SaveCustom />);
+      wrapper = shallow(<SaveCustom sourceData={sourceData} />);
     });
 
     it('contains a button back to the sources list', () => {
@@ -52,20 +55,14 @@ describe('SaveCustom', () => {
     let wrapper: ShallowWrapper;
 
     beforeAll(() => {
-      jest.clearAllMocks();
-      setMockValues({
-        ...mockValues,
-        sourceData: {
-          ...staticCustomSourceData,
-          serviceType: 'sharepoint-server',
-          configuration: {
-            ...staticCustomSourceData.configuration,
-            githubRepository: 'elastic/sharepoint-server-connector',
-          },
-        },
-      });
-
-      wrapper = shallow(<SaveCustom />);
+      wrapper = shallow(
+        <SaveCustom
+          sourceData={{
+            ...sourceData,
+            baseServiceType: 'share_point_server',
+          }}
+        />
+      );
     });
 
     it('includes a link to provide feedback', () => {

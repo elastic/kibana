@@ -7,24 +7,35 @@
 
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { BaseDataGenerator } from './base_data_generator';
-import { EndpointAction, EndpointActionResponse, ISOLATION_ACTIONS } from '../types';
+import {
+  ActivityLogAction,
+  ActivityLogActionResponse,
+  ActivityLogItemTypes,
+  EndpointAction,
+  EndpointActionResponse,
+  ISOLATION_ACTIONS,
+} from '../types';
 
 const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
 export class FleetActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action (isolate or unisolate) */
   generate(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
-    const timeStamp = new Date(this.randomPastDate());
+    const timeStamp = overrides['@timestamp']
+      ? new Date(overrides['@timestamp'])
+      : new Date(this.randomPastDate());
 
     return merge(
       {
-        action_id: this.randomUUID(),
+        action_id: this.seededUUIDv4(),
         '@timestamp': timeStamp.toISOString(),
         expiration: this.randomFutureDate(timeStamp),
         type: 'INPUT_ACTION',
         input_type: 'endpoint',
-        agents: [this.randomUUID()],
+        agents: [this.seededUUIDv4()],
         user_id: 'elastic',
         data: {
           command: this.randomIsolateCommand(),
@@ -33,6 +44,14 @@ export class FleetActionGenerator extends BaseDataGenerator {
       },
       overrides
     );
+  }
+
+  generateActionEsHit(
+    overrides: DeepPartial<EndpointAction> = {}
+  ): estypes.SearchHit<EndpointAction> {
+    return Object.assign(this.toEsSearchHit(this.generate(overrides)), {
+      _index: AGENT_ACTIONS_INDEX,
+    });
   }
 
   generateIsolateAction(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
@@ -45,7 +64,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
 
   /** Generates an endpoint action response */
   generateResponse(overrides: DeepPartial<EndpointActionResponse> = {}): EndpointActionResponse {
-    const timeStamp = new Date();
+    const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
     return merge(
       {
@@ -53,12 +72,56 @@ export class FleetActionGenerator extends BaseDataGenerator {
           command: this.randomIsolateCommand(),
           comment: '',
         },
-        action_id: this.randomUUID(),
-        agent_id: this.randomUUID(),
+        action_id: this.seededUUIDv4(),
+        agent_id: this.seededUUIDv4(),
         started_at: this.randomPastDate(),
         completed_at: timeStamp.toISOString(),
         error: 'some error happened',
         '@timestamp': timeStamp.toISOString(),
+      },
+      overrides
+    );
+  }
+
+  generateResponseEsHit(
+    overrides: DeepPartial<EndpointActionResponse> = {}
+  ): estypes.SearchHit<EndpointActionResponse> {
+    return Object.assign(this.toEsSearchHit(this.generateResponse(overrides)), {
+      _index: AGENT_ACTIONS_RESULTS_INDEX,
+    });
+  }
+
+  /**
+   * An Activity Log entry as returned by the Activity log API
+   * @param overrides
+   */
+  generateActivityLogAction(overrides: DeepPartial<ActivityLogAction> = {}): ActivityLogAction {
+    return merge(
+      {
+        type: ActivityLogItemTypes.FLEET_ACTION,
+        item: {
+          id: this.seededUUIDv4(),
+          data: this.generate(),
+        },
+      },
+      overrides
+    );
+  }
+
+  /**
+   * An Activity Log entry as returned by the Activity log API
+   * @param overrides
+   */
+  generateActivityLogActionResponse(
+    overrides: DeepPartial<ActivityLogActionResponse> = {}
+  ): ActivityLogActionResponse {
+    return merge(
+      {
+        type: ActivityLogItemTypes.FLEET_RESPONSE,
+        item: {
+          id: this.seededUUIDv4(),
+          data: this.generateResponse(),
+        },
       },
       overrides
     );

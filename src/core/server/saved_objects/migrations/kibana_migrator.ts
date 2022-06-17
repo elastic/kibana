@@ -13,8 +13,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 import Semver from 'semver';
+import type { Logger } from '@kbn/logging';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { ElasticsearchClient } from '../../elasticsearch';
-import { Logger } from '../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../mappings';
 import {
   SavedObjectUnsanitizedDoc,
@@ -37,6 +38,7 @@ export interface KibanaMigratorOptions {
   kibanaIndex: string;
   kibanaVersion: string;
   logger: Logger;
+  docLinks: DocLinksServiceStart;
 }
 
 export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
@@ -65,6 +67,7 @@ export class KibanaMigrator {
   private readonly activeMappings: IndexMapping;
   private readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
   public readonly kibanaVersion: string;
+  private readonly docLinks: DocLinksServiceStart;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -76,6 +79,7 @@ export class KibanaMigrator {
     soMigrationsConfig,
     kibanaVersion,
     logger,
+    docLinks,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaIndex = kibanaIndex;
@@ -93,6 +97,7 @@ export class KibanaMigrator {
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
+    this.docLinks = docLinks;
   }
 
   /**
@@ -113,9 +118,7 @@ export class KibanaMigrator {
    *    The promise resolves with an array of migration statuses, one for each
    *    elasticsearch index which was migrated.
    */
-  public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<
-    Array<{ status: string }>
-  > {
+  public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<MigrationResult[]> {
     if (this.migrationResult === undefined || rerun) {
       // Reruns are only used by CI / EsArchiver. Publishing status updates on reruns results in slowing down CI
       // unnecessarily, so we skip it in this case.
@@ -142,7 +145,7 @@ export class KibanaMigrator {
     return this.status$.asObservable();
   }
 
-  private runMigrationsInternal() {
+  private runMigrationsInternal(): Promise<MigrationResult[]> {
     const indexMap = createIndexMap({
       kibanaIndexName: this.kibanaIndex,
       indexMap: this.mappingProperties,
@@ -177,6 +180,7 @@ export class KibanaMigrator {
             indexPrefix: index,
             migrationsConfig: this.soMigrationsConfig,
             typeRegistry: this.typeRegistry,
+            docLinks: this.docLinks,
           });
         },
       };

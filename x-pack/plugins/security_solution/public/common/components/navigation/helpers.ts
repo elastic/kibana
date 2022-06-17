@@ -21,58 +21,74 @@ import {
 
 import { SearchNavTab } from './types';
 import { SourcererUrlState } from '../../store/sourcerer/model';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useUiSetting$ } from '../../lib/kibana';
+import { ENABLE_GROUPED_NAVIGATION } from '../../../../common/constants';
 
 export const getSearch = (tab: SearchNavTab, urlState: UrlState): string => {
   if (tab && tab.urlKey != null && !isAdministration(tab.urlKey)) {
-    return ALL_URL_STATE_KEYS.reduce<Location>(
-      (myLocation: Location, urlKey: KeyUrlState) => {
-        let urlStateToReplace:
-          | Filter[]
-          | Query
-          | SourcererUrlState
-          | TimelineUrl
-          | UrlInputsModel
-          | string = '';
-
-        if (urlKey === CONSTANTS.appQuery && urlState.query != null) {
-          if (urlState.query.query === '') {
-            urlStateToReplace = '';
-          } else {
-            urlStateToReplace = urlState.query;
-          }
-        } else if (urlKey === CONSTANTS.filters && urlState.filters != null) {
-          if (isEmpty(urlState.filters)) {
-            urlStateToReplace = '';
-          } else {
-            urlStateToReplace = urlState.filters;
-          }
-        } else if (urlKey === CONSTANTS.timerange) {
-          urlStateToReplace = urlState[CONSTANTS.timerange];
-        } else if (urlKey === CONSTANTS.sourcerer) {
-          urlStateToReplace = urlState[CONSTANTS.sourcerer];
-        } else if (urlKey === CONSTANTS.timeline && urlState[CONSTANTS.timeline] != null) {
-          const timeline = urlState[CONSTANTS.timeline];
-          if (timeline.id === '') {
-            urlStateToReplace = '';
-          } else {
-            urlStateToReplace = timeline;
-          }
-        }
-        return replaceQueryStringInLocation(
-          myLocation,
-          replaceStateKeyInQueryString(
-            urlKey,
-            urlStateToReplace
-          )(getQueryStringFromLocation(myLocation.search))
-        );
-      },
-      {
-        pathname: '',
-        hash: '',
-        search: '',
-        state: '',
-      }
-    ).search;
+    return getUrlStateSearch(urlState);
   }
   return '';
+};
+
+export const getUrlStateSearch = (urlState: UrlState): string =>
+  ALL_URL_STATE_KEYS.reduce<Location>(
+    (myLocation: Location, urlKey: KeyUrlState) => {
+      let urlStateToReplace:
+        | Filter[]
+        | Query
+        | SourcererUrlState
+        | TimelineUrl
+        | UrlInputsModel
+        | string = '';
+
+      if (urlKey === CONSTANTS.appQuery && urlState.query != null) {
+        if (urlState.query.query === '') {
+          urlStateToReplace = '';
+        } else {
+          urlStateToReplace = urlState.query;
+        }
+      } else if (urlKey === CONSTANTS.filters && urlState.filters != null) {
+        if (isEmpty(urlState.filters)) {
+          urlStateToReplace = '';
+        } else {
+          urlStateToReplace = urlState.filters;
+        }
+      } else if (urlKey === CONSTANTS.timerange) {
+        urlStateToReplace = urlState[CONSTANTS.timerange];
+      } else if (urlKey === CONSTANTS.sourcerer) {
+        urlStateToReplace = urlState[CONSTANTS.sourcerer];
+      } else if (urlKey === CONSTANTS.timeline && urlState[CONSTANTS.timeline] != null) {
+        const timeline = urlState[CONSTANTS.timeline];
+        if (timeline.id === '') {
+          urlStateToReplace = '';
+        } else {
+          urlStateToReplace = timeline;
+        }
+      }
+      return replaceQueryStringInLocation(
+        myLocation,
+        replaceStateKeyInQueryString(
+          urlKey,
+          urlStateToReplace
+        )(getQueryStringFromLocation(myLocation.search))
+      );
+    },
+    {
+      pathname: '',
+      hash: '',
+      search: '',
+      state: '',
+    }
+  ).search;
+
+/**
+ * Hook to check if the new grouped navigation is enabled on both experimental flag and advanced settings
+ * TODO: remove this function when flag and setting not needed
+ */
+export const useIsGroupedNavigationEnabled = () => {
+  const groupedNavFlagEnabled = useIsExperimentalFeatureEnabled('groupedNavigation');
+  const [groupedNavSettingEnabled] = useUiSetting$<boolean>(ENABLE_GROUPED_NAVIGATION);
+  return groupedNavFlagEnabled && groupedNavSettingEnabled;
 };

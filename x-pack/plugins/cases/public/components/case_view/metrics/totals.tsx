@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
+import { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
   ASSOCIATED_USERS_METRIC,
@@ -16,10 +16,9 @@ import {
   TOTAL_ALERTS_METRIC,
   TOTAL_CONNECTORS_METRIC,
 } from './translations';
-import { CaseViewMetricsProps } from './types';
 
-export const CaseViewMetricItems: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 'features'>> =
-  React.memo(({ metrics, features }) => {
+export const CaseViewMetricItems = React.memo(
+  ({ metrics, features }: { metrics: SingleCaseMetrics; features: SingleCaseMetricsFeature[] }) => {
     const metricItems = useGetTitleValueMetricItems(metrics, features);
 
     return (
@@ -34,7 +33,8 @@ export const CaseViewMetricItems: React.FC<Pick<CaseViewMetricsProps, 'metrics' 
         ))}
       </>
     );
-  });
+  }
+);
 CaseViewMetricItems.displayName = 'CaseViewMetricItems';
 
 const MetricValue = euiStyled(EuiFlexItem)`
@@ -50,8 +50,8 @@ interface MetricItem {
 type MetricItems = MetricItem[];
 
 const useGetTitleValueMetricItems = (
-  metrics: CaseMetrics | null,
-  features: CaseMetricsFeature[]
+  metrics: SingleCaseMetrics | null,
+  features: SingleCaseMetricsFeature[]
 ): MetricItems => {
   const { alerts, actions, connectors } = metrics ?? {};
   const totalConnectors = connectors?.total ?? 0;
@@ -61,7 +61,7 @@ const useGetTitleValueMetricItems = (
   const totalIsolatedHosts = calculateTotalIsolatedHosts(actions);
 
   const metricItems = useMemo<MetricItems>(() => {
-    const items: Array<[CaseMetricsFeature, Omit<MetricItem, 'id'>]> = [
+    const items: Array<[SingleCaseMetricsFeature, Omit<MetricItem, 'id'>]> = [
       ['alerts.count', { title: TOTAL_ALERTS_METRIC, value: alertsCount }],
       ['alerts.users', { title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers }],
       ['alerts.hosts', { title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts }],
@@ -88,7 +88,7 @@ const useGetTitleValueMetricItems = (
   return metricItems;
 };
 
-const calculateTotalIsolatedHosts = (actions: CaseMetrics['actions']) => {
+const calculateTotalIsolatedHosts = (actions: SingleCaseMetrics['actions']) => {
   if (!actions?.isolateHost) {
     return 0;
   }

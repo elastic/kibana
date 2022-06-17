@@ -56,7 +56,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"

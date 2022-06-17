@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { AwaitedProperties } from '@kbn/utility-types';
+import {
+  loggingSystemMock,
+  savedObjectsServiceMock,
+  ScopedClusterClientMock,
+} from '@kbn/core/server/mocks';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
@@ -35,7 +40,6 @@ import {
 import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { EndpointAppContext } from './types';
-import { MetadataRequestContext } from './routes/metadata/handlers';
 import { SecuritySolutionRequestHandlerContext } from '../types';
 import { parseExperimentalConfigValue } from '../../common/experimental_features';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
@@ -190,24 +194,22 @@ export const createMockFleetStartContract = (indexPattern: string): FleetStartCo
   };
 };
 
-export const createMockMetadataRequestContext = (): jest.Mocked<MetadataRequestContext> => {
+export const createMockMetadataRequestContext = () => {
   return {
     endpointAppContextService: createMockEndpointAppContextService(),
     logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
-    requestHandlerContext:
-      xpackMocks.createRequestHandlerContext() as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>,
+    requestHandlerContext: xpackMocks.createRequestHandlerContext() as unknown as jest.Mocked<
+      AwaitedProperties<SecuritySolutionRequestHandlerContext>
+    >,
   };
 };
 
 export function createRouteHandlerContext(
-  dataClient: jest.Mocked<IScopedClusterClient>,
+  dataClient: ScopedClusterClientMock,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>,
   overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
 ) {
-  const context = requestContextMock.create(
-    createMockClients(),
-    overrides
-  ) as jest.Mocked<SecuritySolutionRequestHandlerContext>;
+  const context = requestContextMock.create(createMockClients(), overrides);
   context.core.elasticsearch.client = dataClient;
   context.core.savedObjects.client = savedObjectsClient;
   return context;

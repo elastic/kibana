@@ -26,11 +26,13 @@ const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   actionTypeId,
   isPreconfigured,
   isMissingSecrets,
+  isDeprecated,
   ...res
 }) => ({
   ...res,
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
+  is_deprecated: isDeprecated,
   is_missing_secrets: isMissingSecrets,
 });
 
@@ -48,7 +50,7 @@ export const updateActionRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = context.actions.getActionsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const { id } = req.params;
         const { name, config, secrets } = req.body;
 

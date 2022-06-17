@@ -15,8 +15,10 @@ import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
+import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
 import { DatatableUtilitiesService } from '../common';
-import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
@@ -30,19 +32,21 @@ export interface DataSetupDependencies {
   inspector: InspectorSetup;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
+  management: ManagementSetup;
 }
 
 export interface DataStartDependencies {
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsPublicPluginStart;
+  screenshotMode: ScreenshotModePluginStart;
+  share: SharePluginStart;
 }
 
 /**
  * Data plugin public Setup contract
  */
 export interface DataPublicPluginSetup {
-  autocomplete: AutocompleteSetup;
   search: ISearchSetup;
   query: QuerySetup;
 }
@@ -64,11 +68,6 @@ export interface DataPublicPluginStart {
    * {@link DataPublicPluginStartActions}
    */
   actions: DataPublicPluginStartActions;
-  /**
-   * autocomplete service
-   * {@link AutocompleteStart}
-   */
-  autocomplete: AutocompleteStart;
   /**
    * data views service
    * {@link DataViewsContract}
@@ -109,6 +108,7 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   uiSettings: CoreStart['uiSettings'];
   savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];
+  application: CoreStart['application'];
   http: CoreStart['http'];
   storage: IStorageWrapper;
   data: DataPublicPluginStart;

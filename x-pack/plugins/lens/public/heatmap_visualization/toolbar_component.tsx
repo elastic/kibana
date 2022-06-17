@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import type { VisualizationToolbarProps } from '../types';
 import {
   LegendSettingsPopover,
@@ -49,6 +50,11 @@ export const HeatmapToolbar = memo(
       state,
       frame.datasourceLayers
     ).truncateText;
+
+    const legendSize = state?.legend.legendSize;
+
+    const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
+
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -62,11 +68,11 @@ export const HeatmapToolbar = memo(
               buttonDataTestSubj="lnsVisualOptionsButton"
             >
               <ValueLabelsSettings
-                valueLabels={state?.gridConfig.isCellLabelVisible ? 'inside' : 'hide'}
+                valueLabels={state?.gridConfig.isCellLabelVisible ? 'show' : 'hide'}
                 onValueLabelChange={(newMode) => {
                   setState({
                     ...state,
-                    gridConfig: { ...state.gridConfig, isCellLabelVisible: newMode === 'inside' },
+                    gridConfig: { ...state.gridConfig, isCellLabelVisible: newMode === 'show' },
                   });
                 }}
               />
@@ -112,16 +118,17 @@ export const HeatmapToolbar = memo(
                   legend: { ...state.legend, shouldTruncate: !current },
                 });
               }}
-              legendSize={state?.legend.legendSize}
-              onLegendSizeChange={(legendSize) => {
+              legendSize={legendSize}
+              onLegendSizeChange={(newLegendSize) => {
                 setState({
                   ...state,
                   legend: {
                     ...state.legend,
-                    legendSize,
+                    legendSize: newLegendSize,
                   },
                 });
               }}
+              showAutoLegendSizeOption={hadAutoLegendSize}
             />
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -147,19 +154,17 @@ export const HeatmapToolbar = memo(
                 <AxisTitleSettings
                   axis="yLeft"
                   axisTitle={state?.gridConfig.yTitle}
-                  updateTitleState={(value) =>
+                  updateTitleState={({ title, visible }) => {
                     setState({
                       ...state,
-                      gridConfig: { ...state.gridConfig, yTitle: value },
-                    })
-                  }
+                      gridConfig: {
+                        ...state.gridConfig,
+                        yTitle: title,
+                        isYAxisTitleVisible: visible,
+                      },
+                    });
+                  }}
                   isAxisTitleVisible={state?.gridConfig.isYAxisTitleVisible}
-                  toggleAxisTitleVisibility={(_, checked) =>
-                    setState({
-                      ...state,
-                      gridConfig: { ...state.gridConfig, isYAxisTitleVisible: checked },
-                    })
-                  }
                 />
               </ToolbarPopover>
             </TooltipWrapper>
@@ -182,19 +187,17 @@ export const HeatmapToolbar = memo(
                 <AxisTitleSettings
                   axis="x"
                   axisTitle={state?.gridConfig.xTitle}
-                  updateTitleState={(value) =>
+                  updateTitleState={({ title, visible }) =>
                     setState({
                       ...state,
-                      gridConfig: { ...state.gridConfig, xTitle: value },
+                      gridConfig: {
+                        ...state.gridConfig,
+                        xTitle: title,
+                        isXAxisTitleVisible: visible,
+                      },
                     })
                   }
                   isAxisTitleVisible={state?.gridConfig.isXAxisTitleVisible}
-                  toggleAxisTitleVisibility={(_, checked) =>
-                    setState({
-                      ...state,
-                      gridConfig: { ...state.gridConfig, isXAxisTitleVisible: checked },
-                    })
-                  }
                 />
               </ToolbarPopover>
             </TooltipWrapper>

@@ -60,6 +60,10 @@ describe('services queries', () => {
         start: 0,
         end: 50000,
         serviceGroup: null,
+        randomSampler: {
+          probability: 1,
+          seed: 0,
+        },
       })
     );
 

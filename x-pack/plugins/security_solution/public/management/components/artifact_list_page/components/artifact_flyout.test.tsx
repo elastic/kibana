@@ -14,8 +14,10 @@ import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../common/endpoint/service/artifacts';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { trustedAppsAllHttpMocks } from '../../../pages/mocks';
+import { trustedAppsAllHttpMocks } from '../../../mocks';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
+import { entriesToConditionEntries } from '../../../../common/utils/exception_list_items/mappers';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 jest.mock('../../../../common/components/user_privileges');
 const useUserPrivileges = _useUserPrivileges as jest.Mock;
@@ -357,12 +359,19 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         });
       });
 
-      expect(getLastFormComponentProps().item).toEqual({
+      const expectedProps = {
         ...mockedApi.responseProvider.trustedApp({
           query: { item_id: '123' },
         } as unknown as HttpFetchOptionsWithPath),
         created_at: expect.any(String),
-      });
+      };
+
+      // map process.hash entries to have * as suffix
+      expectedProps.entries = entriesToConditionEntries(
+        expectedProps.entries
+      ) as ExceptionListItemSchema['entries'];
+
+      expect(getLastFormComponentProps().item).toEqual(expectedProps);
     });
 
     it('should show error toast and close flyout if item for edit does not exist', async () => {

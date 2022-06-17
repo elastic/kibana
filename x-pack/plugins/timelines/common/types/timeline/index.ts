@@ -314,7 +314,7 @@ export enum TimelineId {
   usersPageExternalAlerts = 'users-page-external-alerts',
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
-  hostsPageSessions = 'hosts-page-sessions',
+  hostsPageSessions = 'hosts-page-sessions-v2',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
@@ -503,20 +503,16 @@ export type TimelineExpandedUserType =
       };
     }
   | EmptyObject;
-
-enum FlowTarget {
-  client = 'client',
+enum FlowTargetSourceDest {
   destination = 'destination',
-  server = 'server',
   source = 'source',
 }
-
 export type TimelineExpandedNetworkType =
   | {
       panelView?: 'networkDetail';
       params?: {
         ip: string;
-        flowTarget: FlowTarget;
+        flowTarget: FlowTargetSourceDest;
       };
     }
   | EmptyObject;

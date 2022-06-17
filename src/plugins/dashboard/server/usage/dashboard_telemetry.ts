@@ -6,10 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository, SavedObjectAttributes } from '@kbn/core/server';
+import { isEmpty } from 'lodash';
+import { SavedObjectAttributes } from '@kbn/core/server';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import {
+  type ControlGroupTelemetry,
+  CONTROL_GROUP_TYPE,
+  RawControlGroupAttributes,
+} from '@kbn/controls-plugin/common';
+import { initializeControlGroupTelemetry } from '@kbn/controls-plugin/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { SavedDashboardPanel730ToLatest } from '../../common';
-import { injectReferences } from '../../common/saved_dashboard_references';
+import { TASK_ID, DashboardTelemetryTaskState } from './dashboard_telemetry_collection_task';
 export interface DashboardCollectorData {
   panels: {
     total: number;
@@ -26,6 +34,7 @@ export interface DashboardCollectorData {
       };
     };
   };
+  controls: ControlGroupTelemetry;
 }
 
 export const getEmptyDashboardData = (): DashboardCollectorData => ({
@@ -35,6 +44,7 @@ export const getEmptyDashboardData = (): DashboardCollectorData => ({
     by_value: 0,
     by_type: {},
   },
+  controls: initializeControlGroupTelemetry({}),
 });
 
 export const getEmptyPanelTypeData = () => ({
@@ -78,26 +88,53 @@ export const collectPanelsByType = (
   }
 };
 
-export async function collectDashboardTelemetry(
-  savedObjectClient: Pick<ISavedObjectsRepository, 'find'>,
-  embeddableService: EmbeddablePersistableStateService
-) {
-  const collectorData = getEmptyDashboardData();
-  const dashboards = await savedObjectClient.find<SavedObjectAttributes>({
-    type: 'dashboard',
-  });
+export const controlsCollectorFactory =
+  (embeddableService: EmbeddablePersistableStateService) =>
+  (attributes: SavedObjectAttributes, collectorData: DashboardCollectorData) => {
+    const controlGroupAttributes: RawControlGroupAttributes | undefined =
+      attributes.controlGroupInput as unknown as RawControlGroupAttributes;
+    if (!isEmpty(controlGroupAttributes)) {
+      collectorData.controls = embeddableService.telemetry(
+        {
+          ...controlGroupAttributes,
+          type: CONTROL_GROUP_TYPE,
+          id: `DASHBOARD_${CONTROL_GROUP_TYPE}`,
+        },
+        collectorData.controls
+      ) as ControlGroupTelemetry;
+    }
 
-  for (const dashboard of dashboards.saved_objects) {
-    const attributes = injectReferences(dashboard, {
-      embeddablePersistableStateService: embeddableService,
+    return collectorData;
+  };
+
+async function getLatestTaskState(taskManager: TaskManagerStartContract) {
+  try {
+    const result = await taskManager.fetch({
+      query: { bool: { filter: { term: { _id: `task:${TASK_ID}` } } } },
     });
-
-    const panels = JSON.parse(
-      attributes.panelsJSON as string
-    ) as unknown as SavedDashboardPanel730ToLatest[];
-
-    collectPanelsByType(panels, collectorData, embeddableService);
+    return result.docs;
+  } catch (err) {
+    const errMessage = err && err.message ? err.message : err.toString();
+    /*
+        The usage service WILL to try to fetch from this collector before the task manager has been initialized, because the
+        task manager has to wait for all plugins to initialize first. It's fine to ignore it as next time around it will be
+        initialized (or it will throw a different type of error)
+      */
+    if (!errMessage.includes('NotInitialized')) {
+      throw err;
+    }
   }
 
-  return collectorData;
+  return null;
+}
+
+export async function collectDashboardTelemetry(taskManager: TaskManagerStartContract) {
+  const latestTaskState = await getLatestTaskState(taskManager);
+
+  if (latestTaskState !== null) {
+    const state = latestTaskState[0].state as DashboardTelemetryTaskState;
+    return state.telemetry;
+  }
+
+  return getEmptyDashboardData();
 }
