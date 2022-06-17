@@ -332,6 +332,10 @@ export class Execution<
             });
           }
 
+          if (fn.deprecated) {
+            this.logger?.warn(`Function '${fnName}' is deprecated`);
+          }
+
           if (this.execution.params.debug) {
             link.debug = {
               args: {},
@@ -478,6 +482,9 @@ export class Execution<
           const argDef = getByAlias(argDefs, argName);
           if (!argDef) {
             throw new Error(`Unknown argument '${argName}' passed to function '${fnDef.name}'`);
+          }
+          if (argDef.deprecated && !acc[argDef.name]) {
+            this.logger?.warn(`Argument '${argName}' is deprecated in function '${fnDef.name}'`);
           }
           acc[argDef.name] = (acc[argDef.name] || []).concat(argAst);
           return acc;
