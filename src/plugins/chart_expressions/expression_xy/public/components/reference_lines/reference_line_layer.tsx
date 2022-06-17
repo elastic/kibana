@@ -12,7 +12,7 @@ import { groupBy } from 'lodash';
 import { Position } from '@elastic/charts';
 import { ReferenceLineLayerConfig } from '../../../common/types';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
-import { LayerAccessorsTitles, GroupsConfiguration } from '../../helpers';
+import { LayerAccessorsTitles, GroupsConfiguration, AxesMap } from '../../helpers';
 import { getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineLayerProps {
@@ -22,6 +22,7 @@ interface ReferenceLineLayerProps {
   titles?: LayerAccessorsTitles;
   xAxisFormatter: FieldFormat;
   yAxesConfiguration: GroupsConfiguration;
+  yAxesMap: AxesMap;
 }
 
 export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
@@ -31,6 +32,7 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
   paddingMap,
   isHorizontal,
   titles,
+  yAxesMap,
 }) => {
   if (!layer.decorations) {
     return null;
@@ -77,11 +79,6 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
     const { forAccessor, type, ...restAnnotationConfig } = decorationConfig;
     const id = `${layer.layerId}-${decorationConfig.forAccessor}`;
 
-    const axesMap = {
-      left: yAxesConfiguration.some((axes) => axes.position === Position.Left),
-      right: yAxesConfiguration.some((axes) => axes.position === Position.Right),
-    };
-
     return (
       <ReferenceLineAnnotations
         key={id}
@@ -93,7 +90,7 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
           ...restAnnotationConfig,
           axisGroup,
         }}
-        axesMap={axesMap}
+        axesMap={yAxesMap}
         paddingMap={paddingMap}
         formatter={formatter}
         isHorizontal={isHorizontal}

@@ -1556,7 +1556,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     }
     gridLine={
       Object {
-        "visible": undefined,
+        "visible": false,
       }
     }
     groupId="left"
@@ -1567,13 +1567,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": undefined,
+          "visible": true,
         },
         "tickLabel": Object {
           "fill": undefined,
           "padding": undefined,
-          "rotation": undefined,
-          "visible": undefined,
+          "rotation": -90,
+          "visible": false,
         },
       }
     }
@@ -1993,6 +1993,10 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     yAxesConfiguration={
       Array [
         Object {
+          "extent": Object {
+            "mode": "full",
+            "type": "axisExtentConfig",
+          },
           "formatter": Object {
             "convert": [MockFunction] {
               "calls": Array [
@@ -2016,6 +2020,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             },
           },
           "groupId": "left",
+          "labelsOrientation": -90,
           "position": "bottom",
           "series": Array [
             Object {
@@ -2027,6 +2032,11 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "layer": "first",
             },
           ],
+          "showGridLines": false,
+          "showLabels": false,
+          "showTitle": true,
+          "title": "",
+          "type": "yAxisConfig",
         },
       ]
     }
@@ -3898,7 +3908,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     }
     gridLine={
       Object {
-        "visible": undefined,
+        "visible": false,
       }
     }
     groupId="left"
@@ -3909,13 +3919,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": undefined,
+          "visible": true,
         },
         "tickLabel": Object {
           "fill": undefined,
           "padding": undefined,
-          "rotation": undefined,
-          "visible": undefined,
+          "rotation": -90,
+          "visible": false,
         },
       }
     }
@@ -4335,6 +4345,10 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     yAxesConfiguration={
       Array [
         Object {
+          "extent": Object {
+            "mode": "full",
+            "type": "axisExtentConfig",
+          },
           "formatter": Object {
             "convert": [MockFunction] {
               "calls": Array [
@@ -4358,6 +4372,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             },
           },
           "groupId": "left",
+          "labelsOrientation": -90,
           "position": "bottom",
           "series": Array [
             Object {
@@ -4369,6 +4384,11 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "layer": "first",
             },
           ],
+          "showGridLines": false,
+          "showLabels": false,
+          "showTitle": true,
+          "title": "",
+          "type": "yAxisConfig",
         },
       ]
     }

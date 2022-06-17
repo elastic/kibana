@@ -366,6 +366,7 @@ const yAxisConfigsToExpression = (yAxisConfigs: AxisConfig[]): Ast[] => {
           showLabels: [axis.showLabels ?? true],
           showGridLines: [axis.showGridLines ?? true],
           labelsOrientation: axis.labelsOrientation !== undefined ? [axis.labelsOrientation] : [],
+          scaleType: axis.scaleType ? [axis.scaleType] : [],
         },
       },
     ],

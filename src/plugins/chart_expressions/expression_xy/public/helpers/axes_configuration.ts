@@ -10,17 +10,14 @@ import { Position } from '@elastic/charts';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
-import type { ExtendedReferenceLineDecorationConfig } from '../../common/types';
 import {
   AxisExtentConfig,
   CommonXYDataLayerConfig,
   DataDecorationConfig,
   YAxisConfig,
   ReferenceLineDecorationConfig,
-  ReferenceLineDecorationConfigResult,
 } from '../../common';
 import { LayersFieldFormats } from './layers';
-import { isReferenceLineDecorationConfig } from './visualization';
 
 export interface Series {
   layer: string;
@@ -47,6 +44,8 @@ export interface AxisConfiguration extends Omit<YAxisConfig, 'id'> {
 }
 
 export type GroupsConfiguration = AxisConfiguration[];
+
+export type AxesMap = Record<'left' | 'right', AxisConfiguration | undefined>;
 
 export function isFormatterCompatible(
   formatter1: SerializedFieldFormat,
@@ -166,6 +165,27 @@ export function getAxisPosition(position: Position, shouldRotate: boolean) {
   return position;
 }
 
+export function getOriginalAxisPosition(position: Position, shouldRotate: boolean) {
+  if (shouldRotate) {
+    switch (position) {
+      case Position.Bottom: {
+        return Position.Left;
+      }
+      case Position.Right: {
+        return Position.Bottom;
+      }
+      case Position.Top: {
+        return Position.Right;
+      }
+      case Position.Left: {
+        return Position.Top;
+      }
+    }
+  }
+
+  return position;
+}
+
 function axisGlobalConfig(position: Position, yAxisConfigs?: YAxisConfig[]) {
   return yAxisConfigs?.find((axis) => !axis.id && axis.position === position) || {};
 }
@@ -190,7 +210,7 @@ export function getAxesConfiguration(
         groupId,
         formatter: formatFactory?.(series[groupId][0].fieldFormat),
         series: series[groupId].map(({ fieldFormat, ...currentSeries }) => currentSeries),
-        ...axisGlobalConfig(position, yAxisConfigs),
+        ...axisGlobalConfig(axis.position || Position.Left, yAxisConfigs),
         ...axis,
         position,
       });
@@ -203,7 +223,7 @@ export function getAxesConfiguration(
       groupId: LEFT_GLOBAL_AXIS_ID,
       formatter: formatFactory?.(series.left[0].fieldFormat),
       series: series.left.map(({ fieldFormat, ...currentSeries }) => currentSeries),
-      ...axisGlobalConfig(position, yAxisConfigs),
+      ...axisGlobalConfig(Position.Left, yAxisConfigs),
       position,
     });
   }
@@ -214,7 +234,7 @@ export function getAxesConfiguration(
       groupId: RIGHT_GLOBAL_AXIS_ID,
       formatter: formatFactory?.(series.right[0].fieldFormat),
       series: series.right.map(({ fieldFormat, ...currentSeries }) => currentSeries),
-      ...axisGlobalConfig(position, yAxisConfigs),
+      ...axisGlobalConfig(Position.Right, yAxisConfigs),
       position,
     });
   }

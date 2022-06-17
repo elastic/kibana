@@ -116,6 +116,18 @@ describe('ReferenceLines', () => {
           },
         ],
         paddingMap: {},
+        yAxesMap: {
+          left: {
+            groupId: 'left',
+            position: 'left',
+            series: [],
+          },
+          right: {
+            groupId: 'right',
+            position: 'right',
+            series: [],
+          },
+        },
       };
     });
 
@@ -450,6 +462,18 @@ describe('ReferenceLines', () => {
           },
         ],
         paddingMap: {},
+        yAxesMap: {
+          left: {
+            groupId: 'left',
+            position: 'left',
+            series: [],
+          },
+          right: {
+            groupId: 'right',
+            position: 'right',
+            series: [],
+          },
+        },
       };
     });
 

@@ -16,6 +16,7 @@ import type {
 } from '../../common/types';
 import { getBaseIconPlacement } from '../components';
 import { hasIcon, iconSet } from './icon';
+import { AxesMap, getOriginalAxisPosition } from './axes_configuration';
 
 export const LINES_MARKER_SIZE = 20;
 
@@ -36,7 +37,8 @@ const isExtendedDecorationConfig = (
 // Note: it does not take into consideration whether the reference line is in view or not
 export const getLinesCausedPaddings = (
   visualConfigs: Array<PartialReferenceLineDecorationConfig | PartialCollectiveConfig | undefined>,
-  axesMap: Record<'left' | 'right', unknown>
+  axesMap: AxesMap,
+  shouldRotate: boolean
 ) => {
   // collect all paddings for the 4 axis: if any text is detected double it.
   const paddings: Partial<Record<Position, number>> = {};
@@ -49,7 +51,11 @@ export const getLinesCausedPaddings = (
     const iconPosition = isExtendedDecorationConfig(config) ? config.iconPosition : undefined;
 
     if (position && (hasIcon(icon) || textVisibility)) {
-      const placement = getBaseIconPlacement(iconPosition, axesMap, position);
+      const placement = getBaseIconPlacement(
+        iconPosition,
+        axesMap,
+        getOriginalAxisPosition(position, shouldRotate)
+      );
       paddings[placement] = Math.max(
         paddings[placement] || 0,
         LINES_MARKER_SIZE * (textVisibility ? 2 : 1) // double the padding size if there's text

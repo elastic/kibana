@@ -26,6 +26,8 @@ import {
   Marker,
   MarkerBody,
   getAxisPosition,
+  getOriginalAxisPosition,
+  AxesMap,
 } from '../../helpers';
 import { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 
@@ -34,7 +36,7 @@ import { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 // this function assume the chart is vertical
 export function getBaseIconPlacement(
   iconPosition: IconPosition | undefined,
-  axesMap?: Record<string, unknown>,
+  axesMap?: AxesMap,
   position?: Position
 ) {
   if (iconPosition === 'auto') {
@@ -75,7 +77,7 @@ export const getSharedStyle = (config: ReferenceLineAnnotationConfig) => ({
 export const getLineAnnotationProps = (
   config: ReferenceLineAnnotationConfig,
   labels: { markerLabel?: string; markerBodyLabel?: string },
-  axesMap: Record<'left' | 'right', boolean>,
+  axesMap: AxesMap,
   paddingMap: Partial<Record<Position, number>>,
   isHorizontal: boolean
 ) => {
@@ -83,7 +85,7 @@ export const getLineAnnotationProps = (
   const markerPositionVertical = getBaseIconPlacement(
     config.iconPosition,
     axesMap,
-    config.axisGroup?.position
+    getOriginalAxisPosition(config.axisGroup?.position ?? Position.Bottom, isHorizontal)
   );
   // the padding map is built for vertical chart
   const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
@@ -108,7 +110,9 @@ export const getLineAnnotationProps = (
       />
     ),
     // rotate the position if required
-    markerPosition: markerPositionVertical,
+    markerPosition: isHorizontal
+      ? mapVerticalToHorizontalPlacement(markerPositionVertical)
+      : markerPositionVertical,
   };
 };
 
@@ -188,7 +192,7 @@ export const computeChartMargins = (
   referenceLinePaddings: Partial<Record<Position, number>>,
   labelVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
   titleVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
-  axesMap: Record<'left' | 'right', unknown>,
+  axesMap: AxesMap,
   isHorizontal: boolean
 ) => {
   const result: Partial<Record<Position, number>> = {};

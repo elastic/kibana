@@ -12,7 +12,7 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CommonXYReferenceLineLayerConfig, ReferenceLineConfig } from '../../../common/types';
-import { GroupsConfiguration, isReferenceLine, LayersAccessorsTitles } from '../../helpers';
+import { AxesMap, GroupsConfiguration, isReferenceLine, LayersAccessorsTitles } from '../../helpers';
 import { ReferenceLineLayer } from './reference_line_layer';
 import { ReferenceLine } from './reference_line';
 import { getNextValuesForReferenceLines } from './utils';
@@ -24,6 +24,7 @@ export interface ReferenceLinesProps {
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
   titles?: LayersAccessorsTitles;
+  yAxesMap: AxesMap;
 }
 
 export const ReferenceLines = ({ layers, titles = {}, ...rest }: ReferenceLinesProps) => {
