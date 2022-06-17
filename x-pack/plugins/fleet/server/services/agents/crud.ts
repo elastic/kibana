@@ -70,7 +70,7 @@ export type GetAgentsOptions =
   | {
       kuery: string;
       showInactive?: boolean;
-      showManaged?: boolean;
+      withoutManaged?: boolean;
     };
 
 export async function getAgents(
@@ -86,7 +86,7 @@ export async function getAgents(
       await getAllAgentsByKuery(esClient, soClient, {
         kuery: options.kuery,
         showInactive: options.showInactive ?? false,
-        showManaged: options.showManaged ?? false,
+        withoutManaged: options.withoutManaged,
       })
     ).agents;
   } else {
@@ -103,7 +103,7 @@ export async function getAgentsByKuery(
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
-    showManaged?: boolean;
+    withoutManaged?: boolean;
   }
 ): Promise<{
   agents: Agent[];
@@ -119,7 +119,7 @@ export async function getAgentsByKuery(
     kuery,
     showInactive = false,
     showUpgradeable,
-    showManaged,
+    withoutManaged = false,
   } = options;
   const filters = [];
 
@@ -131,7 +131,7 @@ export async function getAgentsByKuery(
     filters.push(ACTIVE_AGENT_CONDITION);
   }
 
-  if (showManaged === false) {
+  if (withoutManaged === true) {
     const managedPolicies = await agentPolicyService.list(soClient, {
       perPage: 1000,
       kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
@@ -195,7 +195,7 @@ export async function getAllAgentsByKuery(
   soClient: SavedObjectsClientContract,
   options: Omit<ListWithKuery, 'page' | 'perPage'> & {
     showInactive: boolean;
-    showManaged: boolean;
+    withoutManaged?: boolean;
   }
 ): Promise<{
   agents: Agent[];
