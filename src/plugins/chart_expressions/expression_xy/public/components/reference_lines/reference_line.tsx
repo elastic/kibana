@@ -11,7 +11,7 @@ import { Position } from '@elastic/charts';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { ReferenceLineConfig } from '../../../common/types';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
-import { GroupsConfiguration } from '../../helpers';
+import { AxesMap, GroupsConfiguration } from '../../helpers';
 import { getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineProps {
@@ -21,6 +21,7 @@ interface ReferenceLineProps {
   yAxesConfiguration: GroupsConfiguration;
   isHorizontal: boolean;
   nextValue?: number;
+  yAxesMap: AxesMap;
 }
 
 export const ReferenceLine: FC<ReferenceLineProps> = ({
@@ -30,6 +31,7 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
   paddingMap,
   isHorizontal,
   nextValue,
+  yAxesMap,
 }) => {
   const {
     decorations: [decorationConfig],
@@ -50,16 +52,11 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
   const formatter = axisGroup?.formatter || xAxisFormatter;
   const id = `${layer.layerId}-${value}`;
 
-  const axesMap = {
-    left: yAxesConfiguration.some((axes) => axes.position === 'left'),
-    right: yAxesConfiguration.some((axes) => axes.position === 'right'),
-  };
-
   return (
     <ReferenceLineAnnotations
       config={{ id, ...decorationConfig, nextValue, axisGroup }}
       paddingMap={paddingMap}
-      axesMap={axesMap}
+      axesMap={yAxesMap}
       formatter={formatter}
       isHorizontal={isHorizontal}
     />

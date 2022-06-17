@@ -69,6 +69,7 @@ import {
   getLinesCausedPaddings,
   validateExtent,
   Series,
+  getOriginalAxisPosition,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -246,8 +247,12 @@ export function XYChart({
 
   const xTitle = xAxisConfig?.title || (xAxisColumn && xAxisColumn.name);
   const yAxesMap = {
-    left: yAxesConfiguration.find(({ position }) => position === Position.Left),
-    right: yAxesConfiguration.find(({ position }) => position === Position.Right),
+    left: yAxesConfiguration.find(
+      ({ position }) => position === getAxisPosition(Position.Left, shouldRotate)
+    ),
+    right: yAxesConfiguration.find(
+      ({ position }) => position === getAxisPosition(Position.Right, shouldRotate)
+    ),
   };
 
   const titles = getLayersTitles(
@@ -326,10 +331,11 @@ export function XYChart({
   ].filter(Boolean);
 
   const shouldHideDetails = annotationsLayers.length > 0 ? annotationsLayers[0].hide : false;
-  const linesPaddings = !shouldHideDetails ? getLinesCausedPaddings(visualConfigs, yAxesMap) : {};
+  const linesPaddings = !shouldHideDetails ? getLinesCausedPaddings(visualConfigs, yAxesMap, shouldRotate) : {};
 
   const getYAxesStyle = (axis: AxisConfiguration) => {
     const tickVisible = axis.showLabels;
+    const position = getOriginalAxisPosition(axis.position, shouldRotate);
 
     const style = {
       tickLabel: {
@@ -337,9 +343,9 @@ export function XYChart({
         visible: tickVisible,
         rotation: axis.labelsOrientation,
         padding:
-          linesPaddings[axis.position] != null
+          linesPaddings[position] != null
             ? {
-                inner: linesPaddings[axis.position],
+                inner: linesPaddings[position],
               }
             : undefined,
       },
@@ -347,9 +353,9 @@ export function XYChart({
         visible: axis.showTitle,
         // if labels are not visible add the padding to the title
         padding:
-          !tickVisible && linesPaddings[axis.position] != null
+          !tickVisible && linesPaddings[position] != null
             ? {
-                inner: linesPaddings[axis.position],
+                inner: linesPaddings[position],
               }
             : undefined,
       },
@@ -793,6 +799,7 @@ export function XYChart({
           isHorizontal={shouldRotate}
           paddingMap={linesPaddings}
           titles={titles}
+          yAxesMap={yAxesMap}
         />
       ) : null}
       {rangeAnnotations.length || groupedLineAnnotations.length ? (

@@ -10,7 +10,7 @@ import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '
 import { euiLightVars } from '@kbn/ui-theme';
 import React, { FC } from 'react';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { AxisConfiguration, LINES_MARKER_SIZE } from '../../helpers';
+import { AxesMap, AxisConfiguration, getOriginalAxisPosition, LINES_MARKER_SIZE } from '../../helpers';
 import {
   AvailableReferenceLineIcon,
   FillStyle,
@@ -44,7 +44,7 @@ interface Props {
   config: ReferenceLineAnnotationConfig;
   paddingMap: Partial<Record<Position, number>>;
   formatter?: FieldFormat;
-  axesMap: Record<'left' | 'right', boolean>;
+  axesMap: AxesMap;
   isHorizontal: boolean;
 }
 
@@ -74,7 +74,11 @@ export const ReferenceLineAnnotations: FC<Props> = ({
 
   const defaultColor = euiLightVars.euiColorDarkShade;
   // get the position for vertical chart
-  const markerPositionVertical = getBaseIconPlacement(iconPosition, axesMap, axisGroup?.position);
+  const markerPositionVertical = getBaseIconPlacement(
+    iconPosition,
+    axesMap,
+    getOriginalAxisPosition(axisGroup?.position ?? Position.Bottom, isHorizontal)
+  );
   // the padding map is built for vertical chart
   const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
 
