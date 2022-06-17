@@ -68,8 +68,17 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
    */
   setFieldEditorRef?: (ref: () => void | undefined) => void;
 
+  /**
+   * Handles "Edit field" action
+   * Buttons will be hidden if not provided
+   * @param fieldName
+   */
   editField?: (fieldName?: string) => void;
 
+  /**
+   * Handles "Create a data view action" action
+   * Buttons will be hidden if not provided
+   */
   createNewDataView?: () => void;
 
   /**
