@@ -9,28 +9,17 @@ import { AppLinkItems } from './types';
 import { links as detectionLinks } from '../../detections/links';
 import { links as timelinesLinks } from '../../timelines/links';
 import { getCasesLinkItems } from '../../cases/links';
-import { links as managementLinks, getManagementLinkItems } from '../../management/links';
+import { getManagementLinkItems } from '../../management/links';
 import { dashboardsLandingLinks, threatHuntingLandingLinks } from '../../landing_pages/links';
 import { gettingStartedLinks } from '../../overview/links';
 import { StartPlugins } from '../../types';
 
-const casesLinks = getCasesLinkItems();
-
-export const links = Object.freeze([
-  dashboardsLandingLinks,
-  detectionLinks,
-  timelinesLinks,
-  casesLinks,
-  threatHuntingLandingLinks,
-  gettingStartedLinks,
-  managementLinks,
-]);
-
-export const getFilteredLinks = async (
+export const getAppLinks = async (
   core: CoreStart,
   plugins: StartPlugins
 ): Promise<AppLinkItems> => {
-  const managementFilteredLinks = await getManagementLinkItems(core, plugins);
+  const managementLinks = await getManagementLinkItems(core, plugins);
+  const casesLinks = getCasesLinkItems();
 
   return Object.freeze([
     dashboardsLandingLinks,
@@ -39,6 +28,6 @@ export const getFilteredLinks = async (
     casesLinks,
     threatHuntingLandingLinks,
     gettingStartedLinks,
-    managementFilteredLinks,
+    managementLinks,
   ]);
 };

@@ -452,7 +452,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    * Register deepLinks and appUpdater for all app links, to change deepLinks as needed when licensing changes.
    */
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
-    const { links, getFilteredLinks } = await this.lazyApplicationLinks();
+    const { getAppLinks } = await this.lazyApplicationLinks();
 
     const { license$ } = plugins.licensing;
     const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, false);
@@ -487,12 +487,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }));
       }
 
-      // set initial links to not block rendering
+      const links = await getAppLinks(core, plugins);
       updateAppLinks(links, linksPermissions);
-
-      // set filtered links asynchronously
-      const filteredLinks = await getFilteredLinks(core, plugins);
-      updateAppLinks(filteredLinks, linksPermissions);
     });
   }
 }
