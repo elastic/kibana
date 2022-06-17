@@ -159,24 +159,38 @@ describe('state_helpers', () => {
         params: { window: 5 },
         references: ['formulaX0'],
       };
+
       expect(
         copyColumn({
-          layer: {
-            indexPatternId: '',
-            columnOrder: [],
-            columns: {
-              source,
-              formulaX0: sum,
-              formulaX1: movingAvg,
-              formulaX2: math,
+          layers: {
+            layer: {
+              indexPatternId: '',
+              columnOrder: [],
+              columns: {
+                source,
+                formulaX0: sum,
+                formulaX1: movingAvg,
+                formulaX2: math,
+              },
             },
           },
-          targetId: 'copy',
-          sourceColumn: source,
+          source: {
+            column: source,
+            groupId: 'one',
+            columnId: 'source',
+            layerId: 'layer',
+            dataView: indexPattern,
+            filterOperations: () => true,
+          },
+          target: {
+            columnId: 'copy',
+            groupId: 'one',
+            dataView: indexPattern,
+            layerId: 'layer',
+            filterOperations: () => true,
+          },
           shouldDeleteSource: false,
-          indexPattern,
-          sourceColumnId: 'source',
-        })
+        }).layer
       ).toEqual({
         indexPatternId: '',
         columnOrder: [

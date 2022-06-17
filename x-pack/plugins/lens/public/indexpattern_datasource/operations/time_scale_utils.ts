@@ -47,7 +47,7 @@ export function adjustTimeScaleLabelSuffix(
 export function adjustTimeScaleOnOtherColumnChange<T extends GenericIndexPatternColumn>(
   layer: IndexPatternLayer,
   thisColumnId: string,
-  changedColumnId: string
+  changedColumnId?: string
 ): T {
   const columns = layer.columns;
   const column = columns[thisColumnId] as T;

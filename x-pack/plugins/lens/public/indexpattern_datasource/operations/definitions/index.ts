@@ -51,7 +51,12 @@ import type {
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
+import {
+  DataViewLensOperation,
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternLayer,
+} from '../../types';
 import { DateRange, LayerType } from '../../../../common';
 import { rangeOperation } from './ranges';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
@@ -248,7 +253,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
   onOtherColumnChanged?: (
     layer: IndexPatternLayer,
     thisColumnId: string,
-    changedColumnId: string
+    changedColumnId?: string
   ) => C;
   /**
    * React component for operation specific settings shown in the flyout editor
@@ -608,12 +613,11 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
    * root level
    */
   createCopy: (
-    layer: IndexPatternLayer,
-    sourceColumnId: string,
-    targetColumnId: string,
-    indexPattern: IndexPattern,
+    layers: Record<string, IndexPatternLayer>,
+    source: DataViewLensOperation,
+    target: DataViewLensOperation,
     operationDefinitionMap: Record<string, GenericOperationDefinition>
-  ) => IndexPatternLayer;
+  ) => Record<string, IndexPatternLayer>;
 }
 
 interface OperationDefinitionMap<C extends BaseIndexPatternColumn, P = {}> {
