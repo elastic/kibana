@@ -9,4 +9,10 @@ import { createSelector } from 'reselect';
 import type { SyntheticsAppState } from '../root_reducer';
 
 const getState = (appState: SyntheticsAppState) => appState.monitorStatus;
+
+export const selectSelectedLocationId = createSelector(
+  getState,
+  (state) => state.selectedLocationId
+);
+
 export const selectMonitorStatus = createSelector(getState, (state) => state);

@@ -82,5 +82,6 @@ export const mockState: SyntheticsAppState = {
     data: null,
     loading: false,
     error: null,
+    selectedLocationId: null,
   },
 };
