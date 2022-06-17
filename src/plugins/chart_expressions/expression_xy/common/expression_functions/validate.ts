@@ -19,6 +19,7 @@ import {
   CommonXYDataLayerConfig,
   YAxisConfigResult,
   ExtendedDataLayerConfigResult,
+  XAxisConfigResult,
 } from '../types';
 import { isTimeChart } from '../helpers';
 
@@ -166,7 +167,8 @@ export const validateXExtent = (
 export const validateExtents = (
   dataLayers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>,
   hasBarOrArea: boolean,
-  yAxisConfigs?: YAxisConfigResult[]
+  yAxisConfigs?: YAxisConfigResult[],
+  xAxisConfig?: XAxisConfigResult
 ) => {
   yAxisConfigs?.forEach((axis) => {
     if (!axis.extent) {
@@ -182,6 +184,8 @@ export const validateExtents = (
 
     validateExtentForDataBounds(axis.extent, dataLayers);
   });
+
+  validateXExtent(xAxisConfig?.extent, dataLayers);
 };
 
 export const validateAxes = (
