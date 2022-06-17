@@ -30,6 +30,7 @@ export interface CreateFileArgs<Meta = unknown> {
   fileKind: string;
   alt?: string;
   meta?: Meta;
+  mime?: string;
 }
 
 export interface UpdateFileArgs {
@@ -45,6 +46,8 @@ export interface DeleteFileArgs {
 
 export interface ListFilesArgs {
   fileKind: string;
+  page?: number;
+  perPage?: number;
 }
 
 export interface FindFileArgs {
@@ -112,11 +115,17 @@ export class InternalFileService {
     }
   }
 
-  public async list({ fileKind: fileKindId }: ListFilesArgs): Promise<IFile[]> {
+  public async list({
+    fileKind: fileKindId,
+    page = 1,
+    perPage = 100,
+  }: ListFilesArgs): Promise<IFile[]> {
     const fileKind = this.getFileKind(fileKindId);
     const result = await this.soClient.find<FileSavedObjectAttributes>({
       type: this.savedObjectType,
       filter: `${this.savedObjectType}.attributes.file_kind: ${fileKindId} AND NOT ${this.savedObjectType}.attributes.status: DELETED`,
+      page,
+      perPage,
     });
     return result.saved_objects.map((file) => this.toFile(file, fileKind));
   }

@@ -12,27 +12,27 @@ export const bodySchema = schema.object({
   name: schema.string(),
   alt: schema.maybe(schema.string()),
   meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  mime: schema.maybe(schema.string()),
 });
 
 type Body = TypeOf<typeof bodySchema>;
 
 interface Response {
   id: string;
-  uploadTargetUrl: string;
 }
 
 export const handler: FileKindsRequestHandler<unknown, unknown, Body> = async (
-  { files: { fileService, uploadEndpoint }, fileKind },
+  { fileKind, files },
   req,
   res
 ) => {
+  const { fileService } = await files;
   const {
     body: { name, alt, meta },
   } = req;
   const file = await fileService.asCurrentUser().create({ fileKind, name, alt, meta });
   const body: Response = {
     id: file.id,
-    uploadTargetUrl: uploadEndpoint.get(file.fileKind, req),
   };
   return res.ok({ body });
 };

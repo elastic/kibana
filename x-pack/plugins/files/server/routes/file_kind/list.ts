@@ -4,23 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { schema, TypeOf } from '@kbn/config-schema';
 import { FileJSON } from '../../../common/types';
 import type { FileKindsRequestHandler } from './types';
+
+export const querySchema = schema.object({
+  page: schema.number({ defaultValue: 1 }),
+  perPage: schema.number({ defaultValue: 100 }),
+});
+type Query = TypeOf<typeof querySchema>;
 
 interface Response {
   files: FileJSON[];
 }
 
-export const handler: FileKindsRequestHandler = async (
-  { files: { fileService }, fileKind },
+export const handler: FileKindsRequestHandler<unknown, Query> = async (
+  { files, fileKind },
   req,
   res
 ) => {
-  let files: FileJSON[] = [];
+  const {
+    query: { page, perPage },
+  } = req;
+  const { fileService } = await files;
+  let results: FileJSON[] = [];
   try {
-    const response = await fileService.asCurrentUser().list({ fileKind });
-    files = response.map((file) => file.toJSON());
+    const response = await fileService.asCurrentUser().list({ fileKind, page, perPage });
+    results = response.map((result) => result.toJSON());
   } catch (e) {
     return res.customError({
       statusCode: 500,
@@ -31,7 +41,7 @@ export const handler: FileKindsRequestHandler = async (
     });
   }
   const body: Response = {
-    files,
+    files: results,
   };
   return res.ok({ body });
 };

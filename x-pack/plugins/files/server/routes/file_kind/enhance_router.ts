@@ -24,7 +24,11 @@ type FileKindHandler = RequestHandler<unknown, unknown, unknown, FileKindsReques
 export function enhanceRouter({ router, fileKind }: Args): FileKindRouter {
   const handlerWrapper: (handler: FileKindHandler) => FileKindHandler =
     (handler) => async (ctx, req, res) => {
-      return handler({ ...ctx, fileKind }, req, res);
+      return handler(
+        Object.create(ctx, { fileKind: { value: fileKind, enumerable: true, writeable: false } }),
+        req,
+        res
+      );
     };
 
   return new Proxy<FileKindRouter>(router as FileKindRouter, {

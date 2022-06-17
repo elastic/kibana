@@ -15,4 +15,5 @@ export type {
   UpdatableFileAttributes,
   FileKind,
   BlobStorageSettings,
+  FileJSON,
 } from './types';

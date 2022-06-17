@@ -19,11 +19,8 @@ export const paramsSchema = schema.object({
 });
 type Params = TypeOf<typeof paramsSchema>;
 
-export const handler: FileKindsRequestHandler<Params> = async (
-  { files: { fileService }, fileKind },
-  req,
-  res
-) => {
+export const handler: FileKindsRequestHandler<Params> = async ({ files, fileKind }, req, res) => {
+  const { fileService } = await files;
   const {
     params: { fileId: id },
   } = req;

@@ -14,6 +14,7 @@ import {
   FileSavedObjectAttributes,
   FileStatus,
   UpdatableFileAttributes,
+  FileJSON,
 } from '../../common';
 import { BlobStorageService } from '../blob_storage_service';
 import {
@@ -100,6 +101,9 @@ export class File<M = unknown> implements IFile {
     if (!id) {
       throw new Error('No content to download');
     }
+    if (this.status !== 'READY') {
+      throw new Error('This file is not ready for download.');
+    }
     return this.blobStorage.download({ id, size });
   }
 
@@ -154,8 +158,11 @@ export class File<M = unknown> implements IFile {
     return file;
   }
 
-  public toJSON(): FileSavedObjectAttributes {
-    return this.attributes;
+  public toJSON(): FileJSON {
+    return {
+      ...this.attributes,
+      id: this.id,
+    };
   }
 
   private get attributes(): FileSavedObjectAttributes {

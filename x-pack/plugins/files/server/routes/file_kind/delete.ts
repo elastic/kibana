@@ -19,14 +19,11 @@ interface Response {
   ok: true;
 }
 
-export const handler: FileKindsRequestHandler<Params> = async (
-  { files: { fileService }, fileKind },
-  req,
-  res
-) => {
+export const handler: FileKindsRequestHandler<Params> = async ({ files, fileKind }, req, res) => {
   const {
     params: { fileId: id },
   } = req;
+  const { fileService } = await files;
   const { error, result: file } = await findFile(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
   try {

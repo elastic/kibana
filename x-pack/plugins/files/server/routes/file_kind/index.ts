@@ -13,6 +13,7 @@ import { enhanceRouter } from './enhance_router';
 import * as create from './create';
 import * as upload from './upload';
 import * as update from './update';
+import * as deleteEndpoint from './delete';
 import * as list from './list';
 import * as download from './download';
 import * as find from './find';
@@ -36,13 +37,18 @@ export function registerFileKindRoutes(router: FilesRouter) {
 
       fileKindRouter.put(
         {
-          path: FILE_KIND_API_ROUTES.getCreateFileRoute(fileKind.id),
+          path: FILE_KIND_API_ROUTES.getUploadRoute(fileKind.id),
           validate: {
             body: upload.bodySchema,
             params: upload.paramsSchema,
           },
           options: {
             tags: fileKind.http.create.tags,
+            body: {
+              output: 'stream',
+              parse: false,
+              accepts: 'application/octet-stream',
+            },
           },
         },
         upload.handler
@@ -66,23 +72,24 @@ export function registerFileKindRoutes(router: FilesRouter) {
     if (fileKind.http.delete) {
       fileKindRouter.delete(
         {
-          path: FILE_KIND_API_ROUTES.getUpdateRoute(fileKind.id),
+          path: FILE_KIND_API_ROUTES.getDeleteRoute(fileKind.id),
           validate: {
-            body: update.bodySchema,
-            params: update.paramsSchema,
+            params: deleteEndpoint.paramsSchema,
           },
           options: {
             tags: fileKind.http.delete.tags,
           },
         },
-        update.handler
+        deleteEndpoint.handler
       );
     }
     if (fileKind.http.list) {
       fileKindRouter.get(
         {
           path: FILE_KIND_API_ROUTES.getListRoute(fileKind.id),
-          validate: {},
+          validate: {
+            query: list.querySchema,
+          },
           options: {
             tags: fileKind.http.list.tags,
           },

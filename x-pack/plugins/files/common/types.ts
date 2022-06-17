@@ -50,12 +50,6 @@ export type FileSavedObjectAttributes<Meta = unknown> = {
   mime?: string;
 
   /**
-   * A file extension like .png or .jpeg which can be used to filter for specific
-   * file types when uploading to this target or when filtering across all files.
-   */
-  extension?: string;
-
-  /**
    * Size of the contents in bytes.
    */
   size?: number;
@@ -66,7 +60,7 @@ export type FileSavedObjectAttributes<Meta = unknown> = {
   meta?: Meta;
 };
 
-export type FileJSON = FileSavedObjectAttributes;
+export type FileJSON = FileSavedObjectAttributes & { id: string };
 
 export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttributes<Meta>>;
 

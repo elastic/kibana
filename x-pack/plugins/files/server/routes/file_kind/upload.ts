@@ -24,10 +24,11 @@ interface Response {
 }
 
 export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
-  { files: { fileService }, fileKind },
+  { files, fileKind },
   req,
   res
 ) => {
+  const { fileService } = await files;
   const {
     body: stream,
     params: { fileId: id },

@@ -19,10 +19,11 @@ type Params = TypeOf<typeof paramsSchema>;
 type Response = Readable;
 
 export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
-  { files: { fileService }, fileKind },
+  { files, fileKind },
   req,
   res
 ) => {
+  const { fileService } = await files;
   const {
     params: { fileId: id },
   } = req;

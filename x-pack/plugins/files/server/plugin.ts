@@ -17,13 +17,10 @@ import { PLUGIN_ID } from '../common/constants';
 
 import { BlobStorageService } from './blob_storage_service';
 import { FileServiceFactory } from './file_service';
-import { FilesPluginSetupDependencies, FilesPluginSetup, FilesPluginStart } from './types';
+import type { FilesPluginSetupDependencies, FilesPluginSetup, FilesPluginStart } from './types';
 import { fileKindsRegistry } from './file_kinds_registry';
-import { FilesRequestHandlerContext } from './routes/types';
+import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
 import { registerRoutes } from './routes';
-
-import { getUploadEndpoint, setUploadEndpoint, UploadEndpoint } from './services';
-import { FileKindsRequestHandlerContext } from './routes/file_kind/types';
 
 export class FilesPlugin
   implements Plugin<FilesPluginSetup, FilesPluginStart, FilesPluginSetupDependencies>
@@ -42,27 +39,17 @@ export class FilesPlugin
 
     core.http.registerRouteHandlerContext<FilesRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
-      (ctx, req) => {
+      async (ctx, req) => {
         return {
           fileService: {
             asCurrentUser: () => this.fileServiceFactory!.asScoped(req),
             asInternalUser: () => this.fileServiceFactory!.asInternal(),
           },
-          uploadEndpoint: getUploadEndpoint(),
         };
       }
     );
 
-    const router = core.http.createRouter<FileKindsRequestHandlerContext>();
-
-    fileKindsRegistry.register({
-      http: {
-        create: {
-          tags: [],
-        },
-      },
-      id: 'my-file',
-    });
+    const router: FilesRouter = core.http.createRouter();
 
     core
       .getStartServices()
@@ -81,7 +68,7 @@ export class FilesPlugin
   }
 
   public start(coreStart: CoreStart): FilesPluginStart {
-    const { http, savedObjects } = coreStart;
+    const { savedObjects } = coreStart;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const blobStorageService = new BlobStorageService(
       esClient,
@@ -94,8 +81,6 @@ export class FilesPlugin
       fileKindsRegistry,
       this.logger.get('files-service')
     );
-
-    setUploadEndpoint(UploadEndpoint.create({ http }));
 
     return {
       fileServiceFactory: this.fileServiceFactory,

@@ -14,16 +14,14 @@ import type {
   IKibanaResponse,
 } from '@kbn/core/server';
 import type { FileServiceStart } from '../file_service';
-import type { UploadEndpoint } from '../services';
 
 export interface FilesRequestHandlerContext extends RequestHandlerContext {
-  files: {
+  files: Promise<{
     fileService: {
       asCurrentUser: () => FileServiceStart;
       asInternalUser: () => FileServiceStart;
     };
-    uploadEndpoint: UploadEndpoint;
-  };
+  }>;
 }
 
 export type FilesRouter = IRouter<FilesRequestHandlerContext>;
