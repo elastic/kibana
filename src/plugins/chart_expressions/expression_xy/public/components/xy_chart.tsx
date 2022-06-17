@@ -49,7 +49,6 @@ import type {
   ReferenceLineDecorationConfig,
   ExtendedReferenceLineDecorationConfig,
   XYChartProps,
-  AxisExtentConfig,
   AxisExtentConfigResult,
 } from '../../common/types';
 import {
