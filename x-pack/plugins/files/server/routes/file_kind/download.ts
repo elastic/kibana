@@ -32,5 +32,5 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   const { error, result: file } = await findFile(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
   const body: Response = await file.downloadContent();
-  return res.ok({ body });
+  return res.ok({ body, headers: { 'content-type': 'application/octet-stream' } });
 };
