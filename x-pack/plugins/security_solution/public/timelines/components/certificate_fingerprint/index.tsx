@@ -46,6 +46,7 @@ export const CertificateFingerprint = React.memo<{
   return (
     <DraggableBadge
       contextId={contextId}
+      data-test-subj={`${certificateType}-certificate-fingerprint`}
       eventId={eventId}
       field={fieldName}
       iconType="snowflake"
