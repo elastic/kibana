@@ -115,6 +115,9 @@ export class PluginWrapper<
     }
 
     this.instance = undefined;
+
+    // some plugins might be awaiting for core.getStartServices(); reject these promises
+    this.startDependencies$.complete();
   }
 
   private createPluginInstance() {
