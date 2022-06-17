@@ -19,16 +19,9 @@ h1 {
 
 .grid-stack {
   background: rgb(245, 248, 249);
-  height: 100%;
 }
 
 .grid-stack-item-content {
-  color: #2c3e50;
-  background-color: #fff;
-  box-shadow: 0 0.9px 4px -1px rgba(0, 0, 0, 0.08), 0 2.6px 8px -1px rgba(0, 0, 0, 0.06), 0 5.7px 12px -1px rgba(0, 0, 0, 0.05), 0 15px 15px -1px rgba(0, 0, 0, 0.04);
-  border-radius: 6px;
-  overflow-y: hidden !important;
-
   .euiPanel {
     height: 100%;
   }

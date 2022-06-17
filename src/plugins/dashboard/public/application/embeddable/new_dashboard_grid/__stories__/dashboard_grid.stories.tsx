@@ -58,7 +58,6 @@ export const LogsDashboardExample = () => {
       w: 17,
       h: 6,
       id: '343f0bef-0b19-452e-b1c8-59beb18b6f0c',
-      content: renderToString(<MarkdownGridPanel />),
       render: () => <MarkdownGridPanel />,
     },
     {
@@ -67,7 +66,6 @@ export const LogsDashboardExample = () => {
       w: 31,
       h: 6,
       id: '30326cdb-4ddd-49eb-a4f1-b555caa21d7c',
-      content: renderToString(<ControlsPanel />),
       render: () => <ControlsPanel />,
     },
     {
@@ -76,7 +74,6 @@ export const LogsDashboardExample = () => {
       w: 12,
       h: 8,
       id: 'bb94016e-f4a6-49ca-87a9-296a2869d570',
-      content: renderToString(<MetricsPanel value="2,777" label="Visits" fontSize="22px" />),
       render: () => <MetricsPanel value="2,777" label="Visits" fontSize="22px" />,
     },
     {
@@ -85,7 +82,6 @@ export const LogsDashboardExample = () => {
       w: 12,
       h: 8,
       id: '11',
-      content: renderToString(<UniqueVisitorsPanel />),
       render: () => <UniqueVisitorsPanel />,
     },
     {
@@ -94,7 +90,6 @@ export const LogsDashboardExample = () => {
       w: 24,
       h: 13,
       id: '15',
-      content: renderToString(<ResponseCodesPanel />),
       render: () => <ResponseCodesPanel />,
     },
     {
@@ -103,7 +98,6 @@ export const LogsDashboardExample = () => {
       w: 12,
       h: 5,
       id: '01d8e435-91c0-484f-a11e-856747050b0a',
-      content: renderToString(<MetricsPanel value="4.4%" label="HTTP 4xx" fontSize="12px" />),
       render: () => <MetricsPanel value="4.4%" label="HTTP 4xx" fontSize="12px" />,
     },
     {
@@ -112,7 +106,6 @@ export const LogsDashboardExample = () => {
       w: 12,
       h: 5,
       id: '8c1456d4-1993-4ba2-b701-04aca02c9fef',
-      content: renderToString(<MetricsPanel value="3.4%" label="HTTP 5xx" fontSize="12px" />),
       render: () => <MetricsPanel value="3.4%" label="HTTP 5xx" fontSize="12px" />,
     },
     {
@@ -120,10 +113,6 @@ export const LogsDashboardExample = () => {
       y: 19,
       w: 24,
       h: 18,
-      id: '4',
-      content: renderToString(
-        <GraphPanel title="[Logs] Total Requests and Bytes" graph={REQUEST_MAP} />
-      ),
       render: () => <GraphPanel title="[Logs] Total Requests and Bytes" graph={REQUEST_MAP} />,
     },
     {
@@ -132,12 +121,6 @@ export const LogsDashboardExample = () => {
       w: 24,
       h: 33,
       id: '14',
-      content: renderToString(
-        <GraphPanel
-          title="[Logs] Machine OS and Destination Sankey Chart"
-          graph={SANKEY_CHART_GRAPH}
-        />
-      ),
       render: () => (
         <GraphPanel
           title="[Logs] Machine OS and Destination Sankey Chart"
@@ -151,11 +134,12 @@ export const LogsDashboardExample = () => {
       w: 24,
       h: 15,
       id: '8e59c7cf-6e42-4343-a113-c4a255fcf2ce',
-      content: renderToString(
-        <GraphPanel title="[Logs] Unique Destination Heatmap" graph={DESTINATION_HEATMAP} />
-      ),
       render: () => (
-        <GraphPanel title="[Logs] Unique Destination Heatmap" graph={DESTINATION_HEATMAP} />
+        <GraphPanel
+          title="[Logs] Unique Destination Heatmap"
+          graph={DESTINATION_HEATMAP}
+          height="94%"
+        />
       ),
     },
     {
@@ -164,7 +148,6 @@ export const LogsDashboardExample = () => {
       w: 24,
       h: 13,
       id: '9',
-      content: renderToString(<LogsTable />),
       render: () => <LogsTable />,
     },
 
@@ -174,10 +157,9 @@ export const LogsDashboardExample = () => {
       w: 24,
       h: 13,
       id: '10',
-      content: renderToString(
-        <GraphPanel title="[Logs] Bytes distribution" graph={BYTES_BAR_GRAPH} />
+      render: () => (
+        <GraphPanel title="[Logs] Bytes distribution" graph={BYTES_BAR_GRAPH} height="93%" />
       ),
-      render: () => <GraphPanel title="[Logs] Bytes distribution" graph={BYTES_BAR_GRAPH} />,
     },
   ];
 

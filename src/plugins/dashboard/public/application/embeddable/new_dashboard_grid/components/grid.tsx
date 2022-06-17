@@ -33,7 +33,7 @@ const GRID_CLASS = 'dshGrid';
 const HANDLE_CLASS = 'dshPanel__wrapper';
 const PANEL_CLASS = 'embPanel';
 const NUM_COLUMNS = 48;
-const DEFAULT_CELL_HEIGHT = 20;
+const DEFAULT_CELL_HEIGHT = 24;
 const DEFAULT_GROUP_HEIGHT = NUM_COLUMNS / 3;
 const DEFAULT_GUTTERSIZE = 4;
 

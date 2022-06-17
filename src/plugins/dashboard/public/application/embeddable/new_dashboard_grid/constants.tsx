@@ -157,7 +157,7 @@ export const ResponseCodesPanel = () => {
       <GraphPanel
         title="[Logs] Response Codes Over Time + Annotations"
         graph={RESPONSE_CODE_GRAPH}
-        height="88%"
+        height="83%"
       />
       <EuiText size="xs">
         <EuiFlexGroup>
@@ -292,12 +292,14 @@ export const LogsTable = () => {
   );
 
   return (
-    <table className="euiTable euiTable--responsive">
+    <>
       <EuiText size="s" style={{ paddingBottom: '5px' }}>
         <h5>[Logs] Host, Visits and Bytes Table</h5>
       </EuiText>
-      <TableHeader />
-      <TableContents />
-    </table>
+      <table className="euiTable euiTable--responsive">
+        <TableHeader />
+        <TableContents />
+      </table>
+    </>
   );
 };
