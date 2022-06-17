@@ -85,7 +85,7 @@ export type Query = {
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type AggregateQuery = {
   sql?: string;
-  esql: string;
+  esql?: string;
 };
 
 /**
