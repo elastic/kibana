@@ -12,8 +12,8 @@ import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent, EuiPage } from 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
-import { useEsDocSearch } from '../../../utils/use_es_doc_search';
-import { useDiscoverServices } from '../../../utils/use_discover_services';
+import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 export interface DocProps {
   /**

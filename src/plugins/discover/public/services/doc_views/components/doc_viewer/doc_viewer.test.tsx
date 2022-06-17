@@ -32,7 +32,7 @@ jest.mock('../../../../kibana_services', () => {
   };
 });
 
-jest.mock('../../../../utils/use_discover_services', () => {
+jest.mock('../../../../hooks/use_discover_services', () => {
   return {
     useDiscoverServices: {
       uiSettings: {

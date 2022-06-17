@@ -21,9 +21,9 @@ import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { EsHitRecordList } from '../types';
-import { SortPairArr } from '../../components/doc_table/lib/get_sort';
+import { SortPairArr } from '../../components/doc_table/utils/get_sort';
 import { ElasticSearchHit } from '../../types';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface ContextAppContentProps {
   columns: string[];

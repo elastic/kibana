@@ -13,9 +13,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useIndexPattern } from '../../utils/use_index_pattern';
-import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useIndexPattern } from '../../hooks/use_index_pattern';
+import { useMainRouteBreadcrumb } from '../../hooks/use_navigation_props';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface ContextUrlParams {
   indexPatternId: string;

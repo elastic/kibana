@@ -28,7 +28,7 @@ import { EsHitRecord } from '../../application/types';
 import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';
 import { ElasticSearchHit, HitsFlattened } from '../../types';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
 
 const CELL_CLASS = 'dscDiscoverGrid__cellValue';

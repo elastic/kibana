@@ -8,7 +8,7 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { getSortForSearchSource } from '../../components/doc_table';
-import { SortPairArr } from '../../components/doc_table/lib/get_sort';
+import { SortPairArr } from '../../components/doc_table/utils/get_sort';
 
 export const updateSearchSource = (
   searchSource: ISearchSource,

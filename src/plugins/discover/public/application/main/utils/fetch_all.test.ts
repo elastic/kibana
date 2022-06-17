@@ -22,7 +22,7 @@ import {
   DataMainMsg,
   DataTotalHitsMsg,
   SavedSearchData,
-} from './use_saved_search';
+} from '../hooks/use_saved_search';
 
 import { fetchDocuments } from './fetch_documents';
 import { fetchChart } from './fetch_chart';

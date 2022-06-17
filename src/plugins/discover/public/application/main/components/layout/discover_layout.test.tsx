@@ -26,7 +26,7 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-} from '../../utils/use_saved_search';
+} from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin';
