@@ -242,3 +242,31 @@ The API returns the following:
 --------------------------------------------------
 {"status":"ok","connector_id":"7fc7b9a0-ecc9-11ec-8736-e7d63118c907"}
 --------------------------------------------------
+
+Retrieve the list of issue types for a Jira connector:
+
+[source,sh]
+--------------------------------------------------
+POST api/actions/connector/b3aad810-edbe-11ec-82d1-11348ecbf4a6/_execute
+{
+  "params": {
+    "subAction": "issueTypes"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "status":"ok",
+  "data":[
+    {"id":"10024","name":"Improvement"},{"id":"10006","name":"Task"},
+    {"id":"10007","name":"Sub-task"},{"id":"10025","name":"New Feature"},
+    {"id":"10023","name":"Bug"},{"id":"10000","name":"Epic"}
+  ],
+  "connector_id":"b3aad810-edbe-11ec-82d1-11348ecbf4a6"
+}
+--------------------------------------------------
