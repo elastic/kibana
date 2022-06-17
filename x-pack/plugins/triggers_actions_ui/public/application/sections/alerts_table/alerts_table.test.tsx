@@ -185,6 +185,25 @@ describe('AlertsTable', () => {
         expect(queryByTestId('testActionColumn2')).not.toBe(null);
         expect(queryByTestId('expandColumnCellOpenFlyoutButton-0')).toBe(null);
       });
+
+      it('render no action column if there is no action set nor the expand action should be shown', () => {
+        const customTableProps = {
+          ...tableProps,
+          showExpandToDetails: false,
+          alertsTableConfiguration: {
+            ...alertsTableConfiguration,
+            useActionsColumn: () => {
+              return {
+                actionsColumn: <></>,
+              };
+            },
+          },
+        };
+
+        const { queryByTestId } = render(<AlertsTable {...customTableProps} />);
+        expect(queryByTestId('expandColumnHeaderLabel')).toBe(null);
+        expect(queryByTestId('expandColumnCellOpenFlyoutButton')).toBe(null);
+      });
     });
   });
 });
