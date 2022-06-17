@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Overview render 1`] = `
+exports[`Overview renders correctly 1`] = `
 <Overview
   features={
     Array [
