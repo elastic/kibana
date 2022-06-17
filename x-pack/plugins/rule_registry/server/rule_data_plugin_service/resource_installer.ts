@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { firstValueFrom, type Subject } from 'rxjs';
 import { get, isEmpty } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   DEFAULT_ILM_POLICY_ID,
   ECS_COMPONENT_TEMPLATE_NAME,
@@ -20,7 +21,7 @@ import { technicalComponentTemplate } from '../../common/assets/component_templa
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
 
-import { IndexInfo } from './index_info';
+import type { IndexInfo } from './index_info';
 
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
 
@@ -30,6 +31,7 @@ interface ConstructorOptions {
   logger: Logger;
   isWriteEnabled: boolean;
   disabledRegistrationContexts: string[];
+  pluginStop$: Subject<void>;
 }
 
 export type IResourceInstaller = PublicMethodsOf<ResourceInstaller>;
@@ -55,10 +57,16 @@ export class ResourceInstaller {
 
       const throwTimeoutException = (): Promise<void> => {
         return new Promise((resolve, reject) => {
-          setTimeout(() => {
+          const timeoutId = setTimeout(() => {
             const msg = `Timeout: it took more than ${INSTALLATION_TIMEOUT}ms`;
             reject(new Error(msg));
           }, INSTALLATION_TIMEOUT);
+
+          firstValueFrom(this.options.pluginStop$).then(() => {
+            clearTimeout(timeoutId);
+            const msg = 'Server is stopping; must stop all async operations';
+            reject(new Error(msg));
+          });
         });
       };
 
