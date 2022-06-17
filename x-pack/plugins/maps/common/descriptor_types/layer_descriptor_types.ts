@@ -7,7 +7,6 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { Query } from '@kbn/es-query';
 import { Feature } from 'geojson';
 import {

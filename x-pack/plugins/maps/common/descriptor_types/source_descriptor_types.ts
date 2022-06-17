@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { FeatureCollection } from 'geojson';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { Query } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
