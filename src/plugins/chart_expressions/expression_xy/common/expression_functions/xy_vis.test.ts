@@ -215,4 +215,129 @@ describe('xyVis', () => {
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
+
+  test('throws the error if the x axis extent is enabled for a date histogram', async () => {
+    const {
+      data,
+      args: { layers, ...rest },
+    } = sampleArgs();
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
+          annotationLayers: [],
+          isHistogram: true,
+          xScaleType: 'time',
+          xExtent: { type: 'axisExtentConfig', mode: 'dataBounds' },
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws the error if the x axis extent is enabled with the full mode', async () => {
+    const {
+      data,
+      args: { layers, ...rest },
+    } = sampleArgs();
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
+          annotationLayers: [],
+          xExtent: {
+            type: 'axisExtentConfig',
+            mode: 'full',
+            lowerBound: undefined,
+            upperBound: undefined,
+          },
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws the error if the x axis extent is enabled without a histogram defined', async () => {
+    const {
+      data,
+      args: { layers, ...rest },
+    } = sampleArgs();
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
+          annotationLayers: [],
+          xExtent: {
+            type: 'axisExtentConfig',
+            mode: 'dataBounds',
+          },
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it renders with custom xExtent for a numeric histogram', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    const result = await xyVisFunction.fn(
+      data,
+      {
+        ...rest,
+        ...restLayerArgs,
+        referenceLines: [],
+        annotationLayers: [],
+        isHistogram: true,
+        xExtent: {
+          type: 'axisExtentConfig',
+          mode: 'custom',
+          lowerBound: 0,
+          upperBound: 10,
+        },
+      },
+      createMockExecutionContext()
+    );
+
+    expect(result).toEqual({
+      type: 'render',
+      as: XY_VIS,
+      value: {
+        args: {
+          ...rest,
+          xExtent: {
+            type: 'axisExtentConfig',
+            mode: 'custom',
+            lowerBound: 0,
+            upperBound: 10,
+          },
+          layers: [
+            {
+              layerType,
+              table: data,
+              layerId: 'dataLayers-0',
+              type,
+              ...restLayerArgs,
+              isHistogram: true,
+            },
+          ],
+        },
+      },
+    });
+  });
 });

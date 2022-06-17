@@ -111,7 +111,7 @@ function hostMetricsColumns(
       truncateText: true,
       textOnly: true,
       render: (name: string) => (
-        <MetricsNodeDetailsLink id={name} nodeType={'host'} timerange={timerange} />
+        <MetricsNodeDetailsLink id={name} label={name} nodeType={'host'} timerange={timerange} />
       ),
     },
     {
