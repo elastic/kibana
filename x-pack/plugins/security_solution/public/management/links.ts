@@ -67,7 +67,7 @@ const categories = [
   },
 ];
 
-const links: LinkItem = {
+export const links: LinkItem = {
   id: SecurityPageName.administration,
   title: MANAGE,
   path: MANAGE_PATH,
