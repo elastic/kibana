@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from "@elastic/elasticsearch/lib/api/typesWithBodyKey";
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type ValueToStringConverter = (
   rowIndex: number,

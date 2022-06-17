@@ -18,7 +18,7 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
-import {EsHitRecord} from "@kbn/discover-plugin/public/types";
+import { EsHitRecord } from '../../../types';
 
 jest.mock('../lib/row_formatter', () => {
   const originalModule = jest.requireActual('../lib/row_formatter');

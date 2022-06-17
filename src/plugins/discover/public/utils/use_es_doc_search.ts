@@ -10,11 +10,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom } from 'rxjs';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { EsHitRecord } from '../types';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../common';
 import { useDiscoverServices } from './use_discover_services';
-import {EsHitRecord} from "@kbn/discover-plugin/public/types";
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;
 
