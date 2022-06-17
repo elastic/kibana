@@ -13,7 +13,6 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { newTermsRuleParams, NewTermsRuleParams } from '../../schemas/rule_schemas';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
-import { getInputIndex } from '../../signals/get_input_output_index';
 import { singleSearchAfter } from '../../signals/single_search_after';
 import { getFilter } from '../../signals/get_filter';
 import { GenericBulkCreateResponse } from '../factories';
@@ -64,7 +63,7 @@ const addBulkCreateResults = (
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, logger, version } = createOptions;
+  const { logger } = createOptions;
   return {
     id: NEW_TERMS_RULE_TYPE_ID,
     name: 'New Terms Rule',
@@ -104,18 +103,13 @@ export const createNewTermsAlertType = (
           exceptionItems,
           tuple,
           mergeStrategy,
+          inputIndex,
+          runtimeMappings,
         },
         services,
         params,
         spaceId,
       } = execOptions;
-
-      const inputIndex = await getInputIndex({
-        experimentalFeatures,
-        services,
-        version,
-        index: params.index,
-      });
 
       const filter = await getFilter({
         filters: params.filters,
@@ -153,14 +147,14 @@ export const createNewTermsAlertType = (
       // If we have a timestampOverride, we'll compute a runtime field that emits the override for each document if it exists,
       // otherwise it emits @timestamp. If we don't have a timestamp override we don't want to pay the cost of using a
       // runtime field, so we just use @timestamp directly.
-      const { timestampField, runtimeMappings } = params.timestampOverride
+      const { timestampField, timestampRuntimeMappings } = params.timestampOverride
         ? {
             timestampField: TIMESTAMP_RUNTIME_FIELD,
-            runtimeMappings: buildTimestampRuntimeMapping({
+            timestampRuntimeMappings: buildTimestampRuntimeMapping({
               timestampOverride: params.timestampOverride,
             }),
           }
-        : { timestampField: '@timestamp', runtimeMappings: undefined };
+        : { timestampField: '@timestamp', timestampRuntimeMappings: undefined };
 
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
       // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
@@ -191,6 +185,7 @@ export const createNewTermsAlertType = (
           pageSize: 0,
           timestampOverride: params.timestampOverride,
           buildRuleMessage,
+          runtimeMappings,
         });
         const searchResultWithAggs = searchResult as RecentTermsAggResult;
         if (!searchResultWithAggs.aggregations) {
@@ -227,7 +222,10 @@ export const createNewTermsAlertType = (
             field: params.newTermsFields[0],
             include: includeValues,
           }),
-          runtimeMappings,
+          runtimeMappings: {
+            ...runtimeMappings,
+            ...timestampRuntimeMappings,
+          },
           searchAfterSortIds: undefined,
           index: inputIndex,
           // For Phase 2, we expand the time range to aggregate over the history window
@@ -270,7 +268,10 @@ export const createNewTermsAlertType = (
               field: params.newTermsFields[0],
               include: actualNewTerms,
             }),
-            runtimeMappings,
+            runtimeMappings: {
+              ...runtimeMappings,
+              ...timestampRuntimeMappings,
+            },
             searchAfterSortIds: undefined,
             index: inputIndex,
             // For phase 3, we go back to aggregating only over the rule interval - excluding the history window

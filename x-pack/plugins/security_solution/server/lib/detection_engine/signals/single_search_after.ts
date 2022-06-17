@@ -21,7 +21,6 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 
 interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
-  runtimeMappings?: estypes.MappingRuntimeFields;
   searchAfterSortIds: estypes.SortResults | undefined;
   index: string[];
   from: string;
@@ -34,14 +33,15 @@ interface SingleSearchAfterParams {
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
   trackTotalHits?: boolean;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async ({
   aggregations,
-  runtimeMappings,
   searchAfterSortIds,
   index,
+  runtimeMappings,
   from,
   to,
   services,
@@ -61,10 +61,10 @@ export const singleSearchAfter = async ({
     try {
       const searchAfterQuery = buildEventsSearchQuery({
         aggregations,
-        runtimeMappings,
         index,
         from,
         to,
+        runtimeMappings,
         filter,
         size: pageSize,
         sortOrder,

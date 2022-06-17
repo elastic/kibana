@@ -18,6 +18,7 @@ import { EqlOptionsSelected } from '../../../../../common/search_strategy';
 interface PreviewRouteParams {
   isDisabled: boolean;
   index: string[];
+  dataViewId?: string;
   threatIndex: string[];
   query: FieldValueQueryBar;
   threatQuery: FieldValueQueryBar;
@@ -34,6 +35,7 @@ interface PreviewRouteParams {
 
 export const usePreviewRoute = ({
   index,
+  dataViewId,
   isDisabled,
   query,
   threatIndex,
@@ -97,6 +99,7 @@ export const usePreviewRoute = ({
       setRule(
         formatPreviewRule({
           index,
+          dataViewId,
           query,
           ruleType,
           threatIndex,
@@ -114,6 +117,7 @@ export const usePreviewRoute = ({
     }
   }, [
     index,
+    dataViewId,
     isRequestTriggered,
     query,
     rule,

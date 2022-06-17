@@ -95,6 +95,7 @@ import {
   EventCategoryOverrideOrUndefined,
   TiebreakerFieldOrUndefined,
   NamespaceOrUndefined,
+  DataViewIdOrUndefined,
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
@@ -167,6 +168,7 @@ export interface CreateRulesOptions {
   ruleId: RuleId;
   immutable: Immutable;
   index: IndexOrUndefined;
+  dataViewId: DataViewIdOrUndefined;
   interval: Interval;
   license: LicenseOrUndefined;
   maxSignals: MaxSignals;
@@ -238,6 +240,7 @@ interface PatchRulesFieldsOptions {
   machineLearningJobId: MachineLearningJobIdOrUndefined;
   filters: PartialFilter[];
   index: IndexOrUndefined;
+  dataViewId: DataViewIdOrUndefined;
   interval: IntervalOrUndefined;
   license: LicenseOrUndefined;
   maxSignals: MaxSignalsOrUndefined;

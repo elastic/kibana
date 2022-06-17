@@ -8,6 +8,8 @@
 
 import { Action } from 'history';
 import { AnalyticsClient } from '@kbn/analytics-client';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ButtonColor } from '@elastic/eui';
 import { ContextProviderOpts } from '@kbn/analytics-client';
 import { CoreContext } from '@kbn/core-base-browser-internal';
@@ -58,15 +60,9 @@ export function __kbnBootstrap__(): Promise<void>;
 
 export { AnalyticsClient }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
-//
-// @public
-export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
+export { AnalyticsServiceSetup }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
-//
-// @public
-export type AnalyticsServiceStart = Pick<AnalyticsClient, 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
+export { AnalyticsServiceStart }
 
 // @public (undocumented)
 export interface App<HistoryLocationState = unknown> extends AppNavOptions {
@@ -399,6 +395,8 @@ export { CoreContext }
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     analytics: AnalyticsServiceSetup;
     // (undocumented)
@@ -427,6 +425,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     analytics: AnalyticsServiceStart;
     // (undocumented)

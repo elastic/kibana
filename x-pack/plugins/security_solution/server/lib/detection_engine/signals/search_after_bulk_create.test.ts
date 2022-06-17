@@ -107,6 +107,7 @@ describe('searchAfterAndBulkCreate', () => {
       mergeStrategy: 'missingFields',
       ignoreFields: [],
       spaceId: 'default',
+      indicesToQuery: inputIndexPattern,
     });
   });
 
@@ -218,6 +219,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
       bulkCreate,
       wrapHits,
+      runtimeMappings: undefined,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
@@ -313,6 +315,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
       bulkCreate,
       wrapHits,
+      runtimeMappings: undefined,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
@@ -388,6 +391,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
       bulkCreate,
       wrapHits,
+      runtimeMappings: undefined,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -447,6 +451,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
       bulkCreate,
       wrapHits,
+      runtimeMappings: undefined,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -516,6 +521,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
       bulkCreate,
       wrapHits,
+      runtimeMappings: undefined,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -571,6 +577,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
       bulkCreate,
       wrapHits,
+      runtimeMappings: undefined,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -640,6 +647,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
       bulkCreate,
       wrapHits,
+      runtimeMappings: undefined,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -711,6 +719,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
       bulkCreate,
       wrapHits,
+      runtimeMappings: undefined,
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -758,6 +767,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
       bulkCreate,
       wrapHits,
+      runtimeMappings: undefined,
     });
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(0);
@@ -804,6 +814,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
       bulkCreate,
       wrapHits,
+      runtimeMappings: undefined,
     });
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error
@@ -932,6 +943,7 @@ describe('searchAfterAndBulkCreate', () => {
         buildRuleMessage,
         bulkCreate,
         wrapHits,
+        runtimeMappings: undefined,
       });
     expect(success).toEqual(false);
     expect(errors).toEqual(['error on creation']);
@@ -1019,6 +1031,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
       bulkCreate,
       wrapHits,
+      runtimeMappings: undefined,
     });
 
     expect(mockEnrichment).toHaveBeenCalledWith(

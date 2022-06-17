@@ -31,6 +31,18 @@ export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryCreateSchema =
   rule_id: ruleId,
 });
 
+export const getCreateRulesSchemaMockWithDataView = (ruleId = 'rule-1'): QueryCreateSchema => ({
+  data_view_id: 'logs-*',
+  description: 'Detecting root and admin users',
+  name: 'Query with a rule id',
+  query: 'user.name: root or user.name: admin',
+  severity: 'high',
+  type: 'query',
+  risk_score: 55,
+  language: 'kuery',
+  rule_id: ruleId,
+});
+
 export const getCreateSavedQueryRulesSchemaMock = (ruleId = 'rule-1'): SavedQueryCreateSchema => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
@@ -58,7 +70,7 @@ export const getCreateThreatMatchRulesSchemaMock = (
   language: 'kuery',
   rule_id: ruleId,
   threat_query: '*:*',
-  threat_index: ['list-index'],
+  threat_index: ['auditbeat-*'],
   threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
   interval: '5m',
   from: 'now-6m',

@@ -23,7 +23,6 @@ import {
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { gutterTimeline } from '../../../common/lib/helpers';
-import { useKibana } from '../../../common/lib/kibana';
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 import { useIsPolicySettingsBarVisible } from '../../../management/pages/policy/view/policy_hooks';
 import { useIsGroupedNavigationEnabled } from '../../../common/components/navigation/helpers';
@@ -91,7 +90,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     const addBottomPadding =
       isTimelineBottomBarVisible || isPolicySettingsVisible || isGroupedNavEnabled;
 
-    const userHasSecuritySolutionVisible = useKibana().services.application.capabilities.siem.show;
     const showEmptyState = useShowPagesWithEmptyView();
     const emptyStateProps = showEmptyState
       ? {
@@ -113,7 +111,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
         bottomBarProps={SecuritySolutionBottomBarProps}
         bottomBar={
-          userHasSecuritySolutionVisible && <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
+          isTimelineBottomBarVisible && <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
         }
         paddingSize="none"
         solutionNav={solutionNav}
