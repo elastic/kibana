@@ -62,28 +62,28 @@ refer to <<action-types>>.
 on the `subAction` value. This object is not required when `subAction` is
 `getFields` or `issueTypes`.
 +
-.Properties of `subActionParams` when `subAction` is `fieldsByIssueType`
+.Properties when `subAction` is `fieldsByIssueType`
 [%collapsible%open]
 =====
 `id`:::
 (Required, string) The Jira issue type identifier. For example, `10024`.
 =====
 +
-.Properties of `subActionParams` when `subAction` is `getIncident`
+.Properties when `subAction` is `getIncident`
 [%collapsible%open]
 =====
 `externalId`:::
 (Required, string) The Jira issue identifier. For example, `71778`.
 =====
 +
-.Properties of `subActionParams` when `subAction` is `issue`
+.Properties when `subAction` is `issue`
 [%collapsible%open]
 =====
 `id`:::
 (Required, string) The Jira issue identifier. For example, `71778`.
 =====
 +
-.Properties of `subActionParams` when `subAction` is `issues`
+.Properties when `subAction` is `issues`
 [%collapsible%open]
 =====
 `title`:::
