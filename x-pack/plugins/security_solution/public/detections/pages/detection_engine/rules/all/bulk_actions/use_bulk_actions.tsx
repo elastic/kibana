@@ -33,7 +33,7 @@ import * as i18n from '../../translations';
 import { executeRulesBulkAction } from '../actions';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
-import { getCustomRulesCountFromCache } from './use_custom_rules_count';
+import { getBulkActionsDryRunFromCache } from './use_bulk_actions_dry_run';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
 
@@ -231,10 +231,6 @@ export const useBulkActions = ({
           }
         };
 
-        const customRulesCount = isAllSelected
-          ? getCustomRulesCountFromCache(queryClient)
-          : customSelectedRuleIds.length;
-
         // show warning toast only if bulk edit action exceeds 5s
         // if bulkAction already finished, we won't show toast at all (hence flag "isBulkEditFinished")
         setTimeout(() => {
@@ -246,7 +242,11 @@ export const useBulkActions = ({
               title: i18n.BULK_EDIT_WARNING_TOAST_TITLE,
               text: mountReactNode(
                 <>
-                  <p>{i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(customRulesCount)}</p>
+                  <p>
+                    {i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(
+                      getBulkActionsDryRunFromCache(queryClient)?.summary?.succeeded ?? 0
+                    )}
+                  </p>
                   <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                     <EuiFlexItem grow={false}>
                       <EuiButton color="warning" size="s" onClick={hideWarningToast}>

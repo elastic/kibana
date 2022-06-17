@@ -22,7 +22,7 @@ import type { FilterOptions } from '../../../../../containers/detection_engine/r
 const BULK_ACTIONS_DRY_RUN_QUERY_KEY = 'bulkActionsDryRun';
 
 export const getBulkActionsDryRunFromCache = (queryClient: QueryClient) =>
-  queryClient.getQueryData<BulkActionResponse>(BULK_ACTIONS_DRY_RUN_QUERY_KEY);
+  queryClient.getQueryData<DryRunResult>(BULK_ACTIONS_DRY_RUN_QUERY_KEY);
 
 const computeDryRunPayload = (
   action: BulkAction,
