@@ -46,11 +46,11 @@ import {
   SHOW_MULTIFIELDS,
 } from '../../../common';
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
-import { SortPairArr } from '../doc_table/lib/get_sort';
+import { SortPairArr } from '../doc_table/utils/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import type { ElasticSearchHit, ValueToStringConverter } from '../../types';
-import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 
 interface SortObj {
