@@ -275,6 +275,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatQueryBar: __removedThreatQueryBar,
         threatMapping: __removedThreatMapping,
         eqlOptions: ___eqlOptions,
+        newTermsFields: __removedNewTermsFields,
+        historyWindowSize: __removedHistoryWindowSize,
         ...queryRuleFields
       } = fields;
       return queryRuleFields;
@@ -286,6 +288,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatIndex: ___removedThreatIndex,
         threatQueryBar: ___removedThreatQueryBar,
         threatMapping: ___removedThreatMapping,
+        newTermsFields: ___removedNewTermsFields,
+        historyWindowSize: ___removedHistoryWindowSize,
         ...eqlRuleFields
       } = fields;
       return eqlRuleFields;
@@ -297,6 +301,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatIndex: ____removedThreatIndex,
         threatQueryBar: ____removedThreatQueryBar,
         threatMapping: ____removedThreatMapping,
+        eqlOptions: ____eqlOptions,
         ...newTermsRuleFields
       } = fields;
       return newTermsRuleFields;

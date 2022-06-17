@@ -162,6 +162,12 @@ export const createNewTermsAlertType = (
           }
         : { timestampField: '@timestamp', runtimeMappings: undefined };
 
+      // There are 2 conditions that mean we're finished: either there were still too many alerts to create
+      // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
+      // exactly enough new alerts to hit maxSignals without truncating the array of alerts. We check both because
+      // it's possible for the array to be truncated but alert documents could fail to be created for other reasons,
+      // in which case createdSignalsCount would still be less than maxSignals. Since valid alerts were truncated from
+      // the array in that case, we stop and report the errors.
       while (
         !bulkCreateResults.truncatedAlertsArray &&
         bulkCreateResults.createdSignalsCount < params.maxSignals
