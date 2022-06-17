@@ -204,10 +204,13 @@ export class TaskScheduling {
    * @returns {Promise<ConcreteTaskInstance>}
    */
   public async runNow(taskId: string): Promise<RunNowResult> {
-    if (!this.taskPollingLifecycle) {
-      this.logger.error(`Task with id ${taskId} was not run because tasks are not supported`);
-    } else {
-      return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (!this.taskPollingLifecycle) {
+          this.logger.error(`Task with id ${taskId} was not run because tasks are not supported`);
+          reject();
+        }
+
         try {
           this.awaitTaskRunResult(taskId) // don't expose state on runNow
             .then(({ id }) =>
@@ -220,8 +223,10 @@ export class TaskScheduling {
         } catch (error) {
           reject(error);
         }
-      });
-    }
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 
   /**
@@ -308,10 +313,13 @@ export class TaskScheduling {
 
   private awaitTaskRunResult(taskId: string, cancel?: Promise<void>): Promise<RunNowResult> {
     return new Promise((resolve, reject) => {
+      if (!this.taskPollingLifecycle || !this.ephemeralTaskLifecycle) {
+        reject();
+      }
       // listen for all events related to the current task
       const subscription = merge(
-        this.taskPollingLifecycle.events,
-        this.ephemeralTaskLifecycle.events
+        this.taskPollingLifecycle!.events,
+        this.ephemeralTaskLifecycle!.events
       )
         .pipe(filter(({ id }: TaskLifecycleEvent) => id === taskId))
         .subscribe((taskEvent: TaskLifecycleEvent) => {
