@@ -16,7 +16,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [analytics](./kibana-plugin-core-public.coresetup.analytics.md) | AnalyticsServiceSetup | [AnalyticsServiceSetup](./kibana-plugin-core-public.analyticsservicesetup.md) |
+|  [analytics](./kibana-plugin-core-public.coresetup.analytics.md) | AnalyticsServiceSetup |  |
 |  [application](./kibana-plugin-core-public.coresetup.application.md) | ApplicationSetup | [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |
 |  [executionContext](./kibana-plugin-core-public.coresetup.executioncontext.md) | ExecutionContextSetup | [ExecutionContextSetup](./kibana-plugin-core-public.executioncontextsetup.md) |
 |  [fatalErrors](./kibana-plugin-core-public.coresetup.fatalerrors.md) | FatalErrorsSetup | [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) |
@@ -24,6 +24,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 |  [http](./kibana-plugin-core-public.coresetup.http.md) | HttpSetup | [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
 |  [injectedMetadata](./kibana-plugin-core-public.coresetup.injectedmetadata.md) | InjectedMetadataSetup |  |
 |  [notifications](./kibana-plugin-core-public.coresetup.notifications.md) | NotificationsSetup | [NotificationsSetup](./kibana-plugin-core-public.notificationssetup.md) |
-|  [theme](./kibana-plugin-core-public.coresetup.theme.md) | ThemeServiceSetup | [ThemeServiceSetup](./kibana-plugin-core-public.themeservicesetup.md) |
+|  [theme](./kibana-plugin-core-public.coresetup.theme.md) | ThemeServiceSetup |  |
 |  [uiSettings](./kibana-plugin-core-public.coresetup.uisettings.md) | IUiSettingsClient | [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) |
 
