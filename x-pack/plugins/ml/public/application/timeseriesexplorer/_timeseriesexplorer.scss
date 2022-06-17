@@ -2,13 +2,6 @@
 .ml-time-series-explorer {
   color: $euiColorDarkShade;
 
-  .results-container {
-    .entity-count-text {
-      color: $euiColorSuccess;
-      font-size: $euiFontSizeS;
-    }
-  }
-
   .forecast-controls {
     float: right;
   }
