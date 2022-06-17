@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObject, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
   const headerPage = getPageObject('header');
@@ -54,11 +52,11 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
     await headerPage.waitUntilLoadingHasFinished();
 
     if (splitField !== undefined) {
+      await ml.jobTypeSelection.assertMultiMetricJobWizardOpen();
       await ml.jobWizardMultiMetric.assertDetectorSplitExists(splitField);
       await ml.jobWizardCommon.assertInfluencerSelection([splitField]);
-    }
-
-    if (aggAndFieldIdentifier !== undefined) {
+    } else if (aggAndFieldIdentifier !== undefined) {
+      await ml.jobTypeSelection.assertSingleMetricJobWizardOpen();
       await ml.jobWizardCommon.assertAggAndFieldInputExists();
       await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier, true);
       await ml.jobWizardCommon.assertAnomalyChartExists('LINE');
@@ -90,7 +88,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
     await ml.jobTable.assertJobRowJobId(jobId);
   }
 
-  describe('anomaly charts in dashboard', function () {
+  describe('create jobs from lens', function () {
     this.tags(['ml']);
 
     before(async () => {
@@ -110,111 +108,93 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
       await PageObjects.common.navigateToApp('dashboard');
     });
 
-    describe('tests create job from lens', () => {
-      let tabsCount = 1;
+    let tabsCount = 1;
 
-      afterEach(async () => {
-        if (tabsCount > 1) {
-          await browser.closeCurrentWindow();
-          await retrySwitchTab(0, 10);
-          tabsCount--;
-        }
-      });
+    afterEach(async () => {
+      if (tabsCount > 1) {
+        await browser.closeCurrentWindow();
+        await retrySwitchTab(0, 10);
+        tabsCount--;
+      }
+    });
 
-      it('can create multi metric job from vis with single layer', async () => {
-        const selectedPanelTitle = 'panel1';
-        const jobId = 'testest4';
-        const splitField = 'airline';
+    it('can create multi metric job from vis with single layer', async () => {
+      const selectedPanelTitle = 'panel1';
+      const jobId = 'job_from_lens_1';
+      const splitField = 'airline';
 
-        await dashboardPreparation(selectedPanelTitle);
+      await dashboardPreparation(selectedPanelTitle);
 
-        await testSubjects.click('embeddablePanelAction-create-ml-ad-job-action');
+      await ml.lensVisualizations.clickCreateMLJobMenuAction();
 
-        await retrySwitchTab(1, 10);
-        tabsCount++;
+      await retrySwitchTab(1, 10);
+      tabsCount++;
 
-        await createJobInWizard(jobId, splitField, undefined);
-      });
+      await createJobInWizard(jobId, splitField, undefined);
+    });
 
-      it('can create single metric job from vis with single layer', async () => {
-        const selectedPanelTitle = 'panel2';
-        const aggAndFieldIdentifier = 'Count(Event rate)';
-        const jobId = 'testest52';
+    it('can create single metric job from vis with single layer', async () => {
+      const selectedPanelTitle = 'panel2';
+      const aggAndFieldIdentifier = 'Count(Event rate)';
+      const jobId = 'job_from_lens_2';
 
-        await dashboardPreparation(selectedPanelTitle);
+      await dashboardPreparation(selectedPanelTitle);
 
-        await testSubjects.click('embeddablePanelAction-create-ml-ad-job-action');
+      await ml.lensVisualizations.clickCreateMLJobMenuAction();
 
-        await retrySwitchTab(1, 10);
-        tabsCount++;
+      await retrySwitchTab(1, 10);
+      tabsCount++;
 
-        await createJobInWizard(jobId, undefined, aggAndFieldIdentifier);
-      });
+      await createJobInWizard(jobId, undefined, aggAndFieldIdentifier);
+    });
 
-      it('can create multi metric job from vis with multiple compatible layers and single incompatible layer', async () => {
-        const selectedPanelTitle = 'panel3';
-        const aggAndFieldIdentifier = 'Mean(responsetime)';
-        const jobId = 'testest524';
-        const numberOfCompatibleLayers = 2;
-        const numberOfIncompatibleLayers = 1;
+    it('can create multi metric job from vis with multiple compatible layers and single incompatible layer', async () => {
+      const selectedPanelTitle = 'panel3';
+      const aggAndFieldIdentifier = 'Mean(responsetime)';
+      const jobId = 'job_from_lens_3';
+      const numberOfCompatibleLayers = 2;
+      const numberOfIncompatibleLayers = 1;
 
-        await dashboardPreparation(selectedPanelTitle);
+      await dashboardPreparation(selectedPanelTitle);
 
-        await testSubjects.click('embeddablePanelAction-create-ml-ad-job-action');
+      await ml.lensVisualizations.clickCreateMLJobMenuAction();
 
-        await testSubjects.existOrFail('mlFlyoutLensLayerSelector');
+      await ml.lensVisualizations.assertLensLayerSelectorExists();
 
-        const compatibleLayers = await testSubjects.findAll('mlLensLayerCompatible');
-        expect(compatibleLayers.length).to.eql(
-          numberOfCompatibleLayers,
-          `Expected number of compatible layers to be ${numberOfCompatibleLayers} (got '${compatibleLayers.length}')`
-        );
+      await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 
-        const incompatibleLayers = await testSubjects.findAll('mlLensLayerIncompatible');
-        expect(incompatibleLayers.length).to.eql(
-          numberOfIncompatibleLayers,
-          `Expected number of compatible layers to be ${numberOfIncompatibleLayers} (got '${incompatibleLayers.length}')`
-        );
+      await ml.lensVisualizations.assertNumberOfIncompatibleLensLayers(numberOfIncompatibleLayers);
 
-        await testSubjects.click('mlLensLayerCompatibleButton_1');
+      ml.lensVisualizations.clickCreateJobFromLayer(1);
 
-        await retrySwitchTab(1, 10);
-        tabsCount++;
+      await retrySwitchTab(1, 10);
+      tabsCount++;
 
-        await createJobInWizard(jobId, undefined, aggAndFieldIdentifier);
-      });
+      await createJobInWizard(jobId, undefined, aggAndFieldIdentifier);
+    });
 
-      it('shows flyout for job from vis with no compatible layers', async () => {
-        const selectedPanelTitle = 'panel4';
-        const numberOfCompatibleLayers = 0;
-        const numberOfIncompatibleLayers = 1;
+    it('shows flyout for job from vis with no compatible layers', async () => {
+      const selectedPanelTitle = 'panel4';
+      const numberOfCompatibleLayers = 0;
+      const numberOfIncompatibleLayers = 1;
 
-        await dashboardPreparation(selectedPanelTitle);
+      await dashboardPreparation(selectedPanelTitle);
 
-        await testSubjects.click('embeddablePanelAction-create-ml-ad-job-action');
+      await ml.lensVisualizations.clickCreateMLJobMenuAction();
 
-        await testSubjects.existOrFail('mlFlyoutLensLayerSelector');
+      await ml.lensVisualizations.assertLensLayerSelectorExists();
 
-        const compatibleLayers = await testSubjects.findAll('mlLensLayerCompatible');
-        expect(compatibleLayers.length).to.eql(
-          numberOfCompatibleLayers,
-          `Expected number of compatible layers to be ${numberOfCompatibleLayers} (got '${compatibleLayers.length}')`
-        );
+      await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 
-        const incompatibleLayers = await testSubjects.findAll('mlLensLayerIncompatible');
-        expect(incompatibleLayers.length).to.eql(
-          numberOfIncompatibleLayers,
-          `Expected number of compatible layers to be ${numberOfIncompatibleLayers} (got '${incompatibleLayers.length}')`
-        );
-      });
+      await ml.lensVisualizations.assertNumberOfIncompatibleLensLayers(numberOfIncompatibleLayers);
+    });
 
-      it('does not show link to ml with vis with no compatible layers', async () => {
-        const selectedPanelTitle = 'panel5';
+    it('does not show link to ml with vis with only incompatible layer types', async () => {
+      const selectedPanelTitle = 'panel5';
 
-        await dashboardPreparation(selectedPanelTitle);
+      await dashboardPreparation(selectedPanelTitle);
 
-        await testSubjects.missingOrFail('embeddablePanelAction-create-ml-ad-job-action');
-      });
+      ml.lensVisualizations.assertMLJobMenuActionDoesNotExist();
     });
   });
 }
