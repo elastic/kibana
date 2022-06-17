@@ -59,66 +59,93 @@ refer to <<action-types>>.
 
 `subActionParams`::
 (Required^*^, object) The set of configuration properties, which vary depending
-on the `subAction` value.
+on the `subAction` value. This object is not required when `subAction` is
+`getFields` or `issueTypes`.
 +
-.Properties of `subActionParams`
+.Properties of `subActionParams` when `subAction` is `fieldsByIssueType`
 [%collapsible%open]
 =====
-comments::
-(Optional, array of objects) If `subAction` is `pushToService`, specifies
-additional information that is sent to Jira.
+`id`:::
+(Required, string) The Jira issue type identifier. For example, `10024`.
+=====
++
+.Properties of `subActionParams` when `subAction` is `getIncident`
+[%collapsible%open]
+=====
+`externalId`:::
+(Required, string) The Jira issue identifier. For example, `71778`.
+=====
++
+.Properties of `subActionParams` when `subAction` is `issue`
+[%collapsible%open]
+=====
+`id`:::
+(Required, string) The Jira issue identifier. For example, `71778`.
+=====
++
+.Properties of `subActionParams` when `subAction` is `issues`
+[%collapsible%open]
+=====
+`title`:::
+(Required, string) The title of the Jira issue.
+=====
++
+.Properties of `subActionParams` when `subAction` is `pushToService`
+[%collapsible%open]
+=====
+comments:::
+(Optional, array of objects) Additional information that is sent to Jira.
 +
 .Properties of `comments`
 [%collapsible%open]
 ======
-comment::
+comment::::
 (string) A comment related to the incident. For example, describe how to
 troubleshoot the issue.
 
-commentId::
+commentId::::
 (integer) A unique identifier for the comment.
 ======
 
-`id`::
-(Required^*^, string) If `subAction` is `issue`, specifies the issue identifier.
-
-incident::
-(Required^*^, object) If `subAction` is `pushToService`, specifies information
-necessary to create an incident in Jira.
+incident:::
+(Required, object) Information necessary to create an incident in Jira.
 +
 .Properties of `incident`
 [%collapsible%open]
 ======
-`description`::
+`description`::::
 (Optional, string) The details about the incident.
 
-`labels`::
-(Optional, array of strings) The labels for the incident. For example,
-`["LABEL1"]`.
+////
+`externalId`::::
+(Optional, string) The Jira issue identifier. If present, the incident is
+updated. Otherwise, a new incident is created.
+////
 
-`issueType`::
+`labels`::::
+(Optional, array of strings) The labels for the incident. For example,
+`["LABEL1"]`. NOTE: Labels cannot contain spaces.
+
+`issueType`::::
 (Optional, integer) The type of incident. For example, `10006`. To obtain the
 list of valid values, set `subAction` to `issueTypes`.
 
-`parent`::
-(Optional, string) The ID or key of the parent issue. Only applies to `Subtask`
+`parent`::::
+(Optional, string) The ID or key of the parent issue. Applies only to `Sub-task`
 types of issues.
 
-`priority`::
+`priority`::::
 (Optional, string) The incident priority level. For example, `Lowest`.
 
-`summary`::
+`summary`::::
 (Required, string) A summary of the incident.
 
-`title`::
+`title`::::
 (Optional, string) A title for the incident, used for searching the contents of
 the knowledge base.
 ======
-
-`title`::
-(Required^*^, string) If `subAction` is `issues`, specifies the title of an issue.
-
 =====
+
 For more information, refer to
 {kibana-ref}/jira-action-type.html[{jira} connector and action].
 ====
