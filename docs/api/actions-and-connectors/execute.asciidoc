@@ -108,7 +108,7 @@ commentId::::
 ======
 
 incident:::
-(Required, object) Information necessary to create an incident in Jira.
+(Required, object) Information necessary to create or update a Jira incident.
 +
 .Properties of `incident`
 [%collapsible%open]
@@ -116,11 +116,9 @@ incident:::
 `description`::::
 (Optional, string) The details about the incident.
 
-////
 `externalId`::::
 (Optional, string) The Jira issue identifier. If present, the incident is
 updated. Otherwise, a new incident is created.
-////
 
 `labels`::::
 (Optional, array of strings) The labels for the incident. For example,
