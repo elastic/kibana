@@ -30,8 +30,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_discover'));
       loadTestFile(require.resolve('./_discover_accessibility'));
       loadTestFile(require.resolve('./_discover_histogram'));
-      loadTestFile(require.resolve('./_doc_table'));
-      loadTestFile(require.resolve('./_doc_table_newline'));
+      loadTestFile(require.resolve('./classic/_doc_table'));
+      loadTestFile(require.resolve('./classic/_doc_table_newline'));
       loadTestFile(require.resolve('./_filter_editor'));
       loadTestFile(require.resolve('./_errors'));
       loadTestFile(require.resolve('./_field_data'));
@@ -41,10 +41,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_source_filters'));
       loadTestFile(require.resolve('./_large_string'));
       loadTestFile(require.resolve('./_inspector'));
-      loadTestFile(require.resolve('./_classic_table_doc_navigation'));
+      loadTestFile(require.resolve('./classic/_classic_table_doc_navigation'));
       loadTestFile(require.resolve('./_date_nanos'));
       loadTestFile(require.resolve('./_date_nanos_mixed'));
       loadTestFile(require.resolve('./_indexpattern_without_timefield'));
+      loadTestFile(require.resolve('./classic/_discover_fields_api'));
       loadTestFile(require.resolve('./_discover_fields_api'));
       loadTestFile(require.resolve('./_data_grid'));
       loadTestFile(require.resolve('./_data_grid_context'));

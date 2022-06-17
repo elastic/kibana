@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -47,6 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const heightWithoutNewline = await dscTableRows[0].getAttribute('clientHeight');
         const heightWithNewline = await dscTableRows[1].getAttribute('clientHeight');
         log.debug(`Without newlines: ${heightWithoutNewline}, With newlines: ${heightWithNewline}`);
+
+        await PageObjects.common.sleep(10000);
         return Number(heightWithNewline) > Number(heightWithoutNewline);
       });
     });
