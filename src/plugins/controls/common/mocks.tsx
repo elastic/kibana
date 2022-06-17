@@ -17,7 +17,6 @@ export const mockControlGroupInput = (partial?: Partial<ControlGroupInput>): Con
       control1: {
         order: 0,
         width: 'medium',
-        grow: true,
         type: 'mockedOptionsList',
         explicitInput: {
           id: 'control1',
@@ -26,7 +25,6 @@ export const mockControlGroupInput = (partial?: Partial<ControlGroupInput>): Con
       control2: {
         order: 1,
         width: 'large',
-        grow: true,
         type: 'mockedRangeSlider',
         explicitInput: {
           id: 'control2',
@@ -35,7 +33,6 @@ export const mockControlGroupInput = (partial?: Partial<ControlGroupInput>): Con
       control3: {
         order: 2,
         width: 'small',
-        grow: true,
         type: 'mockedOptionsList',
         explicitInput: {
           id: 'control3',
