@@ -50,6 +50,65 @@ depending on the connector type. For information about the parameter properties,
 refer to <<action-types>>.
 +
 --
+.Jira connectors
+[%collapsible%open]
+====
+`subAction`::
+(Required, string) The action to test. For example, `pushToService`.
+
+`subActionParams`::
+(Required, object) TBD
++
+.Properties of `subActionParams`
+[%collapsible%open]
+=====
+comments::
+(Optional, array of objects) TBD
++
+.Properties of `comments`
+[%collapsible%open]
+======
+comment::
+(string) Additional information for the client, such as how to troubleshoot the
+issue.
+
+commentId::
+(integer) A unique identifier for the comment.
+======
+
+incident::
+(object) TBD
++
+.Properties of `incident`
+[%collapsible%open]
+======
+`description`::
+(Optional, string) The details about the incident.
+
+`labels`::
+(Optional, array of strings) The labels for the incident. For example, `["LABEL1"]`.
+
+`issueType`::
+(Optional, integer) The type of issue. For example, `10006`.
+
+`parent`::
+(Optional, string) The ID or key of the parent issue. Only applies to `Subtask` types of issues.
+
+`priority`::
+(Optional, string) The priority of the incident. For example, `Lowest`.
+
+`summary`::
+(Required, string) TBD
+
+`title`::
+(Optional, string) A title for the issue, used for searching the contents of the knowledge
+base.
+======
+=====
+For more information, refer to
+{kibana-ref}/jira-action-type.html[{jira} connector and action].
+====
+
 .Server log connectors
 [%collapsible%open]
 ====
@@ -102,7 +161,7 @@ The API returns the following:
     "items": [
       {
         "index": {
-          "_index": "updated-index",
+          "_index": "test-index",
           "_id": "iKyijHcBKCsmXNFrQe3T",
           "_version": 1,
           "result": "created",
@@ -111,7 +170,7 @@ The API returns the following:
             "successful": 1,
             "failed": 0
           },
-          "_seq_no": 7,
+          "_seq_no": 0,
           "_primary_term": 1,
           "status": 201
         }
