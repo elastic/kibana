@@ -28,7 +28,7 @@ export function getDashboardTitle(title: string, viewMode: ViewMode, isNew: bool
 export const unsavedChangesBadge = {
   getUnsavedChangedBadgeText: () =>
     i18n.translate('dashboard.unsavedChangesBadge', {
-      defaultMessage: 'Unsaved changes',
+      defaultMessage: 'This dashboard has changed since the last time it was saved. To clear this message save the dashboard',
     }),
 };
 
