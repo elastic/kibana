@@ -142,11 +142,6 @@ export const RulesTables = React.memo<RulesTableProps>(
       onFinish: hideBulkEditConfirmation,
     });
 
-    // const { customRulesCount, isCustomRulesCountLoading } = useCustomRulesCount({
-    //   enabled: isBulkEditConfirmationVisible && isAllSelected,
-    //   filterOptions,
-    // });
-
     const {
       bulkEditActionType,
       isBulkEditFlyoutVisible,
@@ -367,7 +362,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               onRefreshSwitch={handleAutoRefreshSwitch}
               isAllSelected={isAllSelected}
               onToggleSelectAll={toggleSelectAll}
-              isBulkActionInProgress={false || loadingRulesAction != null}
+              isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
               hasDisabledActions={loadingRulesAction != null}
               hasBulkActions
             />
