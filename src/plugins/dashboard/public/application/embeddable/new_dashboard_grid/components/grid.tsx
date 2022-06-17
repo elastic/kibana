@@ -91,6 +91,12 @@ export const Grid: FC<Props> = ({
         ...sharedGridParams,
         class: GRID_CLASS,
       });
+
+      gridRef.current.on('drag', (event, element) => {
+        const node = (element as GridItemHTMLElement)?.gridstackNode;
+        if (!node) return;
+        setInfo(`you just dragged node #${node.id} to ${node.x},${node.y} – good job!`);
+      });
     }
 
     const grid = gridRef.current;
@@ -101,12 +107,6 @@ export const Grid: FC<Props> = ({
       gridData.map(renderPanelInWidget);
       grid.commit();
     }
-
-    grid.on('drag', (event, element) => {
-      const node = (element as GridItemHTMLElement)?.gridstackNode;
-      if (!node) return;
-      setInfo(`you just dragged node #${node.id} to ${node.x},${node.y} – good job!`);
-    });
   }, [gridData, sharedGridParams]);
 
   const addNewPanel = useCallback(() => {
@@ -124,11 +124,11 @@ export const Grid: FC<Props> = ({
       id,
       content: id,
       resizeHandles: 'se',
+      autoPosition: true,
     };
 
-    setPanels(panels.concat(panelNode));
+    setPanels(panels.concat([panelNode]));
     grid.addWidget(panelNode);
-    renderPanelInWidget(panelNode);
   }, [panels, setPanels, columns]);
 
   const addNewPanelGroup = useCallback(() => {
@@ -152,7 +152,8 @@ export const Grid: FC<Props> = ({
         class: 'dshPanelGroup',
       },
     };
-    setPanels(panels.concat(groupNode));
+
+    setPanels(panels.concat([groupNode]));
     const newGroup = grid.addWidget(groupNode);
     const subGrid = newGroup.gridstackNode?.subGrid as GridStack;
 
@@ -170,8 +171,6 @@ export const Grid: FC<Props> = ({
     };
 
     subGrid.on('drag', resizeWrapper);
-
-    renderPanelInWidget(groupNode);
   }, [panels, columns, sharedGridParams]);
 
   return (

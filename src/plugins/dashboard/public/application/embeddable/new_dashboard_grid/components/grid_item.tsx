@@ -17,7 +17,12 @@ interface Props {
 
 export const GridItem: FC<Props> = ({ panel, callbackRef }) => {
   return (
-    <div ref={(element) => callbackRef(element!)} className="grid-stack-item embPanel">
+    <div
+      key={panel.id}
+      id={panel.id}
+      ref={(element) => callbackRef(element!)}
+      className="grid-stack-item embPanel"
+    >
       <EuiPanel
         key={panel.id}
         hasShadow
