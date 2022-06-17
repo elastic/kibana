@@ -35,7 +35,7 @@ export const QueryClicksTable: React.FC<Props> = ({ items }) => {
       return document ? (
         <EuiLinkTo
           to={generateEnginePath(ENGINE_DOCUMENT_DETAIL_PATH, {
-            engineName: engineName,
+            engineName,
             documentId: document.id,
           })}
         >
