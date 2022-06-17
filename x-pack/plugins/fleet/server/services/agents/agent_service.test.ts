@@ -9,8 +9,12 @@ jest.mock('../../routes/security');
 jest.mock('./crud');
 jest.mock('./status');
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 
 import { FleetUnauthorizedError } from '../../errors';
 
@@ -36,7 +40,8 @@ describe('AgentService', () => {
   describe('asScoped', () => {
     describe('without required privilege', () => {
       const agentClient = new AgentServiceImpl(
-        elasticsearchServiceMock.createElasticsearchClient()
+        elasticsearchServiceMock.createElasticsearchClient(),
+        savedObjectsClientMock.create()
       ).asScoped(httpServerMock.createKibanaRequest());
 
       beforeEach(() =>
@@ -99,7 +104,8 @@ describe('AgentService', () => {
 
     describe('with required privilege', () => {
       const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-      const agentClient = new AgentServiceImpl(mockEsClient).asScoped(
+      const mockSoClient = savedObjectsClientMock.create();
+      const agentClient = new AgentServiceImpl(mockEsClient, mockSoClient).asScoped(
         httpServerMock.createKibanaRequest()
       );
 
@@ -128,20 +134,22 @@ describe('AgentService', () => {
         )
       );
 
-      expectApisToCallServicesSuccessfully(mockEsClient, agentClient);
+      expectApisToCallServicesSuccessfully(mockEsClient, mockSoClient, agentClient);
     });
   });
 
   describe('asInternalUser', () => {
     const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    const agentClient = new AgentServiceImpl(mockEsClient).asInternalUser;
+    const mockSoClient = savedObjectsClientMock.create();
+    const agentClient = new AgentServiceImpl(mockEsClient, mockSoClient).asInternalUser;
 
-    expectApisToCallServicesSuccessfully(mockEsClient, agentClient);
+    expectApisToCallServicesSuccessfully(mockEsClient, mockSoClient, agentClient);
   });
 });
 
 function expectApisToCallServicesSuccessfully(
   mockEsClient: ElasticsearchClient,
+  mockSoClient: SavedObjectsClientContract,
   agentClient: AgentClient
 ) {
   test('client.listAgents calls getAgentsByKuery and returns results', async () => {
@@ -149,7 +157,9 @@ function expectApisToCallServicesSuccessfully(
     await expect(agentClient.listAgents({ showInactive: true })).resolves.toEqual(
       'getAgentsByKuery success'
     );
-    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(mockEsClient, { showInactive: true });
+    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(mockEsClient, mockSoClient, {
+      showInactive: true,
+    });
   });
 
   test('client.getAgent calls getAgentById and returns results', async () => {
@@ -173,6 +183,7 @@ function expectApisToCallServicesSuccessfully(
     );
     expect(mockGetAgentStatusForAgentPolicy).toHaveBeenCalledWith(
       mockEsClient,
+      mockSoClient,
       'foo-id',
       'foo-filter'
     );
