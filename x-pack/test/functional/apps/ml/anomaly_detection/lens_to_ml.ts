@@ -118,7 +118,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
       afterEach(async () => {
         if (tabsCount > 1) {
           await browser.closeCurrentWindow();
-          await retrySwitchTab(0, 3);
+          await retrySwitchTab(0, 10);
           tabsCount--;
         }
       });
@@ -132,7 +132,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
         await testSubjects.click('embeddablePanelAction-create-ml-ad-job-action');
 
-        await retrySwitchTab(1, 3);
+        await retrySwitchTab(1, 10);
         tabsCount++;
 
         await createJobInWizard(jobId, splitField, undefined);
@@ -147,7 +147,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
         await testSubjects.click('embeddablePanelAction-create-ml-ad-job-action');
 
-        await retrySwitchTab(1, 3);
+        await retrySwitchTab(1, 10);
         tabsCount++;
 
         await createJobInWizard(jobId, undefined, aggAndFieldIdentifier);
@@ -180,7 +180,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
         await testSubjects.click('mlLensLayerCompatibleButton_1');
 
-        await retrySwitchTab(1, 3);
+        await retrySwitchTab(1, 10);
         tabsCount++;
 
         await createJobInWizard(jobId, undefined, aggAndFieldIdentifier);
