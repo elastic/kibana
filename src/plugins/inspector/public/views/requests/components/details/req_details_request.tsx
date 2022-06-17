@@ -21,7 +21,7 @@ export class RequestDetailsRequest extends Component<RequestDetailsProps> {
 
   render() {
     const { json } = this.props.request;
-
+    console.log(this.props.request.json.query.bool.filter);
     if (!json) {
       return null;
     }

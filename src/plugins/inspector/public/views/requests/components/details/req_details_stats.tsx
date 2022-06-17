@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
 import { RequestDetailsProps } from '../types';
+import { findIndexFilters } from './helpers';
 
 // TODO: Replace by property once available
 interface RequestDetailsStatRow extends RequestStatistic {
@@ -59,15 +60,30 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
   };
 
   render() {
-    const { stats } = this.props.request;
+    const { stats, json } = this.props.request;
+    const indexFilters = this.props.extraInfo
+      ? {
+          indexPatterns: {
+            id: 'indexPatterns',
+            description: 'Active index patterns',
+            label: 'index pattern',
+            value: findIndexFilters(json),
+          },
+        }
+      : null;
 
     if (!stats) {
       return null;
     }
 
-    const sortedStats = Object.keys(stats)
+    const mergedStats = {
+      ...stats,
+      ...(this.props.extraInfo ? indexFilters : {}),
+    };
+
+    const sortedStats = Object.keys(mergedStats)
       .sort()
-      .map((id) => ({ id, ...stats[id] } as RequestDetailsStatRow));
+      .map((id) => ({ id, ...mergedStats[id] } as RequestDetailsStatRow));
 
     return (
       <EuiTable responsive={false}>

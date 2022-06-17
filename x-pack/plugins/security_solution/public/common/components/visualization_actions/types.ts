@@ -25,3 +25,12 @@ export interface VisualizationActionsProps {
   timerange: { from: string; to: string };
   title: React.ReactNode;
 }
+
+export interface MatrixHistogramTemplatesProps {
+  lensAttributes: LensAttributes;
+  getLensAttributes?: GetLensAttributes;
+  timerange: { from: string; to: string };
+  inputsModelId?: InputsModelId;
+  stackByField?: string;
+  id: string;
+}

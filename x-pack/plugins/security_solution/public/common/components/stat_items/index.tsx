@@ -39,6 +39,7 @@ import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { LensAttributes } from '../visualization_actions/types';
 import * as i18n from '../../containers/query_toggle/translations';
 import { UserskKpiStrategyResponse } from '../../../../common/search_strategy/security_solution/users';
+import { LensEmbeddable } from '../visualization_actions/lens';
 const FlexGroup = styled(EuiFlexGroup)`
   .no-margin {
     margin-top: 0 !important;
@@ -326,14 +327,25 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                             </p>
                           </StatValue>
                           {field.lensAttributes && timerange && (
-                            <VisualizationActions
-                              lensAttributes={field.lensAttributes}
-                              queryId={id}
-                              inspectIndex={index}
-                              timerange={timerange}
-                              title={description}
-                              className="viz-actions"
-                            />
+                            <EuiFlexGroup>
+                              <FlexItem>
+                                <VisualizationActions
+                                  lensAttributes={field.lensAttributes}
+                                  queryId={id}
+                                  inspectIndex={index}
+                                  timerange={timerange}
+                                  title={description}
+                                  className="viz-actions"
+                                />
+                              </FlexItem>
+                              <FlexItem>
+                                <LensEmbeddable
+                                  lensAttributes={field.lensAttributes}
+                                  timerange={timerange}
+                                  id={id}
+                                />
+                              </FlexItem>
+                            </EuiFlexGroup>
                           )}
                         </HoverVisibilityContainer>
                       </FlexItem>
