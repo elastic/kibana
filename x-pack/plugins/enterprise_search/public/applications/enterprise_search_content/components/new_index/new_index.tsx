@@ -20,7 +20,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -194,15 +193,6 @@ export const NewIndex: React.FC = () => {
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiLink href="#" target="_blank">
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.selectSearchIndex.learnMore.buttonText',
-                {
-                  defaultMessage: 'Learn more about search indices',
-                }
-              )}
-            </EuiLink>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
