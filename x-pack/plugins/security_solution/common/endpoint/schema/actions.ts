@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { ENDPOINT_DEFAULT_PAGE, ENDPOINT_DEFAULT_PAGE_SIZE } from '../constants';
 
 const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
@@ -73,8 +74,10 @@ export const EndpointActionListRequestSchema = {
       schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 })
     ),
     commands: schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 })),
-    page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
-    pageSize: schema.maybe(schema.number({ defaultValue: 10, min: 1, max: 100 })),
+    page: schema.maybe(schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE, min: 0 })),
+    pageSize: schema.maybe(
+      schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE_SIZE, min: 1, max: 10000 })
+    ),
     startDate: schema.maybe(schema.string()), // date ISO strings or moment date
     endDate: schema.maybe(schema.string()), // date ISO strings or moment date
     userIds: schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 })),

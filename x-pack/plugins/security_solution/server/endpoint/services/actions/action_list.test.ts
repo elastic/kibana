@@ -43,7 +43,7 @@ describe('When using `getActionList()', () => {
 
   it('should return expected output', async () => {
     await expect(getActionList({ esClient, logger, page: 1, pageSize: 10 })).resolves.toEqual({
-      page: 0,
+      page: 1,
       pageSize: 10,
       commands: undefined,
       userIds: undefined,
@@ -67,7 +67,7 @@ describe('When using `getActionList()', () => {
                   '@timestamp': '2022-04-30T16:08:47.449Z',
                   EndpointActions: {
                     action_id: '123',
-                    completed_at: '2022-04-30T16:08:47.449Z',
+                    completed_at: '2022-04-30T10:53:59.449Z',
                     data: {
                       command: 'unisolate',
                       comment: '',
@@ -93,7 +93,7 @@ describe('When using `getActionList()', () => {
                   },
                   action_id: '123',
                   agent_id: 'agent-a',
-                  completed_at: '2022-04-30T16:08:47.449Z',
+                  completed_at: '2022-04-30T10:53:59.449Z',
                   error: '',
                   started_at: expect.any(String),
                 },
@@ -109,7 +109,7 @@ describe('When using `getActionList()', () => {
                     action_id: '123',
                     data: {
                       command: 'isolate',
-                      comment: '5wb6pu6kh2xix5i',
+                      comment: expect.any(String),
                     },
                     expiration: expect.any(String),
                     input_type: 'endpoint',
@@ -226,7 +226,7 @@ describe('When using `getActionList()', () => {
         elasticAgentIds: undefined,
         endDate: undefined,
         page: 0,
-        pageSize: undefined,
+        pageSize: 10,
         startDate: undefined,
         total: 0,
         userIds: undefined,

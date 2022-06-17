@@ -68,9 +68,18 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it('should not work without allowed page and pageSize params', () => {
+    it('should not work without allowed page params', () => {
       expect(() => {
-        EndpointActionListRequestSchema.query.validate({ pageSize: 101 });
+        EndpointActionListRequestSchema.query.validate({ page: -1 });
+      }).toThrow();
+    });
+
+    it('should not work without allowed pageSize params', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ pageSize: 100001 });
+      }).toThrow();
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ pageSize: 0 });
       }).toThrow();
     });
 

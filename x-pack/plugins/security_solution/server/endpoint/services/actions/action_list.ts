@@ -7,6 +7,10 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ENDPOINT_DEFAULT_PAGE,
+  ENDPOINT_DEFAULT_PAGE_SIZE,
+} from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
 
@@ -47,8 +51,8 @@ export const getActionList = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<ActionListApiResponse> => {
-  const size = pageSize ?? 10;
-  const page = (_page ?? 1) - 1;
+  const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
+  const page = _page ?? ENDPOINT_DEFAULT_PAGE;
   // # of hits to skip
   const from = page * size;
 
@@ -66,7 +70,7 @@ export const getActionList = async ({
 
   return {
     page,
-    pageSize,
+    pageSize: size,
     startDate,
     endDate,
     elasticAgentIds,
