@@ -26,7 +26,7 @@ export const useSelectedLocation = () => {
       }
     }
 
-    if (urlLocationId && selectSelectedLocationId !== urlLocationId) {
+    if (urlLocationId && selectedLocation !== urlLocationId) {
       dispatch(setMonitorSummaryLocationAction(urlLocationId));
     }
   }, [dispatch, updateUrlParams, locations, urlLocationId, selectedLocation]);
