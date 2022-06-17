@@ -192,15 +192,15 @@ export const buildExpression = (
   }
 
   const isLeftAxis = validDataLayers.some(({ yConfig }) =>
-    yConfig?.some((config) => config.axisMode === 'left')
+    yConfig?.some((config) => config.axisMode === Position.Left)
   );
   const isRightAxis = validDataLayers.some(({ yConfig }) =>
-    yConfig?.some((config) => config.axisMode === 'right')
+    yConfig?.some((config) => config.axisMode === Position.Right)
   );
 
   const yAxisConfigs: AxisConfig[] = [
     {
-      position: 'left',
+      position: Position.Left,
       extent: state?.yLeftExtent,
       showTitle: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
       title: state.yTitle || '',
@@ -210,7 +210,7 @@ export const buildExpression = (
       scaleType: state.yLeftScale || 'linear',
     },
     {
-      position: 'right',
+      position: Position.Right,
       extent: state?.yRightExtent,
       showTitle: state?.axisTitlesVisibilitySettings?.yRight ?? true,
       title: state.yRightTitle || '',
@@ -223,8 +223,8 @@ export const buildExpression = (
 
   if (isLeftAxis) {
     yAxisConfigs.push({
-      id: 'left',
-      position: 'left',
+      id: Position.Left,
+      position: Position.Left,
       // we need also settings from global config here so that default's doesn't override it
       ...yAxisConfigs[0],
     });
@@ -232,8 +232,8 @@ export const buildExpression = (
 
   if (isRightAxis) {
     yAxisConfigs.push({
-      id: 'right',
-      position: 'right',
+      id: Position.Right,
+      position: Position.Right,
       // we need also settings from global config here so that default's doesn't override it
       ...yAxisConfigs[1],
     });
@@ -300,7 +300,7 @@ export const buildExpression = (
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
           valuesInLegend: [state?.valuesInLegend || false],
-          yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs, validDataLayers)],
+          yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
           xAxisConfig: [
             {
               type: 'expression',
@@ -350,10 +350,7 @@ export const buildExpression = (
   };
 };
 
-const yAxisConfigsToExpression = (
-  yAxisConfigs: AxisConfig[],
-  validDataLayers: ValidXYDataLayerConfig[]
-): Ast[] => {
+const yAxisConfigsToExpression = (yAxisConfigs: AxisConfig[]): Ast[] => {
   return yAxisConfigs.map((axis) => ({
     type: 'expression',
     chain: [

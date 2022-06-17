@@ -41,7 +41,11 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
 
   const { value } = decorationConfig;
 
-  const axisGroup = getAxisGroupForReferenceLine(yAxesConfiguration, decorationConfig);
+  const axisGroup = getAxisGroupForReferenceLine(
+    yAxesConfiguration,
+    decorationConfig,
+    isHorizontal
+  );
 
   const formatter = axisGroup?.formatter || xAxisFormatter;
   const id = `${layer.layerId}-${value}`;

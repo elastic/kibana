@@ -51,7 +51,11 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
   }
 
   const referenceLineElements = decorationConfigsByValue.flatMap((decorationConfig) => {
-    const axisGroup = getAxisGroupForReferenceLine(yAxesConfiguration, decorationConfig);
+    const axisGroup = getAxisGroupForReferenceLine(
+      yAxesConfiguration,
+      decorationConfig,
+      isHorizontal
+    );
 
     const formatter = axisGroup?.formatter || xAxisFormatter;
     const name =
@@ -74,8 +78,8 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
     const id = `${layer.layerId}-${decorationConfig.forAccessor}`;
 
     const axesMap = {
-      left: yAxesConfiguration.some((axes) => axes.position === 'left'),
-      right: yAxesConfiguration.some((axes) => axes.position === 'right'),
+      left: yAxesConfiguration.some((axes) => axes.position === Position.Left),
+      right: yAxesConfiguration.some((axes) => axes.position === Position.Right),
     };
 
     return (
