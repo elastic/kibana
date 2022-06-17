@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { firstValueFrom, type Subject } from 'rxjs';
+import { firstValueFrom, type Observable } from 'rxjs';
 import { get, isEmpty } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -31,7 +31,7 @@ interface ConstructorOptions {
   logger: Logger;
   isWriteEnabled: boolean;
   disabledRegistrationContexts: string[];
-  pluginStop$: Subject<void>;
+  pluginStop$: Observable<void>;
 }
 
 export type IResourceInstaller = PublicMethodsOf<ResourceInstaller>;
@@ -43,6 +43,7 @@ export class ResourceInstaller {
     installer: () => Promise<void>
   ): Promise<void> {
     try {
+      let timeoutId: NodeJS.Timeout;
       const installResources = async (): Promise<void> => {
         const { logger, isWriteEnabled } = this.options;
         if (!isWriteEnabled) {
@@ -53,11 +54,15 @@ export class ResourceInstaller {
         logger.info(`Installing ${resources}`);
         await installer();
         logger.info(`Installed ${resources}`);
+
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
       };
 
       const throwTimeoutException = (): Promise<void> => {
         return new Promise((resolve, reject) => {
-          const timeoutId = setTimeout(() => {
+          timeoutId = setTimeout(() => {
             const msg = `Timeout: it took more than ${INSTALLATION_TIMEOUT}ms`;
             reject(new Error(msg));
           }, INSTALLATION_TIMEOUT);

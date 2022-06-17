@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { type Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
@@ -91,7 +91,7 @@ interface ConstructorOptions {
   isWriteEnabled: boolean;
   isWriterCacheEnabled: boolean;
   disabledRegistrationContexts: string[];
-  pluginStop$: Subject<void>;
+  pluginStop$: Observable<void>;
 }
 
 export class RuleDataService implements IRuleDataService {
