@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { HttpStart } from '@kbn/core/public';
 import { getAppInfo } from './api';
 import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
 
 export interface UseGetAppInfoProps {
-  actionTypeId: string;
+  actionTypeId?: string;
   http: HttpStart;
 }
 
 export interface UseGetAppInfo {
-  fetchAppInfo: (connector: ServiceNowActionConnector) => Promise<AppInfo | RESTApiError>;
+  fetchAppInfo: (
+    connector: ServiceNowActionConnector
+  ) => Promise<AppInfo | RESTApiError | undefined>;
   isLoading: boolean;
 }
 
@@ -28,6 +31,10 @@ export const useGetAppInfo = ({ actionTypeId, http }: UseGetAppInfoProps): UseGe
   const fetchAppInfo = useCallback(
     async (connector) => {
       try {
+        if (!actionTypeId || isEmpty(actionTypeId)) {
+          return;
+        }
+
         didCancel.current = false;
         abortCtrl.current.abort();
         abortCtrl.current = new AbortController();

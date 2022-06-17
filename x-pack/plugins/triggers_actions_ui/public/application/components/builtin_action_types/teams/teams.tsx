@@ -7,13 +7,8 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeModel,
-  GenericValidationResult,
-  ConnectorValidationResult,
-} from '../../../../types';
-import { TeamsActionParams, TeamsSecrets, TeamsActionConnector } from '../types';
-import { isValidUrl } from '../../../lib/value_validators';
+import { ActionTypeModel, GenericValidationResult } from '../../../../types';
+import { TeamsActionParams, TeamsSecrets } from '../types';
 
 export function getActionType(): ActionTypeModel<unknown, TeamsSecrets, TeamsActionParams> {
   return {
@@ -31,25 +26,6 @@ export function getActionType(): ActionTypeModel<unknown, TeamsSecrets, TeamsAct
         defaultMessage: 'Send a message to a Microsoft Teams channel.',
       }
     ),
-    validateConnector: async (
-      action: TeamsActionConnector
-    ): Promise<ConnectorValidationResult<unknown, TeamsSecrets>> => {
-      const translations = await import('./translations');
-      const secretsErrors = {
-        webhookUrl: new Array<string>(),
-      };
-      const validationResult = { config: { errors: {} }, secrets: { errors: secretsErrors } };
-      if (!action.secrets.webhookUrl) {
-        secretsErrors.webhookUrl.push(translations.WEBHOOK_URL_REQUIRED);
-      } else if (action.secrets.webhookUrl) {
-        if (!isValidUrl(action.secrets.webhookUrl)) {
-          secretsErrors.webhookUrl.push(translations.WEBHOOK_URL_INVALID);
-        } else if (!isValidUrl(action.secrets.webhookUrl, 'https:')) {
-          secretsErrors.webhookUrl.push(translations.WEBHOOK_URL_HTTP_INVALID);
-        }
-      }
-      return validationResult;
-    },
     validateParams: async (
       actionParams: TeamsActionParams
     ): Promise<GenericValidationResult<TeamsActionParams>> => {

@@ -62,7 +62,7 @@ journey('DefaultEmailSettings', async ({ page, params }) => {
     await page.fill(byTestId('emailHostInput'), 'test');
     await page.fill(byTestId('emailPortInput'), '1025');
     await page.click('text=Require authentication for this server');
-    await page.click(byTestId('saveNewActionButton'));
+    await page.click(byTestId('create-connector-flyout-save-btn'));
   });
 
   step('Select email connector', async () => {

@@ -18,7 +18,7 @@ export const CONNECTORS_DROPDOWN = '[data-test-subj="dropdown-connectors"]';
 
 export const PASSWORD = '[data-test-subj="connector-servicenow-password-form-input"]';
 
-export const SAVE_BTN = '[data-test-subj="saveNewActionButton"]';
+export const SAVE_BTN = '[data-test-subj="create-connector-flyout-save-btn"]';
 
 export const SERVICE_NOW_CONNECTOR_CARD = '[data-test-subj=".servicenow-card"]';
 

@@ -8,13 +8,7 @@ import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ActionTypeForm } from './action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import {
-  ActionConnector,
-  ActionType,
-  RuleAction,
-  ConnectorValidationResult,
-  GenericValidationResult,
-} from '../../../types';
+import { ActionConnector, ActionType, RuleAction, GenericValidationResult } from '../../../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
 import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
@@ -43,9 +37,6 @@ describe('action_type_form', () => {
       id: '.pagerduty',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({});
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);
@@ -92,9 +83,6 @@ describe('action_type_form', () => {
       id: '.pagerduty',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({});
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);

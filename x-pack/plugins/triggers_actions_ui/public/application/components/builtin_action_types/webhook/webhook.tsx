@@ -7,18 +7,8 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeModel,
-  GenericValidationResult,
-  ConnectorValidationResult,
-} from '../../../../types';
-import {
-  WebhookActionParams,
-  WebhookConfig,
-  WebhookSecrets,
-  WebhookActionConnector,
-} from '../types';
-import { isValidUrl } from '../../../lib/value_validators';
+import { ActionTypeModel, GenericValidationResult } from '../../../../types';
+import { WebhookActionParams, WebhookConfig, WebhookSecrets } from '../types';
 
 export function getActionType(): ActionTypeModel<
   WebhookConfig,
@@ -40,47 +30,6 @@ export function getActionType(): ActionTypeModel<
         defaultMessage: 'Webhook data',
       }
     ),
-    validateConnector: async (
-      action: WebhookActionConnector
-    ): Promise<
-      ConnectorValidationResult<Pick<WebhookConfig, 'url' | 'method'>, WebhookSecrets>
-    > => {
-      const translations = await import('./translations');
-      const configErrors = {
-        url: new Array<string>(),
-        method: new Array<string>(),
-      };
-      const secretsErrors = {
-        user: new Array<string>(),
-        password: new Array<string>(),
-      };
-      const validationResult = {
-        config: { errors: configErrors },
-        secrets: { errors: secretsErrors },
-      };
-      if (!action.config.url) {
-        configErrors.url.push(translations.URL_REQUIRED);
-      }
-      if (action.config.url && !isValidUrl(action.config.url)) {
-        configErrors.url = [...configErrors.url, translations.URL_INVALID];
-      }
-      if (!action.config.method) {
-        configErrors.method.push(translations.METHOD_REQUIRED);
-      }
-      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        secretsErrors.user.push(translations.USERNAME_REQUIRED);
-      }
-      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        secretsErrors.password.push(translations.PASSWORD_REQUIRED);
-      }
-      if (action.secrets.user && !action.secrets.password) {
-        secretsErrors.password.push(translations.PASSWORD_REQUIRED_FOR_USER);
-      }
-      if (!action.secrets.user && action.secrets.password) {
-        secretsErrors.user.push(translations.USERNAME_REQUIRED_FOR_PASSWORD);
-      }
-      return validationResult;
-    },
     validateParams: async (
       actionParams: WebhookActionParams
     ): Promise<GenericValidationResult<WebhookActionParams>> => {

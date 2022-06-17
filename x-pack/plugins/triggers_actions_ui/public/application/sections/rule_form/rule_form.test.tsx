@@ -17,7 +17,6 @@ import {
   Rule,
   RuleType,
   RuleTypeModel,
-  ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../types';
 import { RuleForm } from './rule_form';
@@ -56,16 +55,6 @@ describe('rule_form', () => {
     id: 'my-action-type',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-      return Promise.resolve({
-        config: {
-          errors: {},
-        },
-        secrets: {
-          errors: {},
-        },
-      });
-    },
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);

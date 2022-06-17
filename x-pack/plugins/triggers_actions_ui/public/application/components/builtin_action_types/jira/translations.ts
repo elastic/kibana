@@ -14,53 +14,10 @@ export const API_URL_LABEL = i18n.translate(
   }
 );
 
-export const API_URL_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredApiUrlTextField',
-  {
-    defaultMessage: 'URL is required.',
-  }
-);
-
-export const API_URL_INVALID = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.invalidApiUrlTextField',
-  {
-    defaultMessage: 'URL is invalid.',
-  }
-);
-
-export const API_URL_REQUIRE_HTTPS = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.requireHttpsApiUrlTextField',
-  {
-    defaultMessage: 'URL must start with https://.',
-  }
-);
-
 export const JIRA_PROJECT_KEY_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.projectKey',
   {
     defaultMessage: 'Project key',
-  }
-);
-
-export const JIRA_PROJECT_KEY_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredProjectKeyTextField',
-  {
-    defaultMessage: 'Project key is required',
-  }
-);
-
-export const JIRA_AUTHENTICATION_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.authenticationLabel',
-  {
-    defaultMessage: 'Authentication',
-  }
-);
-
-export const JIRA_REENTER_VALUES_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.reenterValuesLabel',
-  {
-    defaultMessage:
-      'Authentication credentials are encrypted. Please reenter values for these fields.',
   }
 );
 
@@ -71,13 +28,6 @@ export const JIRA_EMAIL_LABEL = i18n.translate(
   }
 );
 
-export const JIRA_EMAIL_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredEmailTextField',
-  {
-    defaultMessage: 'Email address is required',
-  }
-);
-
 export const JIRA_API_TOKEN_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.apiTokenTextFieldLabel',
   {
@@ -85,45 +35,10 @@ export const JIRA_API_TOKEN_LABEL = i18n.translate(
   }
 );
 
-export const JIRA_API_TOKEN_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredApiTokenTextField',
-  {
-    defaultMessage: 'API token is required',
-  }
-);
-
-export const MAPPING_FIELD_SUMMARY = i18n.translate(
-  'xpack.triggersActionsUI.cases.configureCases.mappingFieldSummary',
-  {
-    defaultMessage: 'Summary',
-  }
-);
-
-export const DESCRIPTION_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredDescriptionTextField',
-  {
-    defaultMessage: 'Description is required.',
-  }
-);
-
 export const SUMMARY_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredSummaryTextField',
   {
     defaultMessage: 'Summary is required.',
-  }
-);
-
-export const MAPPING_FIELD_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.mappingFieldDescription',
-  {
-    defaultMessage: 'Description',
-  }
-);
-
-export const MAPPING_FIELD_COMMENTS = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.mappingFieldComments',
-  {
-    defaultMessage: 'Comments',
   }
 );
 

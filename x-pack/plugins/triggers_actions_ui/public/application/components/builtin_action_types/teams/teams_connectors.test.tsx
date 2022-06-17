@@ -7,112 +7,126 @@
 
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from '@testing-library/react';
-import { TeamsActionConnector } from '../types';
+import { act, render } from '@testing-library/react';
 import TeamsActionFields from './teams_connectors';
+import { ConnectorFormTestProvider } from '../test_utils';
+import userEvent from '@testing-library/user-event';
 jest.mock('../../../../common/lib/kibana');
 
 describe('TeamsActionFields renders', () => {
   test('all connector fields are rendered', async () => {
     const actionConnector = {
       secrets: {
-        webhookUrl: 'https:\\test',
+        webhookUrl: 'https://test.com',
       },
       id: 'test',
       actionTypeId: '.teams',
       name: 'teams',
       config: {},
-    } as TeamsActionConnector;
+      isDeprecated: false,
+    };
+
     const wrapper = mountWithIntl(
-      <TeamsActionFields
-        action={actionConnector}
-        errors={{ index: [], webhookUrl: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <TeamsActionFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
     );
 
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
+
     expect(wrapper.find('[data-test-subj="teamsWebhookUrlInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="teamsWebhookUrlInput"]').first().prop('value')).toBe(
-      'https:\\test'
+      'https://test.com'
     );
   });
 
-  test('should display a message on create to remember credentials', () => {
-    const actionConnector = {
-      actionTypeId: '.teams',
-      config: {},
-      secrets: {},
-    } as TeamsActionConnector;
-    const wrapper = mountWithIntl(
-      <TeamsActionFields
-        action={actionConnector}
-        errors={{ index: [], webhookUrl: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
-  });
+  describe('Validation', () => {
+    const onSubmit = jest.fn();
 
-  test('should display a message on edit to re-enter credentials', () => {
-    const actionConnector = {
-      secrets: {
-        webhookUrl: 'http:\\test',
-      },
-      id: 'test',
-      actionTypeId: '.teams',
-      name: 'teams',
-      config: {},
-    } as TeamsActionConnector;
-    const wrapper = mountWithIntl(
-      <TeamsActionFields
-        action={actionConnector}
-        errors={{ index: [], webhookUrl: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
-  });
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
 
-  test('should display a message for missing secrets after import', () => {
-    const actionConnector = {
-      secrets: {
-        webhookUrl: 'http:\\test',
-      },
-      id: 'test',
-      actionTypeId: '.teams',
-      isMissingSecrets: true,
-      name: 'teams',
-      config: {},
-    } as TeamsActionConnector;
-    const wrapper = mountWithIntl(
-      <TeamsActionFields
-        action={actionConnector}
-        errors={{ index: [], webhookUrl: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
+    it('connector validation succeeds when connector config is valid', async () => {
+      const actionConnector = {
+        secrets: {
+          webhookUrl: 'https://test.com',
+        },
+        id: 'test',
+        actionTypeId: '.teams',
+        name: 'teams',
+        config: {},
+        isDeprecated: false,
+      };
+
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <TeamsActionFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          secrets: {
+            webhookUrl: 'https://test.com',
+          },
+          id: 'test',
+          actionTypeId: '.teams',
+          name: 'teams',
+          isDeprecated: false,
+        },
+        isValid: true,
+      });
+    });
+
+    it('validates teh web hook url field correctly', async () => {
+      const actionConnector = {
+        secrets: {
+          webhookUrl: 'https://test.com',
+        },
+        id: 'test',
+        actionTypeId: '.teams',
+        name: 'teams',
+        config: {},
+        isDeprecated: false,
+      };
+
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <TeamsActionFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        await userEvent.type(
+          getByTestId('teamsWebhookUrlInput'),
+          `{selectall}{backspace}no-valid`,
+          {
+            delay: 10,
+          }
+        );
+      });
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
   });
 });
