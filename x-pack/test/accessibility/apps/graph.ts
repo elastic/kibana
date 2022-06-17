@@ -12,7 +12,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const browser = getService('browser');
-  const find = getService('find');
   const PageObjects = getPageObjects(['settings', 'common', 'graph', 'header', 'home']);
 
   describe('Graph app a11y tests', () => {
