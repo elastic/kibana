@@ -177,7 +177,6 @@ The API returns the following:
   "api_key_owner": "elastic",
   "created_by": "elastic",
   "updated_by": "elastic",
-  "snooze_schedule": [],
   "rule_type_id": ".index-threshold",
   "scheduled_task_id": "4c5eda00-e74f-11ec-b72f-5b18752ff9ea",
   "created_at": "2022-06-08T17:20:31.632Z",
