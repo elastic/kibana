@@ -48,6 +48,7 @@ export default function ({ getService, getPageObjects }) {
             interval: `${interval}s`,
           },
         },
+        throttle_period: '15m',
         actions: {
           email_admin: {
             email: {

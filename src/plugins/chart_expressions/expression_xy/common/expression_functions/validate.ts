@@ -19,6 +19,7 @@ import {
   CommonXYDataLayerConfig,
   YAxisConfigResult,
   ExtendedDataLayerConfigResult,
+  XAxisConfigResult,
 } from '../types';
 import { isTimeChart } from '../helpers';
 
@@ -88,6 +89,14 @@ export const errors = {
     i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
       defaultMessage: 'Only line charts can be fit to the data bounds',
     }),
+  extentFullModeIsInvalidError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.extentFullModeIsInvalid', {
+      defaultMessage: 'For x axis extent, the full mode is not supported.',
+    }),
+  extentModeNotSupportedError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.extentModeNotSupportedError', {
+      defaultMessage: 'X axis extent is only supported for numeric histograms.',
+    }),
   timeMarkerForNotTimeChartsError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.timeMarkerForNotTimeChartsError', {
       defaultMessage: 'Only time charts can have current time marker',
@@ -113,16 +122,14 @@ export const errors = {
 };
 
 export const hasBarLayer = (layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>) =>
-  layers.filter(({ seriesType }) => seriesType === SeriesTypes.BAR).length > 0;
+  layers.some(({ seriesType }) => seriesType === SeriesTypes.BAR);
 
 export const hasAreaLayer = (layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>) =>
-  layers.filter(({ seriesType }) => seriesType === SeriesTypes.AREA).length > 0;
+  layers.some(({ seriesType }) => seriesType === SeriesTypes.AREA);
 
 export const hasHistogramBarLayer = (
   layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
-) =>
-  layers.filter(({ seriesType, isHistogram }) => seriesType === SeriesTypes.BAR && isHistogram)
-    .length > 0;
+) => layers.some(({ seriesType, isHistogram }) => seriesType === SeriesTypes.BAR && isHistogram);
 
 export const isValidExtentWithCustomMode = (extent: AxisExtentConfigResult) => {
   const isValidLowerBound =
@@ -137,16 +144,31 @@ export const validateExtentForDataBounds = (
   extent: AxisExtentConfigResult,
   layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
 ) => {
-  const lineSeries = layers.filter(({ seriesType }) => seriesType === SeriesTypes.LINE);
-  if (!lineSeries.length && extent.mode === AxisExtentModes.DATA_BOUNDS) {
+  const hasLineSeries = layers.some(({ seriesType }) => seriesType === SeriesTypes.LINE);
+  if (!hasLineSeries && extent.mode === AxisExtentModes.DATA_BOUNDS) {
     throw new Error(errors.dataBoundsForNotLineChartError());
+  }
+};
+
+export const validateXExtent = (
+  extent: AxisExtentConfigResult | undefined,
+  dataLayers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
+) => {
+  if (extent) {
+    if (extent.mode === AxisExtentModes.FULL) {
+      throw new Error(errors.extentFullModeIsInvalidError());
+    }
+    if (isTimeChart(dataLayers) || dataLayers.every(({ isHistogram }) => !isHistogram)) {
+      throw new Error(errors.extentModeNotSupportedError());
+    }
   }
 };
 
 export const validateExtents = (
   dataLayers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>,
   hasBarOrArea: boolean,
-  yAxisConfigs?: YAxisConfigResult[]
+  yAxisConfigs?: YAxisConfigResult[],
+  xAxisConfig?: XAxisConfigResult
 ) => {
   yAxisConfigs?.forEach((axis) => {
     if (!axis.extent) {
@@ -162,6 +184,8 @@ export const validateExtents = (
 
     validateExtentForDataBounds(axis.extent, dataLayers);
   });
+
+  validateXExtent(xAxisConfig?.extent, dataLayers);
 };
 
 export const validateAxes = (
@@ -214,7 +238,7 @@ export const validateMarkSizeForChartType = (
   markSizeAccessor: ExpressionValueVisDimension | string | undefined,
   seriesType: SeriesType
 ) => {
-  if (markSizeAccessor && seriesType !== SeriesTypes.LINE && seriesType !== SeriesTypes.AREA) {
+  if (markSizeAccessor && !isAreaOrLineChart(seriesType)) {
     throw new Error(errors.markSizeAccessorForNonLineOrAreaChartsError());
   }
 };
@@ -256,7 +280,7 @@ export const validateLinesVisibilityForChartType = (
   showLines: boolean | undefined,
   seriesType: SeriesType
 ) => {
-  if (showLines && !(seriesType === SeriesTypes.LINE || seriesType === SeriesTypes.AREA)) {
+  if (showLines && !isAreaOrLineChart(seriesType)) {
     throw new Error(errors.linesVisibilityForNonLineChartError());
   }
 };

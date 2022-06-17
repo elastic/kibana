@@ -235,18 +235,3 @@ export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig)
     extent.upperBound <= extent.lowerBound;
   return { inclusiveZeroError, boundaryError };
 }
-
-export const getAxisGroupConfig = (
-  axesGroup?: GroupsConfiguration,
-  decoration?: ReferenceLineDecorationConfigResult | ExtendedReferenceLineDecorationConfig
-) => {
-  return axesGroup?.find((axis) => {
-    if (decoration?.axisId) {
-      return axis.groupId.includes(decoration.axisId);
-    }
-
-    return decoration && isReferenceLineDecorationConfig(decoration)
-      ? decoration.position === axis.position
-      : axis.series.some(({ accessor }) => accessor === decoration?.forAccessor);
-  });
-};

@@ -50,7 +50,7 @@ export const referenceLineFunction: ReferenceLineFn = {
       types: ['string'],
       help: i18n.translate('expressionXY.referenceLine.axisId.help', {
         defaultMessage:
-          'Id of axis to which the reference line belongs. Have more priority than "position"',
+          'Id of axis to which the reference line belongs. It has higher priority than "position"',
       }),
     },
     color: {

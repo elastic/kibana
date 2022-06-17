@@ -127,7 +127,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const hasBar = hasBarLayer(dataLayers);
   const hasArea = hasAreaLayer(dataLayers);
 
-  validateExtents(dataLayers, hasBar || hasArea, args.yAxisConfigs);
+  validateExtents(dataLayers, hasBar || hasArea, args.yAxisConfigs, args.xAxisConfig);
   validateFillOpacity(args.fillOpacity, hasArea);
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);

@@ -49,6 +49,8 @@ import type {
   ReferenceLineDecorationConfig,
   ExtendedReferenceLineDecorationConfig,
   XYChartProps,
+  AxisExtentConfig,
+  AxisExtentConfigResult,
 } from '../../common/types';
 import {
   isHorizontalChart,
@@ -247,8 +249,8 @@ export function XYChart({
 
   const xTitle = xAxisConfig?.title || (xAxisColumn && xAxisColumn.name);
   const yAxesMap = {
-    left: yAxesConfiguration.find(({ position }) => position === 'left'),
-    right: yAxesConfiguration.find(({ position }) => position === 'right'),
+    left: yAxesConfiguration.find(({ position }) => position === Position.Left),
+    right: yAxesConfiguration.find(({ position }) => position === Position.Right),
   };
 
   const titles = getLayersTitles(
@@ -321,7 +323,8 @@ export function XYChart({
       .map((config) => ({
         ...config,
         position: config
-          ? getAxisGroupForReferenceLine(yAxesConfiguration, config)?.position ?? Position.Bottom
+          ? getAxisGroupForReferenceLine(yAxesConfiguration, config, shouldRotate)?.position ??
+            Position.Left
           : Position.Bottom,
       })),
     ...groupedLineAnnotations,
@@ -360,7 +363,8 @@ export function XYChart({
   };
 
   const getYAxisDomain = (axis: GroupsConfiguration[number]) => {
-    const extent = axis.extent || {
+    const extent: AxisExtentConfigResult = axis.extent || {
+      type: 'axisExtentConfig',
       mode: 'full',
     };
     const hasBarOrArea = Boolean(
@@ -393,17 +397,17 @@ export function XYChart({
       max,
       padding,
       includeDataFromIds: referenceLineLayers
-        .flatMap((l) =>
-          l.decorations
-            ? l.decorations.map((decoration) => ({ layerId: l.layerId, decoration }))
-            : []
+        .flatMap(
+          (l) => l.decorations?.map((decoration) => ({ layerId: l.layerId, decoration })) || []
         )
         .filter(({ decoration }) => {
           if (decoration.axisId) {
             return axis.groupId.includes(decoration.axisId);
           }
 
-          return axis.position === decoration.position;
+          return (
+            axis.position === getAxisPosition(decoration.position ?? Position.Left, shouldRotate)
+          );
         })
         .map(({ layerId, decoration }) =>
           isReferenceLineDecorationConfig(decoration)

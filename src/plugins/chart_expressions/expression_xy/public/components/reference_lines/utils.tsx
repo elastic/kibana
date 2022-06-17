@@ -25,6 +25,7 @@ import {
   mapVerticalToHorizontalPlacement,
   Marker,
   MarkerBody,
+  getAxisPosition,
 } from '../../helpers';
 import { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 
@@ -107,9 +108,7 @@ export const getLineAnnotationProps = (
       />
     ),
     // rotate the position if required
-    markerPosition: isHorizontal
-      ? mapVerticalToHorizontalPlacement(markerPositionVertical)
-      : markerPositionVertical,
+    markerPosition: markerPositionVertical,
   };
 };
 
@@ -221,11 +220,12 @@ export const computeChartMargins = (
 
 export function getAxisGroupForReferenceLine(
   yAxesConfiguration: GroupsConfiguration,
-  decorationConfig: ReferenceLineDecorationConfig | ExtendedReferenceLineDecorationConfig
+  decorationConfig: ReferenceLineDecorationConfig | ExtendedReferenceLineDecorationConfig,
+  shouldRotate: boolean
 ) {
   return yAxesConfiguration.find(
     (axis) =>
       (decorationConfig.axisId && axis.groupId.includes(decorationConfig.axisId)) ||
-      decorationConfig.position === axis.position
+      getAxisPosition(decorationConfig.position ?? Position.Left, shouldRotate) === axis.position
   );
 }
