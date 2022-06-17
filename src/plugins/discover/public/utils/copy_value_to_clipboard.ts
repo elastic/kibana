@@ -8,7 +8,7 @@
 
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ValueToStringConverter } from '../types';
+import type { DataTableRecord } from '../types';
 import { DiscoverServices } from '../build_services';
 import { convertNameToString } from './convert_value_to_string';
 
@@ -23,19 +23,17 @@ const COPY_FAILED_ERROR_MESSAGE = i18n.translate('discover.grid.copyFailedErrorT
 });
 
 export const copyValueToClipboard = ({
-  rowIndex,
+  row,
   columnId,
   services,
-  valueToStringConverter,
 }: {
-  rowIndex: number;
+  row: DataTableRecord;
   columnId: string;
   services: DiscoverServices;
-  valueToStringConverter: ValueToStringConverter;
 }): string | null => {
   const { toastNotifications } = services;
 
-  const result = valueToStringConverter(rowIndex, columnId);
+  const result = row.renderText!(columnId);
   const valueFormatted = result.formattedString;
 
   const copied = copyToClipboard(valueFormatted);
@@ -69,20 +67,18 @@ export const copyValueToClipboard = ({
 export const copyColumnValuesToClipboard = async ({
   columnId,
   services,
-  valueToStringConverter,
-  rowsCount,
+  rows,
 }: {
   columnId: string;
   services: DiscoverServices;
-  valueToStringConverter: ValueToStringConverter;
-  rowsCount: number;
+  rows: DataTableRecord[];
 }): Promise<string | null> => {
   const { toastNotifications } = services;
   const nameFormattedResult = convertNameToString(columnId);
   let withFormula = nameFormattedResult.withFormula;
 
-  const valuesFormatted = [...Array(rowsCount)].map((_, rowIndex) => {
-    const result = valueToStringConverter(rowIndex, columnId, { disableMultiline: true });
+  const valuesFormatted = rows.map((row) => {
+    const result = row.renderText!(columnId);
     withFormula = withFormula || result.withFormula;
     return result.formattedString;
   });

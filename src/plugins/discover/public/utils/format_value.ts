@@ -6,53 +6,54 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import type {
   FieldFormatsContentType,
   HtmlContextTypeOptions,
   TextContextTypeOptions,
 } from '@kbn/field-formats-plugin/common/types';
+import { DataTableRecord } from '../types';
 
 /**
  * Formats the value of a specific field using the appropriate field formatter if available
  * or the default string field formatter otherwise.
  *
- * @param value The value to format
- * @param hit The actual search hit (required to get highlight information from)
- * @param fieldFormats Field formatters
+ * @param columnId The value to format
+ * @param record The actual search hit (required to get highlight information from)
  * @param dataView The data view if available
- * @param field The field that value was from if available
  * @param contentType Type of a converter
  * @param options Options for the converter
  * @returns An sanitized HTML string, that is safe to be applied via dangerouslySetInnerHTML
  */
 export function formatFieldValue(
-  value: unknown,
-  hit: estypes.SearchHit,
-  fieldFormats: FieldFormatsStart,
-  dataView?: DataView,
-  field?: DataViewField,
+  columnId: string,
+  record: DataTableRecord,
+  dataView: DataView,
   contentType?: FieldFormatsContentType,
   options?: HtmlContextTypeOptions | TextContextTypeOptions
 ): string {
   const usedContentType = contentType ?? 'html';
+  const field = dataView.fields.getByName(columnId);
+  const value = record.flattened[columnId];
   const converterOptions: HtmlContextTypeOptions | TextContextTypeOptions = {
-    hit,
+    hit: record.raw,
     field,
     ...options,
   };
-
-  if (!dataView || !field) {
-    // If either no field is available or no data view, we'll use the default
-    // string formatter to format that field.
-    return fieldFormats
-      .getDefaultInstance(KBN_FIELD_TYPES.STRING)
-      .convert(value, usedContentType, converterOptions);
+  const formatter = dataView.getFormatterForField(field);
+  if (contentType === 'text') {
+    (Array.isArray(value) ? value : [value])
+      .map((val) => {
+        const formatted = formatter.convert(val, usedContentType, converterOptions);
+        return stringify(formatted, true);
+      })
+      .join(',');
   }
 
-  // If we have a data view and field we use that fields field formatter
-  return dataView.getFormatterForField(field).convert(value, usedContentType, converterOptions);
+  return formatter.convert(value, usedContentType, converterOptions);
 }
+
+const stringify = (val: object | string, disableMultiline: boolean) => {
+  // it can wrap "strings" with quotes
+  return disableMultiline ? JSON.stringify(val) : JSON.stringify(val, null, 2);
+};

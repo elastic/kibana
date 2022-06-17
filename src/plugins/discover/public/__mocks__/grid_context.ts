@@ -11,9 +11,7 @@ import { indexPatternMock } from './index_pattern';
 import { dataViewComplexMock } from './data_view_complex';
 import { esHits } from './es_hits';
 import { esHitsComplex } from './es_hits_complex';
-import { discoverServiceMock } from './services';
 import { GridContext } from '../components/discover_grid/discover_grid_context';
-import { convertValueToString } from '../utils/convert_value_to_string';
 import { buildDataTableRecord } from '../utils/build_data_record';
 import { EsHitRecord } from '../types';
 
@@ -31,15 +29,6 @@ const buildGridContext = (dataView: DataView, rows: EsHitRecord[]): GridContext 
     isDarkMode: false,
     selectedDocs: [],
     setSelectedDocs: jest.fn(),
-    valueToStringConverter: (rowIndex, columnId, options) =>
-      convertValueToString({
-        rowIndex,
-        columnId,
-        services: discoverServiceMock,
-        rows: usedRows,
-        dataView,
-        options,
-      }),
   };
 };
 

@@ -397,7 +397,11 @@ export class DataView implements DataViewBase {
    * Provide a field, get its formatter
    * @param field field to get formatter for
    */
-  getFormatterForField(field: DataViewField | DataViewField['spec']): FieldFormat {
+  getFormatterForField(field?: DataViewField | DataViewField['spec']): FieldFormat {
+    if (!field || !field.type) {
+      return this.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
+    }
+
     const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
     if (fieldFormat) {
       return fieldFormat;

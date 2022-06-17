@@ -14,7 +14,7 @@ import {
   copyColumnNameToClipboard,
 } from '../../utils/copy_value_to_clipboard';
 import { DiscoverServices } from '../../build_services';
-import type { ValueToStringConverter } from '../../types';
+import type { DataTableRecord } from '../../types';
 
 function buildCopyColumnButton({
   label,
@@ -57,15 +57,13 @@ export function buildCopyColumnNameButton({
 }
 
 export function buildCopyColumnValuesButton({
+  rows,
   columnId,
   services,
-  rowsCount,
-  valueToStringConverter,
 }: {
+  rows: DataTableRecord[];
   columnId: string;
   services: DiscoverServices;
-  rowsCount: number;
-  valueToStringConverter: ValueToStringConverter;
 }): EuiListGroupItemProps {
   return buildCopyColumnButton({
     label: (
@@ -74,13 +72,14 @@ export function buildCopyColumnValuesButton({
         defaultMessage="Copy column"
       />
     ),
-    onCopy: () =>
+    onCopy: () => {
       copyColumnValuesToClipboard({
         columnId,
         services,
-        rowsCount,
-        valueToStringConverter,
-      }),
+        rows,
+      });
+    },
+
     dataTestSubj: 'gridCopyColumnValuesToClipBoardButton',
   });
 }

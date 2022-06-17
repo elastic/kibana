@@ -7,7 +7,7 @@
  */
 
 import './table.scss';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,7 +28,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { flattenHit } from '@kbn/data-plugin/public';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { usePager } from '../../../../utils/use_pager';
@@ -37,10 +36,10 @@ import { SHOW_MULTIFIELDS } from '../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../doc_views_types';
 import { getFieldsToShow } from '../../../../utils/get_fields_to_show';
 import { getIgnoredReason } from '../../../../utils/get_ignored_reason';
-import { formatFieldValue } from '../../../../utils/format_value';
 import { isNestedFieldParent } from '../../../../application/main/utils/nested_fields';
 import { TableFieldValue } from './table_cell_value';
 import { TableActions } from './table_cell_actions';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 export interface FieldRecord {
   action: Omit<FieldRecordLegacy['action'], 'isActive'>;
@@ -109,7 +108,7 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const { storage, uiSettings, fieldFormats } = useDiscoverServices();
+  const { storage, uiSettings } = useDiscoverServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
   const isSingleDocView = !filter;
@@ -118,9 +117,9 @@ export const DocViewerTable = ({
   const [pinnedFields, setPinnedFields] = useState<string[]>(
     getPinnedFields(currentDataViewId, storage)
   );
+  const doc = useMemo(() => buildDataTableRecord(hit, dataView), [hit, dataView]);
 
-  const flattened = flattenHit(hit, dataView, { source: true, includeIgnoredValues: true });
-  const fieldsToShow = getFieldsToShow(Object.keys(flattened), dataView, showMultiFields);
+  const fieldsToShow = getFieldsToShow(Object.keys(doc.flattened), dataView, showMultiFields);
 
   const searchPlaceholder = i18n.translate('discover.docView.table.searchPlaceHolder', {
     defaultMessage: 'Search field names',
@@ -164,14 +163,14 @@ export const DocViewerTable = ({
         ? getTypeForFieldIcon(fieldMapping)
         : undefined;
 
-      const ignored = getIgnoredReason(fieldMapping ?? field, hit._ignored);
+      const ignored = getIgnoredReason(fieldMapping ?? field, doc.raw._ignored);
 
       return {
         action: {
           onToggleColumn,
           onFilter: filter,
           isActive: !!columns?.includes(field),
-          flattenedField: flattened[field],
+          flattenedField: doc.flattened[field],
         },
         field: {
           field,
@@ -183,29 +182,12 @@ export const DocViewerTable = ({
           onTogglePinned,
         },
         value: {
-          formattedValue: formatFieldValue(
-            flattened[field],
-            hit,
-            fieldFormats,
-            dataView,
-            fieldMapping
-          ),
+          formattedValue: doc.renderFormatted!(field),
           ignored,
         },
       };
     },
-    [
-      mapping,
-      dataView,
-      hit,
-      onToggleColumn,
-      filter,
-      columns,
-      flattened,
-      pinnedFields,
-      onTogglePinned,
-      fieldFormats,
-    ]
+    [doc, mapping, dataView, onToggleColumn, filter, columns, pinnedFields, onTogglePinned]
   );
 
   const handleOnChange = useCallback(
@@ -217,7 +199,7 @@ export const DocViewerTable = ({
     [storage]
   );
 
-  const { pinnedItems, restItems } = Object.keys(flattened)
+  const { pinnedItems, restItems } = Object.keys(doc.flattened)
     .sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
       const mappingB = mapping(fieldB);

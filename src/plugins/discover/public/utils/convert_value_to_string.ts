@@ -9,79 +9,50 @@
 import { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import { formatFieldValue } from './format_value';
-import { DiscoverServices } from '../build_services';
 import { DataTableRecord } from '../types';
 
-interface ConvertedResult {
+export interface ConvertedResult {
   formattedString: string;
   withFormula: boolean;
 }
 
 export const convertValueToString = ({
-  rowIndex,
-  rows,
+  row,
   columnId,
   dataView,
-  services,
   options,
 }: {
-  rowIndex: number;
-  rows: DataTableRecord[];
+  row?: DataTableRecord;
   columnId: string;
   dataView: DataView;
-  services: DiscoverServices;
   options?: {
     disableMultiline?: boolean;
   };
 }): ConvertedResult => {
-  const { fieldFormats } = services;
-  if (!rows[rowIndex]) {
+  if (!row) {
     return {
       formattedString: '',
       withFormula: false,
     };
   }
-  const rowFlattened = rows[rowIndex].flattened;
-  const value = rowFlattened?.[columnId];
+
   const field = dataView.fields.getByName(columnId);
-  const valuesArray = Array.isArray(value) ? value : [value];
   const disableMultiline = options?.disableMultiline ?? false;
 
   if (field?.type === '_source') {
     return {
-      formattedString: stringify(rowFlattened, disableMultiline),
+      formattedString: stringify(row.raw, disableMultiline),
       withFormula: false,
     };
   }
 
-  let withFormula = false;
-
-  const formatted = valuesArray
-    .map((subValue) => {
-      const formattedValue = formatFieldValue(
-        subValue,
-        rows[rowIndex].raw,
-        fieldFormats,
-        dataView,
-        field,
-        'text',
-        {
-          skipFormattingInStringifiedJSON: disableMultiline,
-        }
-      );
-
-      if (typeof formattedValue === 'string') {
-        withFormula = withFormula || cellHasFormulas(formattedValue);
-        return escapeFormattedValue(formattedValue);
-      }
-
-      return stringify(formattedValue, disableMultiline) || '';
-    })
-    .join(', ');
+  const formatted = formatFieldValue(columnId, row, dataView, 'text', {
+    skipFormattingInStringifiedJSON: disableMultiline,
+  });
 
   return {
-    formattedString: formatted,
-    withFormula,
+    formattedString: escapeFormattedValue(formatted),
+    withFormula: cellHasFormulas(formatted),
   };
 };
 

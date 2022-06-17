@@ -12,7 +12,7 @@ import { EuiDataGridColumn, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
-import type { ValueToStringConverter } from '../../types';
+import type { DataTableRecord } from '../../types';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
@@ -54,23 +54,21 @@ export function getLeadControlColumns() {
 }
 
 export function buildEuiGridColumn({
+  rows,
   columnName,
   columnWidth = 0,
   indexPattern,
   defaultColumns,
   isSortEnabled,
   services,
-  valueToStringConverter,
-  rowsCount,
 }: {
+  rows: DataTableRecord[];
   columnName: string;
   columnWidth: number | undefined;
   indexPattern: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
   services: DiscoverServices;
-  valueToStringConverter: ValueToStringConverter;
-  rowsCount: number;
 }) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
   const column: EuiDataGridColumn = {
@@ -102,8 +100,7 @@ export function buildEuiGridColumn({
         buildCopyColumnValuesButton({
           columnId: columnName,
           services,
-          rowsCount,
-          valueToStringConverter,
+          rows,
         }),
       ],
     },
@@ -143,24 +140,22 @@ export function buildEuiGridColumn({
 
 export function getEuiGridColumns({
   columns,
-  rowsCount,
   settings,
   indexPattern,
   showTimeCol,
   defaultColumns,
   isSortEnabled,
   services,
-  valueToStringConverter,
+  rows,
 }: {
   columns: string[];
-  rowsCount: number;
   settings: DiscoverGridSettings | undefined;
   indexPattern: DataView;
   showTimeCol: boolean;
   defaultColumns: boolean;
   isSortEnabled: boolean;
   services: DiscoverServices;
-  valueToStringConverter: ValueToStringConverter;
+  rows: DataTableRecord[];
 }) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
@@ -174,12 +169,11 @@ export function getEuiGridColumns({
     buildEuiGridColumn({
       columnName: column,
       columnWidth: getColWidth(column),
+      rows,
       indexPattern,
       defaultColumns,
       isSortEnabled,
       services,
-      valueToStringConverter,
-      rowsCount,
     })
   );
 }

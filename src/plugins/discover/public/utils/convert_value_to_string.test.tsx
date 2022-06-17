@@ -12,58 +12,27 @@ import { convertValueToString, convertNameToString } from './convert_value_to_st
 
 describe('convertValueToString', () => {
   it('should convert a keyword value to text', () => {
-    const result = convertValueToString({
-      rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
-      columnId: 'keyword_key',
-      rowIndex: 0,
-      options: {
-        disableMultiline: true,
-      },
-    });
+    const result = convertField('keyword_key');
 
     expect(result.formattedString).toBe('abcd1');
   });
 
   it('should convert a text value to text', () => {
-    const result = convertValueToString({
-      rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
-      columnId: 'text_message',
-      rowIndex: 0,
-      options: {
-        disableMultiline: true,
-      },
-    });
-
+    const result = convertField('text_message');
     expect(result.formattedString).toBe('"Hi there! I am a sample string."');
   });
 
   it('should convert a multiline text value to text', () => {
-    const result = convertValueToString({
-      rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
-      columnId: 'text_message',
-      rowIndex: 1,
-      options: {
-        disableMultiline: true,
-      },
-    });
-
+    const result = convertField('text_message');
     expect(result.formattedString).toBe('"I\'m multiline\n*&%$#@"');
     expect(result.withFormula).toBe(false);
   });
 
   it('should convert a number value to text', () => {
     const result = convertValueToString({
-      rows: discoverGridContextComplexMock.rows,
+      row: discoverGridContextComplexMock.rows[0],
       dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
       columnId: 'number_price',
-      rowIndex: 0,
       options: {
         disableMultiline: true,
       },
@@ -74,11 +43,9 @@ describe('convertValueToString', () => {
 
   it('should convert a date value to text', () => {
     const result = convertValueToString({
-      rows: discoverGridContextComplexMock.rows,
+      row: discoverGridContextComplexMock.rows[0],
       dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
       columnId: 'date',
-      rowIndex: 0,
       options: {
         disableMultiline: true,
       },
@@ -89,11 +56,9 @@ describe('convertValueToString', () => {
 
   it('should convert a date nanos value to text', () => {
     const result = convertValueToString({
-      rows: discoverGridContextComplexMock.rows,
+      row: discoverGridContextComplexMock.rows[0],
       dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
       columnId: 'date_nanos',
-      rowIndex: 0,
       options: {
         disableMultiline: true,
       },
@@ -104,11 +69,9 @@ describe('convertValueToString', () => {
 
   it('should convert a boolean value to text', () => {
     const result = convertValueToString({
-      rows: discoverGridContextComplexMock.rows,
+      row: discoverGridContextComplexMock.rows[0],
       dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
       columnId: 'bool_enabled',
-      rowIndex: 0,
       options: {
         disableMultiline: true,
       },
@@ -119,11 +82,8 @@ describe('convertValueToString', () => {
 
   it('should convert a binary value to text', () => {
     const result = convertValueToString({
-      rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
       columnId: 'binary_blob',
-      rowIndex: 0,
       options: {
         disableMultiline: true,
       },
@@ -134,11 +94,9 @@ describe('convertValueToString', () => {
 
   it('should convert an object value to text', () => {
     const result = convertValueToString({
-      rows: discoverGridContextComplexMock.rows,
+      row: discoverGridContextComplexMock.rows[0],
       dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
       columnId: 'object_user.first',
-      rowIndex: 0,
       options: {
         disableMultiline: true,
       },
@@ -149,11 +107,9 @@ describe('convertValueToString', () => {
 
   it('should convert a nested value to text', () => {
     const result = convertValueToString({
-      rows: discoverGridContextComplexMock.rows,
+      row: discoverGridContextComplexMock.rows[0],
       dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
       columnId: 'nested_user',
-      rowIndex: 0,
       options: {
         disableMultiline: true,
       },
@@ -303,11 +259,9 @@ describe('convertValueToString', () => {
 
   it('should convert an array value to text', () => {
     const result = convertValueToString({
-      rows: discoverGridContextComplexMock.rows,
+      row: discoverGridContextComplexMock.rows[0],
       dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
       columnId: 'array_tags',
-      rowIndex: 0,
       options: {
         disableMultiline: true,
       },
@@ -477,3 +431,14 @@ describe('convertValueToString', () => {
     expect(result.withFormula).toBe(true);
   });
 });
+
+function convertField(columnId: string) {
+  return convertValueToString({
+    row: discoverGridContextComplexMock.rows[0],
+    dataView: discoverGridContextComplexMock.indexPattern,
+    columnId,
+    options: {
+      disableMultiline: true,
+    },
+  });
+}

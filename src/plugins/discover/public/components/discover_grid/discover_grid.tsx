@@ -47,10 +47,9 @@ import {
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
 import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
-import type { DataTableRecord, ValueToStringConverter } from '../../types';
+import type { DataTableRecord } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
-import { convertValueToString } from '../../utils/convert_value_to_string';
 
 interface SortObj {
   id: string;
@@ -231,20 +230,6 @@ export const DiscoverGrid = ({
     return rowsFiltered;
   }, [rows, usedSelectedDocs, isFilterActive]);
 
-  const valueToStringConverter: ValueToStringConverter = useCallback(
-    (rowIndex, columnId, options) => {
-      return convertValueToString({
-        rowIndex,
-        rows: displayedRows,
-        dataView: indexPattern,
-        columnId,
-        services,
-        options,
-      });
-    },
-    [displayedRows, indexPattern, services]
-  );
-
   /**
    * Pagination
    */
@@ -321,14 +306,13 @@ export const DiscoverGrid = ({
     () =>
       getEuiGridColumns({
         columns: displayedColumns,
-        rowsCount: displayedRows.length,
+        rows: displayedRows,
         settings,
         indexPattern,
         showTimeCol,
         defaultColumns,
         isSortEnabled,
         services,
-        valueToStringConverter,
       }),
     [
       displayedColumns,
@@ -339,7 +323,6 @@ export const DiscoverGrid = ({
       defaultColumns,
       isSortEnabled,
       services,
-      valueToStringConverter,
     ]
   );
 
@@ -464,7 +447,6 @@ export const DiscoverGrid = ({
             setIsFilterActive(false);
           }
         },
-        valueToStringConverter,
       }}
     >
       <span

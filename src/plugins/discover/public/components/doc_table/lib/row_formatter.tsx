@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { Fragment } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { formatHit } from '../../../utils/format_hit';
 
 import './row_formatter.scss';
+import { DataTableRecord } from '../../../types';
 
 interface Props {
   defPairs: Array<readonly [string, string]>;
@@ -38,13 +37,12 @@ const TemplateComponent = ({ defPairs }: Props) => {
 };
 
 export const formatRow = (
-  hit: estypes.SearchHit,
+  hit: DataTableRecord,
   indexPattern: DataView,
   fieldsToShow: string[],
-  maxEntries: number,
-  fieldFormats: FieldFormatsStart
+  maxEntries: number
 ) => {
-  const pairs = formatHit(hit, undefined, indexPattern, fieldsToShow, maxEntries, fieldFormats);
+  const pairs = formatHit(hit, indexPattern, fieldsToShow, maxEntries);
   return <TemplateComponent defPairs={pairs} />;
 };
 

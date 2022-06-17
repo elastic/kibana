@@ -11,13 +11,12 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { formatFieldValue } from '../../../utils/format_value';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
 import { useNavigationProps } from '../../../utils/use_navigation_props';
 import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
-import {DataTableRecord, EsHitRecord} from '../../../types';
+import { DataTableRecord, EsHitRecord } from '../../../types';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../utils/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
@@ -47,7 +46,7 @@ export const TableRow = ({
   onAddColumn,
   onRemoveColumn,
 }: TableRowProps) => {
-  const { uiSettings, filterManager, fieldFormats, addBasePath } = useDiscoverServices();
+  const { uiSettings, filterManager, addBasePath } = useDiscoverServices();
   const [maxEntries, hideTimeColumn] = useMemo(
     () => [
       uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
@@ -73,16 +72,10 @@ export const TableRow = ({
     // If we're formatting the _source column, don't use the regular field formatter,
     // but our Discover mechanism to format a hit in a better human-readable way.
     if (fieldName === '_source') {
-      return formatRow(row.raw, indexPattern, fieldsToShow, maxEntries, fieldFormats);
+      return formatRow(row, indexPattern, fieldsToShow, maxEntries);
     }
 
-    const formattedField = formatFieldValue(
-      row.flattened[fieldName],
-      row.raw,
-      fieldFormats,
-      indexPattern,
-      mapping(fieldName)
-    );
+    const formattedField = row.renderFormatted!(fieldName);
 
     return (
       // formatFieldValue always returns sanitized HTML
@@ -141,7 +134,7 @@ export const TableRow = ({
   }
 
   if (columns.length === 0 && useNewFieldsApi) {
-    const formatted = formatRow(row.raw, indexPattern, fieldsToShow, maxEntries, fieldFormats);
+    const formatted = formatRow(row, indexPattern, fieldsToShow, maxEntries);
 
     rowCells.push(
       <TableCell

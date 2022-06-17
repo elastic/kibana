@@ -10,7 +10,7 @@ import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import classnames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiDataGridCellValueElementProps,
   EuiDescriptionList,
@@ -24,7 +24,6 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
-import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';
 import { DataTableRecord, EsHitRecord } from '../../types';
 import { useDiscoverServices } from '../../utils/use_discover_services';
@@ -87,7 +86,6 @@ export const getRenderCellValueFn =
     if (isDetails) {
       return renderPopoverContent({
         row,
-        field,
         columnId,
         dataView,
         useTopLevelObjectColumns,
@@ -96,13 +94,13 @@ export const getRenderCellValueFn =
       });
     }
 
-    if (field?.type === '_source' || useTopLevelObjectColumns) {
+    if (columnId === '_source' || useTopLevelObjectColumns) {
       const pairs = useTopLevelObjectColumns
         ? getTopLevelObjectPairs(row.raw, columnId, dataView, fieldsToShow).slice(
             0,
             maxDocFieldsDisplayed
           )
-        : formatHit(row.raw, row.flattened, dataView, fieldsToShow, maxEntries, fieldFormats);
+        : formatHit(row, dataView, fieldsToShow, maxEntries);
 
       return (
         <EuiDescriptionList
@@ -129,7 +127,7 @@ export const getRenderCellValueFn =
         // formatFieldValue guarantees sanitized values
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
-          __html: formatFieldValue(row.flattened[columnId], row.raw, fieldFormats, dataView, field),
+          __html: row.renderFormatted!(columnId),
         }}
       />
     );
@@ -159,15 +157,12 @@ function getJSON(columnId: string, row: DataTableRecord, useTopLevelObjectColumn
  */
 function renderPopoverContent({
   row,
-  field,
   columnId,
   dataView,
   useTopLevelObjectColumns,
-  fieldFormats,
   closePopover,
 }: {
   row: DataTableRecord;
-  field: DataViewField | undefined;
   columnId: string;
   dataView: DataView;
   useTopLevelObjectColumns: boolean;
@@ -186,7 +181,7 @@ function renderPopoverContent({
       onClick={closePopover}
     />
   );
-  if (useTopLevelObjectColumns || field?.type === '_source') {
+  if (useTopLevelObjectColumns || columnId === '_source') {
     return (
       <EuiFlexGroup gutterSize="none" direction="column" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
@@ -213,13 +208,7 @@ function renderPopoverContent({
           // formatFieldValue guarantees sanitized values
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
-            __html: formatFieldValue(
-              row.flattened[columnId],
-              row.raw,
-              fieldFormats,
-              dataView,
-              field
-            ),
+            __html: row.renderFormatted!(columnId),
           }}
         />
       </EuiFlexItem>

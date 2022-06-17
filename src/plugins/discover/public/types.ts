@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from "@elastic/elasticsearch/lib/api/typesWithBodyKey";
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ConvertedResult } from './utils/convert_value_to_string';
 
 export type ValueToStringConverter = (
   rowIndex: number,
@@ -37,4 +38,6 @@ export interface DataTableRecord {
    * Determines that the given doc is the anchor doc when rendering view surrounding docs
    */
   isAnchor?: boolean;
+  renderFormatted: (fieldName: string) => string;
+  renderText: (fieldName: string) => ConvertedResult;
 }

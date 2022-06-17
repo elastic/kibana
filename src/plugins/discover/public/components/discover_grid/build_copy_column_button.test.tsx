@@ -49,8 +49,7 @@ describe('Build a column button to copy to clipboard', () => {
     const { label, iconType, onClick } = buildCopyColumnValuesButton({
       columnId: 'extension',
       services: discoverServiceMock,
-      rowsCount: 3,
-      valueToStringConverter: discoverGridContextMock.valueToStringConverter,
+      rows: discoverGridContextMock.rows,
     });
 
     const wrapper = mountWithIntl(
@@ -62,7 +61,7 @@ describe('Build a column button to copy to clipboard', () => {
     await wrapper.find(EuiButton).simulate('click');
 
     // first row out of 3 rows does not have a value
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('extension\n\njpg\ngif');
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('extension\n\njpg\ngif\npng\ndoc');
 
     const {
       label: labelSource,
@@ -71,8 +70,7 @@ describe('Build a column button to copy to clipboard', () => {
     } = buildCopyColumnValuesButton({
       columnId: '_source',
       services: discoverServiceMock,
-      valueToStringConverter: discoverGridContextMock.valueToStringConverter,
-      rowsCount: 3,
+      rows: discoverGridContextMock.rows,
     });
 
     const wrapperSource = mountWithIntl(
