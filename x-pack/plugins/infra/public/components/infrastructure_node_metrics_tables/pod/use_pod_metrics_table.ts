@@ -10,16 +10,14 @@ import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
+import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
 import {
   averageOfValues,
   createMetricByFieldLookup,
   makeUnpackMetric,
-  MetricsQueryOptions,
   metricsToApiOptions,
   scaleUpPercentage,
-  SortState,
   useInfrastructureNodeMetrics,
-  UseNodeMetricsTableOptions,
 } from '../shared';
 
 type PodMetricsField =
