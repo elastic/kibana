@@ -78,6 +78,11 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   }
 
   // There should be a single top-level transaction, representing journey browser starting time and session duration.
+  if (ftrTransactionHits.length > 1) {
+    log.warning(`Filtering doesn't work, more than 1 'functional test runner' transaction found`);
+    return;
+  }
+
   const trSource = ftrTransactionHits[0]!._source as Document;
   const startTime = trSource['@timestamp'];
   const duration = trSource.transaction.duration.us / 1000; // convert microseconds as milliseconds
