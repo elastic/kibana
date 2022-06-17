@@ -13,6 +13,9 @@ import { ApiKeyBtn } from './api_key_btn';
 import { fetchServiceAPIKey } from '../../../state/api';
 import { useEnablement } from '../hooks/use_enablement';
 
+const syntheticsTestRunDocsLink =
+  'https://www.elastic.co/guide/en/observability/current/synthetic-run-tests.html';
+
 export const ManagementSettings = () => {
   const {
     enablement: { canManageApiKeys },
@@ -63,7 +66,7 @@ export const ManagementSettings = () => {
             <EuiPopoverTitle>{GET_API_KEY_GENERATE}</EuiPopoverTitle>
             <EuiText size="s">
               {GET_API_KEY_LABEL_DESCRIPTION}{' '}
-              <EuiLink href="#" external target="_blank">
+              <EuiLink href={syntheticsTestRunDocsLink} external target="_blank">
                 {LEARN_MORE_LABEL}
               </EuiLink>
             </EuiText>
@@ -74,7 +77,7 @@ export const ManagementSettings = () => {
             <EuiPopoverTitle>{GET_API_KEY_GENERATE}</EuiPopoverTitle>
             <EuiText size="s">
               {GET_API_KEY_REDUCED_PERMISSIONS_LABEL}{' '}
-              <EuiLink href="#" external target="_blank">
+              <EuiLink href={syntheticsTestRunDocsLink} external target="_blank">
                 {LEARN_MORE_LABEL}
               </EuiLink>
             </EuiText>
