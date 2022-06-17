@@ -25,18 +25,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('graph');
     });
 
-    // after(async () => {
-    //   await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-    //     useActualUrl: true,
-    //   });
-    //   await PageObjects.header.waitUntilLoadingHasFinished();
-    //   await PageObjects.home.removeSampleDataSet('flights');
-    // });
+    after(async () => {
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.home.removeSampleDataSet('flights');
+    });
 
     it('Graph listing page', async function () {
       await a11y.testAppSnapshot();
     });
-
 
     it('Edit Graph page', async function () {
       await testSubjects.click('graphListingTitleLink-Kibana-Sample-Data---Flights');
@@ -71,43 +70,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('graphInspectButton');
     });
 
+    it('Graph settings - advanced settings tab', async function () {
+      await testSubjects.click('graphSettingsButton');
+      await a11y.testAppSnapshot();
+    });
 
+    it('Graph settings - block list tab', async function () {
+      await testSubjects.click('blocklist');
+      await a11y.testAppSnapshot();
+    });
 
-it('Graph settings - advanced settings tab', async function () {
-  await testSubjects.click('graphSettingsButton');
-  await a11y.testAppSnapshot();
-});
+    it('Graph settings - drilldowns tab', async function () {
+      await testSubjects.click('drillDowns');
+      await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
 
+    // https://github.com/elastic/kibana/issues/134693
+    it.skip('Graph settings drilldown tab - add new drilldown', async function () {
+      await testSubjects.click('graphAddNewTemplate');
+      await a11y.testAppSnapshot();
+      await testSubjects.click('graphRemoveUrlTemplate');
+      await testSubjects.click('euiFlyoutCloseButton');
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
 
-
-    // it('Create new Graph page', async function () {
-    //   await PageObjects.graph.newGraph();
-    //   await a11y.testAppSnapshot();
-    // });
-    //
-    // it('Select a data source panel', async function () {
-    //   await testSubjects.click('graphDatasourceButton');
-    //   await a11y.testAppSnapshot();
-    //   await testSubjects.click('savedObjectTitlekibana_sample_data_flights');
-    // });
-    //
-    // it('Add fields panel', async function () {
-    //   await testSubjects.click('graph-add-field-button');
-    //   await retry.waitFor(
-    //     'Add fields panel is visible',
-    //     async () => await testSubjects.exists('graph-add-field-button')
-    //   );
-    //   await a11y.testAppSnapshot();
-    //   await testSubjects.setValue('graph-field-search', 'Carrier');
-    // });
-
-
-
-
-
-
-
-
-
+    it('Create new graph page', async function () {
+      await testSubjects.click('graphNewButton');
+      await testSubjects.click('confirmModalConfirmButton');
+      await a11y.testAppSnapshot();
+    });
   });
 }
