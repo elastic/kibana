@@ -11,7 +11,7 @@ import { get } from 'lodash';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import { AppDeepLink, AppNavLinkStatus, AppUpdater, Capabilities } from '@kbn/core/public';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { SecurityPageName } from '../types';
 import {
   OVERVIEW,
@@ -561,8 +561,8 @@ const formatDeepLinks = (appLinks: AppLinkItems): AppDeepLink[] =>
 /**
  * Registers any change in appLinks to be updated in app deepLinks
  */
-export const registerDeepLinksUpdater = (appUpdater$: Subject<AppUpdater>) => {
-  subscribeAppLinks((appLinks) => {
+export const registerDeepLinksUpdater = (appUpdater$: Subject<AppUpdater>): Subscription => {
+  return subscribeAppLinks((appLinks) => {
     appUpdater$.next(() => ({
       navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent main security link to switch to visible after update
       deepLinks: formatDeepLinks(appLinks),
