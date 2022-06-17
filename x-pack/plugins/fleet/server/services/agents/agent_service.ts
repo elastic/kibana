@@ -7,7 +7,11 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type {
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+  KibanaRequest,
+} from '@kbn/core/server';
 
 import type { AgentStatus, ListWithKuery } from '../../types';
 import type { Agent, GetAgentStatusResponse } from '../../../common';
@@ -82,6 +86,7 @@ export interface AgentClient {
 class AgentClientImpl implements AgentClient {
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
+    private readonly soClient: SavedObjectsClientContract,
     private readonly preflightCheck?: () => void | Promise<void>
   ) {}
 
@@ -91,7 +96,7 @@ class AgentClientImpl implements AgentClient {
     }
   ) {
     await this.#runPreflight();
-    return getAgentsByKuery(this.internalEsClient, options);
+    return getAgentsByKuery(this.internalEsClient, this.soClient, options);
   }
 
   public async getAgent(agentId: string) {
@@ -106,7 +111,12 @@ class AgentClientImpl implements AgentClient {
 
   public async getAgentStatusForAgentPolicy(agentPolicyId?: string, filterKuery?: string) {
     await this.#runPreflight();
-    return getAgentStatusForAgentPolicy(this.internalEsClient, agentPolicyId, filterKuery);
+    return getAgentStatusForAgentPolicy(
+      this.internalEsClient,
+      this.soClient,
+      agentPolicyId,
+      filterKuery
+    );
   }
 
   #runPreflight = async () => {
@@ -120,7 +130,10 @@ class AgentClientImpl implements AgentClient {
  * @internal
  */
 export class AgentServiceImpl implements AgentService {
-  constructor(private readonly internalEsClient: ElasticsearchClient) {}
+  constructor(
+    private readonly internalEsClient: ElasticsearchClient,
+    private readonly soClient: SavedObjectsClientContract
+  ) {}
 
   public asScoped(req: KibanaRequest) {
     const preflightCheck = async () => {
@@ -132,10 +145,10 @@ export class AgentServiceImpl implements AgentService {
       }
     };
 
-    return new AgentClientImpl(this.internalEsClient, preflightCheck);
+    return new AgentClientImpl(this.internalEsClient, this.soClient, preflightCheck);
   }
 
   public get asInternalUser() {
-    return new AgentClientImpl(this.internalEsClient);
+    return new AgentClientImpl(this.internalEsClient, this.soClient);
   }
 }

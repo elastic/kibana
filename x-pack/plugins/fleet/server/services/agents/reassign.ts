@@ -80,9 +80,14 @@ export async function reassignAgents(
   options: ({ agents: Agent[] } | GetAgentsOptions) & { force?: boolean },
   newAgentPolicyId: string
 ): Promise<{ items: BulkActionResult[] }> {
-  const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
-  if (!agentPolicy) {
+  const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+  if (!newAgentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
+  }
+  if (newAgentPolicy.is_managed) {
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      `Cannot reassign an agent to hosted agent policy ${newAgentPolicy.id}`
+    );
   }
 
   const outgoingErrors: Record<Agent['id'], Error> = {};
@@ -101,7 +106,7 @@ export async function reassignAgents(
       }
     }
   } else if ('kuery' in options) {
-    givenAgents = await getAgents(esClient, options);
+    givenAgents = await getAgents(esClient, soClient, { ...options, showManaged: false }); // force
   }
   const givenOrder =
     'agentIds' in options ? options.agentIds : givenAgents.map((agent) => agent.id);
@@ -113,16 +118,11 @@ export async function reassignAgents(
         throw new AgentReassignmentError(`${agent.id} is already assigned to ${newAgentPolicyId}`);
       }
 
-      const isAllowed = await reassignAgentIsAllowed(
-        soClient,
-        esClient,
-        agent.id,
-        newAgentPolicyId
-      );
-      if (isAllowed) {
-        return agent;
+      // by kuery already filtered out managed agents
+      if (!('kuery' in options)) {
+        await reassignAgentIsAllowed(soClient, esClient, agent.id, newAgentPolicyId);
       }
-      throw new AgentReassignmentError(`${agent.id} may not be reassigned to ${newAgentPolicyId}`);
+      return agent;
     })
   );
 

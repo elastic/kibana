@@ -104,7 +104,7 @@ export async function sendUpgradeAgentsActions(
       }
     }
   } else if ('kuery' in options) {
-    givenAgents = await getAgents(esClient, options);
+    givenAgents = await getAgents(esClient, soClient, options);
   }
 
   // get any policy ids from upgradable agents

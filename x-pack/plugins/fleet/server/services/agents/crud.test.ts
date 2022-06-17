@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 
@@ -19,12 +19,14 @@ jest.mock('../../../common', () => ({
 describe('Agents CRUD test', () => {
   let esClientMock: ElasticsearchClient;
   let searchMock: jest.Mock;
+  let soClientMock: SavedObjectsClientContract;
   describe('getAgentsByKuery', () => {
     beforeEach(() => {
       searchMock = jest.fn();
       esClientMock = {
         search: searchMock,
       } as unknown as ElasticsearchClient;
+      soClientMock = {} as unknown as SavedObjectsClientContract;
     });
 
     function getEsResponse(ids: string[], total: number) {
@@ -45,7 +47,7 @@ describe('Agents CRUD test', () => {
         .mockImplementationOnce(() =>
           Promise.resolve(getEsResponse(['1', '2', '3', '4', '5', 'up', '7'], 7))
         );
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -74,7 +76,7 @@ describe('Agents CRUD test', () => {
         .mockImplementationOnce(() =>
           Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5', 'up2', '7'], 7))
         );
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -110,7 +112,7 @@ describe('Agents CRUD test', () => {
         .mockImplementationOnce(() =>
           Promise.resolve(getEsResponse(['up1', 'up2', 'up3', 'up4', 'up5', 'up6', '7'], 7))
         );
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
         showInactive: false,
         page: 2,
@@ -137,7 +139,7 @@ describe('Agents CRUD test', () => {
       searchMock.mockImplementationOnce(() =>
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001))
       );
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -162,7 +164,7 @@ describe('Agents CRUD test', () => {
 
     it('should return second page', async () => {
       searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['6', '7'], 7)));
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: false,
         showInactive: false,
         page: 2,

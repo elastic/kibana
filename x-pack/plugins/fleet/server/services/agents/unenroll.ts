@@ -71,7 +71,7 @@ export async function unenrollAgents(
   }
 ): Promise<{ items: BulkActionResult[] }> {
   // start with all agents specified
-  const givenAgents = await getAgents(esClient, options);
+  const givenAgents = await getAgents(esClient, soClient, options);
 
   // Filter to those not already unenrolled, or unenrolling
   const agentsEnrolled = givenAgents.filter((agent) => {
