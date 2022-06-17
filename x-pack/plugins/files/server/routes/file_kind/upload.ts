@@ -11,6 +11,8 @@ import { Readable } from 'stream';
 import { findFile } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
+export const method = 'put' as const;
+
 export const bodySchema = schema.stream();
 type Body = TypeOf<typeof bodySchema>;
 

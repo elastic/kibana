@@ -11,6 +11,8 @@ import { Readable } from 'stream';
 import { findFile } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
+export const method = 'delete' as const;
+
 export const paramsSchema = schema.object({
   fileId: schema.string(),
 });

@@ -10,6 +10,8 @@ import type { FileJSON } from '../../../common/types';
 import type { FileKindsRequestHandler } from './types';
 import { findFile } from './helpers';
 
+export const method = 'patch' as const;
+
 export const bodySchema = schema.object({
   name: schema.maybe(schema.string()),
   alt: schema.maybe(schema.string()),

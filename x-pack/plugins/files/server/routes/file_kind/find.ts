@@ -14,6 +14,8 @@ interface Response {
   file: FileJSON;
 }
 
+export const method = 'get' as const;
+
 export const paramsSchema = schema.object({
   fileId: schema.string(),
 });

@@ -10,6 +10,8 @@ import type { FileKindsRequestHandler } from './types';
 
 import { findFile } from './helpers';
 
+export const method = 'delete' as const;
+
 export const paramsSchema = schema.object({
   fileId: schema.string(),
 });

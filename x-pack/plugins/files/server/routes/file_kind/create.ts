@@ -8,6 +8,8 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { FileKindsRequestHandler } from './types';
 
+export const method = 'post' as const;
+
 export const bodySchema = schema.object({
   name: schema.string(),
   alt: schema.maybe(schema.string()),

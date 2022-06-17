@@ -8,6 +8,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { FileJSON } from '../../../common/types';
 import type { FileKindsRequestHandler } from './types';
 
+export const method = 'get' as const;
+
 export const querySchema = schema.object({
   page: schema.number({ defaultValue: 1 }),
   perPage: schema.number({ defaultValue: 100 }),

@@ -22,7 +22,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
   fileKindsRegistry.getAll().forEach((fileKind) => {
     const fileKindRouter = enhanceRouter({ router, fileKind: fileKind.id });
     if (fileKind.http.create) {
-      fileKindRouter.post(
+      fileKindRouter[create.method](
         {
           path: FILE_KIND_API_ROUTES.getCreateFileRoute(fileKind.id),
           validate: {
@@ -35,7 +35,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
         create.handler
       );
 
-      fileKindRouter.put(
+      fileKindRouter[upload.method](
         {
           path: FILE_KIND_API_ROUTES.getUploadRoute(fileKind.id),
           validate: {
@@ -55,7 +55,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
       );
     }
     if (fileKind.http.update) {
-      fileKindRouter.patch(
+      fileKindRouter[update.method](
         {
           path: FILE_KIND_API_ROUTES.getUpdateRoute(fileKind.id),
           validate: {
@@ -70,7 +70,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
       );
     }
     if (fileKind.http.delete) {
-      fileKindRouter.delete(
+      fileKindRouter[deleteEndpoint.method](
         {
           path: FILE_KIND_API_ROUTES.getDeleteRoute(fileKind.id),
           validate: {
@@ -84,7 +84,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
       );
     }
     if (fileKind.http.list) {
-      fileKindRouter.get(
+      fileKindRouter[list.method](
         {
           path: FILE_KIND_API_ROUTES.getListRoute(fileKind.id),
           validate: {
@@ -98,7 +98,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
       );
     }
     if (fileKind.http.download) {
-      fileKindRouter.get(
+      fileKindRouter[download.method](
         {
           path: FILE_KIND_API_ROUTES.getDownloadRoute(fileKind.id),
           validate: {
@@ -112,7 +112,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
       );
     }
     if (fileKind.http.find) {
-      fileKindRouter.get(
+      fileKindRouter[find.method](
         {
           path: FILE_KIND_API_ROUTES.getFindRoute(fileKind.id),
           validate: {
