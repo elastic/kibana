@@ -12,16 +12,13 @@ import React, { FC } from 'react';
 
 interface Props {
   panel: GridStackWidget & { render?: () => JSX.Element };
-  callbackRef: (element: HTMLDivElement | null) => void;
+  callbackRef: (element: HTMLDivElement) => void;
 }
 
 export const GridItem: FC<Props> = ({ panel, callbackRef }) => {
   return (
-    <div ref={(element) => callbackRef(element)}>
+    <div ref={(element) => callbackRef(element!)} className="grid-stack-item embPanel">
       <EuiPanel
-        panelRef={(element) => {
-          callbackRef(element);
-        }}
         key={panel.id}
         hasShadow
         hasBorder

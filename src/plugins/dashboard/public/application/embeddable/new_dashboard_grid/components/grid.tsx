@@ -55,7 +55,7 @@ export const Grid: FC<Props> = ({
   guttersize = DEFAULT_GUTTERSIZE, // TODO: do we want to allow 0 or should we set a min value?
 }) => {
   const gridRef = useRef<GridStack>();
-  const panelRefs = useRef<{ [key: string]: Ref<GridStack> }>({});
+  const panelRefs = useRef<{ [key: string]: Ref<HTMLDivElement> }>({});
   const [panels, setPanels] = useState<GridStackNode[]>(gridData);
   const [info, setInfo] = useState<string>('');
 
@@ -73,12 +73,16 @@ export const Grid: FC<Props> = ({
     [columns, guttersize]
   );
 
-  const renderPanelInWidget = (panel: GridStackNode) => {
-    if (!panelRefs.current[panel.id]) {
-      panelRefs.current[panel.id] = createRef();
-    }
+  if (Object.keys(panelRefs).length !== panels.length) {
+    panels.map((panel) => {
+      if (!panelRefs.current[panel.id!]) {
+        panelRefs.current[panel.id!] = createRef();
+      }
+    });
+  }
 
-    gridRef?.current?.addWidget(panelRefs.current[panel.id].current, panel);
+  const renderPanelInWidget = (panel: GridStackNode) => {
+    gridRef?.current?.addWidget(panelRefs.current[panel.id!]!.current, panel);
   };
 
   useEffect(() => {
@@ -92,7 +96,10 @@ export const Grid: FC<Props> = ({
     const grid = gridRef.current;
 
     if (gridData.length) {
+      grid.batchUpdate();
+      grid.removeAll(false);
       gridData.map(renderPanelInWidget);
+      grid.commit();
     }
 
     grid.on('drag', (event, element) => {
@@ -176,7 +183,16 @@ export const Grid: FC<Props> = ({
       <EuiAccordion id={`accordion`} buttonContent="Panel data">
         <div>{JSON.stringify(panels)}</div>
       </EuiAccordion>
-      <div className={`grid-stack dshLayout--editing ${GRID_CONFIG[columns].class}`} />
+      <div className={`grid-stack dshLayout--editing ${GRID_CONFIG[columns].class}`}>
+        {panels.map((panel) => {
+          const callbackRef = (element: HTMLDivElement) => {
+            if (panelRefs.current[panel.id]) {
+              panelRefs.current[panel.id!].current = element;
+            }
+          };
+          return <GridItem panel={panel} callbackRef={callbackRef} />;
+        })}
+      </div>
     </div>
   );
 };
