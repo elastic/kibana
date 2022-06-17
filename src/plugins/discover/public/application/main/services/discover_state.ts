@@ -10,7 +10,13 @@ import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
-import { Filter, FilterStateStore, compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
+import {
+  Filter,
+  FilterStateStore,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  AggregateQuery,
+} from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
@@ -170,6 +176,10 @@ export interface GetStateReturn {
 }
 const APP_STATE_URL_KEY = '_a';
 
+function isOfAggregateQueryType(arg: AggregateQuery | Query): arg is AggregateQuery {
+  return Boolean(arg && 'sql' in arg);
+}
+
 /**
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
@@ -191,7 +201,11 @@ export function getState({
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
 
   if (appStateFromUrl && appStateFromUrl.query && !appStateFromUrl.query.language) {
-    appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
+    if (isOfAggregateQueryType(appStateFromUrl.query)) {
+      appStateFromUrl.query = appStateFromUrl.query;
+    } else {
+      appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
+    }
   }
 
   if (appStateFromUrl?.sort && !appStateFromUrl.sort.length) {

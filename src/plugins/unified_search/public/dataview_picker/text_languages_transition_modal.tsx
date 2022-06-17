@@ -25,15 +25,12 @@ import {
 } from '@elastic/eui';
 
 export interface TextBasedLanguagesTransitionModalProps {
-  closeModal: (dismissFlag: boolean) => void;
-  // defined by the application
-  onSave: (dismissFlag: boolean) => void;
+  closeModal: (dismissFlag: boolean, needsSave?: boolean) => void;
 }
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default function TextBasedLanguagesTransitionModal({
   closeModal,
-  onSave,
 }: TextBasedLanguagesTransitionModalProps) {
   const [dismissModalChecked, setDismissModalChecked] = useState(false);
   const onTransitionModalDismiss = useCallback((e) => {
@@ -108,7 +105,7 @@ export default function TextBasedLanguagesTransitionModal({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={() => onSave(dismissModalChecked)}
+              onClick={() => closeModal(dismissModalChecked, true)}
               fill
               color="success"
               iconType="save"

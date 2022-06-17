@@ -105,6 +105,10 @@ interface State {
   dateRangeTo: string;
 }
 
+function isOfQueryType(arg: any): arg is Query {
+  return Boolean(arg && 'query' in arg);
+}
+
 class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
   public static defaultProps = {
     showQueryBar: true,
@@ -123,20 +127,24 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     }
 
     let nextQuery = null;
-    if (nextProps.query && nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
-      nextQuery = {
-        query: nextProps.query.query,
-        language: nextProps.query.language,
-      };
-    } else if (
-      nextProps.query &&
-      prevState.query &&
-      nextProps.query.language !== prevState.query.language
-    ) {
-      nextQuery = {
-        query: '',
-        language: nextProps.query.language,
-      };
+    if (isOfQueryType(nextProps.query)) {
+      if (nextProps.query && nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
+        nextQuery = {
+          query: nextProps.query.query,
+          language: nextProps.query.language,
+        };
+      } else if (
+        nextProps.query &&
+        prevState.query &&
+        nextProps.query.language !== prevState.query.language
+      ) {
+        nextQuery = {
+          query: '',
+          language: nextProps.query.language,
+        };
+      }
+    } else {
+      nextQuery = nextProps.query;
     }
 
     let nextDateRange = null;
@@ -300,6 +308,27 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     this.setState({
       openQueryBarMenu: value,
     });
+  };
+
+  public onTextLangQuerySubmit = (query?: any) => {
+    // clean up all filters
+    this.props.onFiltersUpdated?.([]);
+    this.setState(
+      {
+        query,
+      },
+      () => {
+        if (this.props.onQuerySubmit) {
+          this.props.onQuerySubmit({
+            query: this.state.query,
+            dateRange: {
+              from: this.state.dateRangeFrom,
+              to: this.state.dateRangeTo,
+            },
+          });
+        }
+      }
+    );
   };
 
   public onQueryBarSubmit = (queryAndDateRange: { dateRange?: TimeRange; query?: Query }) => {
@@ -489,6 +518,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
           filterBar={filterBar}
           suggestionsSize={this.props.suggestionsSize}
           isScreenshotMode={this.props.isScreenshotMode}
+          onTextLangQuerySubmit={this.onTextLangQuerySubmit}
         />
       </div>
     );

@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
-import type { Filter, TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -43,11 +43,16 @@ import { AddFilterPopover } from './add_filter_popover';
 import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
+import { TextBasedLanguagesEditor } from './text_based_languages_editor';
 import './query_bar.scss';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
 ) as unknown as typeof EuiSuperDatePicker;
+
+function isOfQueryType(arg: any): arg is Query {
+  return Boolean(arg && 'query' in arg);
+}
 
 const QueryStringInput = withKibana(QueryStringInputUI);
 
@@ -90,6 +95,7 @@ export interface QueryBarTopRowProps {
   showSubmitButton?: boolean;
   suggestionsSize?: SuggestionsListSize;
   isScreenshotMode?: boolean;
+  onTextLangQuerySubmit: (query: any) => void;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -153,6 +159,7 @@ export const QueryBarTopRow = React.memo(
 
     const kibana = useKibana<IDataPluginServices>();
     const { uiSettings, storage, appName } = kibana.services;
+    const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const queryLanguage = props.query && props.query.language;
     const queryRef = useRef<Query | undefined>(props.query);
@@ -419,13 +426,19 @@ export const QueryBarTopRow = React.memo(
 
     function renderDataViewsPicker() {
       if (!props.dataViewPickerComponentProps) return;
-
+      let textBasedLanguage;
+      if (Boolean(isQueryLangSelected)) {
+        const query = props.query as AggregateQuery;
+        textBasedLanguage = Object.keys(query)[0];
+      }
       return (
         <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
           <DataViewPicker
             showNewMenuTour
             {...props.dataViewPickerComponentProps}
             trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
+            onTextLangQuerySubmit={props.onTextLangQuerySubmit}
+            textBasedLanguage={textBasedLanguage}
           />
         </EuiFlexItem>
       );
@@ -492,6 +505,14 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
+    function renderTextLangEditor() {
+      return (
+        <EuiFlexGroup gutterSize="s" responsive={false} css={{ margin: 0 }}>
+          {isQueryLangSelected && props.query && <TextBasedLanguagesEditor query={props.query} />}
+        </EuiFlexGroup>
+      );
+    }
+
     const isScreenshotMode = props.isScreenshotMode === true;
 
     return (
@@ -514,9 +535,9 @@ export const QueryBarTopRow = React.memo(
               {renderDataViewsPicker()}
               <EuiFlexItem
                 grow={!shouldShowDatePickerAsBadge()}
-                style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320 }}
+                style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
               >
-                {renderQueryInput()}
+                {!isQueryLangSelected ? renderQueryInput() : renderTextLangEditor()}
               </EuiFlexItem>
               {shouldShowDatePickerAsBadge() && props.filterBar}
               {renderUpdateButton()}

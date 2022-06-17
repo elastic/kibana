@@ -28,6 +28,7 @@ export type {
   PhraseFilter,
   PhrasesFilter,
   Query,
+  AggregateQuery,
   QueryStringFilter,
   RangeFilter,
   RangeFilterMeta,

@@ -8,6 +8,7 @@
 
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
+import type { AggregateQuery } from '@kbn/es-query';
 import { ChangeDataView } from './change_dataview';
 
 export type ChangeDataViewTriggerProps = EuiButtonProps & {
@@ -36,6 +37,11 @@ export interface DataViewPickerProps {
   onSaveTextLanguageQuery?: () => void;
 }
 
+export interface DataViewPickerPropsExtended extends DataViewPickerProps {
+  onTextLangQuerySubmit: (query?: AggregateQuery) => void;
+  textBasedLanguage?: string;
+}
+
 export const DataViewPicker = ({
   isMissingCurrent,
   currentDataViewId,
@@ -47,7 +53,9 @@ export const DataViewPicker = ({
   showNewMenuTour,
   textBasedLanguages,
   onSaveTextLanguageQuery,
-}: DataViewPickerProps) => {
+  onTextLangQuerySubmit,
+  textBasedLanguage,
+}: DataViewPickerPropsExtended) => {
   return (
     <ChangeDataView
       isMissingCurrent={isMissingCurrent}
@@ -60,6 +68,8 @@ export const DataViewPicker = ({
       showNewMenuTour={showNewMenuTour}
       textBasedLanguages={textBasedLanguages}
       onSaveTextLanguageQuery={onSaveTextLanguageQuery}
+      onTextLangQuerySubmit={onTextLangQuerySubmit}
+      textBasedLanguage={textBasedLanguage}
     />
   );
 };

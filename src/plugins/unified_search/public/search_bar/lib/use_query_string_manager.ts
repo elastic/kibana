@@ -15,7 +15,9 @@ interface UseQueryStringProps {
   query?: Query;
   queryStringManager: QueryStringContract;
 }
-
+function isOfQueryType(arg: any): arg is Query {
+  return Boolean(arg && 'query' in arg);
+}
 export const useQueryStringManager = (props: UseQueryStringProps) => {
   // Filters should be either what's passed in the initial state or the current state of the filter manager
   const [query, setQuery] = useState<Query>(props.query || props.queryStringManager.getQuery());
@@ -36,6 +38,7 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
     };
   }, [props.queryStringManager]);
 
+  const isQueryType = isOfQueryType(query);
   const stableQuery = useMemo(
     () => ({
       language: query.language,
@@ -43,6 +46,5 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
     }),
     [query.language, query.query]
   );
-
-  return { query: stableQuery };
+  return { query: isQueryType ? stableQuery : query };
 };

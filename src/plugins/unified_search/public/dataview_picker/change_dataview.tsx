@@ -29,7 +29,7 @@ import {
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { DataViewPickerProps } from '.';
+import type { DataViewPickerPropsExtended } from '.';
 import { DataViewsList } from './dataview_list';
 import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
@@ -90,12 +90,16 @@ export function ChangeDataView({
   showNewMenuTour = false,
   textBasedLanguages,
   onSaveTextLanguageQuery,
-}: DataViewPickerProps) {
+  onTextLangQuerySubmit,
+  textBasedLanguage,
+}: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   const [triggerLabel, setTriggerLabel] = useState('');
-  const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(false);
+  const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
+    Boolean(textBasedLanguage)
+  );
   const [isTextLangTransitionModalVisible, setIsTextLangTransitionModalVisible] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
@@ -134,9 +138,13 @@ export function ChangeDataView({
 
   useEffect(() => {
     if (trigger.label) {
-      setTriggerLabel(trigger.label);
+      if (textBasedLanguage) {
+        setTriggerLabel(textBasedLanguage.toUpperCase());
+      } else {
+        setTriggerLabel(trigger.label);
+      }
     }
-  }, [trigger.label]);
+  }, [textBasedLanguage, trigger.label]);
 
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
@@ -286,6 +294,7 @@ export function ChangeDataView({
             setPopoverIsOpen(false);
             setIsTextBasedLangSelected(true);
             // also update the query with the sql query
+            onTextLangQuerySubmit({ sql: `SELECT * FROM ${trigger.title}` });
           }}
         />
       );
@@ -301,39 +310,25 @@ export function ChangeDataView({
     setIsTextLangTransitionModalDismissed(true);
   }, [storage]);
 
-  const handleCloseTransitionModal = useCallback(
-    (shouldDismissModal: boolean) => {
+  const onModalClose = useCallback(
+    (shouldDismissModal: boolean, needsSave?: boolean) => {
       setIsTextLangTransitionModalVisible(false);
+      if (Boolean(needsSave)) {
+        onSaveTextLanguageQuery?.();
+      }
       setIsTextBasedLangSelected(false);
       // clean up the text based language query
-
+      onTextLangQuerySubmit();
+      setTriggerLabel(trigger.label);
       if (shouldDismissModal) {
         onTransitionModalDismiss();
       }
     },
-    [onTransitionModalDismiss]
-  );
-
-  const handleSaveTransitionModal = useCallback(
-    (shouldDismissModal: boolean) => {
-      setIsTextLangTransitionModalVisible(false);
-      onSaveTextLanguageQuery?.();
-      setIsTextBasedLangSelected(false);
-      // clean up the text based language query
-      if (shouldDismissModal) {
-        onTransitionModalDismiss();
-      }
-    },
-    [onSaveTextLanguageQuery, onTransitionModalDismiss]
+    [onSaveTextLanguageQuery, onTextLangQuerySubmit, onTransitionModalDismiss, trigger.label]
   );
 
   if (isTextLangTransitionModalVisible && !isTextLangTransitionModalDismissed) {
-    modal = (
-      <TextBasedLanguagesTransitionModal
-        onSave={handleSaveTransitionModal}
-        closeModal={handleCloseTransitionModal}
-      />
-    );
+    modal = <TextBasedLanguagesTransitionModal closeModal={onModalClose} />;
   }
 
   return (
