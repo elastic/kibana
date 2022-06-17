@@ -108,9 +108,7 @@ export const getLineAnnotationProps = (
       />
     ),
     // rotate the position if required
-    markerPosition: isHorizontal
-      ? mapVerticalToHorizontalPlacement(markerPositionVertical)
-      : markerPositionVertical,
+    markerPosition: markerPositionVertical,
   };
 };
 

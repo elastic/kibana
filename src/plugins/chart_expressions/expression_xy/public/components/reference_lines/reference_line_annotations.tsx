@@ -50,12 +50,13 @@ interface Props {
 
 const getRectDataValue = (
   annotationConfig: ReferenceLineAnnotationConfig,
-  formatter: FieldFormat | undefined
+  formatter: FieldFormat | undefined,
+  groupId: string
 ) => {
-  const { name, value, nextValue, fill, axisGroup } = annotationConfig;
+  const { name, value, nextValue, fill } = annotationConfig;
   const isFillAbove = fill === 'above';
 
-  if (axisGroup?.position === Position.Bottom) {
+  if (groupId === Position.Bottom) {
     return getBottomRect(name, isFillAbove, formatter, value, nextValue);
   }
 
@@ -103,7 +104,7 @@ export const ReferenceLineAnnotations: FC<Props> = ({
       key={`${id}-line`}
       dataValues={[dataValues]}
       domainType={
-        axisGroup?.position === Position.Bottom
+        props.groupId === Position.Bottom
           ? AnnotationDomainType.XDomain
           : AnnotationDomainType.YDomain
       }
@@ -113,7 +114,7 @@ export const ReferenceLineAnnotations: FC<Props> = ({
 
   let rect;
   if (fill && fill !== 'none') {
-    const rectDataValues = getRectDataValue(config, formatter);
+    const rectDataValues = getRectDataValue(config, formatter, props.groupId);
 
     rect = (
       <RectAnnotation
