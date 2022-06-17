@@ -47,6 +47,9 @@ export interface ConsoleDataState {
     /** The text the user is typing into the console input area */
     textEntered: string;
 
+    /** The command name that was entered (derived from `textEntered` */
+    commandEntered: string;
+
     /** Placeholder text for the input area **/
     placeholder: string;
 

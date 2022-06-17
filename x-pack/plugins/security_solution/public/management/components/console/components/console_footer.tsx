@@ -15,7 +15,7 @@ export const ConsoleFooter = memo(() => {
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="transparent">
       <EuiText size="xs" color="subdued" className="font-style-italic">
-        {'ConsoleFooter placeholder'}
+        {footerContent || <>&nbsp;</>}
       </EuiText>
     </EuiPanel>
   );

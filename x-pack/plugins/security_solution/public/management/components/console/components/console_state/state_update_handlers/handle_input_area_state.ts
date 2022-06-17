@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
+import { getCommandNameFromTextInput } from '../../../service/parsed_command_input';
 import { ConsoleDataAction, ConsoleStoreReducer } from '../types';
 
 export const INPUT_DEFAULT_PLACEHOLDER_TEXT = i18n.translate(
@@ -54,11 +55,20 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
     case 'updateInputTextEnteredState':
       if (state.input.textEntered !== payload.textEntered) {
+        const textEntered = payload.textEntered;
+        const commandEntered =
+          // If the user has typed a command (some text followed by at space),
+          // then parse it to get the command name.
+          textEntered.trimStart().indexOf(' ') !== -1
+            ? getCommandNameFromTextInput(textEntered)
+            : '';
+
         return {
           ...state,
           input: {
             ...state.input,
-            textEntered: payload.textEntered,
+            textEntered,
+            commandEntered,
           },
         };
       }

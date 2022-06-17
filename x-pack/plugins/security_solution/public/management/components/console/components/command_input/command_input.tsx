@@ -9,6 +9,7 @@ import React, { memo, MouseEventHandler, useCallback, useMemo, useRef, useState 
 import { CommonProps, EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { useInputHints } from './hooks/use_input_hints';
 import { InputPlaceholder } from './components/input_placeholder';
 import { useWithInputTextEntered } from '../../hooks/state_selectors/use_with_input_text_entered';
 import { InputAreaPopover } from './components/input_area_popover';
@@ -62,6 +63,7 @@ export interface CommandInputProps extends CommonProps {
 }
 
 export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ...commonProps }) => {
+  useInputHints();
   const dispatch = useConsoleStateDispatch();
   const textEntered = useWithInputTextEntered();
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
