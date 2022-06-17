@@ -335,7 +335,9 @@ export function XYChart({
   ].filter(Boolean);
 
   const shouldHideDetails = annotationsLayers.length > 0 ? annotationsLayers[0].hide : false;
-  const linesPaddings = !shouldHideDetails ? getLinesCausedPaddings(visualConfigs, yAxesMap, shouldRotate) : {};
+  const linesPaddings = !shouldHideDetails
+    ? getLinesCausedPaddings(visualConfigs, yAxesMap, shouldRotate)
+    : {};
 
   const getYAxesStyle = (axis: AxisConfiguration) => {
     const tickVisible = axis.showLabels;
