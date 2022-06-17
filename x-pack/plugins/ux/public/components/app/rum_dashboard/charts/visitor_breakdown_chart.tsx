@@ -73,9 +73,7 @@ export function VisitorBreakdownChart({
 
   return (
     <LensEmbeddableComponent
-      id={`ux-visitor-breakdown-${metric}`}
-      data-test-subj={`ux-visitor-breakdown-${metric}`}
-      title={`ux-visitor-breakdown-${metric}`}
+      id={`ux-visitor-breakdown-${metric.replaceAll('.', '-')}`}
       hidePanelTitles
       withDefaultActions
       style={{ minHeight: '250px', height: '100%' }}
