@@ -28,6 +28,7 @@ import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
+import { EphemeralTask } from './task';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
@@ -51,7 +52,7 @@ export interface TaskManagerSetupContract {
 
 export type TaskManagerStartContract = Pick<
   TaskScheduling,
-  'schedule' | 'ensureScheduled' | 'bulkUpdateSchedules'
+  'schedule' | 'ephemeralRunNow' | 'runNow' | 'ensureScheduled' | 'bulkUpdateSchedules'
 > &
   Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
@@ -117,6 +118,7 @@ export class TaskManagerPlugin
       kibanaIndexName: core.savedObjects.getKibanaIndex(),
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
+      shouldRunTasks,
     });
 
     core.status.derivedStatus$.subscribe((status) =>
@@ -189,7 +191,7 @@ export class TaskManagerPlugin
       startingPollInterval: this.config!.poll_interval,
     });
 
-    // Only run tasks if configured to do so
+    // Only poll for tasks if configured to run tasks
     if (shouldRunTasks) {
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
@@ -244,7 +246,8 @@ export class TaskManagerPlugin
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
-      // ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
+      runNow: (...args) => taskScheduling.runNow(...args),
+      ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
       supportsEphemeralTasks: () => this.config.ephemeral_tasks.enabled && shouldRunTasks,
     };
   }
