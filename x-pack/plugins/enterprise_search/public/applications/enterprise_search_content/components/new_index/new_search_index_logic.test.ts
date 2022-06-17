@@ -11,13 +11,9 @@ import { DEFAULT_LANGUAGE } from './constants';
 import { NewSearchIndexLogic } from './new_search_index_logic';
 
 const DEFAULT_VALUES = {
-  searchEngines: [],
-  searchEngineSelectOptions: [],
   rawName: '',
   name: '',
   language: DEFAULT_LANGUAGE,
-  selectedSearchEngines: [],
-  shouldCreateAlias: true,
 };
 
 describe('NewSearchIndexLogic', () => {
@@ -56,15 +52,6 @@ describe('NewSearchIndexLogic', () => {
 
       it('sets name to a sanitized value', () => {
         expect(NewSearchIndexLogic.values.name).toEqual('name-with-special-characters');
-      });
-    });
-
-    describe('toggleCreateAlias ', () => {
-      it('toggles shouldCreateAlias', () => {
-        NewSearchIndexLogic.actions.toggleCreateAlias();
-        expect(NewSearchIndexLogic.values.shouldCreateAlias).toEqual(false);
-        NewSearchIndexLogic.actions.toggleCreateAlias();
-        expect(NewSearchIndexLogic.values.shouldCreateAlias).toEqual(true);
       });
     });
   });
