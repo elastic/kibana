@@ -25,6 +25,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
     await retry.tryForTime(seconds * 1000, async () => {
       await browser.switchTab(tabIndex);
     });
+    await browser.setWindowSize(1920, 1080);
   }
 
   async function setFarequoteTimerange() {
