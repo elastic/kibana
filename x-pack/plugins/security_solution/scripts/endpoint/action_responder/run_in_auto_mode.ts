@@ -6,10 +6,9 @@
  */
 
 import type { RunContext } from '@kbn/dev-cli-runner';
+import { createRuntimeServices, RuntimeServices } from '../common/stack_services';
 import {
-  createRuntimeServices,
   fetchEndpointActionList,
-  RuntimeServices,
   sendEndpointActionResponse,
   sendFleetActionResponse,
   sleep,
@@ -17,8 +16,18 @@ import {
 
 const ACTION_RESPONSE_DELAY = 40_000;
 
-export const runInAutoMode = async (context: RunContext) => {
-  const runtimeServices = createRuntimeServices(context);
+export const runInAutoMode = async ({
+  log,
+  flags: { username, password, asSuperuser, kibana, elastic },
+}: RunContext) => {
+  const runtimeServices = await createRuntimeServices({
+    log,
+    password: password as string,
+    username: username as string,
+    asSuperuser: asSuperuser as boolean,
+    elasticsearchUrl: elastic as string,
+    kibanaUrl: kibana as string,
+  });
 
   do {
     await checkPendingActionsAndRespond(runtimeServices);

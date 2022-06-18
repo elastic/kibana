@@ -18,7 +18,6 @@ ${HORIZONTAL_LINE}
  Endpoint Action Responder
 ${HORIZONTAL_LINE}
 `);
-
       if (context.flags.auto) {
         return runInAutoMode(context);
       }
@@ -34,12 +33,13 @@ ${HORIZONTAL_LINE}
       description: 'Respond to pending Endpoint actions',
       flags: {
         string: ['kibana', 'elastic', 'username', 'password'],
-        boolean: ['auto'],
+        boolean: ['auto', 'asSuperuser'],
         default: {
           kibana: 'http://localhost:5601',
           elastic: 'http://localhost:9200',
           username: 'elastic',
           password: 'changeme',
+          asSuperuser: false,
         },
         help: `
         --auto              If used, tool will run in auto mode, checking for pending
@@ -49,6 +49,9 @@ ${HORIZONTAL_LINE}
                             **IMPORTANT:** This username's roles MUST have 'superuser']
                             and 'kibana_system' roles
         --password          User name Password (Default: changeme)
+        --asSuperuser       If defined, then a Security super user will be created using the
+                            the credentials defined via 'username' and 'password' options. This
+                            new user will then be used to run this utility.
         --kibana            The url to Kibana (Default: http://localhost:5601)
         --elastic           The url to Elasticsearch (Default: http:localholst:9200)
       `,
