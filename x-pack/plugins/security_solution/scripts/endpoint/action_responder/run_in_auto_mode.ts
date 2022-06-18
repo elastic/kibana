@@ -18,7 +18,7 @@ const ACTION_RESPONSE_DELAY = 40_000;
 
 export const runInAutoMode = async ({
   log,
-  flags: { username, password, asSuperuser, kibana, elastic },
+  flags: { username, password, asSuperuser, kibana, elastic, delay: _delay },
 }: RunContext) => {
   const runtimeServices = await createRuntimeServices({
     log,
@@ -29,13 +29,18 @@ export const runInAutoMode = async ({
     kibanaUrl: kibana as string,
   });
 
+  const delay = Number(_delay) || ACTION_RESPONSE_DELAY;
+
   do {
-    await checkPendingActionsAndRespond(runtimeServices);
-    await sleep(10_000);
+    await checkPendingActionsAndRespond(runtimeServices, { delay });
+    await sleep(5_000);
   } while (true);
 };
 
-const checkPendingActionsAndRespond = async ({ kbnClient, esClient, log }: RuntimeServices) => {
+const checkPendingActionsAndRespond = async (
+  { kbnClient, esClient, log }: RuntimeServices,
+  { delay = ACTION_RESPONSE_DELAY }: { delay?: number } = {}
+) => {
   let hasMore = true;
   let nextPage = 1;
 
@@ -52,7 +57,7 @@ const checkPendingActionsAndRespond = async ({ kbnClient, esClient, log }: Runti
 
       for (const action of actions) {
         if (action.isCompleted === false) {
-          if (Date.now() - new Date(action.startedAt).getTime() >= ACTION_RESPONSE_DELAY) {
+          if (Date.now() - new Date(action.startedAt).getTime() >= delay) {
             log.info(
               `[${new Date().toLocaleTimeString()}]: Responding to [${
                 action.command

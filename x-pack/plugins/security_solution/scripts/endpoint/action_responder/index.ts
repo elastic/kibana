@@ -32,7 +32,7 @@ ${HORIZONTAL_LINE}
     {
       description: 'Respond to pending Endpoint actions',
       flags: {
-        string: ['kibana', 'elastic', 'username', 'password'],
+        string: ['kibana', 'elastic', 'username', 'password', 'delay'],
         boolean: ['auto', 'asSuperuser'],
         default: {
           kibana: 'http://localhost:5601',
@@ -40,6 +40,7 @@ ${HORIZONTAL_LINE}
           username: 'elastic',
           password: 'changeme',
           asSuperuser: false,
+          delay: '',
         },
         help: `
         --auto              If used, tool will run in auto mode, checking for pending
@@ -52,6 +53,8 @@ ${HORIZONTAL_LINE}
         --asSuperuser       If defined, then a Security super user will be created using the
                             the credentials defined via 'username' and 'password' options. This
                             new user will then be used to run this utility.
+        --delay             The delay (in milliseconds) that should be applied before responding
+                            to an action. (Default: 40000 (40s))
         --kibana            The url to Kibana (Default: http://localhost:5601)
         --elastic           The url to Elasticsearch (Default: http:localholst:9200)
       `,
