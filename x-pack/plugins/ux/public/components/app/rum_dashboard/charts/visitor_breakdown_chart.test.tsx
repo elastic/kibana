@@ -24,7 +24,7 @@ describe('VisitorBreakdownChart', () => {
           environment: 'ENVIRONMENT_ALL',
         },
         urlQuery: 'elastic.co',
-        dataView: { id: 'Required' },
+        dataView: 'Required',
       };
 
       expect(getVisitorBreakdownLensAttributes(props)).toMatchSnapshot();
@@ -32,7 +32,7 @@ describe('VisitorBreakdownChart', () => {
   });
 
   describe('component', () => {
-    const mockEmbeddableComponent = jest.fn(() => <></>);
+    const mockEmbeddableComponent = jest.fn((_) => <></>);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -52,11 +52,12 @@ describe('VisitorBreakdownChart', () => {
           environment: 'ENVIRONMENT_ALL',
         },
         urlQuery: 'elastic.co',
-        dataView: { id: 'Required' },
+        dataView: 'Required',
       };
 
-      const { container } = render(<VisitorBreakdownChart {...props} />);
+      const { container: _ } = render(<VisitorBreakdownChart {...props} />);
 
+      expect(mockEmbeddableComponent).toHaveBeenCalledTimes(1);
       expect(mockEmbeddableComponent.mock.calls[0][0]).toEqual(
         expect.objectContaining({
           timeRange: {

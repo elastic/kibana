@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
 import {
   CountIndexPatternColumn,
   PersistedIndexPatternLayer,
@@ -37,7 +36,7 @@ interface LensAttributes {
   metric: string;
   uiFilters: UxUIFilters;
   urlQuery?: string;
-  dataView?: DataView;
+  dataView: string;
 }
 
 type Props = {
@@ -154,12 +153,12 @@ export function getVisitorBreakdownLensAttributes({
     title: `ux-visitor-breakdown-${metric}`,
     references: [
       {
-        id: dataView?.id ?? '',
+        id: dataView,
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: dataView?.id ?? '',
+        id: dataView,
         name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },

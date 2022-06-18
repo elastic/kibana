@@ -54,7 +54,7 @@ export function VisitorBreakdown() {
             </EuiLoadingEmbeddable>
           ) : (
             <VisitorBreakdownChart
-              dataView={dataView}
+              dataView={dataView?.id ?? ''}
               start={start ?? ''}
               end={end ?? ''}
               uiFilters={uxUiFilters}
@@ -79,7 +79,7 @@ export function VisitorBreakdown() {
             </EuiLoadingEmbeddable>
           ) : (
             <VisitorBreakdownChart
-              dataView={dataView}
+              dataView={dataView?.id ?? ''}
               start={start ?? ''}
               end={end ?? ''}
               uiFilters={uxUiFilters}
