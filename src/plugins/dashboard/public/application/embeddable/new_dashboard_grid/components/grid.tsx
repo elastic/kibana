@@ -106,7 +106,6 @@ export const Grid: FC<Props> = ({
 
     // This batches all the updates and only re-renders once you call grid.commit()
     grid.batchUpdate();
-
     grid.removeAll(false);
 
     panels.map((panel) => {

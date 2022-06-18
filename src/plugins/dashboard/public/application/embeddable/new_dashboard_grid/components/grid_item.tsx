@@ -7,12 +7,11 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React, { FC, ReactChildren } from 'react';
+import React, { FC } from 'react';
 import { GridStackWidget } from '../lib/gridstack_helpers';
 
 interface Props {
   panel: GridStackWidget;
-  children: ReactChildren;
 }
 
 export const GridItem: FC<Props> = ({ panel, children }) => {
