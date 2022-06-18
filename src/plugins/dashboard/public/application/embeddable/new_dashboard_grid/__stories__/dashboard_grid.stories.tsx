@@ -7,7 +7,8 @@
  */
 import React, { useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
-import 'gridstack/dist/h5/gridstack-dd-native';
+import { renderToString } from 'react-dom/server';
+// import 'gridstack/dist/h5/gridstack-dd-native';
 import { Grid } from '../components/grid';
 import { smallGridData, mediumGridData, largeGridData } from './fixtures';
 
@@ -58,6 +59,106 @@ export const MediumGridExample = () => {
 
 export const LargeGridExample = () => {
   return <TestReactGrid columns={48} gridData={largeGridData} />;
+};
+
+export const NestedGridsExample = () => {
+  const gridData = [
+    {
+      y: 0,
+      content: 'regular item',
+      x: 0,
+      w: 1,
+      h: 1,
+    },
+    {
+      x: 1,
+      w: 4,
+      h: 4,
+      subGrid: {
+        dragOut: true,
+        class: 'sub1',
+        cellHeight: 50,
+        column: 'auto',
+        acceptWidgets: true,
+        margin: 5,
+        children: [
+          {
+            x: 0,
+            y: 0,
+            content: '0',
+            w: 1,
+            h: 1,
+          },
+          {
+            x: 1,
+            y: 0,
+            content: '1',
+            w: 1,
+            h: 1,
+          },
+          {
+            x: 2,
+            y: 0,
+            content: '2',
+            w: 1,
+            h: 1,
+          },
+          {
+            x: 3,
+            y: 0,
+            content: '3',
+            w: 1,
+            h: 1,
+          },
+          {
+            x: 0,
+            y: 1,
+            content: '4',
+            w: 1,
+            h: 1,
+          },
+          {
+            x: 1,
+            y: 1,
+            content: '5',
+            w: 1,
+            h: 1,
+          },
+        ],
+      },
+      y: 0,
+    },
+    {
+      x: 5,
+      w: 3,
+      h: 4,
+      subGrid: {
+        class: 'sub2',
+        cellHeight: 50,
+        column: 'auto',
+        acceptWidgets: true,
+        margin: 5,
+        children: [
+          {
+            x: 0,
+            y: 0,
+            content: '6',
+            w: 1,
+            h: 1,
+          },
+          {
+            x: 0,
+            y: 1,
+            w: 2,
+            content: '7',
+            h: 1,
+          },
+        ],
+      },
+      y: 0,
+    },
+  ];
+  return <Grid columns={12} gridData={gridData} />;
 };
 
 export const LogsDashboardExample = () => {

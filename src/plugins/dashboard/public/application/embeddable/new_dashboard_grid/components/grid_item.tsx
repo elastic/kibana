@@ -7,31 +7,48 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { GridStackWidget } from 'gridstack';
-import React, { FC } from 'react';
+import React, { FC, ReactChildren } from 'react';
+import { GridStackWidget } from '../lib/gridstack_helpers';
 
 interface Props {
-  panel: GridStackWidget & { render?: () => JSX.Element };
-  callbackRef: (element: HTMLDivElement) => void;
+  panel: GridStackWidget;
+  children: ReactChildren;
 }
 
-export const GridItem: FC<Props> = ({ panel, callbackRef }) => {
+export const GridItem: FC<Props> = ({ panel, children }) => {
+  const content = panel.render ? panel.render() : panel.content;
+
   return (
-    <div
+    <EuiPanel
       key={panel.id}
+<<<<<<< HEAD
       id={panel.id as string}
       ref={(element) => callbackRef(element!)}
       className="grid-stack-item embPanel"
+=======
+      hasShadow
+      hasBorder
+      className={'grid-stack-item-content'}
+      paddingSize="m"
+>>>>>>> 7881fa4dd36 (Added support for JSX wrapper for widgets with sub grids)
     >
-      <EuiPanel
-        key={panel.id}
-        hasShadow
-        hasBorder
-        className={'grid-stack-item-content'}
-        paddingSize="s"
-      >
-        {panel.render ? panel.render() : panel.content}
-      </EuiPanel>
-    </div>
+      <span data-test-subj="dashboardPanelTitle__wrapper">
+        <figcaption className="embPanel__header" data-test-subj="embeddablePanelHeading-">
+          <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
+            <span className="embPanel__titleInner">
+              <button
+                className="euiLink embPanel__titleText embPanel__placeholderTitleText css-qzrsgm-euiLink-text"
+                type="button"
+                data-test-subj="embeddablePanelTitleLink"
+                aria-label="Click to edit title: [No Title]"
+              >
+                {content}
+              </button>
+            </span>
+          </h2>
+        </figcaption>
+      </span>
+      {children}
+    </EuiPanel>
   );
 };
