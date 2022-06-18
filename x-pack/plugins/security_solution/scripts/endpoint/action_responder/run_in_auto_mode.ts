@@ -47,11 +47,15 @@ const checkPendingActionsAndRespond = async ({ kbnClient, esClient, log }: Runti
             log.info(
               `[${new Date().toLocaleTimeString()}]: Responding to [${
                 action.command
-              }] action [id: ${action.id} | agent: ${action.agents.join(', ')}]`
+              }] action [id: ${action.id}] agent: [${action.agents.join(', ')}]`
             );
 
-            await sendFleetActionResponse(esClient, action);
-            await sendEndpointActionResponse(esClient, action);
+            const fleetResponse = await sendFleetActionResponse(esClient, action);
+
+            // If not a fleet response error, then also sent the Endpoint Response
+            if (!fleetResponse.error) {
+              await sendEndpointActionResponse(esClient, action);
+            }
           }
         }
       }

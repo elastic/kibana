@@ -90,7 +90,13 @@ export const sendFleetActionResponse = async (
     },
   });
 
-  delete fleetResponse.error;
+  // 30% of the time we generate an error
+  if (fleetActionGenerator.randomFloat() < 0.3) {
+    fleetResponse.action_response = {};
+  } else {
+    // show it as success (generator currently always generates a `error`, so delete it)
+    delete fleetResponse.error;
+  }
 
   await esClient.index(
     {
@@ -108,6 +114,8 @@ export const sendEndpointActionResponse = async (
   esClient: Client,
   action: ActionDetails
 ): Promise<LogsEndpointActionResponse> => {
+  // FIXME:PT Generate command specific responses
+
   const endpointResponse = endpointActionGenerator.generateResponse({
     agent: { id: action.agents[0] },
     EndpointActions: {
@@ -119,6 +127,13 @@ export const sendEndpointActionResponse = async (
       started_at: action.startedAt,
     },
   });
+
+  // 30% of the time we generate an error
+  if (endpointActionGenerator.randomFloat() < 0.3) {
+    endpointResponse.error = {
+      message: 'Endpoint encountered an error',
+    };
+  }
 
   await esClient.index({
     index: ENDPOINT_ACTION_RESPONSES_INDEX,
