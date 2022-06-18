@@ -7,7 +7,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiBadge, EuiBadgeGroup, EuiBadgeProps, EuiHeaderLinks } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiBadgeProps, EuiHeaderLinks, EuiToolTip, ToolTipPositions} from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '@kbn/core/public';
@@ -20,7 +20,7 @@ import { TopNavMenuItem } from './top_nav_menu_item';
 export type TopNavMenuProps = StatefulSearchBarProps &
   Omit<SearchBarProps, 'kibana' | 'intl' | 'timeHistory'> & {
     config?: TopNavMenuData[];
-    badges?: Array<EuiBadgeProps & { badgeText: string }>;
+    badges?: Array<EuiBadgeProps & { badgeText: string, toolTipProps: { content: string; position: ToolTipPositions }}>;
     showSearchBar?: boolean;
     showQueryBar?: boolean;
     showQueryInput?: boolean;
@@ -70,12 +70,15 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     if (!badges || badges.length === 0) return null;
     return (
       <EuiBadgeGroup className={'kbnTopNavMenu__badgeGroup'}>
-        {badges.map((badge: EuiBadgeProps & { badgeText: string }, i: number) => {
-          const { badgeText, ...badgeProps } = badge;
+        {badges.map((badge: EuiBadgeProps & { badgeText: string, toolTipProps: { content: string; position: string }}, i: number) => {
+          const { badgeText, toolTipProps, ...badgeProps } = badge;
           return (
-            <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
-              {badgeText}
-            </EuiBadge>
+            <EuiToolTip content={toolTipProps.content} position={toolTipProps.position as ToolTipPositions} 
+            >
+              <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
+                  {badgeText}
+              </EuiBadge>
+            </EuiToolTip>
           );
         })}
       </EuiBadgeGroup>
