@@ -7,7 +7,14 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiBadge, EuiBadgeGroup, EuiBadgeProps, EuiHeaderLinks } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiBadgeProps,
+  EuiHeaderLinks,
+  EuiToolTip,
+  ToolTipPositions,
+} from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '@kbn/core/public';
@@ -22,7 +29,12 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> =
   StatefulSearchBarProps<QT> &
     Omit<SearchBarProps<QT>, 'kibana' | 'intl' | 'timeHistory'> & {
       config?: TopNavMenuData[];
-      badges?: Array<EuiBadgeProps & { badgeText: string }>;
+      badges?: Array<
+        EuiBadgeProps & {
+          badgeText: string;
+          toolTipProps: { content: string; position: ToolTipPositions };
+        }
+      >;
       showSearchBar?: boolean;
       showQueryInput?: boolean;
       showDatePicker?: boolean;
@@ -73,14 +85,27 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
     if (!badges || badges.length === 0) return null;
     return (
       <EuiBadgeGroup className={'kbnTopNavMenu__badgeGroup'}>
-        {badges.map((badge: EuiBadgeProps & { badgeText: string }, i: number) => {
-          const { badgeText, ...badgeProps } = badge;
-          return (
-            <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
-              {badgeText}
-            </EuiBadge>
-          );
-        })}
+        {badges.map(
+          (
+            badge: EuiBadgeProps & {
+              badgeText: string;
+              toolTipProps: { content: string; position: string };
+            },
+            i: number
+          ) => {
+            const { badgeText, toolTipProps, ...badgeProps } = badge;
+            return (
+              <EuiToolTip
+                content={toolTipProps.content}
+                position={toolTipProps.position as ToolTipPositions}
+              >
+                <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
+                  {badgeText}
+                </EuiBadge>
+              </EuiToolTip>
+            );
+          }
+        )}
       </EuiBadgeGroup>
     );
   }
