@@ -7,6 +7,8 @@
  */
 import React from 'react';
 import { action } from '@storybook/addon-actions';
+import { within, userEvent } from '@storybook/testing-library';
+import { expect } from '@storybook/jest';
 
 import { NoDataViewsPrompt as NoDataViewsPromptComponent } from './no_data_views.component';
 import { NoDataViewsPrompt } from './no_data_views';
@@ -56,7 +58,22 @@ const componentArgTypes = {
 };
 
 export const NoDataViewsComponent = (params: Record<keyof typeof componentArgTypes, any>) => {
-  return <NoDataViewsPromptComponent onClickCreate={action('onClick')} {...params} />;
+  return <NoDataViewsPromptComponent {...params} />;
+};
+
+NoDataViewsComponent.play = async ({
+  args,
+  canvasElement,
+}: {
+  args: Record<keyof typeof componentArgTypes, any>;
+  canvasElement: HTMLElement;
+}) => {
+  const canvas = within(canvasElement);
+
+  const createDataViewButton = canvas.getByRole('button');
+  await userEvent.click(createDataViewButton);
+
+  expect(args.onClickCreate).toHaveBeenCalled();
 };
 
 NoDataViewsComponent.argTypes = componentArgTypes;

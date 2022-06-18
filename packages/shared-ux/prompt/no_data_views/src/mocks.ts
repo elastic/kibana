@@ -33,6 +33,7 @@ export const getStoryArgTypes = () => ({
     options: ['some/link', undefined],
     control: { type: 'radio' },
   },
+  onClickCreate: { action: true },
 });
 
 export const getMockServices = (params?: Params) => {

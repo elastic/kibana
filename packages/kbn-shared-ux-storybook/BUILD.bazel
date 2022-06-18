@@ -40,7 +40,10 @@ RUNTIME_DEPS = [
   "//packages/kbn-shared-ux-services",
   "//packages/kbn-storybook",
   "@npm//@storybook/react",
+  "@npm//@storybook/jest",
   "@npm//@storybook/addon-actions",
+  "@npm//@storybook/addon-interactions",
+  "@npm//@storybook/testing-library",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -61,6 +64,8 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@storybook/react",
   "@npm//@storybook/addon-actions",
+  "@npm//@storybook/addon-interactions",
+  "@npm//@storybook/testing-library",
 ]
 
 jsts_transpiler(
