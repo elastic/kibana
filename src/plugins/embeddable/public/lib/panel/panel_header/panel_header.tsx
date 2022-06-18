@@ -151,12 +151,6 @@ export function PanelHeader({
       </span>
     );
   };
-  
-  if (hidePanelTitle) {
-   return (
-  <div data-test-subj="dashboardPanelTitle__wrapper" className={classes} style={{visibility:'collapse'}}></div> 
-    );
-  }
 
   if (!showPanelBar) {
     return (
@@ -170,6 +164,17 @@ export function PanelHeader({
         />
         <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
       </div>
+    );
+  } else if (hidePanelTitle) {
+    return (
+    <PanelOptionsMenu
+          getActionContextMenuPanel={getActionContextMenuPanel}
+          isViewMode={isViewMode}
+          closeContextMenu={closeContextMenu}
+          title={title}
+          index={index}
+        />
+        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
     );
   }
 
