@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
-      await PageObjects.common.navigateToUrl('kibana_overview');
+      await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
