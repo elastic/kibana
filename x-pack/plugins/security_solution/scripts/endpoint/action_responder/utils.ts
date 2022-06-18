@@ -9,9 +9,27 @@ import { KbnClient } from '@kbn/test';
 import type { RunContext } from '@kbn/dev-cli-runner';
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../common/endpoint/constants';
-import { ActionListApiResponse } from '../../../common/endpoint/types';
+import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
+import {
+  ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINTS_ACTION_LIST_ROUTE,
+} from '../../../common/endpoint/constants';
+import {
+  ActionDetails,
+  ActionListApiResponse,
+  EndpointActionData,
+  EndpointActionResponse,
+  LogsEndpointActionResponse,
+} from '../../../common/endpoint/types';
 import { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
+import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
+
+const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
+
+export const fleetActionGenerator = new FleetActionGenerator();
+
+export const endpointActionGenerator = new EndpointActionGenerator();
 
 export const sleep = (ms: number = 1000) => new Promise((r) => setTimeout(r, ms));
 
@@ -58,6 +76,55 @@ export const fetchEndpointActionList = async (
   ).data;
 };
 
-export const sendFleetActionResponse = async () => {};
+export const sendFleetActionResponse = async (
+  esClient: Client,
+  action: ActionDetails
+): Promise<EndpointActionResponse> => {
+  const fleetResponse = fleetActionGenerator.generateResponse({
+    action_id: action.id,
+    agent_id: action.agents[0],
+    action_response: {
+      endpoint: {
+        ack: true,
+      },
+    },
+  });
 
-export const sendEndpointActionResponse = async () => {};
+  delete fleetResponse.error;
+
+  await esClient.index(
+    {
+      index: AGENT_ACTIONS_RESULTS_INDEX,
+      body: fleetResponse,
+      refresh: 'wait_for',
+    },
+    ES_INDEX_OPTIONS
+  );
+
+  return fleetResponse;
+};
+
+export const sendEndpointActionResponse = async (
+  esClient: Client,
+  action: ActionDetails
+): Promise<LogsEndpointActionResponse> => {
+  const endpointResponse = endpointActionGenerator.generateResponse({
+    agent: { id: action.agents[0] },
+    EndpointActions: {
+      action_id: action.id,
+      data: {
+        command: action.command as EndpointActionData['command'],
+        comment: '',
+      },
+      started_at: action.startedAt,
+    },
+  });
+
+  await esClient.index({
+    index: ENDPOINT_ACTION_RESPONSES_INDEX,
+    body: endpointResponse,
+    refresh: 'wait_for',
+  });
+
+  return endpointResponse;
+};

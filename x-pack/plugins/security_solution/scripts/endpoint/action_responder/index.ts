@@ -44,8 +44,11 @@ ${HORIZONTAL_LINE}
         help: `
         --auto              If used, tool will run in auto mode, checking for pending
                             actions periodically and auto responding to them.
-        --username          User ID (Default: elastic)
-        --password          User ID Password (Default: changeme)
+        --username          User name to be used for auth against elasticsearch and
+                            kibana (Default: elastic).
+                            **IMPORTANT:** This username's roles MUST have 'superuser']
+                            and 'kibana_system' roles
+        --password          User name Password (Default: changeme)
         --kibana            The url to Kibana (Default: http://localhost:5601)
         --elastic           The url to Elasticsearch (Default: http:localholst:9200)
       `,

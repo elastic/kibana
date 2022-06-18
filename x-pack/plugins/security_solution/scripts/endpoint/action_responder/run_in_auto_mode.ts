@@ -6,7 +6,14 @@
  */
 
 import type { RunContext } from '@kbn/dev-cli-runner';
-import { createRuntimeServices, fetchEndpointActionList, RuntimeServices, sleep } from './utils';
+import {
+  createRuntimeServices,
+  fetchEndpointActionList,
+  RuntimeServices,
+  sendEndpointActionResponse,
+  sendFleetActionResponse,
+  sleep,
+} from './utils';
 
 const ACTION_RESPONSE_DELAY = 40_000;
 
@@ -19,7 +26,7 @@ export const runInAutoMode = async (context: RunContext) => {
   } while (true);
 };
 
-const checkPendingActionsAndRespond = async ({ kbnClient, log }: RuntimeServices) => {
+const checkPendingActionsAndRespond = async ({ kbnClient, esClient, log }: RuntimeServices) => {
   let hasMore = true;
   let nextPage = 1;
 
@@ -36,7 +43,14 @@ const checkPendingActionsAndRespond = async ({ kbnClient, log }: RuntimeServices
     for (const action of actions) {
       if (action.isCompleted === false) {
         if (Date.now() - new Date(action.startedAt).getTime() >= ACTION_RESPONSE_DELAY) {
-          log.info(`Responding to [${action.command}] action [id: ${action.id}]`);
+          log.info(
+            `[${new Date().toLocaleTimeString()}]: Responding to [${action.command}] action [id: ${
+              action.id
+            }]`
+          );
+
+          await sendFleetActionResponse(esClient, action);
+          await sendEndpointActionResponse(esClient, action);
         }
       }
     }
