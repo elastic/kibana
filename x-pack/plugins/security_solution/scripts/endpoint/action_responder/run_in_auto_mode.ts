@@ -30,29 +30,34 @@ const checkPendingActionsAndRespond = async ({ kbnClient, esClient, log }: Runti
   let hasMore = true;
   let nextPage = 1;
 
-  while (hasMore) {
-    const { data: actions } = await fetchEndpointActionList(kbnClient, {
-      page: nextPage++,
-      pageSize: 100,
-    });
+  try {
+    while (hasMore) {
+      const { data: actions } = await fetchEndpointActionList(kbnClient, {
+        page: nextPage++,
+        pageSize: 100,
+      });
 
-    if (actions.length === 0) {
-      hasMore = false;
-    }
+      if (actions.length === 0) {
+        hasMore = false;
+      }
 
-    for (const action of actions) {
-      if (action.isCompleted === false) {
-        if (Date.now() - new Date(action.startedAt).getTime() >= ACTION_RESPONSE_DELAY) {
-          log.info(
-            `[${new Date().toLocaleTimeString()}]: Responding to [${action.command}] action [id: ${
-              action.id
-            }]`
-          );
+      for (const action of actions) {
+        if (action.isCompleted === false) {
+          if (Date.now() - new Date(action.startedAt).getTime() >= ACTION_RESPONSE_DELAY) {
+            log.info(
+              `[${new Date().toLocaleTimeString()}]: Responding to [${
+                action.command
+              }] action [id: ${action.id} | agent: ${action.agents.join(', ')}]`
+            );
 
-          await sendFleetActionResponse(esClient, action);
-          await sendEndpointActionResponse(esClient, action);
+            await sendFleetActionResponse(esClient, action);
+            await sendEndpointActionResponse(esClient, action);
+          }
         }
       }
     }
+  } catch (e) {
+    log.error(`${e.message}. Run with '--verbose' option to see more`);
+    log.verbose(e);
   }
 };
