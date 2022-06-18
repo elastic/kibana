@@ -17,7 +17,11 @@ import {
   EuiTableRowCell,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
+import {
+  Request,
+  RequestStatistic,
+  RequestStatistics,
+} from '../../../../../common/adapters/request/types';
 import { RequestDetailsProps } from '../types';
 import { findIndexFilters } from './helpers';
 
@@ -61,25 +65,29 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
 
   render() {
     const { stats, json } = this.props.request;
-    const indexFilters = this.props.extraInfo
-      ? {
-          indexPatterns: {
-            id: 'indexPatterns',
-            description: 'Active index patterns',
-            label: 'index pattern',
-            value: findIndexFilters(json),
-          },
-        }
-      : null;
+    const indexFilters = findIndexFilters(json);
+    const indexFiltersStats =
+      indexFilters.length > 0
+        ? {
+            indexPatterns: {
+              id: 'indexFilters',
+              description: 'Active index patterns',
+              label: 'index pattern',
+              value: indexFilters.join(', '),
+            },
+          }
+        : null;
 
     if (!stats) {
       return null;
     }
 
-    const mergedStats = {
-      ...stats,
-      ...(this.props.extraInfo ? indexFilters : {}),
-    };
+    const mergedStats: RequestStatistics = indexFiltersStats
+      ? {
+          ...stats,
+          ...indexFiltersStats,
+        }
+      : stats;
 
     const sortedStats = Object.keys(mergedStats)
       .sort()

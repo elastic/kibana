@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-const hasIndexFilter = (query: unknown, indexFilters: string[]) => {
-  if (typeof query !== 'string' && typeof query !== 'number' && query != null) {
+const hasIndexFilter = (query: unknown, indexFilters: Set<string>) => {
+  if (typeof query === 'object' && query != null) {
     Object.keys(query).forEach((key) => {
       if (key === '_index') {
-        indexFilters.push(query[key]);
+        indexFilters.add(query[key]);
       } else {
         hasIndexFilter(query[key], indexFilters);
       }
@@ -18,8 +18,8 @@ const hasIndexFilter = (query: unknown, indexFilters: string[]) => {
   }
   return indexFilters;
 };
-export const findIndexFilters = (query: object) => {
-  const indexFilters: string[] = [];
+export const findIndexFilters = (query: object | null | undefined) => {
+  const indexFilters = new Set<string>();
   hasIndexFilter(query, indexFilters);
-  return indexFilters.join(' ,');
+  return [...indexFilters];
 };

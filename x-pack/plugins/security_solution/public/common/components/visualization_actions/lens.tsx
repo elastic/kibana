@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { useDispatch } from 'react-redux';
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -31,29 +32,10 @@ const LensEmbeddableComponent = ({
   });
   const LensComponent = lens.EmbeddableComponent;
 
-  const [isPopoverOpen, setPopover] = useState(false);
-  const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
-
-  const closePopover = () => {
-    setPopover(false);
-  };
-
-  const onOpenInspectModal = useCallback(() => {
-    closePopover();
-    setIsInspectModalOpen(true);
-  }, []);
-
-  const onCloseInspectModal = useCallback(() => {
-    setIsInspectModalOpen(false);
-  }, []);
-
-  const handleInspectButtonClick = useCallback((prev) => !prev, []);
-
   const actions = useActions({
     withActions: true,
     attributes,
     timeRange: timerange,
-    handleInspectButtonClick,
   });
 
   return attributes ? (
@@ -75,6 +57,7 @@ const LensEmbeddableComponent = ({
             })
           );
         }}
+        viewMode={ViewMode.VIEW}
         onFilter={
           (/* _data*/) => {
             // call back event for on filter event
@@ -86,6 +69,7 @@ const LensEmbeddableComponent = ({
           }
         }
         withDefaultActions={true}
+        extraActions={actions}
       />
     </>
   ) : null;

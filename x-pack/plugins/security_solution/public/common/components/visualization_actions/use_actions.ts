@@ -6,38 +6,36 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { useKibana } from '../../lib/kibana/kibana_react';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useAddToNewCase } from './use_add_to_new_case';
 
 import { useGetUserCasesPermissions } from '../../lib/kibana';
-import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE, INSPECT, OPEN_IN_LENS } from './translations';
+import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE, OPEN_IN_LENS } from './translations';
+import { LensAttributes } from './types';
 
-export type ActionTypes = 'inspect' | 'addToExistingCase' | 'addToNewCase' | 'openInLens';
+export type ActionTypes = 'addToExistingCase' | 'addToNewCase' | 'openInLens';
 
 export function useActions({
   withActions,
   attributes,
   timeRange,
-  handleInspectButtonClick,
 }: {
   withActions?: boolean | ActionTypes[];
 
-  attributes: AllSeries;
+  attributes: LensAttributes | null;
 
   timeRange: { from: string; to: string };
-  handleInspectButtonClick: () => void;
 }) {
   const { lens } = useKibana().services;
-  const { canUseEditor, navigateToPrefilledEditor } = lens;
+  const { navigateToPrefilledEditor } = lens;
   const userPermissions = useGetUserCasesPermissions();
   const userCanCrud = userPermissions?.crud ?? false;
   const [defaultActions, setDefaultActions] = useState([
+    'openInLens',
     'addToNewCase',
     'addToExistingCase',
-    'OpenInLens',
   ]);
 
   useEffect(() => {
@@ -50,7 +48,6 @@ export function useActions({
   }, [withActions]);
 
   const onOpenInLens = useCallback(() => {
-    closePopover();
     if (!timeRange || !attributes) {
       return;
     }
@@ -66,41 +63,32 @@ export function useActions({
     );
   }, [attributes, navigateToPrefilledEditor, timeRange]);
 
-  const [isPopoverOpen, setPopover] = useState(false);
-
-  const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
-
-  const closePopover = () => {
-    setPopover(false);
-  };
-
   const { disabled: isAddToExistingCaseDisabled, onAddToExistingCaseClicked } =
     useAddToExistingCase({
-      onAddToCaseClicked: closePopover,
       lensAttributes: attributes,
       timeRange,
       userCanCrud,
     });
 
   const { onAddToNewCaseClicked, disabled: isAddToNewCaseDisabled } = useAddToNewCase({
-    onClick: closePopover,
     timeRange,
     lensAttributes: attributes,
     userCanCrud,
   });
 
-  return defaultActions.map<Action>((action) => {
+  return defaultActions.reduce<Action[]>((acc, action) => {
     if (action === 'addToExistingCase') {
-      return getAddToExistingCaseAction({ callback: onAddToExistingCaseClicked });
+      return [...acc, getAddToExistingCaseAction({ callback: onAddToExistingCaseClicked })];
     }
     if (action === 'addToNewCase') {
-      return getAddToNewCaseAction({ callback: onAddToNewCaseClicked });
+      return [...acc, getAddToNewCaseAction({ callback: onAddToNewCaseClicked })];
     }
     if (action === 'openInLens') {
-      return getOpenInLensAction({ callback: onOpenInLens });
+      return [...acc, getOpenInLensAction({ callback: onOpenInLens })];
     }
-    if (action === 'inspect') return getInspectAction({ callback: handleInspectButtonClick });
-  });
+
+    return acc;
+  }, []);
 }
 
 const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => {
@@ -109,25 +97,6 @@ const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => 
 
     getDisplayName(context: ActionExecutionContext<object>): string {
       return OPEN_IN_LENS;
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'inspect';
-    },
-    type: 'actionButton',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
-    },
-  };
-};
-
-const getInspectAction = ({ callback }: { callback: () => void }): Action => {
-  return {
-    id: 'inspect',
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return INSPECT;
     },
     getIconType(context: ActionExecutionContext<object>): string | undefined {
       return 'visArea';
@@ -139,29 +108,6 @@ const getInspectAction = ({ callback }: { callback: () => void }): Action => {
     async execute(context: ActionExecutionContext<object>): Promise<void> {
       callback();
     },
-    order: 50,
-  };
-};
-
-const getSaveAction = ({ callback }: { callback: () => void }): Action => {
-  return {
-    id: 'expViewSave',
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return i18n.translate('xpack.observability.expView.save', {
-        defaultMessage: 'Save visualization',
-      });
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'save';
-    },
-    type: 'actionButton',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
-    },
-    order: 49,
   };
 };
 
