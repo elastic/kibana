@@ -17,11 +17,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('overview page - page header', function describeIndexTests() {
     before(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
-      await PageObjects.common.navigateToUrl('kibana_overview');
+      await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
@@ -33,9 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on integrations leads to integrations', async () => {
-      await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
       const headerItems = await find.byCssSelector('.euiPageHeaderContent__rightSideItems');
       const items = await headerItems.findAllByCssSelector('.kbnRedirectCrossAppLinks');
       expect(items!.length).to.be(3);
