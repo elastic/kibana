@@ -6,7 +6,10 @@
  */
 
 import type { RunContext } from '@kbn/dev-cli-runner';
+import { set } from 'lodash';
+import { ActionDetails } from '../../../common/endpoint/types';
 import { createRuntimeServices, RuntimeServices } from '../common/stack_services';
+
 import {
   fetchEndpointActionList,
   sendEndpointActionResponse,
@@ -28,6 +31,17 @@ export const runInAutoMode = async ({
     elasticsearchUrl: elastic as string,
     kibanaUrl: kibana as string,
   });
+
+  log.write(`TIP:  the following tokens can be used in the Action request 'comment' to drive
+      the type of response that is sent:
+      Token                         Description
+      ---------------------------   -------------------------------------------------------
+      RESPOND.STATE=SUCCESS         Will ensure the Endpoint Action response is success
+      RESPOND.STATE=FAILURE         Will ensure the Endpoint Action response is a failure
+      RESPOND.FLEET.STATE=SUCCESS   Will ensure the Fleet Action response is success
+      RESPOND.FLEET.STATE=FAILURE   Will ensure the Fleet Action response is a failure
+
+`);
 
   const delay = Number(_delay) || ACTION_RESPONSE_DELAY;
 
@@ -64,11 +78,19 @@ const checkPendingActionsAndRespond = async (
               }] action [id: ${action.id}] agent: [${action.agents.join(', ')}]`
             );
 
-            const fleetResponse = await sendFleetActionResponse(esClient, action);
+            const tokens = parseCommentTokens(getActionComment(action));
+
+            log.verbose('tokens found in action:', tokens);
+
+            const fleetResponse = await sendFleetActionResponse(esClient, action, {
+              // If an Endpoint state token was found, then force the Fleet response to `success`
+              // so that we can actually generate an endpoint response below.
+              state: tokens.state ? 'success' : tokens.fleet.state,
+            });
 
             // If not a fleet response error, then also sent the Endpoint Response
             if (!fleetResponse.error) {
-              await sendEndpointActionResponse(esClient, action);
+              await sendEndpointActionResponse(esClient, action, { state: tokens.state });
             }
           }
         }
@@ -78,4 +100,53 @@ const checkPendingActionsAndRespond = async (
     log.error(`${e.message}. Run with '--verbose' option to see more`);
     log.verbose(e);
   }
+};
+
+interface CommentTokens {
+  state: 'success' | 'failure' | undefined;
+  fleet: {
+    state: 'success' | 'failure' | undefined;
+  };
+}
+
+const parseCommentTokens = (comment: string): CommentTokens => {
+  const response: CommentTokens = {
+    state: undefined,
+    fleet: {
+      state: undefined,
+    },
+  };
+
+  if (comment) {
+    const findTokensRegExp = /(respond\.\S*=\S*)/gi;
+    let matches;
+
+    while ((matches = findTokensRegExp.exec(comment)) !== null) {
+      const [key, value] = matches[0]
+        .toLowerCase()
+        .split('=')
+        .map((s) => s.trim());
+
+      set(response, key.split('.').slice(1), value);
+    }
+  }
+  return response;
+};
+
+const getActionComment = (action: ActionDetails): string => {
+  const actionRequest = action.logEntries.find(
+    (entry) => entry.type === 'fleetAction' || entry.type === 'action'
+  );
+
+  if (actionRequest) {
+    if (actionRequest.type === 'fleetAction') {
+      return actionRequest.item.data.data.comment ?? '';
+    }
+
+    if (actionRequest.type === 'action') {
+      return actionRequest.item.data.EndpointActions.data.comment ?? '';
+    }
+  }
+
+  return '';
 };

@@ -46,7 +46,8 @@ export const fetchEndpointActionList = async (
 
 export const sendFleetActionResponse = async (
   esClient: Client,
-  action: ActionDetails
+  action: ActionDetails,
+  { state }: { state?: 'success' | 'failure' } = {}
 ): Promise<EndpointActionResponse> => {
   const fleetResponse = fleetActionGenerator.generateResponse({
     action_id: action.id,
@@ -59,7 +60,7 @@ export const sendFleetActionResponse = async (
   });
 
   // 30% of the time we generate an error
-  if (fleetActionGenerator.randomFloat() < 0.3) {
+  if (state === 'failure' || (!state && fleetActionGenerator.randomFloat() < 0.3)) {
     fleetResponse.action_response = {};
     fleetResponse.error = 'Agent failed to deliver message to endpoint due to unknown error';
   } else {
@@ -81,7 +82,8 @@ export const sendFleetActionResponse = async (
 
 export const sendEndpointActionResponse = async (
   esClient: Client,
-  action: ActionDetails
+  action: ActionDetails,
+  { state }: { state?: 'success' | 'failure' } = {}
 ): Promise<LogsEndpointActionResponse> => {
   // FIXME:PT Generate command specific responses
 
@@ -98,7 +100,7 @@ export const sendEndpointActionResponse = async (
   });
 
   // 30% of the time we generate an error
-  if (endpointActionGenerator.randomFloat() < 0.3) {
+  if (state === 'failure' || (state !== 'success' && endpointActionGenerator.randomFloat() < 0.3)) {
     endpointResponse.error = {
       message: 'Endpoint encountered an error and was unable to apply action to host',
     };
