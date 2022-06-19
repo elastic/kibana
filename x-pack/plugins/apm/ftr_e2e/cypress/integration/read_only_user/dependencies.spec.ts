@@ -31,7 +31,7 @@ describe('Dependencies', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   describe('top-level dependencies page', () => {

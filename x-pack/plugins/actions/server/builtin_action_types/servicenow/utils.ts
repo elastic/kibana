@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import {
   ExternalServiceCredentials,
@@ -83,12 +83,12 @@ export const throwIfSubActionIsNotSupported = ({
 };
 
 export interface GetAxiosInstanceOpts {
-  connectorId?: string;
+  connectorId: string;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   credentials: ExternalServiceCredentials;
   snServiceUrl: string;
-  connectorTokenClient?: ConnectorTokenClientContract;
+  connectorTokenClient: ConnectorTokenClientContract;
 }
 
 export const getAxiosInstance = ({
@@ -134,11 +134,28 @@ export const getAxiosInstance = ({
           tokenUrl: `${snServiceUrl}/oauth_token.do`,
           connectorTokenClient,
         });
-        axiosConfig.headers.Authorization = accessToken;
+        if (!accessToken) {
+          throw new Error(`Unable to retrieve access token for connectorId: ${connectorId}`);
+        }
+        axiosConfig.headers = { ...axiosConfig.headers, Authorization: accessToken };
         return axiosConfig;
       },
       (error) => {
-        Promise.reject(error);
+        return Promise.reject(error);
+      }
+    );
+    axiosInstance.interceptors.response.use(
+      (response: AxiosResponse) => response,
+      async (error) => {
+        const statusCode = error?.response?.status;
+
+        // Look for 4xx errors that indicate something is wrong with the request
+        // We don't know for sure that it is an access token issue but remove saved
+        // token just to be sure
+        if (statusCode >= 400 && statusCode < 500) {
+          await connectorTokenClient.deleteConnectorTokens({ connectorId });
+        }
+        return Promise.reject(error);
       }
     );
   }

@@ -34,7 +34,7 @@ import {
   EuiIcon,
   EuiSuperSelect,
 } from '@elastic/eui';
-import sqlParser from 'js-sql-parser';
+import sqliteParser from '@appland/sql-parser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -59,6 +59,7 @@ import {
   FormArrayField,
 } from '../../shared_imports';
 import { OsqueryIcon } from '../../components/osquery_icon';
+import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -136,7 +137,7 @@ const ECSFieldWrapper = styled(EuiFlexItem)`
   max-width: 100%;
 `;
 
-const singleSelection = { asPlainText: true };
+const SINGLE_SELECTION = { asPlainText: true };
 
 const ECSSchemaOptions = ECSSchema.map((ecs) => ({
   label: ecs.field,
@@ -162,6 +163,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   );
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
+  const [formData] = useFormData();
 
   const handleChange = useCallback(
     (newSelectedOptions) => {
@@ -186,7 +188,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
           }
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__labelDisplay--expand">
+          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__label--expand">
             {option.value.field}
           </StyledFieldSpan>
         </EuiFlexItem>
@@ -229,6 +231,12 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
     return text;
   }, [selectedOptions]);
 
+  const availableECSSchemaOptions = useMemo(() => {
+    const currentFormECSFieldValues = map(formData.ecs_mapping, 'key');
+
+    return ECSSchemaOptions.filter(({ label }) => !currentFormECSFieldValues.includes(label));
+  }, [formData.ecs_mapping]);
+
   useEffect(() => {
     // @ts-expect-error update types
     setSelected(() => {
@@ -236,7 +244,16 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
 
       const selectedOption = find(ECSSchemaOptions, ['label', field.value]);
 
-      return selectedOption ? [selectedOption] : [];
+      return selectedOption
+        ? [selectedOption]
+        : [
+            {
+              label: field.value,
+              value: {
+                value: field.value,
+              },
+            },
+          ];
     });
   }, [field.value]);
 
@@ -253,9 +270,9 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
       <EuiComboBox
         prepend={prepend}
         fullWidth
-        singleSelection={singleSelection}
+        singleSelection={SINGLE_SELECTION}
         // @ts-expect-error update types
-        options={ECSSchemaOptions}
+        options={availableECSSchemaOptions}
         selectedOptions={selectedOptions}
         onChange={handleChange}
         data-test-subj="ECS-field-input"
@@ -317,6 +334,7 @@ interface OsqueryColumnFieldProps {
   resultType: FieldHook<string>;
   resultValue: FieldHook<string | string[]>;
   euiFieldProps: EuiComboBoxProps<OsquerySchemaOption>;
+  item: ArrayItem;
   idAria?: string;
 }
 
@@ -325,6 +343,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   resultValue,
   euiFieldProps = {},
   idAria,
+  item,
 }) => {
   const inputRef = useRef<HTMLInputElement>();
   const { setValue } = resultValue;
@@ -334,6 +353,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const [selectedOptions, setSelected] = useState<
     Array<EuiComboBoxOptionOption<OsquerySchemaOption>>
   >([]);
+  const [formData] = useFormData();
 
   const renderOsqueryOption = useCallback(
     (option, searchValue, contentClassName) => (
@@ -343,7 +363,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         gutterSize="none"
       >
         <EuiFlexItem grow={false}>
-          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__labelDisplay--expand">
+          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__label--expand">
             {option.value.suggestion_label}
           </StyledFieldSpan>
         </EuiFlexItem>
@@ -370,14 +390,25 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     [setValue, setSelected]
   );
 
+  const isSingleSelection = useMemo(() => {
+    const ecsKey = get(formData, item.path)?.key;
+    if (ecsKey?.length && typeValue === 'value') {
+      const ecsKeySchemaOption = find(ECSSchemaOptions, ['label', ecsKey]);
+
+      return ecsKeySchemaOption?.value?.normalization !== 'array';
+    }
+
+    return !!ecsKey?.length;
+  }, [typeValue, formData, item.path]);
+
   const onTypeChange = useCallback(
     (newType) => {
       if (newType !== typeValue) {
         setType(newType);
-        setValue(newType === 'value' && euiFieldProps.singleSelection === false ? [] : '');
+        setValue(newType === 'value' && isSingleSelection === false ? [] : '');
       }
     },
-    [typeValue, setType, setValue, euiFieldProps.singleSelection]
+    [typeValue, setType, setValue, isSingleSelection]
   );
 
   const handleCreateOption = useCallback(
@@ -386,7 +417,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
       if (!trimmedNewOption.length) return;
 
-      if (euiFieldProps.singleSelection === false) {
+      if (isSingleSelection === false) {
         setValue([trimmedNewOption]);
         if (resultValue.value.length) {
           setValue([...castArray(resultValue.value), trimmedNewOption]);
@@ -399,7 +430,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         setValue(trimmedNewOption);
       }
     },
-    [euiFieldProps.singleSelection, resultValue.value, setValue]
+    [isSingleSelection, resultValue.value, setValue]
   );
 
   const Prepend = useMemo(
@@ -421,14 +452,14 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   );
 
   useEffect(() => {
-    if (euiFieldProps?.singleSelection && isArray(resultValue.value)) {
+    if (isSingleSelection && isArray(resultValue.value)) {
       setValue(resultValue.value.join(' '));
     }
 
-    if (!euiFieldProps?.singleSelection && !isArray(resultValue.value)) {
+    if (!isSingleSelection && !isArray(resultValue.value)) {
       setValue(resultValue.value.length ? [resultValue.value] : []);
     }
-  }, [euiFieldProps?.singleSelection, resultValue.value, setValue]);
+  }, [isSingleSelection, resultValue.value, setValue]);
 
   useEffect(() => {
     setSelected(() => {
@@ -471,6 +502,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
             rowHeight={32}
             isClearable
             {...euiFieldProps}
+            singleSelection={isSingleSelection ? SINGLE_SELECTION : false}
             options={(typeValue === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
           />
         </EuiFlexItem>
@@ -566,7 +598,6 @@ const osqueryResultFieldValidator = async (
             },
           }
         ),
-        __isBlocking__: false,
       }
     : undefined;
 };
@@ -586,8 +617,6 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
   isLastItem,
   onDelete,
 }) => {
-  const multipleValuesField = useRef(false);
-
   const MultiFields = useMemo(
     () => (
       <UseMultiFields
@@ -608,6 +637,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
               osquerySchemaOptions,
               editForm: !isLastItem,
             },
+            readDefaultValueOnForm: !item.isNew,
             config: {
               valueChangeDebounceTime: 300,
               type: FIELD_TYPES.COMBO_BOX,
@@ -625,19 +655,18 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
         {(fields) => (
           <OsqueryColumnField
             {...fields}
+            item={item}
             // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
             euiFieldProps={{
               // @ts-expect-error update types
               options: osquerySchemaOptions,
               isDisabled,
-              // @ts-expect-error update types
-              singleSelection: !multipleValuesField.current ? { asPlainText: true } : false,
             }}
           />
         )}
       </UseMultiFields>
     ),
-    [item.path, osquerySchemaOptions, isLastItem, isDisabled]
+    [item, osquerySchemaOptions, isLastItem, isDisabled]
   );
 
   const ecsComboBoxEuiFieldProps = useMemo(() => ({ isDisabled }), [isDisabled]);
@@ -674,6 +703,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
                 component={ECSComboboxField}
                 euiFieldProps={ecsComboBoxEuiFieldProps}
                 validationData={validationData}
+                readDefaultValueOnForm={!item.isNew}
                 // @ts-expect-error update types
                 config={config}
               />
@@ -738,7 +768,7 @@ export const ECSMappingEditorField = React.memo(
   ({ euiFieldProps }: ECSMappingEditorFieldProps) => {
     const lastItemPath = useRef<string>();
     const onAdd = useRef<FormArrayField['addItem']>();
-    const osquerySchemaOptions = useRef<OsquerySchemaOption[]>([]);
+    const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
     const [{ query, ...formData }, formDataSerializer, isMounted] = useFormData();
 
     useEffect(() => {
@@ -746,11 +776,13 @@ export const ECSMappingEditorField = React.memo(
         return;
       }
 
+      const oneLineQuery = removeMultilines(query);
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let ast: Record<string, any> | undefined;
 
       try {
-        ast = sqlParser.parse(query)?.value;
+        ast = sqliteParser(oneLineQuery)?.statement?.[0];
       } catch (e) {
         return;
       }
@@ -762,44 +794,88 @@ export const ECSMappingEditorField = React.memo(
           order: number;
         }
       > =
-        ast?.from?.value?.reduce(
-          (
-            acc: {
-              [x: string]: {
-                columns: OsqueryColumn[];
-                order: number;
-              };
-            },
-            table: {
-              value: {
-                left?: { value: { value: string }; alias?: { value: string } };
-                right?: { value: { value: string }; alias?: { value: string } };
-                value?: { value: string };
-                alias?: { value: string };
-              };
+        reduce(
+          ast,
+          (acc, data) => {
+            // select * from uptime
+            if (data?.type === 'identifier' && data?.variant === 'table') {
+              const osqueryTable = find(osquerySchema, ['name', data.name]);
+
+              if (osqueryTable) {
+                acc[data.alias || data.name] = {
+                  columns: osqueryTable.columns,
+                  order: Object.keys(acc).length,
+                };
+              }
             }
-          ) => {
-            each(['value.left', 'value.right', 'value'], (valueKey) => {
-              if (valueKey) {
-                const osqueryTable = find(osquerySchema, [
-                  'name',
-                  get(table, `${valueKey}.value.value`),
-                ]);
+
+            // select * from uptime, routes
+            if (data?.type === 'map' && data?.variant === 'join') {
+              if (data?.source?.type === 'identifier' && data?.source?.variant === 'table') {
+                const osqueryTable = find(osquerySchema, ['name', data?.source?.name]);
 
                 if (osqueryTable) {
-                  acc[
-                    get(table, `${valueKey}.alias.value`) ?? get(table, `${valueKey}.value.value`)
-                  ] = {
+                  acc[data?.source?.alias || data?.source?.name] = {
                     columns: osqueryTable.columns,
                     order: Object.keys(acc).length,
                   };
                 }
               }
-            });
+
+              if (data?.source?.type === 'statement' && data?.source?.variant === 'compound') {
+                if (
+                  data?.source?.statement.from.type === 'identifier' &&
+                  data?.source?.statement.from.variant === 'table'
+                ) {
+                  const osqueryTable = find(osquerySchema, [
+                    'name',
+                    data?.source?.statement.from.name,
+                  ]);
+
+                  if (osqueryTable) {
+                    acc[data?.source?.statement.from.alias || data?.source?.statement.from.name] = {
+                      columns: osqueryTable.columns,
+                      order: Object.keys(acc).length,
+                    };
+                  }
+                }
+              }
+
+              each(
+                data?.map,
+                (mapValue: {
+                  type: string;
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  source: { type: string; variant: string; name: any | string; alias: any };
+                }) => {
+                  if (mapValue?.type === 'join') {
+                    if (
+                      mapValue?.source?.type === 'identifier' &&
+                      mapValue?.source?.variant === 'table'
+                    ) {
+                      const osqueryTable = find(osquerySchema, ['name', mapValue?.source?.name]);
+
+                      if (osqueryTable) {
+                        acc[mapValue?.source?.alias || mapValue?.source?.name] = {
+                          columns: osqueryTable.columns,
+                          order: Object.keys(acc).length,
+                        };
+                      }
+                    }
+                  }
+                }
+              );
+            }
 
             return acc;
           },
-          {}
+          {} as Record<
+            string,
+            {
+              columns: OsqueryColumn[];
+              order: number;
+            }
+          >
         ) ?? {};
 
       // Table doesn't exist in osquery schema
@@ -807,119 +883,122 @@ export const ECSMappingEditorField = React.memo(
         return;
       }
 
-      const suggestions =
-        isArray(ast?.selectItems?.value) &&
-        ast?.selectItems?.value
-          ?.map((selectItem: { type: string; value: string; hasAs: boolean; alias?: string }) => {
-            if (selectItem.type === 'Identifier') {
-              /*
-                select * from routes, uptime;
-              */
-              if (ast?.selectItems?.value.length === 1 && selectItem.value === '*') {
-                return reduce(
-                  astOsqueryTables,
-                  (acc, { columns: osqueryColumns, order: tableOrder }, table) => {
-                    acc.push(
-                      ...osqueryColumns.map((osqueryColumn) => ({
-                        label: osqueryColumn.name,
+      const suggestions = isArray(ast?.result)
+        ? ast?.result
+            ?.map((selectItem: { type: string; name: string; alias?: string }) => {
+              if (selectItem.type === 'identifier') {
+                /*
+                  select * from routes, uptime;
+                */
+                if (ast?.result.length === 1 && selectItem.name === '*') {
+                  return reduce(
+                    astOsqueryTables,
+                    (acc, { columns: osqueryColumns, order: tableOrder }, table) => {
+                      acc.push(
+                        ...osqueryColumns.map((osqueryColumn) => ({
+                          label: osqueryColumn.name,
+                          value: {
+                            name: osqueryColumn.name,
+                            description: osqueryColumn.description,
+                            table,
+                            tableOrder,
+                            suggestion_label: osqueryColumn.name,
+                          },
+                        }))
+                      );
+
+                      return acc;
+                    },
+                    [] as OsquerySchemaOption[]
+                  );
+                }
+
+                /*
+                  select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+                */
+
+                const [table, column] = selectItem.name.includes('.')
+                  ? selectItem.name?.split('.')
+                  : [Object.keys(astOsqueryTables)[0], selectItem.name];
+
+                if (column === '*' && astOsqueryTables[table]) {
+                  const { columns: osqueryColumns, order: tableOrder } = astOsqueryTables[table];
+
+                  return osqueryColumns.map((osqueryColumn) => ({
+                    label: osqueryColumn.name,
+                    value: {
+                      name: osqueryColumn.name,
+                      description: osqueryColumn.description,
+                      table,
+                      tableOrder,
+                      suggestion_label: `${osqueryColumn.name}`,
+                    },
+                  }));
+                }
+
+                if (astOsqueryTables[table]) {
+                  const osqueryColumn = find(astOsqueryTables[table].columns, ['name', column]);
+
+                  if (osqueryColumn) {
+                    const label = selectItem.alias ?? column;
+
+                    return [
+                      {
+                        label,
                         value: {
                           name: osqueryColumn.name,
                           description: osqueryColumn.description,
                           table,
-                          tableOrder,
-                          suggestion_label: osqueryColumn.name,
+                          tableOrder: astOsqueryTables[table].order,
+                          suggestion_label: `${label}`,
                         },
-                      }))
-                    );
-
-                    return acc;
-                  },
-                  [] as OsquerySchemaOption[]
-                );
+                      },
+                    ];
+                  }
+                }
               }
 
               /*
-                select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+                SELECT pid, uid, name, ROUND((
+                  (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
+                ) * 100, 2) AS percentage
+                FROM processes, (
+                SELECT (
+                  SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
+                  SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
+                  FROM cpu_time
+                ) AS cpu_time
+                ORDER BY user_time+system_time DESC
+                LIMIT 5;
               */
 
-              const [table, column] = selectItem.value.includes('.')
-                ? selectItem.value?.split('.')
-                : [Object.keys(astOsqueryTables)[0], selectItem.value];
-
-              if (column === '*' && astOsqueryTables[table]) {
-                const { columns: osqueryColumns, order: tableOrder } = astOsqueryTables[table];
-
-                return osqueryColumns.map((osqueryColumn) => ({
-                  label: osqueryColumn.name,
-                  value: {
-                    name: osqueryColumn.name,
-                    description: osqueryColumn.description,
-                    table,
-                    tableOrder,
-                    suggestion_label: `${osqueryColumn.name}`,
-                  },
-                }));
-              }
-
-              if (astOsqueryTables[table]) {
-                const osqueryColumn = find(astOsqueryTables[table].columns, ['name', column]);
-
-                if (osqueryColumn) {
-                  const label = selectItem.hasAs ? selectItem.alias : column;
-
-                  return [
-                    {
-                      label,
-                      value: {
-                        name: osqueryColumn.name,
-                        description: osqueryColumn.description,
-                        table,
-                        tableOrder: astOsqueryTables[table].order,
-                        suggestion_label: `${label}`,
-                      },
+              if (selectItem.type === 'function' && selectItem.alias) {
+                return [
+                  {
+                    label: selectItem.alias,
+                    value: {
+                      name: selectItem.alias,
+                      description: '',
+                      table: '',
+                      tableOrder: -1,
+                      suggestion_label: selectItem.alias,
                     },
-                  ];
-                }
-              }
-            }
-
-            /*
-              SELECT pid, uid, name, ROUND((
-                (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
-              ) * 100, 2) AS percentage
-              FROM processes, (
-              SELECT (
-                SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
-                SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
-                FROM cpu_time
-              ) AS cpu_time
-              ORDER BY user_time+system_time DESC
-              LIMIT 5;
-            */
-
-            if (selectItem.hasAs && selectItem.alias) {
-              return [
-                {
-                  label: selectItem.alias,
-                  value: {
-                    name: selectItem.alias,
-                    description: '',
-                    table: '',
-                    tableOrder: -1,
-                    suggestion_label: selectItem.alias,
                   },
-                },
-              ];
-            }
+                ];
+              }
 
-            return [];
-          })
-          .flat();
+              return [];
+            })
+            .flat()
+        : [];
 
       // Remove column duplicates by keeping the column from the table that appears last in the query
-      osquerySchemaOptions.current = sortedUniqBy(
+      const newOptions = sortedUniqBy(
         orderBy(suggestions, ['value.suggestion_label', 'value.tableOrder'], ['asc', 'desc']),
         'label'
+      );
+      setOsquerySchemaOptions((prevValue) =>
+        !deepEqual(prevValue, newOptions) ? newOptions : prevValue
       );
     }, [query]);
 
@@ -940,7 +1019,9 @@ export const ECSMappingEditorField = React.memo(
         if (itemKey) {
           const serializedFormData = formDataSerializer();
           const itemValue =
-            serializedFormData.ecs_mapping && serializedFormData.ecs_mapping[`${itemKey}`]?.field;
+            serializedFormData.ecs_mapping &&
+            (serializedFormData.ecs_mapping[`${itemKey}`]?.field ||
+              serializedFormData.ecs_mapping[`${itemKey}`]?.value);
 
           if (itemValue && onAdd.current) {
             onAdd.current();
@@ -999,7 +1080,7 @@ export const ECSMappingEditorField = React.memo(
                 {items.map((item, index) => (
                   <ECSMappingEditorForm
                     key={item.id}
-                    osquerySchemaOptions={osquerySchemaOptions.current}
+                    osquerySchemaOptions={osquerySchemaOptions}
                     item={item}
                     isLastItem={index === items.length - 1}
                     onDelete={removeItem}

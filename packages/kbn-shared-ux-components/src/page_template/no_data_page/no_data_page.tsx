@@ -45,7 +45,10 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
     });
 
   return (
-    <div className={classNames('kbnNoDataPageContents', rest.className)}>
+    <div
+      className={classNames('kbnNoDataPageContents', rest.className)}
+      data-test-subj="kbnNoDataPage"
+    >
       <EuiText textAlign="center">
         <KibanaSolutionAvatar name={solution} iconType={logo || `logo${solution}`} size="xxl" />
         <EuiSpacer size="l" />
@@ -58,7 +61,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
               values={{
                 solution,
                 link: (
-                  <EuiLink href={docsLink}>
+                  <EuiLink href={docsLink} target="_blank">
                     <FormattedMessage
                       id="sharedUXComponents.noDataPage.intro.link"
                       defaultMessage="learn more"

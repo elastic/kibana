@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../../app_logic';
-import { getAddPath, getSourcesPath } from '../../../../routes';
+import { getAddPath, getEditPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
 import { hasCustomConnectorOption, hasExternalConnectorOption } from '../../source_data';
@@ -138,7 +138,7 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
     badgeLabel: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.betaLabel',
       {
-        defaultMessage: 'Beta',
+        defaultMessage: 'Technical preview',
       }
     ),
   };
@@ -171,22 +171,22 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexStart" direction="row" responsive={false}>
         <ConnectorCard {...internalConnectorProps} data-test-subj="InternalConnectorCard" />
-        {externalConnectorAvailable && (
-          <ConnectorCard
-            {...externalConnectorProps}
-            disabledMessage={
-              externalConfigured
-                ? i18n.translate(
-                    'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.alreadyConfiguredMessage',
-                    {
-                      defaultMessage: "You've already configured an external connector",
-                    }
-                  )
-                : undefined
-            }
-            data-test-subj="ExternalConnectorCard"
-          />
-        )}
+        {externalConnectorAvailable &&
+          (externalConfigured ? (
+            <ConnectorCard
+              {...externalConnectorProps}
+              buttonText={i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.reviewButtonLabel',
+                {
+                  defaultMessage: 'Review the connector package',
+                }
+              )}
+              to={getEditPath('external')}
+              data-test-subj="ExternalConnectorCard"
+            />
+          ) : (
+            <ConnectorCard {...externalConnectorProps} data-test-subj="ExternalConnectorCard" />
+          ))}
         {customConnectorAvailable && (
           <ConnectorCard {...customConnectorProps} data-test-subj="CustomConnectorCard" />
         )}

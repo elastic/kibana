@@ -19,7 +19,6 @@ import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/app
 import {
   ValidationResult,
   Rule,
-  ConnectorValidationResult,
   GenericValidationResult,
   RuleTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -91,9 +90,6 @@ describe('alert_form', () => {
     id: 'alert-action-type',
     iconClass: '',
     selectMessage: '',
-    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-      return Promise.resolve({});
-    },
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);
@@ -135,7 +131,10 @@ describe('alert_form', () => {
           <KibanaReactContext.Provider>
             <RuleForm
               rule={initialAlert}
-              config={{ minimumScheduleInterval: { value: '1m', enforce: false } }}
+              config={{
+                isUsingSecurity: true,
+                minimumScheduleInterval: { value: '1m', enforce: false },
+              }}
               dispatch={() => {}}
               errors={{ name: [], 'schedule.interval': [] }}
               operation="create"

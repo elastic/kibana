@@ -31,13 +31,23 @@ import {
   DataViewsPublicPluginStart,
   META_FIELDS,
 } from '@kbn/data-views-plugin/public';
+import {
+  SavedObjectRelation,
+  SavedObjectManagementTypeInfo,
+} from '@kbn/saved-objects-management-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
-import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
+import {
+  TAB_INDEXED_FIELDS,
+  TAB_SCRIPTED_FIELDS,
+  TAB_SOURCE_FILTERS,
+  TAB_RELATIONSHIPS,
+} from '../constants';
 import { SourceFiltersTable } from '../source_filters_table';
 import { IndexedFieldsTable } from '../indexed_fields_table';
 import { ScriptedFieldsTable } from '../scripted_fields_table';
+import { RelationshipsTable } from '../relationships_table';
 import { getTabs, getPath, convertToEuiFilterOptions } from './utils';
 import { getFieldInfo } from '../../utils';
 
@@ -46,6 +56,8 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   fields: DataViewField[];
   saveIndexPattern: DataViewsPublicPluginStart['updateSavedObject'];
   refreshFields: () => void;
+  relationships: SavedObjectRelation[];
+  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
 interface FilterItems {
@@ -132,9 +144,20 @@ export function Tabs({
   history,
   location,
   refreshFields,
+  relationships,
+  allowedTypes,
 }: TabsProps) {
-  const { uiSettings, docLinks, dataViewFieldEditor, overlays, theme, dataViews } =
-    useKibana<IndexPatternManagmentContext>().services;
+  const {
+    uiSettings,
+    docLinks,
+    dataViewFieldEditor,
+    overlays,
+    theme,
+    dataViews,
+    http,
+    application,
+    savedObjectsManagement,
+  } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [syncingStateFunc, setSyncingStateFunc] = useState<any>({
     getCurrentTab: () => TAB_INDEXED_FIELDS,
@@ -463,7 +486,7 @@ export function Tabs({
                       getFieldInfo,
                     }}
                     openModal={overlays.openModal}
-                    theme={theme!}
+                    theme={theme}
                     userEditPermission={dataViews.getCanSaveSync()}
                   />
                 )}
@@ -507,6 +530,22 @@ export function Tabs({
               />
             </Fragment>
           );
+        case TAB_RELATIONSHIPS:
+          return (
+            <Fragment>
+              <EuiSpacer size="m" />
+              <RelationshipsTable
+                basePath={http.basePath}
+                id={indexPattern.id!}
+                capabilities={application.capabilities}
+                relationships={relationships}
+                allowedTypes={allowedTypes}
+                navigateToUrl={application.navigateToUrl}
+                getDefaultTitle={savedObjectsManagement.getDefaultTitle}
+                getSavedObjectLabel={savedObjectsManagement.getSavedObjectLabel}
+              />
+            </Fragment>
+          );
       }
     },
     [
@@ -529,18 +568,25 @@ export function Tabs({
       theme,
       dataViews,
       compositeRuntimeFields,
+      http,
+      application,
+      savedObjectsManagement,
+      allowedTypes,
+      relationships,
     ]
   );
 
   const euiTabs: EuiTabbedContentTab[] = useMemo(
     () =>
-      getTabs(indexPattern, fieldFilter).map((tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
-        return {
-          ...tab,
-          content: getContent(tab.id),
-        };
-      }),
-    [fieldFilter, getContent, indexPattern]
+      getTabs(indexPattern, fieldFilter, relationships.length).map(
+        (tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
+          return {
+            ...tab,
+            content: getContent(tab.id),
+          };
+        }
+      ),
+    [fieldFilter, getContent, indexPattern, relationships]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);

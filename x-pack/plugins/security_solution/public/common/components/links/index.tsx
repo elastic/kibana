@@ -16,10 +16,6 @@ import {
 import React, { useMemo, useCallback, SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
-import {
-  DefaultFieldRendererOverflow,
-  DEFAULT_MORE_MAX_HEIGHT,
-} from '../../../timelines/components/field_renderers/field_renderers';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
   getCaseDetailsUrl,
@@ -28,24 +24,36 @@ import {
   getNetworkDetailsUrl,
   getCreateCaseUrl,
   useFormatUrl,
+  useGetSecuritySolutionUrl,
 } from '../link_to';
 import {
   FlowTarget,
   FlowTargetSourceDest,
 } from '../../../../common/search_strategy/security_solution/network';
-import { useUiSetting$, useKibana, useNavigation } from '../../lib/kibana';
+import { useUiSetting$, useKibana, useNavigateTo } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
 import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
-import { LinkAnchor, GenericLinkButton, PortContainer, Comma, LinkButton } from './helpers';
+import {
+  LinkAnchor,
+  GenericLinkButton,
+  PortContainer,
+  Comma,
+  LinkButton,
+  ReputationLinkSetting,
+  ReputationLinksOverflow,
+} from './helpers';
 import { HostsTableType } from '../../../hosts/store/model';
 import { UsersTableType } from '../../../users/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
+
+/** The default max-height of the Reputation Links popover used to show "+n More" items (e.g. `+9 More`) */
+export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
 // Internal Links
 const UserDetailsLinkComponent: React.FC<{
@@ -401,11 +409,6 @@ enum DefaultReputationLink {
   'talosIntelligence.com' = 'talosIntelligence.com',
 }
 
-export interface ReputationLinkSetting {
-  name: string;
-  url_template: string;
-}
-
 function isDefaultReputationLink(name: string): name is DefaultReputationLink {
   return (
     name === DefaultReputationLink['virustotal.com'] ||
@@ -499,9 +502,8 @@ const ReputationLinkComponent: React.FC<{
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <DefaultFieldRendererOverflow
+          <ReputationLinksOverflow
             rowItems={ipReputationLinks}
-            idPrefix="moreReputationLink"
             render={renderCallback}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={overflowIndexStart}
@@ -533,20 +535,46 @@ interface SecuritySolutionLinkProps {
   path?: string;
 }
 
-type LinkClickEvent = MouseEvent<HTMLButtonElement | HTMLAnchorElement>;
-type LinkClickEventHandler = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
-
-interface SecuritySolutionInjectedLinkProps {
-  onClick?: LinkClickEventHandler;
-  href?: string;
+interface LinkProps {
+  onClick: MouseEventHandler;
+  href: string;
 }
+
+type GetSecuritySolutionProps = (
+  params: SecuritySolutionLinkProps & { onClick?: MouseEventHandler }
+) => LinkProps;
+
+/**
+ * It returns the `onClick` and `href` props to use in link components based on the` deepLinkId` and `path` parameters.
+ */
+export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionProps => {
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const { navigateTo } = useNavigateTo();
+
+  const getSecuritySolutionProps = useCallback<GetSecuritySolutionProps>(
+    ({ deepLinkId, path, onClick: onClickProps }) => {
+      const url = getSecuritySolutionUrl({ deepLinkId, path });
+      return {
+        href: url,
+        onClick: (ev: MouseEvent) => {
+          ev.preventDefault();
+          navigateTo({ url });
+          if (onClickProps) {
+            onClickProps(ev);
+          }
+        },
+      };
+    },
+    [getSecuritySolutionUrl, navigateTo]
+  );
+
+  return getSecuritySolutionProps;
+};
 
 /**
  * HOC that wraps any Link component and makes it a Security solutions internal navigation Link.
- *
- * It injects `onClick` and 'href' into the Link component calculated based on the` deepLinkId` and `path` parameters.
  */
-export const withSecuritySolutionLink = <T extends SecuritySolutionInjectedLinkProps>(
+export const withSecuritySolutionLink = <T extends Partial<LinkProps>>(
   WrappedComponent: React.FC<T>
 ) => {
   const SecuritySolutionLink: React.FC<Omit<T & SecuritySolutionLinkProps, 'href'>> = ({
@@ -555,38 +583,27 @@ export const withSecuritySolutionLink = <T extends SecuritySolutionInjectedLinkP
     onClick: onClickProps,
     ...rest
   }) => {
-    const { formatUrl } = useFormatUrl(deepLinkId);
-    const { navigateTo } = useNavigation();
-    const url = useMemo(() => formatUrl(path ?? ''), [formatUrl, path]);
-
-    const onClick = useCallback(
-      (ev: LinkClickEvent) => {
-        ev.preventDefault();
-
-        if (onClickProps) {
-          onClickProps(ev);
-        }
-
-        navigateTo({ url });
-      },
-      [navigateTo, url, onClickProps]
-    );
-
-    return <WrappedComponent onClick={onClick} href={url} {...(rest as unknown as T)} />;
+    const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+    const { onClick, href } = getSecuritySolutionLinkProps({
+      deepLinkId,
+      path,
+      onClick: onClickProps,
+    });
+    return <WrappedComponent onClick={onClick} href={href} {...(rest as unknown as T)} />;
   };
   return SecuritySolutionLink;
 };
 
 /**
- * Security Solutions internal link.
+ * Security Solutions internal link button.
  *
- * `const example = () => <SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts} />;`
+ * `<SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts} />;`
  */
 export const SecuritySolutionLinkButton = withSecuritySolutionLink(LinkButton);
 
 /**
- * Security Solutions internal link.
+ * Security Solutions internal link anchor.
  *
- * `const example = () => <SecuritySolutionLinkAnchor deepLinkId={SecurityPageName.hosts} />;`
+ * `<SecuritySolutionLinkAnchor deepLinkId={SecurityPageName.hosts} />;`
  */
 export const SecuritySolutionLinkAnchor = withSecuritySolutionLink(LinkAnchor);

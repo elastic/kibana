@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
@@ -45,13 +45,11 @@ describe('Related Cases', () => {
       (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
         read: false,
       });
-      act(() => {
-        render(
-          <TestProviders>
-            <RelatedCases eventId={eventId} />
-          </TestProviders>
-        );
-      });
+      render(
+        <TestProviders>
+          <RelatedCases eventId={eventId} />
+        </TestProviders>
+      );
 
       expect(screen.queryByText('cases')).toBeNull();
     });
@@ -66,13 +64,11 @@ describe('Related Cases', () => {
     describe('When related cases are unable to be retrieved', () => {
       test('should show 0 related cases when there are none', async () => {
         mockGetRelatedCases.mockReturnValue([]);
-        act(() => {
-          render(
-            <TestProviders>
-              <RelatedCases eventId={eventId} />
-            </TestProviders>
-          );
-        });
+        render(
+          <TestProviders>
+            <RelatedCases eventId={eventId} />
+          </TestProviders>
+        );
 
         expect(await screen.findByText('0 cases.')).toBeInTheDocument();
       });
@@ -81,14 +77,11 @@ describe('Related Cases', () => {
     describe('When 1 related case is retrieved', () => {
       test('should show 1 related case', async () => {
         mockGetRelatedCases.mockReturnValue([{ id: '789', title: 'Test Case' }]);
-        act(() => {
-          render(
-            <TestProviders>
-              <RelatedCases eventId={eventId} />
-            </TestProviders>
-          );
-        });
-
+        render(
+          <TestProviders>
+            <RelatedCases eventId={eventId} />
+          </TestProviders>
+        );
         expect(await screen.findByText('1 case:')).toBeInTheDocument();
         expect(await screen.findByTestId('case-details-link')).toHaveTextContent('Test Case');
       });
@@ -100,14 +93,11 @@ describe('Related Cases', () => {
           { id: '789', title: 'Test Case 1' },
           { id: '456', title: 'Test Case 2' },
         ]);
-        act(() => {
-          render(
-            <TestProviders>
-              <RelatedCases eventId={eventId} />
-            </TestProviders>
-          );
-        });
-
+        render(
+          <TestProviders>
+            <RelatedCases eventId={eventId} />
+          </TestProviders>
+        );
         expect(await screen.findByText('2 cases:')).toBeInTheDocument();
         const cases = await screen.findAllByTestId('case-details-link');
         expect(cases).toHaveLength(2);

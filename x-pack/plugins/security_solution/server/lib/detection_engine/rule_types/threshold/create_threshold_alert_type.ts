@@ -13,6 +13,7 @@ import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_sch
 import { thresholdExecutor } from '../../signals/executors/threshold';
 import { ThresholdAlertState } from '../../signals/types';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
+import { validateImmutable, validateIndexPatterns } from '../utils';
 
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
@@ -32,6 +33,18 @@ export const createThresholdAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
         },
       },
     },
@@ -58,6 +71,8 @@ export const createThresholdAlertType = (
           tuple,
           wrapHits,
           ruleDataReader,
+          inputIndex,
+          runtimeMappings,
         },
         services,
         startedAt,
@@ -78,6 +93,8 @@ export const createThresholdAlertType = (
         version,
         wrapHits,
         ruleDataReader,
+        inputIndex,
+        runtimeMappings,
       });
 
       return result;

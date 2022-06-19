@@ -18,7 +18,11 @@ import {
   getConfirmFleetServerConnectionStep,
 } from './steps';
 
-export const AdvancedTab: React.FunctionComponent = () => {
+interface AdvancedTabProps {
+  selectedPolicyId?: string;
+}
+
+export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selectedPolicyId }) => {
   const {
     eligibleFleetServerPolicies,
     refreshEligibleFleetServerPolicies,
@@ -35,7 +39,7 @@ export const AdvancedTab: React.FunctionComponent = () => {
 
   const steps = [
     getSelectAgentPolicyStep({
-      policyId: fleetServerPolicyId,
+      policyId: fleetServerPolicyId || selectedPolicyId,
       setPolicyId: setFleetServerPolicyId,
       eligibleFleetServerPolicies,
       refreshEligibleFleetServerPolicies,
@@ -43,7 +47,7 @@ export const AdvancedTab: React.FunctionComponent = () => {
     getSetDeploymentModeStep({
       deploymentMode,
       setDeploymentMode,
-      disabled: !Boolean(fleetServerPolicyId),
+      disabled: !Boolean(fleetServerPolicyId || selectedPolicyId),
     }),
     getAddFleetServerHostStep({ fleetServerHostForm, disabled: !Boolean(fleetServerPolicyId) }),
     getGenerateServiceTokenStep({

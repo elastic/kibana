@@ -9,19 +9,22 @@ import { i18n } from '@kbn/i18n';
 import { SecurityPageName, USERS_PATH } from '../../common/constants';
 import { USERS } from '../app/translations';
 import { LinkItem } from '../common/links/types';
+import userPageImg from '../common/images/users_page.png';
 
 export const links: LinkItem = {
   id: SecurityPageName.users,
   title: USERS,
+  landingImage: userPageImg,
+  description: i18n.translate('xpack.securitySolution.appLinks.users.description', {
+    defaultMessage:
+      'A comprehensive overview of user data that enables understanding of authentication and user behavior within your environment.',
+  }),
   path: USERS_PATH,
-  globalNavEnabled: true,
-  experimentalKey: 'usersEnabled',
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.users', {
       defaultMessage: 'Users',
     }),
   ],
-  globalNavOrder: 9004,
   links: [
     {
       id: SecurityPageName.usersAuthentications,
@@ -41,7 +44,7 @@ export const links: LinkItem = {
     {
       id: SecurityPageName.usersRisk,
       title: i18n.translate('xpack.securitySolution.appLinks.users.risk', {
-        defaultMessage: 'Users by risk',
+        defaultMessage: 'User risk',
       }),
       path: `${USERS_PATH}/userRisk`,
       experimentalKey: 'riskyUsersEnabled',

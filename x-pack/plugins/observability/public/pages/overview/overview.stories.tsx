@@ -8,10 +8,11 @@
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { createKibanaReactContext, KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
@@ -37,7 +38,7 @@ const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 const withCore = makeDecorator({
   name: 'withCore',
   parameterName: 'core',
-  wrapper: (storyFn, context, { options: { theme, ...options } }) => {
+  wrapper: (storyFn, context) => {
     unregisterAll();
     const KibanaReactContext = createKibanaReactContext({
       application: {
@@ -81,19 +82,12 @@ const withCore = makeDecorator({
               appMountParameters: {
                 setHeaderActionMenu: () => {},
               } as unknown as AppMountParameters,
-              config: {
-                unsafe: {
-                  alertingExperience: { enabled: true },
-                  cases: { enabled: true },
-                  rules: { enabled: true },
-                },
-              },
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
               kibanaFeatures: [],
             }}
           >
-            <HasDataContextProvider>{storyFn(context)}</HasDataContextProvider>
+            <HasDataContextProvider>{storyFn(context) as ReactNode}</HasDataContextProvider>
           </PluginContext.Provider>
         </KibanaReactContext.Provider>
       </MemoryRouter>

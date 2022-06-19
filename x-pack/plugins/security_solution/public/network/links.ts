@@ -9,18 +9,22 @@ import { i18n } from '@kbn/i18n';
 import { NETWORK_PATH, SecurityPageName } from '../../common/constants';
 import { NETWORK } from '../app/translations';
 import { LinkItem } from '../common/links/types';
+import networkPageImg from '../common/images/network_page.png';
 
 export const links: LinkItem = {
   id: SecurityPageName.network,
   title: NETWORK,
+  landingImage: networkPageImg,
+  description: i18n.translate('xpack.securitySolution.appLinks.network.description', {
+    defaultMessage:
+      'Provides key activity metrics in an interactive map as well as event tables that enable interaction with the Timeline.',
+  }),
   path: NETWORK_PATH,
-  globalNavEnabled: true,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.network', {
       defaultMessage: 'Network',
     }),
   ],
-  globalNavOrder: 9003,
   links: [
     {
       id: SecurityPageName.networkDns,

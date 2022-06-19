@@ -53,6 +53,7 @@ import {
   filters,
   RuleId,
   index,
+  data_view_id,
   output_index,
   saved_id,
   timeline_id,
@@ -79,8 +80,13 @@ import {
   rule_name_override,
   timestamp_override,
   Author,
+  timestamp_field,
   event_category_override,
-} from '../common/schemas';
+  tiebreaker_field,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
+} from '../common';
 
 /**
  * Differences from this and the createRulesSchema are
@@ -111,11 +117,14 @@ export const importRulesSchema = t.intersection([
       author: DefaultStringArray, // defaults to empty array of strings if not set during decode
       building_block_type, // defaults to undefined if not set during decode
       enabled: DefaultBooleanTrue, // defaults to true if not set during decode
+      timestamp_field, // defaults to "undefined" if not set during decode
       event_category_override, // defaults to "undefined" if not set during decode
+      tiebreaker_field, // defaults to "undefined" if not set during decode
       false_positives: DefaultStringArray, // defaults to empty string array if not set during decode
       filters, // defaults to undefined if not set during decode
       from: DefaultFromString, // defaults to "now-6m" if not set during decode
       index, // defaults to undefined if not set during decode
+      data_view_id, // defaults to undefined if not set during decode
       immutable: OnlyFalseAllowed, // defaults to "false" if not set during decode
       interval: DefaultIntervalString, // defaults to "5m" if not set during decode
       query, // defaults to undefined if not set during decode
@@ -129,8 +138,11 @@ export const importRulesSchema = t.intersection([
       meta, // defaults to "undefined" if not set during decode
       machine_learning_job_id, // defaults to "undefined" if not set during decode
       max_signals: DefaultMaxSignalsNumber, // defaults to DEFAULT_MAX_SIGNALS (100) if not set during decode
+      related_integrations: RelatedIntegrationArray, // defaults to "undefined" if not set during decode
+      required_fields: RequiredFieldArray, // defaults to "undefined" if not set during decode
       risk_score_mapping: DefaultRiskScoreMappingArray, // defaults to empty risk score mapping array if not set during decode
       rule_name_override, // defaults to "undefined" if not set during decode
+      setup: SetupGuide, // defaults to "undefined" if not set during decode
       severity_mapping: DefaultSeverityMappingArray, // defaults to empty actions array if not set during decode
       tags: DefaultStringArray, // defaults to empty string array if not set during decode
       to: DefaultToString, // defaults to "now" if not set during decode

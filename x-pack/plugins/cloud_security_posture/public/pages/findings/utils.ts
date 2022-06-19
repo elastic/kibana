@@ -6,17 +6,100 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-plugin/common';
-import type { FindingsBaseEsQuery, FindingsBaseURLQuery } from './types';
+import { EuiBasicTableProps, Pagination } from '@elastic/eui';
+import { useCallback, useEffect, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { FindingsBaseProps, FindingsBaseURLQuery } from './types';
+import { useKibana } from '../../common/hooks/use_kibana';
 
-export const getBaseQuery = ({
-  dataView,
-  query,
-  filters,
-}: FindingsBaseURLQuery & { dataView: DataView }): FindingsBaseEsQuery => ({
-  index: dataView.title,
-  // TODO: this will throw for malformed query
-  // page will display an error boundary with the JS error
-  // will be accounted for before releasing the feature
-  query: buildEsQuery(dataView, query, filters),
+const getBaseQuery = ({ dataView, query, filters }: FindingsBaseURLQuery & FindingsBaseProps) => {
+  try {
+    return {
+      query: buildEsQuery(dataView, query, filters), // will throw for malformed query
+    };
+  } catch (error) {
+    return {
+      query: undefined,
+      error: error instanceof Error ? error : new Error('Unknown Error'),
+    };
+  }
+};
+
+type TablePagination = NonNullable<EuiBasicTableProps<unknown>['pagination']>;
+
+export const getPaginationTableParams = (
+  params: TablePagination & Pick<Required<TablePagination>, 'pageIndex' | 'pageSize'>,
+  pageSizeOptions = [10, 25, 100],
+  showPerPageOptions = true
+): Required<TablePagination> => ({
+  ...params,
+  pageSizeOptions,
+  showPerPageOptions,
 });
+
+export const usePersistedQuery = <T>(getter: ({ filters, query }: FindingsBaseURLQuery) => T) => {
+  const {
+    data: {
+      query: { filterManager, queryString },
+    },
+  } = useKibana().services;
+
+  return useCallback(
+    () =>
+      getter({
+        filters: filterManager.getAppFilters(),
+        query: queryString.getQuery(),
+      }),
+    [getter, filterManager, queryString]
+  );
+};
+
+export const getPaginationQuery = ({
+  pageIndex,
+  pageSize,
+}: Pick<Pagination, 'pageIndex' | 'pageSize'>) => ({
+  from: pageIndex * pageSize,
+  size: pageSize,
+});
+
+export const useBaseEsQuery = ({
+  dataView,
+  filters,
+  query,
+}: FindingsBaseURLQuery & FindingsBaseProps) => {
+  const {
+    notifications: { toasts },
+    data: {
+      query: { filterManager, queryString },
+    },
+  } = useKibana().services;
+
+  const baseEsQuery = useMemo(
+    () => getBaseQuery({ dataView, filters, query }),
+    [dataView, filters, query]
+  );
+
+  /**
+   * Sync filters with the URL query
+   */
+  useEffect(() => {
+    filterManager.setAppFilters(filters);
+    queryString.setQuery(query);
+  }, [filters, filterManager, queryString, query]);
+
+  const handleMalformedQueryError = () => {
+    const error = baseEsQuery.error;
+    if (error) {
+      toasts.addError(error, {
+        title: i18n.translate('xpack.csp.findings.search.queryErrorToastMessage', {
+          defaultMessage: 'Query Error',
+        }),
+        toastLifeTimeMs: 1000 * 5,
+      });
+    }
+  };
+
+  useEffect(handleMalformedQueryError, [baseEsQuery.error, toasts]);
+
+  return baseEsQuery;
+};

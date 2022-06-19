@@ -8,6 +8,8 @@
 import type { Logger } from '@kbn/logging';
 import { compact, keyBy } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { parseInterval } from '@kbn/data-plugin/common';
+import { Environment } from '../../../common/environment_rt';
 import { apmMlAnomalyQuery } from './apm_ml_anomaly_query';
 import {
   ApmMlDetectorType,
@@ -22,6 +24,27 @@ import { anomalySearch } from './anomaly_search';
 import { getAnomalyResultBucketSize } from './get_anomaly_result_bucket_size';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 
+const FALLBACK_ML_BUCKET_SPAN = 15; // minutes
+
+function divide(value: number | null, divider: number) {
+  if (value === null) {
+    return null;
+  }
+  return value / divider;
+}
+
+// Expected bounds are retrieved with bucket span interval padded to the time range
+// so we need to cut the excess bounds to just the start and end time
+// so that the chart show up correctly without the padded time
+function getBoundedX(value: number | null, start: number, end: number) {
+  if (value === null) {
+    return null;
+  }
+  if (value < start) return start;
+  if (value > end) return end;
+  return value;
+}
+
 export async function getAnomalyTimeseries({
   serviceName,
   transactionType,
@@ -29,11 +52,13 @@ export async function getAnomalyTimeseries({
   end,
   logger,
   mlSetup,
+  environment: preferredEnvironment,
 }: {
   serviceName: string;
   transactionType: string;
   start: number;
   end: number;
+  environment: Environment;
   logger: Logger;
   mlSetup: Required<Setup>['ml'];
 }): Promise<ServiceAnomalyTimeseries[]> {
@@ -41,17 +66,37 @@ export async function getAnomalyTimeseries({
     return [];
   }
 
-  const { intervalString } = getAnomalyResultBucketSize({
-    start,
-    end,
-  });
-
   const mlJobs = await getMlJobsWithAPMGroup(mlSetup.anomalyDetectors);
 
   if (!mlJobs.length) {
     return [];
   }
 
+  // If multiple ML jobs exist
+  // find the first job with valid running datafeed that matches the preferred environment
+  const preferredBucketSpan = mlJobs.find(
+    (j) =>
+      j.datafeedState !== undefined && j.environment === preferredEnvironment
+  )?.bucketSpan;
+
+  const minBucketSize =
+    parseInterval(
+      preferredBucketSpan ?? `${FALLBACK_ML_BUCKET_SPAN}m`
+    )?.asSeconds() ?? FALLBACK_ML_BUCKET_SPAN * 60; // secs
+
+  // Expected bounds (aka ML model plots) are stored as points in time, in intervals of the predefined bucket_span,
+  // so to query bounds that include start and end time
+  // we need to append bucket size before and after the range
+  const extendedStart = start - minBucketSize * 1000; // ms
+  const extendedEnd = end + minBucketSize * 1000; // ms
+
+  const { intervalString } = getAnomalyResultBucketSize({
+    start: extendedStart,
+    end: extendedEnd,
+    // If the calculated bucketSize is smaller than the bucket span interval,
+    // use the original job's bucket_span
+    minBucketSize,
+  });
   const anomaliesResponse = await anomalySearch(
     mlSetup.mlSystem.mlAnomalySearch,
     {
@@ -64,7 +109,7 @@ export async function getAnomalyTimeseries({
                 serviceName,
                 transactionType,
               }),
-              ...rangeQuery(start, end, 'timestamp'),
+              ...rangeQuery(extendedStart, extendedEnd, 'timestamp'),
               ...apmMlJobsQuery(mlJobs),
             ],
           },
@@ -110,8 +155,8 @@ export async function getAnomalyTimeseries({
                   field: 'timestamp',
                   fixed_interval: intervalString,
                   extended_bounds: {
-                    min: start,
-                    max: end,
+                    min: extendedStart,
+                    max: extendedEnd,
                   },
                 },
                 aggs: {
@@ -147,13 +192,6 @@ export async function getAnomalyTimeseries({
   );
 
   const jobsById = keyBy(mlJobs, (job) => job.jobId);
-
-  function divide(value: number | null, divider: number) {
-    if (value === null) {
-      return null;
-    }
-    return value / divider;
-  }
 
   const series: Array<ServiceAnomalyTimeseries | undefined> =
     anomaliesResponse.aggregations?.by_timeseries_id.buckets.map((bucket) => {
@@ -192,11 +230,13 @@ export async function getAnomalyTimeseries({
             divider
           ),
         })),
-        bounds: bucket.timeseries.buckets.map((dateBucket) => ({
-          x: dateBucket.key as number,
-          y0: divide(dateBucket.model_lower.value, divider),
-          y1: divide(dateBucket.model_upper.value, divider),
-        })),
+        bounds: bucket.timeseries.buckets.map((dateBucket) => {
+          return {
+            x: getBoundedX(dateBucket.key, start, end) as number,
+            y0: divide(dateBucket.model_lower.value, divider),
+            y1: divide(dateBucket.model_upper.value, divider),
+          };
+        }),
       };
     }) ?? [];
 

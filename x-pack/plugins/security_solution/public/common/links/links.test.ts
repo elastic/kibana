@@ -5,416 +5,286 @@
  * 2.0.
  */
 
-import {
-  getAncestorLinksInfo,
-  getDeepLinks,
-  getInitialDeepLinks,
-  getLinkInfo,
-  getNavLinkItems,
-  needsUrlState,
-} from './links';
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
 import { Capabilities } from '@kbn/core/types';
-import { AppDeepLink } from '@kbn/core/public';
-import { mockGlobalState } from '../mock';
-import { NavLinkItem } from './types';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
-import { LicenseService } from '../../../common/license';
+import { mockGlobalState, TestProviders } from '../mock';
+import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import { AppLinkItems } from './types';
+import { act, renderHook } from '@testing-library/react-hooks';
+import {
+  useAppLinks,
+  getAncestorLinksInfo,
+  getLinkInfo,
+  needsUrlState,
+  updateAppLinks,
+  useLinkExists,
+} from './links';
+
+const defaultAppLinks: AppLinkItems = [
+  {
+    id: SecurityPageName.hosts,
+    title: 'Hosts',
+    path: '/hosts',
+    links: [
+      {
+        id: SecurityPageName.hostsAnomalies,
+        title: 'Anomalies',
+        path: `/hosts/anomalies`,
+      },
+      {
+        id: SecurityPageName.hostsEvents,
+        title: 'Events',
+        path: `/hosts/events`,
+        skipUrlState: true,
+      },
+    ],
+  },
+];
 
 const mockExperimentalDefaults = mockGlobalState.app.enableExperimental;
+
 const mockCapabilities = {
   [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
   [SERVER_APP_ID]: { show: true },
 } as unknown as Capabilities;
 
-const findDeepLink = (id: string, deepLinks: AppDeepLink[]): AppDeepLink | null =>
-  deepLinks.reduce((deepLinkFound: AppDeepLink | null, deepLink) => {
-    if (deepLinkFound !== null) {
-      return deepLinkFound;
-    }
-    if (deepLink.id === id) {
-      return deepLink;
-    }
-    if (deepLink.deepLinks) {
-      return findDeepLink(id, deepLink.deepLinks);
-    }
-    return null;
-  }, null);
+const fakePageId = 'fakePage';
+const testFeatureflag = 'detectionResponseEnabled';
 
-const findNavLink = (id: SecurityPageName, navLinks: NavLinkItem[]): NavLinkItem | null =>
-  navLinks.reduce((deepLinkFound: NavLinkItem | null, deepLink) => {
-    if (deepLinkFound !== null) {
-      return deepLinkFound;
-    }
-    if (deepLink.id === id) {
-      return deepLink;
-    }
-    if (deepLink.links) {
-      return findNavLink(id, deepLink.links);
-    }
-    return null;
-  }, null);
+jest.mock('./app_links', () => {
+  const actual = jest.requireActual('./app_links');
+  const fakeLink = {
+    id: fakePageId,
+    title: 'test fake menu item',
+    path: 'test fake path',
+    hideWhenExperimentalKey: testFeatureflag,
+  };
 
-// remove filter once new nav is live
-const allPages = Object.values(SecurityPageName).filter(
-  (pageName) =>
-    pageName !== SecurityPageName.explore &&
-    pageName !== SecurityPageName.detections &&
-    pageName !== SecurityPageName.investigate
-);
-const casesPages = [
-  SecurityPageName.case,
-  SecurityPageName.caseConfigure,
-  SecurityPageName.caseCreate,
-];
-const featureFlagPages = [
-  SecurityPageName.detectionAndResponse,
-  SecurityPageName.hostsAuthentications,
-  SecurityPageName.hostsRisk,
-  SecurityPageName.usersRisk,
-];
-const premiumPages = [
-  SecurityPageName.caseConfigure,
-  SecurityPageName.hostsAnomalies,
-  SecurityPageName.networkAnomalies,
-  SecurityPageName.usersAnomalies,
-  SecurityPageName.detectionAndResponse,
-  SecurityPageName.hostsRisk,
-  SecurityPageName.usersRisk,
-];
-const nonCasesPages = allPages.reduce(
-  (acc: SecurityPageName[], p) =>
-    casesPages.includes(p) || featureFlagPages.includes(p) ? acc : [p, ...acc],
-  []
-);
+  return {
+    ...actual,
+    getAppLinks: () => [...actual.appLinks, fakeLink],
+    appLinks: [...actual.appLinks, fakeLink],
+  };
+});
 
 const licenseBasicMock = jest.fn().mockImplementation((arg: LicenseType) => arg === 'basic');
 const licensePremiumMock = jest.fn().mockReturnValue(true);
 const mockLicense = {
-  isAtLeast: licensePremiumMock,
-} as unknown as LicenseService;
+  hasAtLeast: licensePremiumMock,
+} as unknown as ILicense;
 
-describe('security app link helpers', () => {
+const renderUseAppLinks = () =>
+  renderHook<{}, AppLinkItems>(() => useAppLinks(), { wrapper: TestProviders });
+const renderUseLinkExists = (id: SecurityPageName) =>
+  renderHook<SecurityPageName, boolean>(() => useLinkExists(id), {
+    wrapper: TestProviders,
+  });
+
+describe('Security app links', () => {
   beforeEach(() => {
-    mockLicense.isAtLeast = licensePremiumMock;
-  });
-  describe('getInitialDeepLinks', () => {
-    it('should return all pages in the app', () => {
-      const links = getInitialDeepLinks();
-      allPages.forEach((page) => expect(findDeepLink(page, links)).toBeTruthy());
-    });
-  });
-  describe('getDeepLinks', () => {
-    it('basicLicense should return only basic links', async () => {
-      mockLicense.isAtLeast = licenseBasicMock;
+    mockLicense.hasAtLeast = licensePremiumMock;
 
-      const links = await getDeepLinks({
-        enableExperimental: mockExperimentalDefaults,
-        license: mockLicense,
-        capabilities: mockCapabilities,
-      });
-      expect(findDeepLink(SecurityPageName.hostsAnomalies, links)).toBeFalsy();
-      allPages.forEach((page) => {
-        if (premiumPages.includes(page)) {
-          return expect(findDeepLink(page, links)).toBeFalsy();
-        }
-        if (featureFlagPages.includes(page)) {
-          // ignore feature flag pages
-          return;
-        }
-        expect(findDeepLink(page, links)).toBeTruthy();
-      });
-    });
-    it('platinumLicense should return all links', async () => {
-      const links = await getDeepLinks({
-        enableExperimental: mockExperimentalDefaults,
-        license: mockLicense,
-        capabilities: mockCapabilities,
-      });
-      allPages.forEach((page) => {
-        if (premiumPages.includes(page) && !featureFlagPages.includes(page)) {
-          return expect(findDeepLink(page, links)).toBeTruthy();
-        }
-        if (featureFlagPages.includes(page)) {
-          // ignore feature flag pages
-          return;
-        }
-        expect(findDeepLink(page, links)).toBeTruthy();
-      });
-    });
-    it('hideWhenExperimentalKey hides entry when key = true', async () => {
-      const links = await getDeepLinks({
-        enableExperimental: { ...mockExperimentalDefaults, usersEnabled: true },
-        license: mockLicense,
-        capabilities: mockCapabilities,
-      });
-      expect(findDeepLink(SecurityPageName.hostsAuthentications, links)).toBeFalsy();
-    });
-    it('hideWhenExperimentalKey shows entry when key = false', async () => {
-      const links = await getDeepLinks({
-        enableExperimental: { ...mockExperimentalDefaults, usersEnabled: false },
-        license: mockLicense,
-        capabilities: mockCapabilities,
-      });
-      expect(findDeepLink(SecurityPageName.hostsAuthentications, links)).toBeTruthy();
-    });
-    it('experimentalKey shows entry when key = false', async () => {
-      const links = await getDeepLinks({
-        enableExperimental: {
-          ...mockExperimentalDefaults,
-          riskyHostsEnabled: false,
-          riskyUsersEnabled: false,
-          detectionResponseEnabled: false,
-        },
-        license: mockLicense,
-        capabilities: mockCapabilities,
-      });
-      expect(findDeepLink(SecurityPageName.hostsRisk, links)).toBeFalsy();
-      expect(findDeepLink(SecurityPageName.usersRisk, links)).toBeFalsy();
-      expect(findDeepLink(SecurityPageName.detectionAndResponse, links)).toBeFalsy();
-    });
-    it('experimentalKey shows entry when key = true', async () => {
-      const links = await getDeepLinks({
-        enableExperimental: {
-          ...mockExperimentalDefaults,
-          riskyHostsEnabled: true,
-          riskyUsersEnabled: true,
-          detectionResponseEnabled: true,
-        },
-        license: mockLicense,
-        capabilities: mockCapabilities,
-      });
-      expect(findDeepLink(SecurityPageName.hostsRisk, links)).toBeTruthy();
-      expect(findDeepLink(SecurityPageName.usersRisk, links)).toBeTruthy();
-      expect(findDeepLink(SecurityPageName.detectionAndResponse, links)).toBeTruthy();
-    });
-
-    it('Removes siem features when siem capabilities are false', async () => {
-      const capabilities = {
-        ...mockCapabilities,
-        [SERVER_APP_ID]: { show: false },
-      } as unknown as Capabilities;
-      const links = await getDeepLinks({
-        enableExperimental: mockExperimentalDefaults,
-        license: mockLicense,
-        capabilities,
-      });
-      nonCasesPages.forEach((page) => {
-        // investigate is active for both Cases and Timelines pages
-        if (page === SecurityPageName.investigate) {
-          return expect(findDeepLink(page, links)).toBeTruthy();
-        }
-        return expect(findDeepLink(page, links)).toBeFalsy();
-      });
-      casesPages.forEach((page) => expect(findDeepLink(page, links)).toBeTruthy());
-    });
-    it('Removes cases features when cases capabilities are false', async () => {
-      const capabilities = {
-        ...mockCapabilities,
-        [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
-      } as unknown as Capabilities;
-      const links = await getDeepLinks({
-        enableExperimental: mockExperimentalDefaults,
-        license: mockLicense,
-        capabilities,
-      });
-      nonCasesPages.forEach((page) => expect(findDeepLink(page, links)).toBeTruthy());
-      casesPages.forEach((page) => expect(findDeepLink(page, links)).toBeFalsy());
+    updateAppLinks(defaultAppLinks, {
+      capabilities: mockCapabilities,
+      experimentalFeatures: mockExperimentalDefaults,
+      license: mockLicense,
     });
   });
 
-  describe('getNavLinkItems', () => {
-    it('basicLicense should return only basic links', () => {
-      mockLicense.isAtLeast = licenseBasicMock;
-      const links = getNavLinkItems({
-        enableExperimental: mockExperimentalDefaults,
-        license: mockLicense,
-        capabilities: mockCapabilities,
-      });
-      expect(findNavLink(SecurityPageName.hostsAnomalies, links)).toBeFalsy();
-      allPages.forEach((page) => {
-        if (premiumPages.includes(page)) {
-          return expect(findNavLink(page, links)).toBeFalsy();
-        }
-        if (featureFlagPages.includes(page)) {
-          // ignore feature flag pages
-          return;
-        }
-        expect(findNavLink(page, links)).toBeTruthy();
-      });
-    });
-    it('platinumLicense should return all links', () => {
-      const links = getNavLinkItems({
-        enableExperimental: mockExperimentalDefaults,
-        license: mockLicense,
-        capabilities: mockCapabilities,
-      });
-      allPages.forEach((page) => {
-        if (premiumPages.includes(page) && !featureFlagPages.includes(page)) {
-          return expect(findNavLink(page, links)).toBeTruthy();
-        }
-        if (featureFlagPages.includes(page)) {
-          // ignore feature flag pages
-          return;
-        }
-        expect(findNavLink(page, links)).toBeTruthy();
-      });
-    });
-    it('hideWhenExperimentalKey hides entry when key = true', () => {
-      const links = getNavLinkItems({
-        enableExperimental: { ...mockExperimentalDefaults, usersEnabled: true },
-        license: mockLicense,
-        capabilities: mockCapabilities,
-      });
-      expect(findNavLink(SecurityPageName.hostsAuthentications, links)).toBeFalsy();
-    });
-    it('hideWhenExperimentalKey shows entry when key = false', () => {
-      const links = getNavLinkItems({
-        enableExperimental: { ...mockExperimentalDefaults, usersEnabled: false },
-        license: mockLicense,
-        capabilities: mockCapabilities,
-      });
-      expect(findNavLink(SecurityPageName.hostsAuthentications, links)).toBeTruthy();
-    });
-    it('experimentalKey shows entry when key = false', () => {
-      const links = getNavLinkItems({
-        enableExperimental: {
-          ...mockExperimentalDefaults,
-          riskyHostsEnabled: false,
-          riskyUsersEnabled: false,
-          detectionResponseEnabled: false,
-        },
-        license: mockLicense,
-        capabilities: mockCapabilities,
-      });
-      expect(findNavLink(SecurityPageName.hostsRisk, links)).toBeFalsy();
-      expect(findNavLink(SecurityPageName.usersRisk, links)).toBeFalsy();
-      expect(findNavLink(SecurityPageName.detectionAndResponse, links)).toBeFalsy();
-    });
-    it('experimentalKey shows entry when key = true', () => {
-      const links = getNavLinkItems({
-        enableExperimental: {
-          ...mockExperimentalDefaults,
-          riskyHostsEnabled: true,
-          riskyUsersEnabled: true,
-          detectionResponseEnabled: true,
-        },
-        license: mockLicense,
-        capabilities: mockCapabilities,
-      });
-      expect(findNavLink(SecurityPageName.hostsRisk, links)).toBeTruthy();
-      expect(findNavLink(SecurityPageName.usersRisk, links)).toBeTruthy();
-      expect(findNavLink(SecurityPageName.detectionAndResponse, links)).toBeTruthy();
+  describe('useAppLinks', () => {
+    it('should return initial appLinks', () => {
+      const { result } = renderUseAppLinks();
+      expect(result.current).toStrictEqual(defaultAppLinks);
     });
 
-    it('Removes siem features when siem capabilities are false', () => {
-      const capabilities = {
-        ...mockCapabilities,
-        [SERVER_APP_ID]: { show: false },
-      } as unknown as Capabilities;
-      const links = getNavLinkItems({
-        enableExperimental: mockExperimentalDefaults,
-        license: mockLicense,
-        capabilities,
+    it('should filter not allowed links', async () => {
+      const { result, waitForNextUpdate } = renderUseAppLinks();
+      // this link should not be excluded, the test checks all conditions are passed
+      const networkLinkItem = {
+        id: SecurityPageName.network,
+        title: 'Network',
+        path: '/network',
+        capabilities: [`${CASES_FEATURE_ID}.read_cases`, `${SERVER_APP_ID}.show`],
+        experimentalKey: 'flagEnabled' as unknown as keyof typeof mockExperimentalDefaults,
+        hideWhenExperimentalKey: 'flagDisabled' as unknown as keyof typeof mockExperimentalDefaults,
+        licenseType: 'basic' as const,
+      };
+
+      await act(async () => {
+        updateAppLinks(
+          [
+            {
+              ...networkLinkItem,
+              // all its links should be filtered for all different criteria
+              links: [
+                {
+                  id: SecurityPageName.networkExternalAlerts,
+                  title: 'external alerts',
+                  path: '/external_alerts',
+                  experimentalKey:
+                    'flagDisabled' as unknown as keyof typeof mockExperimentalDefaults,
+                },
+                {
+                  id: SecurityPageName.networkDns,
+                  title: 'dns',
+                  path: '/dns',
+                  hideWhenExperimentalKey:
+                    'flagEnabled' as unknown as keyof typeof mockExperimentalDefaults,
+                },
+                {
+                  id: SecurityPageName.networkAnomalies,
+                  title: 'Anomalies',
+                  path: '/anomalies',
+                  capabilities: [
+                    `${CASES_FEATURE_ID}.read_cases`,
+                    `${CASES_FEATURE_ID}.write_cases`,
+                  ],
+                },
+                {
+                  id: SecurityPageName.networkHttp,
+                  title: 'Http',
+                  path: '/http',
+                  licenseType: 'gold',
+                },
+              ],
+            },
+            {
+              // should be excluded by license with all its links
+              id: SecurityPageName.hosts,
+              title: 'Hosts',
+              path: '/hosts',
+              licenseType: 'platinum',
+              links: [
+                {
+                  id: SecurityPageName.hostsEvents,
+                  title: 'Events',
+                  path: '/events',
+                },
+              ],
+            },
+          ],
+          {
+            capabilities: {
+              ...mockCapabilities,
+              [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+            },
+            experimentalFeatures: {
+              flagEnabled: true,
+              flagDisabled: false,
+            } as unknown as typeof mockExperimentalDefaults,
+            license: { hasAtLeast: licenseBasicMock } as unknown as ILicense,
+          }
+        );
+        await waitForNextUpdate();
       });
-      nonCasesPages.forEach((page) => {
-        // investigate is active for both Cases and Timelines pages
-        if (page === SecurityPageName.investigate) {
-          return expect(findNavLink(page, links)).toBeTruthy();
-        }
-        return expect(findNavLink(page, links)).toBeFalsy();
-      });
-      casesPages.forEach((page) => expect(findNavLink(page, links)).toBeTruthy());
+
+      expect(result.current).toStrictEqual([networkLinkItem]);
     });
-    it('Removes cases features when cases capabilities are false', () => {
-      const capabilities = {
-        ...mockCapabilities,
-        [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
-      } as unknown as Capabilities;
-      const links = getNavLinkItems({
-        enableExperimental: mockExperimentalDefaults,
-        license: mockLicense,
-        capabilities,
+  });
+
+  describe('useLinkExists', () => {
+    it('should return true if the link exists', () => {
+      const { result } = renderUseLinkExists(SecurityPageName.hostsEvents);
+      expect(result.current).toBe(true);
+    });
+
+    it('should return false if the link does not exists', () => {
+      const { result } = renderUseLinkExists(SecurityPageName.rules);
+      expect(result.current).toBe(false);
+    });
+
+    it('should update if the links are removed', async () => {
+      const { result, waitForNextUpdate } = renderUseLinkExists(SecurityPageName.hostsEvents);
+      expect(result.current).toBe(true);
+      await act(async () => {
+        updateAppLinks(
+          [
+            {
+              id: SecurityPageName.hosts,
+              title: 'Hosts',
+              path: '/hosts',
+            },
+          ],
+          {
+            capabilities: mockCapabilities,
+            experimentalFeatures: mockExperimentalDefaults,
+            license: mockLicense,
+          }
+        );
+        await waitForNextUpdate();
       });
-      nonCasesPages.forEach((page) => expect(findNavLink(page, links)).toBeTruthy());
-      casesPages.forEach((page) => expect(findNavLink(page, links)).toBeFalsy());
+      expect(result.current).toBe(false);
+    });
+
+    it('should update if the links are added', async () => {
+      const { result, waitForNextUpdate } = renderUseLinkExists(SecurityPageName.rules);
+      expect(result.current).toBe(false);
+      await act(async () => {
+        updateAppLinks(
+          [
+            {
+              id: SecurityPageName.hosts,
+              title: 'Hosts',
+              path: '/hosts',
+              links: [
+                {
+                  id: SecurityPageName.rules,
+                  title: 'Rules',
+                  path: '/rules',
+                },
+              ],
+            },
+          ],
+          {
+            capabilities: mockCapabilities,
+            experimentalFeatures: mockExperimentalDefaults,
+            license: mockLicense,
+          }
+        );
+        await waitForNextUpdate();
+      });
+      expect(result.current).toBe(true);
     });
   });
 
   describe('getAncestorLinksInfo', () => {
-    it('finds flattened links for hosts', () => {
-      const hierarchy = getAncestorLinksInfo(SecurityPageName.hosts);
-      expect(hierarchy).toEqual([
+    it('should find ancestors flattened links', () => {
+      const hierarchy = getAncestorLinksInfo(SecurityPageName.hostsEvents);
+      expect(hierarchy).toStrictEqual([
         {
-          features: ['siem.show'],
-          globalNavEnabled: false,
-          globalSearchKeywords: ['Threat hunting'],
-          id: 'threat-hunting',
-          path: '/threat_hunting',
-          title: 'Threat Hunting',
-        },
-        {
-          globalNavEnabled: true,
-          globalNavOrder: 9002,
-          globalSearchEnabled: true,
-          globalSearchKeywords: ['Hosts'],
-          id: 'hosts',
-          path: '/hosts',
-          title: 'Hosts',
-        },
-      ]);
-    });
-    it('finds flattened links for uncommonProcesses', () => {
-      const hierarchy = getAncestorLinksInfo(SecurityPageName.uncommonProcesses);
-      expect(hierarchy).toEqual([
-        {
-          features: ['siem.show'],
-          globalNavEnabled: false,
-          globalSearchKeywords: ['Threat hunting'],
-          id: 'threat-hunting',
-          path: '/threat_hunting',
-          title: 'Threat Hunting',
-        },
-        {
-          globalNavEnabled: true,
-          globalNavOrder: 9002,
-          globalSearchEnabled: true,
-          globalSearchKeywords: ['Hosts'],
-          id: 'hosts',
+          id: SecurityPageName.hosts,
           path: '/hosts',
           title: 'Hosts',
         },
         {
-          id: 'uncommon_processes',
-          path: '/hosts/uncommonProcesses',
-          title: 'Uncommon Processes',
+          id: SecurityPageName.hostsEvents,
+          path: '/hosts/events',
+          skipUrlState: true,
+          title: 'Events',
         },
       ]);
     });
   });
 
   describe('needsUrlState', () => {
-    it('returns true when url state exists for page', () => {
+    it('should return true when url state exists for page', () => {
       const needsUrl = needsUrlState(SecurityPageName.hosts);
       expect(needsUrl).toEqual(true);
     });
-    it('returns false when url state does not exist for page', () => {
-      const needsUrl = needsUrlState(SecurityPageName.landing);
+    it('should return false when url state does not exist for page', () => {
+      const needsUrl = needsUrlState(SecurityPageName.hostsEvents);
       expect(needsUrl).toEqual(false);
     });
   });
 
   describe('getLinkInfo', () => {
-    it('gets information for an individual link', () => {
-      const linkInfo = getLinkInfo(SecurityPageName.hosts);
-      expect(linkInfo).toEqual({
-        globalNavEnabled: true,
-        globalNavOrder: 9002,
-        globalSearchEnabled: true,
-        globalSearchKeywords: ['Hosts'],
-        id: 'hosts',
-        path: '/hosts',
-        title: 'Hosts',
+    it('should get information for an individual link', () => {
+      const linkInfo = getLinkInfo(SecurityPageName.hostsEvents);
+      expect(linkInfo).toStrictEqual({
+        id: SecurityPageName.hostsEvents,
+        path: '/hosts/events',
+        skipUrlState: true,
+        title: 'Events',
       });
     });
   });

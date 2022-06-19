@@ -47,7 +47,6 @@ export interface EditConnectorProps {
     onError: () => void,
     onSuccess: () => void
   ) => void;
-  updateCase: (newCase: Case) => void;
   userActions: CaseUserActions[];
   userCanCrud?: boolean;
 }
@@ -119,7 +118,6 @@ export const EditConnector = React.memo(
     isLoading,
     isValidConnector,
     onSubmit,
-    updateCase,
     userActions,
     userCanCrud = true,
   }: EditConnectorProps) => {
@@ -275,7 +273,6 @@ export const EditConnector = React.memo(
       connectors,
       hasDataToPush,
       onEditClick,
-      updateCase,
       userCanCrud,
       isValidConnector,
     });

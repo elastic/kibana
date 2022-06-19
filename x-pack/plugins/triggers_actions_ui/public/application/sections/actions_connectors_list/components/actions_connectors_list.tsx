@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -39,18 +40,17 @@ import {
   ActionConnector,
   ActionConnectorTableItem,
   ActionTypeIndex,
-  EditConectorTabs,
+  EditConnectorTabs,
 } from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 import { useKibana } from '../../../../common/lib/kibana';
-import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../..';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
-import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
 import {
   connectorDeprecatedMessage,
   deprecatedMessage,
 } from '../../../../common/connectors_selection';
+import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
+import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
   return (
@@ -96,7 +96,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [editConnectorProps, setEditConnectorProps] = useState<{
     initialConnector?: ActionConnector;
-    tab?: EditConectorTabs;
+    tab?: EditConnectorTabs;
     isFix?: boolean;
   }>({});
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
@@ -175,7 +175,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
 
   async function editItem(
     actionConnector: ActionConnector,
-    tab: EditConectorTabs,
+    tab: EditConnectorTabs,
     isFix?: boolean
   ) {
     setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
@@ -209,7 +209,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           <>
             <EuiLink
               data-test-subj={`edit${item.id}`}
-              onClick={() => editItem(item, EditConectorTabs.Configuration)}
+              onClick={() => editItem(item, EditConnectorTabs.Configuration)}
               key={item.id}
               disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
             >
@@ -280,7 +280,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                       <EuiButtonEmpty
                         size="xs"
                         data-test-subj="fixConnectorButton"
-                        onClick={() => editItem(item, EditConectorTabs.Configuration, true)}
+                        onClick={() => editItem(item, EditConnectorTabs.Configuration, true)}
                       >
                         {i18n.translate(
                           'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel',
@@ -297,7 +297,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
               <RunOperation
                 canExecute={canExecute && actionTypesIndex && actionTypesIndex[item.actionTypeId]}
                 item={item}
-                onRun={() => editItem(item, EditConectorTabs.Test)}
+                onRun={() => editItem(item, EditConnectorTabs.Test)}
               />
             )}
           </EuiFlexGroup>
@@ -442,6 +442,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         )}
         setIsLoadingState={(isLoading: boolean) => setIsLoadingActionTypes(isLoading)}
       />
+
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}
       {(isLoadingActions || isLoadingActionTypes) && <CenterJustifiedSpinner />}
@@ -454,26 +455,29 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         )}
       {actionConnectorTableItems.length === 0 && !canSave && <NoPermissionPrompt />}
       {addFlyoutVisible ? (
-        <ConnectorAddFlyout
+        <CreateConnectorFlyout
           onClose={() => {
             setAddFlyoutVisibility(false);
           }}
-          onTestConnector={(connector) => editItem(connector, EditConectorTabs.Test)}
-          reloadConnectors={loadActions}
+          onTestConnector={(connector) => editItem(connector, EditConnectorTabs.Test)}
+          onConnectorCreated={loadActions}
           actionTypeRegistry={actionTypeRegistry}
         />
       ) : null}
       {editConnectorProps.initialConnector ? (
-        <ConnectorEditFlyout
+        <EditConnectorFlyout
           key={`${editConnectorProps.initialConnector.id}${
             editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
           }`}
-          initialConnector={editConnectorProps.initialConnector}
+          connector={editConnectorProps.initialConnector}
           tab={editConnectorProps.tab}
           onClose={() => {
             setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
           }}
-          reloadConnectors={loadActions}
+          onConnectorUpdated={(connector) => {
+            setEditConnectorProps({ initialConnector: connector });
+            loadActions();
+          }}
           actionTypeRegistry={actionTypeRegistry}
         />
       ) : null}

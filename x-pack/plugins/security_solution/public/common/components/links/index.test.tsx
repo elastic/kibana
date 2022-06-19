@@ -43,7 +43,7 @@ jest.mock('../../lib/kibana', () => {
         },
       },
     }),
-    useNavigation: () => ({
+    useNavigateTo: () => ({
       navigateTo: mockNavigateTo,
     }),
   };

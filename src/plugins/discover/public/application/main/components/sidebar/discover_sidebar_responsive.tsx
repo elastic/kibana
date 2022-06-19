@@ -24,14 +24,15 @@ import {
 } from '@elastic/eui';
 import type { DataViewField, DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { SavedObject } from '@kbn/core/types';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { AppState } from '../../services/discover_state';
-import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
+import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
+import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -276,7 +277,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       <EuiShowFor sizes={['xs', 's']}>
         <div className="dscSidebar__mobile">
           <EuiButton
-            contentProps={{ className: 'dscSidebar__mobileButton' }}
+            contentProps={{
+              className: 'dscSidebar__mobileButton',
+              id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields,
+            }}
             fullWidth
             onClick={() => setIsFlyoutVisible(true)}
           >

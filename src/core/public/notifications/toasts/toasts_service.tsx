@@ -9,12 +9,12 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { I18nStart } from '../../i18n';
 import { IUiSettingsClient } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi, IToasts } from './toasts_api';
 import { OverlayStart } from '../../overlays';
-import { ThemeServiceStart } from '../../theme';
 import { CoreContextProvider } from '../../utils';
 
 interface SetupDeps {

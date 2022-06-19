@@ -361,6 +361,7 @@ export default function (providerContext: FtrProviderContext) {
         type: 'epm-packages',
         id: 'all_assets',
       });
+
       expect(res.attributes).eql({
         installed_kibana_space_id: 'default',
         installed_kibana: [
@@ -400,6 +401,10 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_osquery_pack_asset',
             type: 'osquery-pack-asset',
           },
+          {
+            id: 'sample_osquery_saved_query',
+            type: 'osquery-saved-query',
+          },
         ],
         installed_es: [
           {
@@ -420,6 +425,14 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             id: 'logs-all_assets.test_logs-0.2.0-pipeline1',
+            type: 'ingest_pipeline',
+          },
+          {
+            id: 'logs-all_assets.test_logs2-0.2.0',
+            type: 'ingest_pipeline',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics-0.2.0',
             type: 'ingest_pipeline',
           },
           {
@@ -484,6 +497,7 @@ export default function (providerContext: FtrProviderContext) {
           { id: '7f4c5aca-b4f5-5f0a-95af-051da37513fc', type: 'epm-packages-assets' },
           { id: '4281a436-45a8-54ab-9724-fda6849f789d', type: 'epm-packages-assets' },
           { id: 'cb0bbdd7-e043-508b-91c0-09e4cc0f5a3c', type: 'epm-packages-assets' },
+          { id: '6a87d1a5-adf8-5a30-82c4-4c3b8298272b', type: 'epm-packages-assets' },
           { id: '2e56f08b-1d06-55ed-abee-4708e1ccf0aa', type: 'epm-packages-assets' },
           { id: '4035007b-9c33-5227-9803-2de8a17523b5', type: 'epm-packages-assets' },
           { id: 'e6ae7d31-6920-5408-9219-91ef1662044b', type: 'epm-packages-assets' },
@@ -492,7 +506,6 @@ export default function (providerContext: FtrProviderContext) {
         ],
         name: 'all_assets',
         version: '0.2.0',
-        removable: true,
         install_version: '0.2.0',
         install_status: 'installed',
         install_started_at: res.attributes.install_started_at,

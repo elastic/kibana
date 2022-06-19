@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiIcon, EuiText, EuiAccordion, EuiNotificationBadge } from '@elastic/eui';
 import { ProcessEvent } from '../../../common/types/process_tree';
-import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { useStyles } from '../detail_panel_alert_list_item/styles';
 import { DetailPanelAlertListItem } from '../detail_panel_alert_list_item';
@@ -31,10 +30,7 @@ export const DetailPanelAlertGroupItem = ({
   onShowAlertDetails,
 }: DetailPanelAlertsGroupItemDeps) => {
   const styles = useStyles();
-
-  const alertsCount = useMemo(() => {
-    return alerts.length >= ALERT_COUNT_THRESHOLD ? ALERT_COUNT_THRESHOLD + '+' : alerts.length;
-  }, [alerts]);
+  const alertsCount = alerts.length.toLocaleString();
 
   if (!alerts[0].kibana) {
     return null;

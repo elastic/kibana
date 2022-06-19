@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { uniq } from 'lodash';
+import { isUndefined, uniq } from 'lodash';
 import React from 'react';
 import moment from 'moment';
 import { Endzones } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
-import type { CommonXYDataLayerConfig } from '../../common';
+import {
+  getAccessorByDimension,
+  getColumnByAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
+import type { AxisExtentConfigResult, CommonXYDataLayerConfig } from '../../common';
 
 export interface XDomain {
   min?: number;
@@ -22,7 +26,7 @@ export interface XDomain {
 export const getAppliedTimeRange = (layers: CommonXYDataLayerConfig[]) => {
   return layers
     .map(({ xAccessor, table }) => {
-      const xColumn = table.columns.find((col) => col.id === xAccessor);
+      const xColumn = xAccessor ? getColumnByAccessor(xAccessor, table.columns) : null;
       const timeRange =
         xColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(xColumn)?.timeRange;
       if (timeRange) {
@@ -39,7 +43,8 @@ export const getXDomain = (
   layers: CommonXYDataLayerConfig[],
   minInterval: number | undefined,
   isTimeViz: boolean,
-  isHistogram: boolean
+  isHistogram: boolean,
+  xExtent?: AxisExtentConfigResult
 ) => {
   const appliedTimeRange = getAppliedTimeRange(layers)?.timeRange;
   const from = appliedTimeRange?.from;
@@ -55,14 +60,25 @@ export const getXDomain = (
     : undefined;
 
   if (isHistogram && isFullyQualified(baseDomain)) {
+    if (xExtent && !isTimeViz) {
+      return {
+        extendedDomain: {
+          min: xExtent.lowerBound ?? NaN,
+          max: xExtent.upperBound ?? NaN,
+          minInterval: baseDomain.minInterval,
+        },
+        baseDomain,
+      };
+    }
     const xValues = uniq(
       layers
-        .flatMap<number>(({ table, xAccessor }) =>
-          table.rows.map((row) => row[xAccessor!].valueOf())
-        )
+        .flatMap<number>(({ table, xAccessor }) => {
+          const accessor = xAccessor && getAccessorByDimension(xAccessor, table.columns);
+          return table.rows.map((row) => accessor && row[accessor] && row[accessor].valueOf());
+        })
+        .filter((v) => !isUndefined(v))
         .sort()
     );
-
     const [firstXValue] = xValues;
     const lastXValue = xValues[xValues.length - 1];
 
