@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
+import {
+  UxLocalUIFilterName,
+  uxLocalUIFilterNames,
+} from '../../../../../common/ux_ui_filter';
 import {
   VisitorBreakdownChart,
   VisitorBreakdownMetric,
@@ -16,6 +20,18 @@ import {
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useStaticDataView } from '../../../../hooks/use_static_data_view';
+import { useLocalUIFilters } from '../hooks/use_local_uifilters';
+import { getExcludedName } from '../local_uifilters';
+
+type VisitorBreakdownFieldMap = Record<
+  VisitorBreakdownMetric,
+  UxLocalUIFilterName
+>;
+
+const visitorBreakdownFieldMap: VisitorBreakdownFieldMap = {
+  [VisitorBreakdownMetric.OS_BREAKDOWN]: 'os',
+  [VisitorBreakdownMetric.UA_BREAKDOWN]: 'browser',
+};
 
 const EuiLoadingEmbeddable = styled(EuiFlexGroup)`
   & {
@@ -24,12 +40,49 @@ const EuiLoadingEmbeddable = styled(EuiFlexGroup)`
   }
 `;
 
+const getInvertedFilterName = (filter: UxLocalUIFilterName, negate: boolean) =>
+  negate ? filter : getExcludedName(filter);
+
 export function VisitorBreakdown() {
   const { urlParams, uxUiFilters } = useLegacyUrlParams();
   const { start, end, searchTerm } = urlParams;
-
   // static dataView is required for lens
   const { dataView, loading } = useStaticDataView();
+
+  const { filters, setFilterValue } = useLocalUIFilters({
+    filterNames: uxLocalUIFilterNames.filter((name) =>
+      ['browser', 'browserExcluded', 'os', 'osExcluded'].includes(name)
+    ),
+  });
+
+  const onFilter = useCallback(
+    (metric: VisitorBreakdownMetric, event: any) => {
+      if (!visitorBreakdownFieldMap[metric]) {
+        return;
+      }
+
+      const filterValues = event?.data?.map((fdata: any) => fdata.value);
+      const invertedField = getInvertedFilterName(
+        visitorBreakdownFieldMap[metric],
+        event?.negate ?? false
+      );
+      const invertedFieldValues =
+        filters?.find((filter) => filter.name === invertedField)?.value ?? [];
+
+      setFilterValue(
+        invertedField,
+        invertedFieldValues.filter((value) => !filterValues.includes(value))
+      );
+
+      setFilterValue(
+        event?.negate
+          ? getExcludedName(visitorBreakdownFieldMap[metric])
+          : visitorBreakdownFieldMap[metric],
+        filterValues
+      );
+    },
+    [filters, setFilterValue]
+  );
 
   return (
     <>
@@ -60,6 +113,7 @@ export function VisitorBreakdown() {
               uiFilters={uxUiFilters}
               urlQuery={searchTerm}
               metric={VisitorBreakdownMetric.UA_BREAKDOWN}
+              onFilter={onFilter}
             />
           )}
         </EuiFlexItem>
@@ -85,6 +139,7 @@ export function VisitorBreakdown() {
               uiFilters={uxUiFilters}
               urlQuery={searchTerm}
               metric={VisitorBreakdownMetric.OS_BREAKDOWN}
+              onFilter={onFilter}
             />
           )}
         </EuiFlexItem>

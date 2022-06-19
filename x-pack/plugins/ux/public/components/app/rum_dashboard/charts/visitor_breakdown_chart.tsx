@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   CountIndexPatternColumn,
@@ -33,7 +33,7 @@ export enum VisitorBreakdownMetric {
 }
 
 interface LensAttributes {
-  metric: string;
+  metric: VisitorBreakdownMetric;
   uiFilters: UxUIFilters;
   urlQuery?: string;
   dataView: string;
@@ -42,11 +42,13 @@ interface LensAttributes {
 type Props = {
   start: string;
   end: string;
+  onFilter: (metric: VisitorBreakdownMetric, event: any) => void;
 } & LensAttributes;
 
 export function VisitorBreakdownChart({
   start,
   end,
+  onFilter,
   uiFilters,
   urlQuery,
   metric,
@@ -66,6 +68,13 @@ export function VisitorBreakdownChart({
     [uiFilters, urlQuery, metric, dataView]
   );
 
+  const filterHandler = useCallback(
+    (event) => {
+      onFilter(metric, event);
+    },
+    [onFilter, metric]
+  );
+
   if (!LensEmbeddableComponent) {
     return <EuiText>No lens component</EuiText>;
   }
@@ -82,7 +91,7 @@ export function VisitorBreakdownChart({
         to: end ?? '',
       }}
       viewMode={ViewMode.VIEW}
-      disableTriggers
+      onFilter={filterHandler}
     />
   );
 }
