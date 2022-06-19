@@ -8,15 +8,24 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
-import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
+import { AttributesTypeUser, CommentAttributes } from '@kbn/cases-plugin/common/api';
+import { CASE_COMMENT_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
+import { SavedObject } from '@kbn/core/types';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { defaultUser, postCaseReq, postExternalReferenceReq } from '../../../../common/lib/mock';
+import {
+  defaultUser,
+  postCaseReq,
+  postCommentUserReq,
+  postExternalReferenceReq,
+} from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
   createComment,
   getCaseUserActions,
   removeServerGeneratedPropertiesFromSavedObject,
+  bulkCreateAttachments,
+  updateComment,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -96,6 +105,96 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(commentUserAction.type).to.eql('comment');
       expect(commentUserAction.action).to.eql('create');
       expect(commentUserAction.payload).to.eql({ comment: postExternalReferenceReq });
+    });
+
+    it('should put the externalReferenceId to the SO references if externalReferenceType===so', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postExternalReferenceReq,
+      });
+
+      const esResponse = await es.get<SavedObject<CommentAttributes>>(
+        {
+          index: '.kibana',
+          id: `${CASE_COMMENT_SAVED_OBJECT}:${patchedCase.comments![0].id}`,
+        },
+        { meta: true }
+      );
+
+      const ref = esResponse.body._source?.references.find(
+        (r) => r.id === postExternalReferenceReq.externalReferenceId
+      );
+
+      expect(ref).to.eql({
+        id: 'my-id',
+        name: 'externalReferenceId',
+        type: 'test-type',
+      });
+    });
+
+    it('should put the externalReferenceId to the SO references if externalReferenceType===so when bulk create', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await bulkCreateAttachments({
+        supertest,
+        caseId: postedCase.id,
+        params: [postCommentUserReq, postExternalReferenceReq],
+      });
+
+      const esResponse = await es.get<SavedObject<CommentAttributes>>(
+        {
+          index: '.kibana',
+          id: `${CASE_COMMENT_SAVED_OBJECT}:${patchedCase.comments![1].id}`,
+        },
+        { meta: true }
+      );
+
+      const ref = esResponse.body._source?.references.find(
+        (r) => r.id === postExternalReferenceReq.externalReferenceId
+      );
+
+      expect(ref).to.eql({
+        id: 'my-id',
+        name: 'externalReferenceId',
+        type: 'test-type',
+      });
+    });
+
+    it('should put the new externalReferenceId to the SO references when updating the attachment', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postExternalReferenceReq,
+      });
+
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          ...postExternalReferenceReq,
+          externalReferenceId: 'my-new-id',
+        },
+      });
+
+      const esResponse = await es.get<SavedObject<CommentAttributes>>(
+        {
+          index: '.kibana',
+          id: `${CASE_COMMENT_SAVED_OBJECT}:${patchedCase.comments![0].id}`,
+        },
+        { meta: true }
+      );
+
+      const ref = esResponse.body._source?.references.find((r) => r.id === 'my-new-id');
+
+      expect(ref).to.eql({
+        id: 'my-new-id',
+        name: 'externalReferenceId',
+        type: 'test-type',
+      });
     });
 
     it('should return 400 when missing attributes for external reference type', async () => {

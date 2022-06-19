@@ -70,9 +70,19 @@ export const ActionsCommentRequestRt = rt.type({
   owner: rt.string,
 });
 
+export enum ExternalReferenceStorageType {
+  so = 'so',
+  other = 'other',
+}
+
+const ExternalReferenceStorageRt = rt.union([
+  rt.type({ type: rt.literal(ExternalReferenceStorageType.so), soType: rt.string }),
+  rt.type({ type: rt.literal(ExternalReferenceStorageType.other) }),
+]);
+
 export const ExternalReferenceRt = rt.type({
   externalReferenceId: rt.string,
-  externalReferenceType: rt.union([rt.literal('so'), rt.literal('other')]),
+  externalReferenceStorage: ExternalReferenceStorageRt,
   externalReferenceAttachmentTypeId: rt.string,
   externalReferenceMetadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
   type: rt.literal(CommentType.externalReference),

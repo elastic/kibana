@@ -66,8 +66,14 @@ export const createCaseCommentSavedObjectType = ({
       externalReferenceId: {
         type: 'keyword',
       },
-      externalReferenceType: {
-        type: 'keyword',
+      externalReferenceStorage: {
+        dynamic: false,
+        properties: {
+          // externalReferenceStorage.type
+          type: {
+            type: 'keyword',
+          },
+        },
       },
       externalReferenceAttachmentTypeId: {
         type: 'keyword',
