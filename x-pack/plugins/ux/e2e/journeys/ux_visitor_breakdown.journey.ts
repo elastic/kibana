@@ -7,10 +7,12 @@
 
 import { journey, step, before } from '@elastic/synthetics';
 import { UXDashboardDatePicker } from '../page_objects/date_picker';
-import { loginToKibana, waitForLoadingToFinish } from './utils';
-
-const byLensTestId = (id: string) => `[data-test-embeddable-id="${id}"]`;
-const byLensDataLayerId = (id: string) => `[data-ech-series-name="${id}"]`;
+import {
+  byLensDataLayerId,
+  byLensTestId,
+  loginToKibana,
+  waitForLoadingToFinish,
+} from './utils';
 
 const osNameMetric = 'ux-visitor-breakdown-user_agent-os-name';
 const uaNameMetric = 'ux-visitor-breakdown-user_agent-name';
@@ -104,7 +106,9 @@ journey('UX Visitor Breakdown', async ({ page, params }) => {
       osNames.map(
         async (dataTestId) =>
           // lens embeddable injects its own test attribute
-          await page.waitForSelector(byLensDataLayerId(dataTestId))
+          await page.waitForSelector(byLensDataLayerId(dataTestId), {
+            state: 'attached',
+          })
       )
     );
   });
