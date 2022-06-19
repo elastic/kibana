@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import {
   getVisitorBreakdownLensAttributes,
   VisitorBreakdownChart,
+  VisitorBreakdownMetric,
 } from './visitor_breakdown_chart';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 
@@ -19,7 +20,7 @@ describe('VisitorBreakdownChart', () => {
   describe('getVisitorBreakdownLensAttributes', () => {
     test('generates expected lens attributes', () => {
       const props = {
-        metric: 'user_agent.os.name',
+        metric: VisitorBreakdownMetric.OS_BREAKDOWN,
         uiFilters: {
           environment: 'ENVIRONMENT_ALL',
         },
@@ -47,12 +48,13 @@ describe('VisitorBreakdownChart', () => {
       const props = {
         start: '0',
         end: '5000',
-        metric: 'user_agent.os.name',
+        metric: VisitorBreakdownMetric.OS_BREAKDOWN,
         uiFilters: {
           environment: 'ENVIRONMENT_ALL',
         },
         urlQuery: 'elastic.co',
         dataView: 'Required',
+        onFilter: (_m: VisitorBreakdownMetric, _e: any) => {},
       };
 
       const { container: _ } = render(<VisitorBreakdownChart {...props} />);
