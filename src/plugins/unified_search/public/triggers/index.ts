@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { ApplyGlobalFilterActionContext } from './apply_filter_action';
-export { ACTION_GLOBAL_APPLY_FILTER } from './apply_filter_action';
-export { ACTION_UPDATE_USED_DATA_VIEWS } from './update_used_data_view_action';
+export * from './update_used_data_view_trigger';

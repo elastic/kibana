@@ -7,6 +7,7 @@
 
 import React, { useMemo, memo } from 'react';
 import { EuiForm } from '@elastic/eui';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
@@ -90,10 +91,22 @@ export function LayerPanels(
     },
     [updateDatasource]
   );
+
   const updateAll = useMemo(
     () => (datasourceId: string, newDatasourceState: unknown, newVisualizationState: unknown) => {
       // React will synchronously update if this is triggered from a third party component,
       // which we don't want. The timeout lets user interaction have priority, then React updates.
+
+      const getActionContext = () => {
+        const trigger = props.uiActions.getTrigger('UPDATE_USED_DATA_VIEWS_TRIGGER');
+        if (!trigger) {
+          throw new Error('Unable to get context, could not locate trigger');
+        }
+        return {
+          trigger,
+        } as ActionExecutionContext;
+      };
+
       setTimeout(() => {
         dispatchLens(
           updateState({
@@ -123,9 +136,17 @@ export function LayerPanels(
             },
           })
         );
+        const executeContext = {
+          ...getActionContext(),
+          initialDataView: [],
+          newDataView: null,
+          dataViews: [],
+        };
+        const action = props.uiActions.getAction('ACTION_UPDATE_USED_DATA_VIEWS');
+        action.execute(executeContext);
       }, 0);
     },
-    [dispatchLens]
+    [dispatchLens, props.uiActions]
   );
 
   const toggleFullscreen = useMemo(
