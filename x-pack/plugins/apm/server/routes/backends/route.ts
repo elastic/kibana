@@ -22,6 +22,7 @@ import {
   BackendOperation,
   getTopBackendOperations,
 } from './get_top_backend_operations';
+import { BackendSpan, getTopBackendSpans } from './get_top_backend_spans';
 
 const topBackendsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/top_backends',
@@ -510,6 +511,40 @@ const backendOperationsRoute = createApmServerRoute({
   },
 });
 
+const topBackendSpansRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/backends/operations/spans',
+  options: {
+    tags: ['access:apm'],
+  },
+  params: t.type({
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      kueryRt,
+      t.type({ backendName: t.string, spanName: t.string }),
+    ]),
+  }),
+  handler: async (resources): Promise<{ spans: BackendSpan[] }> => {
+    const setup = await setupRequest(resources);
+
+    const {
+      query: { backendName, spanName, start, end, environment, kuery },
+    } = resources.params;
+
+    const spans = await getTopBackendSpans({
+      setup,
+      backendName,
+      spanName,
+      start,
+      end,
+      environment,
+      kuery,
+    });
+
+    return { spans };
+  },
+});
+
 export const backendsRouteRepository = {
   ...topBackendsRoute,
   ...upstreamServicesForBackendRoute,
@@ -518,4 +553,5 @@ export const backendsRouteRepository = {
   ...backendThroughputChartsRoute,
   ...backendFailedTransactionRateChartsRoute,
   ...backendOperationsRoute,
+  ...topBackendSpansRoute,
 };
