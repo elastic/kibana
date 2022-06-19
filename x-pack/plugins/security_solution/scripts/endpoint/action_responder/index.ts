@@ -6,7 +6,7 @@
  */
 
 import { run, RunContext } from '@kbn/dev-cli-runner';
-import { HORIZONTAL_LINE } from './constants';
+import { HORIZONTAL_LINE, SUPPORTED_TOKENS } from './constants';
 import { runInAutoMode } from './run_in_auto_mode';
 export const ONE = 'test';
 
@@ -30,7 +30,8 @@ ${HORIZONTAL_LINE}
     },
 
     {
-      description: 'Respond to pending Endpoint actions',
+      description: `Respond to pending Endpoint actions.
+  ${SUPPORTED_TOKENS}`,
       flags: {
         string: ['kibana', 'elastic', 'username', 'password', 'delay'],
         boolean: ['auto', 'asSuperuser'],

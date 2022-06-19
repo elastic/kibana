@@ -7,6 +7,7 @@
 
 import type { RunContext } from '@kbn/dev-cli-runner';
 import { set } from 'lodash';
+import { SUPPORTED_TOKENS } from './constants';
 import { ActionDetails } from '../../../common/endpoint/types';
 import { createRuntimeServices, RuntimeServices } from '../common/stack_services';
 
@@ -32,16 +33,7 @@ export const runInAutoMode = async ({
     kibanaUrl: kibana as string,
   });
 
-  log.write(`TIP:  the following tokens can be used in the Action request 'comment' to drive
-      the type of response that is sent:
-      Token                         Description
-      ---------------------------   -------------------------------------------------------
-      RESPOND.STATE=SUCCESS         Will ensure the Endpoint Action response is success
-      RESPOND.STATE=FAILURE         Will ensure the Endpoint Action response is a failure
-      RESPOND.FLEET.STATE=SUCCESS   Will ensure the Fleet Action response is success
-      RESPOND.FLEET.STATE=FAILURE   Will ensure the Fleet Action response is a failure
-
-`);
+  log.write(`  ${SUPPORTED_TOKENS}`);
 
   const delay = Number(_delay) || ACTION_RESPONSE_DELAY;
 

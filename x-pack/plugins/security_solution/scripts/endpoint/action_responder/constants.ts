@@ -6,3 +6,14 @@
  */
 
 export const HORIZONTAL_LINE = '-'.repeat(80);
+
+export const SUPPORTED_TOKENS = `The following tokens can be used in the Action request 'comment' to drive
+  the type of response that is sent:
+  Token                         Description
+  ---------------------------   -------------------------------------------------------
+  RESPOND.STATE=SUCCESS         Will ensure the Endpoint Action response is success
+  RESPOND.STATE=FAILURE         Will ensure the Endpoint Action response is a failure
+  RESPOND.FLEET.STATE=SUCCESS   Will ensure the Fleet Action response is success
+  RESPOND.FLEET.STATE=FAILURE   Will ensure the Fleet Action response is a failure
+
+`;
