@@ -98,6 +98,9 @@ export async function getIsUsingServiceDestinationMetrics({
   }
 
   if (!useSpanName) {
+    // if span.name is not required,
+    // use service destination metrics if there is at least one service destination metric
+    // for the given time range
     return (await getServiceDestinationMetricsCount()) > 0;
   }
 
@@ -112,6 +115,9 @@ export async function getIsUsingServiceDestinationMetrics({
   ]);
 
   return (
+    // use service destination metrics, IF:
+    // - there is at least ONE service destination metric for the given time range
+    // - AND, there is NO service destination metric WITHOUT span.name for the given time range
     anyServiceDestinationMetricsCount > 0 &&
     serviceDestinationMetricsWithoutSpanNameCount === 0
   );
