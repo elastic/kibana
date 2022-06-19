@@ -41,14 +41,20 @@ export const createRuntimeServices = async ({
   let password = _password;
 
   if (asSuperuser) {
-    ({ username, password } = await createSecuritySuperuser(
+    const superuserResponse = await createSecuritySuperuser(
       createEsClient({
         url: elasticsearchUrl,
         username,
         password,
         log,
       })
-    ));
+    );
+
+    ({ username, password } = superuserResponse);
+
+    if (superuserResponse.created) {
+      log.info(`Kibana user [${username}] was crated with password [${password}]`);
+    }
   }
 
   return {
