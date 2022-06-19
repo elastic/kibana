@@ -63,7 +63,7 @@ journey('UX Visitor Breakdown', async ({ page, params }) => {
     });
     await loginToKibana({
       page,
-      user: { username: 'viewer_user', password: 'changeme' },
+      user: { username: 'elastic', password: 'changeme' },
     });
   });
 
