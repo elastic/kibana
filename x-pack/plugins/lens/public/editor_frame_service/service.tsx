@@ -111,7 +111,6 @@ export class EditorFrameService {
                 datasourceMap={resolvedDatasources}
                 visualizationMap={resolvedVisualizations}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
-                uiActions={plugins.uiActions}
               />
             </div>
           );

@@ -16,11 +16,10 @@ export const ACTION_UPDATE_USED_DATA_VIEWS = 'ACTION_UPDATE_USED_DATA_VIEWS';
 export interface UpdateUsedDataViewActionContext {
   initialDataView: DataView;
   newDataView: DataView | null; // null in case of removing
-  dataViews: DataView[] | [];
 }
 
 async function isCompatible(context: UpdateUsedDataViewActionContext) {
-  return context.dataViews.length > 0;
+  return true;
 }
 
 export function createUpdateUsedDataViewAction(filterManager: FilterManager): Action {
@@ -30,17 +29,13 @@ export function createUpdateUsedDataViewAction(filterManager: FilterManager): Ac
     order: 100,
     getIconType: () => 'filter',
     getDisplayName: () => {
-      return i18n.translate('unifiedSearch.filter.applyFilterActionTitle', {
-        defaultMessage: 'Apply filter to current view',
+      return i18n.translate('unifiedSearch.filter.updateUsedDataViewActionTitle', {
+        defaultMessage: 'Update used data views',
       });
     },
     isCompatible,
-    execute: async ({
-      initialDataView,
-      newDataView,
-      dataViews,
-    }: UpdateUsedDataViewActionContext) => {
-      // console.log('initialDataView', initialDataView);
+    execute: async ({ initialDataView, newDataView }: UpdateUsedDataViewActionContext) => {
+      console.log('dataViews', initialDataView, newDataView);
     },
   });
 }

@@ -119,6 +119,18 @@ export function LayerPanels(
                 typeof newVisualizationState === 'function'
                   ? newVisualizationState(prevState.visualization.state)
                   : newVisualizationState;
+
+              const initialDataView =
+                prevState.datasourceStates[datasourceId].state.currentIndexPatternId;
+              const newDataView = newDatasourceState.currentIndexPatternId;
+
+              const executeContext = {
+                ...getActionContext(),
+                initialDataView,
+                newDataView,
+              };
+              const action = props.uiActions.getAction('ACTION_UPDATE_USED_DATA_VIEWS');
+              action.execute(executeContext);
               return {
                 ...prevState,
                 datasourceStates: {
@@ -136,14 +148,6 @@ export function LayerPanels(
             },
           })
         );
-        const executeContext = {
-          ...getActionContext(),
-          initialDataView: [],
-          newDataView: null,
-          dataViews: [],
-        };
-        const action = props.uiActions.getAction('ACTION_UPDATE_USED_DATA_VIEWS');
-        action.execute(executeContext);
       }, 0);
     },
     [dispatchLens, props.uiActions]

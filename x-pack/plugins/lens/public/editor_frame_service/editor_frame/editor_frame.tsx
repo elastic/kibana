@@ -8,7 +8,6 @@
 import React, { useCallback, useRef } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DatasourceMap, FramePublicAPI, VisualizationMap, Suggestion } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
@@ -38,7 +37,6 @@ export interface EditorFrameProps {
   plugins: EditorFrameStartPlugins;
   showNoDataPopover: () => void;
   lensInspector: LensInspector;
-  uiActions: UiActionsStart;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -107,7 +105,7 @@ export function EditorFrame(props: EditorFrameProps) {
               datasourceMap={datasourceMap}
               visualizationMap={visualizationMap}
               framePublicAPI={framePublicAPI}
-              uiActions={props.uiActions}
+              uiActions={props.plugins.uiActions}
             />
           )
         }
