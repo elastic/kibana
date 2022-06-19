@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('overview page - solutions', function describeIndexTests() {
@@ -46,9 +47,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on Observability card leads to Observability', async () => {
-      const solutionCards = await find.allByCssSelector('.kbnOverviewMore__item');
-      await solutionCards[0].click();
-
+      await retry.try(async () => {
+        const solutionCards = await find.allByCssSelector('.kbnOverviewMore__item');
+        await solutionCards[0].click();
+      });
       await PageObjects.common.waitUntilUrlIncludes('app/observability');
     });
 
@@ -56,9 +58,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const solutionCards = await find.allByCssSelector('.kbnOverviewMore__item');
-      await solutionCards[1].click();
-
+      await retry.try(async () => {
+        const solutionCards = await find.allByCssSelector('.kbnOverviewMore__item');
+        await solutionCards[1].click();
+      });
       await PageObjects.common.waitUntilUrlIncludes('app/security');
     });
   });
