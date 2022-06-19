@@ -93,7 +93,9 @@ journey('UX Visitor Breakdown', async ({ page, params }) => {
       uaNames.map(
         async (dataTestId) =>
           // lens embeddable injects its own test attribute
-          await page.waitForSelector(byLensDataLayerId(dataTestId))
+          await page.waitForSelector(byLensDataLayerId(dataTestId), {
+            state: 'attached',
+          })
       )
     );
   });
