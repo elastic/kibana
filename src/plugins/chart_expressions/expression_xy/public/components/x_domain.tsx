@@ -10,7 +10,7 @@ import { isUndefined, uniq } from 'lodash';
 import React from 'react';
 import moment from 'moment';
 import { Endzones } from '@kbn/charts-plugin/public';
-import { search } from '@kbn/data-plugin/public';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import {
   getAccessorByDimension,
   getColumnByAccessor,
@@ -23,12 +23,14 @@ export interface XDomain {
   minInterval?: number;
 }
 
-export const getAppliedTimeRange = (layers: CommonXYDataLayerConfig[]) => {
+export const getAppliedTimeRange = (
+  datatableUtilitites: DatatableUtilitiesService,
+  layers: CommonXYDataLayerConfig[]
+) => {
   return layers
     .map(({ xAccessor, table }) => {
       const xColumn = xAccessor ? getColumnByAccessor(xAccessor, table.columns) : null;
-      const timeRange =
-        xColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(xColumn)?.timeRange;
+      const timeRange = xColumn && datatableUtilitites.getDateHistogramMeta(xColumn)?.timeRange;
       if (timeRange) {
         return {
           timeRange,
@@ -40,13 +42,14 @@ export const getAppliedTimeRange = (layers: CommonXYDataLayerConfig[]) => {
 };
 
 export const getXDomain = (
+  datatableUtilitites: DatatableUtilitiesService,
   layers: CommonXYDataLayerConfig[],
   minInterval: number | undefined,
   isTimeViz: boolean,
   isHistogram: boolean,
   xExtent?: AxisExtentConfigResult
 ) => {
-  const appliedTimeRange = getAppliedTimeRange(layers)?.timeRange;
+  const appliedTimeRange = getAppliedTimeRange(datatableUtilitites, layers)?.timeRange;
   const from = appliedTimeRange?.from;
   const to = appliedTimeRange?.to;
   const baseDomain = isTimeViz

@@ -11,8 +11,8 @@ import supertest from 'supertest';
 import moment from 'moment';
 import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { HttpConfig } from '../http_config';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { Router } from '../router';
 import { HttpServer } from '../http_server';
 
