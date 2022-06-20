@@ -817,6 +817,14 @@ describe('SearchSource', () => {
       expect(JSON.parse(searchSourceJSON).indexRefName).toEqual(references[0].name);
     });
 
+    test('sould contain persited index patters by value', () => {
+      const indexPattern123 = { id: 'local-123' } as DataView;
+      searchSource.setField('index', indexPattern123);
+      const { searchSourceJSON, references } = searchSource.serialize();
+      expect(references.length).toEqual(0);
+      expect(JSON.parse(searchSourceJSON).index).toMatchInlineSnapshot();
+    });
+
     test('should add other fields', () => {
       searchSource.setField('highlightAll', true);
       searchSource.setField('from', 123456);
