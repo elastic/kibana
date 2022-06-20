@@ -158,7 +158,7 @@ export const FieldEditorFlyoutContentContainer = ({
           dataView.deleteFieldFormat(updatedField.name);
         }
 
-        if (!dataView.isPersisted()) {
+        const afterSave = () => {
           const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
             defaultMessage: "Saved '{fieldName}'",
             values: { fieldName: updatedField.name },
@@ -166,17 +166,15 @@ export const FieldEditorFlyoutContentContainer = ({
           notifications.toasts.addSuccess(message);
           setIsSaving(false);
           onSave(editedField);
+        };
+
+        if (!dataView.isPersisted()) {
+          afterSave();
           return;
         }
 
         await dataViews.updateSavedObject(dataView).then(() => {
-          const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
-            defaultMessage: "Saved '{fieldName}'",
-            values: { fieldName: updatedField.name },
-          });
-          notifications.toasts.addSuccess(message);
-          setIsSaving(false);
-          onSave(editedField);
+          afterSave();
         });
       } catch (e) {
         const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
