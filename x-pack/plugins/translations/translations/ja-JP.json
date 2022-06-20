@@ -3285,8 +3285,6 @@
     "embeddableApi.panel.enhancedDashboardPanelAriaLabel": "ダッシュボードパネル：{title}",
     "embeddableApi.panel.inspectPanel.displayName": "検査",
     "embeddableApi.panel.inspectPanel.untitledEmbeddableFilename": "無題",
-    "embeddableApi.panel.labelAborted": "中断しました",
-    "embeddableApi.panel.labelError": "エラー",
     "embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabel": "パネルオプション",
     "embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabelWithIndex": "パネル{index}のオプション",
     "embeddableApi.panel.optionsMenu.panelOptionsButtonEnhancedAriaLabel": "{title} のパネルオプション",
