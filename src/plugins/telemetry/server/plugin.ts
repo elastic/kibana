@@ -240,10 +240,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     const configMaybe = await withTimeout<TelemetryConfigType>({
       promise: firstValueFrom(this.config$),
-      timeoutMs: 5000,
+      timeoutMs: 3000,
     });
 
-    // If we can't get the saved object in 5 second, skip this round.
+    // If we can't get configuration in 3 second, skip this round.
     if (configMaybe.timedout) {
       return;
     }
