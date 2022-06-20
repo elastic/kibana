@@ -80,8 +80,8 @@ export const SearchExperience: React.FC = () => {
       sortFields: [],
     }
   );
-  const sortOptions =
-    engine.type === 'elasticsearch' ? RELEVANCE_SORT_OPTIONS : DEFAULT_SORT_OPTIONS;
+  const useRelevance = engine.type === 'elasticsearch' || engine.type === 'meta';
+  const sortOptions = useRelevance ? RELEVANCE_SORT_OPTIONS : DEFAULT_SORT_OPTIONS;
 
   const sortingOptions = buildSortOptions(fields, sortOptions);
 
@@ -95,7 +95,7 @@ export const SearchExperience: React.FC = () => {
   });
 
   const initialState = {
-    sortField: engine.type === 'elasticsearch' ? '_score' : 'id',
+    sortField: sortOptions[0].value,
     sortDirection: 'desc',
   };
 
