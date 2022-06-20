@@ -16,5 +16,5 @@ export const mapEmbeddableCounter = {
   },
   decrement() {
     count--;
-  }
+  },
 };
