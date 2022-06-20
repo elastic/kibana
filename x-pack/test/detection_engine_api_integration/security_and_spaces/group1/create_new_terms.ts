@@ -213,6 +213,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.false_positives': [],
         'kibana.alert.rule.from': '2019-02-19T20:42:00.000Z',
         'kibana.alert.rule.immutable': false,
+        'kibana.alert.rule.indices': ['auditbeat-*'],
         'kibana.alert.rule.interval': '5m',
         'kibana.alert.rule.max_signals': 100,
         'kibana.alert.rule.references': [],
