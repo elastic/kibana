@@ -20,6 +20,7 @@ import {
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import { IResourceInstaller } from '../rule_data_plugin_service/resource_installer';
 import { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
+import { WRITING_DISABLED_VIA_CONFIG_ERROR_MSG } from '../translations';
 
 export interface RuleDataClientConstructorOptions {
   indexInfo: IndexInfo;
@@ -36,6 +37,7 @@ export type WaitResult = Either<Error, ElasticsearchClient>;
 export class RuleDataClient implements IRuleDataClient {
   private _isWriteEnabled: boolean = false;
   private _isWriterCacheEnabled: boolean = true;
+  private _lastWriterBulkError: Error | undefined = undefined;
 
   // Writers cached by namespace
   private writerCache: Map<string, IRuleDataWriter>;
@@ -64,6 +66,14 @@ export class RuleDataClient implements IRuleDataClient {
 
   private set writeEnabled(isEnabled: boolean) {
     this._isWriteEnabled = isEnabled;
+  }
+
+  public get lastWriterBulkError(): Error | undefined {
+    return this._lastWriterBulkError;
+  }
+
+  private set lastWriterBulkError(error: Error | undefined) {
+    this._lastWriterBulkError = error;
   }
 
   public isWriteEnabled(): boolean {
@@ -156,7 +166,7 @@ export class RuleDataClient implements IRuleDataClient {
     // Wait until both index and namespace level resources have been installed / updated.
     const prepareForWriting = async () => {
       if (!isWriteEnabled()) {
-        throw new RuleDataWriteDisabledError();
+        throw new RuleDataWriteDisabledError(WRITING_DISABLED_VIA_CONFIG_ERROR_MSG);
       }
 
       const indexLevelResourcesResult = await this.options.waitUntilReadyForWriting;
@@ -182,6 +192,7 @@ export class RuleDataClient implements IRuleDataClient {
     };
 
     const prepareForWritingResult = prepareForWriting().catch((error) => {
+      this.lastWriterBulkError = error;
       if (error instanceof RuleDataWriterInitializationError) {
         this.options.logger.error(error);
         this.options.logger.error(
@@ -205,6 +216,7 @@ export class RuleDataClient implements IRuleDataClient {
               index: alias,
             };
 
+            this.lastWriterBulkError = undefined;
             const response = await clusterClient.bulk(requestWithDefaultParameters, { meta: true });
 
             if (response.body.errors) {
@@ -218,6 +230,7 @@ export class RuleDataClient implements IRuleDataClient {
           return undefined;
         } catch (error) {
           this.options.logger.error(error);
+          this.lastWriterBulkError = error;
 
           return undefined;
         }

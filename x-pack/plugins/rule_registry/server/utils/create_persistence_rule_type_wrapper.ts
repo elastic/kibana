@@ -11,14 +11,7 @@ import { ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
-import { WRITING_DISABLED_ERROR_MSG } from '../translations';
-
-const writingDisabledErrorResult = {
-  createdAlerts: [],
-  errors: {
-    [WRITING_DISABLED_ERROR_MSG]: { count: 1, statusCode: 500 },
-  },
-};
+import { WRITING_DISABLED_VIA_CONFIG_ERROR_MSG } from '../translations';
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient }) =>
@@ -111,13 +104,17 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   });
 
                 if (response == null) {
-                  if (!ruleDataClient.isWriteEnabled()) {
-                    // It was not possible to initialize the writter and writing was disabled.
-                    // In this case, bilk() call will always fail to write any data.
-                    logger.debug('Writing is disabled.');
-                    return writingDisabledErrorResult;
-                  }
-                  return { createdAlerts: [], errors: {} };
+                  return {
+                    createdAlerts: [],
+                    errors: ruleDataClient.lastWriterBulkError
+                      ? {
+                          [ruleDataClient.lastWriterBulkError.message]: {
+                            count: 1,
+                            statusCode: 500,
+                          },
+                        }
+                      : {},
+                  };
                 }
 
                 return {
@@ -134,8 +131,18 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   errors: errorAggregator(response.body, [409]),
                 };
               } else if (!ruleDataClient.isWriteEnabled()) {
-                logger.debug('Writing is disabled.');
-                return writingDisabledErrorResult;
+                const errorReason =
+                  ruleDataClient.lastWriterBulkError?.message ??
+                  WRITING_DISABLED_VIA_CONFIG_ERROR_MSG;
+                return {
+                  createdAlerts: [],
+                  errors: {
+                    [errorReason]: {
+                      count: 1,
+                      statusCode: 500,
+                    },
+                  },
+                };
               } else {
                 return { createdAlerts: [], errors: {} };
               }

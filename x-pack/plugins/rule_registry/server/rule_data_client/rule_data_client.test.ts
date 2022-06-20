@@ -8,11 +8,12 @@
 import { left, right } from 'fp-ts/lib/Either';
 import { RuleDataClient, RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
-import { Dataset, RuleDataWriterInitializationError } from '..';
+import { Dataset, RuleDataWriteDisabledError, RuleDataWriterInitializationError } from '..';
 import { resourceInstallerMock } from '../rule_data_plugin_service/resource_installer.mock';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { createNoMatchingIndicesError } from '@kbn/data-views-plugin/server/fetcher/lib/errors';
+import { WRITING_DISABLED_VIA_CONFIG_ERROR_MSG } from '../translations';
 
 const mockLogger = loggingSystemMock.create().get();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
@@ -197,6 +198,9 @@ describe('RuleDataClient', () => {
         await delay();
 
         expect(await writer.bulk({})).toEqual(undefined);
+        expect(ruleDataClient.lastWriterBulkError).toEqual(
+          new RuleDataWriteDisabledError(WRITING_DISABLED_VIA_CONFIG_ERROR_MSG)
+        );
         expect(mockLogger.debug).toHaveBeenCalledWith(
           `Writing is disabled, bulk() will not write any data.`
         );
@@ -219,14 +223,13 @@ describe('RuleDataClient', () => {
         await delay();
 
         expect(await writer.bulk({})).toEqual(undefined);
-        expect(mockLogger.error).toHaveBeenNthCalledWith(
-          1,
-          new RuleDataWriterInitializationError(
-            'index',
-            'observability.apm',
-            new Error('could not get cluster client')
-          )
+        const expectedError = new RuleDataWriterInitializationError(
+          'index',
+          'observability.apm',
+          new Error('could not get cluster client')
         );
+        expect(ruleDataClient.lastWriterBulkError).toEqual(expectedError);
+        expect(mockLogger.error).toHaveBeenNthCalledWith(1, expectedError);
         expect(mockLogger.error).toHaveBeenNthCalledWith(
           2,
           `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
@@ -247,10 +250,13 @@ describe('RuleDataClient', () => {
         await delay();
 
         expect(await writer.bulk({})).toEqual(undefined);
-        expect(mockLogger.error).toHaveBeenNthCalledWith(
-          1,
-          new RuleDataWriterInitializationError('namespace', 'observability.apm', error)
+        const expectedError = new RuleDataWriterInitializationError(
+          'namespace',
+          'observability.apm',
+          error
         );
+        expect(ruleDataClient.lastWriterBulkError).toEqual(expectedError);
+        expect(mockLogger.error).toHaveBeenNthCalledWith(1, expectedError);
         expect(mockLogger.error).toHaveBeenNthCalledWith(
           2,
           `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
@@ -271,6 +277,7 @@ describe('RuleDataClient', () => {
         await delay();
 
         expect(await writer.bulk({})).toEqual(undefined);
+        expect(ruleDataClient.lastWriterBulkError).toEqual(error);
         expect(mockLogger.error).toHaveBeenNthCalledWith(1, error);
         expect(ruleDataClient.isWriteEnabled()).toBe(true);
       });

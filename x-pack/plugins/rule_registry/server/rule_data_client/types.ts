@@ -18,6 +18,7 @@ export interface IRuleDataClient {
   indexNameWithNamespace(namespace: string): string;
   kibanaVersion: string;
   isWriteEnabled(): boolean;
+  lastWriterBulkError?: Error;
   getReader(options?: { namespace?: string }): IRuleDataReader;
   getWriter(options?: { namespace?: string }): IRuleDataWriter;
 }

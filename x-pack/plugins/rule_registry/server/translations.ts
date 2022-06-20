@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const WRITING_DISABLED_ERROR_MSG = i18n.translate(
+export const WRITING_DISABLED_VIA_CONFIG_ERROR_MSG = i18n.translate(
   'xpack.ruleRegistry.write.disabledErrorMsg',
   {
     defaultMessage:
-      'Rule registry writing is disabled. Make sure that "xpack.ruleRegistry.write.enabled" configuration is not set to false within "kibana.yml" and that Rule Data Client was initialized successfully.',
+      'Rule registry writing is disabled with the "kibana.yml" configuration flag "xpack.ruleRegistry.write.enabled".',
   }
 );
