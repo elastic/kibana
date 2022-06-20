@@ -7,8 +7,8 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from './mocks';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';
 
 const dummyBody: any = { foo: 'bar' };

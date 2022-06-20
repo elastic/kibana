@@ -28,7 +28,7 @@ import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import { loggingSystemMock } from '../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServiceMock } from '../http/http_service.mock';
 import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 import { configSchema, ElasticsearchConfig } from './elasticsearch_config';

@@ -8,7 +8,7 @@
 
 import { writeFile, exists } from './fs';
 import { writePidFile } from './write_pid_file';
-import { loggingSystemMock } from '../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 jest.mock('./fs', () => ({
   writeFile: jest.fn(),

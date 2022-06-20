@@ -9,9 +9,9 @@
 import { resolve } from 'path';
 import { readFile } from 'fs/promises';
 import supertest from 'supertest';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { HttpService, IRouter } from '../../http';
 import { createHttpServer } from '../../http/test_utils';
 import { registerRouteForBundle } from '../bundle_routes/bundles_route';

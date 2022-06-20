@@ -89,10 +89,10 @@ jest.doMock('./status/status_service', () => ({
   StatusService: jest.fn(() => mockStatusService),
 }));
 
-import { loggingServiceMock } from './logging/logging_service.mock';
+import { loggingServiceMock } from '@kbn/core-logging-server-mocks';
 
 export const mockLoggingService = loggingServiceMock.create();
-jest.doMock('./logging/logging_service', () => ({
+jest.doMock('@kbn/core-logging-server-internal', () => ({
   LoggingService: jest.fn(() => mockLoggingService),
 }));
 

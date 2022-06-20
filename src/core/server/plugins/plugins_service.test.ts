@@ -16,8 +16,8 @@ import { schema } from '@kbn/config-schema';
 import { ConfigPath, ConfigService, Env } from '@kbn/config';
 
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '../mocks';
-import { loggingSystemMock } from '../logging/logging_system.mock';
 import { environmentServiceMock } from '../environment/environment_service.mock';
 import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';

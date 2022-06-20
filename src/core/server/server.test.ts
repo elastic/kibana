@@ -32,7 +32,7 @@ import { Env } from '@kbn/config';
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { Server } from './server';
 
-import { loggingSystemMock } from './logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const logger = loggingSystemMock.create();

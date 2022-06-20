@@ -9,13 +9,14 @@
 import { cleanupMock } from './migrations_state_machine_cleanup.mocks';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-import { loggingSystemMock, elasticsearchServiceMock } from '../../mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { LoggerAdapter } from '@kbn/core-logging-server-internal';
+import { elasticsearchServiceMock } from '../../mocks';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
-import { LoggerAdapter } from '../../logging/logger_adapter';
 import { AllControlStates, State } from './state';
 import { createInitialState } from './initial_state';
 import { ByteSizeValue } from '@kbn/config-schema';

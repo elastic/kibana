@@ -12,6 +12,11 @@ import type { Logger, LoggerFactory } from '@kbn/logging';
 import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { DocLinksService } from '@kbn/core-doc-links-server-internal';
+import {
+  LoggingService,
+  ILoggingSystem,
+  config as loggingConfig,
+} from '@kbn/core-logging-server-internal';
 import { coreDeprecationProvider, ensureValidConfiguration } from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
@@ -19,7 +24,6 @@ import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
-import { LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';
@@ -33,7 +37,6 @@ import { ExecutionContextService } from './execution_context';
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
-import { config as loggingConfig } from './logging';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';

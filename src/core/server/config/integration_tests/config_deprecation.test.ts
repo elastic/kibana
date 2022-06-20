@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockLoggingSystem } from './config_deprecation.test.mocks';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 describe('configuration deprecations', () => {

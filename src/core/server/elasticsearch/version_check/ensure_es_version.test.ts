@@ -7,7 +7,7 @@
  */
 
 import { mapNodesVersionCompatibility, pollEsNodesVersion, NodesInfo } from './ensure_es_version';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '../client/mocks';
 import { take, delay } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
