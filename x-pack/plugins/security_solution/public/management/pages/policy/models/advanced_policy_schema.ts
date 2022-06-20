@@ -66,7 +66,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.interval',
       {
         defaultMessage:
-          'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
+          'Interval between global artifact manifest download attempts, in seconds. Default: 3600, minimum 300.',
       }
     ),
   },
@@ -194,7 +194,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.interval',
       {
         defaultMessage:
-          'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
+          'Interval between global artifact manifest download attempts, in seconds. Default: 3600, minimum 300.',
       }
     ),
   },
@@ -397,7 +397,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.interval',
       {
         defaultMessage:
-          'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
+          'Interval between global artifact manifest download attempts, in seconds. Default: 3600, minimum 300.',
       }
     ),
   },
