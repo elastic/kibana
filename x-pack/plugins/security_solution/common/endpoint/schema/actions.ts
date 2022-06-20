@@ -18,11 +18,11 @@ const BaseActionRequestSchema = {
   parameters: schema.maybe(schema.object({})),
 };
 
-export const HostIsolationRequestSchema = {
+export const NoParametersRequestSchema = {
   body: schema.object({ ...BaseActionRequestSchema }),
 };
 
-export const KillProcessRequestSchema = {
+export const KillOrSuspendProcessRequestSchema = {
   body: schema.object({
     ...BaseActionRequestSchema,
     parameters: schema.oneOf([
@@ -33,8 +33,8 @@ export const KillProcessRequestSchema = {
 };
 
 export const ResponseActionBodySchema = schema.oneOf([
-  HostIsolationRequestSchema.body,
-  KillProcessRequestSchema.body,
+  NoParametersRequestSchema.body,
+  KillOrSuspendProcessRequestSchema.body,
 ]);
 
 export const EndpointActionLogRequestSchema = {
