@@ -103,7 +103,15 @@ export const ConfigureStandaloneAgentStep = ({
                 </EuiCopy>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton iconType="download" href={downloadLink} isDisabled={!downloadLink}>
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiButton
+                  iconType="download"
+                  href={downloadLink}
+                  onClick={() => {
+                    if (onCopy) onCopy();
+                  }}
+                  isDisabled={!downloadLink}
+                >
                   <>{downloadMsg}</>
                 </EuiButton>
               </EuiFlexItem>
