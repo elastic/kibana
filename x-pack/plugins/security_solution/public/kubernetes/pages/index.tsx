@@ -23,6 +23,7 @@ import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { SessionsView } from '../../common/components/sessions_viewer';
 import { TimelineId } from '../../../common/types/timeline';
+import { kubernetesSessionsHeaders } from './constants';
 
 export const KubernetesContainer = React.memo(() => {
   const { kubernetesSecurity, uiSettings } = useKibana().services;
@@ -70,6 +71,8 @@ export const KubernetesContainer = React.memo(() => {
         pageFilters={[]}
         startDate={from}
         filterQuery={sessionsFilterQuery}
+        columns={kubernetesSessionsHeaders}
+        defaultColumns={kubernetesSessionsHeaders}
       />
     ),
     [from, to]
