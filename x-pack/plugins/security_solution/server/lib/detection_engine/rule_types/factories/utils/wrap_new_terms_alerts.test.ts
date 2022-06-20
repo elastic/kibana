@@ -21,6 +21,7 @@ describe('wrapNewTermsAlerts', () => {
       spaceId: 'default',
       mergeStrategy: 'missingFields',
       completeRule,
+      indicesToQuery: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     });
 
     expect(alerts[0]._id).toEqual('a36d9fe6fe4b2f65058fb1a487733275f811af58');
@@ -36,6 +37,7 @@ describe('wrapNewTermsAlerts', () => {
       spaceId: 'otherSpace',
       mergeStrategy: 'missingFields',
       completeRule,
+      indicesToQuery: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     });
 
     expect(alerts[0]._id).toEqual('f7877a31b1cc83373dbc9ba5939ebfab1db66545');
@@ -51,6 +53,7 @@ describe('wrapNewTermsAlerts', () => {
       spaceId: 'otherSpace',
       mergeStrategy: 'missingFields',
       completeRule,
+      indicesToQuery: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     });
 
     expect(alerts[0]._id).toEqual('75e5a507a4bc48bcd983820c7fd2d9621ff4e2ea');
@@ -66,6 +69,7 @@ describe('wrapNewTermsAlerts', () => {
       spaceId: 'otherSpace',
       mergeStrategy: 'missingFields',
       completeRule,
+      indicesToQuery: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     });
 
     expect(alerts[0]._id).toEqual('86a216cfa4884767d9bb26d2b8db911cb4aa85ce');

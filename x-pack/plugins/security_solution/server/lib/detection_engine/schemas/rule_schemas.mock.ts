@@ -133,6 +133,7 @@ export const getNewTermsRuleParams = (): NewTermsRuleParams => {
     language: 'kuery',
     query: 'user.name: root or user.name: admin',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    dataViewId: undefined,
     filters: [
       {
         query: {
