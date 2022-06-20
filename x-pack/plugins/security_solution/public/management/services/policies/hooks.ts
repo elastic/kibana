@@ -24,7 +24,7 @@ export function useGetEndpointSpecificPolicies(
     page,
     perPage,
   }: {
-    onError?: (error: ServerApiError) => void;
+    onError?: (error: ) => void;
     page?: number;
     perPage?: number;
   } = { page: 1, perPage: MANAGEMENT_DEFAULT_PAGE_SIZE }

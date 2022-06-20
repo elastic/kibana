@@ -158,24 +158,27 @@ const statusToErrorMessage = (statusCode: number) => {
 export class SiemResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
-  error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
-    const contentType: CustomHttpResponseOptions<T>['headers'] = {
-      'content-type': 'application/json',
-    };
-    const defaultedHeaders: CustomHttpResponseOptions<T>['headers'] = {
-      ...contentType,
-      ...(headers ?? {}),
-    };
-
-    return this.response.custom({
-      headers: defaultedHeaders,
-      statusCode,
-      body: Buffer.from(
+ error<T>({ statusCode,body,headers }: CustomHttpResponseOptions<T>) {
+  const contentType: CustomHttpResponseOptions<T>['headers'] = {
+    'content-type': 'application/json',
+  };
+  const defaultedHeaders: CustomHttpResponseOptions<T>['headers'] = {
+    ...contentType,
+    ...(headers ?? {}),
+  };
+  return this.response.custom({
+    message:statusToErrorMessage(statusCode),
+    error_code:statusCode,
+    attributes:Buffer.from(
         JSON.stringify({
-          message: body ?? statusToErrorMessage(statusCode),
-          status_code: statusCode,
+         status_code:statusCode,
+          message:body,
+          
+          
         })
       ),
+      headers:defaultedHeaders,
+      
     });
   }
 }
