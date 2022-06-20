@@ -36,7 +36,7 @@ import { useHasMlPermissions } from '../use_has_ml_permissions';
 import { getBulkActionsDryRunFromCache } from './use_bulk_actions_dry_run';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
-
+import { prepareSearchParams } from './prepare_search_params';
 import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
 import { useInvalidateRules } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
 import { BULK_RULE_ACTIONS } from '../../../../../../common/lib/apm/user_actions';
@@ -207,10 +207,6 @@ export const useBulkActions = ({
         setIsRefreshOn(false);
         closePopover();
 
-        const customSelectedRuleIds = selectedRules
-          .filter((rule) => rule.immutable === false)
-          .map((rule) => rule.id);
-
         // User has cancelled edit action or there are no custom rules to proceed
         if ((await confirmBulkEdit()) === false) {
           setIsRefreshOn(true);
@@ -269,14 +265,12 @@ export const useBulkActions = ({
           toasts,
           payload: { edit: [editPayload] },
           onFinish: () => hideWarningToast(),
-          search: isAllSelected
-            ? {
-                query: convertRulesFilterToKQL({
-                  ...filterOptions,
-                  showCustomRules: true, // only edit custom rules, as elastic rule are immutable
-                }),
-              }
-            : { ids: customSelectedRuleIds },
+          search: prepareSearchParams({
+            isAllSelected,
+            filterOptions,
+            selectedRuleIds,
+            dryRunResult: getBulkActionsDryRunFromCache(queryClient),
+          }),
         });
 
         isBulkEditFinished = true;

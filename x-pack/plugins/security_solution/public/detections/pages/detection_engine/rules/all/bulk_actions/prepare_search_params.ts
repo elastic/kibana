@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { DryRunResult } from './use_bulk_actions_dry_run';
+import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
+import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
+
+interface PrepareSearchFilterProps {
+  dryRunResult?: DryRunResult;
+  isAllSelected: boolean;
+  selectedRuleIds: string[];
+  filterOptions: FilterOptions;
+}
+/**
+ * helper methods to prepare search query for bulk actions based on results of previous dry run
+ * to exclude failed rules from search and perform bulk action on possible successfully edited rules
+ * props {PrepareSearchFilterProps}
+ */
+export const prepareSearchParams = ({
+  isAllSelected,
+  dryRunResult,
+  selectedRuleIds,
+  filterOptions,
+}: PrepareSearchFilterProps) => {
+  // if not all rules selected, filter out rules that failed during dry run
+  if (!isAllSelected) {
+    const failedRuleIdsSet = new Set(dryRunResult?.failed.flatMap(({ ruleIds }) => ruleIds));
+
+    return { ids: selectedRuleIds.filter((id) => !failedRuleIdsSet.has(id)) };
+  }
+
+  // otherwise create filter that excludes failed results based on dry run errors
+  let modifiedFilterOptions = filterOptions;
+  dryRunResult?.failed.forEach(({ message }) => {
+    switch (message) {
+      case 'Immutable':
+        modifiedFilterOptions = { ...modifiedFilterOptions, showCustomRules: true };
+        break;
+      case 'ML rule cant have index':
+        modifiedFilterOptions = {
+          ...modifiedFilterOptions,
+          excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'machine_learning'],
+        };
+        break;
+    }
+  });
+
+  return { query: convertRulesFilterToKQL(modifiedFilterOptions) };
+};

@@ -22,7 +22,7 @@ import type { FilterOptions } from '../../../../../containers/detection_engine/r
 const BULK_ACTIONS_DRY_RUN_QUERY_KEY = 'bulkActionsDryRun';
 
 export const getBulkActionsDryRunFromCache = (queryClient: QueryClient) =>
-  queryClient.getQueryData<DryRunResult>(BULK_ACTIONS_DRY_RUN_QUERY_KEY);
+  processDryRunResult(queryClient.getQueryData<BulkActionResponse>(BULK_ACTIONS_DRY_RUN_QUERY_KEY));
 
 const computeDryRunPayload = (
   action: BulkAction,
@@ -44,7 +44,7 @@ export interface DryRunResult {
   summary?: BulkActionResponse['attributes']['summary'];
   failed: Array<{
     message: string;
-    rulesCount: number;
+    ruleIds: string[];
   }>;
 }
 
@@ -55,12 +55,13 @@ const processDryRunResult = (result: BulkActionResponse | undefined): DryRunResu
     failed:
       result?.attributes.errors?.map(({ message, rules }) => ({
         message,
-        rulesCount: rules.length,
+        ruleIds: rules.map(({ id }) => id),
       })) ?? [],
   };
 
   return processed;
 };
+
 interface UseBulkActionsDryRunProps {
   action?: BulkAction;
   searchParams: { filterOptions?: FilterOptions } | { ids?: string[] };

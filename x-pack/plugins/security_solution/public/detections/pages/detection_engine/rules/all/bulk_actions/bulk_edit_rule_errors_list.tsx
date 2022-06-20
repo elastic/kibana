@@ -28,7 +28,8 @@ const BulkEditRuleErrorsListComponent = ({ actionErrors = [] }: BulkEditRuleErro
       />
       <EuiSpacer />
       <ul>
-        {actionErrors.map(({ message, rulesCount }) => {
+        {actionErrors.map(({ message, ruleIds }) => {
+          const rulesCount = ruleIds.length;
           switch (message) {
             case 'Immutable':
               return (

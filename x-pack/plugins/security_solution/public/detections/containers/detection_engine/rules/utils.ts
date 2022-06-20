@@ -6,7 +6,7 @@
  */
 
 import { escapeKuery } from '../../../../common/lib/keury';
-import { FilterOptions } from './types';
+import { FilterOptions, Rule } from './types';
 
 const SEARCHABLE_RULE_PARAMS = [
   'alert.attributes.name',
@@ -31,6 +31,7 @@ export const convertRulesFilterToKQL = ({
   showElasticRules,
   filter,
   tags,
+  excludeRuleTypes = [],
 }: FilterOptions): string => {
   const filters: string[] = [];
 
@@ -55,6 +56,10 @@ export const convertRulesFilterToKQL = ({
 
     filters.push(`(${searchQuery})`);
   }
+
+  excludeRuleTypes.forEach((ruleType) => {
+    filters.push(`NOT alert.attributes.params.type: ${ruleType}`);
+  });
 
   return filters.join(' AND ');
 };

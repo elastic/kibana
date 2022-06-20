@@ -166,6 +166,7 @@ export const RulesSchema = t.array(RuleSchema);
 
 export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
+export type RuleType = Rule['type'];
 
 export interface RuleError {
   id?: string;
@@ -217,6 +218,7 @@ export interface FilterOptions {
   showCustomRules: boolean;
   showElasticRules: boolean;
   tags: string[];
+  excludeRuleTypes?: Array<Rule['type']>;
 }
 
 export interface FetchRulesResponse {

@@ -15,7 +15,6 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { partition } from 'lodash/fp';
 
 import { AllRulesTabs } from './rules_table_toolbar';
 import { Loader } from '../../../../../common/components/loader';
@@ -152,12 +151,6 @@ export const RulesTables = React.memo<RulesTableProps>(
 
     const selectedItemsCount = isAllSelected ? pagination.total : selectedRuleIds.length;
     const hasPagination = pagination.total > pagination.perPage;
-
-    const [selectedElasticRuleIds, selectedCustomRuleIds] = useMemo(() => {
-      const ruleImmutabilityMap = new Map(rules.map((rule) => [rule.id, rule.immutable]));
-      const predicate = (id: string) => ruleImmutabilityMap.get(id);
-      return partition(predicate, selectedRuleIds);
-    }, [rules, selectedRuleIds]);
 
     const { getBulkItemsPopoverContent, bulkAction, bulkActionEdit } = useBulkActions({
       filterOptions,
@@ -338,11 +331,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         )}
         {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (
           <BulkEditFlyout
-            rulesCount={
-              isAllSelected
-                ? bulkActionsDryRunResult?.summary?.succeeded ?? 0
-                : selectedCustomRuleIds.length
-            }
+            rulesCount={bulkActionsDryRunResult?.summary?.succeeded ?? 0}
             editAction={bulkEditActionType}
             onClose={handleBulkEditFormCancel}
             onConfirm={handleBulkEditFormConfirm}
