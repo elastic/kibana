@@ -97,6 +97,15 @@ export const TimeSeries = ({
     [annotations]
   );
 
+  const onRenderChange = useCallback(
+    (isRendered) => {
+      if (isRendered) {
+        initialRender();
+      }
+    },
+    [initialRender]
+  );
+
   let tooltipFormatter = decorateFormatter(xAxisFormatter);
   if (!isLastBucketDropped) {
     const domainBounds = calculateDomainForSeries(series);
@@ -164,11 +173,7 @@ export const TimeSeries = ({
         debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
         showLegendExtra={true}
-        onRenderChange={(isRendered) => {
-          if (isRendered) {
-            initialRender();
-          }
-        }}
+        onRenderChange={onRenderChange}
         allowBrushingLastHistogramBin={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}

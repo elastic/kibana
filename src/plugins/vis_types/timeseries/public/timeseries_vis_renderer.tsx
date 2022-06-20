@@ -50,6 +50,14 @@ export const getTimeseriesVisRenderer: (deps: {
 
     const showNoResult = !checkIfDataExists(visData, model);
 
+    const initialRender = () => {
+      // We need to wait a little to be sure that all inner components will be fully rendered.
+      // Important for reporting!
+      setTimeout(() => {
+        handlers.done();
+      }, 350);
+    };
+
     render(
       <I18nProvider>
         <KibanaThemeProvider theme$={theme.theme$}>
@@ -68,7 +76,7 @@ export const getTimeseriesVisRenderer: (deps: {
               syncColors={syncColors}
               syncTooltips={syncTooltips}
               uiState={handlers.uiState! as PersistedState}
-              initialRender={handlers.done}
+              initialRender={initialRender}
             />
           </VisualizationContainer>
         </KibanaThemeProvider>

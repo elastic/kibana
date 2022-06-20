@@ -49,14 +49,6 @@ export class Gauge extends Component {
     this.handleResize(true);
   }
 
-  componentDidUpdate() {
-    if (this.handledResize) {
-      setTimeout(() => {
-        this.props.initialRender();
-      }, 3000);
-    }
-  }
-
   handleResize() {
     // Bingo!
     const newState = calculateCoordinates(this.inner, this.resize, this.state);
@@ -65,7 +57,7 @@ export class Gauge extends Component {
   }
 
   render() {
-    const { metric, type } = this.props;
+    const { metric, type, initialRender } = this.props;
     const { scale, translateX, translateY } = this.state;
     const value = getLastValue(metric?.data);
     const max = (metric && getValueBy('max', metric.data)) || 1;
@@ -89,6 +81,7 @@ export class Gauge extends Component {
       max: this.props.max || max,
       color: (metric && metric.color) || '#8ac336',
       type,
+      initialRender,
     };
 
     let metrics;

@@ -75,7 +75,7 @@ class TableVis extends Component {
     }
   };
 
-  componentDidMount() {
+  componentDidUpdate() {
     this.props.initialRender();
   }
 

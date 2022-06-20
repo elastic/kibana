@@ -42,6 +42,10 @@ export class GaugeVis extends Component {
     this.handleResize();
   }
 
+  componentDidUpdate() {
+    this.props.initialRender();
+  }
+
   handleResize() {
     // Bingo!
     const newState = calculateCoordinates(this.inner, this.resize, this.state);

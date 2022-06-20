@@ -29,6 +29,7 @@ function MarkdownVisualization(props) {
   const style = { backgroundColor: panelBackgroundColor };
 
   let markdown;
+
   useEffect(() => {
     props.initialRender();
   }, [props]);

@@ -70,6 +70,7 @@ function GaugeVisualization(props) {
     type: model.gauge_style || 'half',
     additionalLabel: props.additionalLabel,
     backgroundColor: panelBackgroundColor,
+    initialRender: props.initialRender,
   };
 
   if (colors.text) {
@@ -83,7 +84,7 @@ function GaugeVisualization(props) {
 
   return (
     <div className="tvbVis" style={style}>
-      <Gauge {...params} initialRender={props.initialRender} />
+      <Gauge {...params} />
     </div>
   );
 }

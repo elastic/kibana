@@ -35,14 +35,9 @@ export class TopN extends Component {
   }
 
   componentDidMount() {
-    this.setState(
-      {
-        labelMaxWidth: this.labelMaxWidth,
-      },
-      () => {
-        this.props.initialRender();
-      }
-    );
+    this.setState({
+      labelMaxWidth: this.labelMaxWidth,
+    });
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -51,6 +46,7 @@ export class TopN extends Component {
         labelMaxWidth: this.labelMaxWidth,
       });
     }
+    this.props.initialRender();
   }
 
   handleClick(item) {

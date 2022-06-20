@@ -40,17 +40,17 @@ export class Metric extends Component {
   }
 
   componentDidMount() {
-    this.handleResize(true);
+    this.handleResize();
   }
 
-  handleResize(notifyRender = false) {
+  componentDidUpdate() {
+    this.props.initialRender();
+  }
+
+  handleResize() {
     // Bingo!
     const newState = calculateCoordinates(this.inner, this.resize, this.state);
-    this.setState(newState, () => {
-      if (notifyRender) {
-        this.props.initialRender();
-      }
-    });
+    this.setState(newState);
   }
 
   render() {
