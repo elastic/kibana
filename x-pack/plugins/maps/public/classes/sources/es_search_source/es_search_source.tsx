@@ -589,27 +589,39 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       return {};
     }
 
-    const { docValueFields } = getDocValueAndSourceFields(
-      indexPattern,
-      this._getTooltipPropertyNames(),
-      'strict_date_optional_time'
-    );
-
-    const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
     const searchService = getSearchService();
-    const searchSource = await searchService.searchSource.create(initialSearchContext as object);
+    const searchSource = await searchService.searchSource.create();
     searchSource.setField('trackTotalHits', false);
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 1);
-
     const query = {
       language: 'kuery',
       query: `_id:"${docId}" and _index:"${index}"`,
     };
-
     searchSource.setField('query', query);
-    searchSource.setField('fieldsFromSource', this._getTooltipPropertyNames());
+
+    // searchSource calls dataView.getComputedFields to seed docvalueFields
+    // dataView.getComputedFields adds each date field in the dataView to docvalueFields to ensure standardized date format across kibana
+    // we don't need these as they request unneeded fields and bloat responses
+    // setting fieldsFromSource notifies searchSource to filterout unused docvalueFields
+    // '_id' is used since the value of 'fieldsFromSource' is irreverent because '_source: false'.
+    searchSource.setField('fieldsFromSource', ['_id']);
+    searchSource.setField('source', false);
+
+    // Get all tooltip properties from fields API
+    searchSource.setField(
+      'fields',
+      this._getTooltipPropertyNames().map((fieldName) => {
+        const field = indexPattern.fields.getByName(fieldName);
+        return field && field.type === 'date'
+          ? {
+              field: fieldName,
+              format: 'strict_date_optional_time',
+            }
+          : fieldName;
+      })
+    );
 
     const { rawResponse: resp } = await lastValueFrom(
       searchSource.fetch$({
