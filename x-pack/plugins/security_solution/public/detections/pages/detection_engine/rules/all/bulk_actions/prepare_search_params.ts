@@ -15,10 +15,12 @@ interface PrepareSearchFilterProps {
   selectedRuleIds: string[];
   filterOptions: FilterOptions;
 }
+
 /**
  * helper methods to prepare search query for bulk actions based on results of previous dry run
  * to exclude failed rules from search and perform bulk action on possible successfully edited rules
- * props {PrepareSearchFilterProps}
+ * @param {PrepareSearchFilterProps} props
+ * @returns either list of ids or KQL search query (if isAllSelected === true)
  */
 export const prepareSearchParams = ({
   isAllSelected,
