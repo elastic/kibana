@@ -36,6 +36,8 @@ import type { InternalApplicationSetup, InternalApplicationStart } from './appli
 import { ExecutionContextService } from './execution_context';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 
+/** @internal */
+export const KBN_LOAD_MARKS = 'kbnLoad';
 interface Params {
   rootDomElement: HTMLElement;
   browserSupportsCsp: boolean;
@@ -124,6 +126,20 @@ export class CoreSystem {
 
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
+  }
+
+  private getLoadMarksInfo() {
+    if (!performance) return [];
+    const reportData = {};
+    performance.mark(KBN_LOAD_MARKS, {
+      detail: 'start_done',
+    });
+    const marks = performance.getEntriesByName(KBN_LOAD_MARKS);
+    for (const mark of marks) {
+      reportData[mark.detail] = mark.startTime;
+    }
+
+    return reportData;
   }
 
   public async setup() {
@@ -270,6 +286,7 @@ export class CoreSystem {
       analytics.reportEvent('Loaded Kibana', {
         kibana_version: this.coreContext.env.packageInfo.version,
         ...fetchOptionalMemoryInfo(),
+        ...this.getLoadMarksInfo(),
       });
 
       return {
@@ -322,6 +339,26 @@ export class CoreSystem {
         memory_js_heap_size_used: {
           type: 'long',
           _meta: { description: 'The used size of the heap', optional: true },
+        },
+        load_start: {
+          type: 'long',
+          _meta: { description: 'When the render template starts loading assets', optional: true },
+        },
+        bootstrap: {
+          type: 'long',
+          _meta: { description: 'When kbnBootstrap callback is called', optional: true },
+        },
+        core_create: {
+          type: 'long',
+          _meta: { description: 'When core system is created', optional: true },
+        },
+        setup_done: {
+          type: 'long',
+          _meta: { description: 'When core system setup is complete', optional: true },
+        },
+        start_done: {
+          type: 'long',
+          _meta: { description: 'When core system start is complete', optional: true },
         },
       },
     });
