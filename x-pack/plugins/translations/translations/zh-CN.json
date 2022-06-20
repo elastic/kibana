@@ -24953,7 +24953,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addIndexPatternsTitle": "添加索引模式",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addTagsTitle": "添加标签",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.applyTimelineTemplateTitle": "应用时间线模板",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationDescription": "将仅对您选定的 {customRulesCount, plural, other {# 个定制规则}}应用更新操作。",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationTitle": "无法编辑 {elasticRulesCount, plural, other {# 个 Elastic 规则}}",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditRejectionDescription": "无法修改 Elastic 规则。将仅对定制规则应用更新操作。",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastDescription": "{rulesCount, plural, other {# 个规则}}正在更新。",
