@@ -15,8 +15,8 @@ import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { CommentType } from '@kbn/cases-plugin/common';
 
 import {
-  HostIsolationRequestSchema,
-  KillProcessRequestSchema,
+  NoParametersRequestSchema,
+  KillOrSuspendProcessRequestSchema,
   ResponseActionBodySchema,
 } from '../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../common/constants';
@@ -27,6 +27,8 @@ import {
   ENDPOINT_ACTION_RESPONSES_DS,
   failedFleetActionErrorCode,
   KILL_PROCESS_ROUTE,
+  SUSPEND_PROCESS_ROUTE,
+  GET_RUNNING_PROCESSES_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -36,7 +38,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActions,
-  KillProcessParameters,
+  ResponseActionParametersWithPidOrEntityId,
 } from '../../../../common/endpoint/types';
 import type {
   SecuritySolutionPluginRouter,
@@ -57,7 +59,7 @@ export function registerResponseActionRoutes(
   router.post(
     {
       path: ISOLATE_HOST_ROUTE_V2,
-      validate: HostIsolationRequestSchema,
+      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
@@ -70,7 +72,7 @@ export function registerResponseActionRoutes(
   router.post(
     {
       path: RELEASE_HOST_ROUTE,
-      validate: HostIsolationRequestSchema,
+      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
@@ -83,13 +85,45 @@ export function registerResponseActionRoutes(
   router.post(
     {
       path: KILL_PROCESS_ROUTE,
-      validate: KillProcessRequestSchema,
+      validate: KillOrSuspendProcessRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
       { all: ['canKillProcess'] },
       logger,
-      responseActionRequestHandler<KillProcessParameters>(endpointContext, 'kill-process')
+      responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        endpointContext,
+        'kill-process'
+      )
+    )
+  );
+
+  router.post(
+    {
+      path: SUSPEND_PROCESS_ROUTE,
+      validate: KillOrSuspendProcessRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canSuspendProcess'] },
+      logger,
+      responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        endpointContext,
+        'suspend-process'
+      )
+    )
+  );
+
+  router.post(
+    {
+      path: GET_RUNNING_PROCESSES_ROUTE,
+      validate: NoParametersRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canGetRunningProcesses'] },
+      logger,
+      responseActionRequestHandler(endpointContext, 'running-processes')
     )
   );
 }
@@ -98,6 +132,8 @@ const commandToFeatureKeyMap = new Map<ResponseActions, FeatureKeys>([
   ['isolate', 'HOST_ISOLATION'],
   ['unisolate', 'HOST_ISOLATION'],
   ['kill-process', 'KILL_PROCESS'],
+  ['suspend-process', 'SUSPEND_PROCESS'],
+  ['running-processes', 'RUNNING_PROCESSES'],
 ]);
 
 const returnActionIdCommands: ResponseActions[] = ['isolate', 'unisolate'];
