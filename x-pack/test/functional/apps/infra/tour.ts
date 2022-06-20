@@ -15,12 +15,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
 
   const setInitialTourState = async (activeStep?: number) => {
+    await browser.setLocalStorageItem('guidedOnboarding.observability.tourActive', 'true');
     await browser.setLocalStorageItem(
-      'xpack.observability.tourState',
-      JSON.stringify({
-        activeStep: activeStep || 1,
-        isTourActive: true,
-      })
+      'guidedOnboarding.observability.tourStep',
+      String(activeStep || 1)
     );
     await browser.refresh();
   };

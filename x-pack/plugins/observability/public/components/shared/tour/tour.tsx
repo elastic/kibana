@@ -15,25 +15,15 @@ import {
   EuiFlexItem,
   EuiTourStep,
   EuiTourStepProps,
-  EuiText,
-  ElementTarget,
   EuiOverlayMask,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { ApplicationStart } from '@kbn/core/public';
 import { observabilityAppId } from '../../../../common';
+import { tourStepsConfig } from './steps_config';
 
 import './tour.scss';
-
-interface TourStep {
-  content: EuiTourStepProps['content'];
-  anchor: ElementTarget;
-  anchorPosition: EuiTourStepProps['anchorPosition'];
-  title: EuiTourStepProps['title'];
-  dataTestSubj: string;
-  showOverlay: boolean;
-}
 
 const minWidth: EuiTourStepProps['minWidth'] = 360;
 const maxWidth: EuiTourStepProps['maxWidth'] = 360;
@@ -43,107 +33,8 @@ const repositionOnScroll: EuiTourStepProps['repositionOnScroll'] = false;
 const overviewPath = '/overview';
 const guidedSetupStep = 6;
 
-const observabilityTourStorageKey = 'xpack.observability.tourState';
-
-const tourStepsConfig: TourStep[] = [
-  {
-    title: i18n.translate('xpack.observability.tour.observabilityOverviewStep.tourTitle', {
-      defaultMessage: 'Welcome to Elastic Observability',
-    }),
-    content: (
-      <EuiText>
-        {i18n.translate('xpack.observability.tour.observabilityOverviewStep.tourContent', {
-          defaultMessage:
-            'Take a quick tour of the Observability solution to get a feel for how it works.',
-        })}
-      </EuiText>
-    ),
-    anchor: `[id^="KibanaPageTemplateSolutionNav"]`,
-    anchorPosition: 'rightUp',
-    dataTestSubj: 'overviewStep',
-    showOverlay: true,
-  },
-  {
-    title: i18n.translate('xpack.observability.tour.streamStep.tourTitle', {
-      defaultMessage: 'View all your infrastructure logs in real time',
-    }),
-    content: (
-      <EuiText>
-        {i18n.translate('xpack.observability.tour.streamStep.tourContent', {
-          defaultMessage: 'Verify your data is flowing correctly.',
-        })}
-      </EuiText>
-    ),
-    anchor: `[data-nav-id="stream"]`,
-    anchorPosition: 'rightUp',
-    dataTestSubj: 'streamStep',
-    showOverlay: true,
-  },
-  {
-    title: i18n.translate('xpack.observability.tour.metricsExplorerStep.tourTitle', {
-      defaultMessage: 'Inspect your overall infrastructure performance',
-    }),
-    content: (
-      <EuiText>
-        {i18n.translate('xpack.observability.tour.metricsExplorerStep.tourContent', {
-          defaultMessage: 'Check the health of your infrastructure.',
-        })}
-      </EuiText>
-    ),
-    anchor: `[data-nav-id="metrics_explorer"]`,
-    anchorPosition: 'rightUp',
-    dataTestSubj: 'metricsExplorerStep',
-    showOverlay: true,
-  },
-  {
-    title: i18n.translate('xpack.observability.tour.tracesStep.tourTitle', {
-      defaultMessage: 'Understand the entire lifecycle of a request/action',
-    }),
-    content: (
-      <EuiText>
-        {i18n.translate('xpack.observability.tour.tracesStep.tourContent', {
-          defaultMessage: 'Track down any issues affecting your infrastructure.',
-        })}
-      </EuiText>
-    ),
-    anchor: `[data-nav-id="traces"]`,
-    anchorPosition: 'rightUp',
-    dataTestSubj: 'tracesStep',
-    showOverlay: true,
-  },
-  {
-    title: i18n.translate('xpack.observability.tour.alertsStep.tourTitle', {
-      defaultMessage: 'Get notified when something goes wrong',
-    }),
-    content: (
-      <EuiText>
-        {i18n.translate('xpack.observability.tour.alertsStep.tourContent', {
-          defaultMessage: 'Configure how you want to be notified when a problem occurs.',
-        })}
-      </EuiText>
-    ),
-    anchor: `[data-nav-id="alerts"]`,
-    anchorPosition: 'rightUp',
-    dataTestSubj: 'alertStep',
-    showOverlay: true,
-  },
-  {
-    title: i18n.translate('xpack.observability.tour.guidedSetupStep.tourTitle', {
-      defaultMessage: `You're ready!`,
-    }),
-    content: (
-      <EuiText>
-        {i18n.translate('xpack.observability.tour.guidedSetupStep.tourContent', {
-          defaultMessage: 'View the guided setup to learn about next steps.',
-        })}
-      </EuiText>
-    ),
-    anchor: '#guidedSetupButton',
-    anchorPosition: 'rightUp',
-    dataTestSubj: 'guidedSetupStep',
-    showOverlay: false,
-  },
-];
+const observTourActiveStorageKey = 'guidedOnboarding.observability.tourActive';
+const observTourStepStorageKey = 'guidedOnboarding.observability.tourStep';
 
 const getSteps = ({
   activeStep,
@@ -220,19 +111,27 @@ interface TourState {
   isTourActive: boolean;
 }
 
-const getInitialTourState = (prevTourState: string | null): TourState => {
-  if (prevTourState) {
-    try {
-      const parsedPrevTourState = JSON.parse(prevTourState);
-      return parsedPrevTourState as TourState;
-    } catch (e) {
-      // Fall back to default state
-    }
+const getInitialTourState = ({
+  prevIsTourActive,
+  prevActiveStep,
+}: {
+  prevIsTourActive: string | null;
+  prevActiveStep: string | null;
+}): TourState => {
+  if (prevIsTourActive === null) {
+    return {
+      activeStep: 1,
+      // Tour is inactive by default
+      isTourActive: false,
+    };
   }
 
+  const isTourActive = prevIsTourActive === 'true';
+  const activeStep = prevActiveStep === null ? 1 : Number(prevActiveStep);
+
   return {
-    activeStep: 1,
-    isTourActive: false,
+    activeStep,
+    isTourActive,
   };
 };
 
@@ -247,9 +146,13 @@ export function ObservabilityTour({
   isPageDataLoaded: boolean;
   showTour: boolean;
 }) {
-  const prevTourState = localStorage.getItem(observabilityTourStorageKey);
-  const { activeStep: initialActiveStep, isTourActive: initialIsTourActive } =
-    getInitialTourState(prevTourState);
+  const prevIsTourActive = localStorage.getItem(observTourActiveStorageKey);
+  const prevActiveStep = localStorage.getItem(observTourStepStorageKey);
+
+  const { activeStep: initialActiveStep, isTourActive: initialIsTourActive } = getInitialTourState({
+    prevIsTourActive,
+    prevActiveStep,
+  });
 
   const [isTourActive, setIsTourActive] = useState(initialIsTourActive);
   const [activeStep, setActiveStep] = useState(initialActiveStep);
@@ -277,8 +180,12 @@ export function ObservabilityTour({
   const isTourVisible = showTour && isTourActive && isPageDataLoaded && isSmallBreakpoint === false;
 
   useEffect(() => {
-    localStorage.setItem(observabilityTourStorageKey, JSON.stringify({ isTourActive, activeStep }));
-  }, [isTourActive, activeStep]);
+    localStorage.setItem(observTourActiveStorageKey, String(isTourActive));
+  }, [isTourActive]);
+
+  useEffect(() => {
+    localStorage.setItem(observTourStepStorageKey, String(activeStep));
+  }, [activeStep]);
 
   useEffect(() => {
     // The user must be on the overview page to view the guided setup step in the tour
