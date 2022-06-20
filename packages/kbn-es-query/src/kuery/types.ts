@@ -8,11 +8,14 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SerializableRecord } from '@kbn/utility-types';
-import { NodeTypes } from './node_types';
+import { KQL_NODE_TYPE_LITERAL } from './node_types/literal';
+
+/** @public */
+export type KqlNodeType = typeof KQL_NODE_TYPE_LITERAL | 'function' | 'wildcard';
 
 /** @public */
 export interface KueryNode {
-  type: keyof NodeTypes;
+  type: KqlNodeType;
   [key: string]: any;
 }
 

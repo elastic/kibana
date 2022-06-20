@@ -67,7 +67,14 @@ describe('useInlineErrorsCount', function () {
       [
         {
           error: { monitorList: null, serviceLocations: null, enablement: null },
-          list: { monitors: [], page: 1, perPage: 10, total: null, syncErrors: null },
+          list: {
+            monitors: [],
+            page: 1,
+            perPage: 10,
+            total: null,
+            syncErrors: null,
+            absoluteTotal: 0,
+          },
           enablement: null,
           loading: { monitorList: false, serviceLocations: false, enablement: false },
           locations: [],
