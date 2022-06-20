@@ -58,7 +58,8 @@ describe('buildAlert', () => {
       completeRule,
       'allFields',
       SPACE_ID,
-      jest.fn()
+      jest.fn(),
+      completeRule.ruleParams.index as string[]
     );
     expect(alertGroup.length).toEqual(3);
     expect(alertGroup[0]).toEqual(

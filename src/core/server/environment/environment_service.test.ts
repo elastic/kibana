@@ -17,7 +17,7 @@ import type { AnalyticsServicePreboot } from '../analytics';
 
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { loggingSystemMock } from '../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { analyticsServiceMock } from '../analytics/analytics_service.mock';
 
 jest.mock('./resolve_uuid', () => ({

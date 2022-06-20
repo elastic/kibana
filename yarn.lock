@@ -1429,10 +1429,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@46.9.0":
-  version "46.9.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.9.0.tgz#45a615eb84c81d8cc5219eaa4eef8f4761c9fc05"
-  integrity sha512-RVDNgg9bZIZoq/8sfRg6n9gXHPzs4n8bAJogxnzv73f4sLcdytGqjNbdDpbDO2MPRKnA7nN92/L0Ewkp7SiU0Q==
+"@elastic/charts@46.10.1":
+  version "46.10.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.10.1.tgz#4613db939e05efa041199ba14ee4a7aa9cf2d2e7"
+  integrity sha512-zpQBmB/NnqOS14rwMbQYePErFshxnvmCW0cFSVkU2B4+2VhVBSueDZhbPbWAoOtmE61RprRxHxgT51JKCUwcAQ==
   dependencies:
     "@popperjs/core" "^2.4.0"
     bezier-easing "^2.1.0"
@@ -3088,6 +3088,18 @@
   uid ""
 
 "@kbn/core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-logging-server-mocks@link:bazel-bin/packages/core/logging/core-logging-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-logging-server@link:bazel-bin/packages/core/logging/core-logging-server":
   version "0.0.0"
   uid ""
 
@@ -6459,6 +6471,18 @@
   uid ""
 
 "@types/kbn__core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-logging-server-mocks@link:bazel-bin/packages/core/logging/core-logging-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-logging-server@link:bazel-bin/packages/core/logging/core-logging-server/npm_module_types":
   version "0.0.0"
   uid ""
 
