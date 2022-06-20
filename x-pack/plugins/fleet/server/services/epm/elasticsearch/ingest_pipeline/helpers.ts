@@ -10,8 +10,9 @@ import { ElasticsearchAssetType } from '../../../../types';
 import type { RegistryDataStream } from '../../../../types';
 import { getPathParts } from '../../archive';
 
-import type { PipelineInstall, RewriteSubstitution } from './types';
 import { getPipelineNameForDatastream } from '../../../../../common';
+
+import type { PipelineInstall, RewriteSubstitution } from './types';
 
 export const isTopLevelPipeline = (path: string) => {
   const pathParts = getPathParts(path);

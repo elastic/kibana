@@ -17,6 +17,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import type { RegistryStream, PackageInfo } from '../../../../../../types';
 import { getPipelineNameForDatastream } from '../../../../../../../../../common';
 
@@ -94,7 +95,7 @@ export const DatastreamPipeline: React.FunctionComponent<Props> = ({
               ],
             },
           ]}
-        ></EuiBasicTable>
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RegistryDataStream } from '../types';
+import type { RegistryDataStream } from '../types';
 
 /**
  * Return the ingest pipeline name for a datastream
