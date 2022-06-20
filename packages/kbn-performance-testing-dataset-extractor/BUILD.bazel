@@ -41,6 +41,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-test",
   "//packages/kbn-tooling-log",
   "@npm//@elastic/elasticsearch",
+  "@npm//moment",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
