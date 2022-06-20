@@ -14,6 +14,16 @@ Development on Windows is recommended through WSL2.  WSL lets users run a Linux 
 
 <DocCallOut title="Prerequisites">
   
+  This guide allows you to achieve two different kind of experiences (Basic and Default each with their specifics).
+  However a common prerequisite for both is enabling the Hardware Virtualization on Windows. 
+  
+  That will highly depend on your hardware, as it should be enabled first on your UEFI (or BIOS). Please check the official Microsoft documentation on 
+  [How to Enable Virtualization on Windows](https://support.microsoft.com/en-us/windows/enable-virtualization-on-windows-11-pcs-c5578302-6e43-4b4b-a449-8ced115f58e1).
+  
+  After successfully achieve the previous step there is a second good guide describing [How to Enable Hyper-V Platform Feature on Windows](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v#enable-the-hyper-v-role-through-settings).
+  
+  Once hardware virtualization is enabled on Windows, please pay attention to the specific prerequisites for each type of experience listed below.
+  
   ### Basic Experience
   For a basic WSL usage you must be running **Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11**. Note that in a basic setup you won't be able to use 
   the browser GUI to visually run and/or debug functional tests. It's highly advisable to make sure you install the prerequisites for a default usage listed below.
