@@ -21,7 +21,7 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import type { DataView } from '@kbn/data-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_cis_kubernetes_integration');
