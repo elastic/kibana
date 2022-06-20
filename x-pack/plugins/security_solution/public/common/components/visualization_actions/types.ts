@@ -26,11 +26,12 @@ export interface VisualizationActionsProps {
   title: React.ReactNode;
 }
 
-export interface MatrixHistogramTemplatesProps {
-  lensAttributes: LensAttributes;
+export interface LensEmbeddableComponentProps {
   getLensAttributes?: GetLensAttributes;
-  timerange: { from: string; to: string };
-  inputsModelId?: InputsModelId;
-  stackByField?: string;
+  height?: string;
   id: string;
+  inputsModelId?: InputsModelId;
+  lensAttributes: LensAttributes;
+  stackByField?: string;
+  timerange: { from: string; to: string };
 }

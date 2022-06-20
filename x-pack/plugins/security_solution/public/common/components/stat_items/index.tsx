@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
   IconType,
+  EuiStat,
 } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
@@ -27,19 +28,15 @@ import {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../common/search_strategy';
-import { AreaChart } from '../charts/areachart';
-import { BarChart } from '../charts/barchart';
+
 import { ChartSeriesData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
-import { histogramDateTimeFormatter } from '../utils';
-import { getEmptyTagValue } from '../empty_value';
 
 import { InspectButton } from '../inspect';
-import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
-import { HoverVisibilityContainer } from '../hover_visibility_container';
+
 import { LensAttributes } from '../visualization_actions/types';
 import * as i18n from '../../containers/query_toggle/translations';
 import { UserskKpiStrategyResponse } from '../../../../common/search_strategy/security_solution/users';
-import { LensEmbeddable } from '../visualization_actions/lens';
+import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
 const FlexGroup = styled(EuiFlexGroup)`
   .no-margin {
     margin-top: 0 !important;
@@ -60,6 +57,8 @@ const StatValue = styled(EuiTitle)`
 `;
 
 StatValue.displayName = 'StatValue';
+
+const ChartHeight = '120px';
 
 interface StatItem {
   color?: string;
@@ -315,40 +314,20 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                       )}
 
                       <FlexItem>
-                        <HoverVisibilityContainer
-                          targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}
-                        >
-                          <StatValue>
-                            <p data-test-subj="stat-title">
-                              {field.value != null
-                                ? field.value.toLocaleString()
-                                : getEmptyTagValue()}{' '}
-                              {field.description}
-                            </p>
-                          </StatValue>
-                          {field.lensAttributes && timerange && (
-                            <EuiFlexGroup>
-                              <FlexItem>
-                                <VisualizationActions
-                                  lensAttributes={field.lensAttributes}
-                                  queryId={id}
-                                  inspectIndex={index}
-                                  timerange={timerange}
-                                  title={description}
-                                  className="viz-actions"
-                                />
-                              </FlexItem>
-                              <FlexItem>
-                                <LensEmbeddable
-                                  lensAttributes={field.lensAttributes}
-                                  timerange={timerange}
-                                  id={id}
-                                />
-                              </FlexItem>
-                            </EuiFlexGroup>
-                          )}
-                        </HoverVisibilityContainer>
+                        {field.lensAttributes && (
+                          <LensEmbeddable
+                            height="100px"
+                            id={id}
+                            lensAttributes={field.lensAttributes}
+                            timerange={timerange}
+                          />
+                        )}
                       </FlexItem>
+                      {field.description && (
+                        <FlexItem>
+                          <EuiStat title={field.description} description={null} titleSize="s" />
+                        </FlexItem>
+                      )}
                     </EuiFlexGroup>
                   </FlexItem>
                 ))}
@@ -358,16 +337,11 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
               <EuiFlexGroup>
                 {enableBarChart && (
                   <FlexItem>
-                    <BarChart
-                      barChart={barChart}
-                      configs={barchartConfigs()}
-                      visualizationActionsOptions={{
-                        lensAttributes: barChartLensAttributes,
-                        queryId: id,
-                        inspectIndex: index,
-                        timerange,
-                        title: description,
-                      }}
+                    <LensEmbeddable
+                      lensAttributes={barChartLensAttributes}
+                      timerange={timerange}
+                      id={id}
+                      height={ChartHeight}
                     />
                   </FlexItem>
                 )}
@@ -375,20 +349,14 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                 {enableAreaChart && from != null && to != null && (
                   <>
                     <FlexItem>
-                      <AreaChart
-                        areaChart={areaChart}
-                        configs={areachartConfigs({
-                          xTickFormatter: histogramDateTimeFormatter([from, to]),
-                          onBrushEnd: narrowDateRange,
-                        })}
-                        visualizationActionsOptions={{
-                          lensAttributes: areaChartLensAttributes,
-                          queryId: id,
-                          inspectIndex: index,
-                          timerange,
-                          title: description,
-                        }}
-                      />
+                      {areaChartLensAttributes && (
+                        <LensEmbeddable
+                          lensAttributes={areaChartLensAttributes}
+                          timerange={timerange}
+                          id={id}
+                          height={ChartHeight}
+                        />
+                      )}
                     </FlexItem>
                   </>
                 )}

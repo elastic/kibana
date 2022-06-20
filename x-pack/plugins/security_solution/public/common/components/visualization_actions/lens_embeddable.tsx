@@ -9,26 +9,33 @@ import React, { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import styled from 'styled-components';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
-import { MatrixHistogramTemplatesProps } from './types';
+import { LensEmbeddableComponentProps } from './types';
 import { useActions } from './use_actions';
 
+const LensComponentWrapper = styled.div<{ height?: string }>`
+  height: ${({ height }) => height ?? 'auto'};
+`;
+
 const LensEmbeddableComponent = ({
-  lensAttributes,
   getLensAttributes,
-  timerange,
-  inputsModelId = 'global',
-  stackByField,
+  height,
   id,
-}: MatrixHistogramTemplatesProps) => {
+  inputsModelId = 'global',
+  lensAttributes,
+  stackByField,
+  timerange,
+}: LensEmbeddableComponentProps) => {
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
   const { attributes, indexPattern } = useLensAttributes({
     lensAttributes,
     getLensAttributes,
     stackByField,
+    title: '',
   });
   const LensComponent = lens.EmbeddableComponent;
 
@@ -50,7 +57,7 @@ const LensEmbeddableComponent = ({
   );
 
   return attributes ? (
-    <>
+    <LensComponentWrapper height={height}>
       <LensComponent
         id={id}
         style={{ height: '100%' }}
@@ -83,7 +90,7 @@ const LensEmbeddableComponent = ({
         extraActions={actions}
         inspectExtraInfo={inspectExtraInfo}
       />
-    </>
+    </LensComponentWrapper>
   ) : null;
 };
 
