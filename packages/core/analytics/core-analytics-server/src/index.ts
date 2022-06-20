@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { AnalyticsServiceSetup, AnalyticsServiceStart } from './contracts';
+export type {
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+  AnalyticsServicePreboot,
+} from './contracts';

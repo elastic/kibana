@@ -10,14 +10,11 @@ import { of } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-server';
-
-/**
- * Exposes the public APIs of the AnalyticsClient during the preboot phase
- * {@link AnalyticsClient}
- * @public
- */
-export type AnalyticsServicePreboot = Omit<AnalyticsClient, 'shutdown'>;
+import type {
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+  AnalyticsServicePreboot,
+} from '@kbn/core-analytics-server';
 
 export class AnalyticsService {
   private readonly analyticsClient: AnalyticsClient;

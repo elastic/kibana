@@ -7,4 +7,3 @@
  */
 
 export { AnalyticsService } from './analytics_service';
-export type { AnalyticsServicePreboot } from './analytics_service';
