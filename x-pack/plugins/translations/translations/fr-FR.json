@@ -24771,8 +24771,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkAction.enable.successToastDescription": "Activation réussie de {totalRules, plural, =1 {{totalRules} règle} other {{totalRules} règles}}",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addIndexPatternsTitle": "Ajouter des modèles d'indexation",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addTagsTitle": "Ajouter des balises",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationTitle": "Impossible de modifier {elasticRulesCount, plural, =1 {# règle Elastic} other {# règles Elastic}}",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditRejectionDescription": "Les règles Elastic ne sont pas modifiables. L'action de mise à jour sera appliquée uniquement aux règles personnalisées.",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastDescription": "{rulesCount, plural, =1 {# règle est} other {# règles sont}} en cours de mise à jour.",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastNotifyButtonLabel": "M'envoyer une notification à la fin",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastTitle": "Les mises à jour des règles sont en cours",

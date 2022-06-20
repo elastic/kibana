@@ -24911,8 +24911,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addIndexPatternsTitle": "インデックスパターンを追加",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addTagsTitle": "タグを追加",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.applyTimelineTemplateTitle": "タイムラインテンプレートを適用",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationTitle": "{elasticRulesCount, plural, other  {#個のElasticルール}}を編集できません",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditRejectionDescription": "Elasticルールは変更できません。更新アクションはカスタムルールにのみ適用されます。",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastDescription": "{rulesCount, plural, other  {#個のルール}}を更新しています。",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastNotifyButtonLabel": "完了時に通知",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastTitle": "ルールを更新しています",
