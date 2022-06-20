@@ -11,8 +11,6 @@ import type { Agent, BulkActionResult } from '../../types';
 import * as APIKeyService from '../api_keys';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
-import { appContextService } from '../app_context';
-
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import {
@@ -72,7 +70,6 @@ export async function unenrollAgents(
     revoke?: boolean;
   }
 ): Promise<{ items: BulkActionResult[] }> {
-  const startTime = Date.now();
   // start with all agents specified
   const givenAgents = await getAgents(esClient, soClient, { ...options, withoutManaged: true });
 
@@ -139,15 +136,6 @@ export async function unenrollAgents(
     }
     return result;
   };
-
-  const endTime = Date.now() - startTime;
-  try {
-    appContextService
-      .getLogger()
-      .info(`unenroll check for ${agentsEnrolled.length} agents took: ${endTime} ms`);
-  } catch (e) {
-    // temporarily catching error to pass test
-  }
 
   return {
     items: givenAgents.map(getResultForAgent),

@@ -12,8 +12,6 @@ import type { Agent, BulkActionResult } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
-import { appContextService } from '../app_context';
-
 import {
   getAgentDocuments,
   getAgents,
@@ -82,7 +80,6 @@ export async function reassignAgents(
   options: ({ agents: Agent[] } | GetAgentsOptions) & { force?: boolean },
   newAgentPolicyId: string
 ): Promise<{ items: BulkActionResult[] }> {
-  const startTime = Date.now();
   const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (!newAgentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
@@ -169,15 +166,6 @@ export async function reassignAgents(
     created_at: now,
     type: 'POLICY_REASSIGN',
   });
-
-  const endTime = Date.now() - startTime;
-  try {
-    appContextService
-      .getLogger()
-      .info(`reassign for ${givenAgents.length} agents took: ${endTime} ms`);
-  } catch (e) {
-    // temporarily catching error to pass test
-  }
 
   return { items: orderedOut };
 }
