@@ -7,7 +7,9 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-import { splitPkgKey, fetchFindLatestPackageOrUndefined } from '.';
+import { PackageNotFoundError } from '../../../errors';
+
+import { splitPkgKey, fetchFindLatestPackageOrUndefined, fetchFindLatestPackageOrThrow } from '.';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
@@ -63,60 +65,76 @@ describe('splitPkgKey', () => {
   });
 });
 
-describe('fetchFindLatestPackageOrUndefined', () => {
+describe('fetch package', () => {
   afterEach(() => {
     mockFetchUrl.mockReset();
     mockGetBundledPackageByName.mockReset();
   });
 
-  it('Should return registry package if bundled package is older version', async () => {
-    const bundledPackage = { name: 'testpkg', version: '1.0.0' };
-    const registryPackage = { name: 'testpkg', version: '1.0.1' };
+  describe('fetchFindLatestPackageOrUndefined', () => {
+    it('Should return registry package if bundled package is older version', async () => {
+      const bundledPackage = { name: 'testpkg', version: '1.0.0' };
+      const registryPackage = { name: 'testpkg', version: '1.0.1' };
 
-    mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
+      mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
 
-    mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
-    const result = await fetchFindLatestPackageOrUndefined('testpkg');
-    expect(result).toEqual(registryPackage);
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+      const result = await fetchFindLatestPackageOrUndefined('testpkg');
+      expect(result).toEqual(registryPackage);
+    });
+
+    it('Should return bundled package if bundled package is newer version', async () => {
+      const bundledPackage = { name: 'testpkg', version: '1.0.1' };
+      const registryPackage = { name: 'testpkg', version: '1.0.0' };
+
+      mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
+
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+      const result = await fetchFindLatestPackageOrUndefined('testpkg');
+      expect(result).toEqual(bundledPackage);
+    });
+    it('Should return bundled package if bundled package there is no registry package', async () => {
+      const bundledPackage = { name: 'testpkg', version: '1.0.1' };
+
+      mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+      const result = await fetchFindLatestPackageOrUndefined('testpkg');
+      expect(result).toEqual(bundledPackage);
+    });
+
+    it('Should fall back to bundled package if there is an error getting from the registry', async () => {
+      const bundledPackage = { name: 'testpkg', version: '1.0.1' };
+
+      mockFetchUrl.mockRejectedValue(new Error('Registry error'));
+
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+      const result = await fetchFindLatestPackageOrUndefined('testpkg');
+      expect(result).toEqual(bundledPackage);
+    });
+
+    it('Should return undefined if there is a registry error and no bundled package', async () => {
+      const bundledPackage = null;
+
+      mockFetchUrl.mockRejectedValue(new Error('Registry error'));
+
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+      const result = await fetchFindLatestPackageOrUndefined('testpkg');
+      expect(result).toEqual(undefined);
+    });
   });
 
-  it('Should return bundled package if bundled package is newer version', async () => {
-    const bundledPackage = { name: 'testpkg', version: '1.0.1' };
-    const registryPackage = { name: 'testpkg', version: '1.0.0' };
+  describe('fetchFindLatestPackageOrThrow', () => {
+    it('Should return undefined if there is a registry error and no bundled package', async () => {
+      const bundledPackage = null;
 
-    mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
+      mockFetchUrl.mockRejectedValue(new Error('Registry error'));
 
-    mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
-    const result = await fetchFindLatestPackageOrUndefined('testpkg');
-    expect(result).toEqual(bundledPackage);
-  });
-  it('Should return bundled package if bundled package there is no registry package', async () => {
-    const bundledPackage = { name: 'testpkg', version: '1.0.1' };
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
 
-    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
-
-    mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
-    const result = await fetchFindLatestPackageOrUndefined('testpkg');
-    expect(result).toEqual(bundledPackage);
-  });
-
-  it('Should fall back to bundled package if there is an error getting from the registry', async () => {
-    const bundledPackage = { name: 'testpkg', version: '1.0.1' };
-
-    mockFetchUrl.mockRejectedValue(new Error('Registry error'));
-
-    mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
-    const result = await fetchFindLatestPackageOrUndefined('testpkg');
-    expect(result).toEqual(bundledPackage);
-  });
-
-  it('Should return undefined if there is a registry error and no bundled package', async () => {
-    const bundledPackage = null;
-
-    mockFetchUrl.mockRejectedValue(new Error('Registry error'));
-
-    mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
-    const result = await fetchFindLatestPackageOrUndefined('testpkg');
-    expect(result).toEqual(undefined);
+      expect(() => fetchFindLatestPackageOrThrow('testpkg')).rejects.toBeInstanceOf(
+        PackageNotFoundError
+      );
+    });
   });
 });
