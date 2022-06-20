@@ -18,7 +18,7 @@ ${HORIZONTAL_LINE}
  Endpoint Action Responder
 ${HORIZONTAL_LINE}
 `);
-      if (context.flags.auto) {
+      if (context.flags.mode === 'auto') {
         return runInAutoMode(context);
       }
 
@@ -33,9 +33,10 @@ ${HORIZONTAL_LINE}
       description: `Respond to pending Endpoint actions.
   ${SUPPORTED_TOKENS}`,
       flags: {
-        string: ['kibana', 'elastic', 'username', 'password', 'delay'],
-        boolean: ['auto', 'asSuperuser'],
+        string: ['mode', 'kibana', 'elastic', 'username', 'password', 'delay'],
+        boolean: ['asSuperuser'],
         default: {
+          mode: 'auto',
           kibana: 'http://localhost:5601',
           elastic: 'http://localhost:9200',
           username: 'elastic',
@@ -44,8 +45,10 @@ ${HORIZONTAL_LINE}
           delay: '',
         },
         help: `
-        --auto              If used, tool will run in auto mode, checking for pending
-                            actions periodically and auto responding to them.
+        --mode              The mode for running the tool. (Default: 'auto').
+                            Value values are:
+                            auto  : tool will continue to run and checking for pending
+                                    actions periodically.
         --username          User name to be used for auth against elasticsearch and
                             kibana (Default: elastic).
                             **IMPORTANT:** This username's roles MUST have 'superuser']
