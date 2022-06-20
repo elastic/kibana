@@ -504,6 +504,7 @@ export const getXyVisualization = ({
   renderDimensionEditor(domElement, props) {
     const allProps = {
       ...props,
+      datatableUtilities: data.datatableUtilities,
       formatFactory: fieldFormats.deserialize,
       paletteService,
     };

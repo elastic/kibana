@@ -26,7 +26,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 |  [getStartServices](./kibana-plugin-core-server.coresetup.getstartservices.md) | StartServicesAccessor&lt;TPluginsStart, TStart&gt; | [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) |
 |  [http](./kibana-plugin-core-server.coresetup.http.md) | HttpServiceSetup &amp; { resources: HttpResources; } | [HttpServiceSetup](./kibana-plugin-core-server.httpservicesetup.md) |
 |  [i18n](./kibana-plugin-core-server.coresetup.i18n.md) | I18nServiceSetup | [I18nServiceSetup](./kibana-plugin-core-server.i18nservicesetup.md) |
-|  [logging](./kibana-plugin-core-server.coresetup.logging.md) | LoggingServiceSetup | [LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md) |
+|  [logging](./kibana-plugin-core-server.coresetup.logging.md) | LoggingServiceSetup |  |
 |  [metrics](./kibana-plugin-core-server.coresetup.metrics.md) | MetricsServiceSetup | [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) |
 |  [savedObjects](./kibana-plugin-core-server.coresetup.savedobjects.md) | SavedObjectsServiceSetup | [SavedObjectsServiceSetup](./kibana-plugin-core-server.savedobjectsservicesetup.md) |
 |  [status](./kibana-plugin-core-server.coresetup.status.md) | StatusServiceSetup | [StatusServiceSetup](./kibana-plugin-core-server.statusservicesetup.md) |

@@ -29,6 +29,7 @@ import {
 } from '@kbn/event-annotation-plugin/common/types';
 import { pick } from 'lodash';
 import { Query, search } from '@kbn/data-plugin/public';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
@@ -62,6 +63,7 @@ export const toLineAnnotationColor = (color = defaultAnnotationRangeColor) => {
 };
 
 export const getEndTimestamp = (
+  datatableUtilities: DatatableUtilitiesService,
   startTime: string,
   { activeData, dateRange }: FramePublicAPI,
   dataLayers: XYDataLayerConfig[]
@@ -87,7 +89,7 @@ export const getEndTimestamp = (
     return fallbackValue;
   }
 
-  const dateInterval = search.aggs.getDateHistogramMetaDataByDatatableColumn(xColumn)?.interval;
+  const dateInterval = datatableUtilities.getDateHistogramMeta(xColumn)?.interval;
   if (!dateInterval) return fallbackValue;
   const intervalDuration = search.aggs.parseInterval(dateInterval);
   if (!intervalDuration) return fallbackValue;
@@ -141,6 +143,7 @@ const sanitizeProperties = (annotation: EventAnnotationConfig) => {
 
 export const AnnotationsPanel = (
   props: VisualizationDimensionEditorProps<State> & {
+    datatableUtilities: DatatableUtilitiesService;
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
   }
@@ -244,6 +247,7 @@ export const AnnotationsPanel = (
           <ConfigPanelManualAnnotation
             annotation={currentAnnotation}
             onChange={setAnnotations}
+            datatableUtilities={props.datatableUtilities}
             frame={frame}
             state={state}
           />
@@ -426,9 +430,11 @@ const ConfigPanelManualAnnotation = ({
   frame,
   state,
   onChange,
+  datatableUtilities,
 }: {
   annotation?: ManualEventAnnotationType | undefined;
   onChange: (annotations: Partial<ManualEventAnnotationType | undefined> | undefined) => void;
+  datatableUtilities: DatatableUtilitiesService;
   frame: FramePublicAPI;
   state: XYState;
 }) => {
@@ -523,6 +529,7 @@ const ConfigPanelManualAnnotation = ({
       <ConfigPanelApplyAsRangeSwitch
         annotation={annotation}
         onChange={onChange}
+        datatableUtilities={datatableUtilities}
         frame={frame}
         state={state}
       />
@@ -532,11 +539,13 @@ const ConfigPanelManualAnnotation = ({
 
 const ConfigPanelApplyAsRangeSwitch = ({
   annotation,
+  datatableUtilities,
   onChange,
   frame,
   state,
 }: {
   annotation?: ManualEventAnnotationType;
+  datatableUtilities: DatatableUtilitiesService;
   onChange: (annotations: Partial<ManualEventAnnotationType> | undefined) => void;
   frame: FramePublicAPI;
   state: XYState;
@@ -579,7 +588,12 @@ const ConfigPanelApplyAsRangeSwitch = ({
               key: {
                 type: 'range',
                 timestamp: annotation.key.timestamp,
-                endTimestamp: getEndTimestamp(fromTimestamp.toISOString(), frame, dataLayers),
+                endTimestamp: getEndTimestamp(
+                  datatableUtilities,
+                  fromTimestamp.toISOString(),
+                  frame,
+                  dataLayers
+                ),
               },
               id: annotation.id,
               label:
