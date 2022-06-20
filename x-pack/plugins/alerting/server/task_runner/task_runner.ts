@@ -377,6 +377,7 @@ export class TaskRunner<
       throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
     }
 
+    const postprocessStart = new Date();
     this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
 
     const scopedClusterClientMetrics = wrappedScopedClusterClient.getMetrics();
@@ -463,30 +464,35 @@ export class TaskRunner<
         }
       );
 
-      await executionHandler(
-        ruleRunMetricsStore,
-        alertsWithExecutableActions.map(
-          ([alertId, alert]: [string, Alert<InstanceState, InstanceContext>]) => {
-            const {
-              actionGroup,
-              subgroup: actionSubgroup,
-              context,
-              state,
-            } = alert.getScheduledActionOptions()!;
+      try {
+        await executionHandler(
+          ruleRunMetricsStore,
+          alertsWithExecutableActions.map(
+            ([alertId, alert]: [string, Alert<InstanceState, InstanceContext>]) => {
+              const {
+                actionGroup,
+                subgroup: actionSubgroup,
+                context,
+                state,
+              } = alert.getScheduledActionOptions()!;
 
-            alert.updateLastScheduledActions(actionGroup, actionSubgroup);
-            alert.unscheduleActions();
+              alert.updateLastScheduledActions(actionGroup, actionSubgroup);
+              alert.unscheduleActions();
 
-            return {
-              actionGroup,
-              actionSubgroup,
-              context,
-              state,
-              alertId,
-            };
-          }
-        )
-      );
+              return {
+                actionGroup,
+                actionSubgroup,
+                context,
+                state,
+                alertId,
+              };
+            }
+          )
+        );
+      } catch (err) {
+        this.logger.info('RULE EXECUTION - error while executing alert actions - moving on');
+        this.logger.info(err);
+      }
 
       await scheduleActionsForRecoveredAlerts<
         InstanceState,
@@ -518,6 +524,12 @@ export class TaskRunner<
       }
     }
 
+    const postprocessEnd = new Date();
+    this.logger.info(
+      `RULE EXECUTION - post process time ${
+        postprocessEnd.getTime() - postprocessStart.getTime()
+      }ms`
+    );
     return {
       metrics: ruleRunMetricsStore.getMetrics(),
       alertTypeState: updatedRuleTypeState || undefined,
