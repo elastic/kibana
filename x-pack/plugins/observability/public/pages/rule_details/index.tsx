@@ -255,10 +255,10 @@ export function RuleDetailsPage() {
       disableRule: async () => await disableRule({ http, id: rule.id }),
       onRuleChanged: () => reloadRule(),
       isEditable: hasEditButton,
-      snoozeRule: async (snoozeEndTime: string | -1) => {
-        await snoozeRule({ http, id: rule.id, snoozeEndTime });
+      snoozeRule: async (snoozeSchedule) => {
+        await snoozeRule({ http, id: rule.id, snoozeSchedule });
       },
-      unsnoozeRule: async () => await unsnoozeRule({ http, id: rule.id }),
+      unsnoozeRule: async (scheduleIds) => await unsnoozeRule({ http, id: rule.id, scheduleIds }),
     });
 
   const getNotifyText = () =>

@@ -15,6 +15,7 @@ import {
   RuleSummary,
   AlertingFrameworkHealth,
   ResolvedRule,
+  SnoozeSchedule,
 } from '../../../../types';
 import {
   deleteRules,
@@ -69,8 +70,8 @@ export interface ComponentOpts {
   ) => Promise<IExecutionLogWithErrorsResult>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
-  snoozeRule: (rule: Rule, snoozeEndTime: string | -1) => Promise<void>;
-  unsnoozeRule: (rule: Rule) => Promise<void>;
+  snoozeRule: (rule: Rule, snoozeSchedule: SnoozeSchedule) => Promise<void>;
+  unsnoozeRule: (rule: Rule, scheduleIds?: string[]) => Promise<void>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -149,11 +150,11 @@ export function withBulkRuleOperations<T>(
         }
         resolveRule={async (ruleId: Rule['id']) => resolveRule({ http, ruleId })}
         getHealth={async () => alertingFrameworkHealth({ http })}
-        snoozeRule={async (rule: Rule, snoozeEndTime: string | -1) => {
-          return await snoozeRule({ http, id: rule.id, snoozeEndTime });
+        snoozeRule={async (rule: Rule, snoozeSchedule: SnoozeSchedule) => {
+          return await snoozeRule({ http, id: rule.id, snoozeSchedule });
         }}
-        unsnoozeRule={async (rule: Rule) => {
-          return await unsnoozeRule({ http, id: rule.id });
+        unsnoozeRule={async (rule: Rule, scheduleIds?: string[]) => {
+          return await unsnoozeRule({ http, id: rule.id, scheduleIds });
         }}
       />
     );

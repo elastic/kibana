@@ -46,6 +46,7 @@ import {
   Percentiles,
   TriggersActionsUiConfig,
   RuleTypeRegistryContract,
+  SnoozeSchedule,
 } from '../../../../types';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { PercentileSelectablePopover } from './percentile_selectable_popover';
@@ -116,8 +117,8 @@ export interface RulesListTableProps {
   onRuleChanged: () => Promise<void>;
   onEnableRule: (rule: RuleTableItem) => Promise<void>;
   onDisableRule: (rule: RuleTableItem) => Promise<void>;
-  onSnoozeRule: (rule: RuleTableItem, snoozeEndTime: string | -1) => Promise<void>;
-  onUnsnoozeRule: (rule: RuleTableItem) => Promise<void>;
+  onSnoozeRule: (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => Promise<void>;
+  onUnsnoozeRule: (rule: RuleTableItem, scheduleIds?: string[]) => Promise<void>;
   renderCollapsedItemActions?: (
     rule: RuleTableItem,
     onLoading: (isLoading: boolean) => void
@@ -242,10 +243,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
         hideSnoozeOption
         disableRule={async () => await onDisableRule(rule)}
         enableRule={async () => await onEnableRule(rule)}
-        snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
-          await onSnoozeRule(rule, snoozeEndTime);
-        }}
-        unsnoozeRule={async () => await onUnsnoozeRule(rule)}
+        snoozeRule={async () => {}}
+        unsnoozeRule={async () => {}}
         rule={rule}
         onRuleChanged={onRuleChanged}
         isEditable={rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)}
@@ -449,10 +448,10 @@ export const RulesListTable = (props: RulesListTableProps) => {
               onClick={() => setCurrentlyOpenNotify(rule.id)}
               onClose={() => setCurrentlyOpenNotify('')}
               onRuleChanged={onRuleChanged}
-              snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
-                await onSnoozeRule(rule, snoozeEndTime);
+              snoozeRule={async (snoozeSchedule) => {
+                await onSnoozeRule(rule, snoozeSchedule);
               }}
-              unsnoozeRule={async () => await onUnsnoozeRule(rule)}
+              unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
             />
           );
         },

@@ -7,6 +7,18 @@
 import { HttpSetup } from '@kbn/core/public';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
-export async function unsnoozeRule({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/_unsnooze`);
+export async function unsnoozeRule({
+  id,
+  http,
+  scheduleIds,
+}: {
+  id: string;
+  http: HttpSetup;
+  scheduleIds?: string[];
+}): Promise<void> {
+  await http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/_unsnooze`, {
+    body: JSON.stringify({
+      schedule_ids: scheduleIds,
+    }),
+  });
 }

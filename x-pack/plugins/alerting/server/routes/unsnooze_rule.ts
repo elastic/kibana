@@ -8,12 +8,20 @@
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState, RuleMutedError } from '../lib';
-import { verifyAccessAndContext } from './lib';
+import { verifyAccessAndContext, RewriteRequestCase } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
+
+const bodySchema = schema.object({
+  schedule_ids: schema.maybe(schema.arrayOf(schema.string())),
+});
+
+const rewriteBodyReq: RewriteRequestCase<{ scheduleIds?: string[] }> = ({
+  schedule_ids: scheduleIds,
+}) => (scheduleIds ? { scheduleIds } : {});
 
 export const unsnoozeRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -24,14 +32,16 @@ export const unsnoozeRuleRoute = (
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_unsnooze`,
       validate: {
         params: paramSchema,
+        body: bodySchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const params = req.params;
+        const body = rewriteBodyReq(req.body);
         try {
-          await rulesClient.unsnooze({ ...params });
+          await rulesClient.unsnooze({ ...params, ...body });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleMutedError) {
