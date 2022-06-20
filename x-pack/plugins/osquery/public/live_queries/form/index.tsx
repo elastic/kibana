@@ -125,7 +125,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       ),
   });
 
-  const { updateFieldValues, setFieldValue, submit, isSubmitting, validateFields } = form;
+  const { updateFieldValues, setFieldValue, submit, isSubmitting } = form;
 
   const actionId = useMemo(() => data?.actions[0].action_id, [data?.actions]);
   const agentIds = useMemo(() => data?.actions[0].agents, [data?.actions]);
@@ -268,10 +268,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               buttonContent="Advanced"
             >
               <EuiSpacer size="xs" />
-              <ECSMappingEditorField
-                euiFieldProps={ecsFieldProps}
-                validateFields={validateFields}
-              />
+              <ECSMappingEditorField euiFieldProps={ecsFieldProps} />
             </StyledEuiAccordion>
           </>
         ) : (
@@ -321,7 +318,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       advancedContentState,
       handleToggle,
       ecsFieldProps,
-      validateFields,
       formType,
       permissions.writeSavedQueries,
       agentSelected,

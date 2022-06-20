@@ -63,7 +63,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
       }),
   });
 
-  const { submit, isSubmitting, updateFieldValues, validateFields } = form;
+  const { submit, isSubmitting, updateFieldValues } = form;
 
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
@@ -168,7 +168,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <ECSMappingEditorField validateFields={validateFields} />
+              <ECSMappingEditorField />
             </EuiFlexItem>
           </EuiFlexGroup>
         </Form>

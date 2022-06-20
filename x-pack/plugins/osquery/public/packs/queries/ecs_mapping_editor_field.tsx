@@ -58,6 +58,7 @@ import {
   UseArray,
   ArrayItem,
   FormArrayField,
+  useFormContext,
 } from '../../shared_imports';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
@@ -516,7 +517,6 @@ export const OsqueryColumnField = React.memo(OsqueryColumnFieldComponent);
 
 export interface ECSMappingEditorFieldProps {
   euiFieldProps?: EuiComboBoxProps<{}>;
-  validateFields: (fields: string[]) => void;
 }
 
 interface ECSMappingEditorFormProps {
@@ -767,17 +767,19 @@ interface OsqueryColumn {
 }
 
 export const ECSMappingEditorField = React.memo(
-  ({ euiFieldProps, validateFields }: ECSMappingEditorFieldProps) => {
+  ({ euiFieldProps }: ECSMappingEditorFieldProps) => {
     const lastItemPath = useRef<string>();
     const onAdd = useRef<FormArrayField['addItem']>();
     const itemsList = useRef<ArrayItem[]>([]);
     const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
     const [{ query, ...formData }, formDataSerializer, isMounted] = useFormData();
 
+    const { validateFields } = useFormContext();
+
     useEffect(() => {
       // Additional 'suspended' validation of osquery ecs fields. fieldsToValidateOnChange doesn't work because it happens before the osquerySchema gets updated.
       const fieldsToValidate = prepareEcsFieldsToValidate(itemsList.current);
-      // it always is at least 2 - empty fields
+      // it is always at least 2 - empty fields
       if (fieldsToValidate.length > 2) {
         setTimeout(() => validateFields(fieldsToValidate), 0);
       }
@@ -900,8 +902,8 @@ export const ECSMappingEditorField = React.memo(
             ?.map((selectItem: { type: string; name: string; alias?: string }) => {
               if (selectItem.type === 'identifier') {
                 /*
-              select * from routes, uptime;
-            */
+                  select * from routes, uptime;
+                */
                 if (ast?.result.length === 1 && selectItem.name === '*') {
                   return reduce(
                     astOsqueryTables,
@@ -926,8 +928,8 @@ export const ECSMappingEditorField = React.memo(
                 }
 
                 /*
-              select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
-            */
+                  select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+                */
 
                 const [table, column] = selectItem.name.includes('.')
                   ? selectItem.name?.split('.')
@@ -971,18 +973,18 @@ export const ECSMappingEditorField = React.memo(
               }
 
               /*
-            SELECT pid, uid, name, ROUND((
-              (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
-            ) * 100, 2) AS percentage
-            FROM processes, (
-            SELECT (
-              SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
-              SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
-              FROM cpu_time
-            ) AS cpu_time
-            ORDER BY user_time+system_time DESC
-            LIMIT 5;
-          */
+                SELECT pid, uid, name, ROUND((
+                  (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
+                ) * 100, 2) AS percentage
+                FROM processes, (
+                SELECT (
+                  SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
+                  SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
+                  FROM cpu_time
+                ) AS cpu_time
+                ORDER BY user_time+system_time DESC
+                LIMIT 5;
+              */
 
               if (selectItem.type === 'function' && selectItem.alias) {
                 return [

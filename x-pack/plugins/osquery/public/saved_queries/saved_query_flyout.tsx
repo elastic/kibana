@@ -49,7 +49,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
     defaultValue,
     handleSubmit,
   });
-  const { submit, isSubmitting, validateFields } = form;
+  const { submit, isSubmitting } = form;
 
   return (
     <EuiPortal>
@@ -72,7 +72,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <Form form={form}>
-            <SavedQueryForm validateFields={validateFields} />
+            <SavedQueryForm />
           </Form>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
