@@ -16,13 +16,13 @@ export const initApi = (httpClient: HttpSetup) => {
     context,
     script,
     document,
-    documentId,
-  }: {
+  }: // documentId,
+  {
     index: string;
     context: PainlessExecuteContext;
     script: { source: string } | null;
     document: Record<string, any>;
-    documentId: string;
+    // documentId: string;
   }) => {
     return sendRequest<FieldPreviewResponse>(httpClient, {
       path: `${API_BASE_PATH}/field_preview`,
@@ -32,7 +32,7 @@ export const initApi = (httpClient: HttpSetup) => {
         context,
         script,
         document,
-        documentId,
+        // documentId,
       },
     });
   };
