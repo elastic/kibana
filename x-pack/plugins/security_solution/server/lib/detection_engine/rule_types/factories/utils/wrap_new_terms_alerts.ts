@@ -30,11 +30,13 @@ export const wrapNewTermsAlerts = ({
   spaceId,
   completeRule,
   mergeStrategy,
+  indicesToQuery,
 }: {
   eventsAndTerms: EventsAndTerms[];
   spaceId: string | null | undefined;
   completeRule: CompleteRule<RuleParams>;
   mergeStrategy: ConfigType['alertMergeStrategy'];
+  indicesToQuery: string[];
 }): Array<WrappedFieldsLatest<NewTermsFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const id = objectHash([
@@ -51,7 +53,8 @@ export const wrapNewTermsAlerts = ({
       mergeStrategy,
       [],
       true,
-      buildReasonMessageForNewTermsAlert
+      buildReasonMessageForNewTermsAlert,
+      indicesToQuery
     );
     return {
       _id: id,

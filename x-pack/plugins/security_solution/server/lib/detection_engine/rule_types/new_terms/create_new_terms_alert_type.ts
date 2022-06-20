@@ -306,6 +306,7 @@ export const createNewTermsAlertType = (
             spaceId,
             completeRule,
             mergeStrategy,
+            indicesToQuery: inputIndex,
           });
 
           const bulkCreateResult = await bulkCreate(

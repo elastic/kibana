@@ -216,6 +216,7 @@ const newTermsSpecificRuleParams = t.type({
   index: indexOrUndefined,
   filters: filtersOrUndefined,
   language: nonEqlLanguages,
+  dataViewId: dataViewIdOrUndefined,
 });
 export const newTermsRuleParams = t.intersection([baseRuleParams, newTermsSpecificRuleParams]);
 export type NewTermsRuleParams = t.TypeOf<typeof newTermsRuleParams>;

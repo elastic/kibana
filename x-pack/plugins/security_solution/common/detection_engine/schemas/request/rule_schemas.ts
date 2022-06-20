@@ -360,6 +360,7 @@ const newTermsRuleParams = {
   },
   optional: {
     index,
+    data_view_id,
     filters,
   },
   defaultable: {

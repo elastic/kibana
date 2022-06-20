@@ -133,6 +133,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         index: params.index,
         filters: params.filters,
         language: params.language ?? 'kuery',
+        dataViewId: params.data_view_id,
       };
     }
     default: {
@@ -276,6 +277,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         index: params.index,
         filters: params.filters,
         language: params.language,
+        data_view_id: params.dataViewId,
       };
     }
     default: {
