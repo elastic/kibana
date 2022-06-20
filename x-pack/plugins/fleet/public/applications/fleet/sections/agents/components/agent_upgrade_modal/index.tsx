@@ -355,7 +355,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
                 {i18n.translate('xpack.fleet.upgradeAgents.maintainanceAvailableLabel', {
-                  defaultMessage: 'Maintainance window available',
+                  defaultMessage: 'Maintenance window available',
                 })}
               </EuiFlexItem>
               <EuiSpacer size="xs" />
@@ -395,6 +395,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       ) : null}
       {errors ? (
         <>
+          <EuiSpacer size="s" />
           <EuiCallOut
             color="danger"
             title={i18n.translate('xpack.fleet.upgradeAgents.warningCalloutErrors', {

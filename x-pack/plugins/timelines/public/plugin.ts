@@ -15,7 +15,7 @@ import {
   getLastUpdatedLazy,
   getLoadingPanelLazy,
   getTGridLazy,
-  getFieldsBrowserLazy,
+  getFieldBrowserLazy,
 } from './methods';
 import type { TimelinesUIStart, TGridProps, TimelinesStartPlugins } from './types';
 import { tGridReducer } from './store/t_grid/reducer';
@@ -75,7 +75,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
         return getLastUpdatedLazy(props);
       },
       getFieldBrowser: (props: FieldBrowserProps) => {
-        return getFieldsBrowserLazy(props, {
+        return getFieldBrowserLazy(props, {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           store: this._store!,
         });

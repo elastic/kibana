@@ -15,7 +15,7 @@ import {
   getAccessorByDimension,
   getColumnByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
-import type { CommonXYDataLayerConfig } from '../../common';
+import type { AxisExtentConfigResult, CommonXYDataLayerConfig } from '../../common';
 
 export interface XDomain {
   min?: number;
@@ -43,7 +43,8 @@ export const getXDomain = (
   layers: CommonXYDataLayerConfig[],
   minInterval: number | undefined,
   isTimeViz: boolean,
-  isHistogram: boolean
+  isHistogram: boolean,
+  xExtent?: AxisExtentConfigResult
 ) => {
   const appliedTimeRange = getAppliedTimeRange(layers)?.timeRange;
   const from = appliedTimeRange?.from;
@@ -59,6 +60,16 @@ export const getXDomain = (
     : undefined;
 
   if (isHistogram && isFullyQualified(baseDomain)) {
+    if (xExtent && !isTimeViz) {
+      return {
+        extendedDomain: {
+          min: xExtent.lowerBound ?? NaN,
+          max: xExtent.upperBound ?? NaN,
+          minInterval: baseDomain.minInterval,
+        },
+        baseDomain,
+      };
+    }
     const xValues = uniq(
       layers
         .flatMap<number>(({ table, xAccessor }) => {

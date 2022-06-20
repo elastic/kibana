@@ -9,7 +9,6 @@ import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  EndpointAction,
   EndpointActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
@@ -26,7 +25,7 @@ import {
 describe('When using `getActionDetailsById()', () => {
   let esClient: ElasticsearchClientMock;
   let endpointActionGenerator: EndpointActionGenerator;
-  let actionRequests: estypes.SearchResponse<EndpointAction | LogsEndpointAction>;
+  let actionRequests: estypes.SearchResponse<LogsEndpointAction>;
   let actionResponses: estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>;
 
   beforeEach(() => {
@@ -45,7 +44,7 @@ describe('When using `getActionDetailsById()', () => {
       command: 'isolate',
       completedAt: '2022-04-30T16:08:47.449Z',
       wasSuccessful: true,
-      error: undefined,
+      errors: undefined,
       id: '123',
       isCompleted: true,
       isExpired: false,
@@ -53,21 +52,24 @@ describe('When using `getActionDetailsById()', () => {
         {
           item: {
             data: {
-              '@timestamp': '2022-04-27T16:08:47.449Z',
-              action_id: '123',
-              agents: ['agent-a'],
-              data: {
-                command: 'isolate',
-                comment: '5wb6pu6kh2xix5i',
+              '@timestamp': '2022-04-30T16:08:47.449Z',
+              EndpointActions: {
+                action_id: '123',
+                completed_at: '2022-04-30T16:08:47.449Z',
+                data: {
+                  command: 'unisolate',
+                  comment: '',
+                },
+                started_at: expect.any(String),
               },
-              expiration: '2022-04-29T16:08:47.449Z',
-              input_type: 'endpoint',
-              type: 'INPUT_ACTION',
-              user_id: 'elastic',
+              agent: {
+                id: 'agent-a',
+              },
+              error: undefined,
             },
-            id: '44d8b915-c69c-4c48-8c86-b57d0bd631d0',
+            id: expect.any(String),
           },
-          type: 'fleetAction',
+          type: 'response',
         },
         {
           item: {
@@ -90,23 +92,26 @@ describe('When using `getActionDetailsById()', () => {
         {
           item: {
             data: {
-              '@timestamp': '2022-04-30T16:08:47.449Z',
+              '@timestamp': '2022-04-27T16:08:47.449Z',
               EndpointActions: {
                 action_id: '123',
-                completed_at: '2022-04-30T16:08:47.449Z',
                 data: {
-                  command: 'unisolate',
-                  comment: '',
+                  command: 'isolate',
+                  comment: '5wb6pu6kh2xix5i',
                 },
-                started_at: expect.any(String),
+                expiration: expect.any(String),
+                input_type: 'endpoint',
+                type: 'INPUT_ACTION',
               },
-              agent: {
-                id: 'agent-a',
+              agent: { id: 'agent-a' },
+              user: {
+                id: expect.any(String),
               },
+              error: undefined,
             },
             id: expect.any(String),
           },
-          type: 'response',
+          type: 'action',
         },
       ],
       startedAt: '2022-04-27T16:08:47.449Z',
@@ -144,7 +149,9 @@ describe('When using `getActionDetailsById()', () => {
   });
 
   it('should have `isExpired` of `true` if NOT complete and expiration is in the past', async () => {
-    (actionRequests.hits.hits[0]._source as EndpointAction).expiration = `2021-04-30T16:08:47.449Z`;
+    (
+      actionRequests.hits.hits[0]._source as LogsEndpointAction
+    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
     actionResponses.hits.hits.pop(); // remove the endpoint response
 
     await expect(getActionDetailsById(esClient, '123')).resolves.toEqual(
@@ -156,7 +163,9 @@ describe('When using `getActionDetailsById()', () => {
   });
 
   it('should have `isExpired` of `false` if complete and expiration is in the past', async () => {
-    (actionRequests.hits.hits[0]._source as EndpointAction).expiration = `2021-04-30T16:08:47.449Z`;
+    (
+      actionRequests.hits.hits[0]._source as LogsEndpointAction
+    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
 
     await expect(getActionDetailsById(esClient, '123')).resolves.toEqual(
       expect.objectContaining({

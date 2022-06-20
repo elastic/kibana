@@ -40,6 +40,10 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
     defaultMessage: 'Toggle dialog with details',
   });
 
+  const testSubj = (current as EsHitRecord).isAnchor
+    ? 'docTableExpandToggleColumnAnchor'
+    : 'docTableExpandToggleColumn';
+
   return (
     <EuiToolTip content={buttonLabel} delay="long">
       <EuiButtonIcon
@@ -47,7 +51,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
         size="xs"
         iconSize="s"
         aria-label={buttonLabel}
-        data-test-subj="docTableExpandToggleColumn"
+        data-test-subj={testSubj}
         onClick={() => setExpanded(isCurrentRowExpanded ? undefined : current)}
         color={isCurrentRowExpanded ? 'primary' : 'text'}
         iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}

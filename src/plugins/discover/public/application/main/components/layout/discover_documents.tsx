@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../types';
@@ -25,13 +25,13 @@ import {
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../common';
-import { useColumns } from '../../../../utils/use_data_grid_columns';
+import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { SavedSearch } from '../../../../services/saved_searches';
-import { DataDocumentsMsg, DataDocuments$ } from '../../utils/use_saved_search';
+import { DataDocumentsMsg, DataDocuments$ } from '../../hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { useDataState } from '../../utils/use_data_state';
+import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
-import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
+import { SortPairArr } from '../../../../components/doc_table/utils/get_sort';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';

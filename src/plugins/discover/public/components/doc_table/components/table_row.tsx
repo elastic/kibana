@@ -14,12 +14,12 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { formatFieldValue } from '../../../utils/format_value';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { TableCell } from './table_row/table_cell';
-import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
-import { useNavigationProps } from '../../../utils/use_navigation_props';
+import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
+import { useNavigationProps } from '../../../hooks/use_navigation_props';
 import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
 import { DataTableRecord, EsHitRecord } from '../../../types';
 import { TableRowDetails } from './table_row_details';
-import { useDiscoverServices } from '../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 
 export type DocTableRow = EsHitRecord & {

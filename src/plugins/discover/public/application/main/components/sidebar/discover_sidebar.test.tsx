@@ -21,7 +21,7 @@ import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
-import { AvailableFields$ } from '../../utils/use_saved_search';
+import { AvailableFields$ } from '../../hooks/use_saved_search';
 
 function getCompProps(): DiscoverSidebarProps {
   const indexPattern = stubLogstashIndexPattern;

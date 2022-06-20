@@ -21,7 +21,7 @@ import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { SortPairArr } from '../../components/doc_table/lib/get_sort';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../types';
 
 export interface ContextAppContentProps {

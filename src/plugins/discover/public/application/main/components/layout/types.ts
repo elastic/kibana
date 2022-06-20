@@ -12,7 +12,7 @@ import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin';
 import { DataTableRecord } from '../../../../types';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { DataRefetch$, SavedSearchData } from '../../utils/use_saved_search';
+import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 import { SavedSearch } from '../../../../services/saved_searches';
 
 export interface DiscoverLayoutProps {

@@ -29,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { indexPatterns as indexPatternUtils } from '@kbn/data-plugin/public';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING } from '../../../../../common';

@@ -27,9 +27,9 @@ import {
 } from '@elastic/eui';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import { useNavigationProps } from '../../utils/use_navigation_props';
-import { useDiscoverServices } from '../../utils/use_discover_services';
-import { DataTableRecord } from '../../types';
+import { useNavigationProps } from '../../hooks/use_navigation_props';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import type { DataTableRecord } from '../../types';
 
 export interface DiscoverGridFlyoutProps {
   columns: string[];
@@ -76,9 +76,9 @@ export function DiscoverGridFlyout({
   }, [hits, hit, pageCount]);
 
   const setPage = useCallback(
-    (pageIdx: number) => {
-      if (hits && hits[pageIdx]) {
-        setExpandedDoc(hits[pageIdx]);
+    (index: number) => {
+      if (hits && hits[index]) {
+        setExpandedDoc(hits[index]);
       }
     },
     [hits, setExpandedDoc]
