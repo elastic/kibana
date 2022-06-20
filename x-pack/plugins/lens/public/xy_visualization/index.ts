@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -29,11 +30,15 @@ export class XyVisualization {
   ) {
     editorFrame.registerVisualization(async () => {
       const { getXyVisualization } = await import('../async_services');
-      const [, { charts, fieldFormats, eventAnnotation }] = await core.getStartServices();
+      const [coreStart, { data, charts, fieldFormats, eventAnnotation }] =
+        await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
       const eventAnnotationService = await eventAnnotation.getService();
       const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
       return getXyVisualization({
+        core: coreStart,
+        data,
+        storage: new Storage(localStorage),
         paletteService: palettes,
         eventAnnotationService,
         fieldFormats,

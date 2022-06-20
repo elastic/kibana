@@ -391,9 +391,7 @@ const annotationLayerToExpression = (
         arguments: {
           hide: [Boolean(layer.hide)],
           layerId: [layer.layerId],
-          annotations: layer.annotations
-            ? layer.annotations.map((ann): Ast => eventAnnotationService.toExpression(ann))
-            : [],
+          annotations: eventAnnotationService.toExpression(layer.annotations || []),
         },
       },
     ],

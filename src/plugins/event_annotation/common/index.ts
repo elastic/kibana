@@ -7,8 +7,6 @@
  */
 
 export type {
-  EventAnnotationArgs,
-  EventAnnotationOutput,
   ManualPointEventAnnotationArgs,
   ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationArgs,
@@ -20,5 +18,7 @@ export type { EventAnnotationGroupArgs } from './event_annotation_group';
 export type {
   EventAnnotationConfig,
   RangeEventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
+  PointInTimeQueryEventAnnotationConfig,
   AvailableAnnotationIcon,
 } from './types';

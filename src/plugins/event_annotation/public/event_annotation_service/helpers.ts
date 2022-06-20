@@ -7,7 +7,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
-import { EventAnnotationConfig, RangeEventAnnotationConfig } from '../../common';
+import {
+  EventAnnotationConfig,
+  RangeEventAnnotationConfig,
+  PointInTimeQueryEventAnnotationConfig,
+} from '../../common';
 export const defaultAnnotationColor = euiLightVars.euiColorAccent;
 export const defaultAnnotationRangeColor = `#F04E981A`; // defaultAnnotationColor with opacity 0.1
 
@@ -22,4 +26,10 @@ export const isRangeAnnotation = (
   annotation?: EventAnnotationConfig
 ): annotation is RangeEventAnnotationConfig => {
   return Boolean(annotation && annotation?.key.type === 'range');
+};
+
+export const isQueryAnnotation = (
+  annotation?: EventAnnotationConfig
+): annotation is PointInTimeQueryEventAnnotationConfig => {
+  return annotation?.type === 'query';
 };

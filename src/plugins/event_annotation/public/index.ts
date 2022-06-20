@@ -18,4 +18,5 @@ export {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   isRangeAnnotation,
+  isQueryAnnotation,
 } from './event_annotation_service/helpers';

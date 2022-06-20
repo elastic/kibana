@@ -139,6 +139,7 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
 
   if (!currentConfig) {
     resultAnnotations.push({
+      type: 'manual',
       label: defaultAnnotationLabel,
       key: {
         type: 'point_in_time',

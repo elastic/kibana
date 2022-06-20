@@ -12,9 +12,9 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ThemeServiceStart } from '@kbn/core/public';
+import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import {
   FillStyle,
@@ -22,6 +22,8 @@ import {
   YAxisMode,
   ExtendedYConfig,
 } from '@kbn/expression-xy-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
@@ -72,12 +74,18 @@ import { DimensionTrigger } from '../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 
 export const getXyVisualization = ({
+  core,
+  storage,
+  data,
   paletteService,
   fieldFormats,
   useLegacyTimeAxis,
   kibanaTheme,
   eventAnnotationService,
 }: {
+  core: CoreStart;
+  storage: IStorageWrapper;
+  data: DataPublicPluginStart;
   paletteService: PaletteRegistry;
   eventAnnotationService: EventAnnotationServiceType;
   fieldFormats: FieldFormatsStart;
@@ -510,7 +518,22 @@ export const getXyVisualization = ({
 
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>{dimensionEditor}</I18nProvider>
+        <I18nProvider>
+          <KibanaContextProvider
+            services={{
+              appName: 'lens',
+              storage,
+              uiSettings: core.uiSettings,
+              data,
+              fieldFormats,
+              savedObjects: core.savedObjects,
+              docLinks: core.docLinks,
+              http: core.http,
+            }}
+          >
+            {dimensionEditor}
+          </KibanaContextProvider>
+        </I18nProvider>
       </KibanaThemeProvider>,
       domElement
     );

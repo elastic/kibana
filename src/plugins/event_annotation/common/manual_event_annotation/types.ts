@@ -24,8 +24,3 @@ export type ManualRangeEventAnnotationArgs = {
 export type ManualRangeEventAnnotationOutput = ManualRangeEventAnnotationArgs & {
   type: 'manual_range_event_annotation';
 };
-
-export type EventAnnotationArgs = ManualPointEventAnnotationArgs | ManualRangeEventAnnotationArgs;
-export type EventAnnotationOutput =
-  | ManualPointEventAnnotationOutput
-  | ManualRangeEventAnnotationOutput;

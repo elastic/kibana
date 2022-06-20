@@ -8,16 +8,16 @@
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { EventAnnotationOutput } from '../manual_event_annotation/types';
-
-export interface EventAnnotationGroupOutput {
-  type: 'event_annotation_group';
-  annotations: EventAnnotationOutput[];
-}
+import { EventAnnotationOutput } from '../types';
 
 export interface EventAnnotationGroupArgs {
+  index: string;
   annotations: EventAnnotationOutput[];
 }
+
+export type EventAnnotationGroupOutput = EventAnnotationGroupArgs & {
+  type: 'event_annotation_group';
+};
 
 export function eventAnnotationGroup(): ExpressionFunctionDefinition<
   'event_annotation_group',
@@ -34,8 +34,18 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
       defaultMessage: 'Event annotation group',
     }),
     args: {
+      index: {
+        types: ['string'],
+        help: i18n.translate('eventAnnotation.group.args.annotationDataview', {
+          defaultMessage: 'Annotation data view',
+        }),
+      },
       annotations: {
-        types: ['manual_point_event_annotation', 'manual_range_event_annotation'],
+        types: [
+          'manual_point_event_annotation',
+          'manual_range_event_annotation',
+          'query_point_event_annotation',
+        ],
         help: i18n.translate('eventAnnotation.group.args.annotationConfigs', {
           defaultMessage: 'Annotation configs',
         }),
@@ -45,6 +55,7 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
     fn: (input, args) => {
       return {
         type: 'event_annotation_group',
+        index: args.index,
         annotations: args.annotations,
       };
     },

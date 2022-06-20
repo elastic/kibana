@@ -6,59 +6,98 @@
  * Side Public License, v 1.
  */
 
+import { partition } from 'lodash';
 import { EventAnnotationServiceType } from './types';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   defaultAnnotationLabel,
+  isRangeAnnotation,
+  isQueryAnnotation,
 } from './helpers';
-import { EventAnnotationConfig } from '../../common';
-import { RangeEventAnnotationConfig } from '../../common/types';
 
 export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';
 }
 
-const isRangeAnnotation = (
-  annotation?: EventAnnotationConfig
-): annotation is RangeEventAnnotationConfig => {
-  return Boolean(annotation && annotation?.key.type === 'range');
-};
-
 export function getEventAnnotationService(): EventAnnotationServiceType {
   return {
-    toExpression: (annotation) => {
-      if (isRangeAnnotation(annotation)) {
-        const { label, isHidden, color, key, outside } = annotation;
-        const { timestamp: time, endTimestamp: endTime } = key;
-        return {
-          type: 'expression',
-          chain: [
-            {
-              type: 'function',
-              function: 'manual_range_event_annotation',
-              arguments: {
-                time: [time],
-                endTime: [endTime],
-                label: [label || defaultAnnotationLabel],
-                color: [color || defaultAnnotationRangeColor],
-                outside: [Boolean(outside)],
-                isHidden: [Boolean(isHidden)],
+    toExpression: (annotations) => {
+      const visibleAnnotations = annotations.filter(({ isHidden }) => !isHidden);
+      const [queryBasedAnnotations, manualBasedAnnotations] = partition(
+        visibleAnnotations,
+        isQueryAnnotation
+      );
+
+      const expressions = [];
+
+      for (const annotation of manualBasedAnnotations) {
+        if (isRangeAnnotation(annotation)) {
+          const { label, isHidden, color, key, outside } = annotation;
+          const { timestamp: time, endTimestamp: endTime } = key;
+          expressions.push({
+            type: 'expression' as const,
+            chain: [
+              {
+                type: 'function' as const,
+                function: 'manual_range_event_annotation',
+                arguments: {
+                  time: [time],
+                  endTime: [endTime],
+                  label: [label || defaultAnnotationLabel],
+                  color: [color || defaultAnnotationRangeColor],
+                  outside: [Boolean(outside)],
+                  isHidden: [Boolean(isHidden)],
+                },
               },
-            },
-          ],
-        };
-      } else {
-        const { label, isHidden, color, lineStyle, lineWidth, icon, key, textVisibility } =
-          annotation;
-        return {
-          type: 'expression',
+            ],
+          });
+        } else {
+          const { label, isHidden, color, lineStyle, lineWidth, icon, key, textVisibility } =
+            annotation;
+          expressions.push({
+            type: 'expression' as const,
+            chain: [
+              {
+                type: 'function' as const,
+                function: 'manual_point_event_annotation',
+                arguments: {
+                  time: [key.timestamp],
+                  label: [label || defaultAnnotationLabel],
+                  color: [color || defaultAnnotationColor],
+                  lineWidth: [lineWidth || 1],
+                  lineStyle: [lineStyle || 'solid'],
+                  icon: hasIcon(icon) ? [icon] : ['triangle'],
+                  textVisibility: [textVisibility || false],
+                  isHidden: [Boolean(isHidden)],
+                },
+              },
+            ],
+          });
+        }
+      }
+
+      for (const annotation of queryBasedAnnotations) {
+        const {
+          label,
+          isHidden,
+          color,
+          lineStyle,
+          lineWidth,
+          icon,
+          key,
+          textVisibility,
+          query,
+          additionalFields,
+        } = annotation;
+        expressions.push({
+          type: 'expression' as const,
           chain: [
             {
-              type: 'function',
-              function: 'manual_point_event_annotation',
+              type: 'function' as const,
+              function: 'query_point_event_annotation',
               arguments: {
-                time: [key.timestamp],
+                field: [key.field],
                 label: [label || defaultAnnotationLabel],
                 color: [color || defaultAnnotationColor],
                 lineWidth: [lineWidth || 1],
@@ -66,11 +105,14 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 icon: hasIcon(icon) ? [icon] : ['triangle'],
                 textVisibility: [textVisibility || false],
                 isHidden: [Boolean(isHidden)],
+                query: query ? [queryToAst(query)] : [],
+                additionalFields: additionalFields || [],
               },
             },
           ],
-        };
+        });
       }
+      return expressions;
     },
   };
 }

@@ -10,5 +10,5 @@ import { ExpressionAstExpression } from '@kbn/expressions-plugin/common/ast';
 import { EventAnnotationConfig } from '../../common';
 
 export interface EventAnnotationServiceType {
-  toExpression: (props: EventAnnotationConfig) => ExpressionAstExpression;
+  toExpression: (props: EventAnnotationConfig[]) => ExpressionAstExpression[];
 }
