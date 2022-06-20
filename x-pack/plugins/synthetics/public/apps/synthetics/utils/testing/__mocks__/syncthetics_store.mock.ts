@@ -72,7 +72,7 @@ export const mockState: SyntheticsAppState = {
       perPage: 0,
       page: 0,
       syncErrors: [],
-      allTotal: 0,
+      absoluteTotal: 0,
     },
     error: null,
     loading: false,
