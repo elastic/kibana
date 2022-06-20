@@ -25,6 +25,7 @@ export interface SolutionGroupedNavProps {
   items: SideNavItem[];
   selectedId: string;
   footerItems?: SideNavItem[];
+  bottomOffset?: string;
 }
 export interface SolutionNavItemsProps {
   items: SideNavItem[];
@@ -52,6 +53,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
   items,
   selectedId,
   footerItems = [],
+  bottomOffset,
 }) => {
   const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
 
@@ -108,9 +110,10 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
         items={panelItems}
         title={title}
         categories={categories}
+        bottomOffset={bottomOffset}
       />
     );
-  }, [activePanelNavId, navItemsById, onClosePanelNav, onOutsidePanelClick]);
+  }, [activePanelNavId, bottomOffset, navItemsById, onClosePanelNav, onOutsidePanelClick]);
 
   return (
     <>
