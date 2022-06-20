@@ -58,11 +58,25 @@ export const getInstalledIntegrationsRoute = (
           },
         });
 
-        registryPackages.errors.forEach(({ error, item }) => {
-          const logMessage = `Error fetching package info from registry for ${item.package_name}@${item.package_version}`;
-          const logReason = error instanceof Error ? error.message : String(error);
-          logger.error(`${logMessage}. ${logReason}`);
-        });
+        if (registryPackages.errors.length > 0) {
+          const errors = registryPackages.errors.map(({ error, item }) => {
+            return {
+              error,
+              packageId: `${item.package_name}@${item.package_version}`,
+            };
+          });
+
+          const packages = errors.map((e) => e.packageId).join(', ');
+          logger.error(
+            `Unable to retrieve installed integrations. Error fetching packages from registry: ${packages}.`
+          );
+
+          errors.forEach(({ error, packageId }) => {
+            const logMessage = `Error fetching package info from registry for ${packageId}`;
+            const logReason = error instanceof Error ? error.message : String(error);
+            logger.debug(`${logMessage}. ${logReason}`);
+          });
+        }
 
         registryPackages.results.forEach(({ result }) => {
           set.addRegistryPackage(result.packageInfo);
