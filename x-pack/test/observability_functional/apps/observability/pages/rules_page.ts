@@ -8,12 +8,13 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default ({ getService }: FtrProviderContext) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
   const find = getService('find');
   const retry = getService('retry');
+  const pageObjects = getPageObjects(['common']);
   const RULE_ENDPOINT = '/api/alerting/rule';
 
   async function createRule(rule: any): Promise<string> {
@@ -21,6 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
     expect(ruleResponse.status).to.eql(200);
     return ruleResponse.body.id;
   }
+
   async function deleteRuleById(ruleId: string) {
     const ruleResponse = await supertest
       .delete(`${RULE_ENDPOINT}/${ruleId}`)
@@ -34,8 +36,8 @@ export default ({ getService }: FtrProviderContext) => {
     for (const euiTableRow of tableRows) {
       const $ = await euiTableRow.parseDomContent();
       rows.push({
-        name: $.findTestSubjects('rulesTableCell-name').find('a').text(),
-        enabled: $.findTestSubjects('rulesTableCell-ContextStatus').find('button').attr('title'),
+        name: $.findTestSubjects('rulesTableCell-name').text(),
+        enabled: $.findTestSubjects('rulesTableCell-status').find('button').attr('title'),
       });
     }
     return rows;
@@ -132,9 +134,9 @@ export default ({ getService }: FtrProviderContext) => {
         const tableRows = await find.allByCssSelector('.euiTableRow');
         const rows = await getRulesList(tableRows);
         expect(rows.length).to.be(2);
-        expect(rows[0].name).to.be('error-log');
+        expect(rows[0].name).to.contain('error-log');
         expect(rows[0].enabled).to.be('Enabled');
-        expect(rows[1].name).to.be('uptime');
+        expect(rows[1].name).to.contain('uptime');
         expect(rows[1].enabled).to.be('Enabled');
       });
 
@@ -148,6 +150,61 @@ export default ({ getService }: FtrProviderContext) => {
           expect(rows[0].enabled).to.be('Disabled');
           return true;
         });
+      });
+    });
+
+    describe('Url and filtering synchronization', () => {
+      let logThresholdRuleId: string;
+      let logThresholdRuleId2: string;
+
+      before(async () => {
+        const logThresholdRule = {
+          params: {
+            timeSize: 5,
+            timeUnit: 'm',
+            count: { value: 75, comparator: 'more than' },
+            criteria: [{ field: 'log.level', comparator: 'equals', value: 'error' }],
+          },
+          consumer: 'alerts',
+          schedule: { interval: '1m' },
+          tags: [],
+          name: 'error-log',
+          rule_type_id: 'logs.alert.document.count',
+          notify_when: 'onActionGroupChange',
+          actions: [],
+        };
+        const logThresholdRule2 = {
+          params: {
+            timeSize: 5,
+            timeUnit: 'm',
+            count: { value: 85, comparator: 'more than' },
+            criteria: [{ field: 'log.level', comparator: 'equals', value: 'error' }],
+          },
+          consumer: 'alerts',
+          schedule: { interval: '1m' },
+          tags: [],
+          name: 'error-log2',
+          rule_type_id: 'logs.alert.document.count',
+          notify_when: 'onActionGroupChange',
+          actions: [],
+        };
+        logThresholdRuleId = await createRule(logThresholdRule);
+        logThresholdRuleId2 = await createRule(logThresholdRule2);
+        await pageObjects.common.navigateToUrlWithBrowserHistory(
+          'observability',
+          '/alerts/rules',
+          `?_a=(lastResponse:!(ok))`,
+          { ensureCurrentUrl: false }
+        );
+      });
+      after(async () => {
+        await deleteRuleById(logThresholdRuleId);
+        await deleteRuleById(logThresholdRuleId2);
+      });
+      it('should sync page state with URL', async () => {
+        const tableRows = await find.allByCssSelector('.euiTableRow');
+        const rows = await getRulesList(tableRows);
+        expect(rows.length).to.be(2);
       });
     });
 
