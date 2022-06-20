@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
@@ -27,7 +28,7 @@ import type { TimeScaleArgs } from './types';
 
 describe('time_scale', () => {
   let timeScaleWrapped: (input: Datatable, args: TimeScaleArgs) => Promise<Datatable>;
-  const timeScale = getTimeScale(() => 'UTC');
+  const timeScale = getTimeScale(createDatatableUtilitiesMock, () => 'UTC');
 
   const emptyTable: Datatable = {
     type: 'datatable',
@@ -395,7 +396,7 @@ describe('time_scale', () => {
       resolveTimezonePromise = res;
     });
     const timeScaleResolved = jest.fn((x) => x);
-    const delayedTimeScale = getTimeScale(() => timezonePromise);
+    const delayedTimeScale = getTimeScale(createDatatableUtilitiesMock, () => timezonePromise);
     const delayedTimeScaleWrapper = functionWrapper(delayedTimeScale);
     const result = delayedTimeScaleWrapper(
       {

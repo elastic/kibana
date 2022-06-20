@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export { getDatatableUtilities, setDatatableUtilities } from './datatable_utilities';
 export { getFormatService, setFormatService } from './format_service';
 export {
   getPaletteService,

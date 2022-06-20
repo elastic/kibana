@@ -17,7 +17,8 @@ import { collapse } from '../common/expressions';
 export const setupExpressions = (
   expressions: ExpressionsSetup,
   formatFactory: Parameters<typeof getDatatable>[0],
-  getTimeZone: Parameters<typeof getTimeScale>[0]
+  getDatatableUtilities: Parameters<typeof getTimeScale>[0],
+  getTimeZone: Parameters<typeof getTimeScale>[1]
 ) => {
   [
     collapse,
@@ -26,6 +27,6 @@ export const setupExpressions = (
     renameColumns,
     datatableColumn,
     getDatatable(formatFactory),
-    getTimeScale(getTimeZone),
+    getTimeScale(getDatatableUtilities, getTimeZone),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));
 };

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DatatableColumn } from '@kbn/expressions-plugin';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 
-/** @public **/
-export const checkColumnForPrecisionError = (column: DatatableColumn) =>
-  column.meta.sourceParams?.hasPrecisionError;
+export const [getDatatableUtilities, setDatatableUtilities] =
+  createGetterSetter<DatatableUtilitiesService>('data.datatableUtilities');

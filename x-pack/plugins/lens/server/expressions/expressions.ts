@@ -14,7 +14,7 @@ import {
   getTimeScale,
   getDatatable,
 } from '../../common/expressions';
-import { getFormatFactory, getTimeZoneFactory } from './utils';
+import { getDatatableUtilitiesFactory, getFormatFactory, getTimeZoneFactory } from './utils';
 
 import type { PluginStartContract } from '../plugin';
 
@@ -27,6 +27,6 @@ export const setupExpressions = (
     formatColumn,
     renameColumns,
     getDatatable(getFormatFactory(core)),
-    getTimeScale(getTimeZoneFactory(core)),
+    getTimeScale(getDatatableUtilitiesFactory(core), getTimeZoneFactory(core)),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));
 };

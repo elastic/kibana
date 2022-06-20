@@ -8,6 +8,7 @@
 import React from 'react';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { EuiButtonGroupProps, EuiButtonGroup } from '@elastic/eui';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { XyToolbar } from '.';
 import { DimensionEditor } from './dimension_editor';
 import { AxisSettingsPopover } from './axis_settings_popover';
@@ -221,6 +222,8 @@ describe('XY Config panels', () => {
   });
 
   describe('Dimension Editor', () => {
+    const datatableUtilities = createDatatableUtilitiesMock();
+
     test('shows the correct axis side options when in horizontal mode', () => {
       const state = testState();
       const component = mount(
@@ -234,6 +237,7 @@ describe('XY Config panels', () => {
             ...state,
             layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
           }}
+          datatableUtilities={datatableUtilities}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
@@ -258,6 +262,7 @@ describe('XY Config panels', () => {
           accessor="bar"
           groupId="left"
           state={state}
+          datatableUtilities={datatableUtilities}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
@@ -303,6 +308,7 @@ describe('XY Config panels', () => {
           accessor="bar"
           groupId="left"
           state={state}
+          datatableUtilities={datatableUtilities}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
@@ -345,6 +351,7 @@ describe('XY Config panels', () => {
           accessor="bar"
           groupId="left"
           state={state}
+          datatableUtilities={datatableUtilities}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
@@ -387,6 +394,7 @@ describe('XY Config panels', () => {
           accessor="bar"
           groupId="left"
           state={state}
+          datatableUtilities={datatableUtilities}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
