@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { QueryClientProvider } from 'react-query';
+import { isEmpty, map, pickBy } from 'lodash';
 import { EuiAccordionProps, EuiSpacer } from '@elastic/eui';
+import { isDeepEqual } from 'react-use/lib/util';
 import uuid from 'uuid';
-import { map } from 'lodash';
 import { ECSMapping } from '../../common/schemas/common';
 import { StyledEuiAccordion } from '../components/accordion';
 import { ECSMappingEditorField } from '../packs/queries/lazy_ecs_mapping_editor_field';
-import { UseField, useFormContext } from '../shared_imports';
+import { convertECSMappingToObject } from '../../common/schemas/common/utils';
+import { Form, UseField, useForm } from '../shared_imports';
 import { queryClient } from '../query_client';
 import { SavedQueriesDropdown } from '../saved_queries/saved_queries_dropdown';
 import { LiveQueryQueryField } from '../live_queries/form/live_query_query_field';
 import { useKibana } from '../common/lib/kibana';
+import { osqueryConnectorFormSchema } from './schema';
 
 export interface OsqueryActionParams {
   message: {
@@ -30,13 +33,17 @@ export interface OsqueryActionParams {
   };
 }
 
-const GhostFormField = () => <></>;
-
 const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryActionParams>> = ({
   actionParams,
+  editAction,
   index,
+  actionConnector,
 }) => {
-  // co
+  const FORM_ID = useMemo(
+    () => `osqueryConnectorForm-${actionConnector?.name}`,
+    [actionConnector?.name]
+  );
+
   const uniqueId = useMemo(() => uuid.v4(), []);
 
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -63,35 +70,77 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
         }))
       : [];
 
+  const { form } = useForm({
+    id: FORM_ID,
+    schema: osqueryConnectorFormSchema,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    serializer: ({ savedQueryId, ecs_mapping, ...formData }) =>
+      pickBy(
+        {
+          ...formData,
+          saved_query_id: savedQueryId,
+          ecs_mapping: convertECSMappingToObject(ecs_mapping),
+        },
+        (value) => !isEmpty(value)
+      ),
+    options: {
+      stripEmptyFields: false,
+    },
+    defaultValue: {
+      // @ts-expect-error update types
+      query: actionParams.message?.query,
+      // @ts-expect-error update types
+      savedQueryId: null,
+      // @ts-expect-error update types
+      ecs_mapping: prepareEcsMapping(actionParams.message?.ecs_mapping),
+    },
+  });
+  const { updateFieldValues, setFieldValue, getFormData } = form;
   const ecsFieldProps = useMemo(
     () => ({
       isDisabled: !permissions.writeLiveQueries,
     }),
     [permissions.writeLiveQueries]
   );
-
-  const { updateFieldValues, setFieldValue, getFields } = useFormContext();
-
-  const fields = getFields();
+  const formData = getFormData();
+  const formDataRef = useRef(formData);
+  const handleUpdate = useCallback(() => {
+    editAction(
+      'message',
+      {
+        alerts: `[{{context.alerts}}]`,
+        query: formData.query,
+        ecs_mapping: formData.ecs_mapping,
+        id: uniqueId,
+      },
+      index
+    );
+  }, [editAction, formData.ecs_mapping, formData.query, index, uniqueId]);
 
   const handleSavedQueryChange = useCallback(
     (savedQuery) => {
       if (savedQuery) {
-        const result = prepareEcsMapping(savedQuery.ecs_mapping);
         updateFieldValues({
-          [`actions[${index}].params`]: {
-            query: savedQuery.query,
-            savedQueryId: savedQuery.savedQueryId,
-            ecs_mapping: result,
-          },
+          query: savedQuery.query,
+          savedQueryId: savedQuery.savedQueryId,
+          ecs_mapping: prepareEcsMapping(savedQuery.ecs_mapping),
         });
         setAdvancedContentState('open');
       } else {
         setFieldValue('savedQueryId', null);
       }
+
+      handleUpdate();
     },
-    [index, setFieldValue, updateFieldValues]
+    [handleUpdate, setFieldValue, updateFieldValues]
   );
+
+  useEffect(() => {
+    if (!isDeepEqual(formDataRef.current, formData)) {
+      formDataRef.current = formData;
+      handleUpdate();
+    }
+  }, [formData, formData.query, handleUpdate]);
 
   useEffect(() => {
     if (actionParams.message?.ecs_mapping) {
@@ -101,8 +150,10 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const componentProps = useMemo(() => ({ onChange: handleUpdate }), [handleUpdate]);
+
   return (
-    <>
+    <Form form={form}>
       {!isSavedQueryDisabled && (
         <>
           <QueryClientProvider client={queryClient}>
@@ -113,22 +164,7 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
           </QueryClientProvider>
         </>
       )}
-      <UseField
-        path={`actions[${index}].params.query`}
-        component={LiveQueryQueryField}
-        // componentProps={componentProps}
-      />
-      <UseField
-        path={`actions[${index}].params.id`}
-        component={GhostFormField}
-        defaultValue={uniqueId}
-      />
-      <UseField path={`actions[${index}].params.savedQueryId`} component={GhostFormField} />
-      <UseField
-        path={`actions[${index}].params.alerts`}
-        component={GhostFormField}
-        defaultValue={`[{{context.alerts}}]`}
-      />
+      <UseField path="query" component={LiveQueryQueryField} componentProps={componentProps} />
       <>
         <EuiSpacer size="m" />
         <StyledEuiAccordion
@@ -138,14 +174,10 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
           buttonContent="Advanced"
         >
           <EuiSpacer size="xs" />
-
-          <ECSMappingEditorField
-            euiFieldProps={ecsFieldProps}
-            formPath={`actions[${index}].params`}
-          />
+          <ECSMappingEditorField euiFieldProps={ecsFieldProps} />
         </StyledEuiAccordion>
       </>
-    </>
+    </Form>
   );
 };
 
