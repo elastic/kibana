@@ -10,7 +10,7 @@ import React, { createContext, useContext, useEffect } from 'react';
 import { Observable } from 'rxjs';
 import type { NotificationsSetup, CoreTheme, DocLinksStart, HttpSetup } from '@kbn/core/public';
 
-import type { AutocompleteInfo, History, Settings, Storage, Variables } from '../../services';
+import type { AutocompleteInfo, History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';
 import { MetricsTracker } from '../../types';
 import { EsHostService } from '../lib';
@@ -25,7 +25,6 @@ interface ContextServices {
   esHostService: EsHostService;
   http: HttpSetup;
   autocompleteInfo: AutocompleteInfo;
-  variables: Variables;
 }
 
 export interface ContextValue {

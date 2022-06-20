@@ -9,6 +9,7 @@
 import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
+import { asyncForEach } from '@kbn/std';
 
 export class ConsolePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -52,20 +53,48 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleVariablesButton');
   }
 
-  public async addNewVariable(name: string, value: string) {
+  public async closeVariablesModal() {
+    await this.testSubjects.click('variablesCancelButton');
+  }
+
+  public async addNewVariable({ name, value }: { name: string; value: string }) {
     await this.openVariablesModal();
 
+    // while the variables form opens/loads this may fail, so retry for a while
     await this.retry.try(async () => {
-      await this.testSubjects.click('variables-add-button');
-      const variableNameInput = await this.testSubjects.find('variables-name-input');
-      const variableValueInput = await this.testSubjects.find('variables-value-input');
-      await variableNameInput.click();
-      await variableNameInput.type(name);
-      await variableValueInput.click();
-      await variableValueInput.type(value);
+      await this.testSubjects.click('variablesAddButton');
+
+      const variableNameInputs = await this.testSubjects.findAll('variablesNameInput');
+      await variableNameInputs[variableNameInputs.length - 1].type(name);
+
+      const variableValueInputs = await this.testSubjects.findAll('variablesValueInput');
+      await variableValueInputs[variableValueInputs.length - 1].type(value);
     });
 
-    await this.testSubjects.click('variables-save-button');
+    await this.testSubjects.click('variablesSaveButton');
+  }
+
+  public async removeVariables() {
+    await this.openVariablesModal();
+
+    // while the variables form opens/loads this may fail, so retry for a while
+    await this.retry.try(async () => {
+      const buttons = await this.testSubjects.findAll('variablesRemoveButton');
+      await asyncForEach(buttons, async (button) => {
+        await button.click();
+      });
+    });
+    await this.testSubjects.click('variablesSaveButton');
+  }
+
+  public async getVariables() {
+    await this.openVariablesModal();
+    const inputs = await this.testSubjects.findAll('variablesNameInput');
+    const variables = await Promise.all(
+      inputs.map(async (input) => await input.getAttribute('value'))
+    );
+    await this.closeVariablesModal();
+    return variables;
   }
 
   public async setFontSizeSetting(newSize: number) {

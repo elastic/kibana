@@ -7,15 +7,7 @@
  */
 
 export { createHistory, History } from './history';
-export { createStorage, Storage, StorageKeys } from './storage';
+export { createStorage, Storage, StorageKeys, getStorage, setStorage } from './storage';
 export type { DevToolsSettings } from './settings';
 export { createSettings, Settings, DEFAULT_SETTINGS } from './settings';
 export { AutocompleteInfo, getAutocompleteInfo, setAutocompleteInfo } from './autocomplete';
-export {
-  createVariables,
-  Variables,
-  type DevToolsVariable,
-  getVariables,
-  setVariables,
-  generateDefaultVariable,
-} from './variables';

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState, useCallback, ChangeEvent, FormEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useForm, Controller, useWatch, SubmitHandler } from 'react-hook-form';
+import uuid from 'uuid';
 
 import {
   EuiButton,
@@ -27,48 +27,62 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 
-import type { DevToolsVariable, Variables } from '../../services';
-import { generateDefaultVariable } from '../../services';
-
-interface Props {
+export interface DevToolsVariablesModalProps {
   onClose: () => void;
   onSaveVariables: (newVariables: DevToolsVariable[]) => void;
-  variablesService: Variables;
+  variables: [];
 }
 
-interface FormProps {
-  variables: DevToolsVariable[];
+export interface DevToolsVariable {
+  id: string;
+  name: string;
+  value: string;
 }
 
-export function DevToolsVariablesModal({ onClose, onSaveVariables, variablesService }: Props) {
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<FormProps>({
-    defaultValues: {
-      variables: variablesService.toJSON(),
-    },
-  });
+const generateEmptyVariableField = (): DevToolsVariable => ({
+  id: uuid.v4(),
+  name: '',
+  value: '',
+});
+
+export const DevToolsVariablesModal = (props: DevToolsVariablesModalProps) => {
+  const [variables, setVariables] = useState<DevToolsVariable[]>(props.variables);
   const formId = useGeneratedHtmlId({ prefix: '__console' });
-  const variables = useWatch({
-    control,
-    name: 'variables',
-  });
 
   const addNewVariable = () => {
-    setValue('variables', [...variables, generateDefaultVariable()]);
+    setVariables((v) => [...v, generateEmptyVariableField()]);
   };
 
-  const deleteVariable = (id: string) => {
-    const updatedVariables = variables.filter((v) => v.id !== id);
-    setValue('variables', updatedVariables);
+  const deleteVariable = useCallback(
+    (id: string) => {
+      const updatedVariables = variables.filter((v) => v.id !== id);
+      setVariables(updatedVariables);
+    },
+    [variables]
+  );
+
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    props.onSaveVariables(variables);
   };
 
-  const onSubmit: SubmitHandler<FormProps> = (data) => {
-    onSaveVariables(data.variables);
-  };
+  const onChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>, id: string) => {
+      const { name, value } = e.target;
+      const index = variables.findIndex((v) => v.id === id);
+
+      if (index === -1) {
+        return;
+      } else {
+        setVariables((v) => [
+          ...v.slice(0, index),
+          { ...v[index], [name]: value },
+          ...v.slice(index + 1),
+        ]);
+      }
+    },
+    [variables]
+  );
 
   const columns: Array<EuiBasicTableColumn<DevToolsVariable>> = [
     {
@@ -76,24 +90,15 @@ export function DevToolsVariablesModal({ onClose, onSaveVariables, variablesServ
       name: i18n.translate('console.variablesPage.variablesTable.columns.variableHeader', {
         defaultMessage: 'Variable',
       }),
-      render: (variable, item) => {
-        const index = variables.findIndex((v) => v.id === item.id);
-        const isInvalid = (errors.variables && Boolean(errors?.variables[index])) ?? false;
+      render: (name, { id }) => {
         const textField = (
-          <Controller
-            control={control}
-            defaultValue={variable}
-            rules={{ required: true }}
-            render={({ field }) => (
-              <EuiFieldText
-                data-test-subj="variables-name-input"
-                placeholder="Add a new variable"
-                fullWidth
-                {...field}
-                isInvalid={isInvalid}
-              />
-            )}
-            name={`variables.${index}.name`}
+          <EuiFieldText
+            data-test-subj="variablesNameInput"
+            placeholder="Add a new variable"
+            fullWidth
+            name="name"
+            value={name}
+            onChange={(e) => onChange(e, id)}
           />
         );
         return <>{textField}</>;
@@ -104,16 +109,15 @@ export function DevToolsVariablesModal({ onClose, onSaveVariables, variablesServ
       name: i18n.translate('console.variablesPage.variablesTable.columns.valueHeader', {
         defaultMessage: 'Value',
       }),
-      render: (value, item) => {
-        const index = variables.findIndex((v) => v.id === item.id);
+      render: (value, { id }) => {
         const textField = (
-          <Controller
-            control={control}
-            defaultValue={value}
-            render={({ field }) => (
-              <EuiFieldText data-test-subj="variables-value-input" fullWidth {...field} />
-            )}
-            name={`variables.${index}.value`}
+          <EuiFieldText
+            data-test-subj="variablesValueInput"
+            placeholder="Add a new variable"
+            fullWidth
+            name="value"
+            onChange={(e) => onChange(e, id)}
+            value={value}
           />
         );
         return <>{textField}</>;
@@ -130,6 +134,7 @@ export function DevToolsVariablesModal({ onClose, onSaveVariables, variablesServ
             aria-label="Delete"
             color="danger"
             onClick={() => deleteVariable(id)}
+            data-test-subj="variablesRemoveButton"
           />
         );
         return <>{button}</>;
@@ -138,7 +143,11 @@ export function DevToolsVariablesModal({ onClose, onSaveVariables, variablesServ
   ];
 
   return (
-    <EuiModal data-test-subj="devToolsVariablesModal" onClose={onClose} style={{ width: 800 }}>
+    <EuiModal
+      data-test-subj="devToolsVariablesModal"
+      onClose={props.onClose}
+      style={{ width: 800 }}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
@@ -149,10 +158,10 @@ export function DevToolsVariablesModal({ onClose, onSaveVariables, variablesServ
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiForm id={formId} component="form" onSubmit={handleSubmit(onSubmit)}>
+        <EuiForm id={formId} component="form" onSubmit={onSubmit}>
           <EuiBasicTable items={variables} columns={columns} />
           <EuiButtonEmpty
-            data-test-subj="variables-add-button"
+            data-test-subj="variablesAddButton"
             iconType="plus"
             onClick={addNewVariable}
           >
@@ -162,14 +171,14 @@ export function DevToolsVariablesModal({ onClose, onSaveVariables, variablesServ
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="variables-cancel-button" onClick={onClose}>
+        <EuiButtonEmpty data-test-subj="variablesCancelButton" onClick={props.onClose}>
           <FormattedMessage id="console.variablesPage.cancelButtonLabel" defaultMessage="Cancel" />
         </EuiButtonEmpty>
 
-        <EuiButton fill data-test-subj="variables-save-button" type="submit" form={formId}>
+        <EuiButton fill data-test-subj="variablesSaveButton" type="submit" form={formId}>
           <FormattedMessage id="console.variablesPage.saveButtonLabel" defaultMessage="Save" />
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   );
-}
+};

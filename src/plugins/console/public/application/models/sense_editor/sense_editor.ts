@@ -19,14 +19,16 @@ import { constructUrl } from '../../../lib/es/es';
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
 import createAutocompleter from '../../../lib/autocomplete/autocomplete';
-import { getVariables } from '../../../services';
+import { getStorage } from '../../../services';
+import type { DevToolsVariable } from '../../components';
 
 const { collapseLiteralStrings } = XJson;
 
 function replaceVariableWithValue(value: string) {
-  const key = value.replace('${', '').replace('}', '');
-  const variables = getVariables();
-  return variables.extractValue(key);
+  const key = value.replace(/[^a-z\d.]+/gi, '');
+  const storage = getStorage();
+  const variables = storage.get('variables', []);
+  return variables.find((v: DevToolsVariable) => v.name === key).value ?? '';
 }
 
 export class SenseEditor {
@@ -287,8 +289,7 @@ export class SenseEditor {
       const re = /("\${\w+}")/g;
 
       data = data.replaceAll(re, (match) => {
-        const key = match.replace(/[^a-z]+/gi, '');
-        const value = getVariables().extractValue(key);
+        const value = replaceVariableWithValue(match);
 
         if (
           !(value.startsWith('{') && value.endsWith('}')) &&
