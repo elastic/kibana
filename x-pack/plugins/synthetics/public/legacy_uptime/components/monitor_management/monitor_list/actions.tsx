@@ -64,7 +64,7 @@ export const Actions = ({ id, name, onUpdate, isDisabled, errorSummaries, monito
             isProjectMonitor
               ? i18n.translate('xpack.synthetics.monitorManagement.monitorList.enabled.tooltip', {
                   defaultMessage:
-                    'This monitor was added from an external project. To delete the monitor, remove it from the project and push configuration.',
+                    'This monitor was added from an external project. To delete the monitor, remove it from the project and push the configuration again.',
                 })
               : ''
           }
