@@ -18,8 +18,8 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 
-jest.mock('../lib/row_formatter', () => {
-  const originalModule = jest.requireActual('../lib/row_formatter');
+jest.mock('../utils/row_formatter', () => {
+  const originalModule = jest.requireActual('../utils/row_formatter');
   return {
     ...originalModule,
     formatRow: () => {
