@@ -7,7 +7,16 @@
  */
 
 import { memoize, once } from 'lodash';
-import { BehaviorSubject, EMPTY, from, fromEvent, of, Subscription, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  EMPTY,
+  from,
+  fromEvent,
+  Observable,
+  of,
+  Subscription,
+  throwError,
+} from 'rxjs';
 import { catchError, finalize, map, shareReplay, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
@@ -135,18 +144,24 @@ export class SearchInterceptor {
       : TimeoutErrorMode.CONTACT;
   }
 
-  private createRequestHash$(request: IKibanaSearchRequest, options: IAsyncSearchOptions) {
-    const { sessionId, isRestore } = options;
+  private createRequestHash$(
+    request: IKibanaSearchRequest,
+    options: IAsyncSearchOptions
+  ): Observable<string | undefined> {
+    const { sessionId } = options;
     // Preference is used to ensure all queries go to the same set of shards and it doesn't need to be hashed
     // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-shard-routing.html#shard-and-node-preference
     const { preference, ...params } = request.params || {};
     const hashOptions = {
       ...params,
       sessionId,
-      isRestore,
     };
 
-    return from(sessionId ? createRequestHash(hashOptions) : of(undefined));
+    if (!sessionId) return of(undefined); // don't use cache if doesn't belong to a session
+    const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
+    if (sessionOptions?.isRestore) return of(undefined); // don't use cache if restoring a session
+
+    return from(createRequestHash(hashOptions));
   }
 
   /*

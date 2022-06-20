@@ -18,7 +18,12 @@ export async function getSessionStatus(
   session: SearchSessionSavedObjectAttributes,
   config: SearchSessionsConfigSchema
 ): Promise<SearchSessionStatus> {
+  if (session.status === SearchSessionStatus.CANCELLED) {
+    return SearchSessionStatus.CANCELLED;
+  }
+
   const now = moment();
+
   if (moment(session.expires).isBefore(now)) {
     return SearchSessionStatus.EXPIRED;
   }

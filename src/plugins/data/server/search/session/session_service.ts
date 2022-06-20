@@ -350,7 +350,7 @@ export class SearchSessionService
     user: AuthenticatedUser | null,
     sessionId: string
   ) => {
-    this.logger.debug(`delete | ${sessionId}`);
+    this.logger.debug(`cancel | ${sessionId}`);
     return this.update(deps, user, sessionId, {
       status: SearchSessionStatus.CANCELLED,
     });
