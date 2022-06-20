@@ -81,6 +81,7 @@ import { getMapAttributeService } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 import { synchronizeMaps } from './synchronize_maps';
+import { mapEmbeddableCounter } from './map_embeddable_counter';
 import { getLinkMapView } from '../trigger_actions/link_map_view_action';
 import { getFilterByMapExtent } from '../trigger_actions/filter_by_map_extent_action';
 
@@ -420,6 +421,7 @@ export class MapEmbeddable
       return;
     }
 
+    mapEmbeddableCounter.increment();
     if (getLinkMapView(this.input)) {
       this._linkMapView();
     }
@@ -597,6 +599,7 @@ export class MapEmbeddable
 
   destroy() {
     super.destroy();
+    mapEmbeddableCounter.decrement();
     this._unlinkMapView();
     this._isActive = false;
     if (this._unsubscribeFromStore) {

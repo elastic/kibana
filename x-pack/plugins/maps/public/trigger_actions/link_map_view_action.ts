@@ -39,16 +39,16 @@ export const linkMapViewAction = createAction<LinkMapViewActionContext>({
   },
   getDisplayNameTooltip: () => {
     return i18n.translate('xpack.maps.linkMapView.tooltipContent', {
-      defaultMessage: 'Movement in one map panel moves all other maps panels.',
+      defaultMessage: 'Movement in one map panel moves all other maps panels',
     });
   },
   getIconType: () => {
     return 'crosshairs';
   },
   isCompatible: async ({ embeddable }: LinkMapViewActionContext) => {
-    const { synchronizeMaps } = await import('../embeddable/synchronize_maps');
+    const { mapEmbeddableCounter } = await import('../embeddable/map_embeddable_counter');
     return (
-      synchronizeMaps.hasMultipleMaps() &&
+      mapEmbeddableCounter.hasMultipleMaps() &&
       embeddable.type === MAP_SAVED_OBJECT_TYPE &&
       embeddable.getInput().viewMode === ViewMode.EDIT
     );
