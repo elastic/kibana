@@ -70,6 +70,7 @@ const LensEmbeddableComponent = ({
         }
         withDefaultActions={true}
         extraActions={actions}
+        inspectIndexPattern={true}
       />
     </>
   ) : null;

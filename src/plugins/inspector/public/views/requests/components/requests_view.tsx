@@ -169,7 +169,10 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
         <EuiSpacer size="m" />
 
         {this.state.request && (
-          <RequestDetails request={this.state.request} extraInfo={this.props.options?.extraInfo} />
+          <RequestDetails
+            request={this.state.request}
+            inspectIndexPattern={this.props?.options?.inspectIndexPattern ?? false}
+          />
         )}
       </>
     );

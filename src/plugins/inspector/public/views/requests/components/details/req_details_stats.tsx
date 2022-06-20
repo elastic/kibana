@@ -65,11 +65,12 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
 
   render() {
     const { stats, json } = this.props.request;
+    const { inspectIndexPattern } = this.props;
     const dataView = stats?.indexPattern?.value ?? null;
-    const indexFilters = findIndexFilters(json);
-    const validIndexFilters = indexFilters.filter(
-      (indexPattern) => dataView?.indexOf(indexPattern) >= 0
-    );
+    const indexFilters = inspectIndexPattern ? findIndexFilters(json) : [];
+    const validIndexFilters = inspectIndexPattern
+      ? indexFilters.filter((indexPattern) => dataView?.indexOf(indexPattern) >= 0)
+      : [];
     const indexFiltersStats =
       indexFilters.length > 0
         ? {
@@ -86,12 +87,13 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
       return null;
     }
 
-    const mergedStats: RequestStatistics = indexFiltersStats
-      ? {
-          ...stats,
-          ...indexFiltersStats,
-        }
-      : stats;
+    const mergedStats: RequestStatistics =
+      indexFiltersStats && inspectIndexPattern
+        ? {
+            ...stats,
+            ...indexFiltersStats,
+          }
+        : stats;
 
     const sortedStats = Object.keys(mergedStats)
       .sort()

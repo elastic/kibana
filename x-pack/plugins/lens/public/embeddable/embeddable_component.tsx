@@ -60,6 +60,7 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
 export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceInput) & {
   withDefaultActions?: boolean;
   extraActions?: Action[];
+  inspectIndexPattern?: boolean;
 };
 
 interface PluginsStartDependencies {
@@ -121,13 +122,13 @@ interface EmbeddablePanelWrapperProps {
 }
 
 const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
-  factory,
-  uiActions,
   actionPredicate,
-  inspector,
-  input,
-  theme,
   extraActions,
+  factory,
+  input,
+  inspector,
+  theme,
+  uiActions,
   withDefaultActions,
 }) => {
   const [embeddable, loading] = useEmbeddableFactory({ factory, input });

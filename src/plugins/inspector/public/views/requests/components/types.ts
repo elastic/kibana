@@ -10,5 +10,5 @@ import { Request } from '../../../../common/adapters/request/types';
 
 export interface RequestDetailsProps {
   request: Request;
-  extraInfo?: boolean;
+  inspectIndexPattern?: boolean;
 }
