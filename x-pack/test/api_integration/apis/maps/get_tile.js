@@ -29,7 +29,7 @@ export default function ({ getService }) {
 ?geometryFieldName=geo.coordinates\
 &hasLabels=false\
 &index=logstash-*\
-&requestBody=(_source:!f,docvalue_fields:!(bytes,geo.coordinates,machine.os.raw,(field:'@timestamp',format:epoch_millis)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10000,stored_fields:!(bytes,geo.coordinates,machine.os.raw,'@timestamp'))`
+&requestBody=(_source:!f,fields:!(bytes,machine.os.raw,(field:'@timestamp',format:epoch_millis)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),size:10000)`
         )
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
@@ -93,7 +93,7 @@ export default function ({ getService }) {
 ?geometryFieldName=geo.coordinates\
 &hasLabels=true\
 &index=logstash-*\
-&requestBody=(_source:!f,docvalue_fields:!(bytes,geo.coordinates,machine.os.raw,(field:'@timestamp',format:epoch_millis)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10000,stored_fields:!(bytes,geo.coordinates,machine.os.raw,'@timestamp'))`
+&requestBody=(_source:!f,fields:!(bytes,machine.os.raw,(field:'@timestamp',format:epoch_millis)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),size:10000)`
         )
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
@@ -138,7 +138,7 @@ export default function ({ getService }) {
 ?geometryFieldName=geo.coordinates\
 &hasLabels=false\
 &index=notRealIndex\
-&requestBody=(_source:!f,docvalue_fields:!(bytes,geo.coordinates,machine.os.raw,(field:'@timestamp',format:epoch_millis)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10000,stored_fields:!(bytes,geo.coordinates,machine.os.raw,'@timestamp'))`
+&requestBody=(_source:!f,fields:!(bytes,machine.os.raw,(field:'@timestamp',format:epoch_millis)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),size:10000)`
         )
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
