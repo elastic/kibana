@@ -8,7 +8,6 @@
 import { run, RunContext } from '@kbn/dev-cli-runner';
 import { HORIZONTAL_LINE, SUPPORTED_TOKENS } from './constants';
 import { runInAutoMode } from './run_in_auto_mode';
-export const ONE = 'test';
 
 export const cli = () => {
   run(
