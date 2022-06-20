@@ -95,7 +95,10 @@ export const GettingStarted = () => {
         <EuiHorizontalRule />
         <EuiSpacer />
         <div className="eui-textCenter">
-          <EuiLink onClick={onSkip}>{skipText}</EuiLink>
+          {/* data-test-subj used for FS tracking */}
+          <EuiLink onClick={onSkip} data-test-subj="skipToursLink">
+            {skipText}
+          </EuiLink>
         </div>
       </div>
     </KibanaPageTemplate>
