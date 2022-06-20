@@ -7,7 +7,7 @@
 import { EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 
-export const EuiPanelStyled = styled(EuiPanel)<{ $hasBottomBar: boolean }>`
+export const EuiPanelStyled = styled(EuiPanel)<{ $bottomOffset?: string }>`
   position: fixed;
   top: 95px;
   left: 247px;
@@ -16,11 +16,11 @@ export const EuiPanelStyled = styled(EuiPanel)<{ $hasBottomBar: boolean }>`
   height: inherit;
 
   // If the bottom bar is visible add padding to the navigation
-  ${({ $hasBottomBar, theme }) =>
-    $hasBottomBar &&
+  ${({ $bottomOffset, theme }) =>
+    $bottomOffset != null &&
     `
       height: inherit;
-      bottom: 51px;
+      bottom: ${$bottomOffset};
       box-shadow:
         // left
         -${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS} -${theme.eui.euiSizeS} rgb(0 0 0 / 15%), 

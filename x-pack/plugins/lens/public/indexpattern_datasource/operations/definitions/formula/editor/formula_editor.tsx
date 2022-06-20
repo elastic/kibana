@@ -66,6 +66,7 @@ export const WrappedFormulaEditor = ({
   ...rest
 }: ParamEditorProps<FormulaIndexPatternColumn>) => {
   const dateHistogramInterval = getDateHistogramInterval(
+    rest.data.datatableUtilities,
     rest.layer,
     rest.indexPattern,
     activeData,

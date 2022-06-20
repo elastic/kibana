@@ -6,6 +6,7 @@
  */
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { Logger } from '@kbn/core/server';
@@ -19,7 +20,6 @@ import { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
-import { getInputIndex } from '../get_input_output_index';
 import {
   bulkCreateThresholdSignals,
   findThresholdSignals,
@@ -44,6 +44,8 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
 
 export const thresholdExecutor = async ({
+  inputIndex,
+  runtimeMappings,
   completeRule,
   tuple,
   exceptionItems,
@@ -58,6 +60,8 @@ export const thresholdExecutor = async ({
   wrapHits,
   ruleDataReader,
 }: {
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<ThresholdRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
@@ -107,13 +111,6 @@ export const thresholdExecutor = async ({
       result.warning = true;
     }
 
-    const inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
-    });
-
     // Eliminate dupes
     const bucketFilters = await getThresholdBucketFilters({
       signalHistory,
@@ -147,6 +144,7 @@ export const thresholdExecutor = async ({
       threshold: ruleParams.threshold,
       timestampOverride: ruleParams.timestampOverride,
       buildRuleMessage,
+      runtimeMappings,
     });
 
     // Build and index new alerts
