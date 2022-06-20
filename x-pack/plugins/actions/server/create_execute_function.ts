@@ -24,7 +24,7 @@ import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
 import { RelatedSavedObjects } from './lib/related_saved_objects';
 
-const MAX_ACTIONS_NUMBER_FOR_BULK_EXECUTE = 1000;
+const MAX_ACTIONS_NUMBER_FOR_BULK_EXECUTE = 500;
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   isESOCanEncrypt: boolean;
