@@ -3091,6 +3091,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-logging-server-mocks@link:bazel-bin/packages/core/logging/core-logging-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-logging-server@link:bazel-bin/packages/core/logging/core-logging-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal":
   version "0.0.0"
   uid ""
@@ -6459,6 +6471,18 @@
   uid ""
 
 "@types/kbn__core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-logging-server-mocks@link:bazel-bin/packages/core/logging/core-logging-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-logging-server@link:bazel-bin/packages/core/logging/core-logging-server/npm_module_types":
   version "0.0.0"
   uid ""
 
