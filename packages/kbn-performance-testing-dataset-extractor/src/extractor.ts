@@ -11,6 +11,7 @@ import moment from 'moment';
 import { existsSync } from 'fs';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { initClient, Document } from './es_client';
 
 const DATE_FORMAT = `YYYY-MM-DD'T'HH:mm:ss.SSS'Z'`;
@@ -42,20 +43,22 @@ export interface ScalabilitySetup {
   maxDuration: string;
 }
 
-const parsePayload = (hit: Document, log: ToolingLog): Promise<string | undefined> => {
+const parsePayload = (payload: string, traceId: string, log: ToolingLog): string | undefined => {
   let body;
-  if (
-    hit.http.request.body &&
-    hit.http.request.body.original &&
-    typeof hit.http.request.body.original === 'string'
-  ) {
-    try {
-      body = JSON.parse(hit.http.request.body.original);
-    } catch (error) {
-      log.error(`Failed to parse payload - trace_id: '${hit.trace.id}'`);
-    }
+  try {
+    body = JSON.parse(payload);
+  } catch (error) {
+    log.error(`Failed to parse payload - trace_id: '${traceId}'`);
   }
   return body;
+};
+
+const calculateTransactionTimeRage = (hit: SearchHit<Document>) => {
+  const trSource = hit._source as Document;
+  const startTime = trSource['@timestamp'];
+  const duration = trSource.transaction.duration.us / 1000; // convert microseconds to milliseconds
+  const endTime = moment(startTime, DATE_FORMAT).add(duration, 'milliseconds').toISOString();
+  return { startTime, endTime };
 };
 
 export const extractor = async ({ param, client, log }: CLIParams) => {
@@ -83,16 +86,9 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
     return;
   }
 
-  const trSource = ftrTransactionHits[0]!._source as Document;
-  const startTime = trSource['@timestamp'];
-  const duration = trSource.transaction.duration.us / 1000; // convert microseconds as milliseconds
-  const endTime = moment(startTime, DATE_FORMAT).add(duration, 'milliseconds').toISOString();
-
+  const timeRange = calculateTransactionTimeRage(ftrTransactionHits[0]);
   // Filtering out setup/teardown related transactions by time range from 'functional test runner' transaction
-  const hits = await esClient.getKibanaServerTransactions(buildId, journeyName, {
-    startTime,
-    endTime,
-  });
+  const hits = await esClient.getKibanaServerTransactions(buildId, journeyName, timeRange);
   if (!hits || hits.length === 0) {
     log.warning(`No transactions found. Output file won't be generated.`);
     return;
@@ -104,7 +100,7 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   const data = hits
     .map((hit) => hit!._source as Document)
     .map((hit) => {
-      const body = parsePayload(hit, log);
+      const payload = hit.http.request?.body?.original;
       return {
         processor: hit.processor,
         traceId: hit.trace.id,
@@ -114,7 +110,7 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
           url: { path: hit.url.path },
           headers: hit.http.request.headers,
           method: hit.http.request.method,
-          body,
+          body: payload ? parsePayload(payload, hit.trace.id, log) : undefined,
         },
         response: { statusCode: hit.http.response.status_code },
         transaction: {
