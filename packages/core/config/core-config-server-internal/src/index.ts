@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { coreDeprecationProvider } from './deprecation';
+export { ensureValidConfiguration } from './ensure_valid_configuration';
