@@ -49,9 +49,9 @@ export const DevToolsVariablesModal = (props: DevToolsVariablesModalProps) => {
   const [variables, setVariables] = useState<DevToolsVariable[]>(props.variables);
   const formId = useGeneratedHtmlId({ prefix: '__console' });
 
-  const addNewVariable = () => {
+  const addNewVariable = useCallback(() => {
     setVariables((v) => [...v, generateEmptyVariableField()]);
-  };
+  }, []);
 
   const deleteVariable = useCallback(
     (id: string) => {
@@ -61,10 +61,14 @@ export const DevToolsVariablesModal = (props: DevToolsVariablesModalProps) => {
     [variables]
   );
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    props.onSaveVariables(variables);
-  };
+  const { onSaveVariables } = props;
+  const onSubmit = useCallback(
+    (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      onSaveVariables(variables);
+    },
+    [onSaveVariables, variables]
+  );
 
   const onChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>, id: string) => {
