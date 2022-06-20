@@ -12,7 +12,7 @@ import { useTrackPageview } from '@kbn/observability-plugin/public';
 
 import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
 
-import { useLocations } from '../../hooks/use_locations';
+import { useLocations } from '../../hooks';
 
 import { Loader } from './management/loader/loader';
 import { useEnablement } from '../../hooks/use_enablement';
