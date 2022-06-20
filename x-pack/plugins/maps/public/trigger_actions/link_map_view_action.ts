@@ -39,7 +39,7 @@ export const linkMapViewAction = createAction<LinkMapViewActionContext>({
   },
   getDisplayNameTooltip: () => {
     return i18n.translate('xpack.maps.linkMapView.tooltipContent', {
-      defaultMessage: 'Movement in one map panel moves all other maps panels',
+      defaultMessage: 'Movement in one map panel moves all other maps panels.',
     });
   },
   getIconType: () => {
