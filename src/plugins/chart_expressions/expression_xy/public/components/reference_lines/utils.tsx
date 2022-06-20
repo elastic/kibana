@@ -104,8 +104,12 @@ export const getLineAnnotationProps = (
       <MarkerBody
         label={labels.markerBodyLabel}
         isHorizontal={
-          (!isHorizontal && config.axisGroup?.position === Position.Bottom) ||
-          (isHorizontal && config.axisGroup?.position !== Position.Bottom)
+          (isHorizontal &&
+            (config.axisGroup?.position === Position.Bottom ||
+              config.axisGroup?.position === Position.Top)) ||
+          (!isHorizontal &&
+            config.axisGroup?.position !== Position.Bottom &&
+            config.axisGroup?.position !== Position.Top)
         }
       />
     ),
