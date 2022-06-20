@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ChangeDataView } from './change_dataview';
 import { EuiTourStep } from '@elastic/eui';
-import type { DataViewPickerProps } from '.';
+import type { DataViewPickerPropsExtended } from '.';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
@@ -40,7 +40,10 @@ describe('DataView component', () => {
     return storage;
   };
 
-  function wrapDataViewComponentInContext(testProps: DataViewPickerProps, storageValue: boolean) {
+  function wrapDataViewComponentInContext(
+    testProps: DataViewPickerPropsExtended,
+    storageValue: boolean
+  ) {
     let dataMock = dataPluginMock.createStartContract();
     dataMock = {
       ...dataMock,
@@ -62,7 +65,7 @@ describe('DataView component', () => {
       </I18nProvider>
     );
   }
-  let props: DataViewPickerProps;
+  let props: DataViewPickerPropsExtended;
   beforeEach(() => {
     props = {
       currentDataViewId: 'dataview-1',
@@ -73,6 +76,7 @@ describe('DataView component', () => {
         'data-test-subj': 'dataview-trigger',
       },
       onChangeDataView: jest.fn(),
+      onTextLangQuerySubmit: jest.fn(),
     };
   });
   it('should not render the tour component by default', async () => {
