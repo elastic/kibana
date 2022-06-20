@@ -9,7 +9,7 @@ import { CspAppContext } from '../../plugin';
 import { defineGetCspSetupStatusRoute, INDEX_TIMEOUT_IN_HOURS } from './status';
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import {
   createMockAgentPolicyService,
@@ -82,18 +82,18 @@ describe('CspSetupStatus route', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
     mockContext = xpackMocks.createRequestHandlerContext();
     mockPackagePolicyService = createPackagePolicyServiceMock();
     mockAgentPolicyService = createMockAgentPolicyService();
     mockAgentService = createMockAgentService();
-    mockAgentClient = mockAgentService.asInternalUser as jest.Mocked<AgentClient>;
-
     mockPackageService = createMockPackageService();
+
+    mockAgentClient = mockAgentService.asInternalUser as jest.Mocked<AgentClient>;
     mockPackageClient = mockPackageService.asInternalUser as jest.Mocked<PackageClient>;
 
     cspContext = {
       logger,
-      // @ts-expect-error 2322
       service: {
         agentService: mockAgentService,
         agentPolicyService: mockAgentPolicyService,
@@ -101,7 +101,7 @@ describe('CspSetupStatus route', () => {
         packageService: mockPackageService,
       },
       security: securityMock.createSetup(),
-    };
+    } as unknown as CspAppContext;
   });
 
   it('validate the API route path', async () => {

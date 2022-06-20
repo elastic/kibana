@@ -20,7 +20,7 @@ import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
-import { CspRouter } from '../../types';
+import type { CspRouter } from '../../types';
 import { CspSetupStatus, Status } from '../../../common/types';
 import {
   addRunningAgentToAgentPolicy,
@@ -48,20 +48,6 @@ const isFindingsExists = async (esClient: ElasticsearchClient): Promise<boolean>
   }
 };
 
-const isCspPackageInstalledOnAgentPolicy = async (
-  soClient: SavedObjectsClientContract,
-  packagePolicyService: PackagePolicyServiceInterface
-): Promise<ListResult<PackagePolicy>> => {
-  const cspPackagePolicies = getCspPackagePolicies(
-    soClient,
-    packagePolicyService,
-    CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-    { per_page: 10000 }
-  );
-
-  return cspPackagePolicies;
-};
-
 const getHealthyAgents = async (
   soClient: SavedObjectsClientContract,
   cspPackagePolicies: ListResult<PackagePolicy>,
@@ -82,30 +68,30 @@ const getHealthyAgents = async (
   return totalAgents;
 };
 
-const getTimeDelta = (packageInfo: Installation): number => {
+const getTimeDeltaSinceInstallation = (packageInfo: Installation): number => {
   const installTime = packageInfo!.install_started_at;
+
+  // calculate time delta and convert to hours
   const dt = (new Date().getTime() - new Date(installTime).getTime()) / (1000 * 60 * 60);
 
   return dt;
 };
 
-const geCspIndexStatus = async (
+const getStatus = async (
   esClient: ElasticsearchClient,
   installedIntegrations: number,
   healthyAgents: number,
-  timeDelta: number
+  timeDeltaSinceInstallation: number
 ): Promise<Status> => {
   if (await isFindingsExists(esClient)) return 'indexed';
 
-  if (installedIntegrations > 0) {
-    if (healthyAgents === 0) return 'not deployed';
+  if (installedIntegrations === 0) return 'not installed';
 
-    if (timeDelta < INDEX_TIMEOUT_IN_HOURS) return 'indexing';
+  if (healthyAgents === 0) return 'not deployed';
 
-    return 'index timeout';
-  }
+  if (timeDeltaSinceInstallation < INDEX_TIMEOUT_IN_HOURS) return 'indexing';
 
-  return 'not installed';
+  return 'index timeout';
 };
 
 const getCspSetupStatus = async (
@@ -120,9 +106,11 @@ const getCspSetupStatus = async (
     CLOUD_SECURITY_POSTURE_PACKAGE_NAME
   );
 
-  const cspPackageInstalled = await isCspPackageInstalledOnAgentPolicy(
+  const cspPackageInstalled = await getCspPackagePolicies(
     soClient,
-    packagePolicyService
+    packagePolicyService,
+    CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+    { per_page: 10000 }
   );
 
   const healthyAgents = await getHealthyAgents(
@@ -136,13 +124,15 @@ const getCspSetupStatus = async (
     await packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME)
   )?.version;
 
-  const timeDelta = packageInfo ? await getTimeDelta(packageInfo) : 0;
+  const timeDeltaSinceInstallation = packageInfo
+    ? await getTimeDeltaSinceInstallation(packageInfo)
+    : 0;
 
-  const status = await geCspIndexStatus(
+  const status = await getStatus(
     esClient,
     cspPackageInstalled.total,
     healthyAgents,
-    timeDelta
+    timeDeltaSinceInstallation
   );
 
   return {
@@ -192,7 +182,7 @@ export const defineGetCspSetupStatusRoute = (router: CspRouter, cspContext: CspA
         });
       } catch (err) {
         const error = transformError(err);
-        cspContext.logger.error(`Error while fetching findings status: ${err}`);
+        cspContext.logger.error(`Error while fetching status: ${err}`);
 
         return response.customError({
           body: { message: error.message },
