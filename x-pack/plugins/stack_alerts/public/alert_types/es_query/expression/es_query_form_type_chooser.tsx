@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiListGroup, EuiListGroupItem, EuiTitle } from '@elastic/eui';
+import { EuiListGroup, EuiListGroupItem, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -15,13 +15,20 @@ export enum EsQueryFormType {
   QUERY_DSL = 'query_dsl',
 }
 
-const FORM_TYPE_ITEMS: Array<{ formType: EsQueryFormType; label: string }> = [
+const FORM_TYPE_ITEMS: Array<{ formType: EsQueryFormType; label: string; description: string }> = [
   {
     formType: EsQueryFormType.KQL_OR_LUCENE,
     label: i18n.translate(
       'xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeLabel',
       {
         defaultMessage: 'KQL or Lucene',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeDescription',
+      {
+        defaultMessage:
+          'Make use of a data view, write the query using KQL or Lucene and add filters.',
       }
     ),
   },
@@ -31,6 +38,12 @@ const FORM_TYPE_ITEMS: Array<{ formType: EsQueryFormType; label: string }> = [
       'xpack.stackAlerts.esQuery.ui.selectQueryFormType.queryDslFormTypeLabel',
       {
         defaultMessage: 'Query DSL',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.stackAlerts.esQuery.ui.selectQueryFormType.queryDslFormTypeDescription',
+      {
+        defaultMessage: 'Make use of the powerful Query DSL of Elasticsearch.',
       }
     ),
   },
@@ -51,14 +64,21 @@ export const EsQueryFormTypeChooser: React.FC<EsQueryFormTypeProps> = ({ onFormT
           />
         </h5>
       </EuiTitle>
-      <EuiListGroup flush={true} gutterSize="m" size="l" maxWidth={false}>
+      <EuiListGroup flush gutterSize="m" size="l" maxWidth={false}>
         {FORM_TYPE_ITEMS.map((item) => (
           <EuiListGroupItem
             wrapText
             key={`form-type-${item.formType}`}
             data-test-subj={`formType-${item.formType}`}
             color="primary"
-            label={item.label}
+            label={
+              <span>
+                <strong>{item.label}</strong>
+                <EuiText color="subdued" size="s">
+                  <p>{item.description}</p>
+                </EuiText>
+              </span>
+            }
             onClick={() => onFormTypeSelect(item.formType)}
           />
         ))}
