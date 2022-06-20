@@ -4,7 +4,6 @@
 
 ## CoreSetup.logging property
 
-[LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md)
 
 <b>Signature:</b>
 
