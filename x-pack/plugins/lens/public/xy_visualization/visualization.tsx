@@ -11,6 +11,7 @@ import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -31,7 +32,7 @@ import { State, visualizationTypes, XYSuggestion, XYLayerConfig, XYDataLayerConf
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
-import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
+import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
 import {
   getGroupsAvailableInData,
@@ -72,12 +73,14 @@ import { DimensionTrigger } from '../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 
 export const getXyVisualization = ({
+  datatableUtilities,
   paletteService,
   fieldFormats,
   useLegacyTimeAxis,
   kibanaTheme,
   eventAnnotationService,
 }: {
+  datatableUtilities: DatatableUtilitiesService;
   paletteService: PaletteRegistry;
   eventAnnotationService: EventAnnotationServiceType;
   fieldFormats: FieldFormatsStart;
@@ -496,6 +499,7 @@ export const getXyVisualization = ({
   renderDimensionEditor(domElement, props) {
     const allProps = {
       ...props,
+      datatableUtilities,
       formatFactory: fieldFormats.deserialize,
       paletteService,
     };
@@ -699,7 +703,7 @@ const getMappedAccessors = ({
       { tables: frame.activeData },
       fieldFormats.deserialize
     );
-    mappedAccessors = getAccessorColorConfig(
+    mappedAccessors = getAccessorColorConfigs(
       colorAssignments,
       frame,
       {

@@ -30,7 +30,7 @@ import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
@@ -39,9 +39,14 @@ interface DiscoverLandingParams {
   id: string;
 }
 
-export function DiscoverMainRoute() {
+interface Props {
+  isDev: boolean;
+}
+
+export function DiscoverMainRoute(props: Props) {
   const history = useHistory();
   const services = useDiscoverServices();
+  const { isDev } = props;
   const {
     core,
     chrome,
@@ -74,13 +79,12 @@ export function DiscoverMainRoute() {
         const hasUserDataViewValue = await data.dataViews.hasData
           .hasUserDataView()
           .catch(() => false);
-
-        const hasESDataValue = await data.dataViews.hasData.hasESData().catch(() => false);
-
+        const hasESDataValue =
+          isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
         setHasUserDataView(hasUserDataViewValue);
         setHasESData(hasESDataValue);
 
-        if (!hasUserDataViewValue || !hasESDataValue) {
+        if (!hasUserDataViewValue) {
           setShowNoDataPage(true);
           return;
         }
@@ -106,7 +110,7 @@ export function DiscoverMainRoute() {
         setError(e);
       }
     },
-    [config, data.dataViews, history, toastNotifications]
+    [config, data.dataViews, history, isDev, toastNotifications]
   );
 
   const loadSavedSearch = useCallback(async () => {
@@ -208,7 +212,7 @@ export function DiscoverMainRoute() {
 
           // We've already called this, so we can optimize the analytics services to
           // use the already-retrieved data to avoid a double-call.
-          hasESData: () => Promise.resolve(hasESData),
+          hasESData: () => Promise.resolve(isDev ? true : hasESData),
           hasUserDataView: () => Promise.resolve(hasUserDataView),
         },
       },

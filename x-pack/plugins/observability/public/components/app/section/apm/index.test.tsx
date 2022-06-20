@@ -17,7 +17,7 @@ import * as pluginContext from '../../../../hooks/use_plugin_context';
 import { HasDataContextValue } from '../../../../context/has_data_context';
 import { AppMountParameters } from '@kbn/core/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
-import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -46,13 +46,6 @@ describe('APMSection', () => {
 
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       appMountParameters: {} as AppMountParameters,
-      config: {
-        unsafe: {
-          alertingExperience: { enabled: true },
-          cases: { enabled: true },
-          rules: { enabled: true },
-        },
-      },
       core: {} as CoreStart,
       plugins: {} as ObservabilityPublicPluginsStart,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),

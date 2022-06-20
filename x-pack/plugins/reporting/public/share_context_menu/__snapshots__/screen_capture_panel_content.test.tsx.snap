@@ -15,7 +15,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     </p>
   </div>
   <div
-    class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
   <div
     class="euiFormRow"
@@ -94,7 +94,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     </span>
   </button>
   <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-ghmjhm-euiHorizontalRule-full-s"
+    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
@@ -144,7 +144,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
           class=""
         >
           <div
-            class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
             class="euiText euiText--small"
@@ -156,28 +156,24 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
             </p>
           </div>
           <div
-            class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
-            class="euiCallOut euiCallOut--danger euiCallOut--small"
+            class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger css-1flvw80-euiCallOut"
           >
-            <div
-              class="euiCallOutHeader"
+            <p
+              class="euiTitle euiCallOutHeader__title css-18vjrtd-euiTitle-xxs-euiCallOutHeader-danger"
             >
               <span
                 aria-hidden="true"
-                class="euiCallOutHeader__icon"
+                class="css-15maws8-euiCallOut__icon"
                 color="inherit"
                 data-euiicon-type="alert"
               />
-              <span
-                class="euiCallOutHeader__title"
-              >
-                Unsaved work
-              </span>
-            </div>
+              Unsaved work
+            </p>
             <div
-              class="euiText euiText--extraSmall"
+              class="euiText euiText--extraSmall css-i7i3v9-euiCallOut__description"
             >
               <div
                 class="euiTextColor euiTextColor--default"
@@ -192,7 +188,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
                   </p>
                 </div>
                 <div
-                  class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+                  class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
                 />
               </div>
             </div>
@@ -219,7 +215,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     </p>
   </div>
   <div
-    class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
   <div
     class="euiFormRow"
@@ -298,7 +294,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     </span>
   </button>
   <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-ghmjhm-euiHorizontalRule-full-s"
+    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
@@ -348,7 +344,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
           class=""
         >
           <div
-            class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
             class="euiText euiText--small"
@@ -360,28 +356,24 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
             </p>
           </div>
           <div
-            class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
-            class="euiCallOut euiCallOut--danger euiCallOut--small"
+            class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger css-1flvw80-euiCallOut"
           >
-            <div
-              class="euiCallOutHeader"
+            <p
+              class="euiTitle euiCallOutHeader__title css-18vjrtd-euiTitle-xxs-euiCallOutHeader-danger"
             >
               <span
                 aria-hidden="true"
-                class="euiCallOutHeader__icon"
+                class="css-15maws8-euiCallOut__icon"
                 color="inherit"
                 data-euiicon-type="alert"
               />
-              <span
-                class="euiCallOutHeader__title"
-              >
-                Unsaved work
-              </span>
-            </div>
+              Unsaved work
+            </p>
             <div
-              class="euiText euiText--extraSmall"
+              class="euiText euiText--extraSmall css-i7i3v9-euiCallOut__description"
             >
               <div
                 class="euiTextColor euiTextColor--default"
@@ -396,7 +388,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
                   </p>
                 </div>
                 <div
-                  class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+                  class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
                 />
               </div>
             </div>
@@ -423,7 +415,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     </p>
   </div>
   <div
-    class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
   <button
     class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton--fullWidth"
@@ -443,7 +435,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     </span>
   </button>
   <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-ghmjhm-euiHorizontalRule-full-s"
+    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
@@ -493,7 +485,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
           class=""
         >
           <div
-            class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
             class="euiText euiText--small"
@@ -505,28 +497,24 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
             </p>
           </div>
           <div
-            class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
-            class="euiCallOut euiCallOut--danger euiCallOut--small"
+            class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger css-1flvw80-euiCallOut"
           >
-            <div
-              class="euiCallOutHeader"
+            <p
+              class="euiTitle euiCallOutHeader__title css-18vjrtd-euiTitle-xxs-euiCallOutHeader-danger"
             >
               <span
                 aria-hidden="true"
-                class="euiCallOutHeader__icon"
+                class="css-15maws8-euiCallOut__icon"
                 color="inherit"
                 data-euiicon-type="alert"
               />
-              <span
-                class="euiCallOutHeader__title"
-              >
-                Unsaved work
-              </span>
-            </div>
+              Unsaved work
+            </p>
             <div
-              class="euiText euiText--extraSmall"
+              class="euiText euiText--extraSmall css-i7i3v9-euiCallOut__description"
             >
               <div
                 class="euiTextColor euiTextColor--default"
@@ -541,7 +529,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
                   </p>
                 </div>
                 <div
-                  class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+                  class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
                 />
               </div>
             </div>

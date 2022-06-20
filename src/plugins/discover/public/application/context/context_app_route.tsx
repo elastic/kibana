@@ -13,9 +13,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useIndexPattern } from '../../utils/use_index_pattern';
-import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useIndexPattern } from '../../hooks/use_index_pattern';
+import { useMainRouteBreadcrumb } from '../../hooks/use_navigation_props';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface ContextUrlParams {
   indexPatternId: string;
@@ -28,6 +28,7 @@ export function ContextAppRoute() {
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();
   const anchorId = decodeURIComponent(id);
+  const dataViewId = decodeURIComponent(indexPatternId);
   const breadcrumb = useMainRouteBreadcrumb();
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export function ContextAppRoute() {
     ]);
   }, [chrome, breadcrumb]);
 
-  const { indexPattern, error } = useIndexPattern(services.indexPatterns, indexPatternId);
+  const { indexPattern, error } = useIndexPattern(services.indexPatterns, dataViewId);
 
   if (error) {
     return (
@@ -50,15 +51,15 @@ export function ContextAppRoute() {
         iconColor="danger"
         title={
           <FormattedMessage
-            id="discover.singleDocRoute.errorTitle"
-            defaultMessage="An error occured"
+            id="discover.contextViewRoute.errorTitle"
+            defaultMessage="An error occurred"
           />
         }
         body={
           <FormattedMessage
-            id="discover.singleDocRoute.errorMessage"
-            defaultMessage="No matching index pattern for id {indexPatternId}"
-            values={{ indexPatternId }}
+            id="discover.contextViewRoute.errorMessage"
+            defaultMessage="No matching data view for id {dataViewId}"
+            values={{ dataViewId }}
           />
         }
       />

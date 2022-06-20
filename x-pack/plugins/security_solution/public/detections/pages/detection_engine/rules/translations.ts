@@ -312,6 +312,13 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_OVERWRITE_LABEL = i18n.tra
   }
 );
 
+export const BULK_EDIT_FLYOUT_FORM_DATA_VIEWS_OVERWRITE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.dataViewsOverwriteCheckboxLabel',
+  {
+    defaultMessage: 'Apply changes to rules configured with data views',
+  }
+);
+
 export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxLabel',
   {
@@ -1066,7 +1073,7 @@ export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage:
-        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}.",
+        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}. If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.",
     }
   );
 
@@ -1083,55 +1090,5 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update.',
-    }
-  );
-
-export const INTEGRATIONS_BADGE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.integrations.badgeTitle',
-  {
-    defaultMessage: 'integrations',
-  }
-);
-
-export const INTEGRATIONS_POPOVER_TITLE = (integrationsCount: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverTitle',
-    {
-      values: { integrationsCount },
-      defaultMessage:
-        'You have [{integrationsCount}] related {integrationsCount, plural, =1 {integration} other {integrations}} to your prebuilt rule',
-    }
-  );
-
-export const INTEGRATIONS_POPOVER_DESCRIPTION_INSTALLED = (installedCount: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverDescriptionInstalledTitle',
-    {
-      values: { installedCount },
-      defaultMessage:
-        'You have [{installedCount}] related {installedCount, plural, =1 {integration} other {integrations}} installed, click the link below to view the integration:',
-    }
-  );
-
-export const INTEGRATIONS_POPOVER_DESCRIPTION_UNINSTALLED = (uninstalledCount: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverDescriptionUninstalledTitle',
-    {
-      values: { uninstalledCount },
-      defaultMessage:
-        'You have [{uninstalledCount}] related {uninstalledCount, plural, =1 {integration} other {integrations}} uninstalled, click the link to add integration:',
-    }
-  );
-
-export const INTEGRATIONS_INSTALLED_VERSION_TOOLTIP = (
-  installedVersion: string,
-  targetVersion: string
-) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverDescriptionInstalledVersionTooltip',
-    {
-      values: { installedVersion, targetVersion },
-      defaultMessage:
-        'Version mismatch -- please resolve! Installed version `{installedVersion}` when target version `{targetVersion}`',
     }
   );

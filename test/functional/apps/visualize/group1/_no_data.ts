@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   const createDataView = async (dataViewName: string) => {
-    await testSubjects.setValue('createIndexPatternNameInput', dataViewName, {
+    await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
       clearWithKeyboard: true,
       typeCharByChar: true,
     });

@@ -30,7 +30,6 @@ import {
   disableFilter,
   fromKueryExpression,
   toElasticsearchQuery,
-  nodeTypes,
   buildEsQuery,
   buildQueryFromFilters,
   luceneStringToDsl,
@@ -122,7 +121,6 @@ export { isFilters };
  * @removeBy 8.1
  */
 export const esKuery = {
-  nodeTypes,
   fromKueryExpression,
   toElasticsearchQuery,
 };
