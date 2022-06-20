@@ -82,8 +82,11 @@ describe('header', () => {
 
     it('renders the button when the user has write permissions', () => {
       (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-        crud: true,
-        read: false,
+        all: true,
+        create: true,
+        update: true,
+        delete: true,
+        read: true,
       });
 
       const wrapper = mount(
@@ -97,7 +100,10 @@ describe('header', () => {
 
     it('does not render the button when the user does not have write permissions', () => {
       (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-        crud: false,
+        all: false,
+        create: false,
+        update: false,
+        delete: false,
         read: false,
       });
 

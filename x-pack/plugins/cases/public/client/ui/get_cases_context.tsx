@@ -17,14 +17,14 @@ const CasesProviderLazy: React.FC<{ value: GetCasesContextProps }> = lazy(
 
 const CasesProviderLazyWrapper = ({
   owner,
-  userCanCrud,
+  permissions,
   features,
   children,
   releasePhase,
 }: GetCasesContextProps & { children: ReactNode }) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <CasesProviderLazy value={{ owner, userCanCrud, features, releasePhase }}>
+      <CasesProviderLazy value={{ owner, permissions, features, releasePhase }}>
         {children}
       </CasesProviderLazy>
     </Suspense>

@@ -29,7 +29,7 @@ export const RelatedCases: React.FC<Props> = React.memo(({ eventId, isReadOnly }
   const [relatedCases, setRelatedCases] = useState<RelatedCaseList>([]);
   const [areCasesLoading, setAreCasesLoading] = useState(true);
   const [hasError, setHasError] = useState<boolean>(false);
-  const hasCasesReadPermissions = casePermissions?.read ?? false;
+  const hasCasesReadPermissions = casePermissions.read;
 
   const getRelatedCases = useCallback(async () => {
     let relatedCaseList: RelatedCaseList = [];

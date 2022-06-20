@@ -22,7 +22,6 @@ export interface UserActionContentToolbarProps {
   onEdit: (id: string) => void;
   onQuote: (id: string) => void;
   onDelete?: (id: string) => void;
-  userCanCrud: boolean;
 }
 
 const UserActionContentToolbarComponent = ({
@@ -36,7 +35,6 @@ const UserActionContentToolbarComponent = ({
   onEdit,
   onQuote,
   onDelete,
-  userCanCrud,
 }: UserActionContentToolbarProps) => (
   <EuiFlexGroup responsive={false} alignItems="center">
     <EuiFlexItem grow={false}>
@@ -53,7 +51,6 @@ const UserActionContentToolbarComponent = ({
         onEdit={onEdit}
         onQuote={onQuote}
         onDelete={onDelete}
-        userCanCrud={userCanCrud}
         commentMarkdown={commentMarkdown}
       />
     </EuiFlexItem>

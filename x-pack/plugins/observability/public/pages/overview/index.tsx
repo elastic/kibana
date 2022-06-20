@@ -198,7 +198,7 @@ export function OverviewPage({ routeParams }: Props) {
               >
                 <CasesContext
                   owner={[observabilityFeatureId]}
-                  userCanCrud={userPermissions?.crud ?? false}
+                  permissions={userPermissions}
                   features={{ alerts: { sync: false } }}
                 >
                   <AlertsTableTGrid

@@ -20,6 +20,7 @@ import {
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
+import { CasesPermissions, getUICapabilities } from '../../../client/helpers/capabilities';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
 
@@ -166,7 +167,7 @@ interface Capabilities {
 }
 interface UseApplicationCapabilities {
   actions: Capabilities;
-  generalCases: Capabilities;
+  generalCases: CasesPermissions;
   visualize: Capabilities;
   dashboard: Capabilities;
 }
@@ -179,14 +180,12 @@ interface UseApplicationCapabilities {
 export const useApplicationCapabilities = (): UseApplicationCapabilities => {
   const capabilities = useKibana().services?.application?.capabilities;
   const casesCapabilities = capabilities[FEATURE_ID];
+  const permissions = getUICapabilities(casesCapabilities);
 
   return useMemo(
     () => ({
       actions: { crud: !!capabilities.actions?.save, read: !!capabilities.actions?.show },
-      generalCases: {
-        crud: !!casesCapabilities?.crud_cases,
-        read: !!casesCapabilities?.read_cases,
-      },
+      generalCases: permissions,
       visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
       dashboard: {
         crud: !!capabilities.dashboard?.createNew,
@@ -200,8 +199,7 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       capabilities.dashboard?.show,
       capabilities.visualize?.save,
       capabilities.visualize?.show,
-      casesCapabilities?.crud_cases,
-      casesCapabilities?.read_cases,
+      permissions,
     ]
   );
 };

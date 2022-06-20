@@ -189,7 +189,6 @@ describe('CaseView', () => {
             onComponentInitialized: jest.fn(),
             showAlertDetails: jest.fn(),
             useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
-            userCanCrud: true,
           }}
         />
       );

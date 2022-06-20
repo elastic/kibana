@@ -67,7 +67,13 @@ jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privil
   useAlertsPrivileges: () => mockUseAlertsPrivileges(),
 }));
 
-const defaultUseCasesPermissionsReturn = { read: true };
+const defaultUseCasesPermissionsReturn = {
+  all: false,
+  create: false,
+  update: false,
+  delete: false,
+  read: true,
+};
 const mockUseCasesPermissions = jest.fn(() => defaultUseCasesPermissionsReturn);
 jest.mock('../../common/lib/kibana/hooks', () => {
   const original = jest.requireActual('../../common/lib/kibana/hooks');
@@ -190,7 +196,13 @@ describe('DetectionResponse', () => {
   });
 
   it('should not render cases data sections if user has not cases read permission', () => {
-    mockUseCasesPermissions.mockReturnValue({ read: false });
+    mockUseCasesPermissions.mockReturnValue({
+      all: false,
+      create: false,
+      update: false,
+      delete: false,
+      read: false,
+    });
 
     const result = render(
       <TestProviders>
@@ -211,7 +223,13 @@ describe('DetectionResponse', () => {
   });
 
   it('should render page permissions message if user has any read permission', () => {
-    mockUseCasesPermissions.mockReturnValue({ read: false });
+    mockUseCasesPermissions.mockReturnValue({
+      all: false,
+      create: false,
+      update: false,
+      delete: false,
+      read: false,
+    });
     mockUseAlertsPrivileges.mockReturnValue({
       hasKibanaREAD: true,
       hasIndexRead: false,

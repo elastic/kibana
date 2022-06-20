@@ -20,7 +20,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
   const { cases: casesUi } = useKibana().services;
 
   const casePermissions = useGetUserCasesPermissions();
-  const hasWritePermissions = casePermissions?.crud ?? false;
+  const hasWritePermissions = casePermissions.create;
 
   const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
     onClose,

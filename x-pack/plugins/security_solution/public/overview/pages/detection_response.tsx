@@ -53,7 +53,7 @@ const DetectionResponseComponent = () => {
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
   const { signalIndexName } = useSignalIndex();
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
-  const canReadCases = useGetUserCasesPermissions()?.read;
+  const canReadCases = useGetUserCasesPermissions().read;
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
   if (!canReadAlerts && !canReadCases) {

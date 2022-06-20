@@ -44,6 +44,10 @@ describe('Related Cases', () => {
     test('should not show related cases when user does not have permissions', () => {
       (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
         read: false,
+        update: false,
+        create: false,
+        delete: false,
+        all: false,
       });
       act(() => {
         render(
@@ -60,6 +64,10 @@ describe('Related Cases', () => {
     beforeEach(() => {
       (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
         read: true,
+        update: false,
+        create: false,
+        delete: false,
+        all: false,
       });
     });
 

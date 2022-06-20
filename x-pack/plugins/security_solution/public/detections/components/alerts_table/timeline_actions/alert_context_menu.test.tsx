@@ -63,7 +63,10 @@ jest.mock('../../../../common/lib/kibana', () => ({
     },
   }),
   useGetUserCasesPermissions: jest.fn().mockReturnValue({
-    crud: true,
+    all: true,
+    create: true,
+    update: true,
+    delete: true,
     read: true,
   }),
 }));

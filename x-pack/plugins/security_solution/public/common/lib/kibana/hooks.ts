@@ -147,20 +147,35 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
 };
 
 export interface UseGetUserCasesPermissions {
-  crud: boolean;
+  all: boolean;
+  create: boolean;
   read: boolean;
+  update: boolean;
+  delete: boolean;
 }
 
 export const useGetUserCasesPermissions = () => {
-  const [casesPermissions, setCasesPermissions] = useState<UseGetUserCasesPermissions | null>(null);
+  const [casesPermissions, setCasesPermissions] = useState<UseGetUserCasesPermissions>({
+    all: false,
+    create: false,
+    read: false,
+    update: false,
+    delete: false,
+  });
   const uiCapabilities = useKibana().services.application.capabilities;
+  const casesCapabilities = useKibana().services.cases.helpers.getUICapabilities(
+    uiCapabilities[CASES_FEATURE_ID]
+  );
 
   useEffect(() => {
     setCasesPermissions({
-      crud: !!uiCapabilities[CASES_FEATURE_ID]?.crud_cases,
-      read: !!uiCapabilities[CASES_FEATURE_ID]?.read_cases,
+      all: casesCapabilities.all,
+      create: casesCapabilities.create,
+      read: casesCapabilities.read,
+      update: casesCapabilities.update,
+      delete: casesCapabilities.delete,
     });
-  }, [uiCapabilities]);
+  }, [casesCapabilities]);
 
   return casesPermissions;
 };

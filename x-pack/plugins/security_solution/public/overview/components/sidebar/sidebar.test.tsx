@@ -37,7 +37,10 @@ describe('Sidebar', () => {
 
   it('does not render the recently created cases section when the user does not have read permissions', async () => {
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: false,
+      all: false,
+      create: false,
+      update: false,
+      delete: false,
       read: false,
     });
 
@@ -54,7 +57,10 @@ describe('Sidebar', () => {
 
   it('does render the recently created cases section when the user has read permissions', async () => {
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: false,
+      all: false,
+      create: false,
+      update: false,
+      delete: false,
       read: true,
     });
 

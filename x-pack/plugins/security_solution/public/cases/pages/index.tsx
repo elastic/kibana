@@ -147,7 +147,7 @@ const CaseContainerComponent: React.FC = () => {
             },
           },
           useFetchAlertData,
-          userCanCrud: userPermissions?.crud ?? false,
+          permissions: userPermissions,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />

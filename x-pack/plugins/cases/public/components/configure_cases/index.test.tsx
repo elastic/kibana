@@ -10,7 +10,7 @@ import { ReactWrapper, mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { ConfigureCases } from '.';
-import { TestProviders } from '../../common/mock';
+import { noCasesPermissions, TestProviders } from '../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 
@@ -191,7 +191,7 @@ describe('ConfigureCases', () => {
     test('it disables correctly when the user cannot crud', () => {
       const newWrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
-        wrappingComponentProps: { userCanCrud: false },
+        wrappingComponentProps: { permissions: noCasesPermissions() },
       });
 
       expect(newWrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')).toBe(

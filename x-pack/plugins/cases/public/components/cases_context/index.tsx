@@ -25,14 +25,20 @@ export interface CasesContextValue {
   owner: string[];
   appId: string;
   appTitle: string;
-  userCanCrud: boolean;
+  permissions: {
+    all: boolean;
+    create: boolean;
+    read: boolean;
+    update: boolean;
+    delete: boolean;
+  };
   basePath: string;
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
 }
 
-export interface CasesContextProps extends Pick<CasesContextValue, 'owner' | 'userCanCrud'> {
+export interface CasesContextProps extends Pick<CasesContextValue, 'owner' | 'permissions'> {
   basePath?: string;
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
@@ -47,13 +53,13 @@ export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' 
 
 export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   children,
-  value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH, features = {}, releasePhase = 'ga' },
+  value: { owner, permissions, basePath = DEFAULT_BASE_PATH, features = {}, releasePhase = 'ga' },
 }) => {
   const { appId, appTitle } = useApplication();
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
   const [value, setValue] = useState<CasesContextStateValue>(() => ({
     owner,
-    userCanCrud,
+    permissions,
     basePath,
     /**
      * The empty object at the beginning avoids the mutation
@@ -69,7 +75,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   }));
 
   /**
-   * `userCanCrud` prop may change by the parent plugin.
+   * `permissions` prop may change by the parent plugin.
    * `appId` and `appTitle` are dynamically retrieved from kibana context.
    * We need to update the state if any of these values change, the rest of props are never updated.
    */
@@ -79,10 +85,10 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
         ...prev,
         appId,
         appTitle,
-        userCanCrud,
+        permissions,
       }));
     }
-  }, [appTitle, appId, userCanCrud]);
+  }, [appTitle, appId, permissions]);
 
   return isCasesContextValue(value) ? (
     <CasesContext.Provider value={value}>
@@ -94,7 +100,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
 CasesProvider.displayName = 'CasesProvider';
 
 function isCasesContextValue(value: CasesContextStateValue): value is CasesContextValue {
-  return value.appId != null && value.appTitle != null && value.userCanCrud != null;
+  return value.appId != null && value.appTitle != null && value.permissions != null;
 }
 
 // eslint-disable-next-line import/no-default-export

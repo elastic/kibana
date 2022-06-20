@@ -17,7 +17,6 @@ const props: UserActionContentToolbarProps = {
   id: '1',
   editLabel: 'edit',
   quoteLabel: 'quote',
-  userCanCrud: true,
   isLoading: false,
   onEdit: jest.fn(),
   onQuote: jest.fn(),

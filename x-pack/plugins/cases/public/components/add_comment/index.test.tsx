@@ -29,7 +29,7 @@ const createAttachments = jest.fn();
 const addCommentProps: AddCommentProps = {
   id: 'newComment',
   caseId: '1234',
-  userCanCrud: true,
+  userCanCreate: true,
   onCommentSaving,
   onCommentPosted,
   showLoading: false,
@@ -121,7 +121,7 @@ describe('AddComment ', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <AddComment {...{ ...addCommentProps, userCanCrud: false }} />
+        <AddComment {...{ ...addCommentProps, userCanCreate: false }} />
       </TestProviders>
     );
 

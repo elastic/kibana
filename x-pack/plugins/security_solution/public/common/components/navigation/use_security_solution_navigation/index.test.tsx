@@ -151,8 +151,11 @@ describe('useSecuritySolutionNavigation', () => {
     describe('cases', () => {
       it('should display the cases navigation item when the user has read permissions', () => {
         (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-          crud: true,
           read: true,
+          update: true,
+          create: true,
+          delete: true,
+          all: true,
         });
 
         const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
@@ -179,8 +182,11 @@ describe('useSecuritySolutionNavigation', () => {
 
       it('should not display the cases navigation item when the user does not have read permissions', () => {
         (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-          crud: false,
           read: false,
+          update: false,
+          create: false,
+          delete: false,
+          all: false,
         });
 
         const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(

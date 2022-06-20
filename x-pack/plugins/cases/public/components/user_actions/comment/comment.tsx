@@ -39,7 +39,6 @@ const getDeleteCommentUserAction = ({
 const getCreateCommentUserAction = ({
   userAction,
   comment,
-  userCanCrud,
   commentRefs,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -65,7 +64,6 @@ const getCreateCommentUserAction = ({
     case CommentType.user:
       const userBuilder = createUserAttachmentUserActionBuilder({
         comment,
-        userCanCrud,
         outlined: comment.id === selectedOutlineCommentId,
         isEdit: manageMarkdownEditIds.includes(comment.id),
         commentRefs,
@@ -104,7 +102,6 @@ const getCreateCommentUserAction = ({
 export const createCommentUserActionBuilder: UserActionBuilder = ({
   caseData,
   userAction,
-  userCanCrud,
   commentRefs,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -137,7 +134,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       const commentAction = getCreateCommentUserAction({
         userAction: commentUserAction,
         comment,
-        userCanCrud,
         commentRefs,
         manageMarkdownEditIds,
         selectedOutlineCommentId,

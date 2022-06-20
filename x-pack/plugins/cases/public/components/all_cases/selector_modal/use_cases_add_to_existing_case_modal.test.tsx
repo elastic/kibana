@@ -57,7 +57,13 @@ describe('use cases add to existing case modal hook', () => {
       <CasesContext.Provider
         value={{
           owner: ['test'],
-          userCanCrud: true,
+          permissions: {
+            all: true,
+            create: true,
+            read: true,
+            update: true,
+            delete: true,
+          },
           appId: 'test',
           appTitle: 'jest',
           basePath: '/jest',

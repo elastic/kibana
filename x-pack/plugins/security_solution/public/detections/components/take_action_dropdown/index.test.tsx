@@ -41,7 +41,13 @@ jest.mock('../user_info', () => ({
 }));
 
 jest.mock('../../../common/lib/kibana');
-(useGetUserCasesPermissions as jest.Mock).mockReturnValue({ crud: true });
+(useGetUserCasesPermissions as jest.Mock).mockReturnValue({
+  all: true,
+  create: true,
+  update: true,
+  delete: true,
+  read: true,
+});
 
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),

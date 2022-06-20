@@ -163,7 +163,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
       {isCaseModalOpen &&
         cases.ui.getAllCasesSelectorModal({
           onRowClick,
-          userCanCrud: userPermissions?.crud ?? false,
+          permissions: userPermissions,
           owner: [APP_ID],
         })}
     </>

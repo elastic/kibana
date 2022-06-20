@@ -264,7 +264,7 @@ function AlertsPage() {
         <EuiFlexItem>
           <CasesContext
             owner={[observabilityFeatureId]}
-            userCanCrud={userPermissions?.crud ?? false}
+            permissions={userPermissions}
             features={{ alerts: { sync: false } }}
           >
             <AlertsTableTGrid

@@ -144,7 +144,10 @@ describe('event details footer component', () => {
       },
     });
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: true,
+      all: true,
+      create: true,
+      update: true,
+      delete: true,
       read: true,
     });
   });
