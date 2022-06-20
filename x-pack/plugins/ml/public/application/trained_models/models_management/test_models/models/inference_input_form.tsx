@@ -9,7 +9,7 @@ import React, { FC, useState, useMemo } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiSpacer, EuiButton, EuiTabs, EuiTab, EuiText, EuiIconTip } from '@elastic/eui';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { ErrorMessage } from '../inference_error';
 import { OutputLoadingContent } from '../output_loading';
@@ -19,6 +19,8 @@ import type { InferrerType } from '.';
 
 interface Props {
   inferrer: InferrerType;
+  intro: string;
+  tip: string;
 }
 
 enum TAB {
@@ -26,7 +28,7 @@ enum TAB {
   RAW,
 }
 
-export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
+export const InferenceInputForm: FC<Props> = ({ inferrer, intro, tip }) => {
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
   const [errorText, setErrorText] = useState<string | null>(null);
 
@@ -46,6 +48,18 @@ export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
 
   return (
     <>
+      <EuiText>
+        <b>{intro}</b>&nbsp;
+        <EuiIconTip
+          content={tip}
+          iconProps={{
+            className: 'eui-alignTop',
+          }}
+          position="right"
+          size="s"
+        />
+      </EuiText>
+      <EuiSpacer size="m" />
       <>{inputComponent}</>
       <EuiSpacer size="m" />
       <div>
