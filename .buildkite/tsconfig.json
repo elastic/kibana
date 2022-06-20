@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./lib",
+    "target": "es2019",
+    "strict": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "removeComments": false,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "lib": ["es2020"],
+    "typeRoots": ["./node_modules/@types"],
+    "declaration": true
+  },
+  "include": ["lib/**/*"],
+  "exclude": ["**/*.test.ts", "**/vm-filesystem/**", "**/dist"]
+}

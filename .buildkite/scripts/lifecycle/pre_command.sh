@@ -7,9 +7,10 @@ source .buildkite/scripts/common/util.sh
 BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
 export BUILDKITE_TOKEN
 
-echo '--- Install buildkite dependencies'
-cd '.buildkite'
+echo '--- Install/build buildkite dependencies'
+cd '.buildkite/kibana-buildkite-library'
 retry 5 15 npm ci
+npm run build
 cd ..
 
 echo '--- Agent Debug/SSH Info'

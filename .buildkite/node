@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -euo pipefail
+
+npm --prefix .buildkite run node -r '@ts-node/register' "$@"
