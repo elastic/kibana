@@ -7,9 +7,7 @@
  */
 
 import React, { FC, createContext, useContext } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 
-import { NoDataCardProvider } from '@kbn/shared-ux-card-no-data';
 import type { SharedUxServices } from './types';
 
 // The React Context used to provide the services to the SharedUX components.
@@ -23,24 +21,9 @@ const SharedUxServicesContext = createContext<SharedUxServices | null>(null);
  * Within a plugin, you can use use the Shared UX plugin and retrieve a fully-configured
  * context from the `start` contract.
  */
-export const SharedUxServicesProvider: FC<SharedUxServices> = ({ children, ...services }) => {
-  // TODO: clintandrewhall - including the `NoDataCardProvider` here is a temporary solution
-  // to consumers using this context to populate the NoDataPage.  This will likely be removed soon,
-  // when NoDataPage is moved to its own package.
-  const currentAppId = useObservable(services.application.currentAppId$);
-  const noDataCardServices = {
-    currentAppId,
-    addBasePath: services.http.addBasePath,
-    canAccessFleet: services.permissions.canAccessFleet,
-    navigateToUrl: services.application.navigateToUrl,
-  };
-
-  return (
-    <SharedUxServicesContext.Provider value={services}>
-      <NoDataCardProvider {...noDataCardServices}>{children}</NoDataCardProvider>
-    </SharedUxServicesContext.Provider>
-  );
-};
+export const SharedUxServicesProvider: FC<SharedUxServices> = ({ children, ...services }) => (
+  <SharedUxServicesContext.Provider value={services}>{children}</SharedUxServicesContext.Provider>
+);
 
 /**
  * React hook for accessing pre-wired `SharedUxServices`.

@@ -39,8 +39,6 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//react",
   "@npm//rxjs",
-  "@npm//react-use",
-  "//packages/shared-ux/card/no_data",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -56,9 +54,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/react",
-  "@npm//react-use",
   "@npm//rxjs",
-  "//packages/shared-ux/card/no_data:npm_module_types",
 ]
 
 jsts_transpiler(

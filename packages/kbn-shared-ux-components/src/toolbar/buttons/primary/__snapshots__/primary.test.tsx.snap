@@ -44,58 +44,72 @@ exports[`<ToolbarButton /> is rendered 1`] = `
     }
   }
 >
-  <ToolbarButton
-    label="test"
+  <NoDataCardProvider
+    addBasePath={[MockFunction]}
+    canAccessFleet={true}
+    currentAppId="abc123"
+    navigateToUrl={[Function]}
   >
-    <EuiButton
-      color="primary"
-      fill={true}
-      iconSide="left"
-      size="m"
+    <RedirectAppLinksProvider
+      addBasePath={[MockFunction]}
+      canAccessFleet={true}
+      currentAppId="abc123"
+      navigateToUrl={[Function]}
     >
-      <EuiButtonDisplay
-        baseClassName="euiButton"
-        color="primary"
-        disabled={false}
-        element="button"
-        fill={true}
-        iconSide="left"
-        isDisabled={false}
-        size="m"
-        type="button"
+      <ToolbarButton
+        label="test"
       >
-        <button
-          className="euiButton euiButton--primary euiButton--fill"
-          disabled={false}
-          style={
-            Object {
-              "minWidth": undefined,
-            }
-          }
-          type="button"
+        <EuiButton
+          color="primary"
+          fill={true}
+          iconSide="left"
+          size="m"
         >
-          <EuiButtonContent
-            className="euiButton__content"
+          <EuiButtonDisplay
+            baseClassName="euiButton"
+            color="primary"
+            disabled={false}
+            element="button"
+            fill={true}
             iconSide="left"
-            textProps={
-              Object {
-                "className": "euiButton__text",
-              }
-            }
+            isDisabled={false}
+            size="m"
+            type="button"
           >
-            <span
-              className="euiButtonContent euiButton__content"
+            <button
+              className="euiButton euiButton--primary euiButton--fill"
+              disabled={false}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+              type="button"
             >
-              <span
-                className="euiButton__text"
+              <EuiButtonContent
+                className="euiButton__content"
+                iconSide="left"
+                textProps={
+                  Object {
+                    "className": "euiButton__text",
+                  }
+                }
               >
-                test
-              </span>
-            </span>
-          </EuiButtonContent>
-        </button>
-      </EuiButtonDisplay>
-    </EuiButton>
-  </ToolbarButton>
+                <span
+                  className="euiButtonContent euiButton__content"
+                >
+                  <span
+                    className="euiButton__text"
+                  >
+                    test
+                  </span>
+                </span>
+              </EuiButtonContent>
+            </button>
+          </EuiButtonDisplay>
+        </EuiButton>
+      </ToolbarButton>
+    </RedirectAppLinksProvider>
+  </NoDataCardProvider>
 </SharedUxServicesProvider>
 `;
