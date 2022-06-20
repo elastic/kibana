@@ -14,7 +14,7 @@ import { getTime } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter } from '@kbn/data-plugin/public';
 import { DiscoverAppLocatorParams } from '../../locator';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAlertUtils, QueryParams, SearchThresholdAlertParams } from './view_alert_utils';
 
 type NonNullableEntry<T> = { [K in keyof T]: NonNullable<T[keyof T]> };
