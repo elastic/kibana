@@ -11,7 +11,7 @@ import moment from 'moment-timezone';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import { search } from '@kbn/data-plugin/public';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import type { Document } from './persistence/saved_object_store';
 import type { Datasource, DatasourceMap, Visualization, StateSetter } from './types';
@@ -147,7 +147,10 @@ export function getRemoveOperation(
   return layerCount === 1 ? 'clear' : 'remove';
 }
 
-export function inferTimeField(context: BrushTriggerEvent['data'] | ClickTriggerEvent['data']) {
+export function inferTimeField(
+  datatableUtilities: DatatableUtilitiesService,
+  context: BrushTriggerEvent['data'] | ClickTriggerEvent['data']
+) {
   const tablesAndColumns =
     'table' in context
       ? [{ table: context.table, column: context.column }]
@@ -159,7 +162,7 @@ export function inferTimeField(context: BrushTriggerEvent['data'] | ClickTrigger
     .map(({ table, column }) => {
       const tableColumn = table.columns[column];
       const hasTimeRange = Boolean(
-        tableColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(tableColumn)?.timeRange
+        tableColumn && datatableUtilities.getDateHistogramMeta(tableColumn)?.timeRange
       );
       if (hasTimeRange) {
         return tableColumn.meta.field;
