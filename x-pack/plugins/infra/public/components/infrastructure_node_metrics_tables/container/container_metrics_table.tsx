@@ -109,8 +109,16 @@ function containerNodeColumns(
       name: 'Name',
       field: 'name',
       truncateText: true,
+      textOnly: true,
       render: (name: string) => {
-        return <MetricsNodeDetailsLink id={name} nodeType={'container'} timerange={timerange} />;
+        return (
+          <MetricsNodeDetailsLink
+            id={name}
+            label={name}
+            nodeType={'container'}
+            timerange={timerange}
+          />
+        );
       },
     },
     {

@@ -1394,29 +1394,29 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/apm-rum-core@^5.16.0":
-  version "5.16.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.16.0.tgz#c3f6aaaee005717f10578877a3d1c7e6894eb63f"
-  integrity sha512-5aCwlKdmitM5Jk8wR7WcCtJzejIlSaUUHOGWANvq79GDtcCIjE/yD44pft8UAYQpiI28WXCLAFvJvIQiUzl/nw==
+"@elastic/apm-rum-core@^5.17.0":
+  version "5.17.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.17.0.tgz#660b02b46cb2e98063f2438b1b41350d88f28489"
+  integrity sha512-GN1UyyeL8+AD9crKi2lR1MlariKlL5aIlsuVxR9SM1pGBBno1uVUW8Cu6KqzGpscYGf78LNdDezlc5Amx4vJbw==
   dependencies:
     error-stack-parser "^1.3.5"
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@^1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.4.1.tgz#d46913f1c3aa7f5e54d1898b644ffd7e0b75129a"
-  integrity sha512-bRyqVxe9QY40imv5u0p7q4WaXUDMs2gHewPuADC2LGiX8piNfpRXA7jj3KPD4P/045dlDsmvVjV0AELLyNipuQ==
+"@elastic/apm-rum-react@^1.4.2":
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.4.2.tgz#f9d6d80dec1ad28c469ea3a25971f81688f30a58"
+  integrity sha512-Dg+ayytBbgvmojIcsczZ3lUP0jRG7a87qFinb7xpU/B3IsO1Z0uMr9/HsGLGZSYEcGYI1+fuX7PiVn7/MK5GGw==
   dependencies:
-    "@elastic/apm-rum" "^5.11.1"
+    "@elastic/apm-rum" "^5.12.0"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^5.11.1":
-  version "5.11.1"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.11.1.tgz#ecbef3935ded2e9da338e6a749ab03b26e40c222"
-  integrity sha512-d6IxNvCxufb6JvVEH6TI7stwabJSIIBJsZVnRNaromZAgVOc5woI8mB35AH5glEPUb95KuL9CkCObHlqGpAt5w==
+"@elastic/apm-rum@^5.12.0":
+  version "5.12.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.12.0.tgz#8391e32d5d6b4f6c95b625da410b3fd4c2b50ce5"
+  integrity sha512-WEyzOhrtaExV9iFH2YxHbjuQNESunn5mMlmPfGan/rD6grzamN5vPOo844wgKy7/f5DsQoAIxFTf1VjvOaHcjA==
   dependencies:
-    "@elastic/apm-rum-core" "^5.16.0"
+    "@elastic/apm-rum-core" "^5.17.0"
 
 "@elastic/apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace":
   version "0.0.0"
@@ -1429,10 +1429,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@46.9.0":
-  version "46.9.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.9.0.tgz#45a615eb84c81d8cc5219eaa4eef8f4761c9fc05"
-  integrity sha512-RVDNgg9bZIZoq/8sfRg6n9gXHPzs4n8bAJogxnzv73f4sLcdytGqjNbdDpbDO2MPRKnA7nN92/L0Ewkp7SiU0Q==
+"@elastic/charts@46.10.1":
+  version "46.10.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.10.1.tgz#4613db939e05efa041199ba14ee4a7aa9cf2d2e7"
+  integrity sha512-zpQBmB/NnqOS14rwMbQYePErFshxnvmCW0cFSVkU2B4+2VhVBSueDZhbPbWAoOtmE61RprRxHxgT51JKCUwcAQ==
   dependencies:
     "@popperjs/core" "^2.4.0"
     bezier-easing "^2.1.0"
@@ -3015,7 +3015,23 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-analytics-browser-internal@link:bazel-bin/packages/core/analytics/core-analytics-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-analytics-browser-mocks@link:bazel-bin/packages/core/analytics/core-analytics-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-analytics-browser@link:bazel-bin/packages/core/analytics/core-analytics-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-base-browser-mocks@link:bazel-bin/packages/core/base/core-base-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -3072,6 +3088,30 @@
   uid ""
 
 "@kbn/core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-logging-server-mocks@link:bazel-bin/packages/core/logging/core-logging-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-logging-server@link:bazel-bin/packages/core/logging/core-logging-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-theme-browser-mocks@link:bazel-bin/packages/core/theme/core-theme-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser":
   version "0.0.0"
   uid ""
 
@@ -3235,6 +3275,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/scalability-simulation-generator@link:bazel-bin/packages/kbn-scalability-simulation-generator":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-autocomplete@link:bazel-bin/packages/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
@@ -3316,6 +3360,10 @@
   uid ""
 
 "@kbn/shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data":
   version "0.0.0"
   uid ""
 
@@ -6338,7 +6386,23 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-analytics-browser-internal@link:bazel-bin/packages/core/analytics/core-analytics-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-analytics-browser-mocks@link:bazel-bin/packages/core/analytics/core-analytics-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-analytics-browser@link:bazel-bin/packages/core/analytics/core-analytics-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-browser-mocks@link:bazel-bin/packages/core/base/core-base-browser-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6410,11 +6474,35 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-logging-server-mocks@link:bazel-bin/packages/core/logging/core-logging-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-logging-server@link:bazel-bin/packages/core/logging/core-logging-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-public-internal-base@link:bazel-bin/packages/core/public/internal-base/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__core-server-internal-base@link:bazel-bin/packages/core/server/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-theme-browser-mocks@link:bazel-bin/packages/core/theme/core-theme-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6554,6 +6642,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__scalability-simulation-generator@link:bazel-bin/packages/kbn-scalability-simulation-generator/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__securitysolution-autocomplete@link:bazel-bin/packages/kbn-securitysolution-autocomplete/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6635,6 +6727,10 @@
   uid ""
 
 "@types/kbn__shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data/npm_module_types":
   version "0.0.0"
   uid ""
 

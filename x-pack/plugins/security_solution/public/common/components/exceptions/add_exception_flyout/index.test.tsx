@@ -6,17 +6,15 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 import { AddExceptionFlyout } from '.';
-import { useCurrentUser } from '../../../lib/kibana';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import { useAsync } from '@kbn/securitysolution-hook-utils';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndex } from '../../../containers/source';
-import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { createIndexPatternFieldStub, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -24,24 +22,14 @@ import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { EntriesArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
+import { TestProviders } from '../../../mock';
+
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import { AlertData } from '../types';
-import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiBreakpoints: {
-      l: '1200px',
-    },
-    paddingSizes: {
-      m: '10px',
-    },
-  },
-});
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../lib/kibana');
@@ -68,7 +56,6 @@ const mockUseFetchOrCreateRuleExceptionList = useFetchOrCreateRuleExceptionList 
 >;
 const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
-const mockUseCurrentUser = useCurrentUser as jest.Mock<Partial<ReturnType<typeof useCurrentUser>>>;
 const mockUseRuleAsync = useRuleAsync as jest.Mock;
 
 describe('When the add exception modal is opened', () => {
@@ -104,7 +91,6 @@ describe('When the add exception modal is opened', () => {
         indexPatterns: stubIndexPattern,
       },
     ]);
-    mockUseCurrentUser.mockReturnValue({ username: 'test-username' });
     mockUseRuleAsync.mockImplementation(() => ({
       rule: getRulesSchemaMock(),
     }));
@@ -126,7 +112,7 @@ describe('When the add exception modal is opened', () => {
         },
       ]);
       wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <TestProviders>
           <AddExceptionFlyout
             ruleId={'123'}
             ruleIndices={[]}
@@ -135,7 +121,7 @@ describe('When the add exception modal is opened', () => {
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
           />
-        </ThemeProvider>
+        </TestProviders>
       );
     });
     it('should show the loading spinner', () => {
@@ -147,7 +133,7 @@ describe('When the add exception modal is opened', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
       wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <TestProviders>
           <AddExceptionFlyout
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
@@ -156,7 +142,7 @@ describe('When the add exception modal is opened', () => {
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
           />
-        </ThemeProvider>
+        </TestProviders>
       );
       const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() => callProps.onChange({ exceptionItems: [] }));
@@ -191,7 +177,7 @@ describe('When the add exception modal is opened', () => {
         file: { path: 'test/path' },
       };
       wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <TestProviders>
           <AddExceptionFlyout
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
@@ -201,7 +187,7 @@ describe('When the add exception modal is opened', () => {
             onConfirm={jest.fn()}
             alertData={alertDataMock}
           />
-        </ThemeProvider>
+        </TestProviders>
       );
       const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() =>
@@ -251,7 +237,7 @@ describe('When the add exception modal is opened', () => {
         file: { path: 'test/path' },
       };
       wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <TestProviders>
           <AddExceptionFlyout
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
@@ -261,7 +247,7 @@ describe('When the add exception modal is opened', () => {
             onConfirm={jest.fn()}
             alertData={alertDataMock}
           />
-        </ThemeProvider>
+        </TestProviders>
       );
       const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() =>
@@ -312,7 +298,7 @@ describe('When the add exception modal is opened', () => {
         file: { path: 'test/path' },
       };
       wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <TestProviders>
           <AddExceptionFlyout
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
@@ -322,7 +308,7 @@ describe('When the add exception modal is opened', () => {
             onConfirm={jest.fn()}
             alertData={alertDataMock}
           />
-        </ThemeProvider>
+        </TestProviders>
       );
       const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() =>
@@ -359,24 +345,26 @@ describe('When the add exception modal is opened', () => {
 
   describe('when there is bulk-closeable alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
+    const stubbed = [
+      { name: 'file.path.caseless', type: 'string', aggregatable: true, searchable: true },
+      { name: 'subject_name', type: 'string', aggregatable: true, searchable: true },
+      { name: 'trusted', type: 'string', aggregatable: true, searchable: true },
+      { name: 'file.hash.sha256', type: 'string', aggregatable: true, searchable: true },
+      { name: 'event.code', type: 'string', aggregatable: true, searchable: true },
+    ].map((item) => createIndexPatternFieldStub({ spec: item }));
     let callProps: {
       onChange: (props: { exceptionItems: ExceptionListItemSchema[] }) => void;
       exceptionListItems: ExceptionListItemSchema[];
     };
     beforeEach(async () => {
+      const stubbedIndexPattern = stubIndexPattern;
       // Mocks the index patterns to contain the pre-populated endpoint fields so that the exception qualifies as bulk closable
       mockUseFetchIndex.mockImplementation(() => [
         false,
         {
           indexPatterns: {
-            ...stubIndexPattern,
-            fields: [
-              { name: 'file.path.caseless', type: 'string' },
-              { name: 'subject_name', type: 'string' },
-              { name: 'trusted', type: 'string' },
-              { name: 'file.hash.sha256', type: 'string' },
-              { name: 'event.code', type: 'string' },
-            ],
+            ...stubbedIndexPattern,
+            fields: stubbed,
           },
         },
       ]);
@@ -385,25 +373,28 @@ describe('When the add exception modal is opened', () => {
         _id: 'test-id',
         file: { path: 'test/path' },
       };
-      wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <AddExceptionFlyout
-            ruleId={'123'}
-            ruleIndices={['filebeat-*']}
-            ruleName={ruleName}
-            exceptionListType={'endpoint'}
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
-            alertData={alertDataMock}
-          />
-        </ThemeProvider>
-      );
-      callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-      await waitFor(() =>
-        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
-      );
+      await act(async () => {
+        wrapper = mount(
+          <TestProviders>
+            <AddExceptionFlyout
+              ruleId={'123'}
+              ruleIndices={['filebeat-*']}
+              ruleName={ruleName}
+              exceptionListType={'endpoint'}
+              onCancel={jest.fn()}
+              onConfirm={jest.fn()}
+              alertData={alertDataMock}
+            />
+          </TestProviders>
+        );
+      });
+      await waitFor(() => {
+        callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+
+        return callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
+      });
     });
-    it('has the add exception button enabled', () => {
+    it('has the add exception button enabled', async () => {
       expect(
         wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
       ).not.toBeDisabled();
@@ -456,7 +447,7 @@ describe('When the add exception modal is opened', () => {
 
   test('when there are exception builder errors submit button is disabled', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <AddExceptionFlyout
           ruleId={'123'}
           ruleIndices={['filebeat-*']}
@@ -465,7 +456,7 @@ describe('When the add exception modal is opened', () => {
           onCancel={jest.fn()}
           onConfirm={jest.fn()}
         />
-      </ThemeProvider>
+      </TestProviders>
     );
     const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
     await waitFor(() => callProps.onChange({ exceptionItems: [], errorExists: true }));
