@@ -9,13 +9,9 @@ import { uniq } from 'lodash';
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectOption } from '@elastic/eui';
-import { AdditionalEmailServices, InvalidEmailReason } from '@kbn/actions-plugin/common';
-import {
-  ActionTypeModel,
-  ConnectorValidationResult,
-  GenericValidationResult,
-} from '../../../../types';
-import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
+import { InvalidEmailReason } from '@kbn/actions-plugin/common';
+import { ActionTypeModel, GenericValidationResult } from '../../../../types';
+import { EmailActionParams, EmailConfig, EmailSecrets } from '../types';
 import { RegistrationServices } from '..';
 
 const emailServices: EuiSelectOption[] = [
@@ -99,84 +95,6 @@ export function getActionType(
         defaultMessage: 'Send to email',
       }
     ),
-    validateConnector: async (
-      action: EmailActionConnector
-    ): Promise<
-      ConnectorValidationResult<Omit<EmailConfig, 'secure' | 'hasAuth'>, EmailSecrets>
-    > => {
-      const translations = await import('./translations');
-      const configErrors = {
-        from: new Array<string>(),
-        port: new Array<string>(),
-        host: new Array<string>(),
-        service: new Array<string>(),
-        clientId: new Array<string>(),
-        tenantId: new Array<string>(),
-      };
-      const secretsErrors = {
-        user: new Array<string>(),
-        password: new Array<string>(),
-        clientSecret: new Array<string>(),
-      };
-
-      const validationResult = {
-        config: { errors: configErrors },
-        secrets: { errors: secretsErrors },
-      };
-      if (!action.config.from) {
-        configErrors.from.push(translations.SENDER_REQUIRED);
-      } else {
-        const validatedEmail = services.validateEmailAddresses([action.config.from])[0];
-        if (!validatedEmail.valid) {
-          const message =
-            validatedEmail.reason === InvalidEmailReason.notAllowed
-              ? translations.getNotAllowedEmailAddress(action.config.from)
-              : translations.getInvalidEmailAddress(action.config.from);
-          configErrors.from.push(message);
-        }
-      }
-      if (action.config.service !== AdditionalEmailServices.EXCHANGE) {
-        if (!action.config.port) {
-          configErrors.port.push(translations.PORT_REQUIRED);
-        }
-        if (!action.config.host) {
-          configErrors.host.push(translations.HOST_REQUIRED);
-        }
-        if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-          secretsErrors.user.push(translations.USERNAME_REQUIRED);
-        }
-        if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-          secretsErrors.password.push(translations.PASSWORD_REQUIRED);
-        }
-      } else {
-        if (!action.config.clientId) {
-          configErrors.clientId.push(translations.CLIENT_ID_REQUIRED);
-        }
-        if (!action.config.tenantId) {
-          configErrors.tenantId.push(translations.TENANT_ID_REQUIRED);
-        }
-        if (!action.secrets.clientSecret) {
-          secretsErrors.clientSecret.push(translations.CLIENT_SECRET_REQUIRED);
-        }
-      }
-      if (!action.config.service) {
-        configErrors.service.push(translations.SERVICE_REQUIRED);
-      }
-      if (action.secrets.user && !action.secrets.password) {
-        secretsErrors.password.push(translations.PASSWORD_REQUIRED_FOR_USER_USED);
-      }
-      if (!action.secrets.user && action.secrets.password) {
-        secretsErrors.user.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredUserText',
-            {
-              defaultMessage: 'Username is required when password is used.',
-            }
-          )
-        );
-      }
-      return validationResult;
-    },
     validateParams: async (
       actionParams: EmailActionParams
     ): Promise<GenericValidationResult<EmailActionParams>> => {
