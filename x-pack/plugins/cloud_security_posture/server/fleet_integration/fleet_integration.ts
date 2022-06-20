@@ -73,7 +73,7 @@ export const removeCspRulesInstancesCallback = async (
       type: CSP_RULE_SAVED_OBJECT_TYPE,
       filter: filterByPackagePolicy({
         packagePolicyId: deletedPackagePolicy.id,
-        policyId: deletedPackagePolicy.policy_id as string,
+        policyId: deletedPackagePolicy.policy_id,
       }),
       perPage: 10000,
     });

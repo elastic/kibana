@@ -27,6 +27,8 @@ export const filterByPackagePolicy = ({
   policyId,
 }: {
   packagePolicyId: string;
-  policyId: string;
+  policyId?: string;
 }): string =>
-  `${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.policy_id: "${policyId}" AND ${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.package_policy_id: "${packagePolicyId}"`;
+  `${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.package_policy_id: "${packagePolicyId}"${
+    policyId ? ` AND ${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.policy_id: "${policyId}"` : ''
+  }`;
