@@ -12,6 +12,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { isPromise } from '@kbn/std';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { loggingSystemMock, loggingServiceMock } from '@kbn/core-logging-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -19,8 +20,6 @@ import type {
   StartServicesAccessor,
   CorePreboot,
 } from '.';
-import { loggingSystemMock } from './logging/logging_system.mock';
-import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
 import { httpResourcesMock } from './http_resources/http_resources_service.mock';
@@ -43,12 +42,12 @@ import { prebootServiceMock } from './preboot/preboot_service.mock';
 import { analyticsServiceMock } from './analytics/analytics_service.mock';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
+export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 export { httpServerMock } from './http/http_server.mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
-export { loggingSystemMock } from './logging/logging_system.mock';
 export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
