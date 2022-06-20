@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
 import { FormatFactory } from '../../../common';
@@ -42,6 +43,7 @@ export const idPrefix = htmlIdGenerator()();
 
 export function DimensionEditor(
   props: VisualizationDimensionEditorProps<State> & {
+    datatableUtilities: DatatableUtilitiesService;
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
   }

@@ -17,6 +17,7 @@ import type {
   XYReferenceLineLayerConfig,
   SeriesType,
 } from './types';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
@@ -68,6 +69,7 @@ const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 const xyVisualization = getXyVisualization({
+  datatableUtilities: createDatatableUtilitiesMock(),
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
   useLegacyTimeAxis: false,

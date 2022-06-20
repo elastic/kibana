@@ -11,6 +11,7 @@ import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -76,12 +77,14 @@ import { DimensionTrigger } from '../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 
 export const getXyVisualization = ({
+  datatableUtilities,
   paletteService,
   fieldFormats,
   useLegacyTimeAxis,
   kibanaTheme,
   eventAnnotationService,
 }: {
+  datatableUtilities: DatatableUtilitiesService;
   paletteService: PaletteRegistry;
   eventAnnotationService: EventAnnotationServiceType;
   fieldFormats: FieldFormatsStart;
@@ -500,6 +503,7 @@ export const getXyVisualization = ({
   renderDimensionEditor(domElement, props) {
     const allProps = {
       ...props,
+      datatableUtilities,
       formatFactory: fieldFormats.deserialize,
       paletteService,
     };
