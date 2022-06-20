@@ -7,14 +7,9 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-// import { MlDashboardJobSelectionTable } from './dashboard_job_selection_table';
 
 export function MachineLearningLensVisualizationsProvider({ getService }: FtrProviderContext) {
-  // const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  // const find = getService('find');
-  // const dashboardAddPanel = getService('dashboardAddPanel');
-  // const PageObjects = getPageObjects(['discover']);
 
   return {
     async clickCreateMLJobMenuAction() {
