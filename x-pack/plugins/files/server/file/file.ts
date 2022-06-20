@@ -135,7 +135,8 @@ export class File<M = unknown> implements IFile {
       fileKind,
       alt,
       meta,
-    }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown },
+      mime,
+    }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown; mime?: string },
     internalFileService: InternalFileService
   ) {
     const fileSO = await internalFileService.createSO({
@@ -144,6 +145,7 @@ export class File<M = unknown> implements IFile {
       name,
       alt,
       meta,
+      mime,
     });
 
     const file = internalFileService.toFile(fileSO, fileKind);
