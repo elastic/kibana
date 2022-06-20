@@ -5,39 +5,47 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
-import type { MetricsMap, SortState, UseNodeMetricsTableOptions } from '../shared';
-import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
+import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
+import {
+  metricsToApiOptions,
+  useInfrastructureNodeMetrics,
+  createMetricByFieldLookup,
+} from '../shared';
 
 type PodMetricsField =
   | 'kubernetes.pod.start_time'
   | 'kubernetes.pod.cpu.usage.node.pct'
   | 'kubernetes.pod.memory.usage.bytes';
 
-const podMetricsMap: MetricsMap<PodMetricsField> = {
-  'kubernetes.pod.start_time': {
-    aggregation: 'max',
-    field: 'kubernetes.pod.start_time',
+const podMetricsQueryConfig: MetricsQueryOptions<PodMetricsField> = {
+  sourceFilter: {
+    term: {
+      'event.dataset': 'kubernetes.pod',
+    },
   },
-  'kubernetes.pod.cpu.usage.node.pct': {
-    aggregation: 'avg',
-    field: 'kubernetes.pod.cpu.usage.node.pct',
-  },
-  'kubernetes.pod.memory.usage.bytes': {
-    aggregation: 'avg',
-    field: 'kubernetes.pod.memory.usage.bytes',
+  groupByField: ['kubernetes.pod.uid', 'kubernetes.pod.name'],
+  metricsMap: {
+    'kubernetes.pod.start_time': {
+      aggregation: 'max',
+      field: 'kubernetes.pod.start_time',
+    },
+    'kubernetes.pod.cpu.usage.node.pct': {
+      aggregation: 'avg',
+      field: 'kubernetes.pod.cpu.usage.node.pct',
+    },
+    'kubernetes.pod.memory.usage.bytes': {
+      aggregation: 'avg',
+      field: 'kubernetes.pod.memory.usage.bytes',
+    },
   },
 };
 
-const { options: podMetricsOptions, metricByField } = metricsToApiOptions(podMetricsMap, [
-  'kubernetes.pod.uid',
-  'kubernetes.pod.name',
-]);
-export { metricByField };
+export const metricByField = createMetricByFieldLookup(podMetricsQueryConfig.metricsMap);
 
 export interface PodNodeMetricsRow {
   id: string;
@@ -54,6 +62,11 @@ export function usePodMetricsTable({ timerange, filterClauseDsl }: UseNodeMetric
     direction: 'desc',
   });
 
+  const { options: podMetricsOptions } = useMemo(
+    () => metricsToApiOptions(podMetricsQueryConfig, filterClauseDsl),
+    [filterClauseDsl]
+  );
+
   const {
     isLoading,
     nodes: pods,
@@ -61,7 +74,6 @@ export function usePodMetricsTable({ timerange, filterClauseDsl }: UseNodeMetric
   } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({
     metricsExplorerOptions: podMetricsOptions,
     timerange,
-    filterClauseDsl,
     transform: seriesToPodNodeMetricsRow,
     sortState,
     currentPageIndex,
