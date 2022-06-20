@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DryRunResult } from './use_bulk_actions_dry_run';
-import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
-import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
+import { DryRunResult } from '../use_bulk_actions_dry_run';
+import type { FilterOptions } from '../../../../../../containers/detection_engine/rules/types';
+import { convertRulesFilterToKQL } from '../../../../../../containers/detection_engine/rules/utils';
 
 interface PrepareSearchFilterProps {
   dryRunResult?: DryRunResult;
@@ -17,8 +17,8 @@ interface PrepareSearchFilterProps {
 }
 
 /**
- * helper methods to prepare search query for bulk actions based on results of previous dry run
- * to exclude failed rules from search and perform bulk action on possible successfully edited rules
+ * helper methods to prepare search params for bulk actions based on results of previous dry run
+ * It excludes failed rules from search and perform bulk action on possible successfully edited rules
  * @param {PrepareSearchFilterProps} props
  * @returns either list of ids or KQL search query (if isAllSelected === true)
  */

@@ -7,67 +7,22 @@
 
 import { useQuery, QueryClient } from 'react-query';
 
+import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
+
 import {
   BulkAction,
   BulkActionEditType,
-  BulkActionEditPayload,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
-
 import {
   performBulkAction,
   BulkActionResponse,
 } from '../../../../../containers/detection_engine/rules';
-import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
+import { computeDryRunPayload } from './utils/compute_dry_run_payload';
 
 const BULK_ACTIONS_DRY_RUN_QUERY_KEY = 'bulkActionsDryRun';
 
 export const getBulkActionsDryRunFromCache = (queryClient: QueryClient) =>
   processDryRunResult(queryClient.getQueryData<BulkActionResponse>(BULK_ACTIONS_DRY_RUN_QUERY_KEY));
-
-/**
- * helper utility that creates payload for _bulk_action API in dry mode
- * @param {BulkAction} action
- * @param {BulkActionEditType | undefined} editAction
- * @returns {BulkActionEditPayload[] | undefined}
- */
-const computeDryRunPayload = (
-  action: BulkAction,
-  editAction?: BulkActionEditType
-): BulkActionEditPayload[] | undefined => {
-  if (action !== BulkAction.edit || !editAction) {
-    return undefined;
-  }
-
-  switch (editAction) {
-    case BulkActionEditType.add_index_patterns:
-    case BulkActionEditType.delete_index_patterns:
-    case BulkActionEditType.set_index_patterns:
-      return [
-        {
-          type: editAction,
-          value: [],
-        },
-      ];
-
-    case BulkActionEditType.add_tags:
-    case BulkActionEditType.delete_tags:
-    case BulkActionEditType.set_tags:
-      return [
-        {
-          type: editAction,
-          value: [],
-        },
-      ];
-
-    case BulkActionEditType.set_timeline:
-      return [
-        {
-          type: editAction,
-          value: { timeline_id: '', timeline_title: '' },
-        },
-      ];
-  }
-};
 
 export interface DryRunResult {
   succeededRulesCount?: number;
