@@ -282,7 +282,7 @@ export class SavedSearchEmbeddable
           field,
           value,
           operator,
-          indexPattern.id!
+          indexPattern
         );
         filters = filters.map((filter) => ({
           ...filter,
