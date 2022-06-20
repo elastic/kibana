@@ -6,9 +6,11 @@
  */
 
 import { takeLeading } from 'redux-saga/effects';
+import { fetchSyntheticsMonitorAction } from '../monitor_list/actions';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import { getMonitorStatusAction } from './actions';
 import { fetchMonitorStatus } from './api';
+import { fetchSyntheticsMonitor } from '../monitor_list/api';
 
 export function* fetchMonitorStatusEffect() {
   yield takeLeading(
@@ -17,6 +19,17 @@ export function* fetchMonitorStatusEffect() {
       fetchMonitorStatus,
       getMonitorStatusAction.success,
       getMonitorStatusAction.fail
+    )
+  );
+}
+
+export function* fetchSyntheticsMonitorEffect() {
+  yield takeLeading(
+    fetchSyntheticsMonitorAction.get,
+    fetchEffectFactory(
+      fetchSyntheticsMonitor,
+      fetchSyntheticsMonitorAction.success,
+      fetchSyntheticsMonitorAction.fail
     )
   );
 }

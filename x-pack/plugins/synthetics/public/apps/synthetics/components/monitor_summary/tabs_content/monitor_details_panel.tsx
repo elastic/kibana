@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiLoadingSpinner,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
@@ -43,7 +44,7 @@ export const MonitorDetailsPanel = () => {
         <EuiDescriptionListDescription>Every 10 mins</EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{LOCATIONS_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <EuiBadge iconType="dot" color="success">
+          <EuiBadge iconType={() => <EuiIcon type="dot" color="success" />} color="hollow">
             US East
           </EuiBadge>
         </EuiDescriptionListDescription>
@@ -53,7 +54,7 @@ export const MonitorDetailsPanel = () => {
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <EuiBadge>DEV</EuiBadge>
+          <EuiBadge color="hollow">DEV</EuiBadge>
         </EuiDescriptionListDescription>
       </EuiDescriptionList>
     </>

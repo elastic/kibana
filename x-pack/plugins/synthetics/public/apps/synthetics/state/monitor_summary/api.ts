@@ -6,8 +6,8 @@
  */
 
 import { apiService } from '../../../../utils/api_service';
-import { Ping } from '../../../../../common/runtime_types';
-import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { Ping, SyntheticsMonitor } from '../../../../../common/runtime_types';
+import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface QueryParams {
   monitorId: string;
@@ -17,4 +17,8 @@ export interface QueryParams {
 
 export const fetchMonitorStatus = async (params: QueryParams): Promise<Ping> => {
   return await apiService.get(SYNTHETICS_API_URLS.MONITOR_STATUS, { ...params });
+};
+
+export const fetchSyntheticsMonitor = async (monitorId: string): Promise<SyntheticsMonitor> => {
+  return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`);
 };
