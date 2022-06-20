@@ -54,6 +54,8 @@ async function creatHelloWorldContainerAndEmbeddable(
   const slowContactCardFactory = new SlowContactCardEmbeddableFactory({
     execAction: uiActions.executeTriggerActions,
   });
+  const contactCardCreateSpy = jest.spyOn(slowContactCardFactory, 'create');
+
   const helloWorldFactory = new HelloWorldEmbeddableFactoryDefinition();
 
   setup.registerEmbeddableFactory(filterableFactory.type, filterableFactory);
@@ -90,7 +92,17 @@ async function creatHelloWorldContainerAndEmbeddable(
     throw new Error('Error adding embeddable');
   }
 
-  return { container, embeddable, coreSetup, coreStart, setup, start, uiActions, testPanel };
+  return {
+    setup,
+    start,
+    coreSetup,
+    coreStart,
+    testPanel,
+    container,
+    uiActions,
+    embeddable,
+    contactCardCreateSpy,
+  };
 }
 
 describe('container initialization', () => {
@@ -128,9 +140,20 @@ describe('container initialization', () => {
     done();
   });
 
+  it('initializes embeddables once and only once with multiple input updates', async (done) => {
+    const { container, contactCardCreateSpy } = await creatHelloWorldContainerAndEmbeddable({
+      id: 'hello',
+      panels,
+    });
+    container.updateInput({ lastReloadRequestTime: 1 });
+    container.updateInput({ lastReloadRequestTime: 2 });
+    expect(contactCardCreateSpy).toHaveBeenCalledTimes(4);
+    done();
+  });
+
   it('initializes embeddables in order', async (done) => {
     const childIdInitializeOrder = ['456', '123', '789'];
-    const { container } = await creatHelloWorldContainerAndEmbeddable(
+    const { contactCardCreateSpy } = await creatHelloWorldContainerAndEmbeddable(
       {
         id: 'hello',
         panels,
@@ -139,24 +162,20 @@ describe('container initialization', () => {
       { childIdInitializeOrder }
     );
 
-    const onPanelAddedMock = jest.spyOn(
-      container as unknown as { onPanelAdded: () => {} },
-      'onPanelAdded'
-    );
-
     await new Promise((r) => setTimeout(r, 1));
     for (const [index, orderedId] of childIdInitializeOrder.entries()) {
-      expect(onPanelAddedMock).toHaveBeenNthCalledWith(index + 1, {
-        explicitInput: { id: orderedId },
-        type: 'CONTACT_CARD_EMBEDDABLE',
-      });
+      expect(contactCardCreateSpy).toHaveBeenNthCalledWith(
+        index + 1,
+        expect.objectContaining({ id: orderedId }),
+        expect.anything() // parent passed into create method
+      );
     }
     done();
   });
 
   it('initializes embeddables in order with partial order arg', async (done) => {
     const childIdInitializeOrder = ['789', 'idontexist'];
-    const { container } = await creatHelloWorldContainerAndEmbeddable(
+    const { contactCardCreateSpy } = await creatHelloWorldContainerAndEmbeddable(
       {
         id: 'hello',
         panels,
@@ -166,34 +185,26 @@ describe('container initialization', () => {
     );
     const expectedInitializeOrder = ['789', '123', '456'];
 
-    const onPanelAddedMock = jest.spyOn(
-      container as unknown as { onPanelAdded: () => {} },
-      'onPanelAdded'
-    );
-
     await new Promise((r) => setTimeout(r, 1));
     for (const [index, orderedId] of expectedInitializeOrder.entries()) {
-      expect(onPanelAddedMock).toHaveBeenNthCalledWith(index + 1, {
-        explicitInput: { id: orderedId },
-        type: 'CONTACT_CARD_EMBEDDABLE',
-      });
+      expect(contactCardCreateSpy).toHaveBeenNthCalledWith(
+        index + 1,
+        expect.objectContaining({ id: orderedId }),
+        expect.anything() // parent passed into create method
+      );
     }
     done();
   });
 
   it('initializes embeddables in order, awaiting each', async (done) => {
     const childIdInitializeOrder = ['456', '123', '789'];
-    const { container } = await creatHelloWorldContainerAndEmbeddable(
+    const { container, contactCardCreateSpy } = await creatHelloWorldContainerAndEmbeddable(
       {
         id: 'hello',
         panels,
       },
       {},
       { childIdInitializeOrder, initializeSequentially: true }
-    );
-    const onPanelAddedMock = jest.spyOn(
-      container as unknown as { onPanelAdded: () => {} },
-      'onPanelAdded'
     );
 
     const untilEmbeddableLoadedMock = jest.spyOn(container, 'untilEmbeddableLoaded');
@@ -202,10 +213,11 @@ describe('container initialization', () => {
 
     for (const [index, orderedId] of childIdInitializeOrder.entries()) {
       await container.untilEmbeddableLoaded(orderedId);
-      expect(onPanelAddedMock).toHaveBeenNthCalledWith(index + 1, {
-        explicitInput: { id: orderedId },
-        type: 'CONTACT_CARD_EMBEDDABLE',
-      });
+      expect(contactCardCreateSpy).toHaveBeenNthCalledWith(
+        index + 1,
+        expect.objectContaining({ id: orderedId }),
+        expect.anything() // parent passed into create method
+      );
       expect(untilEmbeddableLoadedMock).toHaveBeenCalledWith(orderedId);
     }
     done();

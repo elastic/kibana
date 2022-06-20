@@ -9,7 +9,7 @@
 import uuid from 'uuid';
 import { isEqual, xor } from 'lodash';
 import { merge, Subscription } from 'rxjs';
-import { pairwise, take, delay } from 'rxjs/operators';
+import { pairwise, startWith } from 'rxjs/operators';
 
 import {
   Embeddable,
@@ -58,20 +58,7 @@ export abstract class Container<
     super(input, output, parent);
     this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
 
-    // initialize all children on the first input change. Delayed so it is run after the constructor is finished.
-    this.getInput$()
-      .pipe(delay(0), take(1))
-      .subscribe(() => {
-        this.initializeChildEmbeddables(input, settings);
-      });
-
-    // on all subsequent input changes, diff and update children on changes.
-    this.subscription = this.getInput$()
-      // At each update event, get both the previous and current state.
-      .pipe(pairwise())
-      .subscribe(([{ panels: prevPanels }, { panels: currentPanels }]) => {
-        this.maybeUpdateChildren(currentPanels, prevPanels);
-      });
+    this.initializeChildEmbeddables(input, settings);
   }
 
   public setChildLoaded(embeddable: IEmbeddable) {
@@ -326,27 +313,58 @@ export abstract class Container<
     initialInput: TContainerInput,
     initializeSettings?: EmbeddableContainerSettings
   ) {
-    let initializeOrder = Object.keys(initialInput.panels);
-    if (initializeSettings?.childIdInitializeOrder) {
-      const initializeOrderSet = new Set<string>();
-      for (const id of [...initializeSettings.childIdInitializeOrder, ...initializeOrder]) {
-        if (!initializeOrderSet.has(id) && Boolean(this.getInput().panels[id])) {
-          initializeOrderSet.add(id);
-        }
-      }
-      initializeOrder = Array.from(initializeOrderSet);
-    }
+    // if there is no special initialization logic, we can immediately start updating children on input updates.
+    let awaitingInitialize = Boolean(
+      initializeSettings?.initializeSequentially || initializeSettings?.childIdInitializeOrder
+    );
 
-    for (const id of initializeOrder) {
-      if (initializeSettings?.initializeSequentially) {
-        const embeddable = await this.onPanelAdded(initialInput.panels[id]);
-        if (embeddable && !isErrorEmbeddable(embeddable)) {
-          await this.untilEmbeddableLoaded(id);
+    const initializationPromise = awaitingInitialize
+      ? new Promise<void>(async (resolveInitialization, reject) => {
+          try {
+            if (!awaitingInitialize) resolveInitialization();
+            let initializeOrder = Object.keys(initialInput.panels);
+
+            if (initializeSettings?.childIdInitializeOrder) {
+              const initializeOrderSet = new Set<string>();
+
+              for (const id of [...initializeSettings.childIdInitializeOrder, ...initializeOrder]) {
+                if (!initializeOrderSet.has(id) && Boolean(this.getInput().panels[id])) {
+                  initializeOrderSet.add(id);
+                }
+              }
+
+              initializeOrder = Array.from(initializeOrderSet);
+            }
+
+            for (const id of initializeOrder) {
+              if (initializeSettings?.initializeSequentially) {
+                const embeddable = await this.onPanelAdded(initialInput.panels[id]);
+
+                if (embeddable && !isErrorEmbeddable(embeddable)) {
+                  await this.untilEmbeddableLoaded(id);
+                }
+              } else {
+                this.onPanelAdded(initialInput.panels[id]);
+              }
+            }
+            awaitingInitialize = false;
+            resolveInitialization();
+          } catch (error) {
+            reject(error);
+            this.onFatalError(error);
+          }
+        })
+      : undefined;
+
+    this.subscription = this.getInput$()
+      // At each update event, get both the previous and current state.
+      .pipe(startWith(initialInput), pairwise())
+      .subscribe(async ([{ panels: prevPanels }, { panels: currentPanels }]) => {
+        if (awaitingInitialize) {
+          await initializationPromise;
         }
-      } else {
-        this.onPanelAdded(initialInput.panels[id]);
-      }
-    }
+        this.maybeUpdateChildren(currentPanels, prevPanels);
+      });
   }
 
   private async createAndSaveEmbeddable<
