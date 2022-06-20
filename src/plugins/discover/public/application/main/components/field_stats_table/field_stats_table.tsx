@@ -17,11 +17,11 @@ import {
   IEmbeddable,
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { SavedSearch } from '../../../../services/saved_searches';
 import type { GetStateReturn } from '../../services/discover_state';
-import { AvailableFields$, DataRefetch$ } from '../../utils/use_saved_search';
+import { AvailableFields$, DataRefetch$ } from '../../hooks/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   dataView: DataView;
