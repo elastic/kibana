@@ -7,7 +7,7 @@
  */
 
 import mockFs from 'mock-fs';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { toArray } from 'rxjs/operators';
 import { resolve } from 'path';
 import { scanPluginSearchPaths } from './scan_plugin_search_paths';
