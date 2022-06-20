@@ -7,11 +7,11 @@
 import { useKibana } from './use_kibana';
 
 export const useCspUiCapabilities = () => {
-  const uiCapabilities = useKibana().services.application?.capabilities;
+  const uiCapabilities = useKibana().services.application.capabilities;
 
   // CSP plugin is using the "Security" (siem) privilege
-  const canUpdate = uiCapabilities.siem.crud as boolean;
-  const canView = uiCapabilities.siem.show as boolean;
+  const canUpdate = !!uiCapabilities.siem.crud as boolean;
+  const canView = !!uiCapabilities.siem.show as boolean;
 
   return { canUpdate, canView };
 };

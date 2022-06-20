@@ -14,8 +14,13 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { Chance } from 'chance';
 import { TestProvider } from '../../test/test_provider';
 import { useParams } from 'react-router-dom';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 const chance = new Chance();
+
+jest.mock('../../common/hooks/use_kibana', () => ({
+  useKibana: jest.fn(),
+}));
 
 jest.mock('./use_csp_rules', () => ({
   useFindCspRules: jest.fn(),
@@ -87,6 +92,12 @@ describe('<RulesContainer />', () => {
   beforeEach(() => {
     queryClient.clear();
     jest.clearAllMocks();
+
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: { capabilities: { siem: { crud: true } } },
+      },
+    });
 
     (useParams as jest.Mock).mockReturnValue(params);
 
