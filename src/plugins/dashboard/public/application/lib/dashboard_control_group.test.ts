@@ -11,7 +11,7 @@ import { mockControlGroupInput } from '../../../../controls/common/mocks';
 import { ControlGroupContainer } from '../../../../controls/public/control_group/embeddable/control_group_container';
 import { combineDashboardFiltersWithControlGroupFilters } from './dashboard_control_group';
 
-jest.mock('@kbn/controls-plugin/public/control_group/embeddable/control_group_container');
+jest.mock('../../../../controls/public/control_group/embeddable/control_group_container');
 
 const testFilter1: Filter = {
   meta: {
