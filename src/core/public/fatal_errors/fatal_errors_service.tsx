@@ -11,9 +11,9 @@ import { render } from 'react-dom';
 import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { I18nStart } from '../i18n';
-import { InjectedMetadataSetup } from '../injected_metadata';
-import { ThemeServiceSetup } from '../theme';
 import { CoreContextProvider } from '../utils';
 import { FatalErrorsScreen } from './fatal_errors_screen';
 import { FatalErrorInfo, getErrorInfo } from './get_error_info';
@@ -21,7 +21,7 @@ import { FatalErrorInfo, getErrorInfo } from './get_error_info';
 export interface Deps {
   i18n: I18nStart;
   theme: ThemeServiceSetup;
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
 }
 
 /**

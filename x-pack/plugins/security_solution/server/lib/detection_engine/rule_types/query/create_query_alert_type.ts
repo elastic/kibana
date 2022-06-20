@@ -12,7 +12,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
-
+import { validateImmutable, validateIndexPatterns } from '../utils';
 export const createQueryAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
@@ -32,6 +32,18 @@ export const createQueryAlertType = (
           }
           return validated;
         },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
+        },
       },
     },
     actionGroups: [
@@ -50,6 +62,8 @@ export const createQueryAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
+          inputIndex,
+          runtimeMappings,
           buildRuleMessage,
           bulkCreate,
           exceptionItems,
@@ -77,6 +91,8 @@ export const createQueryAlertType = (
         tuple,
         version,
         wrapHits,
+        inputIndex,
+        runtimeMappings,
       });
       return { ...result, state };
     },

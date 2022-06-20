@@ -323,7 +323,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
+              "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
@@ -561,6 +561,18 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               },
               {
@@ -636,7 +648,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
+          "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
@@ -911,7 +923,9 @@
             "section": "def-server.RequestHandler",
             "text": "RequestHandler"
           },
-          "<P, Q, B, Context, any, { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: ",
+          "<P, Q, B, Context, any, { custom: <T extends string | Record<string, any> | Error | ",
+          "Stream",
+          " | { message: string | Error; attributes?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -919,9 +933,7 @@
             "section": "def-server.ResponseErrorAttributes",
             "text": "ResponseErrorAttributes"
           },
-          " | undefined; } | Buffer | ",
-          "Stream",
-          " | undefined>(options: ",
+          " | undefined; } | Buffer | undefined>(options: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1030,6 +1042,8 @@
             "text": "CustomHttpResponseOptions"
           },
           "<",
+          "Stream",
+          " | ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1037,11 +1051,11 @@
             "section": "def-server.ResponseError",
             "text": "ResponseError"
           },
-          " | Buffer | ",
-          "Stream",
-          ">) => ",
+          " | Buffer>) => ",
           "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
+          "<string | Error | ",
+          "Stream",
+          " | { message: string | Error; attributes?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1049,9 +1063,7 @@
             "section": "def-server.ResponseErrorAttributes",
             "text": "ResponseErrorAttributes"
           },
-          " | undefined; } | Buffer | ",
-          "Stream",
-          ">; redirected: (options: ",
+          " | undefined; } | Buffer>; redirected: (options: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1061,9 +1073,9 @@
           },
           ") => ",
           "KibanaResponse",
-          "<string | Record<string, any> | Buffer | ",
+          "<string | Record<string, any> | ",
           "Stream",
-          ">; ok: (options?: ",
+          " | Buffer>; ok: (options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1073,9 +1085,9 @@
           },
           ") => ",
           "KibanaResponse",
-          "<string | Record<string, any> | Buffer | ",
+          "<string | Record<string, any> | ",
           "Stream",
-          ">; accepted: (options?: ",
+          " | Buffer>; accepted: (options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1085,9 +1097,9 @@
           },
           ") => ",
           "KibanaResponse",
-          "<string | Record<string, any> | Buffer | ",
+          "<string | Record<string, any> | ",
           "Stream",
-          ">; noContent: (options?: ",
+          " | Buffer>; noContent: (options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1105,7 +1117,9 @@
             "section": "def-server.RequestHandler",
             "text": "RequestHandler"
           },
-          "<P, Q, B, Context, any, { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: ",
+          "<P, Q, B, Context, any, { custom: <T extends string | Record<string, any> | Error | ",
+          "Stream",
+          " | { message: string | Error; attributes?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1113,9 +1127,7 @@
             "section": "def-server.ResponseErrorAttributes",
             "text": "ResponseErrorAttributes"
           },
-          " | undefined; } | Buffer | ",
-          "Stream",
-          " | undefined>(options: ",
+          " | undefined; } | Buffer | undefined>(options: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1224,6 +1236,8 @@
             "text": "CustomHttpResponseOptions"
           },
           "<",
+          "Stream",
+          " | ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1231,11 +1245,11 @@
             "section": "def-server.ResponseError",
             "text": "ResponseError"
           },
-          " | Buffer | ",
-          "Stream",
-          ">) => ",
+          " | Buffer>) => ",
           "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
+          "<string | Error | ",
+          "Stream",
+          " | { message: string | Error; attributes?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1243,9 +1257,7 @@
             "section": "def-server.ResponseErrorAttributes",
             "text": "ResponseErrorAttributes"
           },
-          " | undefined; } | Buffer | ",
-          "Stream",
-          ">; redirected: (options: ",
+          " | undefined; } | Buffer>; redirected: (options: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1255,9 +1267,9 @@
           },
           ") => ",
           "KibanaResponse",
-          "<string | Record<string, any> | Buffer | ",
+          "<string | Record<string, any> | ",
           "Stream",
-          ">; ok: (options?: ",
+          " | Buffer>; ok: (options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1267,9 +1279,9 @@
           },
           ") => ",
           "KibanaResponse",
-          "<string | Record<string, any> | Buffer | ",
+          "<string | Record<string, any> | ",
           "Stream",
-          ">; accepted: (options?: ",
+          " | Buffer>; accepted: (options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1279,9 +1291,9 @@
           },
           ") => ",
           "KibanaResponse",
-          "<string | Record<string, any> | Buffer | ",
+          "<string | Record<string, any> | ",
           "Stream",
-          ">; noContent: (options?: ",
+          " | Buffer>; noContent: (options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1331,7 +1343,9 @@
                 "section": "def-server.RequestHandler",
                 "text": "RequestHandler"
               },
-              "<P, Q, B, Context, any, { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: ",
+              "<P, Q, B, Context, any, { custom: <T extends string | Record<string, any> | Error | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1339,9 +1353,7 @@
                 "section": "def-server.ResponseErrorAttributes",
                 "text": "ResponseErrorAttributes"
               },
-              " | undefined; } | Buffer | ",
-              "Stream",
-              " | undefined>(options: ",
+              " | undefined; } | Buffer | undefined>(options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1450,6 +1462,8 @@
                 "text": "CustomHttpResponseOptions"
               },
               "<",
+              "Stream",
+              " | ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1457,11 +1471,11 @@
                 "section": "def-server.ResponseError",
                 "text": "ResponseError"
               },
-              " | Buffer | ",
-              "Stream",
-              ">) => ",
+              " | Buffer>) => ",
               "KibanaResponse",
-              "<string | Error | { message: string | Error; attributes?: ",
+              "<string | Error | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1469,9 +1483,7 @@
                 "section": "def-server.ResponseErrorAttributes",
                 "text": "ResponseErrorAttributes"
               },
-              " | undefined; } | Buffer | ",
-              "Stream",
-              ">; redirected: (options: ",
+              " | undefined; } | Buffer>; redirected: (options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1481,9 +1493,9 @@
               },
               ") => ",
               "KibanaResponse",
-              "<string | Record<string, any> | Buffer | ",
+              "<string | Record<string, any> | ",
               "Stream",
-              ">; ok: (options?: ",
+              " | Buffer>; ok: (options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1493,9 +1505,9 @@
               },
               ") => ",
               "KibanaResponse",
-              "<string | Record<string, any> | Buffer | ",
+              "<string | Record<string, any> | ",
               "Stream",
-              ">; accepted: (options?: ",
+              " | Buffer>; accepted: (options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1505,9 +1517,9 @@
               },
               ") => ",
               "KibanaResponse",
-              "<string | Record<string, any> | Buffer | ",
+              "<string | Record<string, any> | ",
               "Stream",
-              ">; noContent: (options?: ",
+              " | Buffer>; noContent: (options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -2025,7 +2037,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
+              "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
@@ -2310,6 +2322,18 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               },
               {
@@ -2429,7 +2453,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
+          "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,

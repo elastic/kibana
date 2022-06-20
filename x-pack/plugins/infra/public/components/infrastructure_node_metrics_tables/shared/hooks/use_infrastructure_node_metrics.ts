@@ -6,10 +6,10 @@
  */
 
 import { parse } from '@kbn/datemath';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
+  MetricsExplorerRequestBody,
   MetricsExplorerResponse,
   MetricsExplorerSeries,
 } from '../../../../../common/http_api/metrics_explorer';
@@ -28,7 +28,6 @@ export interface SortState<T> {
 interface UseInfrastructureNodeMetricsOptions<T> {
   metricsExplorerOptions: MetricsExplorerOptions;
   timerange: Pick<MetricsExplorerTimeOptions, 'from' | 'to'>;
-  filterClauseDsl?: QueryDslQueryContainer;
   transform: (series: MetricsExplorerSeries) => T;
   sortState: SortState<T>;
   currentPageIndex: number;
@@ -48,14 +47,7 @@ const nullData: MetricsExplorerResponse = {
 export const useInfrastructureNodeMetrics = <T>(
   options: UseInfrastructureNodeMetricsOptions<T>
 ) => {
-  const {
-    metricsExplorerOptions,
-    timerange,
-    filterClauseDsl,
-    transform,
-    sortState,
-    currentPageIndex,
-  } = options;
+  const { metricsExplorerOptions, timerange, transform, sortState, currentPageIndex } = options;
 
   const [transformedNodes, setTransformedNodes] = useState<T[]>([]);
   const fetch = useKibanaHttpFetch();
@@ -69,12 +61,12 @@ export const useInfrastructureNodeMetrics = <T>(
           return Promise.resolve(nullData);
         }
 
-        const request = {
+        const request: MetricsExplorerRequestBody = {
           metrics: metricsExplorerOptions.metrics,
           groupBy: metricsExplorerOptions.groupBy,
           limit: NODE_COUNT_LIMIT,
           indexPattern: source.configuration.metricAlias,
-          filterQuery: JSON.stringify(filterClauseDsl),
+          filterQuery: metricsExplorerOptions.filterQuery,
           timerange: timerangeWithInterval,
         };
 
@@ -93,7 +85,7 @@ export const useInfrastructureNodeMetrics = <T>(
       },
       cancelPreviousOn: 'creation',
     },
-    [source, metricsExplorerOptions, timerangeWithInterval, filterClauseDsl]
+    [source, metricsExplorerOptions, timerangeWithInterval]
   );
   const isLoadingNodes = promiseState === 'pending' || promiseState === 'uninitialized';
 
@@ -153,22 +145,46 @@ function makeSortNodes<T>(sortState: SortState<T>) {
     const nodeAValue = nodeA[sortState.field];
     const nodeBValue = nodeB[sortState.field];
 
-    if (typeof nodeAValue === 'string' && typeof nodeBValue === 'string') {
-      if (sortState.direction === 'asc') {
-        return nodeAValue.localeCompare(nodeBValue);
-      } else {
-        return nodeBValue.localeCompare(nodeAValue);
-      }
+    if (sortState.direction === 'asc') {
+      return sortAscending(nodeAValue, nodeBValue);
     }
 
-    if (typeof nodeAValue === 'number' && typeof nodeBValue === 'number') {
-      if (sortState.direction === 'asc') {
-        return nodeAValue - nodeBValue;
-      } else {
-        return nodeBValue - nodeAValue;
-      }
-    }
-
-    return 0;
+    return sortDescending(nodeAValue, nodeBValue);
   };
+}
+
+function sortAscending(nodeAValue: unknown, nodeBValue: unknown) {
+  if (nodeAValue === null) {
+    return -1;
+  } else if (nodeBValue === null) {
+    return 1;
+  }
+
+  if (typeof nodeAValue === 'string' && typeof nodeBValue === 'string') {
+    return nodeAValue.localeCompare(nodeBValue);
+  }
+
+  if (typeof nodeAValue === 'number' && typeof nodeBValue === 'number') {
+    return nodeAValue - nodeBValue;
+  }
+
+  return 0;
+}
+
+function sortDescending(nodeAValue: unknown, nodeBValue: unknown) {
+  if (nodeAValue === null) {
+    return 1;
+  } else if (nodeBValue === null) {
+    return -1;
+  }
+
+  if (typeof nodeAValue === 'string' && typeof nodeBValue === 'string') {
+    return nodeBValue.localeCompare(nodeAValue);
+  }
+
+  if (typeof nodeAValue === 'number' && typeof nodeBValue === 'number') {
+    return nodeBValue - nodeAValue;
+  }
+
+  return 0;
 }

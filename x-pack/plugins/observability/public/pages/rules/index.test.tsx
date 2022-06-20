@@ -9,11 +9,13 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
+import { CoreStart } from '@kbn/core/public';
+import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { RulesPage } from '.';
 import { RulesTable } from './components/rules_table';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import * as pluginContext from '../../hooks/use_plugin_context';
-import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { AppMountParameters } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -41,17 +43,11 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
 
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {} as AppMountParameters,
-  config: {
-    unsafe: {
-      alertingExperience: { enabled: true },
-      cases: { enabled: true },
-      overviewNext: { enabled: false },
-      rules: { enabled: true },
-    },
-  },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
   kibanaFeatures: [],
+  core: {} as CoreStart,
+  plugins: {} as ObservabilityPublicPluginsStart,
 }));
 
 const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');

@@ -16,6 +16,7 @@ import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useMlApiContext } from '../../../../contexts/kibana';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { blurButtonOnClick } from '../../../../util/component_utils';
 interface JobMessagesPaneProps {
   jobId: string;
   showClearButton?: boolean;
@@ -94,7 +95,9 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
         size="s"
         isLoading={isClearing}
         isDisabled={disabled}
-        onClick={clearMessages}
+        onClick={blurButtonOnClick(() => {
+          clearMessages();
+        })}
         data-test-subj="mlJobMessagesClearButton"
       >
         <FormattedMessage

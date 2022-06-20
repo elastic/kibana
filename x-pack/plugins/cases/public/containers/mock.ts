@@ -35,7 +35,6 @@ import {
   CaseSeverity,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
 
@@ -75,6 +74,25 @@ export const basicComment: Comment = {
 export const alertComment: AlertComment = {
   alertId: 'alert-id-1',
   index: 'alert-index-1',
+  type: CommentType.alert,
+  id: 'alert-comment-id',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  rule: {
+    id: 'rule-id-1',
+    name: 'Awesome rule',
+  },
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
+export const alertCommentWithIndices: AlertComment = {
+  alertId: 'alert-id-1',
+  index: '.alerts-matchme.alerts',
   type: CommentType.alert,
   id: 'alert-comment-id',
   createdAt: basicCreatedAt,
@@ -661,13 +679,10 @@ export const caseUserActions: CaseUserActions[] = [
 ];
 
 // components tests
-export const useGetCasesMockState: UseGetCasesState = {
+export const useGetCasesMockState = {
   data: allCases,
-  loading: [],
-  selectedCases: [],
+  isLoading: false,
   isError: false,
-  queryParams: DEFAULT_QUERY_PARAMS,
-  filterOptions: DEFAULT_FILTER_OPTIONS,
 };
 
 export const basicCaseClosed: Case = {

@@ -84,6 +84,7 @@ export async function sendUpgradeAgentsActions(
     sourceUri?: string | undefined;
     force?: boolean;
     upgradeDurationSeconds?: number;
+    startTime?: string;
   }
 ) {
   // Full set of agents
@@ -132,8 +133,9 @@ export async function sendUpgradeAgentsActions(
   const upgradeableResults = await Promise.allSettled(
     agentsToCheckUpgradeable.map(async (agent) => {
       // Filter out agents currently unenrolling, unenrolled, or not upgradeable b/c of version check
-      const isAllowed = options.force || isAgentUpgradeable(agent, kibanaVersion);
-      if (!isAllowed) {
+      const isNotAllowed =
+        !options.force && !isAgentUpgradeable(agent, kibanaVersion, options.version);
+      if (isNotAllowed) {
         throw new IngestManagerError(`${agent.id} is not upgradeable`);
       }
 
@@ -166,9 +168,11 @@ export async function sendUpgradeAgentsActions(
 
   const rollingUpgradeOptions = options?.upgradeDurationSeconds
     ? {
-        start_time: now,
+        start_time: options.startTime ?? now,
         minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
-        expiration: moment().add(options?.upgradeDurationSeconds, 'seconds').toISOString(),
+        expiration: moment(options.startTime ?? now)
+          .add(options?.upgradeDurationSeconds, 'seconds')
+          .toISOString(),
       }
     : {};
 
@@ -267,6 +271,7 @@ async function _getCancelledActionId(
 ) {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
+    ignore_unavailable: true,
     query: {
       bool: {
         must: [
@@ -296,6 +301,7 @@ async function _getCancelledActionId(
 async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date().toISOString()) {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
+    ignore_unavailable: true,
     query: {
       bool: {
         must: [
@@ -331,6 +337,8 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
           nbAgents: 0,
           complete: false,
           nbAgentsAck: 0,
+          version: hit._source.data?.version as string,
+          startTime: hit._source?.start_time,
         };
       }
 

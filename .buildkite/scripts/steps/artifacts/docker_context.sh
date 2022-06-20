@@ -19,16 +19,14 @@ if [[ "$KIBANA_DOCKER_CONTEXT" == "default" ]]; then
   DOCKER_CONTEXT_FILE="kibana-$FULL_VERSION-docker-build-context.tar.gz"
 elif [[ "$KIBANA_DOCKER_CONTEXT" == "cloud" ]]; then
   DOCKER_CONTEXT_FILE="kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
+elif [[ "$KIBANA_DOCKER_CONTEXT" == "ubi" ]]; then
+  DOCKER_CONTEXT_FILE="kibana-ubi8-$FULL_VERSION-docker-build-context.tar.gz"
 fi
 
 tar -xf "target/$DOCKER_CONTEXT_FILE" -C "$DOCKER_BUILD_FOLDER"
 cd $DOCKER_BUILD_FOLDER
 
 buildkite-agent artifact download "kibana-$FULL_VERSION-linux-x86_64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-if [[ "$KIBANA_DOCKER_CONTEXT" == "cloud" ]]; then
-  buildkite-agent artifact download "metricbeat-$FULL_VERSION-linux-x86_64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-  buildkite-agent artifact download "filebeat-$FULL_VERSION-linux-x86_64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-fi
 
 echo "--- Build context"
 docker build .

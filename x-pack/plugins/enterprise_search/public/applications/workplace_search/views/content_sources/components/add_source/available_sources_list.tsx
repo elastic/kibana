@@ -30,6 +30,7 @@ import { SourceDataItem } from '../../../../types';
 
 import { staticCustomSourceData } from '../../source_data';
 
+import { BYOSourcePrompt } from './byo_source_prompt';
 import {
   AVAILABLE_SOURCE_EMPTY_STATE,
   AVAILABLE_SOURCE_TITLE,
@@ -165,6 +166,8 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
       </EuiText>
       <EuiSpacer size="m" />
       {sources.length > 0 ? visibleSources : emptyState}
+      <EuiSpacer size="xl" />
+      <BYOSourcePrompt />
     </>
   );
 };

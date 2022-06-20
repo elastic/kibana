@@ -9,18 +9,20 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
-import { PortalNavItem } from './solution_grouped_nav_item';
-import {
-  SolutionGroupedNavPanel,
-  SolutionGroupedNavPanelProps,
-} from './solution_grouped_nav_panel';
+import { SolutionNavPanel, SolutionNavPanelProps } from './solution_grouped_nav_panel';
+import { DefaultSideNavItem } from './types';
+import { bottomNavOffset } from '../../../lib/helpers';
 
-const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
-jest.mock('../../../utils/timeline/use_show_timeline', () => ({
-  useShowTimeline: () => mockUseShowTimeline(),
-}));
+const mockUseIsWithinBreakpoints = jest.fn(() => true);
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useIsWithinBreakpoints: () => mockUseIsWithinBreakpoints(),
+  };
+});
 
-const mockItems: PortalNavItem[] = [
+const mockItems: DefaultSideNavItem[] = [
   {
     id: SecurityPageName.hosts,
     label: 'Hosts',
@@ -37,14 +39,16 @@ const mockItems: PortalNavItem[] = [
 
 const PANEL_TITLE = 'test title';
 const mockOnClose = jest.fn();
-const renderNavPanel = (props: Partial<SolutionGroupedNavPanelProps> = {}) =>
+const mockOnOutsideClick = jest.fn();
+const renderNavPanel = (props: Partial<SolutionNavPanelProps> = {}) =>
   render(
     <>
       <div data-test-subj="outsideClickDummy" />
-      <SolutionGroupedNavPanel
+      <SolutionNavPanel
         items={mockItems}
         title={PANEL_TITLE}
         onClose={mockOnClose}
+        onOutsideClick={mockOnOutsideClick}
         {...props}
       />
     </>,
@@ -101,6 +105,22 @@ describe('SolutionGroupedNav', () => {
     });
   });
 
+  describe('bottom offset', () => {
+    it('should add bottom offset', () => {
+      mockUseIsWithinBreakpoints.mockReturnValueOnce(true);
+      const result = renderNavPanel({ bottomOffset: bottomNavOffset });
+
+      expect(result.getByTestId('groupedNavPanel')).toHaveStyle({ bottom: bottomNavOffset });
+    });
+
+    it('should not add bottom offset if not large screen', () => {
+      mockUseIsWithinBreakpoints.mockReturnValueOnce(false);
+      const result = renderNavPanel({ bottomOffset: bottomNavOffset });
+
+      expect(result.getByTestId('groupedNavPanel')).not.toHaveStyle({ bottom: bottomNavOffset });
+    });
+  });
+
   describe('close', () => {
     it('should call onClose callback if link clicked', () => {
       const result = renderNavPanel();
@@ -112,7 +132,7 @@ describe('SolutionGroupedNav', () => {
       const result = renderNavPanel();
       result.getByTestId('outsideClickDummy').click();
       waitFor(() => {
-        expect(mockOnClose).toHaveBeenCalled();
+        expect(mockOnOutsideClick).toHaveBeenCalled();
       });
     });
   });

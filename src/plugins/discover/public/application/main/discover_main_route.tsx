@@ -30,7 +30,7 @@ import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
@@ -39,9 +39,14 @@ interface DiscoverLandingParams {
   id: string;
 }
 
-export function DiscoverMainRoute() {
+interface Props {
+  isDev: boolean;
+}
+
+export function DiscoverMainRoute(props: Props) {
   const history = useHistory();
   const services = useDiscoverServices();
+  const { isDev } = props;
   const {
     core,
     chrome,
@@ -57,6 +62,8 @@ export function DiscoverMainRoute() {
   const [indexPatternList, setIndexPatternList] = useState<Array<SavedObject<DataViewAttributes>>>(
     []
   );
+  const [hasESData, setHasESData] = useState(false);
+  const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const { id } = useParams<DiscoverLandingParams>();
 
@@ -69,23 +76,32 @@ export function DiscoverMainRoute() {
   const loadDefaultOrCurrentIndexPattern = useCallback(
     async (searchSource: ISearchSource) => {
       try {
-        const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
-        const hasEsData = await data.dataViews.hasData.hasESData().catch(() => false);
-        if (!hasUserDataView || !hasEsData) {
+        const hasUserDataViewValue = await data.dataViews.hasData
+          .hasUserDataView()
+          .catch(() => false);
+        const hasESDataValue =
+          isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
+        setHasUserDataView(hasUserDataViewValue);
+        setHasESData(hasESDataValue);
+
+        if (!hasUserDataViewValue) {
           setShowNoDataPage(true);
           return;
         }
+
         const defaultDataView = await data.dataViews.getDefaultDataView();
+
         if (!defaultDataView) {
           setShowNoDataPage(true);
           return;
         }
+
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
         const ip = await loadIndexPattern(index || '', data.dataViews, config);
 
         const ipList = ip.list as Array<SavedObject<DataViewAttributes>>;
-        const indexPatternData = await resolveIndexPattern(ip, searchSource, toastNotifications);
+        const indexPatternData = resolveIndexPattern(ip, searchSource, toastNotifications);
 
         setIndexPatternList(ipList);
 
@@ -94,7 +110,7 @@ export function DiscoverMainRoute() {
         setError(e);
       }
     },
-    [config, data.dataViews, history, toastNotifications]
+    [config, data.dataViews, history, isDev, toastNotifications]
   );
 
   const loadSavedSearch = useCallback(async () => {
@@ -189,12 +205,23 @@ export function DiscoverMainRoute() {
   if (showNoDataPage) {
     const analyticsServices = {
       coreStart: core,
-      dataViews: data.dataViews,
+      dataViews: {
+        ...data.dataViews,
+        hasData: {
+          ...data.dataViews.hasData,
+
+          // We've already called this, so we can optimize the analytics services to
+          // use the already-retrieved data to avoid a double-call.
+          hasESData: () => Promise.resolve(isDev ? true : hasESData),
+          hasUserDataView: () => Promise.resolve(hasUserDataView),
+        },
+      },
       dataViewEditor,
     };
+
     return (
       <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />;
+        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
       </AnalyticsNoDataPageKibanaProvider>
     );
   }
@@ -204,7 +231,7 @@ export function DiscoverMainRoute() {
   }
 
   if (!indexPattern || !savedSearch) {
-    return <LoadingIndicator />;
+    return <LoadingIndicator type="elastic" />;
   }
 
   return <DiscoverMainAppMemoized indexPatternList={indexPatternList} savedSearch={savedSearch} />;

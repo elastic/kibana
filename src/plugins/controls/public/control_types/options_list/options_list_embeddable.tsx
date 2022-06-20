@@ -176,22 +176,34 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   };
 
   private getCurrentDataViewAndField = async (): Promise<{
-    dataView: DataView;
-    field: OptionsListField;
+    dataView?: DataView;
+    field?: OptionsListField;
   }> => {
-    const { dataViewId, fieldName, textFieldName } = this.getInput();
+    const { dataViewId, fieldName, parentFieldName, childFieldName } = this.getInput();
+
     if (!this.dataView || this.dataView.id !== dataViewId) {
-      this.dataView = await this.dataViewsService.get(dataViewId);
-      if (this.dataView === undefined) {
-        this.onFatalError(
-          new Error(OptionsListStrings.errors.getDataViewNotFoundError(dataViewId))
-        );
+      try {
+        this.dataView = await this.dataViewsService.get(dataViewId);
+        if (!this.dataView)
+          throw new Error(OptionsListStrings.errors.getDataViewNotFoundError(dataViewId));
+      } catch (e) {
+        this.onFatalError(e);
       }
-      this.updateOutput({ dataViews: [this.dataView] });
+      this.updateOutput({ dataViews: this.dataView && [this.dataView] });
     }
 
-    if (!this.field || this.field.name !== fieldName) {
-      const originalField = this.dataView.getFieldByName(fieldName);
+    if (this.dataView && (!this.field || this.field.name !== fieldName)) {
+      const originalField = this.dataView?.getFieldByName(fieldName);
+      const childField =
+        (childFieldName && this.dataView?.getFieldByName(childFieldName)) || undefined;
+      const parentField =
+        (parentFieldName && this.dataView?.getFieldByName(parentFieldName)) || undefined;
+
+      const textFieldName = childField?.esTypes?.includes('text')
+        ? childField.name
+        : parentField?.esTypes?.includes('text')
+        ? parentField.name
+        : undefined;
       (originalField as OptionsListField).textFieldName = textFieldName;
       this.field = originalField;
 
@@ -214,6 +226,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   private runOptionsListQuery = async () => {
     const { dataView, field } = await this.getCurrentDataViewAndField();
+    if (!dataView || !field) return;
+
     this.updateComponentState({ loading: true });
     this.updateOutput({ loading: true, dataViews: [dataView] });
     const { ignoreParentSettings, filters, query, selectedOptions, timeRange, runPastTimeout } =
@@ -235,7 +249,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         },
         this.abortController.signal
       );
-
     if (!selectedOptions || isEmpty(invalidSelections) || ignoreParentSettings?.ignoreValidations) {
       this.updateComponentState({
         availableOptions: suggestions,
@@ -272,6 +285,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       return [];
     }
     const { dataView, field } = await this.getCurrentDataViewAndField();
+    if (!dataView || !field) return;
 
     let newFilter: Filter;
     if (validSelections.length === 1) {

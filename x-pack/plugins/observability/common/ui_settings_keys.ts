@@ -15,3 +15,5 @@ export const apmProgressiveLoading = 'observability:apmProgressiveLoading';
 export const enableServiceGroups = 'observability:enableServiceGroups';
 export const apmServiceInventoryOptimizedSorting =
   'observability:apmServiceInventoryOptimizedSorting';
+export const apmTraceExplorerTab = 'observability:apmTraceExplorerTab';
+export const apmOperationsTab = 'observability:apmOperationsTab';

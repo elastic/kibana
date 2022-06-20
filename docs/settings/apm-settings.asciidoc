@@ -18,8 +18,13 @@ It is enabled by default.
 // Any changes made in this file will be seen there as well.
 // tag::apm-indices-settings[]
 
-Index defaults can be changed in the APM app. Select **Settings** > **Indices**.
+The APM app uses data views to query APM indices.
+To change the default APM indices that the APM app queries, open the APM app and select **Settings** > **Indices**.
 Index settings in the APM app take precedence over those set in `kibana.yml`.
+
+Starting in version 8.2.0, APM indices are {kib} Spaces-aware;
+Changes to APM index settings will only apply to the currently enabled space.
+See <<apm-spaces>> for more information.
 
 [role="screenshot"]
 image::settings/images/apm-settings.png[APM app settings in Kibana]
@@ -72,7 +77,7 @@ Maximum number of child items displayed when viewing trace details. Defaults to 
 Index name where Observability annotations are stored. Defaults to `observability-annotations`.
 
 `xpack.apm.searchAggregatedTransactions` {ess-icon}::
-Enables Transaction histogram metrics. Defaults to `auto` so the UI will use metric indices over transaction indices for transactions if aggregated transactions are found. When set to `always`, additional configuration in APM Server is required. When set to `never` and aggregated transactions are not used. 
+Enables Transaction histogram metrics. Defaults to `auto` so the UI will use metric indices over transaction indices for transactions if aggregated transactions are found. When set to `always`, additional configuration in APM Server is required. When set to `never` and aggregated transactions are not used.
 +
 See {apm-guide-ref}/transaction-metrics.html[Configure transaction metrics] for more information.
 

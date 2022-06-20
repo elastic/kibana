@@ -119,19 +119,17 @@ describe('useSecuritySolutionNavigation', () => {
       { wrapper: TestProviders }
     );
 
-    expect(result?.current?.items?.[2].items?.[2].id).toEqual(SecurityPageName.users);
+    expect(result?.current?.items?.[3].items?.[2].id).toEqual(SecurityPageName.users);
   });
 
-  // TODO: [detectionResponse] remove when page is no longer experimental
-  it('should include detectionAndResponse when feature flag is on', async () => {
+  // TODO: [kubernetes] remove when no longer experimental
+  it('should include kubernetes when feature flag is on', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
-    expect(result?.current?.items?.[0].items?.[2].id).toEqual(
-      SecurityPageName.detectionAndResponse
-    );
+    expect(result?.current?.items?.[1].items?.[2].id).toEqual(SecurityPageName.kubernetes);
   });
 
   it('should omit host isolation exceptions if hook reports false', () => {
@@ -162,7 +160,7 @@ describe('useSecuritySolutionNavigation', () => {
           { wrapper: TestProviders }
         );
 
-        const caseNavItem = (result.current?.items || [])[3].items?.find(
+        const caseNavItem = (result.current?.items || [])[4].items?.find(
           (item) => item['data-test-subj'] === 'navigation-cases'
         );
         expect(caseNavItem).toMatchInlineSnapshot(`

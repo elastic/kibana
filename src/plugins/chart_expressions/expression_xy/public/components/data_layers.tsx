@@ -23,6 +23,7 @@ import {
   FittingFunction,
   ValueLabelMode,
   XYCurveType,
+  XScaleType,
 } from '../../common';
 import { SeriesTypes, ValueLabelModes } from '../../common/constants';
 import {
@@ -31,9 +32,11 @@ import {
   GroupsConfiguration,
   getSeriesProps,
   DatatablesWithFormatInfo,
+  LayersAccessorsTitles,
 } from '../helpers';
 
 interface Props {
+  titles?: LayersAccessorsTitles;
   layers: CommonXYDataLayerConfig[];
   formatFactory: FormatFactory;
   chartHasMoreThanOneBarSeries?: boolean;
@@ -49,9 +52,11 @@ interface Props {
   fillOpacity?: number;
   shouldShowValueLabels?: boolean;
   valueLabels: ValueLabelMode;
+  defaultXScaleType: XScaleType;
 }
 
 export const DataLayers: FC<Props> = ({
+  titles = {},
   layers,
   endValue,
   timeZone,
@@ -67,6 +72,7 @@ export const DataLayers: FC<Props> = ({
   shouldShowValueLabels,
   formattedDatatables,
   chartHasMoreThanOneBarSeries,
+  defaultXScaleType,
 }) => {
   const colorAssignments = getColorAssignments(layers, formatFactory);
   return (
@@ -92,6 +98,7 @@ export const DataLayers: FC<Props> = ({
 
           const seriesProps = getSeriesProps({
             layer,
+            titles: titles[layer.layerId],
             accessor: yColumnId,
             chartHasMoreThanOneBarSeries,
             colorAssignments,
@@ -104,6 +111,7 @@ export const DataLayers: FC<Props> = ({
             timeZone,
             emphasizeFitting,
             fillOpacity,
+            defaultXScaleType,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;

@@ -34,6 +34,7 @@ export type {
   RangeFilterParams,
   ScriptedPhraseFilter,
   ScriptedRangeFilter,
+  TimeRange,
 } from './filters';
 
 export type {
@@ -42,7 +43,6 @@ export type {
   KueryNode,
   KueryParseOptions,
   KueryQueryOptions,
-  NodeTypes,
 } from './kuery';
 
 export {
@@ -96,6 +96,9 @@ export {
   toggleFilterPinned,
   uniqFilters,
   unpinFilter,
+  extractTimeFilter,
+  extractTimeRange,
+  convertRangeFilterToTimeRange,
 } from './filters';
 
 export {

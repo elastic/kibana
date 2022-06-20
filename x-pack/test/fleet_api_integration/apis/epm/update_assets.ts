@@ -428,6 +428,14 @@ export default function (providerContext: FtrProviderContext) {
             type: 'ingest_pipeline',
           },
           {
+            id: 'logs-all_assets.test_logs2-0.2.0',
+            type: 'ingest_pipeline',
+          },
+          {
+            id: 'metrics-all_assets.test_metrics-0.2.0',
+            type: 'ingest_pipeline',
+          },
+          {
             id: 'logs-all_assets.test_logs',
             type: 'index_template',
           },
@@ -498,7 +506,6 @@ export default function (providerContext: FtrProviderContext) {
         ],
         name: 'all_assets',
         version: '0.2.0',
-        removable: true,
         install_version: '0.2.0',
         install_status: 'installed',
         install_started_at: res.attributes.install_started_at,

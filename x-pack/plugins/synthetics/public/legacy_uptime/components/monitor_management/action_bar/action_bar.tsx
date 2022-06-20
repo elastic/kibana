@@ -21,17 +21,22 @@ import { useSelector } from 'react-redux';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { showSyncErrors } from '../../../../apps/synthetics/components/monitors_page/management/show_sync_errors';
 import { MONITOR_MANAGEMENT_ROUTE } from '../../../../../common/constants';
 import { UptimeSettingsContext } from '../../../contexts';
 import { setMonitor } from '../../../state/api';
 
-import { SyntheticsMonitor } from '../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  SyntheticsMonitor,
+  SourceType,
+  ServiceLocationErrors,
+} from '../../../../../common/runtime_types';
 import { TestRun } from '../test_now_mode/test_now_mode';
 
 import { monitorManagementListSelector } from '../../../state/selectors';
 
 import { kibanaService } from '../../../state/kibana_service';
-import { showSyncErrors } from '../show_sync_errors';
 
 export interface ActionBarProps {
   monitor: SyntheticsMonitor;
@@ -58,6 +63,7 @@ export const ActionBar = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean | undefined>(undefined);
+  const isReadOnly = monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
 
   const { data, status } = useFetcher(() => {
     if (!isSaving || !isValid) {
@@ -103,7 +109,11 @@ export const ActionBar = ({
       });
       setIsSuccessful(true);
     } else if (hasErrors && !loading) {
-      showSyncErrors(data.attributes.errors, locations);
+      showSyncErrors(
+        (data as { attributes: { errors: ServiceLocationErrors } })?.attributes.errors ?? [],
+        locations,
+        kibanaService.toasts
+      );
       setIsSuccessful(true);
     }
   }, [data, status, isSaving, isValid, monitorId, hasErrors, locations, loading]);
@@ -111,72 +121,73 @@ export const ActionBar = ({
   return isSuccessful ? (
     <Redirect to={MONITOR_MANAGEMENT_ROUTE + '/all'} />
   ) : (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem>
-        <WarningText>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</WarningText>
-      </EuiFlexItem>
+    <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="ghost"
-              size="s"
-              href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT_ROUTE}/all`}
-            >
-              {DISCARD_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-
-          {onTestNow && (
-            <EuiFlexItem grow={false}>
-              {/* Popover is used instead of EuiTooltip until the resolution of https://github.com/elastic/eui/issues/5604 */}
-              <EuiPopover
-                repositionOnScroll={true}
-                initialFocus={false}
-                button={
-                  <EuiButton
-                    css={{ width: '100%' }}
-                    fill
-                    size="s"
-                    color="success"
-                    iconType="play"
-                    disabled={!isValid || isTestRunInProgress}
-                    data-test-subj={'monitorTestNowRunBtn'}
-                    onClick={() => onTestNow()}
-                    onMouseEnter={() => {
-                      setIsPopoverOpen(true);
-                    }}
-                    onMouseLeave={() => {
-                      setIsPopoverOpen(false);
-                    }}
-                  >
-                    {testRun ? RE_RUN_TEST_LABEL : RUN_TEST_LABEL}
-                  </EuiButton>
-                }
-                isOpen={isPopoverOpen}
-              >
-                <EuiText style={{ width: 260, outline: 'none' }}>
-                  <p>{TEST_NOW_DESCRIPTION}</p>
-                </EuiText>
-              </EuiPopover>
-            </EuiFlexItem>
-          )}
-
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              fill
-              size="s"
-              iconType="check"
-              onClick={handleOnSave}
-              isLoading={isSaving}
-              disabled={hasBeenSubmitted && !isValid}
-            >
-              {monitorId ? UPDATE_MONITOR_LABEL : SAVE_MONITOR_LABEL}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiButtonEmpty
+          color="ghost"
+          size="s"
+          href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT_ROUTE}/all`}
+        >
+          {DISCARD_LABEL}
+        </EuiButtonEmpty>
       </EuiFlexItem>
+      {!isReadOnly ? (
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <WarningText>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</WarningText>
+            </EuiFlexItem>
+            {onTestNow && (
+              <EuiFlexItem grow={false}>
+                {/* Popover is used instead of EuiTooltip until the resolution of https://github.com/elastic/eui/issues/5604 */}
+                <EuiPopover
+                  repositionOnScroll={true}
+                  initialFocus={false}
+                  button={
+                    <EuiButton
+                      css={{ width: '100%' }}
+                      fill
+                      size="s"
+                      color="success"
+                      iconType="play"
+                      disabled={!isValid || isTestRunInProgress}
+                      data-test-subj={'monitorTestNowRunBtn'}
+                      onClick={() => onTestNow()}
+                      onMouseEnter={() => {
+                        setIsPopoverOpen(true);
+                      }}
+                      onMouseLeave={() => {
+                        setIsPopoverOpen(false);
+                      }}
+                    >
+                      {testRun ? RE_RUN_TEST_LABEL : RUN_TEST_LABEL}
+                    </EuiButton>
+                  }
+                  isOpen={isPopoverOpen}
+                >
+                  <EuiText style={{ width: 260, outline: 'none' }}>
+                    <p>{TEST_NOW_DESCRIPTION}</p>
+                  </EuiText>
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
+
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="primary"
+                fill
+                size="s"
+                iconType="check"
+                onClick={handleOnSave}
+                isLoading={isSaving}
+                disabled={hasBeenSubmitted && !isValid}
+              >
+                {monitorId ? UPDATE_MONITOR_LABEL : SAVE_MONITOR_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 };
@@ -187,7 +198,7 @@ const WarningText = euiStyled(EuiText)`
 `;
 
 const DISCARD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.discardLabel', {
-  defaultMessage: 'Discard',
+  defaultMessage: 'Cancel',
 });
 
 const SAVE_MONITOR_LABEL = i18n.translate('xpack.synthetics.monitorManagement.saveMonitorLabel', {

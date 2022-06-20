@@ -37,6 +37,11 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: ['string'],
     help: strings.getYRightTitleHelp(),
   },
+  xExtent: {
+    types: [AXIS_EXTENT_CONFIG],
+    help: strings.getXExtentHelp(),
+    default: `{${AXIS_EXTENT_CONFIG}}`,
+  },
   yLeftExtent: {
     types: [AXIS_EXTENT_CONFIG],
     help: strings.getYLeftExtentHelp(),
@@ -127,6 +132,29 @@ export const commonXYArgs: CommonXYFn['args'] = {
   ariaLabel: {
     types: ['string'],
     help: strings.getAriaLabelHelp(),
+  },
+  detailedTooltip: {
+    types: ['boolean'],
+    help: strings.getDetailedTooltipHelp(),
+  },
+  showTooltip: {
+    types: ['boolean'],
+    default: true,
+    help: strings.getShowTooltipHelp(),
+  },
+  orderBucketsBySum: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getOrderBucketsBySum(),
+  },
+  addTimeMarker: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getAddTimeMakerHelp(),
+  },
+  markSizeRatio: {
+    types: ['number'],
+    help: strings.getMarkSizeRatioHelp(),
   },
   minTimeBarInterval: {
     types: ['string'],

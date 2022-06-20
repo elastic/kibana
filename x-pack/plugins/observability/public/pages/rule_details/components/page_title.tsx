@@ -6,11 +6,11 @@
  */
 import React, { useState } from 'react';
 import moment from 'moment';
-import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ExperimentalBadge } from '../../../components/shared/experimental_badge';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiSpacer } from '@elastic/eui';
 import { PageHeaderProps } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
 import { LAST_UPDATED_MESSAGE, CREATED_WORD, BY_WORD, ON_WORD } from '../translations';
+import { getHealthColor } from '../../rules/config';
 
 export function PageTitle({ rule }: PageHeaderProps) {
   const { triggersActionsUi } = useKibana().services;
@@ -22,7 +22,21 @@ export function PageTitle({ rule }: PageHeaderProps) {
   const closeTagsPopover = () => setIsTagsPopoverOpen(false);
   return (
     <>
-      {rule.name} <ExperimentalBadge />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false} data-test-subj="ruleName">
+          {rule.name}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <EuiText size="xs">
+          <EuiBadge color={getHealthColor(rule.executionStatus.status)}>
+            {rule.executionStatus.status.charAt(0).toUpperCase() +
+              rule.executionStatus.status.slice(1)}
+          </EuiBadge>
+        </EuiText>
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
       <EuiFlexGroup alignItems="baseline">
         <EuiFlexItem component="span" grow={false}>
           <EuiText color="subdued" size="xs">

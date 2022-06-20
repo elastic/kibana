@@ -26,10 +26,10 @@ export const IMPORT_RULE = i18n.translate(
   }
 );
 
-export const UPLOAD_VALUE_LISTS = i18n.translate(
-  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButton',
+export const IMPORT_VALUE_LISTS = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton',
   {
-    defaultMessage: 'Upload value lists',
+    defaultMessage: 'Import value lists',
   }
 );
 
@@ -261,10 +261,10 @@ export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   }
 );
 
-export const BULK_EDIT_FLYOUT_FORM_CLOSE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.closeButtonLabel',
+export const BULK_EDIT_FLYOUT_FORM_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.cancelButtonLabel',
   {
-    defaultMessage: 'Close',
+    defaultMessage: 'Cancel',
   }
 );
 
@@ -309,6 +309,13 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_OVERWRITE_LABEL = i18n.tra
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsOverwriteCheckboxLabel',
   {
     defaultMessage: 'Overwrite all selected rules index patterns',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DATA_VIEWS_OVERWRITE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.dataViewsOverwriteCheckboxLabel',
+  {
+    defaultMessage: 'Apply changes to rules configured with data views',
   }
 );
 
@@ -1066,7 +1073,7 @@ export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage:
-        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}.",
+        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}. If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.",
     }
   );
 

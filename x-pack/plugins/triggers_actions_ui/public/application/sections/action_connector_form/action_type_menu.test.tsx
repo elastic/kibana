@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionTypeMenu } from './action_type_menu';
-import { ConnectorValidationResult, GenericValidationResult } from '../../../types';
+import { GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -40,9 +40,6 @@ describe('connector_add_flyout', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({});
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);
@@ -77,9 +74,6 @@ describe('connector_add_flyout', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({});
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);
@@ -114,9 +108,6 @@ describe('connector_add_flyout', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({});
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);

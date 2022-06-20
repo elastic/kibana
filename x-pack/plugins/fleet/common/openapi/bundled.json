@@ -1256,6 +1256,64 @@
         }
       }
     },
+    "/agents/current_upgrades": {
+      "get": {
+        "summary": "Agents - Current Bulk Upgrades",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "actionId": {
+                            "type": "string"
+                          },
+                          "complete": {
+                            "type": "boolean"
+                          },
+                          "nbAgents": {
+                            "type": "number"
+                          },
+                          "nbAgentsAck": {
+                            "type": "number"
+                          },
+                          "version": {
+                            "type": "string"
+                          },
+                          "startTime": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "actionId",
+                          "complete",
+                          "nbAgents",
+                          "nbAgentsAck",
+                          "version",
+                          "startTime"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "agents-current-upgrades"
+      }
+    },
     "/agents/{agentId}": {
       "parameters": [
         {
@@ -1320,7 +1378,28 @@
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_provided_metadata": {
+                    "type": "object"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "delete": {
         "summary": "Agent - Delete",
@@ -3573,9 +3652,6 @@
           },
           "path": {
             "type": "string"
-          },
-          "removable": {
-            "type": "boolean"
           }
         },
         "required": [
@@ -3797,6 +3873,9 @@
           },
           "rollout_duration_seconds": {
             "type": "number"
+          },
+          "start_time": {
+            "type": "string"
           },
           "agents": {
             "oneOf": [

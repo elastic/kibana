@@ -5,30 +5,55 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 
-const HIDDEN_TIMELINE_ROUTES: readonly string[] = [
+import { getLinksWithHiddenTimeline } from '../../links';
+import { useIsGroupedNavigationEnabled } from '../../components/navigation/helpers';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import { useKibana } from '../../lib/kibana';
+
+const DEPRECATED_HIDDEN_TIMELINE_ROUTES: readonly string[] = [
   `/cases/configure`,
   '/administration',
   '/rules/create',
   '/get_started',
-  '/threat_hunting',
+  '/explore',
   '/dashboards',
   '/manage',
 ];
 
-const isHiddenTimelinePath = (currentPath: string): boolean => {
-  return !!HIDDEN_TIMELINE_ROUTES.find((route) => matchPath(currentPath, route));
+const isTimelinePathVisible = (
+  currentPath: string,
+  isGroupedNavigationEnabled: boolean
+): boolean => {
+  const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);
+
+  const hiddenTimelineRoutes = isGroupedNavigationEnabled
+    ? groupLinksWithHiddenTimelinePaths
+    : DEPRECATED_HIDDEN_TIMELINE_ROUTES;
+
+  return !hiddenTimelineRoutes.find((route) => matchPath(currentPath, route));
 };
 
 export const useShowTimeline = () => {
+  const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const { pathname } = useLocation();
-  const [showTimeline, setShowTimeline] = useState(!isHiddenTimelinePath(pathname));
+  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
+  const userHasSecuritySolutionVisible = useKibana().services.application.capabilities.siem.show;
 
-  useEffect(() => {
-    setShowTimeline(!isHiddenTimelinePath(pathname));
-  }, [pathname]);
+  const isTimelineAllowed = useMemo(
+    () => userHasSecuritySolutionVisible && (indicesExist || dataViewId === null),
+    [indicesExist, dataViewId, userHasSecuritySolutionVisible]
+  );
+
+  const showTimeline = useMemo(() => {
+    if (!isTimelineAllowed) {
+      return false;
+    }
+    return isTimelinePathVisible(pathname, isGroupedNavigationEnabled);
+  }, [isTimelineAllowed, pathname, isGroupedNavigationEnabled]);
 
   return [showTimeline];
 };

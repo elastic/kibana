@@ -71,7 +71,6 @@ import {
   RULES_PLURAL_TITLE,
   SEARCH_PLACEHOLDER,
 } from './translations';
-import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 const ENTER_KEY = 13;
 
 function RulesPage() {
@@ -234,6 +233,7 @@ function RulesPage() {
         field: 'enabled',
         name: STATUS_COLUMN_TITLE,
         sortable: true,
+        'data-test-subj': 'rulesTableCell-ContextStatus',
         render: (_enabled: boolean, item: RuleTableItem) => {
           return triggersActionsUi.getRuleStatusDropdown({
             rule: item,
@@ -401,7 +401,6 @@ function RulesPage() {
                 defaultMessage="Refresh"
               />
             </EuiButton>
-            ,
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup>
@@ -441,11 +440,7 @@ function RulesPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: (
-          <>
-            {RULES_PAGE_TITLE} <ExperimentalBadge />
-          </>
-        ),
+        pageTitle: <>{RULES_PAGE_TITLE}</>,
         rightSideItems: [
           authorizedToCreateAnyRules && (
             <EuiButton

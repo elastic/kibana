@@ -20,7 +20,7 @@ import type {
   VisualizeEditorVisInstance,
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
-import { getTopNavConfig } from '../utils';
+import { getTopNavConfig, isFallbackDataView } from '../utils';
 import type { NavigateToLensContext } from '../..';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
@@ -267,8 +267,8 @@ const TopNav = ({
 
   const shouldShowDataViewPicker = Boolean(
     vis.type.editorConfig?.enableDataViewChange &&
-      !vis.data.savedSearchId &&
-      vis.data.indexPattern &&
+      ((vis.data.indexPattern && !vis.data.savedSearchId) ||
+        isFallbackDataView(vis.data.indexPattern)) &&
       indexPatterns.length
   );
 
@@ -280,6 +280,8 @@ const TopNav = ({
     },
     [stateContainer.transitions]
   );
+
+  const isMissingCurrentDataView = isFallbackDataView(vis.data.indexPattern);
 
   return isChromeVisible ? (
     /**
@@ -305,12 +307,26 @@ const TopNav = ({
       showQueryInput={showQueryInput}
       showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
       dataViewPickerComponentProps={
-        shouldShowDataViewPicker
+        shouldShowDataViewPicker && vis.data.indexPattern
           ? {
-              currentDataViewId: vis.data.indexPattern!.id,
+              currentDataViewId: vis.data.indexPattern.id,
               trigger: {
-                label: vis.data.indexPattern!.title,
+                label: isMissingCurrentDataView
+                  ? i18n.translate('visualizations.fallbackDataView.label', {
+                      defaultMessage: '{type} not found',
+                      values: {
+                        type: vis.data.savedSearchId
+                          ? i18n.translate('visualizations.search.label', {
+                              defaultMessage: 'Search',
+                            })
+                          : i18n.translate('visualizations.dataView.label', {
+                              defaultMessage: 'Data view',
+                            }),
+                      },
+                    })
+                  : vis.data.indexPattern.getName(),
               },
+              isMissingCurrent: isMissingCurrentDataView,
               onChangeDataView,
               showNewMenuTour: false,
             }
