@@ -40,7 +40,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
     defaultMessage: 'Toggle dialog with details',
   });
 
-  const testSubj = (current as EsHitRecord).isAnchor
+  const testSubj = current.isAnchor
     ? 'docTableExpandToggleColumnAnchor'
     : 'docTableExpandToggleColumn';
 

@@ -23,7 +23,7 @@ import {
 import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
-import { SortPairArr } from '../../../components/doc_table/lib/get_sort';
+import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
 
 export function useDiscoverState({

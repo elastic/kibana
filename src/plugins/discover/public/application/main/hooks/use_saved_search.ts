@@ -17,7 +17,7 @@ import { validateTimeRange } from '../utils/validate_time_range';
 import { Chart } from '../components/chart/point_series';
 import { useSingleton } from './use_singleton';
 import { FetchStatus } from '../../types';
-import { fetchAll } from './fetch_all';
+import { fetchAll } from '../utils/fetch_all';
 import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';

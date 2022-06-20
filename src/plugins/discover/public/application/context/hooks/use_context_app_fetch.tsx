@@ -20,7 +20,7 @@ import {
   LoadingStatus,
 } from '../services/context_query_state';
 import { AppState } from '../services/context_state';
-import { getFirstSortableField } from './sorting';
+import { getFirstSortableField } from '../utils/sorting';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../../types';
 
