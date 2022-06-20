@@ -4,4 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { getActionsColumnWidth, getNumberOfActionsInActionColumn } from './actions_column';
+export { getActionsColumnWidth, getActionButtonCount } from './actions_column';

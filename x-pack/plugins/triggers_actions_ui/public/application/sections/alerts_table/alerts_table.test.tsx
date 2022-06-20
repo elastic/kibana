@@ -186,7 +186,7 @@ describe('AlertsTable', () => {
         expect(queryByTestId('expandColumnCellOpenFlyoutButton-0')).toBe(null);
       });
 
-      it('render no action column if there is no action set nor the expand action should be shown', () => {
+      it('should render no action column if there is neither the action nor the expand action config is set', () => {
         const customTableProps = {
           ...tableProps,
           showExpandToDetails: false,

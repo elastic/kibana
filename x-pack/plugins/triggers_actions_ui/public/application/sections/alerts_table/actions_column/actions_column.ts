@@ -4,23 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { euiThemeVars } from '@kbn/ui-theme';
 
+const DEFAULT_ACTION_BUTTON_WIDTH = 32;
 export const MIN_ACTION_COLUMN_HEADER_WIDTH = 75;
-const ITEM_SIZES: { [key: string]: number } = {
-  s: 32, // This module is ready for icons with size 's' only
-};
-const BORDER_SIZE_PER_ACTION = 1;
-const PADDING_SIZE_PER_ACTION = 6 * 2; // left and right
 
-export const getActionsColumnWidth = (actions: number, size = 's') => {
-  const width = ITEM_SIZES[size] * actions + PADDING_SIZE_PER_ACTION + BORDER_SIZE_PER_ACTION;
+/**
+ * Returns the width of the Actions column based on the number of buttons being
+ * displayed
+ *
+ * NOTE: This function is necessary because `width` is a required property of
+ * the `EuiDataGridControlColumn` interface, so it must be calculated before
+ * content is rendered. (The width of a `EuiDataGridControlColumn` does not
+ * automatically size itself to fit all the content.)
+ */
+export const getActionsColumnWidth = (actionButtonCount: number): number => {
+  const contentWidth = actionButtonCount * DEFAULT_ACTION_BUTTON_WIDTH;
+  const leftRightCellPadding = parseInt(euiThemeVars.euiDataGridCellPaddingM, 10) * 2; // parseInt ignores the trailing `px`, e.g. `6px`
+  const cellBorderSize = parseInt(euiThemeVars.euiBorderWidthThin, 10) * 2;
+  const width = contentWidth + leftRightCellPadding + cellBorderSize;
+
   return width > MIN_ACTION_COLUMN_HEADER_WIDTH ? width : MIN_ACTION_COLUMN_HEADER_WIDTH;
 };
 
-export const getNumberOfActionsInActionColumn = (
+export const getActionButtonCount = (
   actionsColumn: JSX.Element,
   isExpandToDetailsShown: boolean
-) => {
+): number => {
   const registeredActionsLength = actionsColumn.props?.children?.length
     ? actionsColumn.props.children.length
     : 0;

@@ -8,7 +8,7 @@ import React from 'react';
 import {
   getActionsColumnWidth,
   MIN_ACTION_COLUMN_HEADER_WIDTH,
-  getNumberOfActionsInActionColumn,
+  getActionButtonCount,
 } from './actions_column';
 
 describe('actions column', () => {
@@ -22,7 +22,7 @@ describe('actions column', () => {
     });
   });
 
-  describe('getNumberOfActionsInActionColumn', () => {
+  describe('getActionButtonCount', () => {
     it('should return the right number of actions', () => {
       const emptyActions = <></>;
       const nonEmptyActions = (
@@ -31,10 +31,10 @@ describe('actions column', () => {
           <span>SecondElement</span>
         </>
       );
-      expect(getNumberOfActionsInActionColumn(emptyActions, false)).toEqual(0);
-      expect(getNumberOfActionsInActionColumn(emptyActions, true)).toEqual(1);
-      expect(getNumberOfActionsInActionColumn(nonEmptyActions, false)).toEqual(2);
-      expect(getNumberOfActionsInActionColumn(nonEmptyActions, true)).toEqual(3);
+      expect(getActionButtonCount(emptyActions, false)).toEqual(0);
+      expect(getActionButtonCount(emptyActions, true)).toEqual(1);
+      expect(getActionButtonCount(nonEmptyActions, false)).toEqual(2);
+      expect(getActionButtonCount(nonEmptyActions, true)).toEqual(3);
     });
   });
 });

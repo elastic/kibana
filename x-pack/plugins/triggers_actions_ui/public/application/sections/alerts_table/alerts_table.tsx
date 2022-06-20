@@ -22,7 +22,8 @@ import {
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
   ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
 } from './translations';
-import { getActionsColumnWidth, getNumberOfActionsInActionColumn } from './actions_column';
+
+import { getActionButtonCount, getActionsColumnWidth } from './actions_column';
 import './alerts_table.scss';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
@@ -79,15 +80,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const { actionsColumn } = useActionsColumn();
   const leadingControlColumns = useMemo(() => {
-    const actionsInActionColumn = getNumberOfActionsInActionColumn(
-      actionsColumn,
-      props.showExpandToDetails
-    );
-    return actionsInActionColumn
+    const actionButtonCount = getActionButtonCount(actionsColumn, props.showExpandToDetails);
+    return actionButtonCount
       ? [
           {
             id: 'expandColumn',
-            width: getActionsColumnWidth(actionsInActionColumn),
+            width: getActionsColumnWidth(actionButtonCount),
             headerCellRender: () => {
               return (
                 <span data-test-subj="expandColumnHeaderLabel">
