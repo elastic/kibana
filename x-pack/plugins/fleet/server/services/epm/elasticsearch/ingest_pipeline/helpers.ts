@@ -11,6 +11,7 @@ import type { RegistryDataStream } from '../../../../types';
 import { getPathParts } from '../../archive';
 
 import type { PipelineInstall, RewriteSubstitution } from './types';
+import { getPipelineNameForDatastream } from '../../../../../common';
 
 export const isTopLevelPipeline = (path: string) => {
   const pathParts = getPathParts(path);
@@ -36,20 +37,6 @@ export const getPipelineNameForInstallation = ({
   }
   // It's a top-level pipeline
   return `${packageVersion}-${pipelineName}`;
-};
-
-export const getPipelineNameForDatastream = ({
-  dataStream,
-  packageVersion,
-}: {
-  dataStream: RegistryDataStream;
-  packageVersion: string;
-}): string => {
-  return `${dataStream.type}-${dataStream.dataset}-${packageVersion}`;
-};
-
-export const getCustomPipelineNameForDatastream = (dataStream: RegistryDataStream): string => {
-  return `${dataStream.type}-${dataStream.dataset}@custom`;
 };
 
 export function rewriteIngestPipeline(

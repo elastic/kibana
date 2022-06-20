@@ -36,3 +36,7 @@ export { normalizeHostsForAgents } from './hosts_utils';
 export { splitPkgKey } from './split_pkg_key';
 export { getMaxPackageName } from './max_package_name';
 export { getMinVersion, getMaxVersion } from './get_min_max_version';
+export {
+  getPipelineNameForDatastream,
+  getCustomPipelineNameForDatastream,
+} from './datastream_es_name';

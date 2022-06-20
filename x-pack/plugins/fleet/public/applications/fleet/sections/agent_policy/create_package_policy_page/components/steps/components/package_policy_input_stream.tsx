@@ -21,6 +21,7 @@ import {
 
 import type {
   NewPackagePolicyInputStream,
+  PackageInfo,
   RegistryStream,
   RegistryVarsEntry,
 } from '../../../../../../types';
@@ -28,6 +29,8 @@ import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
+import { DatastreamPipeline } from './datastream_pipelines';
+import { DatastreamMappings } from './datastream_mappings';
 
 const FlexItemWithMaxWidth = styled(EuiFlexItem)`
   max-width: calc(50% - ${(props) => props.theme.eui.euiSizeL});
@@ -35,6 +38,7 @@ const FlexItemWithMaxWidth = styled(EuiFlexItem)`
 
 export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
   packageInputStream: RegistryStream;
+  packageInfo: PackageInfo;
   packagePolicyInputStream: NewPackagePolicyInputStream;
   updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
@@ -42,6 +46,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
 }> = memo(
   ({
     packageInputStream,
+    packageInfo,
     packagePolicyInputStream,
     updatePackagePolicyInputStream,
     inputStreamValidationResults,
@@ -54,8 +59,9 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
 
     const requiredVars: RegistryVarsEntry[] = [];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     const advancedVars: RegistryVarsEntry[] = [];
+
+    const allowCustomIngestPipeline = true;
 
     if (packageInputStream.vars && packageInputStream.vars.length) {
       packageInputStream.vars.forEach((varDef) => {
@@ -135,7 +141,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                 </EuiFlexItem>
               );
             })}
-            {advancedVars.length ? (
+            {advancedVars.length || allowCustomIngestPipeline ? (
               <Fragment>
                 <EuiFlexItem>
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -165,8 +171,9 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                     ) : null}
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                {isShowingAdvanced
-                  ? advancedVars.map((varDef) => {
+                {isShowingAdvanced ? (
+                  <>
+                    {advancedVars.map((varDef) => {
                       if (!packagePolicyInputStream.vars) return null;
                       const { name: varName, type: varType } = varDef;
                       const value = packagePolicyInputStream.vars?.[varName]?.value;
@@ -192,8 +199,21 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                           />
                         </EuiFlexItem>
                       );
-                    })
-                  : null}
+                    })}
+                    <EuiFlexItem>
+                      <DatastreamPipeline
+                        packageInputStream={packageInputStream}
+                        packageInfo={packageInfo}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <DatastreamMappings
+                        packageInputStream={packageInputStream}
+                        packageInfo={packageInfo}
+                      />
+                    </EuiFlexItem>
+                  </>
+                ) : null}
               </Fragment>
             ) : null}
           </EuiFlexGroup>

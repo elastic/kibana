@@ -21,6 +21,7 @@ import {
 
 import type {
   NewPackagePolicyInput,
+  PackageInfo,
   PackagePolicyInputStream,
   RegistryInput,
   RegistryStream,
@@ -63,6 +64,7 @@ const shouldShowStreamsByDefault = (
 
 export const PackagePolicyInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
+  packageInfo: PackageInfo;
   packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>;
   packagePolicyInput: NewPackagePolicyInput;
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
@@ -71,6 +73,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
 }> = memo(
   ({
     packageInput,
+    packageInfo,
     packageInputStreams,
     packagePolicyInput,
     updatePackagePolicyInput,
@@ -214,6 +217,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
             {inputStreams.map(({ packageInputStream, packagePolicyInputStream }, index) => (
               <EuiFlexItem key={index}>
                 <PackagePolicyInputStreamConfig
+                  packageInfo={packageInfo}
                   packageInputStream={packageInputStream}
                   packagePolicyInputStream={packagePolicyInputStream!}
                   updatePackagePolicyInputStream={(
