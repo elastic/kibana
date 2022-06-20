@@ -29,6 +29,7 @@ import {
   getMultiFieldLabel,
   MULTI_FIELD_VALUES_SEPARATOR,
 } from '../../../../../common/fields_utils';
+import { RenderCounter } from '../../render_counter';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -74,10 +75,6 @@ class TableVis extends Component {
       this.setState({ accessDeniedDrilldownUrl: url });
     }
   };
-
-  componentDidUpdate() {
-    this.props.initialRender();
-  }
 
   renderRow = (row, pivotIds, fieldValuesFormatter) => {
     const { model, fieldFormatMap, getConfig } = this.props;
@@ -249,7 +246,7 @@ class TableVis extends Component {
   closeExternalUrlErrorModal = () => this.setState({ accessDeniedDrilldownUrl: null });
 
   render() {
-    const { visData, model, indexPattern } = this.props;
+    const { visData, model, indexPattern, initialRender } = this.props;
     const { accessDeniedDrilldownUrl } = this.state;
     const fields = (model.pivot_type ? [model.pivot_type ?? null].flat() : []).map(
       (type, index) => ({
@@ -273,7 +270,7 @@ class TableVis extends Component {
     }
 
     return (
-      <>
+      <RenderCounter initialRender={initialRender}>
         <RedirectAppLinks
           application={getCoreStart().application}
           className="tvbVis"
@@ -290,7 +287,7 @@ class TableVis extends Component {
             handleClose={this.closeExternalUrlErrorModal}
           />
         )}
-      </>
+      </RenderCounter>
     );
   }
 }

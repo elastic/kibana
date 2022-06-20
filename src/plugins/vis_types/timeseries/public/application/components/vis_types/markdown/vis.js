@@ -7,7 +7,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import { get } from 'lodash';
 import { ClassNames } from '@emotion/react';
@@ -19,9 +19,10 @@ import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 
 import './_markdown.scss';
+import { RenderCounter } from '../../render_counter';
 
 function MarkdownVisualization(props) {
-  const { backgroundColor, model, visData, getConfig, fieldFormatMap } = props;
+  const { backgroundColor, model, visData, getConfig, fieldFormatMap, initialRender } = props;
   const series = get(visData, `${model.id}.series`, []);
   const variables = convertSeriesToVars(series, model, getConfig, fieldFormatMap);
 
@@ -29,10 +30,6 @@ function MarkdownVisualization(props) {
   const style = { backgroundColor: panelBackgroundColor };
 
   let markdown;
-
-  useEffect(() => {
-    props.initialRender();
-  }, [props]);
 
   if (model.markdown) {
     const markdownSource = replaceVars(
@@ -79,7 +76,7 @@ function MarkdownVisualization(props) {
   }
   return (
     <div className="tvbVis" style={style}>
-      {markdown}
+      <RenderCounter initialRender={initialRender}>{markdown}</RenderCounter>
     </div>
   );
 }
