@@ -117,7 +117,7 @@ export type ConsoleDataAction =
   | {
       type: 'updateInputPlaceholderState';
       payload: {
-        placeholder: string;
+        placeholder: ConsoleDataState['input']['placeholder'];
       };
     }
   | {

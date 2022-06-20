@@ -72,6 +72,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           },
         };
       }
+      break;
 
     case 'updateInputPlaceholderState':
       if (state.input.placeholder !== payload.placeholder) {
