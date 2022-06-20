@@ -44,6 +44,8 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
     [actionConnector?.name]
   );
 
+  const uniqueId = useMemo(() => uuid.v4(), []);
+
   const permissions = useKibana().services.application.capabilities.osquery;
   const [advancedContentState, setAdvancedContentState] =
     useState<EuiAccordionProps['forceState']>('closed');
@@ -56,6 +58,17 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
     () => !permissions.runSavedQueries || !permissions.readSavedQueries,
     [permissions.readSavedQueries, permissions.runSavedQueries]
   );
+
+  const prepareEcsMapping = (mapping: Record<string, Record<string, string>>) =>
+    mapping
+      ? map(mapping, (value, key) => ({
+          key,
+          result: {
+            type: Object.keys(value)[0],
+            value: Object.values(value)[0],
+          },
+        }))
+      : [];
 
   const { form } = useForm({
     id: FORM_ID,
@@ -79,15 +92,7 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
       // @ts-expect-error update types
       savedQueryId: null,
       // @ts-expect-error update types
-      ecs_mapping: actionParams.message?.ecs_mapping
-        ? map(actionParams.message?.ecs_mapping, (value, key) => ({
-            key,
-            result: {
-              type: Object.keys(value)[0],
-              value: Object.values(value)[0],
-            },
-          }))
-        : [],
+      ecs_mapping: prepareEcsMapping(actionParams.message?.ecs_mapping),
     },
   });
   const { updateFieldValues, setFieldValue, getFormData } = form;
@@ -99,10 +104,18 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
   );
   const formData = getFormData();
   const formDataRef = useRef(formData);
-
-  if (!isDeepEqual(formDataRef.current, formData)) {
-    formDataRef.current = formData;
-  }
+  const handleUpdate = useCallback(() => {
+    editAction(
+      'message',
+      {
+        alerts: `[{{context.alerts}}]`,
+        query: formData.query,
+        ecs_mapping: formData.ecs_mapping,
+        id: uniqueId,
+      },
+      index
+    );
+  }, [editAction, formData.ecs_mapping, formData.query, index, uniqueId]);
 
   const handleSavedQueryChange = useCallback(
     (savedQuery) => {
@@ -110,41 +123,24 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
         updateFieldValues({
           query: savedQuery.query,
           savedQueryId: savedQuery.savedQueryId,
-          // @ts-expect-error update types
-          ecs_mapping: savedQuery.ecs_mapping
-            ? map(savedQuery.ecs_mapping, (value, key) => ({
-                key,
-                result: {
-                  type: Object.keys(value)[0],
-                  value: Object.values(value)[0],
-                },
-              }))
-            : [],
+          ecs_mapping: prepareEcsMapping(savedQuery.ecs_mapping),
         });
-        if (!isEmpty(savedQuery.ecs_mapping)) {
-          setAdvancedContentState('open');
-        }
+        setAdvancedContentState('open');
       } else {
         setFieldValue('savedQueryId', null);
       }
+
+      handleUpdate();
     },
-    [setFieldValue, updateFieldValues]
+    [handleUpdate, setFieldValue, updateFieldValues]
   );
 
   useEffect(() => {
-    editAction(
-      'message',
-      {
-        alerts: `[{{context.alerts}}]`,
-        query: formDataRef.current.query,
-        ecs_mapping: formDataRef.current.ecs_mapping,
-        id: uuid.v4(),
-      },
-      index
-    );
-    // Should happen only on after deepEqual check saved to formDataRef
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formDataRef.current, index, advancedContentState]);
+    if (!isDeepEqual(formDataRef.current, formData)) {
+      formDataRef.current = formData;
+      handleUpdate();
+    }
+  }, [formData, formData.query, handleUpdate]);
 
   useEffect(() => {
     if (actionParams.message?.ecs_mapping) {
@@ -153,6 +149,8 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
     // Should happen only on the initial load
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const componentProps = useMemo(() => ({ onChange: handleUpdate }), [handleUpdate]);
 
   return (
     <Form form={form}>
@@ -166,7 +164,7 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
           </QueryClientProvider>
         </>
       )}
-      <UseField path="query" component={LiveQueryQueryField} />
+      <UseField path="query" component={LiveQueryQueryField} componentProps={componentProps} />
       <>
         <EuiSpacer size="m" />
         <StyledEuiAccordion

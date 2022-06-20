@@ -21,12 +21,15 @@ interface LiveQueryQueryFieldProps {
   disabled?: boolean;
   field: FieldHook<string>;
   commands?: EuiCodeEditorProps['commands'];
+  onChange?: (value: string) => void;
+  onChange?: (value: string) => void;
 }
 
 const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   disabled,
   field,
   commands,
+  onChange,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const { value, setValue, errors } = field;
@@ -34,9 +37,13 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
 
   const handleEditorChange = useCallback(
     (newValue) => {
+      if (onChange) {
+        onChange(newValue);
+      }
+
       setValue(newValue);
     },
-    [setValue]
+    [onChange, setValue]
   );
 
   return (

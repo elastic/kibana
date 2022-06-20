@@ -27,26 +27,6 @@ export const getActionType = (): ActionTypeModel => ({
     }
   ),
   // @ts-expect-error update types
-  validateConnector: (action): ValidationResult => {
-    const validationResult = { errors: {} };
-    const errors = {
-      someConnectorField: new Array<string>(),
-    };
-    validationResult.errors = errors;
-    if (!action.config.someConnectorField) {
-      errors.someConnectorField.push(
-        i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSomeConnectorFieldeText',
-          {
-            defaultMessage: 'SomeConnectorField is required.',
-          }
-        )
-      );
-    }
-
-    return validationResult;
-  },
-  // @ts-expect-error update types
   validateParams: (actionParams: OsqueryActionParams): ValidationResult => {
     const validationResult = { errors: {} };
     const errors = {
