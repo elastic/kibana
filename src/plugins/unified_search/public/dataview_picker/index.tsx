@@ -38,7 +38,7 @@ export interface DataViewPickerProps {
 }
 
 export interface DataViewPickerPropsExtended extends DataViewPickerProps {
-  onTextLangQuerySubmit: (query?: AggregateQuery) => void;
+  onTextLangQuerySubmit?: (query?: AggregateQuery) => void;
   textBasedLanguage?: string;
 }
 

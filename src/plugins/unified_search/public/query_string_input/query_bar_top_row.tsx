@@ -96,6 +96,7 @@ export interface QueryBarTopRowProps {
   suggestionsSize?: SuggestionsListSize;
   isScreenshotMode?: boolean;
   onTextLangQuerySubmit: (query: any) => void;
+  onTextLangQueryChange: (query: any) => void;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -383,12 +384,19 @@ export const QueryBarTopRow = React.memo(
         }
       );
 
+      const buttonLabelRun = i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
+        defaultMessage: 'Run query',
+      });
+
+      const iconDirty = Boolean(isQueryLangSelected) ? 'playFilled' : 'kqlFunction';
+      const tooltipDirty = Boolean(isQueryLangSelected) ? buttonLabelRun : buttonLabelUpdate;
+
       const button = props.customSubmitButton ? (
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
         <EuiFlexItem grow={false}>
           <EuiSuperUpdateButton
-            iconType={props.isDirty ? 'kqlFunction' : 'refresh'}
+            iconType={props.isDirty ? iconDirty : 'refresh'}
             iconOnly={!isXXLarge}
             aria-label={props.isLoading ? buttonLabelUpdate : buttonLabelRefresh}
             isDisabled={isDateRangeInvalid}
@@ -400,7 +408,7 @@ export const QueryBarTopRow = React.memo(
             data-test-subj="querySubmitButton"
             // @ts-expect-error Need to fix expecting `children` in EUI
             toolTipProps={{
-              content: props.isDirty ? buttonLabelUpdate : buttonLabelRefresh,
+              content: props.isDirty ? tooltipDirty : buttonLabelRefresh,
               delay: 'long',
               position: 'bottom',
             }}
@@ -508,7 +516,12 @@ export const QueryBarTopRow = React.memo(
     function renderTextLangEditor() {
       return (
         <EuiFlexGroup gutterSize="s" responsive={false} css={{ margin: 0 }}>
-          {isQueryLangSelected && props.query && <TextBasedLanguagesEditor query={props.query} />}
+          {isQueryLangSelected && props.query && (
+            <TextBasedLanguagesEditor
+              query={props.query}
+              onTextLangQueryChange={props.onTextLangQueryChange}
+            />
+          )}
         </EuiFlexGroup>
       );
     }

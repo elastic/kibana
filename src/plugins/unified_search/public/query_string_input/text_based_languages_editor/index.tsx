@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, memo, useEffect, useState } from 'react';
+import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
 import { EsqlLang, monaco } from '@kbn/monaco';
 
 import { i18n } from '@kbn/i18n';
@@ -28,6 +28,7 @@ import { useDebounceWithOptions } from './helpers';
 
 interface TextBasedLanguagesEditorProps {
   query: any;
+  onTextLangQueryChange: (query: any) => void;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -49,6 +50,7 @@ let clickedOutside = false;
 
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
+  onTextLangQueryChange,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getTextBasedLanguage(query);
@@ -126,6 +128,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   };
 
+  const onQueryUpdate = useCallback(
+    (value: string) => {
+      setCode(value);
+      onTextLangQueryChange({ sql: value });
+    },
+    [onTextLangQueryChange]
+  );
+
   return (
     <EuiResizeObserver onResize={onResize}>
       {(resizeRef) => (
@@ -159,7 +169,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     wrappingIndent: 'none',
                   }}
                   width="100%"
-                  onChange={setCode}
+                  onChange={onQueryUpdate}
                   editorDidMount={(editor) => {
                     editor1.current = editor;
                     const model = editor.getModel();

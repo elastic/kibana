@@ -11,7 +11,12 @@ import { skip } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { isEqual } from 'lodash';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, Query, UI_SETTINGS } from '../../../common';
+
+function isOfQueryType(arg: any): arg is Query {
+  return Boolean(arg && 'query' in arg);
+}
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
@@ -64,7 +69,13 @@ export class QueryStringManager {
    */
   public setQuery = (query: Query) => {
     const curQuery = this.query$.getValue();
-    if (query?.language !== curQuery.language || query?.query !== curQuery.query) {
+    const isOfTypeQuery = isOfQueryType(query);
+    if (
+      (isOfTypeQuery && query?.language !== curQuery.language) ||
+      query?.query !== curQuery.query
+    ) {
+      this.query$.next(query);
+    } else if (!isOfTypeQuery && !isEqual(query, curQuery)) {
       this.query$.next(query);
     }
   };

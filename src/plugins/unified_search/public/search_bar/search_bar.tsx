@@ -200,6 +200,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
 
     return (
       (this.state.query && this.props.query && this.state.query.query !== this.props.query.query) ||
+      (this.state.query && this.props.query && !isEqual(this.state.query, this.props.query)) ||
       this.state.dateRangeFrom !== this.props.dateRangeFrom ||
       this.state.dateRangeTo !== this.props.dateRangeTo
     );
@@ -301,6 +302,21 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     });
     if (this.props.onQueryChange) {
       this.props.onQueryChange(queryAndDateRange);
+    }
+  };
+
+  public onTextLangQueryChange = (query?: any) => {
+    this.setState({
+      query,
+    });
+    if (this.props.onQueryChange) {
+      this.props.onQueryChange({
+        query,
+        dateRange: {
+          from: this.state.dateRangeFrom,
+          to: this.state.dateRangeTo,
+        },
+      });
     }
   };
 
@@ -519,6 +535,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
           suggestionsSize={this.props.suggestionsSize}
           isScreenshotMode={this.props.isScreenshotMode}
           onTextLangQuerySubmit={this.onTextLangQuerySubmit}
+          onTextLangQueryChange={this.onTextLangQueryChange}
         />
       </div>
     );
