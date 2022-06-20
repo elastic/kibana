@@ -32,12 +32,35 @@ const computeDryRunPayload = (
     return undefined;
   }
 
-  return [
-    {
-      type: editAction,
-      value: [] as any,
-    },
-  ];
+  switch (editAction) {
+    case BulkActionEditType.add_index_patterns:
+    case BulkActionEditType.delete_index_patterns:
+    case BulkActionEditType.set_index_patterns:
+      return [
+        {
+          type: editAction,
+          value: [],
+        },
+      ];
+
+    case BulkActionEditType.add_tags:
+    case BulkActionEditType.delete_tags:
+    case BulkActionEditType.set_tags:
+      return [
+        {
+          type: editAction,
+          value: [],
+        },
+      ];
+
+    case BulkActionEditType.set_timeline:
+      return [
+        {
+          type: editAction,
+          value: { timeline_id: '', timeline_title: '' },
+        },
+      ];
+  }
 };
 
 export interface DryRunResult {

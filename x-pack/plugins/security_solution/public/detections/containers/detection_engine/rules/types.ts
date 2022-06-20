@@ -166,7 +166,6 @@ export const RulesSchema = t.array(RuleSchema);
 
 export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
-export type RuleType = Rule['type'];
 
 export interface RuleError {
   id?: string;

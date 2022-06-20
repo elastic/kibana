@@ -6,7 +6,7 @@
  */
 
 import { escapeKuery } from '../../../../common/lib/keury';
-import { FilterOptions, Rule } from './types';
+import { FilterOptions } from './types';
 
 const SEARCHABLE_RULE_PARAMS = [
   'alert.attributes.name',
