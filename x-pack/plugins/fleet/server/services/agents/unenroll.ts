@@ -11,6 +11,8 @@ import type { Agent, BulkActionResult } from '../../types';
 import * as APIKeyService from '../api_keys';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
+import { appContextService } from '../app_context';
+
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import {
@@ -70,8 +72,9 @@ export async function unenrollAgents(
     revoke?: boolean;
   }
 ): Promise<{ items: BulkActionResult[] }> {
+  const startTime = Date.now();
   // start with all agents specified
-  const givenAgents = await getAgents(esClient, soClient, options);
+  const givenAgents = await getAgents(esClient, soClient, { ...options, withoutManaged: true });
 
   // Filter to those not already unenrolled, or unenrolling
   const agentsEnrolled = givenAgents.filter((agent) => {
@@ -80,24 +83,27 @@ export async function unenrollAgents(
     }
     return !agent.unenrollment_started_at && !agent.unenrolled_at;
   });
+
   // And which are allowed to unenroll
-  const agentResults = await Promise.allSettled(
+  const agentResults = Promise.allSettled(
     agentsEnrolled.map((agent) =>
       unenrollAgentIsAllowed(soClient, esClient, agent.id).then((_) => agent)
     )
   );
+
   const outgoingErrors: Record<Agent['id'], Error> = {};
-  const agentsToUpdate = options.force
-    ? agentsEnrolled
-    : agentResults.reduce<Agent[]>((agents, result, index) => {
-        if (result.status === 'fulfilled') {
-          agents.push(result.value);
-        } else {
-          const id = givenAgents[index].id;
-          outgoingErrors[id] = result.reason;
-        }
-        return agents;
-      }, []);
+  const agentsToUpdate =
+    options.force || 'kuery' in options // no need to filter with kuery, managed already excluded
+      ? agentsEnrolled
+      : (await agentResults).reduce<Agent[]>((agents, result, index) => {
+          if (result.status === 'fulfilled') {
+            agents.push(result.value);
+          } else {
+            const id = givenAgents[index].id;
+            outgoingErrors[id] = result.reason;
+          }
+          return agents;
+        }, []);
 
   const now = new Date().toISOString();
   if (options.revoke) {
@@ -133,6 +139,15 @@ export async function unenrollAgents(
     }
     return result;
   };
+
+  const endTime = Date.now() - startTime;
+  try {
+    appContextService
+      .getLogger()
+      .info(`unenroll check for ${agentsEnrolled.length} agents took: ${endTime} ms`);
+  } catch (e) {
+    // temporarily catching error to pass test
+  }
 
   return {
     items: givenAgents.map(getResultForAgent),
