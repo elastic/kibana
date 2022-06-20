@@ -21,7 +21,7 @@ import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { filterByPackagePolicy } from '../../../common/utils/helpers';
 import { CspAppContext } from '../../plugin';
-import type { RuleSchema, CspRulesConfigSchema } from '../../../common/types';
+import type { CSPRuleType, CspRulesConfigSchema } from '../../../common/schemas';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   UPDATE_RULES_CONFIG_ROUTE_PATH,
@@ -52,8 +52,8 @@ export const getPackagePolicy = async (
 export const getCspRules = (
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy
-): Promise<SavedObjectsFindResponse<RuleSchema, unknown>> => {
-  return soClient.find<RuleSchema>({
+): Promise<SavedObjectsFindResponse<CSPRuleType, unknown>> => {
+  return soClient.find<CSPRuleType>({
     type: CSP_RULE_SAVED_OBJECT_TYPE,
     filter: filterByPackagePolicy({
       packagePolicyId: packagePolicy.id,
@@ -66,7 +66,7 @@ export const getCspRules = (
 };
 
 export const createRulesConfig = (
-  cspRules: SavedObjectsFindResponse<RuleSchema>
+  cspRules: SavedObjectsFindResponse<CSPRuleType>
 ): CspRulesConfigSchema => {
   const activatedRules = cspRules.saved_objects.filter((cspRule) => cspRule.attributes.enabled);
   const config = {

@@ -73,10 +73,3 @@ export interface Benchmark {
   agent_policy: Pick<GetAgentPoliciesResponseItem, 'id' | 'name' | 'agents'>;
   rules: CspRulesStatus;
 }
-
-export type {
-  RuleMetadataSchema,
-  RuleSchema,
-  RuleTemplateSchema,
-  CspRulesConfigSchema,
-} from './schemas';

@@ -9,10 +9,10 @@ import { SavedObjectsServiceSetup } from '@kbn/core/server';
 import { cspRule, cspRuleTemplate } from './mappings';
 import { cspRuleMigrations, cspRuleTemplateMigrations } from './migrations';
 import {
-  ruleSchemaV830,
-  ruleSchemaV840,
-  ruleTemplateSchemaV830,
-  ruleTemplateSchemaV840,
+  cspRuleSchemaV830,
+  cspRuleSchemaV840,
+  cspRuleTemplateSchemaV830,
+  cspRuleTemplateSchemaV840,
 } from '../../common/schemas';
 
 import {
@@ -30,8 +30,8 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
       visibleInManagement: true,
     },
     schemas: {
-      '8.3.0': ruleSchemaV830,
-      '8.4.0': ruleSchemaV840,
+      '8.3.0': cspRuleSchemaV830,
+      '8.4.0': cspRuleSchemaV840,
     },
     migrations: cspRuleMigrations,
     mappings: cspRule,
@@ -45,8 +45,8 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
       visibleInManagement: true,
     },
     schemas: {
-      '8.3.0': ruleTemplateSchemaV830,
-      '8.4.0': ruleTemplateSchemaV840,
+      '8.3.0': cspRuleTemplateSchemaV830,
+      '8.4.0': cspRuleTemplateSchemaV840,
     },
     migrations: cspRuleTemplateMigrations,
     mappings: cspRuleTemplate,
