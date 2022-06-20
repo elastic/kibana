@@ -240,7 +240,7 @@ export const useBulkActions = ({
                 <>
                   <p>
                     {i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(
-                      getBulkActionsDryRunFromCache(queryClient)?.summary?.succeeded ?? 0
+                      getBulkActionsDryRunFromCache(queryClient)?.succeededRulesCount ?? 0
                     )}
                   </p>
                   <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">

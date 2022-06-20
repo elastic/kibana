@@ -12,11 +12,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DryRunResult } from './use_bulk_actions_dry_run';
 
 interface BulkEditRuleErrorsListProps {
-  actionErrors: DryRunResult['failed'];
+  ruleErrors: DryRunResult['ruleErrors'];
 }
 
-const BulkEditRuleErrorsListComponent = ({ actionErrors = [] }: BulkEditRuleErrorsListProps) => {
-  if (actionErrors.length === 0) {
+const BulkEditRuleErrorsListComponent = ({ ruleErrors = [] }: BulkEditRuleErrorsListProps) => {
+  if (ruleErrors.length === 0) {
     return null;
   }
 
@@ -28,7 +28,7 @@ const BulkEditRuleErrorsListComponent = ({ actionErrors = [] }: BulkEditRuleErro
       />
       <EuiSpacer />
       <ul>
-        {actionErrors.map(({ message, ruleIds }) => {
+        {ruleErrors.map(({ message, ruleIds }) => {
           const rulesCount = ruleIds.length;
           switch (message) {
             case 'Immutable':

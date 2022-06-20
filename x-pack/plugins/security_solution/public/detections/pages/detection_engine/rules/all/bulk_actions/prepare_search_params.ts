@@ -28,14 +28,14 @@ export const prepareSearchParams = ({
 }: PrepareSearchFilterProps) => {
   // if not all rules selected, filter out rules that failed during dry run
   if (!isAllSelected) {
-    const failedRuleIdsSet = new Set(dryRunResult?.failed.flatMap(({ ruleIds }) => ruleIds));
+    const failedRuleIdsSet = new Set(dryRunResult?.ruleErrors.flatMap(({ ruleIds }) => ruleIds));
 
     return { ids: selectedRuleIds.filter((id) => !failedRuleIdsSet.has(id)) };
   }
 
   // otherwise create filter that excludes failed results based on dry run errors
   let modifiedFilterOptions = filterOptions;
-  dryRunResult?.failed.forEach(({ message }) => {
+  dryRunResult?.ruleErrors.forEach(({ message }) => {
     switch (message) {
       case 'Immutable':
         modifiedFilterOptions = { ...modifiedFilterOptions, showCustomRules: true };

@@ -331,7 +331,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         )}
         {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (
           <BulkEditFlyout
-            rulesCount={bulkActionsDryRunResult?.summary?.succeeded ?? 0}
+            rulesCount={bulkActionsDryRunResult?.succeededRulesCount ?? 0}
             editAction={bulkEditActionType}
             onClose={handleBulkEditFormCancel}
             onConfirm={handleBulkEditFormConfirm}

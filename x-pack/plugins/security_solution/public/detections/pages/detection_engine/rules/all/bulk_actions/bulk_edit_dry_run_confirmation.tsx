@@ -11,57 +11,59 @@ import { EuiConfirmModal } from '@elastic/eui';
 import * as i18n from '../../translations';
 import { DryRunResult } from './use_bulk_actions_dry_run';
 import { BulkEditRuleErrorsList } from './bulk_edit_rule_errors_list';
+
 interface BulkEditDryRunConfirmationProps {
   result?: DryRunResult;
   onCancel: () => void;
   onConfirm: () => void;
 }
+
 const BulkEditDryRunConfirmationComponent = ({
   onCancel,
   onConfirm,
   result,
 }: BulkEditDryRunConfirmationProps) => {
-  const hasAllSucceeded = result?.summary?.failed === 0;
-  const { total = 0, succeeded = 0 } = result?.summary ?? {};
-  const failed = result?.failed ?? [];
+  const { failedRulesCount = 0, succeededRulesCount = 0, ruleErrors = [] } = result ?? {};
+  const hasAllSucceeded = failedRulesCount === 0;
 
+  // proceed straight to edit flyout if all rules can be edited successfully
   useEffect(() => {
     if (hasAllSucceeded) {
       setTimeout(onConfirm, 0);
     }
   }, [hasAllSucceeded, onConfirm]);
-
-  // proceed straight to edit flyout if all rules can be edited successfully
   if (hasAllSucceeded) {
     return null;
   }
 
-  if (succeeded === 0) {
+  // if no rule can be edited, modal window that denies bulk edit action will be displayed
+  if (succeededRulesCount === 0) {
     return (
       <EuiConfirmModal
-        title={i18n.BULK_EDIT_CONFIRMATION_DENIED_TITLE(total)}
+        title={i18n.BULK_EDIT_CONFIRMATION_DENIED_TITLE(failedRulesCount)}
         onCancel={onCancel}
         onConfirm={onCancel}
         confirmButtonText={i18n.BULK_EDIT_CONFIRMATION_CLOSE}
         defaultFocusedButton="confirm"
         data-test-subj="bulkEditRejectModal"
       >
-        <BulkEditRuleErrorsList actionErrors={failed} />
+        <BulkEditRuleErrorsList ruleErrors={ruleErrors} />
       </EuiConfirmModal>
     );
   }
 
+  // if there are rules that can and cannot be edited, modal window that propose edit of some the rules will be displayed
   return (
     <EuiConfirmModal
-      title={i18n.BULK_EDIT_CONFIRMATION_PARTLY_TITLE(succeeded)}
+      title={i18n.BULK_EDIT_CONFIRMATION_PARTLY_TITLE(succeededRulesCount)}
       onCancel={onCancel}
       onConfirm={onConfirm}
-      confirmButtonText={i18n.BULK_EDIT_CONFIRMATION_CONFIRM(succeeded)}
+      confirmButtonText={i18n.BULK_EDIT_CONFIRMATION_CONFIRM(succeededRulesCount)}
       cancelButtonText={i18n.BULK_EDIT_CONFIRMATION_CANCEL}
       defaultFocusedButton="confirm"
       data-test-subj="bulkEditConfirmationModal"
     >
-      <BulkEditRuleErrorsList actionErrors={failed} />
+      <BulkEditRuleErrorsList ruleErrors={ruleErrors} />
     </EuiConfirmModal>
   );
 };

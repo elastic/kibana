@@ -24,6 +24,12 @@ const BULK_ACTIONS_DRY_RUN_QUERY_KEY = 'bulkActionsDryRun';
 export const getBulkActionsDryRunFromCache = (queryClient: QueryClient) =>
   processDryRunResult(queryClient.getQueryData<BulkActionResponse>(BULK_ACTIONS_DRY_RUN_QUERY_KEY));
 
+/**
+ * helper utility that creates payload for _bulk_action API in dry mode
+ * @param {BulkAction} action
+ * @param {BulkActionEditType | undefined} editAction
+ * @returns {BulkActionEditPayload[] | undefined}
+ */
 const computeDryRunPayload = (
   action: BulkAction,
   editAction?: BulkActionEditType
@@ -64,18 +70,24 @@ const computeDryRunPayload = (
 };
 
 export interface DryRunResult {
-  summary?: BulkActionResponse['attributes']['summary'];
-  failed: Array<{
+  succeededRulesCount?: number;
+  failedRulesCount?: number;
+  ruleErrors: Array<{
     message: string;
     ruleIds: string[];
   }>;
 }
 
+/**
+ * helper utility that transforms raw BulkActionResponse response into more usable format
+ * @param {BulkActionResponse | undefined} result - raw bulk_actions API response
+ * @returns {DryRunResult}
+ */
 const processDryRunResult = (result: BulkActionResponse | undefined): DryRunResult => {
   const processed = {
-    // all rules that can be edited are succeeded, they also are custom
-    summary: result?.attributes.summary,
-    failed:
+    succeededRulesCount: result?.attributes.summary.succeeded,
+    failedRulesCount: result?.attributes.summary.failed,
+    ruleErrors:
       result?.attributes.errors?.map(({ message, rules }) => ({
         message,
         ruleIds: rules.map(({ id }) => id),
