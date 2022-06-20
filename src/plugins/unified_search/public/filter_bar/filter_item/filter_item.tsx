@@ -315,10 +315,10 @@ export function FilterItem(props: FilterItemProps) {
       try {
         label.title = getDisplayValueFromFilter(filter, indexPatterns);
       } catch (e) {
-        label.status = FILTER_ITEM_ERROR;
+        label.status = FILTER_ITEM_WARNING;
         label.title = props.intl.formatMessage({
-          id: 'unifiedSearch.filter.filterBar.labelErrorText',
-          defaultMessage: `Error`,
+          id: 'unifiedSearch.filter.filterBar.labelWarningText',
+          defaultMessage: `Warning`,
         });
         label.message = e.message;
       }

@@ -11,7 +11,6 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { Document } from '../persistence/saved_object_store';
@@ -36,7 +35,6 @@ export interface EditorFrameStartPlugins {
   embeddable?: EmbeddableStart;
   dashboard?: DashboardStart;
   expressions: ExpressionsStart;
-  uiActions: UiActionsStart;
   charts: ChartsPluginSetup;
 }
 
