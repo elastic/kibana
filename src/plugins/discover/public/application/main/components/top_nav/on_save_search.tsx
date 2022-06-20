@@ -88,12 +88,14 @@ export async function onSaveSearch({
   savedSearch,
   services,
   state,
+  anchorElement,
 }: {
   indexPattern: DataView;
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: GetStateReturn;
+  anchorElement: HTMLElement;
 }) {
   const onSave = async ({
     newTitle,
@@ -136,7 +138,9 @@ export async function onSaveSearch({
   const saveModal = (
     <SavedObjectSaveModal
       onSave={onSave}
-      onClose={() => {}}
+      onClose={() => {
+        anchorElement?.focus();
+      }}
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
       description={savedSearch.description}

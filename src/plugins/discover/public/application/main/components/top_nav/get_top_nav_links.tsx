@@ -103,7 +103,8 @@ export const getTopNavLinks = ({
     testId: 'discoverSaveButton',
     iconType: 'save',
     emphasize: true,
-    run: () => onSaveSearch({ savedSearch, services, indexPattern, navigateTo, state }),
+    run: (anchorElement: HTMLElement) =>
+      onSaveSearch({ savedSearch, services, indexPattern, navigateTo, state, anchorElement }),
   };
 
   const openSearch = {
@@ -161,6 +162,9 @@ export const getTopNavLinks = ({
         },
         isDirty: !savedSearch.id || state.isAppStateDirty(),
         showPublicUrlSwitch,
+        onClose: () => {
+          anchorElement?.focus();
+        },
       });
     },
   };
