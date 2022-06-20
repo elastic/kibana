@@ -19,10 +19,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
+import { useStatusByLocation } from '../hooks/use_status_by_location';
 import { selectMonitorStatus } from '../../../state/monitor_summary';
 
 export const MonitorDetailsPanel = () => {
   const { data } = useSelector(selectMonitorStatus);
+
+  useStatusByLocation();
 
   if (!data) {
     return <EuiLoadingSpinner />;
