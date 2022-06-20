@@ -33,9 +33,9 @@ const CommandInputContainer = styled.div`
 
   .cursor {
     display: inline-block;
-    width: 0.5em;
-    height: 1em;
-    background-color: ${({ theme }) => theme.eui.euiTextColors.default};
+    width: 2px;
+    height: ${({ theme: { eui } }) => eui.euiLineHeight}em;
+    background-color: ${({ theme }) => theme.eui.euiColorPrimaryText};
 
     animation: cursor-blink-animation 1s steps(5, start) infinite;
     -webkit-animation: cursor-blink-animation 1s steps(5, start) infinite;
