@@ -37,7 +37,7 @@ export async function getSessionStatus(
         ...status,
       };
     })
-  ); // todo optimize and handle errors
+  );
 
   if (searchStatuses.some((item) => item.status === SearchStatus.ERROR)) {
     return SearchSessionStatus.ERROR;
