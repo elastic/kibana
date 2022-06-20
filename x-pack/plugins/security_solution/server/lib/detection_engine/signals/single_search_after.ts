@@ -33,6 +33,7 @@ interface SingleSearchAfterParams {
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
   trackTotalHits?: boolean;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 // utilize search_after for paging results into bulk.
@@ -42,6 +43,7 @@ export const singleSearchAfter = async <
   aggregations,
   searchAfterSortIds,
   index,
+  runtimeMappings,
   from,
   to,
   services,
@@ -64,6 +66,7 @@ export const singleSearchAfter = async <
         index,
         from,
         to,
+        runtimeMappings,
         filter,
         size: pageSize,
         sortOrder,

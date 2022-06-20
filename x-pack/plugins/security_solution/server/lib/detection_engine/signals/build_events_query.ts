@@ -19,6 +19,7 @@ interface BuildEventsSearchQuery {
   from: string;
   to: string;
   filter: estypes.QueryDslQueryContainer;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   size: number;
   sortOrder?: estypes.SortOrder;
   searchAfterSortIds: estypes.SortResults | undefined;
@@ -97,6 +98,7 @@ export const buildEventsSearchQuery = ({
   to,
   filter,
   size,
+  runtimeMappings,
   searchAfterSortIds,
   sortOrder,
   timestampOverride,
@@ -134,6 +136,7 @@ export const buildEventsSearchQuery = ({
   const searchQuery = {
     // pre_filter_shard_size: thresholdTerms ? 1 : 128,
     allow_no_indices: true,
+    runtime_mappings: runtimeMappings,
     index,
     size,
     ignore_unavailable: true,
@@ -182,6 +185,7 @@ export const buildEqlSearchRequest = (
   filters: FiltersOrUndefined,
   timestampOverride: TimestampOverrideOrUndefined,
   exceptionLists: ExceptionListItemSchema[],
+  runtimeMappings: estypes.MappingRuntimeFields | undefined,
   eventCategoryOverride?: string,
   timestampField?: string,
   tiebreakerField?: string
@@ -216,6 +220,7 @@ export const buildEqlSearchRequest = (
           filter: requestFilter,
         },
       },
+      runtime_mappings: runtimeMappings,
       timestamp_field: timestampField,
       event_category_field: eventCategoryOverride,
       tiebreaker_field: tiebreakerField,
