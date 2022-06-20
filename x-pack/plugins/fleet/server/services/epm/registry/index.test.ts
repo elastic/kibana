@@ -71,7 +71,8 @@ describe('fetch package', () => {
     mockGetBundledPackageByName.mockReset();
   });
 
-  describe('fetchFindLatestPackageOrUndefined', () => {
+  type FetchFn = typeof fetchFindLatestPackageOrThrow | typeof fetchFindLatestPackageOrUndefined;
+  const performGenericFetchTests = (fetchMethodToTest: FetchFn) => {
     it('Should return registry package if bundled package is older version', async () => {
       const bundledPackage = { name: 'testpkg', version: '1.0.0' };
       const registryPackage = { name: 'testpkg', version: '1.0.1' };
@@ -79,7 +80,7 @@ describe('fetch package', () => {
       mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
 
       mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
-      const result = await fetchFindLatestPackageOrUndefined('testpkg');
+      const result = await fetchMethodToTest('testpkg');
       expect(result).toEqual(registryPackage);
     });
 
@@ -90,7 +91,7 @@ describe('fetch package', () => {
       mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
 
       mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
-      const result = await fetchFindLatestPackageOrUndefined('testpkg');
+      const result = await fetchMethodToTest('testpkg');
       expect(result).toEqual(bundledPackage);
     });
     it('Should return bundled package if bundled package there is no registry package', async () => {
@@ -99,7 +100,7 @@ describe('fetch package', () => {
       mockFetchUrl.mockResolvedValue(JSON.stringify([]));
 
       mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
-      const result = await fetchFindLatestPackageOrUndefined('testpkg');
+      const result = await fetchMethodToTest('testpkg');
       expect(result).toEqual(bundledPackage);
     });
 
@@ -109,10 +110,13 @@ describe('fetch package', () => {
       mockFetchUrl.mockRejectedValue(new Error('Registry error'));
 
       mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
-      const result = await fetchFindLatestPackageOrUndefined('testpkg');
+      const result = await fetchMethodToTest('testpkg');
       expect(result).toEqual(bundledPackage);
     });
+  };
 
+  describe('fetchFindLatestPackageOrUndefined', () => {
+    performGenericFetchTests(fetchFindLatestPackageOrUndefined);
     it('Should return undefined if there is a registry error and no bundled package', async () => {
       const bundledPackage = null;
 
@@ -125,6 +129,7 @@ describe('fetch package', () => {
   });
 
   describe('fetchFindLatestPackageOrThrow', () => {
+    performGenericFetchTests(fetchFindLatestPackageOrThrow);
     it('Should return undefined if there is a registry error and no bundled package', async () => {
       const bundledPackage = null;
 
