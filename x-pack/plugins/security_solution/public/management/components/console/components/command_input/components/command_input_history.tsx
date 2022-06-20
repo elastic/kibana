@@ -6,12 +6,11 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiSelectable, EuiSelectableProps } from '@elastic/eui';
+import { EuiSelectable, EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useIsMounted } from '../../../../../hooks/use_is_mounted';
 import { UserCommandInput } from '../../user_command_input';
-import { InputHistoryItem } from '../../console_state/types';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputHistory } from '../../../hooks/state_selectors/use_with_input_history';
 
@@ -29,7 +28,7 @@ export const CommandInputHistory = memo(() => {
 
   const optionListRef = useRef(); // TODO:PT remove when https://github.com/elastic/eui/pull/5978 becomes available in kibana (task #4179)
 
-  const selectableHistoryOptions = useMemo<EuiSelectableProps['options']>(() => {
+  const selectableHistoryOptions = useMemo(() => {
     return inputHistory.map<EuiSelectableProps['options'][number]>((inputItem, index) => {
       return {
         label: inputItem.input,
@@ -39,7 +38,7 @@ export const CommandInputHistory = memo(() => {
     });
   }, [inputHistory]);
 
-  const selectableListProps: EuiSelectableProps<InputHistoryItem>['listProps'] = useMemo(() => {
+  const selectableListProps: EuiSelectableProps['listProps'] = useMemo(() => {
     return {
       showIcons: false,
       onKeyDownCapture: (ev) => {
@@ -57,12 +56,12 @@ export const CommandInputHistory = memo(() => {
     };
   }, []);
 
-  const renderAsIs: EuiSelectableProps<InputHistoryItem>['children'] = useCallback((list) => {
+  const renderAsIs: EuiSelectableProps['children'] = useCallback((list) => {
     return list;
   }, []);
 
-  const handleSelectableOnChange: EuiSelectableProps<InputHistoryItem>['onChange'] = useCallback(
-    (items) => {
+  const handleSelectableOnChange: EuiSelectableProps['onChange'] = useCallback(
+    (items: EuiSelectableOption[]) => {
       optionWasSelected.current = true;
 
       const selected = items.find((item) => item.checked === 'on');
@@ -93,7 +92,7 @@ export const CommandInputHistory = memo(() => {
     if (optionListRef.current) {
       observer = new MutationObserver((mutationList) => {
         const focusedOption = mutationList.find((mutatedEl) =>
-          mutatedEl.target.classList.contains('euiSelectableListItem-isFocused')
+          (mutatedEl.target as HTMLLIElement).classList.contains('euiSelectableListItem-isFocused')
         );
 
         if (focusedOption) {
@@ -140,7 +139,7 @@ export const CommandInputHistory = memo(() => {
 
   return (
     <div>
-      <EuiSelectable<InputHistoryItem>
+      <EuiSelectable
         options={selectableHistoryOptions}
         onChange={handleSelectableOnChange}
         renderOption={handleRenderOption}
