@@ -33,6 +33,11 @@ import { Type } from '@kbn/config-schema';
 import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { AppenderConfigType, LoggingServiceSetup } from '@kbn/core-logging-server';
 import { appendersSchema } from '@kbn/core-logging-server-internal';
+import type {
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+  AnalyticsServicePreboot,
+} from '@kbn/core-analytics-server';
 import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
@@ -85,11 +90,6 @@ export type {
 };
 
 import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
-import type {
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
-  AnalyticsServicePreboot,
-} from '@kbn/core-analytics-server';
 
 export type { IExecutionContextContainer, KibanaExecutionContext } from './execution_context';
 
