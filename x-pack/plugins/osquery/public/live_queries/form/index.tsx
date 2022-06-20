@@ -311,15 +311,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     ),
     [
       queryField,
-      isSavedQueryDisabled,
-      handleSavedQueryChange,
       queryComponentProps,
+      permissions.writeSavedQueries,
+      handleSavedQueryChange,
       ecsMappingField,
       advancedContentState,
       handleToggle,
       ecsFieldProps,
       formType,
-      permissions.writeSavedQueries,
       agentSelected,
       queryValueProvided,
       resultsStatus,
@@ -327,6 +326,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       enabled,
       isSubmitting,
       submit,
+      isSavedQueryDisabled,
     ]
   );
 
