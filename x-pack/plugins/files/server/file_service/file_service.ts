@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { File, FileSavedObjectAttributes } from '../../common';
+import { File } from '../../common';
 import {
   CreateFileArgs,
   UpdateFileArgs,
@@ -39,8 +39,6 @@ export interface FileServiceStart {
    * Find a file. Will throw if file cannot be found.
    */
   find<M>(args: FindFileArgs): Promise<File<M>>;
-
-  findByAttributes<M>(attributes: Partial<FileSavedObjectAttributes<M>>): Promise<Array<File<M>>>;
 
   /**
    * List all files of specific file kind.
