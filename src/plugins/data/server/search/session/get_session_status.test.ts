@@ -35,14 +35,6 @@ const mockCompletedSearchResponse = {
   },
 };
 
-const mockEsError = {
-  error: {
-    root_cause: {
-      reason: 'not found',
-    },
-  },
-};
-
 describe('getSessionStatus', () => {
   beforeEach(() => {
     deps.internalClient.asyncSearch.status.mockReset();

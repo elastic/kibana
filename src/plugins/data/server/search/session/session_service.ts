@@ -38,6 +38,11 @@ import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
+
+  /**
+   * Needed for using async search status API
+   */
+  internalElasticsearchClient: ElasticsearchClient;
 }
 interface SetupDependencies {
   security?: SecurityPluginSetup;
@@ -253,9 +258,10 @@ export class SearchSessionService
   };
 
   public get = async (
-    { savedObjectsClient }: SearchSessionDependencies,
+    { savedObjectsClient, internalElasticsearchClient }: SearchSessionDependencies,
     user: AuthenticatedUser | null,
-    sessionId: string
+    sessionId: string,
+    checkStatus: boolean = false // TODO: make it cleaner
   ) => {
     this.logger.debug(`get | ${sessionId}`);
     const session = await savedObjectsClient.get<SearchSessionSavedObjectAttributes>(
@@ -263,19 +269,21 @@ export class SearchSessionService
       sessionId
     );
     this.throwOnUserConflict(user, session);
+
+    if (checkStatus) {
+      const sessionStatus = await getSessionStatus(
+        { internalClient: internalElasticsearchClient },
+        session.attributes,
+        this.sessionConfig
+      );
+      session.attributes.status = sessionStatus;
+    }
+
     return session;
   };
 
   public find = async (
-    {
-      savedObjectsClient,
-      internalElasticsearchClient,
-    }: SearchSessionDependencies & {
-      /**
-       * Have to use internal client for checking search status
-       */
-      internalElasticsearchClient: ElasticsearchClient;
-    },
+    { savedObjectsClient, internalElasticsearchClient }: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     options: Omit<SavedObjectsFindOptions, 'type'>
   ) => {
@@ -301,6 +309,8 @@ export class SearchSessionService
       filter,
       type: SEARCH_SESSION_TYPE,
     });
+
+    // TODO: make it cleaner
     findResponse.saved_objects = await Promise.all(
       findResponse.saved_objects.map(async (so) => {
         const sessionStatus = await getSessionStatus(
@@ -487,14 +497,14 @@ export class SearchSessionService
       });
 
       const internalElasticsearchClient = elasticsearch.client.asScoped(request).asInternalUser;
-      const deps = { savedObjectsClient };
+      const deps = { savedObjectsClient, internalElasticsearchClient };
       return {
         getId: this.getId.bind(this, deps, user),
         trackId: this.trackId.bind(this, deps, user),
         getSearchIdMapping: this.getSearchIdMapping.bind(this, deps, user),
         save: this.save.bind(this, deps, user),
         get: this.get.bind(this, deps, user),
-        find: this.find.bind(this, { ...deps, internalElasticsearchClient }, user),
+        find: this.find.bind(this, deps, user),
         update: this.update.bind(this, deps, user),
         extend: this.extend.bind(this, deps, user),
         cancel: this.cancel.bind(this, deps, user),
