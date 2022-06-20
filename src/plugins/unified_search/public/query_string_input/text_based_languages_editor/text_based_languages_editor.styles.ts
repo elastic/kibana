@@ -8,22 +8,31 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 
 export const EDITOR_INITIAL_HEIGHT = 40;
+export const EDITOR_INITIAL_HEIGHT_EXPANDED = 140;
+export const EDITOR_MIN_HEIGHT = 40;
+export const EDITOR_MAX_HEIGHT = 400;
 
 export const textBasedLanguagedEditorStyles = (
   euiTheme: EuiThemeComputed,
   isCompactFocused: boolean,
-  editorHeight: number
+  editorHeight: number,
+  isCodeEditorExpanded: boolean
 ) => {
+  let position = isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'); // cast string to type 'relative' | 'absolute'
+  if (isCodeEditorExpanded) {
+    position = 'relative' as 'relative';
+  }
   return {
     editorContainer: {
-      position: isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'), // cast string to type 'relative' | 'absolute'
+      position,
       zIndex: isCompactFocused ? 1 : 0,
       height: `${editorHeight}px`,
       border: isCompactFocused ? euiTheme.border.thin : 'none',
+      borderRight: euiTheme.border.thin,
     },
     resizableContainer: {
       display: 'flex',
-      width: '100%',
+      width: isCodeEditorExpanded ? '100%' : 'calc(100% - 40px)',
       alignItems: isCompactFocused ? 'flex-start' : 'center',
       border: !isCompactFocused ? euiTheme.border.thin : 'none',
     },
@@ -35,13 +44,32 @@ export const textBasedLanguagedEditorStyles = (
       transform: 'translate(0, -50%)',
     },
     bottomContainer: {
-      borderTop: `1px solid ${euiTheme.colors.primary}`,
-      borderBottom: euiTheme.border.thin,
+      border: euiTheme.border.thin,
+      borderTop: isCodeEditorExpanded ? 'none' : `1px solid ${euiTheme.colors.primary}`,
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.s,
       paddingRight: euiTheme.size.s,
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginTop: 0,
+      marginLeft: 0,
+    },
+    topContainer: {
+      border: euiTheme.border.thin,
+      backgroundColor: euiTheme.colors.lightestShade,
+      paddingLeft: euiTheme.size.s,
+      paddingRight: euiTheme.size.s,
+      position: 'relative' as 'relative', // cast string to type 'relative',
+      marginLeft: 0,
+      marginTop: euiTheme.size.s,
+    },
+    dragResizeContainer: {
+      width: '100%',
+      cursor: 'row-resize',
+      textAlign: 'center' as 'center',
+      height: euiTheme.size.base,
+    },
+    dragResizeButton: {
+      cursor: 'row-resize',
     },
   };
 };

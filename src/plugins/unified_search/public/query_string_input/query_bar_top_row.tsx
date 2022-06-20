@@ -135,6 +135,7 @@ export const QueryBarTopRow = React.memo(
   function QueryBarTopRow(props: QueryBarTopRowProps) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
+    const [codeEditorIsExpanded, setCodeEditorIsExpanded] = useState<boolean>(false);
 
     useEffect(() => {
       function handleResize() {
@@ -515,14 +516,15 @@ export const QueryBarTopRow = React.memo(
 
     function renderTextLangEditor() {
       return (
-        <EuiFlexGroup gutterSize="s" responsive={false} css={{ margin: 0 }}>
-          {isQueryLangSelected && props.query && (
-            <TextBasedLanguagesEditor
-              query={props.query}
-              onTextLangQueryChange={props.onTextLangQueryChange}
-            />
-          )}
-        </EuiFlexGroup>
+        isQueryLangSelected &&
+        props.query && (
+          <TextBasedLanguagesEditor
+            query={props.query}
+            onTextLangQueryChange={props.onTextLangQueryChange}
+            expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
+            isCodeEditorExpanded={codeEditorIsExpanded}
+          />
+        )
       );
     }
 
@@ -550,12 +552,17 @@ export const QueryBarTopRow = React.memo(
                 grow={!shouldShowDatePickerAsBadge()}
                 style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
               >
-                {!isQueryLangSelected ? renderQueryInput() : renderTextLangEditor()}
+                {!isQueryLangSelected
+                  ? renderQueryInput()
+                  : !codeEditorIsExpanded
+                  ? renderTextLangEditor()
+                  : null}
               </EuiFlexItem>
               {shouldShowDatePickerAsBadge() && props.filterBar}
               {renderUpdateButton()}
             </EuiFlexGroup>
             {!shouldShowDatePickerAsBadge() && props.filterBar}
+            {codeEditorIsExpanded && renderTextLangEditor()}
           </>
         )}
       </>
