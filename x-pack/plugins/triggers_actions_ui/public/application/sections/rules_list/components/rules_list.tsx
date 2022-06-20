@@ -87,13 +87,14 @@ import { useLoadRuleAggregations } from '../../../hooks/use_load_rule_aggregatio
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
+import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from '../state_container';
 
 const ENTER_KEY = 13;
 
 export interface RulesListProps {
   filteredRulesTypes: string[] | undefined; // try to add optional
   filteredSolutions: string[] | undefined;
-  showActionFilter: boolean;
+  showActionFilter?: boolean;
   ruleDetailsLink?: string | undefined;
   showCreateRuleButton?: boolean;
 }
@@ -116,7 +117,7 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
   key: percentile,
 }));
 
-export const RulesList = ({
+const RulesList = ({
   filteredRulesTypes,
   filteredSolutions,
   showActionFilter = true,
@@ -132,6 +133,8 @@ export const RulesList = ({
     actionTypeRegistry,
     kibanaFeatures,
   } = useKibana().services;
+  const { lastResponse, setLastResponse } = useRulesPageStateContainer();
+
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
@@ -143,7 +146,7 @@ export const RulesList = ({
   const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
-  const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>([]);
+  // const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>([]);
   const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
@@ -199,13 +202,20 @@ export const RulesList = ({
     searchText,
     typesFilter: typesFilter.length > 0 ? typesFilter : filteredRulesTypes,
     actionTypesFilter,
-    ruleExecutionStatusesFilter,
+    ruleExecutionStatusesFilter: lastResponse,
     ruleStatusesFilter,
     tagsFilter,
     sort,
     onPage: setPage,
     onError,
   });
+
+  const setExecutionStatusFilter = useCallback(
+    (ids: string[]) => {
+      setLastResponse(ids);
+    },
+    [setLastResponse]
+  );
 
   const { tags, loadTags } = useLoadTags({
     onError,
@@ -215,7 +225,7 @@ export const RulesList = ({
     searchText,
     typesFilter,
     actionTypesFilter,
-    ruleExecutionStatusesFilter,
+    ruleExecutionStatusesFilter: lastResponse,
     ruleStatusesFilter,
     tagsFilter,
     onError,
@@ -451,8 +461,8 @@ export const RulesList = ({
     ),
     <RuleExecutionStatusFilter
       key="rule-status-filter"
-      selectedStatuses={ruleExecutionStatusesFilter}
-      onChange={(ids: string[]) => setRuleExecutionStatusesFilter(ids)}
+      selectedStatuses={lastResponse}
+      onChange={setExecutionStatusFilter}
     />,
     ...getRuleTagFilter(),
   ];
@@ -479,7 +489,7 @@ export const RulesList = ({
                 }}
               />
               &nbsp;
-              <EuiLink color="primary" onClick={() => setRuleExecutionStatusesFilter(['error'])}>
+              <EuiLink color="primary" onClick={() => setLastResponse(['error'])}>
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.rulesList.viewBannerButtonLabel"
                   defaultMessage="Show {totalStatusesError, plural, one {rule} other {rules}} with error"
@@ -780,6 +790,7 @@ export const RulesList = ({
   };
 
   return (
+    // <Provider value={rulesPageStateContainer}>
     <section data-test-subj="rulesList">
       <DeleteModalConfirmation
         onDeleted={async () => {
@@ -850,11 +861,20 @@ export const RulesList = ({
         />
       )}
     </section>
+    // </Provider>
   );
 };
 
+function WrappedRulesPage(props: RulesListProps) {
+  return (
+    <Provider value={rulesPageStateContainer}>
+      <RulesList {...props} />
+    </Provider>
+  );
+}
+
 // eslint-disable-next-line import/no-default-export
-export { RulesList as default };
+export { WrappedRulesPage as default };
 
 const noPermissionPrompt = (
   <EuiEmptyPrompt
