@@ -52,6 +52,8 @@ export async function getTopBackendSpans({
   end,
   environment,
   kuery,
+  sampleRangeFrom,
+  sampleRangeTo,
 }: {
   setup: Setup;
   backendName: string;
@@ -60,6 +62,8 @@ export async function getTopBackendSpans({
   end: number;
   environment: Environment;
   kuery: string;
+  sampleRangeFrom?: number;
+  sampleRangeTo?: number;
 }): Promise<BackendSpan[]> {
   const { apmEventClient } = setup;
 
@@ -78,6 +82,18 @@ export async function getTopBackendSpans({
               ...kqlQuery(kuery),
               ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, backendName),
               ...termQuery(SPAN_NAME, spanName),
+              ...((sampleRangeFrom ?? 0) >= 0 && (sampleRangeTo ?? 0) > 0
+                ? [
+                    {
+                      range: {
+                        [SPAN_DURATION]: {
+                          gte: sampleRangeFrom,
+                          lte: sampleRangeTo,
+                        },
+                      },
+                    },
+                  ]
+                : []),
             ],
           },
         },

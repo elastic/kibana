@@ -44,6 +44,8 @@ export function BackendOperationDetailTraceList() {
       refreshInterval,
       refreshPaused,
       kuery,
+      sampleRangeFrom,
+      sampleRangeTo,
     },
   } = useApmParams('/backends/operation');
 
@@ -167,11 +169,22 @@ export function BackendOperationDetailTraceList() {
             end,
             environment,
             kuery,
+            sampleRangeFrom,
+            sampleRangeTo,
           },
         },
       });
     },
-    [backendName, spanName, start, end, environment, kuery]
+    [
+      backendName,
+      spanName,
+      start,
+      end,
+      environment,
+      kuery,
+      sampleRangeFrom,
+      sampleRangeTo,
+    ]
   );
 
   return (

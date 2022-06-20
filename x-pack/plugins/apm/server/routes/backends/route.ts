@@ -572,13 +572,23 @@ const topBackendSpansRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       t.type({ backendName: t.string, spanName: t.string }),
+      t.partial({ sampleRangeFrom: toNumberRt, sampleRangeTo: toNumberRt }),
     ]),
   }),
   handler: async (resources): Promise<{ spans: BackendSpan[] }> => {
     const setup = await setupRequest(resources);
 
     const {
-      query: { backendName, spanName, start, end, environment, kuery },
+      query: {
+        backendName,
+        spanName,
+        start,
+        end,
+        environment,
+        kuery,
+        sampleRangeFrom,
+        sampleRangeTo,
+      },
     } = resources.params;
 
     const spans = await getTopBackendSpans({
@@ -589,6 +599,8 @@ const topBackendSpansRoute = createApmServerRoute({
       end,
       environment,
       kuery,
+      sampleRangeFrom,
+      sampleRangeTo,
     });
 
     return { spans };
