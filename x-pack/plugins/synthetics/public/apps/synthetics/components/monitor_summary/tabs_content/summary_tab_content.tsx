@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export * from './use_url_params';
-export * from './use_breadcrumbs';
-export * from '../../../hooks/use_breakpoints';
-export * from './use_service_allowed';
-export * from './use_enablement';
-export * from './use_locations';
+import { EuiText } from '@elastic/eui';
+import React from 'react';
+
+export const SummaryTabContent = () => {
+  return <EuiText>Monitor summary tab content</EuiText>;
+};
