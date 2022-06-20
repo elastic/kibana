@@ -50,6 +50,7 @@ export interface DeletePackagePoliciesRequest {
   body: {
     packagePolicyIds: string[];
   };
+  force?: boolean;
 }
 
 export type DeletePackagePoliciesResponse = Array<{

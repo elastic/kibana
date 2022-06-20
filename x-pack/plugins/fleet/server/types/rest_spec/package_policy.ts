@@ -52,9 +52,3 @@ export const DryRunPackagePoliciesRequestSchema = {
     packageVersion: schema.maybe(schema.string()),
   }),
 };
-
-export const DeleteOrphanedIntegrationPoliciesRequestSchema = {
-  body: schema.object({
-    ids: schema.arrayOf(schema.string()),
-  }),
-};

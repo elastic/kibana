@@ -55,7 +55,6 @@ export const PACKAGE_POLICY_API_ROUTES = {
   UPGRADE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/upgrade`,
   DRYRUN_PATTERN: `${PACKAGE_POLICY_API_ROOT}/upgrade/dryrun`,
   ORPHANED_INTEGRATION_POLICIES: `${INTERNAL_ROOT}/orphaned_integration_policies`,
-  DELETE_ORPHANED_INTEGRATION_POLICIES: `${INTERNAL_ROOT}/orphaned_integration_policies/delete`,
 };
 
 // Agent policy API routes

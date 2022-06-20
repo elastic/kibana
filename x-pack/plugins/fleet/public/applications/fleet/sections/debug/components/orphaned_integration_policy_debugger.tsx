@@ -21,8 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  sendDeletePackagePolicy,
   sendGetOrphanedIntegrationPolicies,
-  sendDeleteOneOrphanedIntegrationPolicy,
   useStartServices,
 } from '../../../hooks';
 import { queryClient } from '..';
@@ -63,8 +63,9 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
   );
 
   const deleteOnePolicyMutation = useMutation(async (policyId: string) => {
-    const response = await sendDeleteOneOrphanedIntegrationPolicy({
-      ids: [policyId],
+    const response = await sendDeletePackagePolicy({
+      packagePolicyIds: [policyId],
+      force: true,
     });
 
     if (response.error) {
@@ -90,8 +91,9 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
   });
 
   const deleteAllPoliciesMutation = useMutation(async () => {
-    const response = await sendDeleteOneOrphanedIntegrationPolicy({
-      ids: orphanedPolicies?.map((policy: { id: string }) => policy.id),
+    const response = await sendDeletePackagePolicy({
+      packagePolicyIds: orphanedPolicies?.map((policy: { id: string }) => policy.id),
+      force: true,
     });
 
     if (response.error) {

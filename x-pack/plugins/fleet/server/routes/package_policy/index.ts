@@ -14,7 +14,6 @@ import {
   DeletePackagePoliciesRequestSchema,
   UpgradePackagePoliciesRequestSchema,
   DryRunPackagePoliciesRequestSchema,
-  DeleteOrphanedIntegrationPoliciesRequestSchema,
 } from '../../types';
 import type { FleetAuthzRouter } from '../security';
 
@@ -27,7 +26,6 @@ import {
   upgradePackagePolicyHandler,
   dryRunUpgradePackagePolicyHandler,
   getOrphanedPackagePolicies,
-  deleteOrphanedIntegrationPolicyHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -64,17 +62,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     getOrphanedPackagePolicies
-  );
-
-  router.post(
-    {
-      path: PACKAGE_POLICY_API_ROUTES.DELETE_ORPHANED_INTEGRATION_POLICIES,
-      validate: DeleteOrphanedIntegrationPoliciesRequestSchema,
-      fleetAuthz: {
-        integrations: { writeIntegrationPolicies: true },
-      },
-    },
-    deleteOrphanedIntegrationPolicyHandler
   );
 
   // Create

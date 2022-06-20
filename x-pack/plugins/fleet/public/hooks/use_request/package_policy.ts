@@ -116,11 +116,3 @@ export function sendGetOrphanedIntegrationPolicies() {
     method: 'get',
   });
 }
-
-export function sendDeleteOneOrphanedIntegrationPolicy(body: { ids: string[] }) {
-  return sendRequest({
-    path: packagePolicyRouteService.getDeleteOrphanedIntegrationPolicyPath(),
-    method: 'post',
-    body: JSON.stringify(body),
-  });
-}

@@ -110,10 +110,6 @@ export const packagePolicyRouteService = {
   getOrphanedIntegrationPoliciesPath: () => {
     return PACKAGE_POLICY_API_ROUTES.ORPHANED_INTEGRATION_POLICIES;
   },
-
-  getDeleteOrphanedIntegrationPolicyPath: () => {
-    return PACKAGE_POLICY_API_ROUTES.DELETE_ORPHANED_INTEGRATION_POLICIES;
-  },
 };
 
 export const agentPolicyRouteService = {
