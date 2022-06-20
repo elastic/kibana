@@ -343,16 +343,16 @@ function onDataLoadError(
   ) => {
     dispatch(unregisterCancelCallback(requestToken));
 
-    if (dataId === SOURCE_DATA_REQUEST_ID) {
-      const eventHandlers = getEventHandlers(getState());
-      if (eventHandlers && eventHandlers.onDataLoadError) {
-        eventHandlers.onDataLoadError({
-          layerId,
-          dataId,
-          errorMessage,
-        });
-      }
+    const eventHandlers = getEventHandlers(getState());
+    if (eventHandlers && eventHandlers.onDataLoadError) {
+      eventHandlers.onDataLoadError({
+        layerId,
+        dataId,
+        errorMessage,
+      });
+    }
 
+    if (dataId === SOURCE_DATA_REQUEST_ID) {
       const layer = getLayerById(layerId, getState());
       if (layer) {
         dispatch(updateTooltipStateForLayer(layer));
