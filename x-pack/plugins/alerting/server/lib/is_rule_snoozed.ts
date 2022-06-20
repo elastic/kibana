@@ -10,10 +10,9 @@ import { first } from 'lodash';
 import { SanitizedRule, RuleTypeParams } from '../../common/rule';
 
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
+type ActiveSnoozes = Array<{ snoozeEndTime: Date; id: string }>;
 
-export function getActiveSnoozes(
-  rule: RuleSnoozeProps
-): Array<{ snoozeEndTime: Date; id: string }> | null {
+export function getActiveSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
   if (rule.snoozeSchedule == null) {
     return null;
   }
@@ -58,10 +57,7 @@ export function getActiveSnoozes(
       })
       .filter(Boolean)
       // Sort in descending snoozeEndTime order
-      .sort((a, b) => b!.snoozeEndTime.getTime() - a!.snoozeEndTime.getTime()) as Array<{
-      snoozeEndTime: Date;
-      id: string;
-    }>
+      .sort((a, b) => b!.snoozeEndTime.getTime() - a!.snoozeEndTime.getTime()) as ActiveSnoozes
   );
 }
 
