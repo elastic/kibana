@@ -8,7 +8,11 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
-import { AttributesTypeUser, CommentAttributes } from '@kbn/cases-plugin/common/api';
+import {
+  AttributesTypeUser,
+  CommentAttributes,
+  ExternalReferenceStorageType,
+} from '@kbn/cases-plugin/common/api';
 import { CASE_COMMENT_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
 import { SavedObject } from '@kbn/core/types';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -134,6 +138,32 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    it('should NOT add the externalReferenceId to the SO references if externalReferenceType===other', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: {
+          ...postExternalReferenceReq,
+          externalReferenceStorage: { type: ExternalReferenceStorageType.other },
+        },
+      });
+
+      const esResponse = await es.get<SavedObject<CommentAttributes>>(
+        {
+          index: '.kibana',
+          id: `${CASE_COMMENT_SAVED_OBJECT}:${patchedCase.comments![0].id}`,
+        },
+        { meta: true }
+      );
+
+      const ref = esResponse.body._source?.references.find(
+        (r) => r.id === postExternalReferenceReq.externalReferenceId
+      );
+
+      expect(ref).to.be(undefined);
+    });
+
     it('should put the externalReferenceId to the SO references if externalReferenceType===so when bulk create', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       const patchedCase = await bulkCreateAttachments({
@@ -159,6 +189,35 @@ export default ({ getService }: FtrProviderContext): void => {
         name: 'externalReferenceId',
         type: 'test-type',
       });
+    });
+
+    it('should NOT add the externalReferenceId to the SO references if externalReferenceType===other when bulk create', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await bulkCreateAttachments({
+        supertest,
+        caseId: postedCase.id,
+        params: [
+          postCommentUserReq,
+          {
+            ...postExternalReferenceReq,
+            externalReferenceStorage: { type: ExternalReferenceStorageType.other },
+          },
+        ],
+      });
+
+      const esResponse = await es.get<SavedObject<CommentAttributes>>(
+        {
+          index: '.kibana',
+          id: `${CASE_COMMENT_SAVED_OBJECT}:${patchedCase.comments![1].id}`,
+        },
+        { meta: true }
+      );
+
+      const ref = esResponse.body._source?.references.find(
+        (r) => r.id === postExternalReferenceReq.externalReferenceId
+      );
+
+      expect(ref).to.be(undefined);
     });
 
     it('should put the new externalReferenceId to the SO references when updating the attachment', async () => {
