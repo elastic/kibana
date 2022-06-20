@@ -15,8 +15,13 @@ export type GetRecentCasesProps = RecentCasesProps & CasesContextProps;
 const RecentCasesLazy: React.FC<RecentCasesProps> = lazy(
   () => import('../../components/recent_cases')
 );
-export const getRecentCasesLazy = ({ owner, userCanCrud, maxCasesToShow }: GetRecentCasesProps) => (
-  <CasesProvider value={{ owner, userCanCrud }}>
+export const getRecentCasesLazy = ({
+  externalReferenceAttachmentTypeRegistry,
+  owner,
+  userCanCrud,
+  maxCasesToShow,
+}: GetRecentCasesProps) => (
+  <CasesProvider value={{ externalReferenceAttachmentTypeRegistry, owner, userCanCrud }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <RecentCasesLazy maxCasesToShow={maxCasesToShow} />
     </Suspense>

@@ -16,6 +16,7 @@ const CasesProviderLazy: React.FC<{ value: GetCasesContextProps }> = lazy(
 );
 
 const CasesProviderLazyWrapper = ({
+  externalReferenceAttachmentTypeRegistry,
   owner,
   userCanCrud,
   features,
@@ -24,7 +25,15 @@ const CasesProviderLazyWrapper = ({
 }: GetCasesContextProps & { children: ReactNode }) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <CasesProviderLazy value={{ owner, userCanCrud, features, releasePhase }}>
+      <CasesProviderLazy
+        value={{
+          externalReferenceAttachmentTypeRegistry,
+          owner,
+          userCanCrud,
+          features,
+          releasePhase,
+        }}
+      >
         {children}
       </CasesProviderLazy>
     </Suspense>
@@ -32,6 +41,18 @@ const CasesProviderLazyWrapper = ({
 };
 CasesProviderLazyWrapper.displayName = 'CasesProviderLazyWrapper';
 
-export const getCasesContextLazy = () => {
-  return CasesProviderLazyWrapper;
+export const getCasesContextLazy = ({
+  externalReferenceAttachmentTypeRegistry,
+}: Pick<GetCasesContextProps, 'externalReferenceAttachmentTypeRegistry'>) => {
+  // eslint-disable-next-line react/display-name
+  return (
+    props: Omit<GetCasesContextProps, 'externalReferenceAttachmentTypeRegistry'> & {
+      children: ReactNode;
+    }
+  ) => (
+    <CasesProviderLazyWrapper
+      {...props}
+      externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
+    />
+  );
 };

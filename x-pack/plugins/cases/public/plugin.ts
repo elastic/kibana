@@ -47,6 +47,7 @@ export class CasesUiPlugin
   public setup(core: CoreSetup, plugins: CasesPluginSetup) {
     const kibanaVersion = this.kibanaVersion;
     const storage = this.storage;
+    const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
@@ -79,6 +80,7 @@ export class CasesUiPlugin
           pluginsStart,
           storage,
           kibanaVersion,
+          externalReferenceAttachmentTypeRegistry,
         });
       },
     });
@@ -99,13 +101,32 @@ export class CasesUiPlugin
       },
       api: createClientAPI({ http: core.http }),
       ui: {
-        getCases: getCasesLazy,
-        getCasesContext: getCasesContextLazy,
-        getRecentCases: getRecentCasesLazy,
+        getCases: (props) =>
+          getCasesLazy({
+            ...props,
+            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+          }),
+        getCasesContext: () =>
+          getCasesContextLazy({
+            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+          }),
+        getRecentCases: (props) =>
+          getRecentCasesLazy({
+            ...props,
+            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+          }),
         // @deprecated Please use the hook getUseCasesAddToNewCaseFlyout
-        getCreateCaseFlyout: getCreateCaseFlyoutLazy,
+        getCreateCaseFlyout: (props) =>
+          getCreateCaseFlyoutLazy({
+            ...props,
+            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+          }),
         // @deprecated Please use the hook getUseCasesAddToExistingCaseModal
-        getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
+        getAllCasesSelectorModal: (props) =>
+          getAllCasesSelectorModalLazy({
+            ...props,
+            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+          }),
       },
       hooks: {
         getUseCasesAddToNewCaseFlyout: useCasesAddToNewCaseFlyout,

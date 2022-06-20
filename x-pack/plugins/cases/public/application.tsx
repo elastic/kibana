@@ -19,6 +19,8 @@ import {
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RenderAppProps } from './types';
 import { CasesApp } from './components/app';
+import { AttachmentTypeRegistry } from './client/attachment_framework/registry';
+import { ExternalReferenceAttachmentType } from './client/attachment_framework/types';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
@@ -31,15 +33,23 @@ export const renderApp = (deps: RenderAppProps) => {
   };
 };
 
-const CasesAppWithContext = () => {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+interface CasesAppWithContextProps {
+  externalReferenceAttachmentTypeRegistry: AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
+}
 
-  return (
-    <StyledComponentsThemeProvider darkMode={darkMode}>
-      <CasesApp />
-    </StyledComponentsThemeProvider>
-  );
-};
+const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
+  ({ externalReferenceAttachmentTypeRegistry }) => {
+    const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+
+    return (
+      <StyledComponentsThemeProvider darkMode={darkMode}>
+        <CasesApp
+          externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
+        />
+      </StyledComponentsThemeProvider>
+    );
+  }
+);
 
 CasesAppWithContext.displayName = 'CasesAppWithContext';
 
@@ -60,7 +70,11 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
             }}
           >
             <Router history={history}>
-              <CasesAppWithContext />
+              <CasesAppWithContext
+                externalReferenceAttachmentTypeRegistry={
+                  deps.externalReferenceAttachmentTypeRegistry
+                }
+              />
             </Router>
           </KibanaContextProvider>
         </KibanaThemeProvider>

@@ -18,10 +18,13 @@ import {
 import { CasesFeaturesAllRequired, CasesFeatures } from '../../containers/types';
 import { CasesGlobalComponents } from './cases_global_components';
 import { ReleasePhase } from '../types';
+import { AttachmentTypeRegistry } from '../../client/attachment_framework/registry';
+import { ExternalReferenceAttachmentType } from '../../client/attachment_framework/types';
 
 export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
 export interface CasesContextValue {
+  externalReferenceAttachmentTypeRegistry: AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
   owner: string[];
   appId: string;
   appTitle: string;
@@ -32,7 +35,11 @@ export interface CasesContextValue {
   dispatch: CasesContextValueDispatch;
 }
 
-export interface CasesContextProps extends Pick<CasesContextValue, 'owner' | 'userCanCrud'> {
+export interface CasesContextProps
+  extends Pick<
+    CasesContextValue,
+    'owner' | 'userCanCrud' | 'externalReferenceAttachmentTypeRegistry'
+  > {
   basePath?: string;
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
@@ -47,11 +54,19 @@ export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' 
 
 export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   children,
-  value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH, features = {}, releasePhase = 'ga' },
+  value: {
+    externalReferenceAttachmentTypeRegistry,
+    owner,
+    userCanCrud,
+    basePath = DEFAULT_BASE_PATH,
+    features = {},
+    releasePhase = 'ga',
+  },
 }) => {
   const { appId, appTitle } = useApplication();
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
   const [value, setValue] = useState<CasesContextStateValue>(() => ({
+    externalReferenceAttachmentTypeRegistry,
     owner,
     userCanCrud,
     basePath,

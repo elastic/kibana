@@ -16,13 +16,14 @@ const AllCasesSelectorModalLazy: React.FC<AllCasesSelectorModalProps> = lazy(
   () => import('../../components/all_cases/selector_modal')
 );
 export const getAllCasesSelectorModalLazy = ({
+  externalReferenceAttachmentTypeRegistry,
   owner,
   userCanCrud,
   hiddenStatuses,
   onRowClick,
   onClose,
 }: GetAllCasesSelectorModalProps) => (
-  <CasesProvider value={{ owner, userCanCrud }}>
+  <CasesProvider value={{ externalReferenceAttachmentTypeRegistry, owner, userCanCrud }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <AllCasesSelectorModalLazy
         hiddenStatuses={hiddenStatuses}

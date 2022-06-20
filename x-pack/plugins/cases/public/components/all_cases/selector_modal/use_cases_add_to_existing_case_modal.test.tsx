@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { AttachmentTypeRegistry } from '../../../client/attachment_framework/registry';
+import { ExternalReferenceAttachmentType } from '../../../client/attachment_framework/types';
 import { waitFor } from '@testing-library/dom';
 import { act, renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
@@ -45,6 +47,9 @@ const TestComponent: React.FC = () => {
 
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 
+const externalReferenceAttachmentTypeRegistry =
+  new AttachmentTypeRegistry<ExternalReferenceAttachmentType>();
+
 describe('use cases add to existing case modal hook', () => {
   useCreateAttachmentsMock.mockReturnValue({
     createAttachments: jest.fn(),
@@ -56,6 +61,7 @@ describe('use cases add to existing case modal hook', () => {
     return (
       <CasesContext.Provider
         value={{
+          externalReferenceAttachmentTypeRegistry,
           owner: ['test'],
           userCanCrud: true,
           appId: 'test',

@@ -23,6 +23,8 @@ import {
 import { FieldHook } from '../shared_imports';
 import { StartServices } from '../../types';
 import { ReleasePhase } from '../../components/types';
+import { AttachmentTypeRegistry } from '../../client/attachment_framework/registry';
+import { ExternalReferenceAttachmentType } from '../../client/attachment_framework/types';
 
 interface TestProviderProps {
   children: React.ReactNode;
@@ -52,12 +54,19 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     },
   });
 
+  const externalReferenceAttachmentTypeRegistry =
+    new AttachmentTypeRegistry<ExternalReferenceAttachmentType>();
+
   return (
     <I18nProvider>
       <MockKibanaContextProvider>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
-            <CasesProvider value={{ features, owner, userCanCrud }}>{children}</CasesProvider>
+            <CasesProvider
+              value={{ externalReferenceAttachmentTypeRegistry, features, owner, userCanCrud }}
+            >
+              {children}
+            </CasesProvider>
           </QueryClientProvider>
         </ThemeProvider>
       </MockKibanaContextProvider>
@@ -69,6 +78,7 @@ TestProvidersComponent.displayName = 'TestProviders';
 export const TestProviders = React.memo(TestProvidersComponent);
 
 export interface AppMockRenderer {
+  externalReferenceAttachmentTypeRegistry: AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
   render: UiRender;
   coreStart: StartServices;
   queryClient: QueryClient;
@@ -97,12 +107,23 @@ export const createAppMockRenderer = ({
     },
   });
 
+  const externalReferenceAttachmentTypeRegistry =
+    new AttachmentTypeRegistry<ExternalReferenceAttachmentType>();
+
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
-            <CasesProvider value={{ features, owner, userCanCrud, releasePhase }}>
+            <CasesProvider
+              value={{
+                externalReferenceAttachmentTypeRegistry,
+                features,
+                owner,
+                userCanCrud,
+                releasePhase,
+              }}
+            >
               {children}
             </CasesProvider>
           </QueryClientProvider>
@@ -122,6 +143,7 @@ export const createAppMockRenderer = ({
     queryClient,
     render,
     AppWrapper,
+    externalReferenceAttachmentTypeRegistry,
   };
 };
 

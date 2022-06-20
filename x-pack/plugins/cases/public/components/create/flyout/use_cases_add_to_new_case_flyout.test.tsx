@@ -13,7 +13,12 @@ import React from 'react';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesAddToNewCaseFlyout } from './use_cases_add_to_new_case_flyout';
+import { AttachmentTypeRegistry } from '../../../client/attachment_framework/registry';
+import { ExternalReferenceAttachmentType } from '../../../client/attachment_framework/types';
 jest.mock('../../../common/use_cases_toast');
+
+const externalReferenceAttachmentTypeRegistry =
+  new AttachmentTypeRegistry<ExternalReferenceAttachmentType>();
 
 describe('use cases add to new case flyout hook', () => {
   const dispatch = jest.fn();
@@ -24,6 +29,7 @@ describe('use cases add to new case flyout hook', () => {
       return (
         <CasesContext.Provider
           value={{
+            externalReferenceAttachmentTypeRegistry,
             owner: ['test'],
             userCanCrud: true,
             appId: 'test',
