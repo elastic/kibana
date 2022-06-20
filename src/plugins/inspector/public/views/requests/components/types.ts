@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Request } from '../../../../common/adapters/request/types';
+import { Request, RequestStatistics } from '../../../../common/adapters/request/types';
 
 export interface RequestDetailsProps {
   request: Request;
-  inspectIndexPattern?: boolean;
+  inspectExtraInfo?: RequestStatistics | undefined;
 }

@@ -23,7 +23,6 @@ import {
   RequestStatistics,
 } from '../../../../../common/adapters/request/types';
 import { RequestDetailsProps } from '../types';
-import { findIndexFilters } from './helpers';
 
 // TODO: Replace by property once available
 interface RequestDetailsStatRow extends RequestStatistic {
@@ -64,36 +63,19 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
   };
 
   render() {
-    const { stats, json } = this.props.request;
-    const { inspectIndexPattern } = this.props;
-    const dataView = stats?.indexPattern?.value ?? null;
-    const indexFilters = inspectIndexPattern ? findIndexFilters(json) : [];
-    const validIndexFilters = inspectIndexPattern
-      ? indexFilters.filter((indexPattern) => dataView?.indexOf(indexPattern) >= 0)
-      : [];
-    const indexFiltersStats =
-      indexFilters.length > 0
-        ? {
-            indexPatterns: {
-              id: 'indexFilters',
-              description: 'Active index patterns',
-              label: 'index pattern',
-              value: validIndexFilters.join(', '),
-            },
-          }
-        : null;
+    const { stats } = this.props.request;
+    const { inspectExtraInfo } = this.props;
 
     if (!stats) {
       return null;
     }
 
-    const mergedStats: RequestStatistics =
-      indexFiltersStats && inspectIndexPattern
-        ? {
-            ...stats,
-            ...indexFiltersStats,
-          }
-        : stats;
+    const mergedStats: RequestStatistics = inspectExtraInfo
+      ? {
+          ...stats,
+          ...inspectExtraInfo,
+        }
+      : stats;
 
     const sortedStats = Object.keys(mergedStats)
       .sort()

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -25,7 +25,7 @@ const LensEmbeddableComponent = ({
 }: MatrixHistogramTemplatesProps) => {
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
-  const attributes = useLensAttributes({
+  const { attributes, indexPattern } = useLensAttributes({
     lensAttributes,
     getLensAttributes,
     stackByField,
@@ -37,6 +37,17 @@ const LensEmbeddableComponent = ({
     attributes,
     timeRange: timerange,
   });
+
+  const inspectExtraInfo = useMemo(
+    () => ({
+      indexFilters: {
+        description: 'Active index patterns',
+        label: 'Index Pattern',
+        value: indexPattern.join(', '),
+      },
+    }),
+    [indexPattern]
+  );
 
   return attributes ? (
     <>
@@ -70,7 +81,7 @@ const LensEmbeddableComponent = ({
         }
         withDefaultActions={true}
         extraActions={actions}
-        inspectIndexPattern={true}
+        inspectExtraInfo={inspectExtraInfo}
       />
     </>
   ) : null;

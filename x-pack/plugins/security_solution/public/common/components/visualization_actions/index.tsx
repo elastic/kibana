@@ -69,7 +69,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     setPopover(false);
   };
 
-  const attributes = useLensAttributes({
+  const { attributes } = useLensAttributes({
     lensAttributes,
     getLensAttributes,
     stackByField,

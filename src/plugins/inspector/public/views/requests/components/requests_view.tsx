@@ -171,7 +171,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
         {this.state.request && (
           <RequestDetails
             request={this.state.request}
-            inspectIndexPattern={this.props?.options?.inspectIndexPattern ?? false}
+            inspectExtraInfo={this.props?.options?.inspectExtraInfo ?? false}
           />
         )}
       </>
