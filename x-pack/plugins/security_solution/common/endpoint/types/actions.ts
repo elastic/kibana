@@ -6,11 +6,15 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { ActionStatusRequestSchema, HostIsolationRequestSchema } from '../schema/actions';
+import {
+  ActionStatusRequestSchema,
+  HostIsolationRequestSchema,
+  ResponseActionBodySchema,
+} from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
-export type ResponseActions = ISOLATION_ACTIONS;
+export type ResponseActions = ISOLATION_ACTIONS | 'kill-process' | 'suspend-process';
 
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
@@ -72,19 +76,23 @@ export interface LogsEndpointActionResponse {
   error?: EcsError;
 }
 
-interface KillProcessWithPid {
+interface ResponseActionParametersWithPid {
   pid: number;
   entity_id?: never;
 }
 
-interface KillProcessWithEntityId {
+interface ResponseActionParametersWithEntityId {
   pid?: never;
   entity_id: number;
 }
 
-export type KillProcessParameters = KillProcessWithPid | KillProcessWithEntityId;
+export type ResponseActionParametersWithPidOrEntityId =
+  | ResponseActionParametersWithPid
+  | ResponseActionParametersWithEntityId;
 
-export type EndpointActionDataParameterTypes = undefined | KillProcessParameters;
+export type EndpointActionDataParameterTypes =
+  | undefined
+  | ResponseActionParametersWithPidOrEntityId;
 
 export interface EndpointActionData<T extends EndpointActionDataParameterTypes = undefined> {
   command: ResponseActions;
@@ -183,12 +191,14 @@ export interface ActivityLog {
 
 export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
 
+export type ResponseActionRequestBody = TypeOf<typeof ResponseActionBodySchema>;
+
 export interface HostIsolationResponse {
   action: string;
 }
 
 export interface ResponseActionApiResponse {
-  action?: string;
+  action?: string; // only if command is isolate or release
   data: ActionDetails;
 }
 
