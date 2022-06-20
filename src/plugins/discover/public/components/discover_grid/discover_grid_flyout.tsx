@@ -27,9 +27,9 @@ import {
 } from '@elastic/eui';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import { useNavigationProps } from '../../utils/use_navigation_props';
+import { useNavigationProps } from '../../hooks/use_navigation_props';
 import { ElasticSearchHit } from '../../types';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface DiscoverGridFlyoutProps {
   columns: string[];
