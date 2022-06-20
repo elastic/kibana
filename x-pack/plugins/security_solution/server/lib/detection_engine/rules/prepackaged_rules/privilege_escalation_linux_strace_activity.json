@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Strace runs in a privileged context and can be used to escape restrictive environments by instantiating a shell in order to elevate privileges or move laterally.",
+  "description": "Strace is a useful diagnostic, instructional, and debugging tool. This rule identifies a privileged context execution of strace which can be used to escape restrictive environments by instantiating a shell in order to elevate privileges or move laterally.",
   "false_positives": [
     "Strace is a dual-use tool that can be used for benign or malicious activity. Some normal use of this command may originate from developers or SREs engaged in debugging or system call tracing."
   ],
@@ -25,9 +25,27 @@
     "Elastic",
     "Host",
     "Linux",
-    "Threat Detection"
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1068",
+          "name": "Exploitation for Privilege Escalation",
+          "reference": "https://attack.mitre.org/techniques/T1068/"
+        }
+      ]
+    }
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 8
 }
