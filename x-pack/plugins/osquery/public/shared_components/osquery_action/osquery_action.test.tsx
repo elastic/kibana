@@ -12,7 +12,7 @@ import { QueryClientProvider } from 'react-query';
 
 import { OsqueryAction } from '.';
 import { queryClient } from '../../query_client';
-import * as hooks from './use_is_osquery_available';
+import * as hooks from '../use_is_osquery_available';
 import { useKibana } from '../../common/lib/kibana';
 import { AGENT_STATUS_ERROR, EMPTY_PROMPT, NOT_AVAILABLE, PERMISSION_DENIED } from './translations';
 
