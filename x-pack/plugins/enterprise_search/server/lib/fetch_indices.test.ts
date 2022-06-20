@@ -55,7 +55,9 @@ describe('fetchIndices lib function', () => {
     mockClient.asCurrentUser.indices.get.mockImplementation(() => regularIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => regularIndexStatsResponse);
 
-    await expect(fetchIndices(mockClient as unknown as IScopedClusterClient)).resolves.toEqual([
+    await expect(
+      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', /search-.*/)
+    ).resolves.toEqual([
       {
         health: 'green',
         status: 'open',
@@ -104,7 +106,9 @@ describe('fetchIndices lib function', () => {
 
     mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => aliasedIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => aliasedStatsResponse);
-    await expect(fetchIndices(mockClient as unknown as IScopedClusterClient)).resolves.toEqual([
+    await expect(
+      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', /search-.*/)
+    ).resolves.toEqual([
       {
         health: 'green',
         status: 'open',
@@ -149,7 +153,9 @@ describe('fetchIndices lib function', () => {
     mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => missingStatsResponse);
     // simulates when an index has been deleted after get indices call
     // deleted index won't be present in the indices stats call response
-    await expect(fetchIndices(mockClient as unknown as IScopedClusterClient)).resolves.toEqual([
+    await expect(
+      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', /search-.*/)
+    ).resolves.toEqual([
       {
         name: 'search-regular-index',
         total: {
@@ -170,7 +176,9 @@ describe('fetchIndices lib function', () => {
 
   it('should return empty array when no index found', async () => {
     mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => ({}));
-    await expect(fetchIndices(mockClient as unknown as IScopedClusterClient)).resolves.toEqual([]);
+    await expect(
+      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', /search-.*/)
+    ).resolves.toEqual([]);
     expect(mockClient.asCurrentUser.indices.stats).not.toHaveBeenCalled();
   });
 });
