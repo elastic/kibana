@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerUrlParam, updateUrlParam } from './actions';
+import { deregisterUrlParam, registerUrlParam, updateUrlParam } from './actions';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './reducer';
 
 describe('globalUrlParamReducer', () => {
@@ -32,6 +32,23 @@ describe('globalUrlParamReducer', () => {
       expect(() => {
         globalUrlParamReducer(newState, registerUrlParam({ key, initialValue }));
       }).toThrow();
+    });
+  });
+
+  describe('#deregisterUrlParam', () => {
+    it('deregisters the URL param', () => {
+      const key = 'testKey';
+      const initialValue = 'testValue';
+      let state = globalUrlParamReducer(
+        initialGlobalUrlParam,
+        registerUrlParam({ key, initialValue })
+      );
+
+      expect(state).toEqual({ [key]: initialValue });
+
+      state = globalUrlParamReducer(initialGlobalUrlParam, deregisterUrlParam({ key }));
+
+      expect(state).toEqual({});
     });
   });
 

@@ -6,7 +6,7 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { registerUrlParam, updateUrlParam } from './actions';
+import { registerUrlParam, updateUrlParam, deregisterUrlParam } from './actions';
 
 export type GlobalUrlParam = Record<string, string | null>;
 
@@ -23,6 +23,13 @@ export const globalUrlParamReducer = reducerWithInitialState(initialGlobalUrlPar
       ...state,
       [key]: initialValue,
     };
+  })
+  .case(deregisterUrlParam, (state, { key }) => {
+    const nextStste = { ...state };
+
+    delete nextStste[key];
+
+    return nextStste;
   })
   .case(updateUrlParam, (state, { key, value }) => {
     // Only update the URL after the query param is registered and if the current value is different than the previous value

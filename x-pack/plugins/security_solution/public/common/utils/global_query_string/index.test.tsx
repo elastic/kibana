@@ -74,9 +74,23 @@ describe('global query string', () => {
       const urlParamKey = 'testKey';
       window.location.search = `?testKey=(test:(value:123))`;
 
-      const result = registerUrlParam({ urlParamKey });
+      const { state: result } = registerUrlParam({ urlParamKey });
 
       expect(result).toEqual({ test: { value: 123 } });
+    });
+
+    it('returns deregister function', () => {
+      const urlParamKey = 'testKey';
+      window.location.search = `?testKey=(test:(value:123))`;
+
+      const { deregister } = registerUrlParam({ urlParamKey });
+      deregister();
+
+      expect(mockDispatch).toBeCalledWith(
+        globalUrlParamActions.deregisterUrlParam({
+          key: urlParamKey,
+        })
+      );
     });
 
     it('calls registerUrlParam global URL param action', () => {

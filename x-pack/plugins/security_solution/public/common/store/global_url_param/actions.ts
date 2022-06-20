@@ -13,6 +13,8 @@ export const registerUrlParam = actionCreator<{ key: string; initialValue: strin
   'REGISTER_URL_PARAM'
 );
 
+export const deregisterUrlParam = actionCreator<{ key: string }>('DEREGISTER_URL_PARAM');
+
 export const updateUrlParam = actionCreator<{ key: string; value: string | null }>(
   'UPDATE_URL_PARAM'
 );

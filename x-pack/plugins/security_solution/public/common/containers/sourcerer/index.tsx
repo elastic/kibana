@@ -92,7 +92,7 @@ export const useInitSourcerer = (
   const { indexFieldsSearch } = useDataView();
 
   useEffect(() => {
-    const sourcererInitialState = registerUrlParam<SourcererUrlState>({
+    const { state: sourcererInitialState, deregister } = registerUrlParam<SourcererUrlState>({
       urlParamKey: CONSTANTS.sourcerer,
     });
 
@@ -125,6 +125,11 @@ export const useInitSourcerer = (
         });
       }
     }
+
+    return () => {
+      deregister();
+    };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps -- It must run only once when the application is initializing.
   }, []);
 

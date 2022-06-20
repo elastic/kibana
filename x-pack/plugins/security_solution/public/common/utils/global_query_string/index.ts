@@ -34,7 +34,10 @@ interface RegisterUrlParams<State> {
  */
 export const registerUrlParam = <State>({
   urlParamKey,
-}: RegisterUrlParams<State>): State | null => {
+}: RegisterUrlParams<State>): {
+  state: State | null;
+  deregister: () => void;
+} => {
   const initialValue = getParamFromQueryString(
     getQueryStringFromLocation(window.location.search),
     urlParamKey
@@ -45,7 +48,11 @@ export const registerUrlParam = <State>({
     globalUrlParamActions.registerUrlParam({ key: urlParamKey, initialValue: initialValue ?? null })
   );
 
-  return decodeRisonUrlState<State>(initialValue ?? undefined);
+  const deregister = () => {
+    store?.dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
+  };
+
+  return { state: decodeRisonUrlState<State>(initialValue ?? undefined), deregister };
 };
 
 interface UpdateUrlParams<State> {
