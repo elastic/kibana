@@ -19,7 +19,7 @@ export const GridItem: FC<Props> = ({ panel, callbackRef }) => {
   return (
     <div
       key={panel.id}
-      id={panel.id}
+      id={panel.id as string}
       ref={(element) => callbackRef(element!)}
       className="grid-stack-item embPanel"
     >

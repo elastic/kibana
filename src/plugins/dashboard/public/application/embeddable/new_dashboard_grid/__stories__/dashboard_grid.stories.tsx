@@ -35,7 +35,7 @@ export default {
 };
 
 export const UncontrolledExample = () => {
-  return <Grid />;
+  return <Grid columns={12} />;
 };
 
 export const SmallGridExample = () => {
