@@ -15,15 +15,7 @@ All data will be available on the shared APM cluster. See (internal) https://doc
 
 ## For ESS
 
-Add the settings into the `user_settings_override_yaml` deployment configuration within `kibana.plan.kibana` section as escaped YAML inside JSON.
-
-```json
-{
-  "user_settings_override_yaml": "elastic.apm.active: true\nelastic.apm.serverUrl: https://<my_apm_endpoint>\nelastic.apm.secretToken: <my_APM_token>\nelastic.apm.globalLabels.deploymentId: <my_deployment_ID>\nelastic.apm.centralConfig: false\nelastic.apm.breakdownMetrics: false\nelastic.apm.transactionSampleRate: 0.1\nelastic.apm.metricsInterval: 120s\nelastic.apm.captureSpanStackTraces: false"
-}
-```
-
-This is an administrative-only API currently, so you'll need admin access or open a support case to have it configured.
+All ESS clusters are configured to send data to the cloud overview cluster automatically. Search for `label.deploymentId: <your deployment ID>` in a kibana dashboard or APM UI.
 
 ## For ECE or other deployments
 
