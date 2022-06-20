@@ -21,6 +21,7 @@ import type {
   EndpointActivityLogActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  OutputActions,
 } from '../../../../common/endpoint/types';
 import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
 /**
@@ -97,6 +98,7 @@ interface ActionCompletionInfo {
   completedAt: undefined | string;
   wasSuccessful: boolean;
   errors: undefined | string[];
+  output: OutputActions | undefined;
 }
 
 export const getActionCompletionInfo = (
@@ -108,6 +110,7 @@ export const getActionCompletionInfo = (
   const completedInfo: ActionCompletionInfo = {
     completedAt: undefined,
     errors: undefined,
+    output: undefined,
     isCompleted: Boolean(agentIds.length),
     wasSuccessful: Boolean(agentIds.length),
   };
@@ -132,6 +135,7 @@ export const getActionCompletionInfo = (
         completedInfo.completedAt < (normalizedAgentResponse.completedAt ?? '')
       ) {
         completedInfo.completedAt = normalizedAgentResponse.completedAt;
+        completedInfo.output = normalizedAgentResponse.fleetResponse?.item.data.action_data.output;
       }
 
       if (!normalizedAgentResponse.wasSuccessful) {

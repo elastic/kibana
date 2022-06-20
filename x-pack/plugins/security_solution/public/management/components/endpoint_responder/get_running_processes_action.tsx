@@ -1,0 +1,143 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useEffect } from 'react';
+import { EuiBasicTable } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ActionDetails } from '../../../../common/endpoint/types';
+import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
+import { EndpointCommandDefinitionMeta } from './types';
+import { CommandExecutionComponentProps } from '../console/types';
+import { useSendGetEndpointRunningProcessesRequest } from '../../hooks/endpoint/use_send_get_endpoint_running_processes_request';
+
+export const GetRunningProcessesActionResult = memo<
+  CommandExecutionComponentProps<
+    { comment?: string },
+    {
+      actionId?: string;
+      actionRequestSent?: boolean;
+      completedActionDetails?: ActionDetails;
+    },
+    EndpointCommandDefinitionMeta
+  >
+>(({ command, setStore, store, status, setStatus, ResultComponent }) => {
+  const endpointId = command.commandDefinition?.meta?.endpointId;
+  const { actionId, completedActionDetails } = store;
+
+  const isPending = status === 'pending';
+  const actionRequestSent = Boolean(store.actionRequestSent);
+
+  const getRunningProcessesApi = useSendGetEndpointRunningProcessesRequest();
+
+  const { data: actionDetails } = useGetActionDetails(actionId ?? '-', {
+    enabled: Boolean(actionId) && isPending,
+    refetchInterval: isPending ? 3000 : false,
+  });
+
+  // Send get running processes request if not yet done
+  useEffect(() => {
+    if (!actionRequestSent && endpointId) {
+      getRunningProcessesApi.mutate({
+        endpoint_ids: [endpointId],
+        comment: command.args.args?.comment?.[0],
+      });
+
+      setStore((prevState) => {
+        return { ...prevState, actionRequestSent: true };
+      });
+    }
+  }, [actionRequestSent, command.args.args?.comment, endpointId, getRunningProcessesApi, setStore]);
+
+  // If get running processes request was created, store the action id if necessary
+  useEffect(() => {
+    if (getRunningProcessesApi.isSuccess && actionId !== getRunningProcessesApi.data.action) {
+      setStore((prevState) => {
+        return { ...prevState, actionId: getRunningProcessesApi.data.action };
+      });
+    }
+  }, [actionId, getRunningProcessesApi?.data?.action, getRunningProcessesApi.isSuccess, setStore]);
+
+  useEffect(() => {
+    if (actionDetails?.data.isCompleted) {
+      setStatus('success');
+      setStore((prevState) => {
+        return {
+          ...prevState,
+          completedActionDetails: actionDetails?.data,
+        };
+      });
+    }
+  }, [actionDetails?.data, setStatus, setStore]);
+
+  // Show nothing if still pending
+  if (isPending) {
+    return <ResultComponent showAs="pending" showTitle={false} />;
+  }
+
+  // Show errors
+  if (completedActionDetails?.errors) {
+    return (
+      <ResultComponent
+        showAs="failure"
+        title={i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getRunningProcesses.errorMessageTitle',
+          { defaultMessage: 'Get running processes action failed' }
+        )}
+        data-test-subj="getRunningProcessesErrorCallout"
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.endpointResponseActions.getRunningProcesses.errorMessage"
+          defaultMessage="The following errors were encountered: {errors}"
+          values={{ errors: completedActionDetails.errors.join(' | ') }}
+        />
+      </ResultComponent>
+    );
+  }
+
+  const columns = [
+    {
+      field: 'entity_id',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.enityId',
+        { defaultMessage: 'Entity id' }
+      ),
+    },
+    {
+      field: 'pid',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.pid',
+        { defaultMessage: 'PID' }
+      ),
+    },
+    {
+      field: 'command',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.command',
+        { defaultMessage: 'Command' }
+      ),
+    },
+    {
+      field: 'user',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.user',
+        { defaultMessage: 'User' }
+      ),
+    },
+  ];
+
+  // Show results
+  return (
+    <ResultComponent data-test-subj="getRunningProcessesSuccessCallout" showTitle={false}>
+      <EuiBasicTable
+        items={[...(completedActionDetails?.output?.content.entries ?? [])]}
+        columns={columns}
+      />
+    </ResultComponent>
+  );
+});
+GetRunningProcessesActionResult.displayName = 'GetRunningProcessesActionResult';

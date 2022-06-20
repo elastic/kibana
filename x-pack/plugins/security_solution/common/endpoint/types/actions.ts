@@ -12,6 +12,20 @@ export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
 export type ResponseActions = ISOLATION_ACTIONS;
 
+export type OutputActionContentEntry = OutputActionRunningProcess;
+export interface OutputActionRunningProcess {
+  command: string;
+  pid: string;
+  entity_id: string;
+  user: string;
+}
+export interface OutputActions {
+  type: 'json' | 'text';
+  content: {
+    entries: OutputActionContentEntry[];
+  };
+}
+
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -90,6 +104,7 @@ export interface EndpointActionData<T extends EndpointActionDataParameterTypes =
   command: ResponseActions;
   comment?: string;
   parameters?: T;
+  output?: OutputActions;
 }
 
 export interface FleetActionResponseData {
@@ -187,6 +202,10 @@ export interface HostIsolationResponse {
   action: string;
 }
 
+export interface RunningProcessesResponse {
+  action: string;
+}
+
 export interface ResponseActionApiResponse {
   action?: string;
   data: ActionDetails;
@@ -238,6 +257,10 @@ export interface ActionDetails {
    * The list of action log items (actions and responses) received thus far for the action.
    */
   logEntries: ActivityLogEntry[];
+  /**
+   * The output data from an action
+   */
+  output: OutputActions | undefined;
 }
 
 export interface ActionDetailsApiResponse {
