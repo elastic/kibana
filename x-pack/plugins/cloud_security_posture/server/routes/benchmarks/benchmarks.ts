@@ -115,7 +115,7 @@ export const getCspRulesStatus = (
       enabled_status: {
         filter: {
           term: {
-            [`${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.enabled`]: 'true',
+            [`${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.enabled`]: true,
           },
         },
       },
