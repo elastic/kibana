@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-<<<<<<< HEAD
 import type { Moment } from 'moment';
-||||||| 5958878a53e
-=======
 import type { ComponentType, ReactNode } from 'react';
->>>>>>> upstream/main
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
