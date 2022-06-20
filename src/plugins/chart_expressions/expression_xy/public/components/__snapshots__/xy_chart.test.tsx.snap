@@ -1521,7 +1521,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     }
     hide={false}
     id="x"
-    position="right"
+    position="left"
     style={
       Object {
         "axisTitle": Object {
@@ -3865,7 +3865,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     }
     hide={false}
     id="x"
-    position="right"
+    position="left"
     style={
       Object {
         "axisTitle": Object {
