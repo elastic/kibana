@@ -14,10 +14,10 @@ import { join } from 'path';
 
 import { ConfigPath, ConfigService, Env } from '@kbn/config';
 import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { PluginsService } from '../plugins_service';
 import { BehaviorSubject, from } from 'rxjs';
 import { config } from '../plugins_config';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { environmentServiceMock } from '../../environment/environment_service.mock';
 import { coreMock } from '../../mocks';
 import { AsyncPlugin, PluginType } from '../types';
