@@ -24,7 +24,7 @@ import {
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus } from '../../../types';
-import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
+import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
 import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
