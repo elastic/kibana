@@ -119,7 +119,7 @@ export const initRoutes = (
 
   getRuleExecutionEventsRoute(router);
 
-  getInstalledIntegrationsRoute(router);
+  getInstalledIntegrationsRoute(router, logger);
 
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);

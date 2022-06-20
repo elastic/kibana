@@ -237,6 +237,10 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
   color: #535966;
 }
 
+.c2 {
+  word-break: break-word;
+}
+
 .c2 dt {
   font-size: 12px !important;
 }
@@ -571,6 +575,10 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
 exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set 1`] = `
 .c3 {
   color: #535966;
+}
+
+.c2 {
+  word-break: break-word;
 }
 
 .c2 dt {
