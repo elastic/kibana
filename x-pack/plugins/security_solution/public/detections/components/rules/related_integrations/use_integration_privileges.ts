@@ -8,6 +8,12 @@
 import { useKibana } from '../../../../common/lib/kibana';
 import { IntegrationPrivileges } from './integration_privileges';
 
+/**
+ * Hook for determining if user has fleet/integrations/SOM privileges for fetching
+ * installed integrations. Initially used as we weren't using the fleet.internalReadonlySoClient
+ * for fetching integrations, but keeping this around for a release or two as we add more
+ * fleet/integration features within Security Solution in case it needs to be leveraged for those.
+ */
 export const useIntegrationPrivileges = (): IntegrationPrivileges => {
   const services = useKibana().services;
 

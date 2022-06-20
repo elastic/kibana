@@ -31,10 +31,9 @@ export const getInstalledIntegrationsRoute = (router: SecuritySolutionPluginRout
       try {
         const ctx = await context.resolve(['core', 'securitySolution']);
         const fleet = ctx.securitySolution.getInternalFleetServices();
-        const soClient = ctx.core.savedObjects.client;
         const set = createInstalledIntegrationSet();
 
-        const packagePolicies = await fleet.packagePolicy.list(soClient, {});
+        const packagePolicies = await fleet.packagePolicy.list(fleet.internalReadonlySoClient, {});
 
         packagePolicies.items.forEach((policy) => {
           set.addPackagePolicy(policy);
