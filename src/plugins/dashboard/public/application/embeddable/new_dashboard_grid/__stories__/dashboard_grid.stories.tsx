@@ -7,7 +7,6 @@
  */
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
-import { renderToString } from 'react-dom/server';
 import 'gridstack/dist/h5/gridstack-dd-native';
 import { Grid } from '../components/grid';
 import { smallGridData, mediumGridData, largeGridData } from './fixtures';
