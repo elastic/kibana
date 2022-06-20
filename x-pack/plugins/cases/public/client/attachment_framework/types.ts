@@ -11,7 +11,7 @@ import { CommentRequestExternalReferenceType } from '../../../common/api';
 import { Case } from '../../containers/types';
 import { AttachmentTypeRegistry } from './registry';
 
-export interface ExternalReferenceAttachmentView {
+export interface ExternalReferenceAttachmentViewObject {
   type?: EuiCommentProps['type'];
   timelineIcon?: EuiCommentProps['timelineIcon'];
   actions?: EuiCommentProps['actions'];
@@ -28,9 +28,9 @@ export interface ExternalReferenceAttachmentViewProps {
 export interface ExternalReferenceAttachmentType {
   id: string;
   icon: IconType;
-  getAttachmentView: (
+  getAttachmentViewObject: (
     props: ExternalReferenceAttachmentViewProps
-  ) => ExternalReferenceAttachmentView;
+  ) => ExternalReferenceAttachmentViewObject;
 }
 
 export interface AttachmentFramework {
