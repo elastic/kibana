@@ -14,12 +14,12 @@ import {
 } from '@kbn/task-manager-plugin/server';
 
 import {
-  getTotalCountAggregations,
   getTotalCountInUse,
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
   getFailedAndUnrecognizedTasksPerDay,
 } from './alerting_telemetry';
+import { getTotalCountAggregations } from './lib/get_total_count_aggregations';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
@@ -98,7 +98,7 @@ export function telemetryTaskRunner(
       async run() {
         const esClient = await getEsClient();
         return Promise.all([
-          getTotalCountAggregations(esClient, kibanaIndex, logger),
+          getTotalCountAggregations({ esClient, kibanaIndex, logger }),
           getTotalCountInUse(esClient, kibanaIndex, logger),
           getExecutionsPerDayCount(esClient, eventLogIndex, logger),
           getExecutionTimeoutsPerDayCount(esClient, eventLogIndex, logger),

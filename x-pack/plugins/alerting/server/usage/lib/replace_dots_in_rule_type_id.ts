@@ -1,0 +1,17 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+function replaceDotSymbols(strToReplace: string) {
+  return strToReplace.replaceAll('.', '__');
+}
+
+export function replaceDotSymbolsInRuleTypeIds(ruleTypeIdObj: Record<string, unknown>) {
+  return Object.keys(ruleTypeIdObj).reduce(
+    (obj, key) => ({ ...obj, [replaceDotSymbols(key)]: ruleTypeIdObj[key] }),
+    {}
+  );
+}
