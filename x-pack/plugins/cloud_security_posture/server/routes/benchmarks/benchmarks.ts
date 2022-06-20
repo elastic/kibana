@@ -31,7 +31,7 @@ import {
 } from '../../../common/schemas/benchmark';
 import { CspAppContext } from '../../plugin';
 import type { Benchmark, CspRulesStatus } from '../../../common/types';
-import type { CSPRuleType } from '../../../common/schemas';
+import type { CspRuleType } from '../../../common/schemas';
 import { filterByPackagePolicy, isNonNullable } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
 
@@ -104,8 +104,8 @@ export interface RulesStatusAggregation {
 export const getCspRulesStatus = (
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy
-): Promise<SavedObjectsFindResponse<CSPRuleType, RulesStatusAggregation>> => {
-  const cspRules = soClient.find<CSPRuleType, RulesStatusAggregation>({
+): Promise<SavedObjectsFindResponse<CspRuleType, RulesStatusAggregation>> => {
+  const cspRules = soClient.find<CspRuleType, RulesStatusAggregation>({
     type: CSP_RULE_SAVED_OBJECT_TYPE,
     filter: filterByPackagePolicy({
       packagePolicyId: packagePolicy.id,

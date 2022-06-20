@@ -10,12 +10,12 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationContext,
 } from '@kbn/core/server';
-import { CSPRuleTypeV830, CSPRuleTypeV840 } from '../../../common/schemas/csp_rule';
+import { CspRuleTypeV830, CspRuleTypeV840 } from '../../../common/schemas/csp_rule';
 
 function migrateCSPRuleMetadata(
-  doc: SavedObjectUnsanitizedDoc<CSPRuleTypeV830>,
+  doc: SavedObjectUnsanitizedDoc<CspRuleTypeV830>,
   context: SavedObjectMigrationContext
-): SavedObjectUnsanitizedDoc<CSPRuleTypeV840> {
+): SavedObjectUnsanitizedDoc<CspRuleTypeV840> {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { enabled, muted, package_policy_id, policy_id, ...metadata } = doc.attributes;
   return {

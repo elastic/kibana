@@ -24,4 +24,4 @@ export const cspRuleMetadata = rt.object({
   version: rt.string(),
 });
 
-export type CSPRuleMetadataType = TypeOf<typeof cspRuleMetadata>;
+export type CspRuleMetadataType = TypeOf<typeof cspRuleMetadata>;

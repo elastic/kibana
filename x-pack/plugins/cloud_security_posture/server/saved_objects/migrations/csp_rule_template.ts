@@ -11,14 +11,14 @@ import {
   SavedObjectMigrationContext,
 } from '@kbn/core/server';
 import {
-  CSPRuleTemplateTypeV830,
-  CSPRuleTemplateTypeV840,
+  CspRuleTemplateTypeV830,
+  CspRuleTemplateTypeV840,
 } from '../../../common/schemas/csp_rule_template';
 
 function migrateCSPRuleMetadata(
-  doc: SavedObjectUnsanitizedDoc<CSPRuleTemplateTypeV830>,
+  doc: SavedObjectUnsanitizedDoc<CspRuleTemplateTypeV830>,
   context: SavedObjectMigrationContext
-): SavedObjectUnsanitizedDoc<CSPRuleTemplateTypeV840> {
+): SavedObjectUnsanitizedDoc<CspRuleTemplateTypeV840> {
   const { enabled, muted, ...metadata } = doc.attributes;
   return {
     ...doc,

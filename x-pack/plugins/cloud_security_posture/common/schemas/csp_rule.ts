@@ -37,6 +37,6 @@ export const cspRuleSchemaV840 = rt.object({
   policy_id: rt.string(),
 });
 
-export type CSPRuleTypeV830 = TypeOf<typeof cspRuleSchemaV830>;
-export type CSPRuleTypeV840 = TypeOf<typeof cspRuleSchemaV840>;
-export type CSPRuleType = CSPRuleTypeV840;
+export type CspRuleTypeV830 = TypeOf<typeof cspRuleSchemaV830>;
+export type CspRuleTypeV840 = TypeOf<typeof cspRuleSchemaV840>;
+export type CspRuleType = CspRuleTypeV840;
