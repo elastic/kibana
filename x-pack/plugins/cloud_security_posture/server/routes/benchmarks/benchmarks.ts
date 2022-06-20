@@ -31,7 +31,7 @@ import {
 } from '../../../common/schemas/benchmark';
 import { CspAppContext } from '../../plugin';
 import type { Benchmark, CspRulesStatus, RuleSchema } from '../../../common/types';
-import { isNonNullable } from '../../../common/utils/helpers';
+import { filterByPackagePolicy, isNonNullable } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
@@ -106,7 +106,10 @@ export const getCspRulesStatus = (
 ): Promise<SavedObjectsFindResponse<RuleSchema, RulesStatusAggregation>> => {
   const cspRules = soClient.find<RuleSchema, RulesStatusAggregation>({
     type: CSP_RULE_SAVED_OBJECT_TYPE,
-    filter: `${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.package_policy_id: ${packagePolicy.id} AND ${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.policy_id: ${packagePolicy.policy_id}`,
+    filter: filterByPackagePolicy({
+      packagePolicyId: packagePolicy.id,
+      policyId: packagePolicy.policy_id,
+    }),
     aggs: {
       enabled_status: {
         filter: {

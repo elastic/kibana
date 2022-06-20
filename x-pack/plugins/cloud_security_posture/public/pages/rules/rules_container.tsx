@@ -7,8 +7,11 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { type EuiBasicTable, EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
+import {
+  extractErrorMessage,
+  filterByPackagePolicy,
+  isNonNullable,
+} from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesBottomBar } from './rules_bottom_bar';
 import { RulesTableHeader } from './rules_table_header';
@@ -97,7 +100,10 @@ export const RulesContainer = () => {
   const [isAllSelected, setIsAllSelected] = useState<boolean>(false);
   const [visibleSelectedRulesIds, setVisibleSelectedRulesIds] = useState<string[]>([]);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
-    filter: `${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.policy_id: "${params.policyId}" and ${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.package_policy_id: "${params.packagePolicyId}"`,
+    filter: filterByPackagePolicy({
+      packagePolicyId: params.packagePolicyId,
+      policyId: params.policyId,
+    }),
     search: '',
     page: 0,
     perPage: 10,
