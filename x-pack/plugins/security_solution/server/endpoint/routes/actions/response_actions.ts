@@ -15,7 +15,7 @@ import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { CommentType } from '@kbn/cases-plugin/common';
 
 import {
-  HostIsolationRequestSchema,
+  NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
   ResponseActionBodySchema,
 } from '../../../../common/endpoint/schema/actions';
@@ -28,6 +28,7 @@ import {
   failedFleetActionErrorCode,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
+  GET_RUNNING_PROCESSES_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -58,7 +59,7 @@ export function registerResponseActionRoutes(
   router.post(
     {
       path: ISOLATE_HOST_ROUTE_V2,
-      validate: HostIsolationRequestSchema,
+      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
@@ -71,7 +72,7 @@ export function registerResponseActionRoutes(
   router.post(
     {
       path: RELEASE_HOST_ROUTE,
-      validate: HostIsolationRequestSchema,
+      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
@@ -112,6 +113,19 @@ export function registerResponseActionRoutes(
       )
     )
   );
+
+  router.post(
+    {
+      path: GET_RUNNING_PROCESSES_ROUTE,
+      validate: NoParametersRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canGetRunningProcesses'] },
+      logger,
+      responseActionRequestHandler(endpointContext, 'running-processes')
+    )
+  );
 }
 
 const commandToFeatureKeyMap = new Map<ResponseActions, FeatureKeys>([
@@ -119,6 +133,7 @@ const commandToFeatureKeyMap = new Map<ResponseActions, FeatureKeys>([
   ['unisolate', 'HOST_ISOLATION'],
   ['kill-process', 'KILL_PROCESS'],
   ['suspend-process', 'SUSPEND_PROCESS'],
+  ['running-processes', 'RUNNING_PROCESSES'],
 ]);
 
 const returnActionIdCommands: ResponseActions[] = ['isolate', 'unisolate'];
