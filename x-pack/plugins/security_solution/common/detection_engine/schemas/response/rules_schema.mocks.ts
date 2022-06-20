@@ -152,7 +152,7 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
     threat_query: '*:*',
-    threat_index: ['list-index'],
+    threat_index: ['auditbeat-*'],
     threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
     threat_mapping: [
       {
