@@ -25,8 +25,8 @@ import {
   noMetricIndicesPromptPrimaryActionTitle,
   noMetricIndicesPromptTitle,
 } from '../../../empty_states';
-import noResultsIllustrationDark from './assets/no-results--dark.svg';
-import noResultsIllustrationLight from './assets/no-results--light.svg';
+import noResultsIllustrationDark from './assets/no_results_dark.svg';
+import noResultsIllustrationLight from './assets/no_results_light.svg';
 
 export const MetricsTableLoadingContent = () => (
   <EuiEmptyPrompt
