@@ -40,6 +40,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
+import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import ECSSchema from '../../common/schemas/ecs/v8.2.0.json';
 import osquerySchema from '../../common/schemas/osquery/v5.2.2.json';
 
@@ -515,6 +516,7 @@ export const OsqueryColumnField = React.memo(OsqueryColumnFieldComponent);
 
 export interface ECSMappingEditorFieldProps {
   euiFieldProps?: EuiComboBoxProps<{}>;
+  formPath: string;
 }
 
 interface ECSMappingEditorFormProps {
@@ -765,11 +767,13 @@ interface OsqueryColumn {
 }
 
 export const ECSMappingEditorField = React.memo(
-  ({ euiFieldProps }: ECSMappingEditorFieldProps) => {
+  ({ euiFieldProps, formPath = '' }: ECSMappingEditorFieldProps) => {
     const lastItemPath = useRef<string>();
     const onAdd = useRef<FormArrayField['addItem']>();
     const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
-    const [{ query, ...formData }, formDataSerializer, isMounted] = useFormData();
+    const [initialFormData, formDataSerializer, isMounted] = useFormData();
+    const { query, ...formData } = get(initialFormData, formPath);
+    console.log({ formData });
 
     useEffect(() => {
       if (!query?.length) {
@@ -888,8 +892,8 @@ export const ECSMappingEditorField = React.memo(
             ?.map((selectItem: { type: string; name: string; alias?: string }) => {
               if (selectItem.type === 'identifier') {
                 /*
-                  select * from routes, uptime;
-                */
+                select * from routes, uptime;
+              */
                 if (ast?.result.length === 1 && selectItem.name === '*') {
                   return reduce(
                     astOsqueryTables,
@@ -914,8 +918,8 @@ export const ECSMappingEditorField = React.memo(
                 }
 
                 /*
-                  select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
-                */
+                select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+              */
 
                 const [table, column] = selectItem.name.includes('.')
                   ? selectItem.name?.split('.')
@@ -959,18 +963,18 @@ export const ECSMappingEditorField = React.memo(
               }
 
               /*
-                SELECT pid, uid, name, ROUND((
-                  (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
-                ) * 100, 2) AS percentage
-                FROM processes, (
-                SELECT (
-                  SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
-                  SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
-                  FROM cpu_time
-                ) AS cpu_time
-                ORDER BY user_time+system_time DESC
-                LIMIT 5;
-              */
+              SELECT pid, uid, name, ROUND((
+                (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
+              ) * 100, 2) AS percentage
+              FROM processes, (
+              SELECT (
+                SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
+                SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
+                FROM cpu_time
+              ) AS cpu_time
+              ORDER BY user_time+system_time DESC
+              LIMIT 5;
+            */
 
               if (selectItem.type === 'function' && selectItem.alias) {
                 return [
@@ -1014,21 +1018,32 @@ export const ECSMappingEditorField = React.memo(
           return;
         }
 
-        const itemKey = get(formData, `${lastItemPath.current}.key`);
+        const itemKey = get(initialFormData, `${lastItemPath.current}.key`);
 
         if (itemKey) {
-          const serializedFormData = formDataSerializer();
+          const serializedFormData = get(formDataSerializer(), formPath);
+          const data = {
+            ...serializedFormData,
+            ecs_mapping: convertECSMappingToObject(serializedFormData.ecs_mapping),
+          };
           const itemValue =
-            serializedFormData.ecs_mapping &&
-            (serializedFormData.ecs_mapping[`${itemKey}`]?.field ||
-              serializedFormData.ecs_mapping[`${itemKey}`]?.value);
+            data.ecs_mapping &&
+            (data.ecs_mapping[`${itemKey}`]?.field || data.ecs_mapping[`${itemKey}`]?.value);
 
           if (itemValue && onAdd.current) {
             onAdd.current();
           }
         }
       }
-    }, [euiFieldProps?.isDisabled, formData, formDataSerializer, isMounted, onAdd]);
+    }, [
+      euiFieldProps?.isDisabled,
+      formData,
+      formDataSerializer,
+      formPath,
+      initialFormData,
+      isMounted,
+      onAdd,
+    ]);
 
     return (
       <>
@@ -1070,7 +1085,7 @@ export const ECSMappingEditorField = React.memo(
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <UseArray path="ecs_mapping">
+        <UseArray path={formPath ? `${formPath}.ecs_mapping` : 'ecs_mapping'}>
           {({ items, addItem, removeItem }) => {
             lastItemPath.current = items[items.length - 1]?.path;
             onAdd.current = addItem;
