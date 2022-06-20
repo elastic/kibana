@@ -67,7 +67,7 @@ export const getExpandColumn = <T extends unknown>({
 
 export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => [
   {
-    field: 'resource_id',
+    field: 'resource.id',
     name: (
       <ColumnNameWithTooltip
         columnName={TEXT.RESOURCE_ID}

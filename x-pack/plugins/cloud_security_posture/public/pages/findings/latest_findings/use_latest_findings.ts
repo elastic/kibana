@@ -48,6 +48,7 @@ const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set([
   '@timestamp',
   'resource.sub_type',
   'resource.name',
+  'resource.id',
   'rule.name',
 ]);
 
