@@ -18,7 +18,6 @@ import { HistoryMock } from '../../services/history.mock';
 import { SettingsMock } from '../../services/settings.mock';
 import { StorageMock } from '../../services/storage.mock';
 import { AutocompleteInfoMock } from '../../services/autocomplete.mock';
-import { VariablesMock } from '../../services/variables.mock';
 import { createApi, createEsHostService } from '../lib';
 
 import { ContextValue } from './services_context';
@@ -41,7 +40,6 @@ export const serviceContextMock = {
         objectStorageClient: {} as unknown as ObjectStorageClient,
         http,
         autocompleteInfo: new AutocompleteInfoMock(),
-        variables: new VariablesMock(storage),
       },
       docLinkVersion: 'NA',
       theme$: themeServiceMock.create().start().theme$,
