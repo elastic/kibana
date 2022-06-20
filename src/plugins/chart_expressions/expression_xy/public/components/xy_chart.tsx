@@ -30,6 +30,7 @@ import {
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
 import { RenderMode } from '@kbn/expressions-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
@@ -101,6 +102,7 @@ declare global {
 export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
+  data: DataPublicPluginStart;
   paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
   timeZone: string;
@@ -144,6 +146,7 @@ export const XYChartReportable = React.memo(XYChart);
 
 export function XYChart({
   args,
+  data,
   formatFactory,
   timeZone,
   chartsThemeService,
@@ -277,6 +280,7 @@ export function XYChart({
   const isHistogramViz = dataLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
+    data.datatableUtilities,
     dataLayers,
     minInterval,
     isTimeViz,
