@@ -94,7 +94,7 @@ describe('fetch package', () => {
       const result = await fetchMethodToTest('testpkg');
       expect(result).toEqual(bundledPackage);
     });
-    it('Should return bundled package if bundled package there is no registry package', async () => {
+    it('Should return bundled package if there is no registry package', async () => {
       const bundledPackage = { name: 'testpkg', version: '1.0.1' };
 
       mockFetchUrl.mockResolvedValue(JSON.stringify([]));
