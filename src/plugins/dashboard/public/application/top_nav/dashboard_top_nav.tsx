@@ -8,7 +8,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Required } from '@kbn/utility-types';
-import { EuiHorizontalRule, ToolTipPositions} from '@elastic/eui';
+import { EuiHorizontalRule, ToolTipPositions } from '@elastic/eui';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -517,8 +517,11 @@ export function DashboardTopNav({
             {
               'data-test-subj': 'dashboardUnsavedChangesBadge',
               badgeText: unsavedChangesBadge.getUnsavedChangedBadgeText(),
-              title:'',
-              toolTipProps: {content:unsavedChangesBadge.getUnsavedChangedBadgeToolTipContent(), position: 'bottom' as ToolTipPositions},
+              title: '',
+              toolTipProps: {
+                content: unsavedChangesBadge.getUnsavedChangedBadgeToolTipContent(),
+                position: 'bottom' as ToolTipPositions,
+              },
               color: 'warning',
             },
           ]
