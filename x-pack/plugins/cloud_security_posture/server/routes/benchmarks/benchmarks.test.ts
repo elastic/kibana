@@ -21,10 +21,12 @@ import {
   DEFAULT_BENCHMARKS_PER_PAGE,
 } from '../../../common/schemas/benchmark';
 import {
-  defineGetBenchmarksRoute,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   getCspPackagePolicies,
   getCspAgentPolicies,
+} from '../../lib/fleet_util';
+import {
+  defineGetBenchmarksRoute,
   createBenchmarkEntry,
   addPackagePolicyCspRules,
 } from './benchmarks';

@@ -47,16 +47,11 @@ export interface ComplianceDashboardData {
   trend: PostureTrend[];
 }
 
-export type LatestFindingsIndexState =
-  | 'indexed'
-  | 'indexing'
-  | 'index_timeout'
-  | 'not deployed'
-  | 'not installed';
+export type Status = 'indexed' | 'indexing' | 'index timeout' | 'not deployed' | 'not installed';
 
 export interface CspSetupStatus {
-  status: LatestFindingsIndexState;
-  installed_pkg_ver: string | null;
+  status: Status;
+  installed_pkg_ver?: string;
   latest_pkg_ver: string;
   installed_integration: number;
   healthy_agents: number;

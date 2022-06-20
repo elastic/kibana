@@ -13,7 +13,7 @@ import {
   PackagePolicyServiceInterface,
   PackageService,
 } from '@kbn/fleet-plugin/server';
-import { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { Installation, ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   INFO_ROUTE_PATH,
@@ -21,14 +21,14 @@ import {
 } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
 import { CspRouter } from '../../types';
-import { CspSetupStatus, LatestFindingsIndexState } from '../../../common/types';
+import { CspSetupStatus, Status } from '../../../common/types';
 import {
   addRunningAgentToAgentPolicy,
   getCspAgentPolicies,
   getCspPackagePolicies,
-} from '../benchmarks/benchmarks';
+} from '../../lib/fleet_util';
 
-const TTL_MINUTES = 60 * 5;
+export const INDEX_TIMEOUT_IN_HOURS = 5;
 
 const isFindingsExists = async (esClient: ElasticsearchClient): Promise<boolean> => {
   try {
@@ -78,44 +78,33 @@ const getHealthyAgents = async (
   const totalAgents = enrichAgentPolicies
     .map((agentPolicy) => (agentPolicy.agents ? agentPolicy.agents : 0))
     .reduce((previousValue, currentValue) => previousValue + currentValue, initialValue);
+
   return totalAgents;
 };
 
-const getInstalledPackageVersion = async (
-  packageService: PackageService
-): Promise<string | null> => {
-  const packageInfo = await packageService.asInternalUser.getInstallation(
-    CLOUD_SECURITY_POSTURE_PACKAGE_NAME
-  );
-
-  if (packageInfo) {
-    return packageInfo.install_version;
-  }
-  return null;
-};
-
-const getTimeDelta = async (packageService: PackageService) => {
-  const packageInfo = await packageService.asInternalUser.getInstallation(
-    CLOUD_SECURITY_POSTURE_PACKAGE_NAME
-  );
+const getTimeDelta = (packageInfo: Installation): number => {
   const installTime = packageInfo!.install_started_at;
-  const dt = new Date().getTime() - new Date(installTime).getTime();
+  const dt = (new Date().getTime() - new Date(installTime).getTime()) / (1000 * 60 * 60);
+
   return dt;
 };
 
-const geLatestFindingsIndexStatus = async (
+const geCspIndexStatus = async (
   esClient: ElasticsearchClient,
   installedIntegrations: number,
   healthyAgents: number,
   timeDelta: number
-): Promise<LatestFindingsIndexState> => {
+): Promise<Status> => {
   if (await isFindingsExists(esClient)) return 'indexed';
-  if (installedIntegrations > 0) {
-    if (!healthyAgents) return 'not deployed';
 
-    if (timeDelta < TTL_MINUTES) return 'indexing';
-    return 'index_timeout';
+  if (installedIntegrations > 0) {
+    if (healthyAgents === 0) return 'not deployed';
+
+    if (timeDelta < INDEX_TIMEOUT_IN_HOURS) return 'indexing';
+
+    return 'index timeout';
   }
+
   return 'not installed';
 };
 
@@ -127,7 +116,9 @@ const getCspSetupStatus = async (
   agentPolicyService: AgentPolicyServiceInterface,
   agentService: AgentService
 ): Promise<CspSetupStatus> => {
-  const installedPckVer = await getInstalledPackageVersion(packageService);
+  const packageInfo = await packageService.asInternalUser.getInstallation(
+    CLOUD_SECURITY_POSTURE_PACKAGE_NAME
+  );
 
   const cspPackageInstalled = await isCspPackageInstalledOnAgentPolicy(
     soClient,
@@ -141,25 +132,25 @@ const getCspSetupStatus = async (
     agentService
   );
 
-  const latestPkgVersion = await packageService.asInternalUser.fetchFindLatestPackage(
-    CLOUD_SECURITY_POSTURE_PACKAGE_NAME
-  );
+  const latestPkgVersion = (
+    await packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME)
+  )?.version;
 
-  const timeDelta = await getTimeDelta(packageService);
+  const timeDelta = packageInfo ? await getTimeDelta(packageInfo) : 0;
 
-  const status = await geLatestFindingsIndexStatus(
+  const status = await geCspIndexStatus(
     esClient,
-    timeDelta,
     cspPackageInstalled.total,
-    healthyAgents
+    healthyAgents,
+    timeDelta
   );
 
   return {
     status,
-    latest_pkg_ver: latestPkgVersion.version,
+    latest_pkg_ver: latestPkgVersion,
     installed_integration: cspPackageInstalled.total,
     healthy_agents: healthyAgents,
-    installed_pkg_ver: installedPckVer,
+    installed_pkg_ver: packageInfo?.install_version,
   };
 };
 
@@ -183,7 +174,7 @@ export const defineGetCspSetupStatusRoute = (router: CspRouter, cspContext: CspA
           throw new Error(`Failed to get Fleet services`);
         }
 
-        const status = await getCspSetupStatus(
+        const cspSetupStatus = await getCspSetupStatus(
           esClient,
           soClient,
           packageService,
@@ -192,8 +183,12 @@ export const defineGetCspSetupStatusRoute = (router: CspRouter, cspContext: CspA
           agentService
         );
 
+        const body: CspSetupStatus = {
+          ...cspSetupStatus,
+        };
+
         return response.ok({
-          body: status,
+          body,
         });
       } catch (err) {
         const error = transformError(err);
