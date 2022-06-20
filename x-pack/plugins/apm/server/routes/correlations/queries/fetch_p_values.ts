@@ -59,8 +59,6 @@ export const fetchPValues = async ({
 
   const flattenedResults = fulfilled.flat();
 
-  console.log('flattenedResults', flattenedResults.length);
-
   const failedTransactionsCorrelations: FailedTransactionsCorrelation[] = [];
   let fallbackResult: FailedTransactionsCorrelation | undefined;
 

@@ -94,10 +94,6 @@ export const fetchDurationCorrelation = async ({
 
   const { aggregations } = resp;
 
-  console.log(ranges);
-
-  console.log(JSON.stringify(resp));
-
   const result = {
     ranges: aggregations?.latency_ranges.buckets ?? [],
     correlation: aggregations?.duration_correlation.value ?? null,

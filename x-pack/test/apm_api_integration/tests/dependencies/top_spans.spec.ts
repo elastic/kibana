@@ -246,8 +246,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           const { spans } = response.body;
 
-          console.log(spans.map((span) => span.duration));
-
           expect(spans.every((span) => span.duration === 50000)).to.be(true);
         });
       });

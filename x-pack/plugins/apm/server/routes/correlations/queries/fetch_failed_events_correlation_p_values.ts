@@ -91,8 +91,6 @@ export const fetchFailedEventsCorrelationPValues = async ({
 
   const overallResult = aggregations.failure_p_value;
 
-  console.log('overallResult', overallResult.buckets.length);
-
   // Using for of to sequentially augment the results with histogram data.
   const result: FailedTransactionsCorrelation[] = [];
   for (const bucket of overallResult.buckets) {
