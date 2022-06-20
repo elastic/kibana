@@ -25,7 +25,7 @@ export const CommandInputHistory = memo(() => {
   const dispatch = useConsoleStateDispatch();
   const inputHistory = useWithInputHistory();
   const [priorInputText] = useState(useWithInputTextEntered());
-  const [optionWasSelected, setOptionWasSelected] = useState(false);
+  const optionWasSelected = useRef(false);
 
   const optionListRef = useRef(); // TODO:PT remove when https://github.com/elastic/eui/pull/5978 becomes available in kibana (task #4179)
 
@@ -63,15 +63,12 @@ export const CommandInputHistory = memo(() => {
 
   const handleSelectableOnChange: EuiSelectableProps<InputHistoryItem>['onChange'] = useCallback(
     (items) => {
-      setOptionWasSelected(() => true);
+      optionWasSelected.current = true;
 
       const selected = items.find((item) => item.checked === 'on');
 
       dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
-      dispatch({
-        type: 'updateInputPlaceholderState',
-        payload: { placeholder: '' },
-      });
+      dispatch({ type: 'updateInputPlaceholderState', payload: { placeholder: '' } });
 
       if (selected) {
         dispatch({ type: 'updateInputTextEnteredState', payload: { textEntered: selected.label } });
@@ -135,7 +132,7 @@ export const CommandInputHistory = memo(() => {
     dispatch({ type: 'updateInputTextEnteredState', payload: { textEntered: '' } });
 
     return () => {
-      if (!optionWasSelected) {
+      if (!optionWasSelected.current) {
         dispatch({ type: 'updateInputTextEnteredState', payload: { textEntered: priorInputText } });
       }
     };
