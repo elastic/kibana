@@ -178,7 +178,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { dataViewFieldEditor, dataViewEditor } = services;
   const { availableFields$ } = props;
 
-  const canEditDataView = !!dataViewEditor?.userPermissions.editDataView();
+  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
 
   useEffect(
     () => {

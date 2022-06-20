@@ -244,7 +244,7 @@ export const LensTopNavMenu = ({
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
-  const canEditDataView = !!dataViewEditor?.userPermissions.editDataView();
+  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
