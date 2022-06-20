@@ -65,7 +65,11 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
 
   render() {
     const { stats, json } = this.props.request;
+    const dataView = stats?.indexPattern?.value ?? null;
     const indexFilters = findIndexFilters(json);
+    const validIndexFilters = indexFilters.filter(
+      (indexPattern) => dataView?.indexOf(indexPattern) >= 0
+    );
     const indexFiltersStats =
       indexFilters.length > 0
         ? {
@@ -73,7 +77,7 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
               id: 'indexFilters',
               description: 'Active index patterns',
               label: 'index pattern',
-              value: indexFilters.join(', '),
+              value: validIndexFilters.join(', '),
             },
           }
         : null;
