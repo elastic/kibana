@@ -50,22 +50,35 @@ const getRuleMock = ({
   savedObjectId?: string;
   id?: string;
   enabled: boolean;
-}) =>
+}): RuleSavedObject =>
   ({
     id: savedObjectId,
     updatedAt: chance.date().toISOString(),
     attributes: {
       metadata: {
-        id,
-        name: chance.sentence(),
+        audit: chance.sentence(),
         benchmark: {
           name: chance.word(),
           version: chance.sentence(),
         },
+        default_value: chance.sentence(),
+        description: chance.sentence(),
+        id,
+        impact: chance.sentence(),
+        name: chance.sentence(),
+        profile_applicability: chance.sentence(),
+        rationale: chance.sentence(),
+        references: chance.sentence(),
+        rego_rule_id: chance.word(),
+        remediation: chance.sentence(),
+        section: chance.sentence(),
+        tags: [chance.word(), chance.word()],
+        version: chance.sentence(),
       },
       package_policy_id: packagePolicyId,
       policy_id: policyId,
       enabled,
+      muted: false,
     },
   } as RuleSavedObject);
 

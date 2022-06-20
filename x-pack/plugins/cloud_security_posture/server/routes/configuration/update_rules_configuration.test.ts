@@ -38,6 +38,7 @@ import { Chance } from 'chance';
 import { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/security-plugin/common/model/authenticated_user.mock';
+import { DeepPartial } from 'utility-types';
 
 describe('Update rules configuration API', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -128,27 +129,41 @@ describe('Update rules configuration API', () => {
   });
 
   it('create csp rules config based on activated csp rules', async () => {
-    const cspRules = {
+    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRuleType>> = {
       page: 1,
       per_page: 1000,
       total: 2,
       saved_objects: [
         {
           type: 'csp_rule',
-          rego_rule_id: '1.1.1',
-          attributes: { enabled: true, rego_rule_id: 'cis_1_1_1' },
+          attributes: {
+            enabled: true,
+            metadata: {
+              rego_rule_id: 'cis_1_1_1',
+            },
+          },
         },
         {
           type: 'csp_rule',
-          attributes: { enabled: false, rego_rule_id: 'cis_1_1_2' },
+          attributes: {
+            enabled: false,
+            metadata: {
+              rego_rule_id: 'cis_1_1_2',
+            },
+          },
         },
         {
           type: 'csp_rule',
-          attributes: { enabled: true, rego_rule_id: 'cis_1_1_3' },
+          attributes: {
+            enabled: true,
+            metadata: {
+              rego_rule_id: 'cis_1_1_3',
+            },
+          },
         },
       ],
-    } as unknown as SavedObjectsFindResponse<CspRuleType>;
-    const cspConfig = await createRulesConfig(cspRules);
+    };
+    const cspConfig = await createRulesConfig(cspRules as SavedObjectsFindResponse<CspRuleType>);
     expect(cspConfig).toMatchObject({
       data_yaml: { activated_rules: { cis_k8s: ['cis_1_1_1', 'cis_1_1_3'] } },
     });
