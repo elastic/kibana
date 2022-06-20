@@ -6,8 +6,8 @@
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 
-// cspRulesConfigSchema have to be correspond to DataYaml struct in https://github.com/elastic/cloudbeat/blob/main/config/config.go#L44-L50
-export const cspRulesConfigSchema = rt.object({
+// cspPackageConfigurationSchema have to be correspond to DataYaml struct in https://github.com/elastic/cloudbeat/blob/main/config/config.go#L44-L50
+export const cspPackageConfigurationSchema = rt.object({
   data_yaml: rt.object({
     activated_rules: rt.object({
       cis_k8s: rt.arrayOf(rt.string()),
@@ -15,4 +15,4 @@ export const cspRulesConfigSchema = rt.object({
   }),
 });
 
-export type CspRulesConfigSchema = TypeOf<typeof cspRulesConfigSchema>;
+export type CspPackageConfigurationType = TypeOf<typeof cspPackageConfigurationSchema>;

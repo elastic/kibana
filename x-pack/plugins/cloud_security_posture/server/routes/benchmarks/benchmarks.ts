@@ -27,8 +27,8 @@ import {
 } from '../../../common/constants';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
-  benchmarksInputSchema,
-  BenchmarksQuerySchema,
+  getBenchmarksQueryParamsSchema,
+  GetBenchmarksQueryParams,
 } from '../../../common/schemas/benchmark';
 import { CspAppContext } from '../../plugin';
 import type { Benchmark, CspRulesStatus } from '../../../common/types';
@@ -50,7 +50,7 @@ export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyServiceInterface,
   packageName: string,
-  queryParams: Partial<BenchmarksQuerySchema>
+  queryParams: Partial<GetBenchmarksQueryParams>
 ): Promise<ListResult<PackagePolicy>> => {
   if (!packagePolicyService) {
     throw new Error('packagePolicyService is undefined');
@@ -194,7 +194,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
   router.get(
     {
       path: BENCHMARKS_ROUTE_PATH,
-      validate: { query: benchmarksInputSchema },
+      validate: { query: getBenchmarksQueryParamsSchema },
     },
     async (context, request, response) => {
       if (!(await context.fleet).authz.fleet.all) {

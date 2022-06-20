@@ -20,7 +20,7 @@ import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/comm
 import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { CspAppContext } from '../../plugin';
-import { CspRulesConfigSchema } from '../../../common/schemas/csp_configuration';
+import { CspPackageConfigurationType } from '../../../common/schemas/csp_package_configuration';
 import { CspRuleSchema } from '../../../common/schemas/csp_rule';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
@@ -64,7 +64,7 @@ export const getCspRules = (
 
 export const createRulesConfig = (
   cspRules: SavedObjectsFindResponse<CspRuleSchema>
-): CspRulesConfigSchema => {
+): CspPackageConfigurationType => {
   const activatedRules = cspRules.saved_objects.filter((cspRule) => cspRule.attributes.enabled);
   const config = {
     data_yaml: {
@@ -76,7 +76,7 @@ export const createRulesConfig = (
   return config;
 };
 
-export const convertRulesConfigToYaml = (config: CspRulesConfigSchema): string => {
+export const convertRulesConfigToYaml = (config: CspPackageConfigurationType): string => {
   return yaml.safeDump(config);
 };
 
