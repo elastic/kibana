@@ -26,7 +26,7 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-} from '../../utils/use_saved_search';
+} from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin';
@@ -39,7 +39,11 @@ import { DiscoverServices } from '../../../../build_services';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
+function mountComponent(
+  indexPattern: DataView,
+  prevSidebarClosed?: boolean,
+  mountOptions: { attachTo?: HTMLElement } = {}
+) {
   const searchSourceMock = createSearchSourceMock({});
   const services = {
     ...discoverServiceMock,
@@ -159,7 +163,8 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
   return mountWithIntl(
     <KibanaContextProvider services={services}>
       <DiscoverLayout {...(props as DiscoverLayoutProps)} />
-    </KibanaContextProvider>
+    </KibanaContextProvider>,
+    mountOptions
   );
 }
 
@@ -172,6 +177,17 @@ describe('Discover component', () => {
   test('selected index pattern with time field displays chart toggle', () => {
     const component = mountComponent(indexPatternWithTimefieldMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
+  });
+
+  test('the saved search title h1 gains focus on navigate', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const component = mountComponent(indexPatternWithTimefieldMock, undefined, {
+      attachTo: container,
+    });
+    expect(
+      component.find('[data-test-subj="discoverSavedSearchTitle"]').getDOMNode()
+    ).toHaveFocus();
   });
 
   describe('sidebar', () => {

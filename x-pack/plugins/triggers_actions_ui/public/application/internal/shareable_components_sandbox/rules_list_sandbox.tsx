@@ -6,11 +6,18 @@
  */
 import React from 'react';
 import { getRulesListLazy } from '../../../common/get_rules_list';
+import { useConnectorContext } from '../../context/use_connector_context';
 
 const style = {
   flex: 1,
 };
 
 export const RulesListSandbox = () => {
-  return <div style={style}>{getRulesListLazy()}</div>;
+  const {
+    services: { validateEmailAddresses },
+  } = useConnectorContext();
+
+  return (
+    <div style={style}>{getRulesListLazy({ connectorServices: { validateEmailAddresses } })}</div>
+  );
 };
