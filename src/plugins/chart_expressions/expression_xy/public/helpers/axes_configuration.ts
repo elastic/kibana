@@ -141,6 +141,7 @@ export function groupAxesByType(
 
     series[axisGroupId].push(currentSeries);
   });
+
   return series;
 }
 
@@ -148,13 +149,13 @@ export function getAxisPosition(position: Position, shouldRotate: boolean) {
   if (shouldRotate) {
     switch (position) {
       case Position.Bottom: {
+        return Position.Left;
+      }
+      case Position.Top: {
         return Position.Right;
       }
       case Position.Right: {
         return Position.Top;
-      }
-      case Position.Top: {
-        return Position.Left;
       }
       case Position.Left: {
         return Position.Bottom;
@@ -238,7 +239,6 @@ export function getAxesConfiguration(
       position,
     });
   }
-
   return axisGroups;
 }
 
