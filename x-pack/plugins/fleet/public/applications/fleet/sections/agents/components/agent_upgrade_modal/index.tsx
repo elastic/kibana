@@ -282,7 +282,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         {noVersions ? (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.noVersionsText"
-            defaultMessage="No versions available to upgrade to. Please select agents which have upgrade available."
+            defaultMessage="No selected agents are eligible for an upgrade. Please select one or more eligible agents."
           />
         ) : isSingleAgent ? (
           <FormattedMessage
