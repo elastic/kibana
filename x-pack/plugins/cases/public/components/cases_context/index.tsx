@@ -18,13 +18,12 @@ import {
 import { CasesFeaturesAllRequired, CasesFeatures } from '../../containers/types';
 import { CasesGlobalComponents } from './cases_global_components';
 import { ReleasePhase } from '../types';
-import { AttachmentTypeRegistry } from '../../client/attachment_framework/registry';
-import { ExternalReferenceAttachmentType } from '../../client/attachment_framework/types';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/types';
 
 export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
 export interface CasesContextValue {
-  externalReferenceAttachmentTypeRegistry: AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   owner: string[];
   appId: string;
   appTitle: string;

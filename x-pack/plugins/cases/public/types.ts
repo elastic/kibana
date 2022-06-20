@@ -39,9 +39,8 @@ import { Cases, CasesStatus, CasesMetrics } from '../common/ui';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import {
   AttachmentFramework,
-  ExternalReferenceAttachmentType,
+  ExternalReferenceAttachmentTypeRegistry,
 } from './client/attachment_framework/types';
-import { AttachmentTypeRegistry } from './client/attachment_framework/registry';
 
 export interface CasesPluginSetup {
   security: SecurityPluginSetup;
@@ -76,7 +75,7 @@ export interface RenderAppProps {
   pluginsStart: CasesPluginStart;
   storage: Storage;
   kibanaVersion: string;
-  externalReferenceAttachmentTypeRegistry: AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
 }
 
 export interface CasesUiStart {

@@ -19,8 +19,7 @@ import {
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RenderAppProps } from './types';
 import { CasesApp } from './components/app';
-import { AttachmentTypeRegistry } from './client/attachment_framework/registry';
-import { ExternalReferenceAttachmentType } from './client/attachment_framework/types';
+import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/types';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
@@ -34,7 +33,7 @@ export const renderApp = (deps: RenderAppProps) => {
 };
 
 interface CasesAppWithContextProps {
-  externalReferenceAttachmentTypeRegistry: AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
 }
 
 const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(

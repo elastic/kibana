@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { APP_OWNER } from '../../../common/constants';
-import { AttachmentTypeRegistry } from '../../client/attachment_framework/registry';
-import { ExternalReferenceAttachmentType } from '../../client/attachment_framework/types';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/types';
 import { getCasesLazy } from '../../client/ui/get_cases';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 
@@ -18,7 +17,7 @@ import { CasesRoutesProps } from './types';
 export type CasesProps = CasesRoutesProps;
 
 interface CasesAppProps {
-  externalReferenceAttachmentTypeRegistry: AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
 }
 
 const CasesAppComponent: React.FC<CasesAppProps> = ({

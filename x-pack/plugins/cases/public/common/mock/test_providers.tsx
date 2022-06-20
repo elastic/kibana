@@ -24,7 +24,10 @@ import { FieldHook } from '../shared_imports';
 import { StartServices } from '../../types';
 import { ReleasePhase } from '../../components/types';
 import { AttachmentTypeRegistry } from '../../client/attachment_framework/registry';
-import { ExternalReferenceAttachmentType } from '../../client/attachment_framework/types';
+import {
+  ExternalReferenceAttachmentType,
+  ExternalReferenceAttachmentTypeRegistry,
+} from '../../client/attachment_framework/types';
 
 interface TestProviderProps {
   children: React.ReactNode;
@@ -78,7 +81,7 @@ TestProvidersComponent.displayName = 'TestProviders';
 export const TestProviders = React.memo(TestProvidersComponent);
 
 export interface AppMockRenderer {
-  externalReferenceAttachmentTypeRegistry: AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   render: UiRender;
   coreStart: StartServices;
   queryClient: QueryClient;
