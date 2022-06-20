@@ -1805,11 +1805,11 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/app.tsx"
+            "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/app.tsx"
+            "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
           },
           {
             "plugin": "maps",
@@ -3227,7 +3227,9 @@
         "signature": [
           "(timeRange: ",
           "TimeRange",
-          ", options: CalculateBoundsOptions) => ",
+          ", options: ",
+          "CalculateBoundsOptions",
+          ") => ",
           {
             "pluginId": "data",
             "scope": "common",

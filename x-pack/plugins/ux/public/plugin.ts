@@ -56,6 +56,11 @@ export interface ApmPluginStartDeps {
   dataViews: DataViewsPublicPluginStart;
 }
 
+async function getDataStartPlugin(core: CoreSetup) {
+  const [_, startPlugins] = await core.getStartServices();
+  return (startPlugins as ApmPluginStartDeps).data;
+}
+
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
   constructor() {}
 
@@ -76,14 +81,16 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         appName: 'ux',
         hasData: async (params?: HasDataParams) => {
           const dataHelper = await getUxDataHelper();
-          return await dataHelper.hasRumData(params!);
+          const dataStartPlugin = await getDataStartPlugin(core);
+          return dataHelper.hasRumData({
+            ...params!,
+            dataStartPlugin,
+          });
         },
         fetchData: async (params: FetchDataParams) => {
-          const [_, startPlugins] = await core.getStartServices();
-
-          const { data: dataStartPlugin } = startPlugins as ApmPluginStartDeps;
+          const dataStartPlugin = await getDataStartPlugin(core);
           const dataHelper = await getUxDataHelper();
-          return await dataHelper.fetchUxOverviewDate({
+          return dataHelper.fetchUxOverviewDate({
             ...params,
             dataStartPlugin,
           });
