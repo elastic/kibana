@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingContent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingContent, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useGetEndpointDetails } from '../../hooks/endpoint/use_get_endpoint_details';
@@ -55,15 +55,20 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false} className="eui-textTruncate">
-            <EuiText size="s" data-test-subj="responderHeaderEndpointName">
-              <h6 className="eui-textTruncate">
-                <FormattedMessage
-                  id="xpack.securitySolution.responder.header.endpointName"
-                  defaultMessage="ENDPOINT {name}"
-                  values={{ name: endpointDetails.metadata.host.name }}
-                />
-              </h6>
-            </EuiText>
+            <EuiToolTip
+              content={endpointDetails.metadata.host.name}
+              anchorClassName="eui-textTruncate"
+            >
+              <EuiText size="s" data-test-subj="responderHeaderEndpointName">
+                <h6 className="eui-textTruncate">
+                  <FormattedMessage
+                    id="xpack.securitySolution.responder.header.endpointName"
+                    defaultMessage="ENDPOINT {name}"
+                    values={{ name: endpointDetails.metadata.host.name }}
+                  />
+                </h6>
+              </EuiText>
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EndpointAgentAndIsolationStatus
