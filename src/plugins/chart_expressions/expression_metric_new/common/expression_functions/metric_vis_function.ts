@@ -22,24 +22,24 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,
   type: 'render',
   inputTypes: ['datatable'],
-  help: i18n.translate('expressionMetricVis.function.help', {
+  help: i18n.translate('expressionNewMetricVis.function.help', {
     defaultMessage: 'Metric visualization',
   }),
   args: {
     metric: {
-      types: ['vis_dimension'],
+      types: ['vis_dimension', 'string'],
       help: i18n.translate('expressionNewMetricVis.function.metric.help', {
         defaultMessage: 'The primary metric.',
       }),
     },
     secondaryMetric: {
-      types: ['vis_dimension'],
+      types: ['vis_dimension', 'string'],
       help: i18n.translate('expressionNewMetricVis.function.secondaryMetric.help', {
         defaultMessage: 'The secondary metric (shown above the primary).',
       }),
     },
     breakdownBy: {
-      types: ['vis_dimension'],
+      types: ['vis_dimension', 'string'],
       help: i18n.translate('expressionNewMetricVis.function.breakdownBy.help', {
         defaultMessage: 'The dimension containing the labels for sub-categories.',
       }),
@@ -53,6 +53,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
     progressMax: {
       types: ['number'],
+      // TODO: revisit default
       default: 0,
       help: i18n.translate('expressionNewMetricVis.function.progressMax.help.', {
         defaultMessage: 'The number at which the progress bar should be full.',
@@ -125,6 +126,9 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visConfig: {
           metric: {
             palette: args.palette?.params,
+            progressMin: args.progressMin,
+            progressMax: args.progressMax,
+            progressDirection: args.progressDirection,
           },
           dimensions: {
             metric: args.metric,

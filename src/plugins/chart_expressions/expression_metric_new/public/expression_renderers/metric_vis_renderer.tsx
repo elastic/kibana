@@ -11,9 +11,28 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import { Chart, Metric, MetricSpec, Settings } from '@elastic/charts';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig } from '../../common';
+import { getThemeService } from '../services/theme_service';
+
+const MetricVis = ({
+  data,
+  themeService,
+}: {
+  data: MetricSpec['data'];
+  themeService: ChartsPluginSetup['theme'];
+}) => {
+  const chartTheme = themeService.useChartsTheme();
+  return (
+    <Chart>
+      <Settings theme={[{ background: { color: 'transparent' } }, chartTheme]} />
+      <Metric id="metric" data={data} />
+    </Chart>
+  );
+};
 
 export const getMetricVisRenderer = (
   theme: ThemeServiceStart
@@ -27,16 +46,36 @@ export const getMetricVisRenderer = (
         unmountComponentAtNode(domNode);
       });
 
+      const primaryMetricColumn = getColumnByAccessor(
+        visConfig.dimensions.metric,
+        visData.columns
+      )!;
+      const secondaryMetricColumn = visConfig.dimensions.secondaryMetric
+        ? getColumnByAccessor(visConfig.dimensions.secondaryMetric, visData.columns)
+        : undefined;
+
+      const data = [
+        [
+          {
+            value: visData.rows[0][primaryMetricColumn.id],
+            color: '#5e5e5e',
+            title: primaryMetricColumn.name,
+            subtitle: 'Write',
+            valueFormatter: (d: unknown) => '' + d,
+            domain: { min: visConfig.metric.progressMin, max: visConfig.metric.progressMax },
+            progressBarDirection: visConfig.metric.progressDirection,
+            extra: secondaryMetricColumn ? (
+              <span>{visData.rows[0][secondaryMetricColumn.id]}</span>
+            ) : undefined,
+          },
+        ],
+      ];
+
+      const themeService = getThemeService();
+
       render(
         <KibanaThemeProvider theme$={theme.theme$}>
-          <VisualizationContainer
-            data-test-subj="mtrVis"
-            className="mtrVis"
-            showNoResult={!visData.rows?.length}
-            handlers={handlers}
-          >
-            {JSON.stringify(visConfig)}
-          </VisualizationContainer>
+          <MetricVis data={data} themeService={themeService} />
         </KibanaThemeProvider>,
         domNode
       );

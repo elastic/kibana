@@ -19,9 +19,9 @@ import { VisParams, visType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
 export interface MetricArguments {
-  metric: ExpressionValueVisDimension;
-  secondaryMetric?: ExpressionValueVisDimension;
-  breakdownBy?: ExpressionValueVisDimension;
+  metric: ExpressionValueVisDimension | string;
+  secondaryMetric?: ExpressionValueVisDimension | string;
+  breakdownBy?: ExpressionValueVisDimension | string;
   progressMin?: number;
   progressMax?: number;
   progressDirection?: LayoutDirection;

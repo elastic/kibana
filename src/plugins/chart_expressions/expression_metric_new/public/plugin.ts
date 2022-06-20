@@ -13,6 +13,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { metricVisFunction } from '../common';
 import { setFormatService, setPaletteService } from './services';
 import { getMetricVisRenderer } from './expression_renderers';
+import { setThemeService } from './services/theme_service';
 
 /** @internal */
 export interface ExpressionMetricPluginSetup {
@@ -28,6 +29,8 @@ export interface ExpressionMetricPluginStart {
 /** @internal */
 export class ExpressionMetricPlugin implements Plugin<void, void> {
   public setup(core: CoreSetup, { expressions, charts }: ExpressionMetricPluginSetup) {
+    setThemeService(charts.theme);
+
     expressions.registerFunction(metricVisFunction);
     expressions.registerRenderer(getMetricVisRenderer(core.theme));
     charts.palettes.getPalettes().then((palettes) => {

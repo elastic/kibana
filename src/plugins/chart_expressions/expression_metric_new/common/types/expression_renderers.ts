@@ -8,6 +8,7 @@
 
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { LayoutDirection } from '@elastic/charts';
 
 export const visType = 'metric';
 
@@ -19,6 +20,9 @@ export interface DimensionsVisParam {
 
 export interface MetricVisParam {
   palette?: CustomPaletteState;
+  progressMin: number;
+  progressMax: number;
+  progressDirection: LayoutDirection;
 }
 
 export interface VisParams {
