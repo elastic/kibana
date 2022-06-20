@@ -6,12 +6,10 @@
  */
 import * as t from 'io-ts';
 import { Logger } from '@kbn/core/server';
-import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
 import { getClientMetrics } from './get_client_metrics';
 import { getLongTaskMetrics } from './get_long_task_metrics';
 import { getVisitorBreakdown } from './get_visitor_breakdown';
-import { hasRumData } from './has_rum_data';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
 import { APMRouteHandlerResources } from '../typings';
@@ -142,31 +140,6 @@ const rumLongTaskMetrics = createApmServerRoute({
   },
 });
 
-const rumHasDataRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/observability_overview/has_rum_data',
-  params: t.partial({
-    query: t.partial({
-      uiFilters: t.string,
-      start: isoToEpochRt,
-      end: isoToEpochRt,
-    }),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    indices: string;
-    hasData: boolean;
-    serviceName: string | number | undefined;
-  }> => {
-    const setup = await setupUXRequest(resources);
-    const {
-      query: { start, end },
-    } = resources.params;
-    return await hasRumData({ setup, start, end });
-  },
-});
-
 function decodeUiFilters(
   logger: Logger,
   uiFiltersEncoded?: string
@@ -200,5 +173,4 @@ export const rumRouteRepository = {
   ...rumClientMetricsRoute,
   ...rumVisitorsBreakdownRoute,
   ...rumLongTaskMetrics,
-  ...rumHasDataRoute,
 };
