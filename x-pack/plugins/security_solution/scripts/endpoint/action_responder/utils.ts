@@ -59,8 +59,8 @@ export const sendFleetActionResponse = async (
     },
   });
 
-  // 30% of the time we generate an error
-  if (state === 'failure' || (!state && fleetActionGenerator.randomFloat() < 0.3)) {
+  // 20% of the time we generate an error
+  if (state === 'failure' || (!state && fleetActionGenerator.randomFloat() < 0.2)) {
     fleetResponse.action_response = {};
     fleetResponse.error = 'Agent failed to deliver message to endpoint due to unknown error';
   } else {
@@ -99,8 +99,8 @@ export const sendEndpointActionResponse = async (
     },
   });
 
-  // 30% of the time we generate an error
-  if (state === 'failure' || (state !== 'success' && endpointActionGenerator.randomFloat() < 0.3)) {
+  // 20% of the time we generate an error
+  if (state === 'failure' || (state !== 'success' && endpointActionGenerator.randomFloat() < 0.2)) {
     endpointResponse.error = {
       message: 'Endpoint encountered an error and was unable to apply action to host',
     };
