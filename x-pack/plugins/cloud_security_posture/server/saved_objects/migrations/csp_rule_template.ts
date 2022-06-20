@@ -15,7 +15,7 @@ import {
   CspRuleTemplateTypeV840,
 } from '../../../common/schemas/csp_rule_template';
 
-function migrateCSPRuleMetadata(
+function migrateCspRuleMetadata(
   doc: SavedObjectUnsanitizedDoc<CspRuleTemplateTypeV830>,
   context: SavedObjectMigrationContext
 ): SavedObjectUnsanitizedDoc<CspRuleTemplateTypeV840> {
@@ -31,5 +31,5 @@ function migrateCSPRuleMetadata(
 }
 
 export const cspRuleTemplateMigrations: SavedObjectMigrationMap = {
-  '8.4.0': migrateCSPRuleMetadata,
+  '8.4.0': migrateCspRuleMetadata,
 };

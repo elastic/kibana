@@ -12,7 +12,7 @@ import {
 } from '@kbn/core/server';
 import { CspRuleTypeV830, CspRuleTypeV840 } from '../../../common/schemas/csp_rule';
 
-function migrateCSPRuleMetadata(
+function migrateCspRuleMetadata(
   doc: SavedObjectUnsanitizedDoc<CspRuleTypeV830>,
   context: SavedObjectMigrationContext
 ): SavedObjectUnsanitizedDoc<CspRuleTypeV840> {
@@ -31,5 +31,5 @@ function migrateCSPRuleMetadata(
 }
 
 export const cspRuleMigrations: SavedObjectMigrationMap = {
-  '8.4.0': migrateCSPRuleMetadata,
+  '8.4.0': migrateCspRuleMetadata,
 };
