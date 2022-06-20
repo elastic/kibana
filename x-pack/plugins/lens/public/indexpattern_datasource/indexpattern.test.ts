@@ -495,7 +495,7 @@ describe('IndexPattern Data Source', () => {
                   "{\\"col-0-0\\":[{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"}],\\"col-1-1\\":[{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}]}",
                 ],
               },
-              "function": "lens_map_to_original_columns",
+              "function": "lens_map_to_columns",
               "type": "function",
             },
           ],

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { renameColumns } from './rename_columns';
+import { mapToColumns } from './map_to_columns';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 
-describe('rename_columns', () => {
+describe('map_to_columns', () => {
   it('should rename columns of a given datatable', async () => {
     const input: Datatable = {
       type: 'datatable',
@@ -40,7 +40,7 @@ describe('rename_columns', () => {
       ],
     };
 
-    const result = await renameColumns.fn(
+    const result = await mapToColumns.fn(
       input,
       { idMap: JSON.stringify(idMap) },
       createMockExecutionContext()
@@ -106,7 +106,7 @@ describe('rename_columns', () => {
       b: [{ id: 'c', label: 'Catamaran' }],
     };
 
-    const result = await renameColumns.fn(
+    const result = await mapToColumns.fn(
       input,
       { idMap: JSON.stringify(idMap) },
       createMockExecutionContext()
@@ -167,7 +167,7 @@ describe('rename_columns', () => {
       ],
     };
 
-    const result = await renameColumns.fn(
+    const result = await mapToColumns.fn(
       input,
       { idMap: JSON.stringify(idMap) },
       createMockExecutionContext()
@@ -233,7 +233,7 @@ describe('rename_columns', () => {
       b: [{ id: 'c', label: 'Apple', operationType: 'date_histogram', sourceField: 'banana' }],
     };
 
-    const result = await renameColumns.fn(
+    const result = await mapToColumns.fn(
       input,
       { idMap: JSON.stringify(idMap) },
       createMockExecutionContext()

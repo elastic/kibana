@@ -362,7 +362,7 @@ function getExpressionForLayer(
         }).toAst(),
         {
           type: 'function',
-          function: 'lens_map_to_original_columns',
+          function: 'lens_map_to_columns',
           arguments: {
             idMap: [JSON.stringify(updatedEsAggsIdMap)],
           },
