@@ -127,6 +127,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
                 stackAlerts: ['all'],
                 discover: ['all'],
                 advancedSettings: ['all'],
+                indexPatterns: ['all'],
               },
               spaces: ['*'],
             },

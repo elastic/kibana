@@ -111,7 +111,7 @@ export const getAlertUtils = (
       defaultMessage: 'Data View has changed',
     });
     const warnDescription = i18n.translate('discover.viewAlert.dataViewChangedWarnDescription', {
-      defaultMessage: `The data view has been updated after the last update of the alert rule.`,
+      defaultMessage: `Data view has been updated after the last update of the alert rule.`,
     });
 
     toastNotifications.addWarning({
