@@ -62,7 +62,7 @@ describe('registerSessionRoutes', () => {
 
     await getHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.getSession).toHaveBeenCalledWith(id);
+    expect(mockContext.search!.getSession).toHaveBeenCalledWith(id, /* checkStatus */ true);
   });
 
   it('find calls findSession with options', async () => {

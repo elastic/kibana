@@ -73,7 +73,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
       const { id } = request.params;
       try {
         const searchContext = await context.search;
-        const response = await searchContext!.getSession(id, true);
+        const response = await searchContext!.getSession(id, /* checkStatus */ true);
 
         return res.ok({
           body: response,
