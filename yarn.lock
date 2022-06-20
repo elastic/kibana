@@ -3027,6 +3027,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-analytics-server-internal@link:bazel-bin/packages/core/analytics/core-analytics-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-analytics-server-mocks@link:bazel-bin/packages/core/analytics/core-analytics-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-analytics-server@link:bazel-bin/packages/core/analytics/core-analytics-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal":
   version "0.0.0"
   uid ""
@@ -6395,6 +6407,18 @@
   uid ""
 
 "@types/kbn__core-analytics-browser@link:bazel-bin/packages/core/analytics/core-analytics-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-analytics-server-internal@link:bazel-bin/packages/core/analytics/core-analytics-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-analytics-server-mocks@link:bazel-bin/packages/core/analytics/core-analytics-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-analytics-server@link:bazel-bin/packages/core/analytics/core-analytics-server/npm_module_types":
   version "0.0.0"
   uid ""
 
