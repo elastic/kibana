@@ -68,7 +68,6 @@ export type GetAgentsOptions =
   | {
       kuery: string;
       showInactive?: boolean;
-      withoutManaged?: boolean;
     };
 
 export async function getAgents(esClient: ElasticsearchClient, options: GetAgentsOptions) {
