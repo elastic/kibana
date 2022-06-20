@@ -38,7 +38,7 @@ journey('DataViewPermissions', async ({ page, params }) => {
     await page.goto(`${baseUrl}?${queryParams}`, {
       waitUntil: 'networkidle',
     });
-    await login.loginToKibana('obs_read_user', 'changeme');
+    await login.loginToKibana('viewer_user', 'changeme');
   });
 
   step('Click explore data button', async () => {

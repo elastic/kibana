@@ -5,66 +5,95 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { HttpSetup } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { HttpSetup, IToasts } from '@kbn/core/public';
 import { AdditionalEmailServices } from '@kbn/actions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { EmailConfig } from '../types';
 import { getServiceConfig } from './api';
 
-export function useEmailConfig(
-  http: HttpSetup,
-  currentService: string | undefined,
-  editActionConfig: (property: string, value: unknown) => void
-) {
-  const [emailServiceConfigurable, setEmailServiceConfigurable] = useState<boolean>(false);
-  const [emailService, setEmailService] = useState<string | undefined>(undefined);
+interface Props {
+  http: HttpSetup;
+  toasts: IToasts;
+}
+
+interface UseEmailConfigReturnValue {
+  isLoading: boolean;
+  getEmailServiceConfig: (
+    service: string
+  ) => Promise<Partial<Pick<EmailConfig, 'host' | 'port' | 'secure'>> | undefined>;
+}
+
+const getConfig = (
+  service: string,
+  config: Partial<Pick<EmailConfig, 'host' | 'port' | 'secure'>>
+): Pick<EmailConfig, 'host' | 'port' | 'secure'> | undefined => {
+  if (service) {
+    if (service === AdditionalEmailServices.EXCHANGE) {
+      return;
+    }
+
+    return {
+      host: config?.host ? config.host : '',
+      port: config?.port ? config.port : 0,
+      secure: null != config?.secure ? config.secure : false,
+    };
+  }
+};
+
+export function useEmailConfig({ http, toasts }: Props): UseEmailConfigReturnValue {
+  const [isLoading, setIsLoading] = useState(false);
+  const abortCtrlRef = useRef(new AbortController());
+  const isMounted = useRef(false);
 
   const getEmailServiceConfig = useCallback(
-    async (service: string) => {
-      let serviceConfig: Partial<Pick<EmailConfig, 'host' | 'port' | 'secure'>>;
-      try {
-        serviceConfig = await getServiceConfig({ http, service });
-        setEmailServiceConfigurable(isEmpty(serviceConfig));
-      } catch (err) {
-        serviceConfig = {};
-        setEmailServiceConfigurable(true);
+    async (service: string | null) => {
+      if (service == null || isEmpty(service)) {
+        return;
       }
 
-      return serviceConfig;
+      setIsLoading(true);
+      isMounted.current = true;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
+
+      try {
+        const serviceConfig = await getServiceConfig({ http, service });
+        if (isMounted.current) {
+          setIsLoading(false);
+        }
+
+        return getConfig(service, serviceConfig);
+      } catch (error) {
+        if (isMounted.current) {
+          setIsLoading(false);
+
+          if (error.name !== 'AbortError') {
+            toasts.addDanger(
+              error.body?.message ??
+                i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.updateErrorNotificationText',
+                  { defaultMessage: 'Cannot get service configuration' }
+                )
+            );
+          }
+        }
+      }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [editActionConfig]
+    [http, toasts]
   );
 
   useEffect(() => {
-    (async () => {
-      if (emailService) {
-        editActionConfig('service', emailService);
-        if (emailService === AdditionalEmailServices.EXCHANGE) {
-          return;
-        }
-        const serviceConfig = await getEmailServiceConfig(emailService);
-
-        editActionConfig('host', serviceConfig?.host ? serviceConfig.host : '');
-        editActionConfig('port', serviceConfig?.port ? serviceConfig.port : 0);
-        editActionConfig('secure', null != serviceConfig?.secure ? serviceConfig.secure : false);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [emailService]);
-
-  useEffect(() => {
-    (async () => {
-      if (currentService) {
-        await getEmailServiceConfig(currentService);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentService]);
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+      abortCtrlRef.current.abort();
+    };
+  }, []);
 
   return {
-    emailServiceConfigurable,
-    setEmailService,
+    isLoading,
+    getEmailServiceConfig,
   };
 }
