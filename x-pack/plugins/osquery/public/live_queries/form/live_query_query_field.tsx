@@ -22,7 +22,6 @@ interface LiveQueryQueryFieldProps {
   field: FieldHook<string>;
   commands?: EuiCodeEditorProps['commands'];
   onChange?: (value: string) => void;
-  onChange?: (value: string) => void;
 }
 
 const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
