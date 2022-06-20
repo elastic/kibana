@@ -209,7 +209,6 @@ export enum RegistryStreamKeys {
   enabled = 'enabled',
   vars = 'vars',
   template_path = 'template_path',
-  data_stream = 'data_stream',
 }
 
 export interface RegistryStream {
@@ -219,7 +218,6 @@ export interface RegistryStream {
   [RegistryStreamKeys.enabled]?: boolean;
   [RegistryStreamKeys.vars]?: RegistryVarsEntry[];
   [RegistryStreamKeys.template_path]: string;
-  [RegistryStreamKeys.data_stream]?: RegistryDataStream;
 }
 
 export type RequirementVersion = string;

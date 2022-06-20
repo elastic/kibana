@@ -14,7 +14,7 @@ export const getPipelineNameForDatastream = ({
   dataStream,
   packageVersion,
 }: {
-  dataStream: RegistryDataStream;
+  dataStream: { dataset: string; type: string };
   packageVersion: string;
 }): string => {
   return `${dataStream.type}-${dataStream.dataset}-${packageVersion}`;

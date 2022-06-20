@@ -23,7 +23,7 @@ import { getPipelineNameForDatastream } from '../../../../../../../../../common'
 interface Props {
   packagePolicyId?: string;
   packageInfo: PackageInfo;
-  packageInputStream: RegistryStream;
+  packageInputStream: RegistryStream & { data_stream: { dataset: string; type: string } };
 }
 
 export const DatastreamMappings: React.FunctionComponent<Props> = ({

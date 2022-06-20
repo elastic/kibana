@@ -37,7 +37,7 @@ const FlexItemWithMaxWidth = styled(EuiFlexItem)`
 `;
 
 export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
-  packageInputStream: RegistryStream;
+  packageInputStream: RegistryStream & { data_stream: { dataset: string; type: string } };
   packageInfo: PackageInfo;
   packagePolicyInputStream: NewPackagePolicyInputStream;
   updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
