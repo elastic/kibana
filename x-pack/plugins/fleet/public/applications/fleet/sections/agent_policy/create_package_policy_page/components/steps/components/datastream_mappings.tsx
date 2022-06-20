@@ -48,7 +48,7 @@ export const DatastreamMappings: React.FunctionComponent<Props> = ({
           <h5>
             <FormattedMessage
               id="xpack.fleet.packagePolicyEditor.datastreamMappings.title"
-              defaultMessage={'Mappings'}
+              defaultMessage="Mappings"
             />
           </h5>
         </EuiTitle>
@@ -57,9 +57,7 @@ export const DatastreamMappings: React.FunctionComponent<Props> = ({
         <EuiText color="subdued" size="xs">
           <FormattedMessage
             id="xpack.fleet.packagePolicyEditor.datastreamMappings.description"
-            defaultMessage={
-              'Mapping is the process of defining how a document, and the fields it contains, are stored and indexed. If you are adding new fields through custom ingest pipeline, we recommend addition of a mapping for those in the component template. {learnMoreLink}'
-            }
+            defaultMessage="Mapping is the process of defining how a document, and the fields it contains, are stored and indexed. If you are adding new fields through custom ingest pipeline, we recommend addition of a mapping for those in the component template. {learnMoreLink}"
             values={{
               learnMoreLink: (
                 <EuiLink href="#TODO" external={true}>
@@ -102,7 +100,7 @@ export const DatastreamMappings: React.FunctionComponent<Props> = ({
         <EuiButtonEmpty size="xs" flush="left" iconType="plusInCircle">
           <FormattedMessage
             id="xpack.fleet.packagePolicyEditor.datastreamMappings.addCustomButn"
-            defaultMessage={'Add custom mappings'}
+            defaultMessage="Add custom mappings"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>

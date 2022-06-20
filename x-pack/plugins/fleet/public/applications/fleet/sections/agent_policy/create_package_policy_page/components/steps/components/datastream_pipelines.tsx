@@ -48,7 +48,7 @@ export const DatastreamPipeline: React.FunctionComponent<Props> = ({
           <h5>
             <FormattedMessage
               id="xpack.fleet.createPackagePolicy.datastreamIngestPipelinesTitle"
-              defaultMessage={'Ingest pipelines'}
+              defaultMessage="Ingest pipelines"
             />
           </h5>
         </EuiTitle>
@@ -57,9 +57,7 @@ export const DatastreamPipeline: React.FunctionComponent<Props> = ({
         <EuiText color="subdued" size="xs">
           <FormattedMessage
             id="xpack.fleet.createPackagePolicy.datastreamIngestPipelinesLabel"
-            defaultMessage={
-              'Ingest pipelines perform common transformations on the ingested data. We recommend modifying only the custom ingest pipeline. These pipelines are shared between integration policies of the same integration type. Hence, any modifications tot he ingest pipelines would affect all the integration policies. {learnMoreLink}'
-            }
+            defaultMessage="Ingest pipelines perform common transformations on the ingested data. We recommend modifying only the custom ingest pipeline. These pipelines are shared between integration policies of the same integration type. Hence, any modifications tot he ingest pipelines would affect all the integration policies. {learnMoreLink}"
             values={{
               learnMoreLink: (
                 <EuiLink href="#TODO" external={true}>
@@ -102,7 +100,7 @@ export const DatastreamPipeline: React.FunctionComponent<Props> = ({
         <EuiButtonEmpty size="xs" flush="left" iconType="plusInCircle">
           <FormattedMessage
             id="xpack.fleet.packagePolicyEdotpr.datastreamIngestPipelines.addCustomButn"
-            defaultMessage={'Add custom pipeline'}
+            defaultMessage="Add custom pipeline"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
