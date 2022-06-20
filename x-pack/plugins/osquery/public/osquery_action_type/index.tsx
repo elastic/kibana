@@ -14,18 +14,12 @@ import { OsqueryActionParams } from './osquery_connector_form';
 export const getActionType = (): ActionTypeModel => ({
   id: '.osquery',
   iconClass: 'logoOsquery',
-  selectMessage: i18n.translate(
-    'xpack.triggersActionsUI.components.builtinActionTypes.exampleAction.selectMessageText',
-    {
-      defaultMessage: 'Example Action is used to show how to create new action type UI.',
-    }
-  ),
-  actionTypeTitle: i18n.translate(
-    'xpack.triggersActionsUI.components.builtinActionTypes.exampleAction.actionTypeTitle',
-    {
-      defaultMessage: 'Example Action',
-    }
-  ),
+  selectMessage: i18n.translate('xpack.osquery.connector.selectActionText', {
+    defaultMessage: 'Example Action is used to show how to create new action type UI.',
+  }),
+  actionTypeTitle: i18n.translate('xpack.osquery.connector.actionTypeTitle', {
+    defaultMessage: 'Example Action',
+  }),
   // @ts-expect-error update types
   validateParams: (actionParams: OsqueryActionParams): ValidationResult => {
     const validationResult = { errors: {} };
@@ -36,12 +30,9 @@ export const getActionType = (): ActionTypeModel => ({
 
     if (actionParams.message && !actionParams.message.query) {
       errors.message.push(
-        i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredExampleMessageText',
-          {
-            defaultMessage: 'Query is required.',
-          }
-        )
+        i18n.translate('xpack.osquery.connector.requiredQuery', {
+          defaultMessage: 'Query is required.',
+        })
       );
     }
 

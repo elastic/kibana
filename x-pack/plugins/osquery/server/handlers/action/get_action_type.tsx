@@ -22,18 +22,12 @@ export const getOsqueryActionType = (osqueryContext: OsqueryAppContext) => ({
   name: 'Osquery',
   minimumLicenseRequired: 'gold' as const,
   iconClass: 'logoOsquery',
-  selectMessage: i18n.translate(
-    'xpack.triggersActionsUI.components.builtinActionTypes.exampleAction.selectMessageText',
-    {
-      defaultMessage: 'Example Action is used to show how to create new action type UI.',
-    }
-  ),
-  actionTypeTitle: i18n.translate(
-    'xpack.triggersActionsUI.components.builtinActionTypes.exampleAction.actionTypeTitle',
-    {
-      defaultMessage: 'Example Action',
-    }
-  ),
+  selectMessage: i18n.translate('xpack.osquery.connector.selectActionText', {
+    defaultMessage: 'Example Action is used to show how to create new action type UI.',
+  }),
+  actionTypeTitle: i18n.translate('xpack.osquery.connector.actionTypeTitle', {
+    defaultMessage: 'Example Action',
+  }),
   executor: curry(executor)({
     osqueryContext,
   }),
