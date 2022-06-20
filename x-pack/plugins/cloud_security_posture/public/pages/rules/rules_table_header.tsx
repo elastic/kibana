@@ -20,6 +20,7 @@ import moment from 'moment';
 import * as TEST_SUBJECTS from './test_subjects';
 import * as TEXT from './translations';
 import { RulesBulkActionsMenu } from './rules_bulk_actions_menu';
+import { CspUiCapabilities } from '../../common/hooks/use_ui_capabilities';
 
 interface RulesTableToolbarProps {
   search(value: string): void;
@@ -33,6 +34,7 @@ interface RulesTableToolbarProps {
   searchValue: string;
   isSearching: boolean;
   lastModified: string | null;
+  canUpdate: CspUiCapabilities['canUpdate'];
 }
 
 interface CounterProps {
@@ -65,6 +67,7 @@ export const RulesTableHeader = ({
   searchValue,
   isSearching,
   lastModified,
+  canUpdate,
 }: RulesTableToolbarProps) => (
   <div>
     {lastModified && <LastModificationLabel lastModified={lastModified} />}
@@ -77,6 +80,7 @@ export const RulesTableHeader = ({
         select={selectAll}
       />
       <BulkMenu
+        canUpdate={canUpdate}
         bulkEnable={bulkEnable}
         bulkDisable={bulkDisable}
         selectedRulesCount={selectedRulesCount}
@@ -113,20 +117,24 @@ const BulkMenu = ({
   bulkEnable,
   bulkDisable,
   selectedRulesCount,
-}: Pick<RulesTableToolbarProps, 'bulkDisable' | 'bulkEnable' | 'selectedRulesCount'>) => (
+  canUpdate,
+}: Pick<
+  RulesTableToolbarProps,
+  'bulkDisable' | 'bulkEnable' | 'selectedRulesCount' | 'canUpdate'
+>) => (
   <EuiFlexItem grow={false}>
     <RulesBulkActionsMenu
       items={[
         {
           icon: 'eye',
-          disabled: !selectedRulesCount,
+          disabled: !selectedRulesCount || !canUpdate,
           children: <ActivateRulesMenuItemText count={selectedRulesCount} />,
           'data-test-subj': TEST_SUBJECTS.CSP_RULES_TABLE_BULK_ENABLE_BUTTON,
           onClick: bulkEnable,
         },
         {
           icon: 'eyeClosed',
-          disabled: !selectedRulesCount,
+          disabled: !selectedRulesCount || !canUpdate,
           children: <DeactivateRulesMenuItemText count={selectedRulesCount} />,
           'data-test-subj': TEST_SUBJECTS.CSP_RULES_TABLE_BULK_DISABLE_BUTTON,
           onClick: bulkDisable,

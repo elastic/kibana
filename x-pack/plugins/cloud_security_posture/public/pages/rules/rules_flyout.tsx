@@ -23,11 +23,13 @@ import { getRemediationList } from '../findings/findings_flyout/overview_tab';
 import type { RuleSavedObject } from './use_csp_rules';
 import * as TEXT from './translations';
 import * as TEST_SUBJECTS from './test_subjects';
+import type { CspUiCapabilities } from '../../common/hooks/use_ui_capabilities';
 
 interface RuleFlyoutProps {
   onClose(): void;
   toggleRule(rule: RuleSavedObject): void;
   rule: RuleSavedObject;
+  canUpdate: CspUiCapabilities['canUpdate'];
 }
 
 const tabs = [
@@ -37,7 +39,7 @@ const tabs = [
 
 type RuleTab = typeof tabs[number]['id'];
 
-export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
+export const RuleFlyout = ({ onClose, rule, toggleRule, canUpdate }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
 
   return (
@@ -65,7 +67,9 @@ export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {tab === 'overview' && <RuleOverviewTab rule={rule} toggleRule={() => toggleRule(rule)} />}
+        {tab === 'overview' && (
+          <RuleOverviewTab rule={rule} toggleRule={() => toggleRule(rule)} canUpdate={canUpdate} />
+        )}
         {tab === 'remediation' && (
           <EuiDescriptionList compressed={false} listItems={getRemediationList(rule.attributes)} />
         )}
@@ -74,11 +78,20 @@ export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
   );
 };
 
-const RuleOverviewTab = ({ rule, toggleRule }: { rule: RuleSavedObject; toggleRule(): void }) => (
+const RuleOverviewTab = ({
+  rule,
+  toggleRule,
+  canUpdate,
+}: {
+  rule: RuleSavedObject;
+  toggleRule(): void;
+  canUpdate: RuleFlyoutProps['canUpdate'];
+}) => (
   <EuiFlexGroup direction="column">
     <EuiFlexItem>
       <span>
         <EuiSwitch
+          disabled={!canUpdate}
           label={TEXT.ACTIVATED}
           checked={rule.attributes.enabled}
           onChange={toggleRule}
