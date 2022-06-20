@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { AnalyticsService } from './analytics_service';
+export type { AnalyticsServicePreboot } from './analytics_service';
