@@ -287,27 +287,27 @@ function endDataLoad(
       throw new DataRequestAbortError();
     }
 
-    if (dataId === SOURCE_DATA_REQUEST_ID) {
-      const features = data && 'features' in data ? (data as FeatureCollection).features : [];
-      const layer = getLayerById(layerId, getState());
+    const features = data && 'features' in data ? (data as FeatureCollection).features : [];
+    const layer = getLayerById(layerId, getState());
 
-      const eventHandlers = getEventHandlers(getState());
-      if (eventHandlers && eventHandlers.onDataLoadEnd) {
-        const resultMeta: ResultMeta = {};
-        if (layer && layer.getType() === LAYER_TYPE.GEOJSON_VECTOR) {
-          const featuresWithoutCentroids = features.filter((feature) => {
-            return feature.properties ? !feature.properties[KBN_IS_CENTROID_FEATURE] : true;
-          });
-          resultMeta.featuresCount = featuresWithoutCentroids.length;
-        }
-
-        eventHandlers.onDataLoadEnd({
-          layerId,
-          dataId,
-          resultMeta,
+    const eventHandlers = getEventHandlers(getState());
+    if (eventHandlers && eventHandlers.onDataLoadEnd) {
+      const resultMeta: ResultMeta = {};
+      if (layer && layer.getType() === LAYER_TYPE.GEOJSON_VECTOR) {
+        const featuresWithoutCentroids = features.filter((feature) => {
+          return feature.properties ? !feature.properties[KBN_IS_CENTROID_FEATURE] : true;
         });
+        resultMeta.featuresCount = featuresWithoutCentroids.length;
       }
 
+      eventHandlers.onDataLoadEnd({
+        layerId,
+        dataId,
+        resultMeta,
+      });
+    }
+
+    if (dataId === SOURCE_DATA_REQUEST_ID) {
       if (layer) {
         dispatch(updateTooltipStateForLayer(layer, features));
       }
