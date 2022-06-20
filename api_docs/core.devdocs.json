@@ -7525,7 +7525,7 @@
         "tags": [],
         "label": "AnalyticsServiceSetup",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the setup phase.\n{@link AnalyticsClient}"
+          "\r\nExposes the public APIs of the AnalyticsClient during the setup phase.\r\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -7546,7 +7546,7 @@
           "ContextProviderOpts",
           "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
         ],
-        "path": "src/core/public/analytics/analytics_service.ts",
+        "path": "node_modules/@types/kbn__core-analytics-browser/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7557,7 +7557,7 @@
         "tags": [],
         "label": "AnalyticsServiceStart",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the start phase\n{@link AnalyticsClient}"
+          "\r\nExposes the public APIs of the AnalyticsClient during the start phase\r\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -7568,7 +7568,7 @@
           "TelemetryCounter",
           ">; }"
         ],
-        "path": "src/core/public/analytics/analytics_service.ts",
+        "path": "node_modules/@types/kbn__core-analytics-browser/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7948,11 +7948,11 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: ",
+          "{ metric?: { type: string; name: string; } | undefined; type?: ",
           "UiSettingsType",
           " | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
-          " | undefined; metric?: { type: string; name: string; } | undefined; }"
+          " | undefined; }"
         ],
         "path": "src/core/types/ui_settings.ts",
         "deprecated": false,
@@ -24607,7 +24607,7 @@
         "label": "EcsEventKind",
         "description": [],
         "signature": [
-          "\"alert\" | \"state\" | \"metric\" | \"event\" | \"signal\" | \"pipeline_error\""
+          "\"metric\" | \"alert\" | \"state\" | \"event\" | \"signal\" | \"pipeline_error\""
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -26986,11 +26986,11 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: ",
+          "{ metric?: { type: string; name: string; } | undefined; type?: ",
           "UiSettingsType",
           " | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
-          " | undefined; metric?: { type: string; name: string; } | undefined; }"
+          " | undefined; }"
         ],
         "path": "src/core/types/ui_settings.ts",
         "deprecated": false,
