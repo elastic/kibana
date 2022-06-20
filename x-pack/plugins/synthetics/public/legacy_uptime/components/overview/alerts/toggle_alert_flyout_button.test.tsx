@@ -29,15 +29,16 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
     });
 
     it("does not contain a tooltip explaining why the user can't create alerts", async () => {
-      const { getByText, findByText } = render(
+      const { getByText, queryByText } = render(
         <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
         { core: makeUptimePermissionsCore({ save: true }) }
       );
       userEvent.click(getByText('Alerts and rules'));
       userEvent.hover(getByText(ToggleFlyoutTranslations.openAlertContextPanelLabel));
-      await expect(() =>
-        findByText('You need read-write access to Uptime to create alerts in this app.')
-      ).rejects.toEqual(expect.anything());
+      await new Promise((r) => setTimeout(r, 250)); // wait for the default time for tooltips to show up
+      await expect(
+        queryByText('You need read-write access to Uptime to create alerts in this app.')
+      ).not.toBeInTheDocument();
     });
   });
 
