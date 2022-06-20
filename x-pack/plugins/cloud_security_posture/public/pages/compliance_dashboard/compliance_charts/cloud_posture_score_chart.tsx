@@ -57,8 +57,8 @@ const ScoreChart = ({
           {
             partition: {
               linkLabel: { maximumSection: Infinity, maxCount: 0 },
-              outerSizeRatio: 0.9,
-              emptySizeRatio: 0.75,
+              outerSizeRatio: 0.75,
+              emptySizeRatio: 0.7,
             },
           },
           // theme
