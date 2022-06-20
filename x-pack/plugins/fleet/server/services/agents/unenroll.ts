@@ -20,6 +20,7 @@ import {
   getAgentPolicyForAgent,
   bulkUpdateAgents,
 } from './crud';
+import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
 async function unenrollAgentIsAllowed(
   soClient: SavedObjectsClientContract,
@@ -71,7 +72,7 @@ export async function unenrollAgents(
   }
 ): Promise<{ items: BulkActionResult[] }> {
   // start with all agents specified
-  const givenAgents = await getAgents(esClient, soClient, { ...options, withoutManaged: true });
+  const givenAgents = await getAgents(esClient, options);
 
   // Filter to those not already unenrolled, or unenrolling
   const agentsEnrolled = givenAgents.filter((agent) => {
@@ -81,26 +82,24 @@ export async function unenrollAgents(
     return !agent.unenrollment_started_at && !agent.unenrolled_at;
   });
 
-  // And which are allowed to unenroll
-  const agentResults = Promise.allSettled(
-    agentsEnrolled.map((agent) =>
-      unenrollAgentIsAllowed(soClient, esClient, agent.id).then((_) => agent)
-    )
-  );
+  const hostedPolicies = await getHostedPolicies(soClient, agentsEnrolled);
 
   const outgoingErrors: Record<Agent['id'], Error> = {};
-  const agentsToUpdate =
-    options.force || 'kuery' in options // no need to filter with kuery, managed already excluded
-      ? agentsEnrolled
-      : (await agentResults).reduce<Agent[]>((agents, result, index) => {
-          if (result.status === 'fulfilled') {
-            agents.push(result.value);
-          } else {
-            const id = givenAgents[index].id;
-            outgoingErrors[id] = result.reason;
-          }
-          return agents;
-        }, []);
+
+  // And which are allowed to unenroll
+  const agentsToUpdate = options.force
+    ? agentsEnrolled
+    : agentsEnrolled.reduce<Agent[]>((agents, agent, index) => {
+        if (isHostedAgent(hostedPolicies, agent)) {
+          const id = givenAgents[index].id;
+          outgoingErrors[id] = new HostedAgentPolicyRestrictionRelatedError(
+            `Cannot unenroll ${agent.id} from a hosted agent policy ${agent.policy_id}`
+          );
+        } else {
+          agents.push(agent);
+        }
+        return agents;
+      }, []);
 
   const now = new Date().toISOString();
   if (options.revoke) {

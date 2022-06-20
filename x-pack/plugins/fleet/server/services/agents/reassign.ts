@@ -22,6 +22,7 @@ import {
 import type { GetAgentsOptions } from '.';
 import { createAgentAction } from './actions';
 import { searchHitToAgent } from './helpers';
+import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
@@ -106,10 +107,12 @@ export async function reassignAgents(
       }
     }
   } else if ('kuery' in options) {
-    givenAgents = await getAgents(esClient, soClient, { ...options, withoutManaged: true });
+    givenAgents = await getAgents(esClient, options);
   }
   const givenOrder =
     'agentIds' in options ? options.agentIds : givenAgents.map((agent) => agent.id);
+
+  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
 
   // which are allowed to unenroll
   const agentResults = await Promise.allSettled(
@@ -118,10 +121,12 @@ export async function reassignAgents(
         throw new AgentReassignmentError(`${agent.id} is already assigned to ${newAgentPolicyId}`);
       }
 
-      // by kuery already filtered out managed agents
-      if (!('kuery' in options)) {
-        await reassignAgentIsAllowed(soClient, esClient, agent.id, newAgentPolicyId);
+      if (isHostedAgent(hostedPolicies, agent)) {
+        throw new HostedAgentPolicyRestrictionRelatedError(
+          `Cannot reassign an agent from hosted agent policy ${agent.policy_id}`
+        );
       }
+
       return agent;
     })
   );

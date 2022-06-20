@@ -656,7 +656,7 @@ class AgentPolicyService {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
 
-    const { total } = await getAgentsByKuery(esClient, soClient, {
+    const { total } = await getAgentsByKuery(esClient, {
       showInactive: false,
       perPage: 0,
       page: 1,

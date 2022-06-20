@@ -315,11 +315,10 @@ export class FleetPlugin
         const plugin = this;
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client;
-        const soClient = coreContext.savedObjects.client;
 
         return {
           get agentClient() {
-            const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
+            const agentService = plugin.setupAgentService(esClient.asInternalUser);
 
             return {
               asCurrentUser: agentService.asScoped(request),
@@ -451,7 +450,7 @@ export class FleetPlugin
       fleetSetupCompleted: () => fleetSetupPromise,
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: this.setupPackageService(core.elasticsearch.client.asInternalUser, soClient),
-      agentService: this.setupAgentService(core.elasticsearch.client.asInternalUser, soClient),
+      agentService: this.setupAgentService(core.elasticsearch.client.asInternalUser),
       agentPolicyService: {
         get: agentPolicyService.get,
         list: agentPolicyService.list,
@@ -475,15 +474,12 @@ export class FleetPlugin
     this.fleetStatus$.complete();
   }
 
-  private setupAgentService(
-    internalEsClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract
-  ): AgentService {
+  private setupAgentService(internalEsClient: ElasticsearchClient): AgentService {
     if (this.agentService) {
       return this.agentService;
     }
 
-    this.agentService = new AgentServiceImpl(internalEsClient, soClient);
+    this.agentService = new AgentServiceImpl(internalEsClient);
     return this.agentService;
   }
 

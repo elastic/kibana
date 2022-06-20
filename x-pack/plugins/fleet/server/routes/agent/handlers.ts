@@ -120,20 +120,15 @@ export const getAgentsHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const soClient = coreContext.savedObjects.client;
 
   try {
-    const { agents, total, page, perPage } = await AgentService.getAgentsByKuery(
-      esClient,
-      soClient,
-      {
-        page: request.query.page,
-        perPage: request.query.perPage,
-        showInactive: request.query.showInactive,
-        showUpgradeable: request.query.showUpgradeable,
-        kuery: request.query.kuery,
-      }
-    );
+    const { agents, total, page, perPage } = await AgentService.getAgentsByKuery(esClient, {
+      page: request.query.page,
+      perPage: request.query.perPage,
+      showInactive: request.query.showInactive,
+      showUpgradeable: request.query.showUpgradeable,
+      kuery: request.query.kuery,
+    });
     const totalInactive = request.query.showInactive
       ? await AgentService.countInactiveAgents(esClient, {
           kuery: request.query.kuery,
@@ -224,11 +219,9 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const soClient = coreContext.savedObjects.client;
   try {
     const results = await AgentService.getAgentStatusForAgentPolicy(
       esClient,
-      soClient,
       request.query.policyId,
       request.query.kuery
     );

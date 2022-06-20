@@ -16,7 +16,7 @@ import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '
 import { appContextService, agentPolicyService } from '..';
 import type { FleetServerAgent } from '../../../common';
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
-import { AGENTS_PREFIX, AGENTS_INDEX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
+import { AGENTS_PREFIX, AGENTS_INDEX } from '../../constants';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
 
@@ -24,8 +24,6 @@ import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './help
 
 const ACTIVE_AGENT_CONDITION = 'active:true';
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
-const MANAGED_AGENT_CONDITION = 'policy_id:{policyIds}';
-const UNMANAGED_AGENT_CONDITION = `NOT (${MANAGED_AGENT_CONDITION})`;
 
 function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode | undefined {
   try {
@@ -73,20 +71,15 @@ export type GetAgentsOptions =
       withoutManaged?: boolean;
     };
 
-export async function getAgents(
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract,
-  options: GetAgentsOptions
-) {
+export async function getAgents(esClient: ElasticsearchClient, options: GetAgentsOptions) {
   let agents: Agent[] = [];
   if ('agentIds' in options) {
     agents = await getAgentsById(esClient, options.agentIds);
   } else if ('kuery' in options) {
     agents = (
-      await getAllAgentsByKuery(esClient, soClient, {
+      await getAllAgentsByKuery(esClient, {
         kuery: options.kuery,
         showInactive: options.showInactive ?? false,
-        withoutManaged: options.withoutManaged,
       })
     ).agents;
   } else {
@@ -100,10 +93,8 @@ export async function getAgents(
 
 export async function getAgentsByKuery(
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
-    withoutManaged?: boolean;
   }
 ): Promise<{
   agents: Agent[];
@@ -119,7 +110,6 @@ export async function getAgentsByKuery(
     kuery,
     showInactive = false,
     showUpgradeable,
-    withoutManaged = false,
   } = options;
   const filters = [];
 
@@ -129,17 +119,6 @@ export async function getAgentsByKuery(
 
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
-  }
-
-  if (withoutManaged === true) {
-    const managedPolicies = await agentPolicyService.list(soClient, {
-      perPage: 1000,
-      kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
-    });
-    if (managedPolicies.items.length > 0) {
-      const managedPolicyIds = managedPolicies.items.map((pol) => pol.id).join(' ');
-      filters.push(UNMANAGED_AGENT_CONDITION.replace('{policyIds}', managedPolicyIds));
-    }
   }
 
   const kueryNode = _joinFilters(filters);
@@ -192,16 +171,14 @@ export async function getAgentsByKuery(
 
 export async function getAllAgentsByKuery(
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract,
   options: Omit<ListWithKuery, 'page' | 'perPage'> & {
     showInactive: boolean;
-    withoutManaged?: boolean;
   }
 ): Promise<{
   agents: Agent[];
   total: number;
 }> {
-  const res = await getAgentsByKuery(esClient, soClient, {
+  const res = await getAgentsByKuery(esClient, {
     ...options,
     page: 1,
     perPage: SO_SEARCH_LIMIT,

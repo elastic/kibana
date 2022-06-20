@@ -65,7 +65,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     await pMap(
       items,
       (agentPolicy: GetAgentPoliciesResponseItem) =>
-        getAgentsByKuery(esClient, soClient, {
+        getAgentsByKuery(esClient, {
           showInactive: false,
           perPage: 0,
           page: 1,
