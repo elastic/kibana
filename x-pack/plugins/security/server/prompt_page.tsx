@@ -55,19 +55,24 @@ export function PromptPage({
     `${basePath.serverBasePath}/ui/legacy_light_theme.css`,
   ];
 
-  const emotionCache = createCache({
+  const globalCache = createCache({
     key: 'eui',
-    container: document.querySelector(`meta[name="eui-styles"]`) as HTMLElement,
+    container: document.querySelector(`meta[name="eui-global"]`) as HTMLElement,
+  });
+  const emotionCache = createCache({
+    key: 'css',
+    container: document.querySelector(`meta[name="emotion"]`) as HTMLElement,
   });
 
   return (
     <html lang={i18n.getLocale()}>
       <head>
         <title>Elastic</title>
-        <meta name="eui-styles" />
+        <meta name="eui-global" />
         {styleSheetPaths.map((path) => (
           <link href={path} rel="stylesheet" key={path} />
         ))}
+        <meta name="emotion" />
         <Fonts url={uiPublicURL} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
         <link rel="alternate icon" type="image/png" href={`${uiPublicURL}/favicons/favicon.png`} />
@@ -80,7 +85,7 @@ export function PromptPage({
       </head>
       <body>
         <I18nProvider>
-          <EuiProvider colorMode="light" cache={{ eui: emotionCache }}>
+          <EuiProvider colorMode="light" cache={{ default: emotionCache, global: globalCache }}>
             <EuiPage paddingSize="none" style={{ minHeight: '100vh' }} data-test-subj="promptPage">
               <EuiPageBody>
                 <EuiPageContent verticalPosition="center" horizontalPosition="center">

@@ -25,9 +25,13 @@ const defaultTheme: CoreTheme = {
   darkMode: false,
 };
 
-const emotionCache = createCache({
+const globalCache = createCache({
   key: 'eui',
   container: document.querySelector(`meta[name="eui-styles"]`) as HTMLElement,
+});
+const emotionCache = createCache({
+  key: 'css',
+  container: document.querySelector(`meta[name="emotion"]`) as HTMLElement,
 });
 
 /**
@@ -39,7 +43,7 @@ export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, chil
   return (
     <EuiProvider
       colorMode={colorMode}
-      cache={{ eui: emotionCache }}
+      cache={{ default: emotionCache, global: globalCache }}
       globalStyles={false}
       utilityClasses={false}
     >
