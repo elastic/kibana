@@ -5,112 +5,93 @@
  * 2.0.
  */
 
+import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { HttpSetup } from '@kbn/core/public';
 import { useEmailConfig } from './use_email_config';
 
-const http = {
-  get: jest.fn(),
-};
-
-const editActionConfig = jest.fn();
+const http = httpServiceMock.createStartContract();
+const toasts = notificationServiceMock.createStartContract().toasts;
 
 const renderUseEmailConfigHook = (currentService?: string) =>
-  renderHook(() => useEmailConfig(http as unknown as HttpSetup, currentService, editActionConfig));
+  renderHook(() => useEmailConfig({ http, toasts }));
 
 describe('useEmailConfig', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('should call get email config API when service changes and handle result', async () => {
+  it('should return the correct result when requesting the config of a service', async () => {
     http.get.mockResolvedValueOnce({
       host: 'smtp.gmail.com',
       port: 465,
       secure: true,
     });
-    const { result, waitForNextUpdate } = renderUseEmailConfigHook();
+
+    const { result } = renderUseEmailConfigHook();
     await act(async () => {
-      result.current.setEmailService('gmail');
-      await waitForNextUpdate();
+      const res = await result.current.getEmailServiceConfig('gmail');
+      expect(http.get).toHaveBeenCalledWith('/internal/actions/connector/_email_config/gmail');
+      expect(res).toEqual({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+      });
     });
-
-    expect(http.get).toHaveBeenCalledWith('/internal/actions/connector/_email_config/gmail');
-    expect(editActionConfig).toHaveBeenCalledWith('service', 'gmail');
-
-    expect(editActionConfig).toHaveBeenCalledWith('host', 'smtp.gmail.com');
-    expect(editActionConfig).toHaveBeenCalledWith('port', 465);
-    expect(editActionConfig).toHaveBeenCalledWith('secure', true);
-
-    expect(result.current.emailServiceConfigurable).toEqual(false);
   });
 
-  it('should call get email config API when service changes and handle partial result', async () => {
+  it('should return the correct result when requesting the config of a service on partial result', async () => {
     http.get.mockResolvedValueOnce({
       host: 'smtp.gmail.com',
       port: 465,
     });
-    const { result, waitForNextUpdate } = renderUseEmailConfigHook();
+
+    const { result } = renderUseEmailConfigHook();
     await act(async () => {
-      result.current.setEmailService('gmail');
-      await waitForNextUpdate();
+      const res = await result.current.getEmailServiceConfig('gmail');
+      expect(http.get).toHaveBeenCalledWith('/internal/actions/connector/_email_config/gmail');
+      expect(res).toEqual({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: false,
+      });
     });
-
-    expect(http.get).toHaveBeenCalledWith('/internal/actions/connector/_email_config/gmail');
-    expect(editActionConfig).toHaveBeenCalledWith('service', 'gmail');
-
-    expect(editActionConfig).toHaveBeenCalledWith('host', 'smtp.gmail.com');
-    expect(editActionConfig).toHaveBeenCalledWith('port', 465);
-    expect(editActionConfig).toHaveBeenCalledWith('secure', false);
-
-    expect(result.current.emailServiceConfigurable).toEqual(false);
   });
 
-  it('should call get email config API when service changes and handle empty result', async () => {
+  it('should return the correct result when requesting the config of a service on empty result', async () => {
     http.get.mockResolvedValueOnce({});
-    const { result, waitForNextUpdate } = renderUseEmailConfigHook();
+    const { result } = renderUseEmailConfigHook();
+
     await act(async () => {
-      result.current.setEmailService('foo');
-      await waitForNextUpdate();
+      const res = await result.current.getEmailServiceConfig('foo');
+      expect(http.get).toHaveBeenCalledWith('/internal/actions/connector/_email_config/foo');
+      expect(res).toEqual({
+        host: '',
+        port: 0,
+        secure: false,
+      });
     });
-
-    expect(http.get).toHaveBeenCalledWith('/internal/actions/connector/_email_config/foo');
-    expect(editActionConfig).toHaveBeenCalledWith('service', 'foo');
-
-    expect(editActionConfig).toHaveBeenCalledWith('host', '');
-    expect(editActionConfig).toHaveBeenCalledWith('port', 0);
-    expect(editActionConfig).toHaveBeenCalledWith('secure', false);
-
-    expect(result.current.emailServiceConfigurable).toEqual(true);
   });
 
-  it('should call get email config API when service changes and handle errors', async () => {
+  it('should show a danger toaster on error', async () => {
     http.get.mockImplementationOnce(() => {
       throw new Error('no!');
     });
+
     const { result, waitForNextUpdate } = renderUseEmailConfigHook();
+
     await act(async () => {
-      result.current.setEmailService('foo');
+      result.current.getEmailServiceConfig('foo');
       await waitForNextUpdate();
+      expect(toasts.addDanger).toHaveBeenCalled();
     });
-
-    expect(http.get).toHaveBeenCalledWith('/internal/actions/connector/_email_config/foo');
-    expect(editActionConfig).toHaveBeenCalledWith('service', 'foo');
-
-    expect(editActionConfig).toHaveBeenCalledWith('host', '');
-    expect(editActionConfig).toHaveBeenCalledWith('port', 0);
-    expect(editActionConfig).toHaveBeenCalledWith('secure', false);
-
-    expect(result.current.emailServiceConfigurable).toEqual(true);
   });
 
-  it('should call get email config API when initial service value is passed and determine if config is editable without overwriting config', async () => {
+  it('should not make an API call if the service is empty', async () => {
     http.get.mockResolvedValueOnce({
       host: 'smtp.gmail.com',
       port: 465,
       secure: true,
     });
-    const { result } = renderUseEmailConfigHook('gmail');
-    expect(http.get).toHaveBeenCalledWith('/internal/actions/connector/_email_config/gmail');
-    expect(editActionConfig).not.toHaveBeenCalled();
-    expect(result.current.emailServiceConfigurable).toEqual(false);
+
+    renderUseEmailConfigHook('');
+    expect(http.get).not.toHaveBeenCalled();
   });
 });
