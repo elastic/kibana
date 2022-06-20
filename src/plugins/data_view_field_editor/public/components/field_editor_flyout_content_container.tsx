@@ -158,6 +158,17 @@ export const FieldEditorFlyoutContentContainer = ({
           dataView.deleteFieldFormat(updatedField.name);
         }
 
+        if (!dataView.isPersisted()) {
+          const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
+            defaultMessage: "Saved '{fieldName}'",
+            values: { fieldName: updatedField.name },
+          });
+          notifications.toasts.addSuccess(message);
+          setIsSaving(false);
+          onSave(editedField);
+          return;
+        }
+
         await dataViews.updateSavedObject(dataView).then(() => {
           const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
             defaultMessage: "Saved '{fieldName}'",

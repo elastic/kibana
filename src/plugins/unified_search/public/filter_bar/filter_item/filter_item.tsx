@@ -78,7 +78,7 @@ export function FilterItem(props: FilterItemProps) {
   useEffect(() => {
     const index = props.filter.meta.index;
     let isSubscribed = true;
-    if (index) {
+    if (index && !index.startsWith('local')) {
       getIndexPatterns()
         .get(index)
         .then((indexPattern) => {

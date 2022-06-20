@@ -409,4 +409,16 @@ describe('IndexPattern', () => {
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
     });
   });
+
+  describe('isPersisted', () => {
+    test('returns true if id does not start with "local"', () => {
+      indexPattern.id = '1234';
+      expect(indexPattern.isPersisted()).toEqual(true);
+    });
+
+    test('returns false if id starts with "local"', () => {
+      indexPattern.id = 'local-1234';
+      expect(indexPattern.isPersisted()).toEqual(false);
+    });
+  });
 });
