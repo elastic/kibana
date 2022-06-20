@@ -20,8 +20,10 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-
 import { useMutation, useQuery } from 'react-query';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getEuiIconType } from '../../../../../services/icons';
 
@@ -63,7 +65,10 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
     if (response.error) {
       notifications.toasts.addError(response.error, {
-        title: `Error uninstalling ${integration.title}`,
+        title: i18n.translate('xpack.fleet.debug.integrationDebugger.uninstall.error', {
+          defaultMessage: 'Error uninstalling {integrationTitle}',
+          values: { integrationTitle: integration.title },
+        }),
         toastMessage: response.error.message,
       });
 
@@ -71,7 +76,12 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
       throw new Error(response.error.message);
     }
 
-    notifications.toasts.addSuccess(`Successfully uninstalled ${integration.title}`);
+    notifications.toasts.addSuccess(
+      i18n.translate('xpack.fleet.debug.integrationDebugger.uninstall.success', {
+        defaultMessage: 'Successfully uninstalled {integrationTitle}',
+        values: { integrationTitle: integration.title },
+      })
+    );
 
     setSelectedIntegrationId(undefined);
     setIsUninstallModalVisible(false);
@@ -86,7 +96,10 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
     if (uninstallResponse.error) {
       notifications.toasts.addError(uninstallResponse.error, {
-        title: `Error reinstalling ${integration.title}`,
+        title: i18n.translate('xpack.fleet.debug.integrationDebugger.reinstall.error', {
+          defaultMessage: 'Error reinstalling {integrationTitle}',
+          values: { integrationTitle: integration.title },
+        }),
         toastMessage: uninstallResponse.error.message,
       });
 
@@ -98,7 +111,10 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
     if (installResponse.error) {
       notifications.toasts.addError(installResponse.error, {
-        title: `Error reinstalling ${integration.title}`,
+        title: i18n.translate('xpack.fleet.debug.integrationDebugger.reinstall.error', {
+          defaultMessage: 'Error reinstalling {integrationTitle}',
+          values: { integrationTitle: integration.title },
+        }),
         toastMessage: installResponse.error.message,
       });
 
@@ -106,7 +122,12 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
       throw new Error(installResponse.error.message);
     }
 
-    notifications.toasts.addSuccess(`Successfully reinstalled ${integration.title}`);
+    notifications.toasts.addSuccess(
+      i18n.translate('xpack.fleet.debug.integrationDebugger.reinstall.success', {
+        defaultMessage: 'Successfully reinstalled {integrationTitle}',
+        values: { integrationTitle: integration.title },
+      })
+    );
 
     setSelectedIntegrationId(undefined);
     setIsReinstallModalVisible(false);
@@ -119,7 +140,10 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
   if (integrations.status === 'error') {
     return (
       <EuiCallOut title="Error" color="danger">
-        Error fetching installed Integrations
+        <FormattedMessage
+          id="xpack.fleet.debug.integrationDebugger.fetchError"
+          defaultMessage="Error fetching installed Integrations"
+        />
       </EuiCallOut>
     );
   }
@@ -142,11 +166,18 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
   return (
     <>
       <EuiText grow={false}>
-        <p>Use this tool to uninstall or reinstall installed integrations.</p>
         <p>
-          Reinstalling an integration will uninstall and then immediately install it again. This can
-          be useful in restoring broken or malformed integration installations when a user hasn{"'"}
-          t done much customization.
+          <FormattedMessage
+            id="xpack.fleet.debug.integrationDebugger.description"
+            defaultMessage="Use this tool to uninstall or reinstall installed integrations."
+          />
+        </p>
+
+        <p>
+          <FormattedMessage
+            id="xpack.fleet.debug.integrationDebugger.reinstallationDescription"
+            defaultMessage="Reinstalling an integration will uninstall and then immediately install it again. This can be useful in restoring broken or malformed integration installations when a user hasn't done much customization."
+          />
         </p>
       </EuiText>
 
@@ -160,8 +191,12 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
           `}
         >
           <EuiComboBox
-            aria-label="Select an Integration"
-            placeholder="Select an Integration"
+            aria-label={i18n.translate('xpack.fleet.debug.integrationDebugger.selectLabel', {
+              defaultMessage: 'Select an Integration',
+            })}
+            placeholder={i18n.translate('xpack.fleet.debug.integrationDebugger.selectLabel', {
+              defaultMessage: 'Select an Integration',
+            })}
             fullWidth
             options={comboBoxOptions}
             singleSelection={{ asPlainText: true }}
@@ -212,10 +247,20 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
                 onCancel={() => setIsReinstallModalVisible(false)}
                 onConfirm={() => reinstallMutation.mutate(selectedIntegration)}
                 isLoading={reinstallMutation.isLoading}
-                cancelButtonText="Cancel"
-                confirmButtonText="Reinstall"
+                cancelButtonText={i18n.translate(
+                  'xpack.fleet.debug.integrationDebugger.cancelReinstall',
+                  { defaultMessage: 'Cancel' }
+                )}
+                confirmButtonText={i18n.translate(
+                  'xpack.fleet.debug.integrationDebugger.confirmReinstall',
+                  { defaultMessage: 'Reinstall' }
+                )}
               >
-                Are you sure you want to reinstall {selectedIntegration.title}?
+                <FormattedMessage
+                  id="xpack.fleet.debug.integrationDebugger.reinstallModal"
+                  defaultMessage="Are you sure you want to reinstall {integrationTitle}?"
+                  values={{ integrationTitle: selectedIntegration.title }}
+                />
               </EuiConfirmModal>
             )}
 
@@ -225,10 +270,20 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
                 onCancel={() => setIsUninstallModalVisible(false)}
                 onConfirm={() => uninstallMutation.mutate(selectedIntegration)}
                 isLoading={uninstallMutation.isLoading}
-                cancelButtonText="Cancel"
-                confirmButtonText="Uninstall"
+                cancelButtonText={i18n.translate(
+                  'xpack.fleet.debug.integrationDebugger.cancelUninstall',
+                  { defaultMessage: 'Cancel' }
+                )}
+                confirmButtonText={i18n.translate(
+                  'xpack.fleet.debug.integrationDebugger.confirmUninstall',
+                  { defaultMessage: 'Uninstall' }
+                )}
               >
-                Are you sure you want to uninstall {selectedIntegration.title}?
+                <FormattedMessage
+                  id="xpack.fleet.debug.integrationDebugger.uninstallModal"
+                  defaultMessage="Are you sure you want to uninstall {integrationTitle}?"
+                  values={{ integrationTitle: selectedIntegration.title }}
+                />
               </EuiConfirmModal>
             )}
           </EuiFlexGroup>
@@ -247,7 +302,10 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
               }),
             })}
           >
-            View integration settings in Integrations UI
+            <FormattedMessage
+              id="xpack.fleet.debug.integrationDebugger.viewIntegrationLink"
+              defaultMessage="View integration settings in Integrations UI"
+            />
           </EuiLink>
         </>
       )}

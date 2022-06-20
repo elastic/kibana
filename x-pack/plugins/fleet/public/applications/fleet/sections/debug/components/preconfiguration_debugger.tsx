@@ -17,8 +17,10 @@ import {
   EuiLink,
   EuiConfirmModal,
 } from '@elastic/eui';
-
 import { useMutation, useQuery } from 'react-query';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   sendGetAgentPolicies,
@@ -76,13 +78,19 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
 
     if (response.error) {
       notifications.toasts.addError(response.error, {
-        title: `Error resetting policy`,
+        title: i18n.translate('xpack.fleet.debug.preconfigurationDebugger.resetError', {
+          defaultMessage: 'Error resetting policy',
+        }),
         toastMessage: response.error.message,
       });
       throw new Error(response.error.message);
     }
 
-    notifications.toasts.addSuccess('Successfully reset policy');
+    notifications.toasts.addSuccess(
+      i18n.translate('xpack.fleet.debug.preconfigurationDebugger.resetSuccess', {
+        defaultMessage: 'Successfully reset policy',
+      })
+    );
     queryClient.invalidateQueries('debug-preconfigured-policies');
     setSelectedPolicyId(undefined);
     setIsResetModalVisible(false);
@@ -95,13 +103,19 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
 
     if (response.error) {
       notifications.toasts.addError(response.error, {
-        title: `Error resetting policies`,
+        title: i18n.translate('xpack.fleet.debug.preconfigurationDebugger.resetAllError', {
+          defaultMessage: 'Error resetting policies',
+        }),
         toastMessage: response.error.message,
       });
       throw new Error(response.error.message);
     }
 
-    notifications.toasts.addSuccess('Successfully reset all policies');
+    notifications.toasts.addSuccess(
+      i18n.translate('xpack.fleet.debug.preconfigurationDebugger.resetAllSuccess', {
+        defaultMessage: 'Successfully reset policies',
+      })
+    );
     queryClient.invalidateQueries('debug-preconfigured-policies');
     setSelectedPolicyId(undefined);
     setIsResetAllModalVisible(false);
@@ -113,14 +127,18 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
     <>
       <EuiText grow={false}>
         <p>
-          This tool can be used to reset {'"preconfigured"'} policies that are managed via{' '}
-          <EuiCode>kibana.yml</EuiCode>. This includes {"Fleet's"} default policies that may exist
-          in cloud environments.
+          <FormattedMessage
+            id="xpack.fleet.debug.preconfigurationDebugger.description"
+            defaultMessage="This tool can be used to reset preconfigured policies that are managed via {codeKibanaYml}. This includes Fleet's default policies that may existin cloud environments."
+            values={{ codeKibanaYml: <EuiCode>kibana.yml</EuiCode> }}
+          />
         </p>
 
         <p>
-          You may reset a single preconfigured policy or use the {'"Reset all"'} button to reset all
-          preconfigured policies at once.
+          <FormattedMessage
+            id="xpack.fleet.debug.preconfigurationDebugger.resetInstructions"
+            defaultMessage='You may reset a single preconfigured policy or use the "Reset all" button to reset all preconfigured policies at once.'
+          />
         </p>
       </EuiText>
 
@@ -134,8 +152,12 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
           `}
         >
           <EuiComboBox
-            aria-label="Select a preconfigured policy"
-            placeholder="Select a preconfigured policy"
+            aria-label={i18n.translate('xpack.fleet.debug.preconfigurationDebugger.selectLabel', {
+              defaultMessage: 'Select a preconfigured policy',
+            })}
+            placeholder={i18n.translate('xpack.fleet.debug.preconfigurationDebugger.selectLabel', {
+              defaultMessage: 'Select a preconfigured policy',
+            })}
             fullWidth
             options={comboBoxOptions}
             singleSelection={{ asPlainText: true }}
@@ -157,7 +179,10 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
               isDisabled={!selectedPolicyId}
               onClick={() => setIsResetModalVisible(true)}
             >
-              Reset
+              <FormattedMessage
+                id="xpack.fleet.debug.preconfigurationDebugger.resetButton"
+                defaultMessage="Reset"
+              />
             </EuiButton>
           </div>
         </EuiFlexItem>
@@ -169,7 +194,10 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
               isDisabled={!preconfiguredPolicies.data?.length}
               onClick={() => setIsResetAllModalVisible(true)}
             >
-              Reset all
+              <FormattedMessage
+                id="xpack.fleet.debug.preconfigurationDebugger.resetAllButton"
+                defaultMessage="Reset all"
+              />
             </EuiButton>
           </div>
         </EuiFlexItem>
@@ -177,27 +205,51 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
 
       {isResetModalVisible && selectedPolicy && selectedPolicyId && (
         <EuiConfirmModal
-          title={`Reset ${selectedPolicy.name}`}
+          title={i18n.translate('xpack.fleet.debug.preconfigurationDebugger.resetModalTitle', {
+            defaultMessage: 'Reset {policyName}',
+            values: { policyName: selectedPolicy.name },
+          })}
           onCancel={() => setIsResetModalVisible(false)}
           onConfirm={() => resetOnePolicyMutation.mutate(selectedPolicyId)}
           isLoading={resetOnePolicyMutation.isLoading}
-          cancelButtonText="Cancel"
-          confirmButtonText="Reset"
+          cancelButtonText={i18n.translate(
+            'xpack.fleet.debug.preconfigurationDebugger.resetModalCancel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.fleet.debug.preconfigurationDebugger.resetModalConfirm',
+            { defaultMessage: 'Reset' }
+          )}
         >
-          Are you sure you want to reset {selectedPolicy.name}?
+          <FormattedMessage
+            id="xpack.fleet.debug.preconfigurationDebugger.resetModalBody"
+            defaultMessage="Are you sure you want to reset {policyName}?"
+            values={{ policyName: selectedPolicy.name }}
+          />
         </EuiConfirmModal>
       )}
 
       {isResetAllModalVisible && (
         <EuiConfirmModal
-          title={`Reset all preconfigured policies`}
+          title={i18n.translate('xpack.fleet.debug.preconfigurationDebugger.resetAllModalTitle', {
+            defaultMessage: 'Reset all preconfigured policies',
+          })}
           onCancel={() => setIsResetAllModalVisible(false)}
           onConfirm={() => resetAllPoliciesMutation.mutate()}
           isLoading={resetAllPoliciesMutation.isLoading}
-          cancelButtonText="Cancel"
-          confirmButtonText="Reset all"
+          cancelButtonText={i18n.translate(
+            'xpack.fleet.debug.preconfigurationDebugger.resetAllModalCancel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.fleet.debug.preconfigurationDebugger.resetAllModalConfirm',
+            { defaultMessage: 'Reset all' }
+          )}
         >
-          Are you sure you want to reset all preconfigured policies?
+          <FormattedMessage
+            id="xpack.fleet.debug.preconfigurationDebugger.resetAllModalBody"
+            defaultMessage="Are you sure you want to reset all preconfigured policies?"
+          />
         </EuiConfirmModal>
       )}
 
@@ -205,7 +257,10 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
         <>
           <EuiSpacer size="m" />
           <EuiLink target="_blank" href={getHref('policy_details', { policyId: selectedPolicyId })}>
-            View Agent Policy in Fleet UI
+            <FormattedMessage
+              id="xpack.fleet.debug.preconfigurationDebugger.viewAgentPolicyLink"
+              defaultMessage="View Agent Policy in Fleet UI"
+            />
           </EuiLink>
 
           <EuiSpacer size="m" />

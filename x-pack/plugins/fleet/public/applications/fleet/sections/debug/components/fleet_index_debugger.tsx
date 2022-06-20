@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
   EuiCallOut,
   EuiComboBox,
@@ -14,8 +15,10 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 import { useQuery } from 'react-query';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { sendRequest } from '../../../hooks';
 
@@ -57,8 +60,10 @@ export const FleetIndexDebugger = () => {
     <>
       <EuiText grow={false}>
         <p>
-          Search for the contents of Fleet indices. Use the code block below to diagnose any
-          potential issues.
+          <FormattedMessage
+            id="xpack.fleet.debug.fleetIndexDebugger.description"
+            defaultMessage="Search for the contents of Fleet indices. Use the code block below to diagnose any potential issues. "
+          />
         </p>
       </EuiText>
 
@@ -68,8 +73,12 @@ export const FleetIndexDebugger = () => {
           <EuiFormRow>
             <EuiComboBox
               prepend="Index"
-              aria-label="Select an index"
-              placeholder="Select an index"
+              aria-label={i18n.translate('xpack.fleet.debug.fleetIndexDebugger.selectLabel', {
+                defaultMessage: 'Select an index',
+              })}
+              placeholder={i18n.translate('xpack.fleet.debug.fleetIndexDebugger.selectLabel', {
+                defaultMessage: 'Select an index',
+              })}
               fullWidth
               options={indices}
               singleSelection={{ asPlainText: true }}
@@ -90,7 +99,12 @@ export const FleetIndexDebugger = () => {
         <>
           <EuiSpacer size="m" />
           <EuiCallOut title="Error" color="danger">
-            {(indexResult?.error as any)?.error?.reason ?? 'Error fetching index data'}
+            {(indexResult?.error as any)?.error?.reason ?? (
+              <FormattedMessage
+                id="xpack.fleet.debug.fleetIndexDebugger.fetchError"
+                defaultMessage="Error fetching index data"
+              />
+            )}
           </EuiCallOut>
         </>
       )}

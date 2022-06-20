@@ -15,8 +15,10 @@ import {
   EuiButton,
   EuiConfirmModal,
 } from '@elastic/eui';
-
 import { useMutation, useQuery } from 'react-query';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   sendGetOrphanedIntegrationPolicies,
@@ -67,13 +69,19 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
 
     if (response.error) {
       notifications.toasts.addError(response.error, {
-        title: `Error deleting policy`,
+        title: i18n.translate('xpack.fleet.debug.orphanedIntegrationPolicyDebugger.deleteError', {
+          defaultMessage: 'Error deleting policy',
+        }),
         toastMessage: response.error.message,
       });
       throw new Error(response.error.message);
     }
 
-    notifications.toasts.addSuccess('Successfully deleted orphaned policy');
+    notifications.toasts.addSuccess(
+      i18n.translate('xpack.fleet.debug.orphanedIntegrationPolicyDebugger.deleteSuccess', {
+        defaultMessage: 'Successfully deleted orphaned policy',
+      })
+    );
     queryClient.invalidateQueries('debug-orphaned-policies');
     setSelectedPolicyId(undefined);
     setIsDeleteModalVisible(false);
@@ -88,13 +96,20 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
 
     if (response.error) {
       notifications.toasts.addError(response.error, {
-        title: `Error deleting orphaned policies`,
+        title: i18n.translate(
+          'xpack.fleet.debug.orphanedIntegrationPolicyDebugger.deleteAllError',
+          { defaultMessage: 'Error deleting orphaned policies' }
+        ),
         toastMessage: response.error.message,
       });
       throw new Error(response.error.message);
     }
 
-    notifications.toasts.addSuccess('Successfully deleted all orphaned policies');
+    notifications.toasts.addSuccess(
+      i18n.translate('xpack.fleet.debug.orphanedIntegrationPolicyDebugger.deleteAllSuccess', {
+        defaultMessage: 'Successfully deleted all orphaned policies',
+      })
+    );
     queryClient.invalidateQueries('debug-orphaned-policies');
     setSelectedPolicyId(undefined);
     setIsDeleteAllModalVisible(false);
@@ -106,13 +121,17 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
     <>
       <EuiText grow={false}>
         <p>
-          This tool can be used to delete {'"orphaned"'} integration policies that have been
-          unlinked from their parent agent policy objects.
+          <FormattedMessage
+            id="xpack.fleet.debug.orphanedIntegrationPolicyDebugger.description"
+            defaultMessage='This tool can be used to delete "orphaned" integration policies that have been unlinked from their parent agent policy objects'
+          />
         </p>
 
         <p>
-          You may delete a single orphaned integration policy or use the {'"Delete all"'} button to
-          delete all orphaned integration policies at once.
+          <FormattedMessage
+            id="xpack.fleet.debug.orphanedIntegrationPolicyDebugger.deleteOptions"
+            defaultMessage='You may delete a single orphaned integration policy or use the "Delete all" button to delete all orphaned integration policies at once.'
+          />
         </p>
       </EuiText>
 
@@ -126,8 +145,14 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
           `}
         >
           <EuiComboBox
-            aria-label="Select an orphaned integration policy"
-            placeholder="Select an orphaned integration policy"
+            aria-label={i18n.translate(
+              'xpack.fleet.debug.orphanedIntegrationPolicyDebugger.selectLabel',
+              { defaultMessage: 'Select an orphaned integration policy' }
+            )}
+            placeholder={i18n.translate(
+              'xpack.fleet.debug.orphanedIntegrationPolicyDebugger.selectLabel',
+              { defaultMessage: 'Select an orphaned integration policy' }
+            )}
             fullWidth
             options={comboBoxOptions}
             singleSelection={{ asPlainText: true }}
@@ -149,7 +174,10 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
               isDisabled={!selectedPolicyId}
               onClick={() => setIsDeleteModalVisible(true)}
             >
-              Delete
+              <FormattedMessage
+                id="xpack.fleet.debug.orphanedIntegrationPolicyDebugger.deleteButton"
+                defaultMessage="Delete"
+              />
             </EuiButton>
           </div>
         </EuiFlexItem>
@@ -161,7 +189,10 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
               isDisabled={!orphanedPolicies?.length}
               onClick={() => setIsDeleteAllModalVisible(true)}
             >
-              Delete all
+              <FormattedMessage
+                id="xpack.fleet.debug.orphanedIntegrationPolicyDebugger.deleteAllButton"
+                defaultMessage="Delete all"
+              />
             </EuiButton>
           </div>
         </EuiFlexItem>
@@ -169,27 +200,52 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
 
       {isDeleteModalVisible && selectedPolicy && selectedPolicyId && (
         <EuiConfirmModal
-          title={`Delete ${selectedPolicy.name}`}
+          title={i18n.translate(
+            'xpack.fleet.debug.orphanedIntegrationPolicyDebugger.deleteModalTitle',
+            { defaultMessage: 'Delete {policyName}', values: { policyName: selectedPolicy.name } }
+          )}
           onCancel={() => setIsDeleteModalVisible(false)}
           onConfirm={() => deleteOnePolicyMutation.mutate(selectedPolicyId)}
           isLoading={deleteOnePolicyMutation.isLoading}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete"
+          cancelButtonText={i18n.translate(
+            'xpack.fleet.debug.orphanedIntegrationPolicyDebugger.cancelDelete',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.fleet.debug.orphanedIntegrationPolicyDebugger.confirmDelete',
+            { defaultMessage: 'Delete' }
+          )}
         >
-          Are you sure you want to delete {selectedPolicy.name}?
+          <FormattedMessage
+            id="xpack.fleet.debug.orphanedIntegrationPolicyDebugger.deleteModalBody"
+            defaultMessage="Are you sure you want to delete {policyName}?"
+            values={{ policyName: selectedPolicy.name }}
+          />
         </EuiConfirmModal>
       )}
 
       {isDeleteAllModalVisible && (
         <EuiConfirmModal
-          title={`Delete all orphaned integration policies`}
+          title={i18n.translate(
+            'xpack.fleet.debug.orphanedIntegrationPolicyDebugger.deleteAllModalTitle',
+            { defaultMessage: 'Delete all orphaned integration policies' }
+          )}
           onCancel={() => setIsDeleteAllModalVisible(false)}
           onConfirm={() => deleteAllPoliciesMutation.mutate()}
           isLoading={deleteAllPoliciesMutation.isLoading}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete all"
+          cancelButtonText={i18n.translate(
+            'xpack.fleet.debug.orphanedIntegrationPolicyDebugger.cancelDeleteAll',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.fleet.debug.orphanedIntegrationPolicyDebugger.confirmDeleteAll',
+            { defaultMessage: 'Delete all' }
+          )}
         >
-          Are you sure you want to delete all orphaned integration policies?
+          <FormattedMessage
+            id="xpack.fleet.debug.orphanedIntegrationPolicyDebugger.deleteAllModalBody"
+            defaultMessage="Are you sure you want to delete all orphaned integration policies?"
+          />
         </EuiConfirmModal>
       )}
 

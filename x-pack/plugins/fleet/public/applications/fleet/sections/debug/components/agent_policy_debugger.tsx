@@ -16,10 +16,10 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-
 import { useQuery } from 'react-query';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { sendGetAgentPolicies, useLink } from '../../../hooks';
 import { SO_SEARCH_LIMIT } from '../../../constants';
@@ -74,7 +74,10 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
   if (status === 'error') {
     return (
       <EuiCallOut title="Error" color="danger">
-        Error fetching Agent Policies
+        <FormattedMessage
+          id="xpack.fleet.debug.agentPolicyDebugger.fetchError"
+          defaultMessage="Error fetching Agent Policies"
+        />
       </EuiCallOut>
     );
   }
@@ -83,8 +86,11 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
     <>
       <EuiText grow={false}>
         <p>
-          Search for an Agent Policy using its name or <EuiCode>id</EuiCode> value. Use the code
-          block below to diagnose any potential issues with the policy{"'"}s configuration.
+          <FormattedMessage
+            id="xpack.fleet.debug.agentPolicyDebugger.description"
+            defaultMessage="Search for an Agent Policy using its name or {codeId} value. Use the code block below to diagnose any potential issues with the policy's configuration."
+            values={{ codeId: <EuiCode>id</EuiCode> }}
+          />
         </p>
       </EuiText>
 
@@ -98,8 +104,12 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
           `}
         >
           <EuiComboBox
-            aria-label="Select an Agent Policy"
-            placeholder="Select an Agent Policy"
+            aria-label={i18n.translate('xpack.fleet.debug.agentPolicyDebugger.selectLabel', {
+              defaultMessage: 'Select an Agent Policy',
+            })}
+            placeholder={i18n.translate('xpack.fleet.debug.agentPolicyDebugger.selectLabel', {
+              defaultMessage: 'Select an Agent Policy',
+            })}
             fullWidth
             options={comboBoxOptions}
             singleSelection={{ asPlainText: true }}
@@ -115,6 +125,7 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
             }}
           />
         </EuiFlexItem>
+
         {selectedPolicyId && (
           <AgentPolicyDeleteProvider
             hasFleetServer={policyHasFleetServer(selectedAgentPolicy as AgentPolicy)}
@@ -145,7 +156,10 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
           <EuiSpacer size="m" />
 
           <EuiLink target="_blank" href={getHref('policy_details', { policyId: selectedPolicyId })}>
-            View Agent Policy in Fleet UI
+            <FormattedMessage
+              id="xpack.fleet.debug.agentPolicyDebugger.viewAgentPolicyLink"
+              defaultMessage="View Agent Policy in Fleet UI"
+            />
           </EuiLink>
 
           <EuiSpacer size="m" />

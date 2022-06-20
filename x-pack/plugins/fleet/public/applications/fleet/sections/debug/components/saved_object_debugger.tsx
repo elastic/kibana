@@ -17,6 +17,9 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { sendRequest } from '../../../hooks';
 
 import { CodeBlock } from './code_block';
@@ -57,10 +60,30 @@ const fetchSavedObjects = async (type?: string, name?: string) => {
 
 export const SavedObjectDebugger: React.FunctionComponent = () => {
   const types = [
-    { value: 'ingest-agent-policies', text: 'Agent policy' },
-    { value: 'ingest-package-policies', text: 'Integration policy' },
-    { value: 'ingest-outputs', text: 'Output' },
-    { value: 'epm-packages', text: 'Packages' },
+    {
+      value: 'ingest-agent-policies',
+      text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.agentPolicyLabel', {
+        defaultMessage: 'Agent policy',
+      }),
+    },
+    {
+      value: 'ingest-package-policies',
+      text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.packagePolicyLabel', {
+        defaultMessage: 'Integration policy',
+      }),
+    },
+    {
+      value: 'ingest-outputs',
+      text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.outputLabel', {
+        defaultMessage: 'Output',
+      }),
+    },
+    {
+      value: 'epm-packages',
+      text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.packageLabel', {
+        defaultMessage: 'Packages',
+      }),
+    },
   ];
 
   const [type, setType] = useState(types[0].value);
@@ -83,8 +106,10 @@ export const SavedObjectDebugger: React.FunctionComponent = () => {
     <>
       <EuiText grow={false}>
         <p>
-          Search for Fleet-related saved objects by selecting a type and name. Use the code block
-          below to diagnose any potential issues.
+          <FormattedMessage
+            id="xpack.fleet.debug.savedObjectDebugger.description"
+            defaultMessage="Search for Fleet-related saved objects by selecting a type and name. Use the code block below to diagnose any potential issues."
+          />
         </p>
       </EuiText>
 
@@ -104,7 +129,9 @@ export const SavedObjectDebugger: React.FunctionComponent = () => {
               options={types}
               value={type}
               onChange={(e) => onTypeChange(e)}
-              aria-label="Use aria labels when no actual label is in use"
+              aria-label={i18n.translate('xpack.fleet.debug.savedObjectDebugger.selectTypeLabel', {
+                defaultMessage: 'Select saved object type',
+              })}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -130,7 +157,10 @@ export const SavedObjectDebugger: React.FunctionComponent = () => {
         <>
           <EuiSpacer size="m" />
           <EuiCallOut title="Error" color="danger">
-            Error fetching Saved Objects
+            <FormattedMessage
+              id="xpack.fleet.debug.savedObjectDebugger.fetchError"
+              defaultMessage="Error fetching Saved Objects"
+            />
           </EuiCallOut>
         </>
       )}

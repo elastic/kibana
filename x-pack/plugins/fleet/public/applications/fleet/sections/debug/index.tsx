@@ -21,6 +21,9 @@ import {
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { useLink, useStartServices } from '../../hooks';
 
 import {
@@ -38,32 +41,44 @@ export const queryClient = new QueryClient();
 
 const panels = [
   {
-    title: 'Agent Policy Debugger',
+    title: i18n.translate('xpack.fleet.debug.agentPolicyDebugger.title', {
+      defaultMessage: 'Agent Policy Debugger',
+    }),
     id: 'agentPolicyDebugger',
     component: <AgentPolicyDebugger />,
   },
   {
-    title: 'Integration Debugger',
+    title: i18n.translate('xpack.fleet.debug.integrationDebugger.title', {
+      defaultMessage: 'Integration Debugger',
+    }),
     id: 'integrationDebugger',
     component: <IntegrationDebugger />,
   },
   {
-    title: 'Saved Object Debugger',
+    title: i18n.translate('xpack.fleet.debug.savedObjectDebugger.title', {
+      defaultMessage: 'Saved Object Debugger',
+    }),
     id: 'savedObjectDebugger',
     component: <SavedObjectDebugger />,
   },
   {
-    title: 'Fleet Index Debugger',
+    title: i18n.translate('xpack.fleet.debug.fleetIndexDebugger.title', {
+      defaultMessage: 'Fleet Index Debugger',
+    }),
     id: 'fleetIndexDebugger',
     component: <FleetIndexDebugger />,
   },
   {
-    title: 'Preconfiguration Debugger',
+    title: i18n.translate('xpack.fleet.debug.preconfigurationDebugger.title', {
+      defaultMessage: 'Preconfiguration Debugger',
+    }),
     id: 'preconfigurationDebugger',
     component: <PreconfigurationDebugger />,
   },
   {
-    title: 'Orphaned Integration Policy Debugger',
+    title: i18n.translate('xpack.fleet.debug.orphanedIntegrationPolicyDebugger.title', {
+      defaultMessage: 'Orphaned Integration Policy Debugger',
+    }),
     id: 'orphanedIntegrationPolicyDebugger',
     component: <OrphanedIntegrationPolicyDebugger />,
   },
@@ -79,15 +94,36 @@ export const DebugPage: React.FunctionComponent = () => {
     <QueryClientProvider client={queryClient}>
       <EuiPage>
         <EuiPageBody panelled>
-          <EuiPageHeader pageTitle="Fleet Debugging Dashboard" iconType="wrench" />
+          <EuiPageHeader
+            pageTitle={i18n.translate('xpack.fleet.debug.pageTitle', {
+              defaultMessage: 'Fleet Debugging Dashboard',
+            })}
+            iconType="wrench"
+          />
           <EuiCallOut color="danger" iconType="alert" title="Danger zone">
             <EuiText grow={false}>
-              <p>
-                This page provides an interface for directly managing {"Fleet's"} underlying data
-                and diagnosing issues. Be aware that these debugging tools can be{' '}
-                <strong>destructive</strong> in nature and can result in{' '}
-                <strong>loss of data</strong>. Please proceed with caution.
-              </p>
+              <FormattedMessage
+                id="xpack.fleet.debug.dangerZone.description"
+                defaultMessage="This page provides an interface for directly managing Fleet's underlying data and diagnosing issues. Be aware that these debugging tools can be {strongDestructive} in nature and can result in {strongLossOfData}. Please proceed with caution."
+                values={{
+                  strongDestructive: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.fleet.debug.dangerZone.destructive"
+                        defaultMessage="destructive"
+                      />
+                    </strong>
+                  ),
+                  strongLossOfData: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.fleet.debug.dangerZone.lossOfData"
+                        defaultMessage="loss of data"
+                      />
+                    </strong>
+                  ),
+                }}
+              />
             </EuiText>
           </EuiCallOut>
 
@@ -113,7 +149,12 @@ export const DebugPage: React.FunctionComponent = () => {
           ))}
 
           <EuiTitle size="l">
-            <h2>Useful Links</h2>
+            <h2>
+              <FormattedMessage
+                id="xpack.fleet.debug.usefulLinks.title"
+                defaultMessage="Useful links"
+              />
+            </h2>
           </EuiTitle>
 
           <EuiSpacer size="m" />
@@ -121,13 +162,17 @@ export const DebugPage: React.FunctionComponent = () => {
           <EuiListGroup
             listItems={[
               {
-                label: 'View Agents in Fleet UI',
+                label: i18n.translate('xpack.fleet.debug.usefulLinks.viewAgents', {
+                  defaultMessage: 'View Agents in Fleet UI',
+                }),
                 href: getHref('agent_list'),
                 iconType: 'agentApp',
                 target: '_blank',
               },
               {
-                label: 'Troubleshooting Guide',
+                label: i18n.translate('xpack.fleet.debug.usefulLinks.troubleshootingGuide', {
+                  defaultMessage: 'Troubleshooting Guide',
+                }),
                 href: 'https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html',
                 iconType: 'popout',
                 target: '_blank',

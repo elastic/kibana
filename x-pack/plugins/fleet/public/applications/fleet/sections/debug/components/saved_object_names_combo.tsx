@@ -9,6 +9,8 @@ import React, { forwardRef, useImperativeHandle } from 'react';
 import { useQuery } from 'react-query';
 import { EuiComboBox } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { sendRequest } from '../../../hooks';
 
 const fetchSavedObjectNames = async (type: string) => {
@@ -82,8 +84,14 @@ export const SavedObjectNamesCombo = forwardRef(
     return (
       <EuiComboBox
         prepend="Name"
-        aria-label="Select a Saved Object"
-        placeholder="Select a Saved Object"
+        aria-label={i18n.translate(
+          'xpack.fleet.debug.savedObjectDebugger.selectedSavedObjectLabel',
+          { defaultMessage: 'Select a Saved Object' }
+        )}
+        placeholder={i18n.translate(
+          'xpack.fleet.debug.savedObjectDebugger.selectedSavedObjectLabel',
+          { defaultMessage: 'Select a Saved Object' }
+        )}
         fullWidth
         options={comboBoxOptions}
         singleSelection={{ asPlainText: true }}
