@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ComponentType, ReactNode } from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
-import type { ComponentType } from 'react';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -44,6 +44,7 @@ import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/c
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React from 'react';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
@@ -53,6 +54,8 @@ import type {
   RuleTagBadgeOptions,
 } from './application/sections/rules_list/components/rule_tag_badge';
 import type { RuleEventLogListProps } from './application/sections/rule_details/components/rule_event_log_list';
+import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
+import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
@@ -91,6 +94,8 @@ export type {
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
   RuleEventLogListProps,
+  CreateConnectorFlyoutProps,
+  EditConnectorFlyoutProps,
   RulesListNotifyBadgeProps,
 };
 export type { ActionType, AsApiContract };
@@ -112,23 +117,15 @@ export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<
   TypeRegistry<AlertsTableConfigurationRegistry>
 >;
 
-export type ActionConnectorFieldsCallbacks = {
-  beforeActionConnectorSave?: () => Promise<void>;
-  afterActionConnectorSave?: (connector: ActionConnector) => Promise<void>;
-} | null;
-export type ActionConnectorFieldsSetCallbacks = React.Dispatch<
-  React.SetStateAction<ActionConnectorFieldsCallbacks>
->;
+export interface ConnectorValidationError {
+  message: ReactNode;
+}
 
-export interface ActionConnectorFieldsProps<TActionConnector> {
-  action: TActionConnector;
-  editActionConfig: (property: string, value: unknown) => void;
-  editActionSecrets: (property: string, value: unknown) => void;
-  errors: IErrorObject;
+export type ConnectorValidationFunc = () => Promise<ConnectorValidationError | void | undefined>;
+export interface ActionConnectorFieldsProps {
   readOnly: boolean;
-  consumer?: string;
-  setCallbacks: ActionConnectorFieldsSetCallbacks;
   isEdit: boolean;
+  registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
 
 export enum RuleFlyoutCloseReason {
@@ -171,16 +168,11 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   iconClass: IconType;
   selectMessage: string;
   actionTypeTitle?: string;
-  validateConnector: (
-    connector: UserConfiguredActionConnector<ActionConfig, ActionSecrets>
-  ) => Promise<ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>>;
   validateParams: (
     actionParams: ActionParams
   ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;
   actionConnectorFields: React.LazyExoticComponent<
-    ComponentType<
-      ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>
-    >
+    ComponentType<ActionConnectorFieldsProps>
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
@@ -192,11 +184,6 @@ export interface GenericValidationResult<T> {
 
 export interface ValidationResult {
   errors: Record<string, any>;
-}
-
-export interface ConnectorValidationResult<Config, Secrets> {
-  config?: GenericValidationResult<Config>;
-  secrets?: GenericValidationResult<Secrets>;
 }
 
 export interface ActionConnectorProps<Config, Secrets> {
@@ -323,26 +310,9 @@ export interface IErrorObject {
   [key: string]: string | string[] | IErrorObject;
 }
 
-export interface ConnectorAddFlyoutProps {
-  onClose: () => void;
-  actionTypes?: ActionType[];
-  onTestConnector?: (connector: ActionConnector) => void;
-  reloadConnectors?: () => Promise<ActionConnector[] | void>;
-  consumer?: string;
-  actionTypeRegistry: ActionTypeRegistryContract;
-}
-export enum EditConectorTabs {
+export enum EditConnectorTabs {
   Configuration = 'configuration',
   Test = 'test',
-}
-
-export interface ConnectorEditFlyoutProps {
-  initialConnector: ActionConnector;
-  onClose: () => void;
-  tab?: EditConectorTabs;
-  reloadConnectors?: () => Promise<ActionConnector[] | void>;
-  consumer?: string;
-  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export interface RuleEditProps<MetaData = Record<string, any>> {
@@ -470,3 +440,7 @@ export enum AlertsTableFlyoutState {
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
+
+export interface ConnectorServices {
+  validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
+}

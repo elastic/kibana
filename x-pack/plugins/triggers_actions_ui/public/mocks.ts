@@ -19,8 +19,6 @@ import {
   RuleAddProps,
   RuleEditProps,
   RuleTypeModel,
-  ConnectorAddFlyoutProps,
-  ConnectorEditFlyoutProps,
   AlertsTableProps,
   AlertsTableConfigurationRegistry,
   RuleTagBadgeOptions,
@@ -36,22 +34,31 @@ import { getRulesListLazy } from './common/get_rules_list';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
 import { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
+import { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
+import { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
+import { getActionFormLazy } from './common/get_action_form';
+import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
   const alertsTableConfigurationRegistry = new TypeRegistry<AlertsTableConfigurationRegistry>();
+  const connectorServices = { validateEmailAddresses: jest.fn() };
   return {
     actionTypeRegistry,
     ruleTypeRegistry,
     alertsTableConfigurationRegistry,
-    getAddConnectorFlyout: (props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>) => {
-      return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry });
+    getActionForm: (props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>) => {
+      return getActionFormLazy({ ...props, actionTypeRegistry, connectorServices });
     },
-    getEditConnectorFlyout: (props: Omit<ConnectorEditFlyoutProps, 'actionTypeRegistry'>) => {
+    getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {
+      return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry, connectorServices });
+    },
+    getEditConnectorFlyout: (props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>) => {
       return getEditConnectorFlyoutLazy({
         ...props,
         actionTypeRegistry,
+        connectorServices,
       });
     },
     getAddAlertFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
@@ -59,6 +66,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         ...props,
         actionTypeRegistry,
         ruleTypeRegistry,
+        connectorServices,
       });
     },
     getEditAlertFlyout: (props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
@@ -66,6 +74,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         ...props,
         actionTypeRegistry,
         ruleTypeRegistry,
+        connectorServices,
       });
     },
     getAlertsStateTable: (props: AlertsTableStateProps) => {
@@ -93,7 +102,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
       return getRulesListNotifyBadgeLazy(props);
     },
     getRulesList: () => {
-      return getRulesListLazy();
+      return getRulesListLazy({ connectorServices });
     },
   };
 }
