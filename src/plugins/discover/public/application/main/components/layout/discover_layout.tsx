@@ -172,13 +172,7 @@ export function DiscoverLayout({
     (field: DataViewField | string, values: string, operation: '+' | '-') => {
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
-      const newFilters = generateFilters(
-        filterManager,
-        field,
-        values,
-        operation,
-        String(indexPattern.id)
-      );
+      const newFilters = generateFilters(filterManager, field, values, operation, indexPattern);
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
       }
