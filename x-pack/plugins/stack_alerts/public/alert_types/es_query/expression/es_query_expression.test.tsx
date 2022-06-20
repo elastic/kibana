@@ -22,6 +22,7 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
+import { EsQueryFormType } from './es_query_form_type_chooser';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('@kbn/es-ui-shared-plugin/public', () => ({
@@ -143,6 +144,7 @@ describe('EsQueryAlertTypeExpression', () => {
 
     const wrapper = mountWithIntl(
       <EsQueryExpression
+        activeEsQueryFormType={EsQueryFormType.QUERY_DSL} // TODO: add a test for another type too?
         unifiedSearch={unifiedSearchMock}
         ruleInterval="1m"
         ruleThrottle="1m"

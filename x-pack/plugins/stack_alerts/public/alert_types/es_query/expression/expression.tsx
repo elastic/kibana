@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren } from 'react';
+import React, { memo, PropsWithChildren, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
 
@@ -16,6 +16,7 @@ import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/p
 import { ErrorKey, EsQueryAlertParams } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
+import { EsQueryFormType, EsQueryFormTypeChooser } from './es_query_form_type_chooser';
 import { isSearchSourceAlert } from '../util';
 import { EXPRESSION_ERROR_KEYS } from '../constants';
 
@@ -38,6 +39,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
 > = (props) => {
   const { ruleParams, errors } = props;
   const isSearchSource = isSearchSourceAlert(ruleParams);
+  const [activeEsQueryFormType, setActiveEsQueryFormType] = useState<EsQueryFormType | null>(null);
 
   const hasExpressionErrors = Object.keys(errors).some((errorKey) => {
     return (
@@ -54,19 +56,36 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     }
   );
 
+  const expressionError = hasExpressionErrors && (
+    <>
+      <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
+      <EuiSpacer />
+    </>
+  );
+
+  // on Discover page
+  if (isSearchSource) {
+    return (
+      <>
+        {expressionError}
+        <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
+      </>
+    );
+  }
+
+  // on Stack Management page
   return (
     <>
-      {hasExpressionErrors && (
-        <>
-          <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
-          <EuiSpacer />
-        </>
-      )}
+      {expressionError}
 
-      {isSearchSource ? (
-        <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
+      {activeEsQueryFormType ? (
+        <EsQueryExpression
+          {...props}
+          ruleParams={ruleParams}
+          activeEsQueryFormType={activeEsQueryFormType}
+        />
       ) : (
-        <EsQueryExpression {...props} ruleParams={ruleParams} />
+        <EsQueryFormTypeChooser onFormTypeSelect={setActiveEsQueryFormType} />
       )}
     </>
   );

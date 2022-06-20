@@ -41,6 +41,7 @@ import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
 import { TestQueryRow } from './test_query_row';
 import { totalHitsToNumber } from './use_test_query';
+import { EsQueryFormType } from './es_query_form_type_chooser';
 
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();
@@ -50,13 +51,20 @@ interface KibanaDeps {
   docLinks: DocLinksStart;
 }
 
-export const EsQueryExpression = ({
+type EsQueryExpressionProps = RuleTypeParamsExpressionProps<
+  EsQueryAlertParams<SearchType.esQuery>
+> & {
+  activeEsQueryFormType: EsQueryFormType;
+};
+
+export const EsQueryExpression: React.FC<EsQueryExpressionProps> = ({
   ruleParams,
   setRuleParams,
   setRuleProperty,
   errors,
   data,
-}: RuleTypeParamsExpressionProps<EsQueryAlertParams<SearchType.esQuery>>) => {
+  activeEsQueryFormType,
+}) => {
   const {
     index,
     timeField,
@@ -162,6 +170,7 @@ export const EsQueryExpression = ({
 
   return (
     <Fragment>
+      {activeEsQueryFormType}
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
