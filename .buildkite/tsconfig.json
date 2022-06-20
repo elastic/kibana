@@ -9,10 +9,7 @@
     "removeComments": false,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "lib": ["es2020"],
-    "typeRoots": ["./node_modules/@types"],
-    "declaration": true
+    "lib": ["es2020"]
   },
-  "include": ["lib/**/*"],
   "exclude": ["**/*.test.ts", "**/vm-filesystem/**", "**/dist"]
 }
