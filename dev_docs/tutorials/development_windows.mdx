@@ -60,7 +60,8 @@ The latest setup instructions can be found at https://docs.microsoft.com/en-us/w
 4. Install support for Google Chrome by running the following inside WSL shell **(IMPORTANT: <DocLink id="kibDevTutorialSetupWindowsDevWSL" section="default-experience" text="Default Experience Only"/>)**
 
    ```
-   sudo apt update && sudo apt -y upgrade && sudo apt -y autoremove 
+   sudo apt update 
+   sudo apt -y upgrade && sudo apt -y autoremove 
    cd /tmp
    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
    sudo dpkg -i google-chrome-stable_current_amd64.deb
