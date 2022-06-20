@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
-import { cspRuleMetadata } from './csp_rule_metadata';
+import { cspRuleMetadataSchema } from './csp_rule_metadata';
 
 export const cspRuleSchemaV830 = rt.object({
   audit: rt.string(),
@@ -31,7 +31,7 @@ export const cspRuleSchemaV830 = rt.object({
 
 export const cspRuleSchemaV840 = rt.object({
   enabled: rt.boolean(),
-  metadata: cspRuleMetadata,
+  metadata: cspRuleMetadataSchema,
   muted: rt.boolean(),
   package_policy_id: rt.string(),
   policy_id: rt.string(),
