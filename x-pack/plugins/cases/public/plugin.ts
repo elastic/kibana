@@ -24,6 +24,8 @@ import { getCasesContextLazy } from './client/ui/get_cases_context';
 import { getCreateCaseFlyoutLazy } from './client/ui/get_create_case_flyout';
 import { getRecentCasesLazy } from './client/ui/get_recent_cases';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
+import { AttachmentTypeRegistry } from './client/attachment_framework/registry';
+import { ExternalReferenceAttachmentType } from './client/attachment_framework/types';
 
 /**
  * @public
@@ -34,9 +36,12 @@ export class CasesUiPlugin
 {
   private readonly kibanaVersion: string;
   private readonly storage = new Storage(localStorage);
+  private externalReferenceAttachmentTypeRegistry: AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.externalReferenceAttachmentTypeRegistry =
+      new AttachmentTypeRegistry<ExternalReferenceAttachmentType>();
   }
 
   public setup(core: CoreSetup, plugins: CasesPluginSetup) {
@@ -85,7 +90,13 @@ export class CasesUiPlugin
   public start(core: CoreStart, plugins: CasesPluginStart): CasesUiStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
+
     return {
+      attachmentFramework: {
+        registerExternalReference: (externalReferenceAttachmentType) => {
+          this.externalReferenceAttachmentTypeRegistry.register(externalReferenceAttachmentType);
+        },
+      },
       api: createClientAPI({ http: core.http }),
       ui: {
         getCases: getCasesLazy,
