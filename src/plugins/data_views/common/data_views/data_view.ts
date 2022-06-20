@@ -135,6 +135,10 @@ export class DataView implements DataViewBase {
    * Name of the data view. Human readable name used to differentiate data view.
    */
   public name: string = '';
+  /**
+   * Whether this data view is backed by a saved object or just a local (ad-hoc) data view.
+   */
+  public isPersisted: boolean = true;
 
   /**
    * constructor
@@ -171,6 +175,7 @@ export class DataView implements DataViewBase {
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
+    this.isPersisted = spec.isPersisted ?? true;
   }
 
   /**
@@ -284,6 +289,7 @@ export class DataView implements DataViewBase {
       fieldAttrs: this.fieldAttrs,
       allowNoIndex: this.allowNoIndex,
       name: this.name,
+      isPersisted: this.isPersisted,
     };
   }
 
