@@ -8,13 +8,13 @@ BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/k
 export BUILDKITE_TOKEN
 
 echo '--- Install/build buildkite dependencies'
-cd '.buildkite/kibana-buildkite-library'
-retry 5 15 npm ci
-npm run build
+npm install -g ts-node # TODO move this to agent image
+cd '.buildkite'
+retry 5 15 npm ci # TODO no dev
 cd ..
 
 echo '--- Agent Debug/SSH Info'
-node .buildkite/scripts/lifecycle/print_agent_links.js || true
+ts-node .buildkite/scripts/lifecycle/print_agent_links.js || true
 
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   echo ""

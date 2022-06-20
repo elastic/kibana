@@ -11,17 +11,6 @@
     "lint": "eslint -c .eslintrc --fix --ext .ts .",
     "watch": "tsc --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/elastic/kibana-buildkite-library.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/elastic/kibana-buildkite-library/issues"
-  },
-  "homepage": "https://github.com/elastic/kibana-buildkite-library#readme",
   "dependencies": {
     "@octokit/rest": "^18.10.0",
     "axios": "^0.21.4",
@@ -30,10 +19,6 @@
     "minimatch": "^5.0.1"
   },
   "devDependencies": {
-    "@swc-node/register": "^1.5.1",
-    "@swc/cli": "^0.1.57",
-    "@swc/core": "^1.2.182",
-    "@swc/register": "^0.1.10",
     "@types/chai": "^4.2.10",
     "@types/js-yaml": "^4.0.5",
     "@types/minimatch": "^3.0.5",

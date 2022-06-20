@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { CiStats } = require('kibana-buildkite-library');
+const { CiStats } = require('#lib');
 
 (async () => {
   try {

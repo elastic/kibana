@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { TestFailures } = require('kibana-buildkite-library');
+const { TestFailures } = require('#lib');
 
 (async () => {
   try {

@@ -8,7 +8,7 @@
 
 const execSync = require('child_process').execSync;
 const fs = require('fs');
-const { areChangesSkippable, doAnyChangesMatch } = require('kibana-buildkite-library');
+const { areChangesSkippable, doAnyChangesMatch } = require('#lib');
 const prConfigs = require('../../../pull_requests.json');
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 
@@ -21,8 +21,7 @@ const getPipeline = (filename, removeSteps = true) => {
 };
 
 const uploadPipeline = (pipelineContent) => {
-  const str =
-    typeof pipelineContent === 'string' ? pipelineContent : JSON.stringify(pipelineContent);
+  const str = typeof pipelineContent === 'string' ? pipelineContent : JSON.stringify(pipelineContent);
 
   execSync('buildkite-agent pipeline upload', {
     input: str,

@@ -15,5 +15,5 @@ node "$(dirname "${0}")/promote_manifest.js" "$ES_SNAPSHOT_MANIFEST"
 
 if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
   echo "--- Trigger agent packer cache pipeline"
-  node .buildkite/scripts/steps/trigger_pipeline.js kibana-agent-packer-cache main
+  ts-node .buildkite/scripts/steps/trigger_pipeline.js kibana-agent-packer-cache main
 fi

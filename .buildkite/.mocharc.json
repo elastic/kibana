@@ -1,5 +1,5 @@
 {
   "extension": ["ts"],
   "spec": "**/*.test.ts",
-  "require": "@swc/register"
+  "require": "ts-node/register"
 }
