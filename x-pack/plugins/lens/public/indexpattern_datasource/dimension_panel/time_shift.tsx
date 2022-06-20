@@ -11,7 +11,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import { Query } from '@kbn/data-plugin/public';
-import { parseTimeShift } from '@kbn/data-plugin/common';
+import { DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
 import {
   adjustTimeScaleLabelSuffix,
   GenericIndexPatternColumn,
@@ -61,6 +61,7 @@ export function setTimeShift(
 }
 
 export function TimeShift({
+  datatableUtilities,
   selectedColumn,
   columnId,
   layer,
@@ -70,6 +71,7 @@ export function TimeShift({
   activeData,
   layerId,
 }: {
+  datatableUtilities: DatatableUtilitiesService;
   selectedColumn: GenericIndexPatternColumn;
   indexPattern: IndexPattern;
   columnId: string;
@@ -89,7 +91,13 @@ export function TimeShift({
     return null;
   }
 
-  const dateHistogramInterval = getDateHistogramInterval(layer, indexPattern, activeData, layerId);
+  const dateHistogramInterval = getDateHistogramInterval(
+    datatableUtilities,
+    layer,
+    indexPattern,
+    activeData,
+    layerId
+  );
   const { isValueTooSmall, isValueNotMultiple, isInvalid, canShift } =
     getLayerTimeShiftChecks(dateHistogramInterval);
 
