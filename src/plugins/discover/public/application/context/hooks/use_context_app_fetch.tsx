@@ -20,9 +20,9 @@ import {
   LoadingStatus,
 } from '../services/context_query_state';
 import { AppState } from '../services/context_state';
-import { getFirstSortableField } from './sorting';
+import { getFirstSortableField } from '../utils/sorting';
 import { EsHitRecord } from '../../types';
-import { useDiscoverServices } from '../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },
