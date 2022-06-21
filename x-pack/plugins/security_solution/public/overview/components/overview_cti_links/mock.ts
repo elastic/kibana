@@ -11,7 +11,8 @@ export const mockTheme = getMockTheme({
   eui: {
     euiSizeL: '10px',
     euiBreakpoints: { s: '10px' },
-    paddingSizes: { s: '10px', m: '10px', l: '10px' },
+    euiSizeS: '10px',
+    euiSizeM: '10px',
   },
 });
 

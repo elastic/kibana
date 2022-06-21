@@ -46,7 +46,7 @@ const DEFAULT_CHART_HEIGHT = 250;
 const StyledEuiText = styled(EuiText)`
   font-size: 9px;
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  margin-right: ${({ theme }) => theme.eui.paddingSizes.xs};
+  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 const LoadingChart = styled(EuiLoadingChart)`

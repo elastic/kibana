@@ -114,7 +114,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText(TEST_NAME)).toBeVisible();
 
       // expand host os accordion
-      renderResult.queryByText('Host OS')?.querySelector('button')?.click();
+      renderResult.queryByText('Host OS')?.click();
       expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('os.family')).toBeVisible();
       expect(renderResult.queryByText('os.full')).toBeVisible();
@@ -158,7 +158,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryAllByText('name').length).toBe(2);
 
       // expand host os accordion
-      renderResult.queryByText('Host OS')?.querySelector('button')?.click();
+      renderResult.queryByText('Host OS')?.click();
       expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('os.family')).toBeVisible();
       expect(renderResult.queryByText('os.full')).toBeVisible();
@@ -175,7 +175,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText(TEST_OS_VERSION)).toBeVisible();
 
       // expand Container Accordion
-      renderResult.queryByText('Container')?.querySelector('button')?.click();
+      renderResult.queryByText('Container')?.click();
       expect(renderResult.queryByText('image.name')).toBeVisible();
       expect(renderResult.queryByText('image.tag')).toBeVisible();
       expect(renderResult.queryByText('image.hash.all')).toBeVisible();
@@ -186,7 +186,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText(TEST_CONTAINER_IMAGE_HASH_ALL)).toBeVisible();
 
       // expand Orchestrator Accordion
-      renderResult.queryByText('Orchestrator')?.querySelector('button')?.click();
+      renderResult.queryByText('Orchestrator')?.click();
       expect(renderResult.queryByText('resource.name')).toBeVisible();
       expect(renderResult.queryByText('resource.type')).toBeVisible();
       expect(renderResult.queryByText('resource.ip')).toBeVisible();

@@ -7,8 +7,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <WithEuiTheme(EuiAccordionClass)
     buttonContent={
       <EuiFlexGroup
         data-test-subj="network-stat-group-auditbeat"
@@ -39,13 +38,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="network-stat-accordion-groupauditbeat"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
@@ -84,12 +77,11 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </WithEuiTheme(EuiAccordionClass)>
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <WithEuiTheme(EuiAccordionClass)
     buttonContent={
       <EuiFlexGroup
         data-test-subj="network-stat-group-filebeat"
@@ -120,13 +112,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="network-stat-accordion-groupfilebeat"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
@@ -305,12 +291,11 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </WithEuiTheme(EuiAccordionClass)>
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <WithEuiTheme(EuiAccordionClass)
     buttonContent={
       <EuiFlexGroup
         data-test-subj="network-stat-group-packetbeat"
@@ -341,13 +326,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="network-stat-accordion-grouppacketbeat"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
@@ -456,6 +435,6 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </WithEuiTheme(EuiAccordionClass)>
 </styled.div>
 `;

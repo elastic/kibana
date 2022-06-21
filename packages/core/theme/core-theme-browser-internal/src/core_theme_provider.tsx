@@ -28,6 +28,7 @@ const emotionCache = createCache({
   key: 'eui-styles',
   container: document.querySelector(`meta[name="${EUI_STYLES_GLOBAL}"]`) as HTMLElement,
 });
+emotionCache.compat = true;
 
 /**
  * Wrapper around `EuiProvider` converting (and exposing) core's theme to EUI theme.

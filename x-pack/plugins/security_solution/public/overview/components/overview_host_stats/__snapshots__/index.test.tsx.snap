@@ -7,8 +7,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <WithEuiTheme(EuiAccordionClass)
     buttonContent={
       <EuiFlexGroup
         gutterSize="s"
@@ -38,13 +37,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="host-stat-accordion-groupauditbeat"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
@@ -258,12 +251,11 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </WithEuiTheme(EuiAccordionClass)>
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <WithEuiTheme(EuiAccordionClass)
     buttonContent={
       <EuiFlexGroup
         gutterSize="s"
@@ -293,13 +285,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="host-stat-accordion-groupendgame"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
@@ -548,12 +534,11 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </WithEuiTheme(EuiAccordionClass)>
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <WithEuiTheme(EuiAccordionClass)
     buttonContent={
       <EuiFlexGroup
         gutterSize="s"
@@ -583,13 +568,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="host-stat-accordion-groupfilebeat"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
@@ -628,12 +607,11 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </WithEuiTheme(EuiAccordionClass)>
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <WithEuiTheme(EuiAccordionClass)
     buttonContent={
       <EuiFlexGroup
         gutterSize="s"
@@ -663,13 +641,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="host-stat-accordion-groupwinlogbeat"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
@@ -743,6 +715,6 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </WithEuiTheme(EuiAccordionClass)>
 </styled.div>
 `;

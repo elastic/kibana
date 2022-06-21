@@ -2,7 +2,7 @@
 
 exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
 <div
-  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  className="euiPanel euiPanel--plain euiPanel--paddingMedium css-f2xo4o-euiPanel-grow-m-m-plain-hasShadow"
 >
   <div>
     <div

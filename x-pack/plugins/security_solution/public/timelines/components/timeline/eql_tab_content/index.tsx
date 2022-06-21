@@ -130,7 +130,7 @@ const VerticalRule = styled.div`
 VerticalRule.displayName = 'VerticalRule';
 
 const EventsCountBadge = styled(EuiBadge)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const isTimerangeSame = (prevProps: Props, nextProps: Props) =>

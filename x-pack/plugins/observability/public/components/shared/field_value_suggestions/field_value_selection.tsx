@@ -26,7 +26,7 @@ import { FieldValueSelectionProps, ListItem } from './types';
 const Counter = euiStyled.div`
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
   background: ${({ theme }) => theme.eui.euiColorLightShade};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding: 0 ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 const formatOptions = (

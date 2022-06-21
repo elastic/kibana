@@ -143,7 +143,7 @@ export const NodesOverview = ({
 };
 
 const TableContainer = euiStyled.div`
-  padding: ${(props) => props.theme.eui.paddingSizes.l};
+  padding: ${(props) => props.theme.eui.euiSizeL};
 `;
 
 const MapContainer = euiStyled.div<{ top: number; positionStatic: boolean }>`

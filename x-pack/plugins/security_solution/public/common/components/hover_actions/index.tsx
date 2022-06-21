@@ -82,7 +82,7 @@ const StyledHoverActionsContainer = styled.div<{
 
 const StyledHoverActionsContainerWithPaddingsAndMinWidth = styled(StyledHoverActionsContainer)`
   min-width: ${({ $hideTopN }) => `${$hideTopN ? '112px' : '138px'}`};
-  padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
+  padding: ${(props) => `0 ${props.theme.eui.euiSizeS}`};
   position: relative;
 `;
 

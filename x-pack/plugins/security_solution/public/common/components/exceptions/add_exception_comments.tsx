@@ -32,7 +32,7 @@ const COMMENT_ACCORDION_BUTTON_CLASS_NAME = 'exceptionCommentAccordionButton';
 
 const MyAvatar = styled(EuiAvatar)`
   ${({ theme }) => css`
-    margin-right: ${theme.eui.paddingSizes.s};
+    margin-right: ${theme.eui.euiSizeS};
   `}
 `;
 
@@ -40,7 +40,7 @@ const CommentAccordion = styled(EuiAccordion)`
   ${({ theme }) => css`
     .${COMMENT_ACCORDION_BUTTON_CLASS_NAME} {
       color: ${theme.eui.euiColorPrimary};
-      padding: ${theme.eui.paddingSizes.m} 0;
+      padding: ${theme.eui.euiSizeM} 0;
     }
   `}
 `;

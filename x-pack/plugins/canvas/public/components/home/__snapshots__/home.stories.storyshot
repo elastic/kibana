@@ -119,7 +119,7 @@ exports[`Storyshots Home Home Page 1`] = `
       </div>
     </header>
     <div
-      className="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--borderRadiusNone"
+      className="euiPanel euiPanel--plain euiPageContent euiPageContent--borderRadiusNone css-10ffim0-euiPanel-grow-none-plain"
       role="main"
     >
       <div

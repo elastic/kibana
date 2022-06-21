@@ -18,7 +18,7 @@ import {
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   .isolation-status {
-    margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+    margin-left: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 

@@ -10,7 +10,7 @@ exports[`alias 1`] = `
 exports[`alias with error status 1`] = `
 <div>
   <span
-    class="euiTextColor euiTextColor--danger"
+    class="css-1t6zs07-euiTextColor-danger"
   >
      NOT 
   </span>
@@ -27,7 +27,7 @@ exports[`alias with error status 1`] = `
 exports[`alias with warning status 1`] = `
 <div>
   <span
-    class="euiTextColor euiTextColor--danger"
+    class="css-1t6zs07-euiTextColor-danger"
   >
      NOT 
   </span>

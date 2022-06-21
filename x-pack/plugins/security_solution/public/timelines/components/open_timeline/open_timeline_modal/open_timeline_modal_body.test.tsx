@@ -29,7 +29,7 @@ describe('OpenTimelineModal', () => {
       euiBreakpoints: {
         s: '500px',
       },
-      paddingSizes: { m: '16px' },
+      euiSizeM: '16px',
     },
   });
   const title = 'All Timelines / Open Timelines';

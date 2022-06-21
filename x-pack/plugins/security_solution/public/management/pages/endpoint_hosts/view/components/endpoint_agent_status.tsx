@@ -16,7 +16,7 @@ import { AgentStatus } from '../../../../../common/components/endpoint/agent_sta
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   .isolation-status {
-    margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+    margin-left: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 

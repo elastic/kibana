@@ -15,7 +15,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
     style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
+      class="euiPanel euiPanel--plain euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter css-1nsffwn-euiPanel-grow-m-l-plain-hasShadow"
       role="main"
     >
       <span
@@ -33,7 +33,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
       />
       <div
-        class="euiText euiText--medium"
+        class="euiText css-1lo1kz-euiText-m"
       >
         <p>
           Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.
@@ -83,7 +83,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
             class="euiButtonEmpty__text"
           >
             <span
-              class="euiTextColor euiTextColor--subdued"
+              class="css-xv0fhq-euiTextColor-subdued"
             >
               Or, set up with self monitoring
             </span>
@@ -110,7 +110,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
     style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
+      class="euiPanel euiPanel--plain euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter css-1nsffwn-euiPanel-grow-m-l-plain-hasShadow"
       role="main"
     >
       <span
@@ -128,7 +128,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
       />
       <div
-        class="euiText euiText--medium"
+        class="euiText css-1lo1kz-euiText-m"
       >
         <p>
           Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.
@@ -178,7 +178,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
             class="euiButtonEmpty__text"
           >
             <span
-              class="euiTextColor euiTextColor--subdued"
+              class="css-xv0fhq-euiTextColor-subdued"
             >
               Or, set up with self monitoring
             </span>

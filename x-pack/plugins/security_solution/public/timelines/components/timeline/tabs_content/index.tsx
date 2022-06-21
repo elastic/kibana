@@ -214,7 +214,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
 ActiveTimelineTab.displayName = 'ActiveTimelineTab';
 
 const CountBadge = styled(EuiBadge)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const StyledEuiTab = styled(EuiTab)`

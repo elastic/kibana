@@ -41,7 +41,7 @@ const ActionsContainer = styled.div`
   display: flex;
   align-items: center;
   div div:first-child div.siemEventsTable__tdContent {
-    margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
+    margin-left: ${({ theme }) => theme.eui.euiSizeM};
   }
 `;
 
@@ -49,7 +49,7 @@ const ActionsContainer = styled.div`
 type BasicTableType = ComponentType<EuiBasicTableProps<TimelineItem>>;
 
 const StyledEuiBasicTable = styled(EuiBasicTable as BasicTableType)`
-  padding-top: ${({ theme }) => theme.eui.paddingSizes.m};
+  padding-top: ${({ theme }) => theme.eui.euiSizeM};
   .EventRenderedView__buildingBlock {
     background: ${({ theme }) => theme.eui.euiColorHighlight};
   }

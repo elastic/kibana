@@ -306,6 +306,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Select sorting method for {display}',
         values: { display },
       }),
+    'euiColumnSortingDraggable.dragHandleAriaLabel': i18n.translate(
+      'core.euiColumnSortingDraggable.dragHandleAriaLabel',
+      {
+        defaultMessage: 'Drag handle',
+      }
+    ),
     'euiComboBox.listboxAriaLabel': i18n.translate('core.euiComboBox.listboxAriaLabel', {
       defaultMessage: 'Choose from the following options',
     }),

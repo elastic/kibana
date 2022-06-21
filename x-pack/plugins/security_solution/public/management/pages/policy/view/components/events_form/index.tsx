@@ -119,7 +119,7 @@ const InnerEventsForm = <T extends OperatingSystem>({
       {supplementalOptions &&
         supplementalOptions.map(({ name, protectionField, tooltipText, beta }) => {
           return (
-            <div key={String(protectionField)} style={{ paddingLeft: theme.eui.paddingSizes.s }}>
+            <div key={String(protectionField)} style={{ paddingLeft: theme.eui.euiSizeS }}>
               <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiSpacer size="s" />

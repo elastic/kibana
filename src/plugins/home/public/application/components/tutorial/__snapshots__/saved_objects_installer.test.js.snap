@@ -14,7 +14,7 @@ Array [
       class="euiFlexItem"
     >
       <div
-        class="euiText euiText--medium"
+        class="euiText css-1lo1kz-euiText-m"
       >
         <p>
           Imports index pattern, visualizations and pre-defined dashboards.
@@ -45,7 +45,7 @@ Array [
     class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />,
   <div
-    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--warning euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--warning css-1flvw80-euiCallOut"
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning css-1yqbqzs-euiPanel-none-m-warning-euiCallOut"
     data-test-subj="loadSavedObjects_failed"
   >
     <p
@@ -71,7 +71,7 @@ Array [
       class="euiFlexItem"
     >
       <div
-        class="euiText euiText--medium"
+        class="euiText css-1lo1kz-euiText-m"
       >
         <p>
           Imports index pattern, visualizations and pre-defined dashboards.
@@ -102,7 +102,7 @@ Array [
     class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />,
   <div
-    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--success euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--success css-1flvw80-euiCallOut"
+    class="euiPanel euiPanel--success euiPanel--paddingMedium euiCallOut euiCallOut--success css-1kpm4pz-euiPanel-none-m-success-euiCallOut"
     data-test-subj="loadSavedObjects_success"
   >
     <p

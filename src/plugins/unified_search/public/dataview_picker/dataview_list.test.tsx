@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { EuiSelectable } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { ShallowWrapper } from 'enzyme';
@@ -22,6 +22,7 @@ function getDataViewPickerOptions(instance: ShallowWrapper) {
 }
 
 function selectDataViewPickerOption(instance: ShallowWrapper, selectedLabel: string) {
+  const event = {} as MouseEvent;
   const options: Array<{ label: string; checked?: 'on' | 'off' }> = getDataViewPickerOptions(
     instance
   ).map((option: { label: string }) =>
@@ -29,7 +30,7 @@ function selectDataViewPickerOption(instance: ShallowWrapper, selectedLabel: str
       ? { ...option, checked: 'on' }
       : { ...option, checked: undefined }
   );
-  return getDataViewPickerList(instance).prop('onChange')!(options);
+  return getDataViewPickerList(instance).prop('onChange')!(options, event);
 }
 
 describe('DataView list component', () => {

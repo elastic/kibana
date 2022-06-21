@@ -44,7 +44,7 @@ const Container = euiStyled.div<IContainerStyleProps>`
   position: relative;
   display: block;
   user-select: none;
-  padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding-top: ${({ theme }) => theme.eui.euiSizeS};
   padding-bottom: ${({ theme }) => theme.eui.euiSizeM};
   margin-right: ${(props) => props.timelineMargins.right}px;
   margin-left: ${(props) =>

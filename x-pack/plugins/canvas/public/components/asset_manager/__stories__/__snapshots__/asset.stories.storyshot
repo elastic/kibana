@@ -12,7 +12,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
     className="euiFlexItem"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAsset"
+      className="euiPanel euiPanel--plain euiPanel--paddingSmall canvasAsset css-2969qh-euiPanel-grow-m-s-plain-hasShadow"
     >
       <div
         className="canvasAsset__thumb canvasCheckered"
@@ -32,7 +32,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
         className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
       />
       <div
-        className="euiText euiText--extraSmall eui-textBreakAll"
+        className="euiText eui-textBreakAll css-1utxlgq-euiText-xs"
       >
         <p
           className="eui-textBreakAll"
@@ -42,7 +42,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
           </strong>
           <br />
           <span
-            className="euiTextColor euiTextColor--subdued"
+            className="css-xv0fhq-euiTextColor-subdued"
             style={Object {}}
           >
             <small>
@@ -199,7 +199,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
     className="euiFlexItem"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAsset"
+      className="euiPanel euiPanel--plain euiPanel--paddingSmall canvasAsset css-2969qh-euiPanel-grow-m-s-plain-hasShadow"
     >
       <div
         className="canvasAsset__thumb canvasCheckered"
@@ -219,7 +219,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
         className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
       />
       <div
-        className="euiText euiText--extraSmall eui-textBreakAll"
+        className="euiText eui-textBreakAll css-1utxlgq-euiText-xs"
       >
         <p
           className="eui-textBreakAll"
@@ -229,7 +229,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
           </strong>
           <br />
           <span
-            className="euiTextColor euiTextColor--subdued"
+            className="css-xv0fhq-euiTextColor-subdued"
             style={Object {}}
           >
             <small>

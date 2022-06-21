@@ -27,15 +27,15 @@ const ControlsContainer = euiStyled('div')`
 
 const Button = euiStyled(EuiButtonIcon)`
   display: block;
-  margin: ${({ theme }) => theme.eui.paddingSizes.xs};
+  margin: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 const ZoomInButton = euiStyled(Button)`
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const Panel = euiStyled(EuiPanel)`
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const steps = 5;

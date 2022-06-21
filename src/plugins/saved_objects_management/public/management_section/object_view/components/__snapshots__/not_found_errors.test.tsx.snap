@@ -2,7 +2,7 @@
 
 exports[`NotFoundErrors component renders correctly for index-pattern type 1`] = `
 <div
-  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger css-1flvw80-euiCallOut"
+  class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger css-j9niqn-euiPanel-none-m-danger-euiCallOut"
 >
   <p
     class="euiTitle euiCallOutHeader__title css-st4zhi-euiTitle-xs-euiCallOutHeader-danger"
@@ -16,38 +16,34 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
     There is a problem with this saved object
   </p>
   <div
-    class="euiText euiText--small css-i7i3v9-euiCallOut__description"
+    class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
   >
-    <div
-      class="euiTextColor euiTextColor--default"
-    >
-      <div>
-        The data view associated with this object no longer exists.
-      </div>
-      <div>
-        If you know what this error means, you can use the 
-        <a
-          aria-label="Saved objects APIs"
-          class="euiLink css-102pf9n-euiLink-primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
-          rel="noopener"
-          target="_blank"
+    <div>
+      The data view associated with this object no longer exists.
+    </div>
+    <div>
+      If you know what this error means, you can use the 
+      <a
+        aria-label="Saved objects APIs"
+        class="euiLink css-102pf9n-euiLink-primary"
+        href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+        rel="noopener"
+        target="_blank"
+      >
+        Saved objects APIs
+        <span
+          class="css-q4vwwx-euiLink__externalIcon"
+          data-euiicon-type="popout"
         >
-          Saved objects APIs
-          <span
-            class="css-q4vwwx-euiLink__externalIcon"
-            data-euiicon-type="popout"
-          >
-            External link
-          </span>
-          <span
-            class="euiScreenReaderOnly"
-          >
-            (opens in a new tab or window)
-          </span>
-        </a>
-         to fix it — otherwise click the delete button above.
-      </div>
+          External link
+        </span>
+        <span
+          class="euiScreenReaderOnly"
+        >
+          (opens in a new tab or window)
+        </span>
+      </a>
+       to fix it — otherwise click the delete button above.
     </div>
   </div>
 </div>
@@ -55,7 +51,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
 
 exports[`NotFoundErrors component renders correctly for index-pattern-field type 1`] = `
 <div
-  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger css-1flvw80-euiCallOut"
+  class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger css-j9niqn-euiPanel-none-m-danger-euiCallOut"
 >
   <p
     class="euiTitle euiCallOutHeader__title css-st4zhi-euiTitle-xs-euiCallOutHeader-danger"
@@ -69,38 +65,34 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
     There is a problem with this saved object
   </p>
   <div
-    class="euiText euiText--small css-i7i3v9-euiCallOut__description"
+    class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
   >
-    <div
-      class="euiTextColor euiTextColor--default"
-    >
-      <div>
-        A field associated with this object no longer exists in the data view.
-      </div>
-      <div>
-        If you know what this error means, you can use the 
-        <a
-          aria-label="Saved objects APIs"
-          class="euiLink css-102pf9n-euiLink-primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
-          rel="noopener"
-          target="_blank"
+    <div>
+      A field associated with this object no longer exists in the data view.
+    </div>
+    <div>
+      If you know what this error means, you can use the 
+      <a
+        aria-label="Saved objects APIs"
+        class="euiLink css-102pf9n-euiLink-primary"
+        href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+        rel="noopener"
+        target="_blank"
+      >
+        Saved objects APIs
+        <span
+          class="css-q4vwwx-euiLink__externalIcon"
+          data-euiicon-type="popout"
         >
-          Saved objects APIs
-          <span
-            class="css-q4vwwx-euiLink__externalIcon"
-            data-euiicon-type="popout"
-          >
-            External link
-          </span>
-          <span
-            class="euiScreenReaderOnly"
-          >
-            (opens in a new tab or window)
-          </span>
-        </a>
-         to fix it — otherwise click the delete button above.
-      </div>
+          External link
+        </span>
+        <span
+          class="euiScreenReaderOnly"
+        >
+          (opens in a new tab or window)
+        </span>
+      </a>
+       to fix it — otherwise click the delete button above.
     </div>
   </div>
 </div>
@@ -108,7 +100,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
 
 exports[`NotFoundErrors component renders correctly for search type 1`] = `
 <div
-  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger css-1flvw80-euiCallOut"
+  class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger css-j9niqn-euiPanel-none-m-danger-euiCallOut"
 >
   <p
     class="euiTitle euiCallOutHeader__title css-st4zhi-euiTitle-xs-euiCallOutHeader-danger"
@@ -122,38 +114,34 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
     There is a problem with this saved object
   </p>
   <div
-    class="euiText euiText--small css-i7i3v9-euiCallOut__description"
+    class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
   >
-    <div
-      class="euiTextColor euiTextColor--default"
-    >
-      <div>
-        The saved search associated with this object no longer exists.
-      </div>
-      <div>
-        If you know what this error means, you can use the 
-        <a
-          aria-label="Saved objects APIs"
-          class="euiLink css-102pf9n-euiLink-primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
-          rel="noopener"
-          target="_blank"
+    <div>
+      The saved search associated with this object no longer exists.
+    </div>
+    <div>
+      If you know what this error means, you can use the 
+      <a
+        aria-label="Saved objects APIs"
+        class="euiLink css-102pf9n-euiLink-primary"
+        href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+        rel="noopener"
+        target="_blank"
+      >
+        Saved objects APIs
+        <span
+          class="css-q4vwwx-euiLink__externalIcon"
+          data-euiicon-type="popout"
         >
-          Saved objects APIs
-          <span
-            class="css-q4vwwx-euiLink__externalIcon"
-            data-euiicon-type="popout"
-          >
-            External link
-          </span>
-          <span
-            class="euiScreenReaderOnly"
-          >
-            (opens in a new tab or window)
-          </span>
-        </a>
-         to fix it — otherwise click the delete button above.
-      </div>
+          External link
+        </span>
+        <span
+          class="euiScreenReaderOnly"
+        >
+          (opens in a new tab or window)
+        </span>
+      </a>
+       to fix it — otherwise click the delete button above.
     </div>
   </div>
 </div>
@@ -161,7 +149,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
 
 exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
 <div
-  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger css-1flvw80-euiCallOut"
+  class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger css-j9niqn-euiPanel-none-m-danger-euiCallOut"
 >
   <p
     class="euiTitle euiCallOutHeader__title css-st4zhi-euiTitle-xs-euiCallOutHeader-danger"
@@ -175,36 +163,32 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
     There is a problem with this saved object
   </p>
   <div
-    class="euiText euiText--small css-i7i3v9-euiCallOut__description"
+    class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
   >
-    <div
-      class="euiTextColor euiTextColor--default"
-    >
-      <div />
-      <div>
-        If you know what this error means, you can use the 
-        <a
-          aria-label="Saved objects APIs"
-          class="euiLink css-102pf9n-euiLink-primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
-          rel="noopener"
-          target="_blank"
+    <div />
+    <div>
+      If you know what this error means, you can use the 
+      <a
+        aria-label="Saved objects APIs"
+        class="euiLink css-102pf9n-euiLink-primary"
+        href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+        rel="noopener"
+        target="_blank"
+      >
+        Saved objects APIs
+        <span
+          class="css-q4vwwx-euiLink__externalIcon"
+          data-euiicon-type="popout"
         >
-          Saved objects APIs
-          <span
-            class="css-q4vwwx-euiLink__externalIcon"
-            data-euiicon-type="popout"
-          >
-            External link
-          </span>
-          <span
-            class="euiScreenReaderOnly"
-          >
-            (opens in a new tab or window)
-          </span>
-        </a>
-         to fix it — otherwise click the delete button above.
-      </div>
+          External link
+        </span>
+        <span
+          class="euiScreenReaderOnly"
+        >
+          (opens in a new tab or window)
+        </span>
+      </a>
+       to fix it — otherwise click the delete button above.
     </div>
   </div>
 </div>

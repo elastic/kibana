@@ -82,7 +82,7 @@ interface TypedGenericComponentMemo {
 
 const RootContainer = styled.div`
   position: relative;
-  padding-top: ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding-top: ${({ theme }) => theme.eui.euiSizeXS};
 
   .body {
     min-height: ${({ theme }) => theme.eui.gutterTypes.gutterExtraLarge};

@@ -22,7 +22,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
             class="euiFlexItem"
           >
             <div
-              class="euiText euiText--medium euiText--constrainedWidth"
+              class="euiText css-j3htvy-euiText-constrainedWidth-m"
             >
               <p>
                 test
@@ -46,7 +46,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
       </div>
     </header>
     <div
-      class="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--borderRadiusNone"
+      class="euiPanel euiPanel--plain euiPageContent euiPageContent--borderRadiusNone css-10ffim0-euiPanel-grow-none-plain"
       role="main"
     >
       <div

@@ -8,7 +8,7 @@
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 
 import { shallow, mount } from 'enzyme';
 
@@ -121,7 +121,10 @@ describe('SearchIndexSelectable', () => {
   it('calls setSelectedIndex onChange', () => {
     const wrapper = shallow(<SearchIndexSelectable />);
     const onChangeHandler = wrapper.find(EuiSelectable).prop('onChange')!;
-    onChangeHandler(DEFAULT_VALUES.indicesFormatted as SearchIndexSelectableOption[]);
+    onChangeHandler(
+      DEFAULT_VALUES.indicesFormatted as SearchIndexSelectableOption[],
+      {} as MouseEvent
+    );
     expect(MOCK_ACTIONS.setSelectedIndex).toHaveBeenCalledWith('search-test-index-2');
   });
 });
