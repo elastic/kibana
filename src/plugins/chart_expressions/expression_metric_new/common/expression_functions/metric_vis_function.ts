@@ -44,6 +44,18 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The dimension containing the labels for sub-categories.',
       }),
     },
+    subtitle: {
+      types: ['string'],
+      help: i18n.translate('expressionNewMetricVis.function.subtitle.help', {
+        defaultMessage: 'The subtitle for a single metric. Overridden if breakdownBy is supplied.',
+      }),
+    },
+    extraText: {
+      types: ['string'],
+      help: i18n.translate('expressionNewMetricVis.function.extra.help', {
+        defaultMessage: 'Text to be shown above metric value. Overridden by secondaryMetric.',
+      }),
+    },
     progressMin: {
       types: ['number'],
       default: 0,
@@ -125,6 +137,8 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visType,
         visConfig: {
           metric: {
+            subtitle: args.subtitle,
+            extraText: args.extraText,
             palette: args.palette?.params,
             progressMin: args.progressMin,
             progressMax: args.progressMax,

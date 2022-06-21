@@ -22,9 +22,11 @@ export interface MetricArguments {
   metric: ExpressionValueVisDimension | string;
   secondaryMetric?: ExpressionValueVisDimension | string;
   breakdownBy?: ExpressionValueVisDimension | string;
-  progressMin?: number;
+  subtitle?: string;
+  extraText?: string;
+  progressMin: number;
   progressMax?: number;
-  progressDirection?: LayoutDirection;
+  progressDirection: LayoutDirection;
   palette?: PaletteOutput<CustomPaletteState>;
   maxCols?: number;
   numTiles?: number;

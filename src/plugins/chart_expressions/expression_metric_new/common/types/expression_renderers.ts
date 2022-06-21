@@ -13,15 +13,17 @@ import { LayoutDirection } from '@elastic/charts';
 export const visType = 'metric';
 
 export interface DimensionsVisParam {
-  metric: ExpressionValueVisDimension;
-  secondaryMetric?: ExpressionValueVisDimension;
-  breakdownBy?: ExpressionValueVisDimension;
+  metric: ExpressionValueVisDimension | string;
+  secondaryMetric?: ExpressionValueVisDimension | string;
+  breakdownBy?: ExpressionValueVisDimension | string;
 }
 
 export interface MetricVisParam {
+  subtitle?: string;
+  extraText?: string;
   palette?: CustomPaletteState;
   progressMin: number;
-  progressMax: number;
+  progressMax?: number;
   progressDirection: LayoutDirection;
 }
 

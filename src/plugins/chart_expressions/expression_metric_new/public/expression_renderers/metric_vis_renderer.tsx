@@ -50,9 +50,14 @@ export const getMetricVisRenderer = (
         visConfig.dimensions.metric,
         visData.columns
       )!;
+
       const secondaryMetricColumn = visConfig.dimensions.secondaryMetric
         ? getColumnByAccessor(visConfig.dimensions.secondaryMetric, visData.columns)
         : undefined;
+
+      const extraText = secondaryMetricColumn
+        ? visData.rows[0][secondaryMetricColumn.id]
+        : visConfig.metric.extraText;
 
       const data = [
         [
@@ -60,13 +65,11 @@ export const getMetricVisRenderer = (
             value: visData.rows[0][primaryMetricColumn.id],
             color: '#5e5e5e',
             title: primaryMetricColumn.name,
-            subtitle: 'Write',
+            subtitle: visConfig.metric.subtitle,
             valueFormatter: (d: unknown) => '' + d,
             domain: { min: visConfig.metric.progressMin, max: visConfig.metric.progressMax },
             progressBarDirection: visConfig.metric.progressDirection,
-            extra: secondaryMetricColumn ? (
-              <span>{visData.rows[0][secondaryMetricColumn.id]}</span>
-            ) : undefined,
+            extra: <span>{extraText}</span>,
           },
         ],
       ];
