@@ -99,7 +99,7 @@ export class AnalyticsManager {
   private findTrainedModel(id: string): estypes.MlTrainedModelConfig {
     const trainedModel = this._trainedModels.find((js) => js.model_id === id);
     if (trainedModel === undefined) {
-      throw Error('Job cannot be found');
+      throw Error('Trained model cannot be found');
     }
     return trainedModel;
   }
@@ -227,9 +227,6 @@ export class AnalyticsManager {
     if (sourceJobId !== undefined) {
       try {
         data = this.findJob(sourceJobId);
-        if (data === undefined) {
-          throw Error('Job cannot be found');
-        }
 
         nextLinkId = data?.source?.index[0];
         nextType = JOB_MAP_NODE_TYPES.INDEX;
