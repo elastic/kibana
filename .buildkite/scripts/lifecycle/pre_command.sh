@@ -4,12 +4,11 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-echo '--- Setup node environment'
-
 # By default, all steps should set up these things to get a full environment before running
 # It can be skipped for pipeline upload steps though, to make job start time a little faster
 if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
   if [[ -d .buildkite/scripts && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"* ]]; then
+    echo '--- Setup environment vars'
     source .buildkite/scripts/common/env.sh
     source .buildkite/scripts/common/setup_node.sh
   fi

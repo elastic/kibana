@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./lib",
+    "rootDir": "./",
     "target": "es2019",
     "strict": true,
     "module": "commonjs",
@@ -9,7 +8,12 @@
     "removeComments": false,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "lib": ["es2020"]
+    "lib": ["es2020"],
+    "paths": {
+      "#pipeline-utils": ["./pipeline-utils/index.ts"],
+      "#pipeline-utils/*": ["./pipeline-utils/*"]
+    },
+    "useUnknownInCatchVariables": false
   },
   "exclude": ["**/*.test.ts", "**/vm-filesystem/**", "**/dist"]
 }

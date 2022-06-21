@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { CiStats } = require('#lib');
+const { CiStats } = require('#pipeline-utils');
 
 (async () => {
   try {

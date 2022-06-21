@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { TestFailures } = require('#lib');
+const { TestFailures } = require('#pipeline-utils');
 
 (async () => {
   try {

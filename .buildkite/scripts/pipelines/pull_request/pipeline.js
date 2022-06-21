@@ -8,7 +8,7 @@
 
 const execSync = require('child_process').execSync;
 const fs = require('fs');
-const { areChangesSkippable, doAnyChangesMatch } = require('#lib');
+const { areChangesSkippable, doAnyChangesMatch } = require('#pipeline-utils');
 const prConfigs = require('../../../pull_requests.json');
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 
