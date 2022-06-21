@@ -15,7 +15,7 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 const GridHeaderContainer = styled(CardSectionPanel)`
   padding-top: 0;
-  padding-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 export type GridHeaderProps = Pick<CommonProps, 'data-test-subj'> & {
