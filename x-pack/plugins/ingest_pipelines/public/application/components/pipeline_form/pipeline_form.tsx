@@ -27,7 +27,7 @@ export interface PipelineFormProps {
   saveError: any;
   defaultValue?: Pipeline;
   isEditing?: boolean;
-  disallowNameEdition?: boolean;
+  canEditName?: boolean;
 }
 
 const defaultFormValue: Pipeline = Object.freeze({
@@ -44,7 +44,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   saveError,
   isEditing,
   onCancel,
-  disallowNameEdition,
+  canEditName,
 }) => {
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
@@ -131,7 +131,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
           isEditing={isEditing}
-          disallowNameEdition={disallowNameEdition}
+          canEditName={canEditName}
         />
 
         {/* Form submission */}

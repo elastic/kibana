@@ -28,7 +28,7 @@ interface Props {
   hasVersion: boolean;
   onEditorFlyoutOpen: () => void;
   isEditing?: boolean;
-  disallowNameEdition?: boolean;
+  canEditName?: boolean;
 }
 
 const UseField = getUseField({ component: Field });
@@ -42,7 +42,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   isEditing,
   hasVersion,
   onEditorFlyoutOpen,
-  disallowNameEdition,
+  canEditName,
 }) => {
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(hasVersion);
 
@@ -76,7 +76,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
           path="name"
           componentProps={{
             ['data-test-subj']: 'nameField',
-            euiFieldProps: { disabled: disallowNameEdition || Boolean(isEditing) },
+            euiFieldProps: { disabled: canEditName === false || Boolean(isEditing) },
           }}
         />
 

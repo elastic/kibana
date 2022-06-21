@@ -53,7 +53,7 @@ function useFormDefaultValue(sourcePipeline?: Pipeline) {
     }
   }, [sourcePipeline, history, locationSearchParams]);
 
-  return { formDefaultValue, disallowNameEdition: locationSearchParams.has('name') };
+  return { formDefaultValue, canEditName: !locationSearchParams.has('name') };
 }
 
 export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Props> = ({
@@ -65,7 +65,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const { formDefaultValue, disallowNameEdition } = useFormDefaultValue(sourcePipeline);
+  const { formDefaultValue, canEditName } = useFormDefaultValue(sourcePipeline);
   const redirectToPathOrRedirectPath = useRedirectToPathOrRedirectPath(history);
 
   const onSave = async (pipeline: Pipeline) => {
@@ -123,7 +123,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
 
       <PipelineForm
         defaultValue={formDefaultValue}
-        disallowNameEdition={disallowNameEdition}
+        canEditName={canEditName}
         onSave={onSave}
         onCancel={onCancel}
         isSaving={isSaving}
