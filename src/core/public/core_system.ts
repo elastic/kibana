@@ -143,10 +143,9 @@ export class CoreSystem {
     return reportData;
   }
 
-  private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart, appId: string) {
+  private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart) {
     analytics.reportEvent('Loaded Kibana', {
       kibana_version: this.coreContext.env.packageInfo.version,
-      first_app: appId,
       ...fetchOptionalMemoryInfo(),
       ...this.getLoadMarksInfo(),
     });
@@ -390,10 +389,6 @@ export class CoreSystem {
             description: 'When the application emmits the first app navigation',
             optional: true,
           },
-        },
-        first_app: {
-          type: 'keyword',
-          _meta: { description: 'The first app loaded in this session' },
         },
       },
     });
