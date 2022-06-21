@@ -48,7 +48,7 @@ export interface EsQueryFiltersConfig {
   ignoreFilterIfFieldNotInIndex?: boolean;
 
   /**
-   * the nest field type requires a special query syntax, which includes an optional ignore_unmapped parameter that indicates whether to ignore an unmapped path and not return any documents instead of an error.
+   * the nested field type requires a special query syntax, which includes an optional ignore_unmapped parameter that indicates whether to ignore an unmapped path and not return any documents instead of an error.
    * The optional ignore_unmapped parameter defaults to false.
    * This `nestedIgnoreUnmapped` param allows creating queries with "ignore_unmapped": true
    */
