@@ -101,6 +101,9 @@
       "label": "Tutorials",
       "items": [
         {
+          "id": "kibDevTutorialSetupWindowsDevWSL"
+        },
+        {
           "id": "kibDevTutorialTestingPlugins"
         },
         {

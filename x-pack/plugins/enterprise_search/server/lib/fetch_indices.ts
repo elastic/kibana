@@ -10,13 +10,14 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import { ElasticsearchIndex } from '../../common/types';
 
-export const fetchIndices = async (client: IScopedClusterClient): Promise<ElasticsearchIndex[]> => {
-  const indexNamesString = 'search-*';
-  const indexNamesRegEx = /^search-*/;
-
+export const fetchIndices = async (
+  client: IScopedClusterClient,
+  indexPattern: string,
+  indexRegExp: RegExp
+): Promise<ElasticsearchIndex[]> => {
   // This call retrieves alias and settings information about indices
   const indices = await client.asCurrentUser.indices.get({
-    index: indexNamesString,
+    index: indexPattern,
     expand_wildcards: ['open'],
     // only get specified index properties from ES to keep the response under 536MB
     // node.js string length limit: https://github.com/nodejs/node/issues/33960
@@ -30,7 +31,7 @@ export const fetchIndices = async (client: IScopedClusterClient): Promise<Elasti
   }
 
   const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
-    index: indexNamesString,
+    index: indexPattern,
     expand_wildcards: ['open'],
     metric: ['docs', 'store'],
   });
@@ -73,5 +74,5 @@ export const fetchIndices = async (client: IScopedClusterClient): Promise<Elasti
       });
       return engines;
     })
-    .filter(({ name }) => name.match(indexNamesRegEx));
+    .filter(({ name }) => name.match(indexRegExp));
 };
