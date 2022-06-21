@@ -164,7 +164,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     loadIndices: async () => {
       const { http } = HttpLogic.values;
       try {
-        const indices = await http.get('/internal/enterprise_search/indices');
+        const indices = await http.get('/internal/enterprise_search/search_indices');
         actions.onLoadIndicesSuccess(indices as ElasticsearchIndex[]);
       } catch (e) {
         flashAPIErrors(e);

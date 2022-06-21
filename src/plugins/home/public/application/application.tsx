@@ -30,15 +30,27 @@ export const renderApp = async (
 ) => {
   const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
   const { featureCatalogue, chrome } = getServices();
-  const navLinks = chrome.navLinks.getAll();
 
   // all the directories could be get in "start" phase of plugin after all of the legacy plugins will be moved to a NP
   const directories = featureCatalogue.get();
 
   // Filters solutions by available nav links
-  const solutions = featureCatalogue
-    .getSolutions()
-    .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
+  const navLinksSubscription = chrome.navLinks.getNavLinks$().subscribe((navLinks) => {
+    const solutions = featureCatalogue
+      .getSolutions()
+      .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
+
+    render(
+      <RedirectAppLinks application={coreStart.application}>
+        <KibanaThemeProvider theme$={theme$}>
+          <KibanaContextProvider services={{ ...coreStart }}>
+            <HomeApp directories={directories} solutions={solutions} />
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
+      </RedirectAppLinks>,
+      element
+    );
+  });
 
   chrome.setBreadcrumbs([{ text: homeTitle }]);
 
@@ -49,19 +61,9 @@ export const renderApp = async (
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 
-  render(
-    <RedirectAppLinks application={coreStart.application}>
-      <KibanaThemeProvider theme$={theme$}>
-        <KibanaContextProvider services={{ ...coreStart }}>
-          <HomeApp directories={directories} solutions={solutions} />
-        </KibanaContextProvider>
-      </KibanaThemeProvider>
-    </RedirectAppLinks>,
-    element
-  );
-
   return () => {
     unmountComponentAtNode(element);
     unlisten();
+    navLinksSubscription.unsubscribe();
   };
 };
