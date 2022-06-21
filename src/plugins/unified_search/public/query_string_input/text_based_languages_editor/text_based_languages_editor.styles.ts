@@ -32,7 +32,7 @@ export const textBasedLanguagedEditorStyles = (
     },
     resizableContainer: {
       display: 'flex',
-      width: isCodeEditorExpanded ? '100%' : 'calc(100% - 40px)',
+      width: isCodeEditorExpanded ? '100%' : 'calc(100% - 80px)',
       alignItems: isCompactFocused ? 'flex-start' : 'center',
       border: !isCompactFocused ? euiTheme.border.thin : 'none',
     },

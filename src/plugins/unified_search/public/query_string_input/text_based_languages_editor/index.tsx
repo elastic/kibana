@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
+  EuiPopover,
   EuiResizeObserver,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
@@ -30,6 +31,7 @@ import {
   EDITOR_MAX_HEIGHT,
   EDITOR_MIN_HEIGHT,
 } from './text_based_languages_editor.styles';
+import { MemoizedDocumentation } from './documentation';
 import { useDebounceWithOptions } from './helpers';
 
 interface TextBasedLanguagesEditorProps {
@@ -54,6 +56,7 @@ const languageId = (language: string) => {
     }
   }
 };
+
 let clickedOutside = false;
 let initialRender = true;
 
@@ -74,8 +77,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
-  const [isWordWrapped, setIsWordWrapped] = useState(true);
+  const [isWordWrapped, setIsWordWrapped] = useState(false);
   const [userDrags, setUserDrags] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
+
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
     isCompactFocused,
@@ -200,6 +205,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     hideCursorInOverviewRuler: true,
     scrollbar: {
       vertical: 'auto',
+      horizontal: 'hidden',
     },
     overviewRulerBorder: false,
   };
@@ -227,7 +233,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               aria-label={
                 isWordWrapped
                   ? i18n.translate(
-                      'unifiedSearch.query.textBasedLanguagesEditor..disableWordWrapLabel',
+                      'unifiedSearch.query.textBasedLanguagesEditor.disableWordWrapLabel',
                       {
                         defaultMessage: 'Disable word wrap',
                       }
@@ -249,19 +255,42 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="minimize"
-              color="text"
-              aria-label={i18n.translate(
-                'unifiedSearch.query.textBasedLanguagesEditor.MinimizeEditor',
-                {
-                  defaultMessage: 'Minimize editor',
-                }
-              )}
-              onClick={() => {
-                expandCodeEditor(false);
-              }}
-            />
+            <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="minimize"
+                  color="text"
+                  aria-label={i18n.translate(
+                    'unifiedSearch.query.textBasedLanguagesEditor.MinimizeEditor',
+                    {
+                      defaultMessage: 'Minimize editor',
+                    }
+                  )}
+                  onClick={() => {
+                    expandCodeEditor(false);
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  panelClassName="documentation__docs--overlay"
+                  panelPaddingSize="none"
+                  isOpen={isHelpOpen}
+                  closePopover={() => setIsHelpOpen(false)}
+                  ownFocus={false}
+                  button={
+                    <EuiButtonIcon
+                      iconType="documentation"
+                      color="text"
+                      aria-label="Documentation"
+                      onClick={() => setIsHelpOpen(true)}
+                    />
+                  }
+                >
+                  <MemoizedDocumentation />
+                </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
@@ -337,13 +366,39 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         </EuiResizeObserver>
         {!isCodeEditorExpanded && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              display="base"
-              iconType="expand"
-              size="m"
-              aria-label="Expand"
-              onClick={() => expandCodeEditor(true)}
-            />
+            <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  display="base"
+                  iconType="expand"
+                  size="m"
+                  aria-label="Expand"
+                  onClick={() => expandCodeEditor(true)}
+                  css={{ borderRadius: 0 }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  panelClassName="documentation__docs--overlay"
+                  panelPaddingSize="none"
+                  isOpen={isHelpOpen}
+                  closePopover={() => setIsHelpOpen(false)}
+                  ownFocus={false}
+                  button={
+                    <EuiButtonIcon
+                      display="base"
+                      iconType="documentation"
+                      size="m"
+                      aria-label="Documentation"
+                      onClick={() => setIsHelpOpen(true)}
+                      css={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                    />
+                  }
+                >
+                  <MemoizedDocumentation />
+                </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
