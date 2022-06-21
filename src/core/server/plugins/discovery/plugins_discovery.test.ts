@@ -11,16 +11,16 @@ import { REPO_ROOT } from '@kbn/utils';
 import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
 import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { firstValueFrom, from } from 'rxjs';
 import { map, toArray } from 'rxjs/operators';
 import { resolve } from 'path';
 import { ConfigService, Env } from '@kbn/config';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
-import { CoreContext } from '../../core_context';
 import { PluginType } from '../types';
 
 const KIBANA_ROOT = process.cwd();

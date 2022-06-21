@@ -55,11 +55,6 @@ export const latestFindingsMapping: MappingTypeMapping = {
         id: {
           type: 'keyword',
           ignore_above: 1024,
-          fields: {
-            text: {
-              type: 'text',
-            },
-          },
         },
         name: {
           type: 'keyword',
@@ -85,16 +80,6 @@ export const latestFindingsMapping: MappingTypeMapping = {
         },
       },
     },
-    resource_id: {
-      // deprecated - the new field is resource.id
-      type: 'text',
-      fields: {
-        keyword: {
-          ignore_above: 1024,
-          type: 'keyword',
-        },
-      },
-    },
     rule: {
       properties: {
         name: {
@@ -106,6 +91,10 @@ export const latestFindingsMapping: MappingTypeMapping = {
               type: 'keyword',
             },
           },
+        },
+        id: {
+          ignore_above: 1024,
+          type: 'keyword',
         },
         benchmark: {
           properties: {

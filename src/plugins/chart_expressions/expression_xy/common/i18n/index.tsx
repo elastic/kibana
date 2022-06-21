@@ -41,6 +41,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.yRightTitle.help', {
       defaultMessage: 'Y right axis title',
     }),
+  getXExtentHelp: () =>
+    i18n.translate('expressionXY.xyVis.xExtent.help', {
+      defaultMessage: 'X axis extents',
+    }),
   getYLeftExtentHelp: () =>
     i18n.translate('expressionXY.xyVis.yLeftExtent.help', {
       defaultMessage: 'Y left axis extents',
@@ -120,6 +124,10 @@ export const strings = {
   getAriaLabelHelp: () =>
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
+    }),
+  getDetailedTooltipHelp: () =>
+    i18n.translate('expressionXY.xyVis.detailedTooltip.help', {
+      defaultMessage: 'Show detailed tooltip',
     }),
   getShowTooltipHelp: () =>
     i18n.translate('expressionXY.xyVis.showTooltip.help', {

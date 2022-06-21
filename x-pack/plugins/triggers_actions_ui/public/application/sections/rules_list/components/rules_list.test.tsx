@@ -988,6 +988,19 @@ describe('rules_list component with items', () => {
       })
     );
   });
+
+  it('rule list items with actions are editable if canExecuteAction is true', async () => {
+    await setup();
+    expect(wrapper.find('.euiButtonIcon-isDisabled').length).toEqual(2);
+  });
+
+  it('rule list items with actions are not editable if canExecuteAction is false', async () => {
+    const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+    hasExecuteActionsCapability.mockReturnValue(false);
+    await setup();
+    expect(wrapper.find('.euiButtonIcon-isDisabled').length).toEqual(8);
+    hasExecuteActionsCapability.mockReturnValue(true);
+  });
 });
 
 describe('rules_list component empty with show only capability', () => {
@@ -1143,6 +1156,7 @@ describe('rules_list with show only capability', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(wrapper.find('[data-test-subj="deleteActionHoverButton"]')).toHaveLength(0);
+    hasAllPrivilege.mockReturnValue(true);
   });
 
   it('renders table of rules with actions menu collapsedItemActions', async () => {
@@ -1273,7 +1287,6 @@ describe('rules_list with disabled items', () => {
 
   it('clicking the notify badge shows the snooze panel', async () => {
     await setup();
-
     expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeFalsy();
 
     wrapper
@@ -1283,7 +1296,7 @@ describe('rules_list with disabled items', () => {
 
     expect(wrapper.find('[data-test-subj="rulesListNotifyBadge"]').exists()).toBeTruthy();
 
-    wrapper.find('[data-test-subj="rulesListNotifyBadge"]').first().simulate('click');
+    wrapper.find('[data-test-subj="rulesListNotifyBadge-unsnoozed"]').first().simulate('click');
 
     expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
   });

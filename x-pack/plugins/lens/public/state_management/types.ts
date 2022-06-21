@@ -7,8 +7,8 @@
 
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
-import { Filter } from '@kbn/es-query';
-import { Query, SavedQuery } from '@kbn/data-plugin/public';
+import { Filter, Query } from '@kbn/es-query';
+import { SavedQuery } from '@kbn/data-plugin/public';
 import { Document } from '../persistence';
 
 import { TableInspectorAdapter } from '../editor_frame_service/types';
@@ -29,6 +29,7 @@ export type DatasourceStates = Record<string, { state: unknown; isLoading: boole
 export interface PreviewState {
   visualization: VisualizationState;
   datasourceStates: DatasourceStates;
+  activeData?: TableInspectorAdapter;
 }
 export interface EditorFrameState extends PreviewState {
   activeDatasourceId: string | null;
@@ -44,7 +45,6 @@ export interface LensAppState extends EditorFrameState {
   // Determines whether the lens editor shows the 'save and return' button, and the originating app breadcrumb.
   isLinkedToOriginatingApp?: boolean;
   isSaveable: boolean;
-  activeData?: TableInspectorAdapter;
 
   isLoading: boolean;
   query: Query;

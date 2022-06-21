@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
 import type { Metric, MetricType } from '../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
 
@@ -220,7 +220,10 @@ export const getSiblingPipelineSeriesFormula = (
   // support nested aggs with formula
   const additionalSubFunction = metrics.find((metric) => metric.id === subMetricField);
   let formula = `${aggregationMap.name}(`;
-  let minMax = '';
+  let minimumValue = '';
+  if (currentMetric.type === 'positive_only') {
+    minimumValue = `, 0`;
+  }
   if (additionalSubFunction) {
     const additionalPipelineAggMap = SUPPORTED_METRICS[additionalSubFunction.type];
     if (!additionalPipelineAggMap) {
@@ -228,14 +231,9 @@ export const getSiblingPipelineSeriesFormula = (
     }
     const additionalSubFunctionField =
       additionalSubFunction.type !== 'count' ? additionalSubFunction.field : '';
-    if (currentMetric.type === 'positive_only') {
-      minMax = `, 0, ${pipelineAggMap.name}(${additionalPipelineAggMap.name}(${
-        additionalSubFunctionField ?? ''
-      }))`;
-    }
     formula += `${pipelineAggMap.name}(${additionalPipelineAggMap.name}(${
       additionalSubFunctionField ?? ''
-    }))${minMax})`;
+    }))${minimumValue})`;
   } else {
     let additionalFunctionArgs;
     // handle percentile and percentile_rank
@@ -246,14 +244,9 @@ export const getSiblingPipelineSeriesFormula = (
     if (pipelineAggMap.name === 'percentile_rank' && nestedMetaValue) {
       additionalFunctionArgs = `, value=${nestedMetaValue}`;
     }
-    if (currentMetric.type === 'positive_only') {
-      minMax = `, 0, ${pipelineAggMap.name}(${subMetricField ?? ''}${
-        additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
-      })`;
-    }
     formula += `${pipelineAggMap.name}(${subMetricField ?? ''}${
       additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
-    })${minMax})`;
+    })${minimumValue})`;
   }
   return formula;
 };

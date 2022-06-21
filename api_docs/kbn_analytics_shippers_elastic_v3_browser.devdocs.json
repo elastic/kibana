@@ -24,7 +24,9 @@
         "type": "Class",
         "tags": [],
         "label": "ElasticV3BrowserShipper",
-        "description": [],
+        "description": [
+          "\nElastic V3 shipper to use in the browser."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/analytics-shippers-elastic-v3-browser",
@@ -45,7 +47,9 @@
             "type": "string",
             "tags": [],
             "label": "shipperName",
-            "description": [],
+            "description": [
+              "Shipper's unique name"
+            ],
             "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
             "deprecated": false
           },
@@ -55,7 +59,9 @@
             "type": "Object",
             "tags": [],
             "label": "telemetryCounter$",
-            "description": [],
+            "description": [
+              "Observable to emit the stats of the processed events."
+            ],
             "signature": [
               "Subject",
               "<",
@@ -71,7 +77,9 @@
             "type": "Function",
             "tags": [],
             "label": "Constructor",
-            "description": [],
+            "description": [
+              "\nCreates a new instance of the {@link ElasticV3BrowserShipper}."
+            ],
             "signature": [
               "any"
             ],
@@ -84,7 +92,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "{@link ElasticV3ShipperOptions }"
+                ],
                 "signature": [
                   "ElasticV3ShipperOptions"
                 ],
@@ -98,7 +108,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "initContext",
-                "description": [],
+                "description": [
+                  "{@link AnalyticsClientInitContext }"
+                ],
                 "signature": [
                   "AnalyticsClientInitContext"
                 ],
@@ -115,7 +127,9 @@
             "type": "Function",
             "tags": [],
             "label": "extendContext",
-            "description": [],
+            "description": [
+              "\nUses the `cluster_uuid` and `license_id` from the context to hold them in memory for the generation of the headers\nused later on in the HTTP request."
+            ],
             "signature": [
               "(newContext: ",
               "EventContext",
@@ -130,7 +144,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "newContext",
-                "description": [],
+                "description": [
+                  "The full new context to set {@link EventContext }"
+                ],
                 "signature": [
                   "EventContext"
                 ],
@@ -147,7 +163,9 @@
             "type": "Function",
             "tags": [],
             "label": "optIn",
-            "description": [],
+            "description": [
+              "\nWhen `false`, it flushes the internal queue and stops sending events."
+            ],
             "signature": [
               "(isOptedIn: boolean) => void"
             ],
@@ -160,7 +178,9 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "isOptedIn",
-                "description": [],
+                "description": [
+                  "`true` for resume sending events. `false` to stop."
+                ],
                 "signature": [
                   "boolean"
                 ],
@@ -177,7 +197,9 @@
             "type": "Function",
             "tags": [],
             "label": "reportEvents",
-            "description": [],
+            "description": [
+              "\nEnqueues the events to be sent to in a batched approach."
+            ],
             "signature": [
               "(events: ",
               "Event",
@@ -192,7 +214,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "events",
-                "description": [],
+                "description": [
+                  "batched events {@link Event }"
+                ],
                 "signature": [
                   "Event",
                   "[]"
@@ -210,7 +234,9 @@
             "type": "Function",
             "tags": [],
             "label": "shutdown",
-            "description": [],
+            "description": [
+              "\nShuts down the shipper.\nTriggers a flush of the internal queue to attempt to send any events held in the queue."
+            ],
             "signature": [
               "() => void"
             ],

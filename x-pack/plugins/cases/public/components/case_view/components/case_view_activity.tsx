@@ -7,12 +7,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useQueryClient } from 'react-query';
-import { CASE_VIEW_CACHE_KEY } from '../../../containers/constants';
+import { useGetConnectors } from '../../../containers/configure/use_connectors';
 import { CaseSeverity } from '../../../../common/api';
-import { useConnectors } from '../../../containers/configure/use_connectors';
 import { useCaseViewNavigation } from '../../../common/navigation';
-import { UpdateKey, UseFetchAlertData } from '../../../../common/ui/types';
+import { UseFetchAlertData } from '../../../../common/ui/types';
 import { Case, CaseStatuses } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import { CasesNavigation } from '../../links';
@@ -33,25 +31,21 @@ export const CaseViewActivity = ({
   caseData,
   actionsNavigation,
   showAlertDetails,
-  updateCase,
   useFetchAlertData,
 }: {
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   caseData: Case;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
-  updateCase: () => void;
   useFetchAlertData: UseFetchAlertData;
 }) => {
   const { userCanCrud } = useCasesContext();
   const { getCaseViewUrl } = useCaseViewNavigation();
-  const queryClient = useQueryClient();
 
-  const {
-    data: userActionsData,
-    refetch: fetchCaseUserActions,
-    isLoading: isLoadingUserActions,
-  } = useGetCaseUserActions(caseData.id, caseData.connector.id);
+  const { data: userActionsData, isLoading: isLoadingUserActions } = useGetCaseUserActions(
+    caseData.id,
+    caseData.connector.id
+  );
 
   const onShowAlertDetails = useCallback(
     (alertId: string, index: string) => {
@@ -62,17 +56,9 @@ export const CaseViewActivity = ({
     [showAlertDetails]
   );
 
-  const handleUpdateField = useCallback(
-    (_newCase: Case, _updateKey: UpdateKey) => {
-      queryClient.invalidateQueries(CASE_VIEW_CACHE_KEY);
-    },
-    [queryClient]
-  );
-
   const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
     caseId: caseData.id,
     caseData,
-    handleUpdateField,
   });
 
   const changeStatus = useCallback(
@@ -102,20 +88,12 @@ export const CaseViewActivity = ({
     [onUpdateField]
   );
 
-  const { loading: isLoadingConnectors, connectors } = useConnectors();
+  const { isLoading: isLoadingConnectors, data: connectors = [] } = useGetConnectors();
 
   const [connectorName, isValidConnector] = useMemo(() => {
     const connector = connectors.find((c) => c.id === caseData.connector.id);
     return [connector?.name ?? '', !!connector];
   }, [connectors, caseData.connector]);
-
-  const handleUpdateCase = useCallback(
-    (_newCase: Case) => {
-      updateCase();
-      fetchCaseUserActions();
-    },
-    [updateCase, fetchCaseUserActions]
-  );
 
   const onSubmitConnector = useCallback(
     (connectorId, connectorFields, onError, onSuccess) => {
@@ -150,7 +128,6 @@ export const CaseViewActivity = ({
                 caseUserActions={userActionsData.caseUserActions}
                 data={caseData}
                 actionsNavigation={actionsNavigation}
-                fetchUserActions={fetchCaseUserActions}
                 isLoadingDescription={isLoading && loadingKey === 'description'}
                 isLoadingUserActions={isLoadingUserActions}
                 onShowAlertDetails={onShowAlertDetails}
@@ -164,7 +141,6 @@ export const CaseViewActivity = ({
                     />
                   ) : null
                 }
-                updateCase={updateCase}
                 useFetchAlertData={useFetchAlertData}
                 userCanCrud={userCanCrud}
               />
@@ -195,7 +171,6 @@ export const CaseViewActivity = ({
           />
         ) : null}
         <TagList
-          data-test-subj="case-view-tag-list"
           userCanCrud={userCanCrud}
           tags={caseData.tags}
           onSubmit={onSubmitTags}
@@ -211,7 +186,6 @@ export const CaseViewActivity = ({
             isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
             isValidConnector={isLoadingConnectors ? true : isValidConnector}
             onSubmit={onSubmitConnector}
-            updateCase={handleUpdateCase}
             userActions={userActionsData.caseUserActions}
             userCanCrud={userCanCrud}
           />

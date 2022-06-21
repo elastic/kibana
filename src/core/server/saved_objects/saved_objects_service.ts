@@ -9,14 +9,14 @@
 import { Subject, Observable, firstValueFrom } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
-import { CoreService } from '../../types';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
 } from '.';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
-import { CoreContext } from '../core_context';
 import { InternalCoreUsageDataSetup } from '../core_usage_data';
 import {
   ElasticsearchClient,
@@ -50,7 +50,6 @@ import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
-import { DocLinksServiceStart } from '../doc_links';
 
 const kibanaIndex = '.kibana';
 

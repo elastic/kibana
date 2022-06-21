@@ -16,12 +16,13 @@ import type {
   AggregationsSingleBucketAggregateBase,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CoreService } from '../../types';
-import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from '..';
-import { CoreContext } from '../core_context';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
+import type { Logger } from '@kbn/logging';
+import { SavedObjectsServiceStart, SavedObjectTypeRegistry } from '..';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType, InternalHttpServiceSetup } from '../http';
-import { LoggingConfigType } from '../logging';
+
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import type {
   CoreServicesUsageData,

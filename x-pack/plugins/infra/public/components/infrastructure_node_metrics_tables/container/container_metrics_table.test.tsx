@@ -17,6 +17,7 @@ import { createStartServicesAccessorMock } from '../test_helpers';
 import { createLazyContainerMetricsTable } from './create_lazy_container_metrics_table';
 import IntegratedContainerMetricsTable from './integrated_container_metrics_table';
 import { metricByField } from './use_container_metrics_table';
+import type { MetricsExplorerSeries } from '../../../../common/http_api';
 
 describe('ContainerMetricsTable', () => {
   const timerange = {
@@ -110,18 +111,18 @@ function createFetchMock(): NodeMetricsTableFetchMock {
 
 function createContainer(
   name: string,
-  uptimeMs: number,
+  startTime: number,
   cpuUsagePct: number,
   memoryUsageBytes: number
-) {
+): Partial<MetricsExplorerSeries> {
   return {
     id: name,
     rows: [
       {
-        [metricByField['kubernetes.container.start_time']]: uptimeMs,
-        [metricByField['kubernetes.container.cpu.usage.node.pct']]: cpuUsagePct,
+        [metricByField['kubernetes.container.start_time']]: startTime,
+        [metricByField['kubernetes.container.cpu.usage.limit.pct']]: cpuUsagePct,
         [metricByField['kubernetes.container.memory.usage.bytes']]: memoryUsageBytes,
-      },
+      } as MetricsExplorerSeries['rows'][number],
     ],
   };
 }

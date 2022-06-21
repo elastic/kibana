@@ -8,12 +8,8 @@
 
 import { CoreStart, HttpStart } from '@kbn/core/public';
 import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
-import {
-  HasDataViewsResponse,
-  IndicesResponse,
-  IndicesResponseModified,
-  IndicesViaSearchResponse,
-} from '..';
+import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
+import { IndicesResponse, IndicesResponseModified } from '../types';
 
 export class HasData {
   private removeAliases = (source: IndicesResponseModified): boolean => !source.item.indices;

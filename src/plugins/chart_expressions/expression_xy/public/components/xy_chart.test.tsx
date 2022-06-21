@@ -32,6 +32,7 @@ import {
 } from '@elastic/charts';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { DataLayerConfig } from '../../common';
@@ -69,7 +70,7 @@ const onSelectRange = jest.fn();
 describe('XYChart component', () => {
   let getFormatSpy: jest.Mock;
   let convertSpy: jest.Mock;
-  let defaultProps: Omit<XYChartRenderProps, 'data' | 'args'>;
+  let defaultProps: Omit<XYChartRenderProps, 'args'>;
 
   const dataWithoutFormats: Datatable = {
     type: 'datatable',
@@ -109,6 +110,7 @@ describe('XYChart component', () => {
     getFormatSpy.mockReturnValue({ convert: convertSpy });
 
     defaultProps = {
+      data: dataPluginMock.createStartContract(),
       formatFactory: getFormatSpy,
       timeZone: 'UTC',
       renderMode: 'view',
@@ -493,6 +495,40 @@ describe('XYChart component', () => {
 
         expect(component.find(XyEndzones).length).toEqual(0);
       });
+    });
+  });
+
+  describe('x axis extents', () => {
+    const { args } = sampleArgs();
+
+    test('it passes custom x axis extents to elastic-charts settings spec', () => {
+      {
+        const component = shallow(
+          <XYChart
+            {...defaultProps}
+            args={{
+              ...args,
+              layers: [
+                {
+                  ...(args.layers[0] as DataLayerConfig),
+                  isHistogram: true,
+                },
+              ],
+              xExtent: {
+                type: 'axisExtentConfig',
+                mode: 'custom',
+                lowerBound: 123,
+                upperBound: 456,
+              },
+            }}
+          />
+        );
+        expect(component.find(Settings).prop('xDomain')).toEqual({
+          min: 123,
+          max: 456,
+          minInterval: 50,
+        });
+      }
     });
   });
 
@@ -1809,8 +1845,7 @@ describe('XYChart component', () => {
         .find(LineSeries)
         .prop('name') as SeriesNameFn;
 
-      // In this case, the ID is used as the name. This shouldn't happen in practice
-      expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual(null);
+      expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('a');
       expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
     });
 
@@ -1890,7 +1925,7 @@ describe('XYChart component', () => {
       // This accessor has a human-readable name
       expect(nameFn1({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Label A');
       // This accessor does not
-      expect(nameFn2({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual(null);
+      expect(nameFn2({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual('b');
       expect(nameFn1({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
     });
 
@@ -2257,6 +2292,10 @@ describe('XYChart component', () => {
         yLeft: 0,
         yRight: 0,
       },
+      xExtent: {
+        mode: 'dataBounds',
+        type: 'axisExtentConfig',
+      },
       yLeftExtent: {
         mode: 'full',
         type: 'axisExtentConfig',
@@ -2348,6 +2387,10 @@ describe('XYChart component', () => {
         yLeft: 0,
         yRight: 0,
       },
+      xExtent: {
+        mode: 'dataBounds',
+        type: 'axisExtentConfig',
+      },
       yLeftExtent: {
         mode: 'full',
         type: 'axisExtentConfig',
@@ -2423,6 +2466,10 @@ describe('XYChart component', () => {
         x: 0,
         yLeft: 0,
         yRight: 0,
+      },
+      xExtent: {
+        mode: 'dataBounds',
+        type: 'axisExtentConfig',
       },
       yLeftExtent: {
         mode: 'full',
@@ -2951,6 +2998,52 @@ describe('XYChart component', () => {
 
       expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_COLUMN);
       expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_ROW);
+    });
+  });
+
+  describe('detailed tooltip', () => {
+    it('should render custom detailed tooltip', () => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            detailedTooltip: true,
+          }}
+        />
+      );
+      const settings = component.find(Settings);
+      const tooltip = settings.prop('tooltip');
+      expect(tooltip).toEqual(
+        expect.objectContaining({
+          headerFormatter: undefined,
+          customTooltip: expect.any(Function),
+        })
+      );
+    });
+
+    it('should render default tooltip, if detailed tooltip is hidden', () => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            detailedTooltip: false,
+          }}
+        />
+      );
+      const settings = component.find(Settings);
+      const tooltip = settings.prop('tooltip');
+      expect(tooltip).toEqual(
+        expect.objectContaining({
+          headerFormatter: expect.any(Function),
+          customTooltip: undefined,
+        })
+      );
     });
   });
 });

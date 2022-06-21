@@ -8,12 +8,13 @@
 import { hydrateSavedObjects } from './hydrate_saved_object';
 import { DecryptedSyntheticsMonitorSavedObject } from '../../common/types';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
+import { getUptimeESMockClient } from '../legacy_uptime/lib/requests/helper';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+
 import moment from 'moment';
 
 describe('hydrateSavedObjects', () => {
-  const mockEsClient = {
-    search: jest.fn(),
-  };
+  const { uptimeEsClient: mockUptimeEsClient, esClient: mockEsClient } = getUptimeESMockClient();
 
   const mockMonitorTemplate = {
     id: 'my-mock-monitor',
@@ -24,7 +25,7 @@ describe('hydrateSavedObjects', () => {
   };
 
   const serverMock: UptimeServerSetup = {
-    uptimeEsClient: mockEsClient,
+    uptimeEsClient: mockUptimeEsClient,
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
     },
@@ -32,6 +33,12 @@ describe('hydrateSavedObjects', () => {
 
   const toKibanaResponse = (hits: Array<{ _source: Record<string, string | object> }>) => ({
     body: { hits: { hits } },
+  });
+
+  beforeEach(() => {
+    mockUptimeEsClient.baseESClient.security.hasPrivileges = jest
+      .fn()
+      .mockResolvedValue({ has_all_requested: true });
   });
 
   it.each([['browser'], ['http'], ['tcp']])(
@@ -55,12 +62,55 @@ describe('hydrateSavedObjects', () => {
               url: { port: 443, full: 'https://example.com' },
             },
           },
-        ])
+        ]) as unknown as SearchResponse
       );
 
       await hydrateSavedObjects({ monitors, server: serverMock });
 
       expect(serverMock.authSavedObjectsClient?.bulkUpdate).toHaveBeenCalledWith([
+        {
+          ...monitor,
+          attributes: {
+            ...monitor.attributes,
+            'url.port': 443,
+            urls: 'https://example.com',
+          },
+        },
+      ]);
+    }
+  );
+
+  it.each([['browser'], ['http'], ['tcp']])(
+    'does not hydrate when the user does not have permissions',
+    async (type) => {
+      const time = moment();
+      const monitor = {
+        ...mockMonitorTemplate,
+        attributes: { ...mockMonitorTemplate.attributes, type },
+        updated_at: moment(time).subtract(1, 'hour').toISOString(),
+      } as DecryptedSyntheticsMonitorSavedObject;
+
+      const monitors: DecryptedSyntheticsMonitorSavedObject[] = [monitor];
+
+      mockUptimeEsClient.baseESClient.security.hasPrivileges = jest
+        .fn()
+        .mockResolvedValue({ has_all_requested: false });
+
+      mockEsClient.search.mockResolvedValue(
+        toKibanaResponse([
+          {
+            _source: {
+              config_id: monitor.id,
+              '@timestamp': moment(time).toISOString(),
+              url: { port: 443, full: 'https://example.com' },
+            },
+          },
+        ]) as unknown as SearchResponse
+      );
+
+      await hydrateSavedObjects({ monitors, server: serverMock });
+
+      expect(serverMock.authSavedObjectsClient?.bulkUpdate).not.toHaveBeenCalledWith([
         {
           ...monitor,
           attributes: {

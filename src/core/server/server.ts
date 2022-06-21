@@ -10,6 +10,13 @@ import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { DocLinksService } from '@kbn/core-doc-links-server-internal';
+import {
+  LoggingService,
+  ILoggingSystem,
+  config as loggingConfig,
+} from '@kbn/core-logging-server-internal';
 import { coreDeprecationProvider, ensureValidConfiguration } from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
@@ -17,7 +24,6 @@ import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
-import { LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';
@@ -27,23 +33,16 @@ import { EnvironmentService, config as pidConfig } from './environment';
 // do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';
 import { ExecutionContextService } from './execution_context';
-import { DocLinksService } from './doc_links';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
-import { config as loggingConfig } from './logging';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { config as i18nConfig } from './i18n';
 import { ContextService } from './context';
-import {
-  InternalCorePreboot,
-  InternalCoreSetup,
-  InternalCoreStart,
-  ServiceConfigDescriptor,
-} from './internal_types';
+import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { DeprecationsService, config as deprecationConfig } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';

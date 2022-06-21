@@ -12,7 +12,8 @@ import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+
 import {
   AxisExtentModes,
   FillStyles,
@@ -195,6 +196,7 @@ export interface XYArgs extends DataLayerArgs {
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
+  xExtent?: AxisExtentConfigResult;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
   yLeftScale: YScaleType;
@@ -220,6 +222,7 @@ export interface XYArgs extends DataLayerArgs {
   minTimeBarInterval?: string;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
+  detailedTooltip?: boolean;
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
 }
@@ -228,6 +231,7 @@ export interface LayeredXYArgs {
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
+  xExtent?: AxisExtentConfigResult;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
   yLeftScale: YScaleType;
@@ -247,6 +251,7 @@ export interface LayeredXYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  detailedTooltip?: boolean;
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
@@ -258,6 +263,7 @@ export interface XYProps {
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
+  xExtent?: AxisExtentConfigResult;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
   yLeftScale: YScaleType;
@@ -282,6 +288,7 @@ export interface XYProps {
   minTimeBarInterval?: string;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
+  detailedTooltip?: boolean;
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
 }

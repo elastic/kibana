@@ -13,9 +13,9 @@ import { schema } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
 
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
-import { CoreContext } from '../core_context';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '../mocks';
-import { loggingSystemMock } from '../logging/logging_system.mock';
 
 import { PluginWrapper } from './plugin';
 import { PluginManifest, PluginType } from './types';
