@@ -557,6 +557,21 @@ export const RulesList = ({
             ))}
           </EuiFilterGroup>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="refreshRulesButton"
+            iconType="refresh"
+            onClick={loadData}
+            name="refresh"
+            color="primary"
+          >
+            <FormattedMessage
+              id="xpack.observability.rules.refreshRulesButtonLabel"
+              defaultMessage="Refresh"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+        ,
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
