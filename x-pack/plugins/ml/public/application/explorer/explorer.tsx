@@ -638,7 +638,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                     ]}
                     minSize={'200px'}
                     initialSize={20}
-                    paddingSize={'s'}
+                    paddingSize={'m'}
                     onToggleCollapsed={onToggleCollapsed}
                   >
                     <div data-test-subj="mlAnomalyExplorerInfluencerList">
@@ -660,6 +660,9 @@ export const Explorer: FC<ExplorerUIProps> = ({
                           />
                         </h2>
                       </EuiTitle>
+
+                      <EuiSpacer size={'m'} />
+
                       {loading ? (
                         <EuiLoadingContent lines={10} />
                       ) : (

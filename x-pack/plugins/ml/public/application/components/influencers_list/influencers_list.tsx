@@ -136,6 +136,8 @@ const InfluencersByName: FC<InfluencersByNameProps> = ({
       </EuiTitle>
       <EuiSpacer size="xs" />
       {influencerValues}
+
+      <EuiSpacer size="m" />
     </React.Fragment>
   );
 };
