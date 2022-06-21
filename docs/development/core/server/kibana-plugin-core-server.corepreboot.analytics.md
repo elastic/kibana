@@ -4,7 +4,6 @@
 
 ## CorePreboot.analytics property
 
-[AnalyticsServicePreboot](./kibana-plugin-core-server.analyticsservicepreboot.md)
 
 <b>Signature:</b>
 
