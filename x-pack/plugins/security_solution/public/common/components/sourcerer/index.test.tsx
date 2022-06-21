@@ -27,7 +27,6 @@ import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { TimelineId, TimelineType } from '../../../../common/types';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-import { updateUrlParam } from '../../utils/global_query_string';
 
 const mockDispatch = jest.fn();
 
@@ -53,6 +52,16 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   return {
     ...original,
     toMountPoint: jest.fn(),
+  };
+});
+
+const mockUpdateUrlParam = jest.fn();
+jest.mock('../../utils/global_query_string', () => {
+  const original = jest.requireActual('../../utils/global_query_string');
+
+  return {
+    ...original,
+    useUpdateUrlParam: () => mockUpdateUrlParam,
   };
 });
 
@@ -454,9 +463,7 @@ describe('Sourcerer component', () => {
     wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="sourcerer-save"]`).first().simulate('click');
 
-    expect(updateUrlParam).toHaveBeenCalledWith(
-      expect.objectContaining({ urlParamKey: 'sourcerer' })
-    );
+    expect(mockUpdateUrlParam).toHaveBeenCalledTimes(1);
   });
 
   it('resets to default index pattern', async () => {

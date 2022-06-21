@@ -8,6 +8,8 @@
 import { deregisterUrlParam, registerUrlParam, updateUrlParam } from './actions';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './reducer';
 
+const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+
 describe('globalUrlParamReducer', () => {
   describe('#registerUrlParam', () => {
     it('registers the URL param', () => {
@@ -29,9 +31,9 @@ describe('globalUrlParamReducer', () => {
         registerUrlParam({ key, initialValue })
       );
 
-      expect(() => {
-        globalUrlParamReducer(newState, registerUrlParam({ key, initialValue }));
-      }).toThrow();
+      globalUrlParamReducer(newState, registerUrlParam({ key, initialValue }));
+
+      expect(error).toHaveBeenCalledWith("Url param key 'testKey' is already being used.");
     });
   });
 

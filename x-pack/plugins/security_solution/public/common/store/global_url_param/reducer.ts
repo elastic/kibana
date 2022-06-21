@@ -16,7 +16,9 @@ export const globalUrlParamReducer = reducerWithInitialState(initialGlobalUrlPar
   .case(registerUrlParam, (state, { key, initialValue }) => {
     // It doesn't allow the query param to be used twice
     if (state[key] !== undefined) {
-      throw new Error(`Url param string '${key}' is already being used.`);
+      // eslint-disable-next-line no-console
+      console.error(`Url param key '${key}' is already being used.`);
+      return state;
     }
 
     return {

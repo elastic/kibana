@@ -29,7 +29,7 @@ import { useUpdateDataView } from './use_update_data_view';
 import { Trigger } from './trigger';
 import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
-import { updateUrlParam } from '../../utils/global_query_string';
+import { useUpdateUrlParam } from '../../utils/global_query_string';
 import { CONSTANTS } from '../url_state/constants';
 
 export interface SourcererComponentProps {
@@ -41,6 +41,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
   const isDefaultSourcerer = scopeId === SourcererScopeName.default;
+  const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(CONSTANTS.sourcerer);
 
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
@@ -149,18 +150,15 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       );
 
       if (isDefaultSourcerer) {
-        updateUrlParam<SourcererUrlState>({
-          urlParamKey: CONSTANTS.sourcerer,
-          value: {
-            [SourcererScopeName.default]: {
-              id: newSelectedDataView,
-              selectedPatterns: newSelectedPatterns,
-            },
+        updateUrlParam({
+          [SourcererScopeName.default]: {
+            id: newSelectedDataView,
+            selectedPatterns: newSelectedPatterns,
           },
         });
       }
     },
-    [dispatch, scopeId, isDefaultSourcerer]
+    [dispatch, scopeId, isDefaultSourcerer, updateUrlParam]
   );
 
   const onChangeDataView = useCallback(

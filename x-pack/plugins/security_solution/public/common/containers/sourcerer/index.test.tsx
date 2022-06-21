@@ -34,9 +34,7 @@ import {
 import { SelectedDataView, SourcererScopeName } from '../../store/sourcerer/model';
 import { postSourcererDataView } from './api';
 import { sourcererActions } from '../../store/sourcerer';
-
-import { registerUrlParam, updateUrlParam } from '../../utils/global_query_string';
-import { CONSTANTS } from '../../components/url_state/constants';
+import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -62,7 +60,7 @@ jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => [mockRouteSpy],
 }));
 
-(registerUrlParam as jest.Mock).mockReturnValue({ state: null, deregister: () => {} });
+(useInitializeUrlParam as jest.Mock).mockImplementation((_, onInitialize) => onInitialize({}));
 
 const mockSearch = jest.fn();
 
@@ -203,15 +201,14 @@ describe('Sourcerer Hooks', () => {
   it('initilizes dataview with data from query string', async () => {
     const selectedPatterns = ['testPattern-*'];
     const selectedDataViewId = 'security-solution-default';
-    (registerUrlParam as jest.Mock).mockReturnValue({
-      deregister: () => {},
-      state: {
+    (useInitializeUrlParam as jest.Mock).mockImplementation((_, onInitialize) =>
+      onInitialize({
         [SourcererScopeName.default]: {
           id: selectedDataViewId,
           selectedPatterns,
         },
-      },
-    });
+      })
+    );
 
     renderHook<string, void>(() => useInitSourcerer(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -227,21 +224,21 @@ describe('Sourcerer Hooks', () => {
   });
 
   it('sets default selected patterns to the URL when there is no sorcerer URL param in the query string', async () => {
-    (registerUrlParam as jest.Mock).mockReturnValue({ state: null, deregister: () => {} });
+    const updateUrlParam = jest.fn();
+    (useUpdateUrlParam as jest.Mock).mockReturnValue(updateUrlParam);
+    (useInitializeUrlParam as jest.Mock).mockImplementation((_, onInitialize) =>
+      onInitialize(null)
+    );
 
     renderHook<string, void>(() => useInitSourcerer(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
     expect(updateUrlParam).toHaveBeenCalledWith({
-      urlParamKey: CONSTANTS.sourcerer,
-      value: {
-        [SourcererScopeName.default]: {
-          id: DEFAULT_DATA_VIEW_ID,
-          selectedPatterns: DEFAULT_INDEX_PATTERN,
-        },
+      [SourcererScopeName.default]: {
+        id: DEFAULT_DATA_VIEW_ID,
+        selectedPatterns: DEFAULT_INDEX_PATTERN,
       },
-      history: undefined,
     });
   });
 

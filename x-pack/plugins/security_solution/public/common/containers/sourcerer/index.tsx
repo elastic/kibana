@@ -38,7 +38,7 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
 import { useFetchIndex } from '../source';
-import { registerUrlParam, updateUrlParam } from '../../utils/global_query_string';
+import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
 import { CONSTANTS } from '../../components/url_state/constants';
 
 export const useInitSourcerer = (
@@ -49,6 +49,7 @@ export const useInitSourcerer = (
   const initialTimelineSourcerer = useRef(true);
   const initialDetectionSourcerer = useRef(true);
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
+  const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(CONSTANTS.sourcerer);
 
   const getDataViewsSelector = useMemo(
     () => sourcererSelectors.getSourcererDataViewsSelector(),
@@ -91,46 +92,40 @@ export const useInitSourcerer = (
   } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
   const { indexFieldsSearch } = useDataView();
 
-  useEffect(() => {
-    const { state: sourcererInitialState, deregister } = registerUrlParam<SourcererUrlState>({
-      urlParamKey: CONSTANTS.sourcerer,
-    });
-
-    // Initialize the store with value from UrlParam.
-    if (sourcererInitialState != null) {
-      (Object.keys(sourcererInitialState) as SourcererScopeName[]).forEach((scope) => {
-        if (!(scope === SourcererScopeName.default && scopeId === SourcererScopeName.detections)) {
-          dispatch(
-            sourcererActions.setSelectedDataView({
-              id: scope,
-              selectedDataViewId: sourcererInitialState[scope]?.id ?? null,
-              selectedPatterns: sourcererInitialState[scope]?.selectedPatterns ?? [],
-            })
-          );
-        }
-      });
-    } else {
-      // Initialize the UrlParam with values from the store.
-      // It isn't strictly necessary but I am keeping it for compatibility with the previous implementation.
-      if (scopeDataViewId) {
-        updateUrlParam<SourcererUrlState>({
-          urlParamKey: CONSTANTS.sourcerer,
-          value: {
+  const onInitializeUrlParam = useCallback(
+    (initialState: SourcererUrlState | null) => {
+      // Initialize the store with value from UrlParam.
+      if (initialState != null) {
+        (Object.keys(initialState) as SourcererScopeName[]).forEach((scope) => {
+          if (
+            !(scope === SourcererScopeName.default && scopeId === SourcererScopeName.detections)
+          ) {
+            dispatch(
+              sourcererActions.setSelectedDataView({
+                id: scope,
+                selectedDataViewId: initialState[scope]?.id ?? null,
+                selectedPatterns: initialState[scope]?.selectedPatterns ?? [],
+              })
+            );
+          }
+        });
+      } else {
+        // Initialize the UrlParam with values from the store.
+        // It isn't strictly necessary but I am keeping it for compatibility with the previous implementation.
+        if (scopeDataViewId) {
+          updateUrlParam({
             [SourcererScopeName.default]: {
               id: scopeDataViewId,
               selectedPatterns,
             },
-          },
-        });
+          });
+        }
       }
-    }
+    },
+    [dispatch, scopeDataViewId, scopeId, selectedPatterns, updateUrlParam]
+  );
 
-    return () => {
-      deregister();
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- It must run only once when the application is initializing.
-  }, []);
+  useInitializeUrlParam<SourcererUrlState>(CONSTANTS.sourcerer, onInitializeUrlParam);
 
   /*
    * Note for future engineer:

@@ -7,11 +7,12 @@
 
 import * as H from 'history';
 import { parse, ParsedQuery, stringify } from 'query-string';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { url } from '@kbn/kibana-utils-plugin/public';
 import { isEmpty, pickBy } from 'lodash/fp';
 import { useHistory } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import {
   decodeRisonUrlState,
   encodeRisonUrlState,
@@ -19,61 +20,70 @@ import {
   getQueryStringFromLocation,
 } from '../../components/url_state/helpers';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
-import { getStore } from '../../store';
 import { globalUrlParamActions, globalUrlParamSelectors } from '../../store/global_url_param';
 import { useRouteSpy } from '../route/use_route_spy';
 import { getLinkInfo } from '../../links';
 
-interface RegisterUrlParams<State> {
-  urlParamKey: string;
-}
-
 /**
- * Adds UrlParamKey and the initial value to redux store.
+ * Adds urlParamKey and the initial value to redux store.
+ *
+ * Please call this hook at the highest possible level of the rendering tree.
+ * So it is only called when the application starts instead of on every page.
+ *
+ * @param urlParamKey Must not change.
+ * @param onInitialize Called once when initializing.
  */
-export const registerUrlParam = <State>({
-  urlParamKey,
-}: RegisterUrlParams<State>): {
-  state: State | null;
-  deregister: () => void;
-} => {
-  const initialValue = getParamFromQueryString(
-    getQueryStringFromLocation(window.location.search),
-    urlParamKey
-  );
+export const useInitializeUrlParam = <State>(
+  urlParamKey: string,
+  /**
+   * @param state Decoded URL param value.
+   */
+  onInitialize: (state: State | null) => void
+) => {
+  const dispatch = useDispatch();
 
-  const store = getStore();
-  store?.dispatch(
-    globalUrlParamActions.registerUrlParam({ key: urlParamKey, initialValue: initialValue ?? null })
-  );
+  useEffect(() => {
+    const initialValue = getParamFromQueryString(
+      getQueryStringFromLocation(window.location.search),
+      urlParamKey
+    );
 
-  const deregister = () => {
-    store?.dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
-  };
+    dispatch(
+      globalUrlParamActions.registerUrlParam({
+        key: urlParamKey,
+        initialValue: initialValue ?? null,
+      })
+    );
 
-  return { state: decodeRisonUrlState<State>(initialValue ?? undefined), deregister };
+    // execute consumer initialization
+    onInitialize(decodeRisonUrlState<State>(initialValue ?? undefined));
+
+    return () => {
+      dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- It must run only once when the application is initializing.
+  }, []);
 };
-
-interface UpdateUrlParams<State> {
-  urlParamKey: string;
-  value: State | null;
-}
 
 /**
  * Updates URL parameters in the url.
  *
- * Make sure to call `registerUrlParam` before calling this function.
+ * Make sure to call `useInitializeUrlParam` before calling this function.
  */
-export const updateUrlParam = <State>({ urlParamKey, value }: UpdateUrlParams<State>) => {
-  const store = getStore();
-  const encodedValue = value !== null ? encodeRisonUrlState(value) : null;
+export const useUpdateUrlParam = <State>(urlParamKey: string) => {
+  const dispatch = useDispatch();
 
-  store?.dispatch(globalUrlParamActions.updateUrlParam({ key: urlParamKey, value: encodedValue }));
+  const updateUrlParam = useCallback(
+    (value: State | null) => {
+      const encodedValue = value !== null ? encodeRisonUrlState(value) : null;
+      dispatch(globalUrlParamActions.updateUrlParam({ key: urlParamKey, value: encodedValue }));
+    },
+    [dispatch, urlParamKey]
+  );
+
+  return updateUrlParam;
 };
 
-/**
- * Generates the global query string for security solutions links.
- */
 export const useGlobalQueryString = (): string => {
   const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
 

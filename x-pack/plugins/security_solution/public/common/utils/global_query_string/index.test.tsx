@@ -8,10 +8,10 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import {
-  registerUrlParam,
-  updateUrlParam,
+  useInitializeUrlParam,
   useGlobalQueryString,
   useSyncGlobalQueryString,
+  useUpdateUrlParam,
 } from '.';
 import { GlobalUrlParam, globalUrlParamActions } from '../../store/global_url_param';
 import { mockHistory } from '../route/mocks';
@@ -26,16 +26,15 @@ import { createStore } from '../../store';
 import { LinkInfo } from '../../links';
 import { SecurityPageName } from '../../../app/types';
 
-const mockGetState = jest.fn();
 const mockDispatch = jest.fn();
-const mockedStore = {
-  dispatch: mockDispatch,
-  getState: mockGetState,
-};
-jest.mock('../../store', () => ({
-  ...jest.requireActual('../../store'),
-  getStore: () => mockedStore,
-}));
+
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -57,6 +56,26 @@ jest.mock('../../links', () => ({
 }));
 
 describe('global query string', () => {
+  const { storage } = createSecuritySolutionStorageMock();
+
+  const makeStore = (globalUrlParam: GlobalUrlParam) =>
+    createStore(
+      {
+        ...mockGlobalState,
+        globalUrlParam,
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+
+  const makeWrapper = (globalUrlParam?: GlobalUrlParam) => {
+    const wrapper = ({ children }: { children: React.ReactElement }) => (
+      <TestProviders store={makeStore(globalUrlParam ?? {})}>{children}</TestProviders>
+    );
+    return wrapper;
+  };
+
   beforeAll(() => {
     // allow window.location.search to be redefined
     Object.defineProperty(window, 'location', {
@@ -69,22 +88,27 @@ describe('global query string', () => {
     jest.clearAllMocks();
     window.location.search = '?';
   });
-  describe('registerUrlParam', () => {
-    it('returns decoded URL param value', () => {
+  describe('useInitializeUrlParam', () => {
+    it('calls onInitialize with decoded URL param value', () => {
       const urlParamKey = 'testKey';
       window.location.search = `?testKey=(test:(value:123))`;
+      const onInitialize = jest.fn();
 
-      const { state: result } = registerUrlParam({ urlParamKey });
+      renderHook(() => useInitializeUrlParam(urlParamKey, onInitialize), {
+        wrapper: makeWrapper(),
+      });
 
-      expect(result).toEqual({ test: { value: 123 } });
+      expect(onInitialize).toHaveBeenCalledWith({ test: { value: 123 } });
     });
 
-    it('returns deregister function', () => {
+    it('deregister during unmount', () => {
       const urlParamKey = 'testKey';
-      window.location.search = `?testKey=(test:(value:123))`;
+      window.location.search = `?testKey='123'`;
 
-      const { deregister } = registerUrlParam({ urlParamKey });
-      deregister();
+      const { unmount } = renderHook(() => useInitializeUrlParam(urlParamKey, () => {}), {
+        wrapper: makeWrapper(),
+      });
+      unmount();
 
       expect(mockDispatch).toBeCalledWith(
         globalUrlParamActions.deregisterUrlParam({
@@ -98,7 +122,9 @@ describe('global query string', () => {
       const initialValue = 123;
       window.location.search = `?testKey=${initialValue}`;
 
-      registerUrlParam({ urlParamKey });
+      renderHook(() => useInitializeUrlParam(urlParamKey, () => {}), {
+        wrapper: makeWrapper(),
+      });
 
       expect(mockDispatch).toBeCalledWith(
         globalUrlParamActions.registerUrlParam({
@@ -115,13 +141,16 @@ describe('global query string', () => {
       const value = { test: 123 };
       const encodedVaue = '(test:123)';
 
-      mockGetState.mockReturnValue({
-        globalUrlParam: {
-          [urlParamKey]: 'oldValue',
-        },
-      });
+      const globalUrlParam = {
+        [urlParamKey]: 'oldValue',
+      };
 
-      updateUrlParam({ urlParamKey, value });
+      const {
+        result: { current: updateUrlParam },
+      } = renderHook(() => useUpdateUrlParam(urlParamKey), {
+        wrapper: makeWrapper(globalUrlParam),
+      });
+      updateUrlParam(value);
 
       expect(mockDispatch).toBeCalledWith(
         globalUrlParamActions.updateUrlParam({
@@ -134,7 +163,12 @@ describe('global query string', () => {
     it('dispatch updateUrlParam action with null value', () => {
       const urlParamKey = 'testKey';
 
-      updateUrlParam({ urlParamKey, value: null });
+      const {
+        result: { current: updateUrlParam },
+      } = renderHook(() => useUpdateUrlParam(urlParamKey), {
+        wrapper: makeWrapper(),
+      });
+      updateUrlParam(null);
 
       expect(mockDispatch).toBeCalledWith(
         globalUrlParamActions.updateUrlParam({
@@ -147,7 +181,6 @@ describe('global query string', () => {
 
   describe('useGlobalQueryString', () => {
     it('returns global query string', () => {
-      const { storage } = createSecuritySolutionStorageMock();
       const store = createStore(
         {
           ...mockGlobalState,
@@ -173,25 +206,6 @@ describe('global query string', () => {
   });
 
   describe('useSyncGlobalQueryString', () => {
-    const { storage } = createSecuritySolutionStorageMock();
-    const makeStore = (globalUrlParam: GlobalUrlParam) =>
-      createStore(
-        {
-          ...mockGlobalState,
-          globalUrlParam,
-        },
-        SUB_PLUGINS_REDUCER,
-        kibanaObservable,
-        storage
-      );
-
-    const makeWrapper = (globalUrlParam: GlobalUrlParam) => {
-      const wrapper = ({ children }: { children: React.ReactElement }) => (
-        <TestProviders store={makeStore(globalUrlParam)}>{children}</TestProviders>
-      );
-      return wrapper;
-    };
-
     it("doesn't delete other URL params when updating one", async () => {
       const urlParamKey = 'testKey';
       const value = '123';
