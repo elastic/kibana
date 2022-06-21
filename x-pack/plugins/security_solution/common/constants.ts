@@ -327,6 +327,7 @@ export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID] as const;
 /*
   Rule notifications options
 */
+export const ENABLE_OSQUERY_CONNECTOR = true;
 export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.index',
@@ -340,8 +341,11 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.swimlane',
   '.teams',
   '.webhook',
-  '.osquery',
 ];
+
+if (ENABLE_OSQUERY_CONNECTOR) {
+  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.osquery');
+}
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;
 export const NOTIFICATION_THROTTLE_RULE = 'rule' as const;
