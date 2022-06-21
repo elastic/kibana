@@ -8,3 +8,4 @@
 export * from './core_web_vitals';
 export * from './url_ux_query.journey';
 export * from './ux_js_errors.journey';
+export * from './ux_client_metrics.journey';
