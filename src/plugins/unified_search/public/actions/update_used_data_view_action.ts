@@ -15,6 +15,7 @@ export interface UpdateUsedDataViewActionContext {
   initialDataView: string;
   newDataView: string; // null in case of removing
   usedDataViews: string[] | [];
+  globalDataView: string;
 }
 
 export function createUpdateUsedDataViewAction(filterManager: FilterManager): Action {
@@ -25,6 +26,7 @@ export function createUpdateUsedDataViewAction(filterManager: FilterManager): Ac
       initialDataView,
       newDataView,
       usedDataViews,
+      globalDataView,
     }: UpdateUsedDataViewActionContext) => {
       const countOfInitialDataView = usedDataViews.filter((i) => i === initialDataView).length;
       const filters = filterManager.getFilters();
@@ -39,7 +41,7 @@ export function createUpdateUsedDataViewAction(filterManager: FilterManager): Ac
         if (usedDataViews.length > 1) {
           newDataView = usedDataViews[0];
         } else {
-          newDataView = '@todo'; // <= for that case Unified Search Data view should be used
+          newDataView = globalDataView;
         }
       }
 

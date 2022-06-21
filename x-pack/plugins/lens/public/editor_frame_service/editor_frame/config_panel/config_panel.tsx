@@ -95,20 +95,20 @@ export function LayerPanels(
     [updateDatasource]
   );
 
+  const getActionContext = async () => {
+    const trigger = await props.uiActions.getTrigger('UPDATE_USED_DATA_VIEWS_TRIGGER');
+    if (!trigger) {
+      throw new Error('Unable to get context, could not locate trigger');
+    }
+    return {
+      trigger,
+    } as ActionExecutionContext;
+  };
+
   const updateAll = useMemo(
     () => (datasourceId: string, newDatasourceState: unknown, newVisualizationState: unknown) => {
       // React will synchronously update if this is triggered from a third party component,
       // which we don't want. The timeout lets user interaction have priority, then React updates.
-
-      const getActionContext = () => {
-        const trigger = props.uiActions.getTrigger('UPDATE_USED_DATA_VIEWS_TRIGGER');
-        if (!trigger) {
-          throw new Error('Unable to get context, could not locate trigger');
-        }
-        return {
-          trigger,
-        } as ActionExecutionContext;
-      };
 
       setTimeout(() => {
         dispatchLens(
@@ -212,7 +212,19 @@ export function LayerPanels(
             const datasourceId = datasourcePublicAPI?.datasourceId;
             const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
 
-            // todo
+            const action = props.uiActions.getAction('ACTION_UPDATE_USED_DATA_VIEWS');
+
+            action.execute({
+              ...getActionContext(),
+              initialDataView: layerDatasourceState.layers[layerId].indexPatternId,
+              newDataView: '',
+              usedDataViews: Object.values(
+                Object.values(layerDatasourceState.layers).map(
+                  ({ indexPatternId }) => indexPatternId
+                )
+              ),
+              globalDataView: layerDatasourceState.currentIndexPatternId,
+            });
 
             dispatchLens(
               removeOrClearLayer({
