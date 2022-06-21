@@ -97,6 +97,7 @@ export interface DataViewsPublicPluginSetup {}
 
 export interface DataViewsServicePublic extends DataViewsServicePublicMethods {
   getCanSaveSync: () => boolean;
+  getCanSaveAdvancedSettings: () => Promise<boolean>;
   hasData: HasDataService;
 }
 
