@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { JobSelectorControl } from '../job_selector';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';

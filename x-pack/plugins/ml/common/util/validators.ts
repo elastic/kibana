@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ALLOWED_DATA_UNITS } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 

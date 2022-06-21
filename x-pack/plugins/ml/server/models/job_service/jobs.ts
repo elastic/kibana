@@ -9,7 +9,7 @@ import { uniq } from 'lodash';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   getSingleMetricViewerJobErrorMessage,
   parseTimeIntervalForJob,

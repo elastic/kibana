@@ -10,7 +10,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { SwimlaneType } from '../application/explorer/explorer_constants';
 import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';

@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { XJsonMode } from '@kbn/ace';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlContext } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';

@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { duration } from 'moment';
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { AggCardinality } from '../../../common/types/fields';

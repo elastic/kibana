@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { usePageUrlState } from '../../../../util/url_state';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { ExplorationPageUrlState } from '../../../../../../common/types/locator';

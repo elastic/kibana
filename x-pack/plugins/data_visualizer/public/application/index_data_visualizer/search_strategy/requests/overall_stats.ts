@@ -9,11 +9,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import {
-  buildSamplerAggregation,
-  getSamplerAggregationsResponsePath,
-  isPopulatedObject,
-} from '@kbn/ml-data-utils';
+import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   buildBaseFilterCriteria,
   getSafeAggregationName,

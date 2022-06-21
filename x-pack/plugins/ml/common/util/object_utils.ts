@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 /**
  * Get the first key in the object

@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { merge } from 'lodash';
 import moment from 'moment';
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { ml } from '../../../services/ml_api_service';
 import { useMlContext } from '../../../contexts/ml';

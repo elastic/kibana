@@ -6,7 +6,7 @@
  */
 
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { AggName } from '../../../common/types/aggregations';
 import { Dictionary } from '../../../common/types/common';
 import { EsFieldName } from '../../../common/types/fields';

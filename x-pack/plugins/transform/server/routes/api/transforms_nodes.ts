@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { NODES_INFO_PRIVILEGES } from '../../../common/constants';
 

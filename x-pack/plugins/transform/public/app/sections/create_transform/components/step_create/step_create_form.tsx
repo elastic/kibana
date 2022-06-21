@@ -30,7 +30,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/public';
 
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
 import {
   isGetTransformsStatsResponseSchema,

@@ -8,7 +8,7 @@
 import { IUiSettingsClient } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import { TimefilterContract, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   getBoundsRoundedToInterval,
   TimeBuckets,

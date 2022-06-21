@@ -7,7 +7,7 @@
 
 import { each, get } from 'lodash';
 
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { escapeForElasticsearchQuery } from '../../util/string_utils';

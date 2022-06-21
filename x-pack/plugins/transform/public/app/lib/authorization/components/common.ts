@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { Privileges } from '../../../../../common/types/privileges';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { TransformState, TRANSFORM_STATE } from '../constants';
 import { TransformId } from './transform';

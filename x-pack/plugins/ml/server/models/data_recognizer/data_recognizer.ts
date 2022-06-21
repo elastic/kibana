@@ -17,7 +17,7 @@ import type {
 import moment from 'moment';
 import { merge } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlClient } from '../../lib/ml_client';

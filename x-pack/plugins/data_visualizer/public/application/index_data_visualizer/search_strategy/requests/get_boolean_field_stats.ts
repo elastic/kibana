@@ -14,11 +14,9 @@ import type {
   ISearchOptions,
   ISearchStart,
 } from '@kbn/data-plugin/public';
-import {
-  buildSamplerAggregation,
-  getSamplerAggregationsResponsePath,
-  isPopulatedObject,
-} from '@kbn/ml-data-utils';
+import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
 import type {
   Field,
   BooleanFieldStats,

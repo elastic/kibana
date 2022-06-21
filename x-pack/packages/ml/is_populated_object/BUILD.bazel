@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "data-utils"
-PKG_REQUIRE_NAME = "@kbn/ml-data-utils"
+PKG_DIRNAME = "is_populated_object"
+PKG_REQUIRE_NAME = "@kbn/ml-is-populated-object"
 
 SOURCE_FILES = glob(
   [
@@ -36,10 +36,6 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//@elastic/elasticsearch",
-  "@npm//lodash",
-  "//packages/kbn-field-types",
-  "//x-pack/packages/ml/is_populated_object",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -54,11 +50,6 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/lodash",
-  "@npm//@elastic/elasticsearch",
-  "@npm//tslib",
-  "//packages/kbn-field-types:npm_module_types",
-  "//x-pack/packages/ml/is_populated_object:npm_module_types",
 ]
 
 jsts_transpiler(

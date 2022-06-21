@@ -26,7 +26,7 @@ import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/bas
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { isPopulatedObject } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getAnalysisType } from '../../data_frame_analytics/common';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';

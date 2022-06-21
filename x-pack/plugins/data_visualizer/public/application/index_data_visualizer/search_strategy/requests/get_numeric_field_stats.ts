@@ -16,11 +16,8 @@ import {
   ISearchOptions,
 } from '@kbn/data-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
-import {
-  buildSamplerAggregation,
-  getSamplerAggregationsResponsePath,
-  isPopulatedObject,
-} from '@kbn/ml-data-utils';
+import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-data-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   MAX_PERCENT,
   PERCENTILE_SPACING,
