@@ -55,8 +55,11 @@ export class ServiceAPIClient {
     this.server = server;
   }
 
-  getHttpsAgent() {
+  getHttpsAgent(url: string) {
     const config = this.config;
+    if (url !== this.config.devUrl && this.authorization && this.server.isDev) {
+      return;
+    }
     if (config.tls && config.tls.certificate && config.tls.key) {
       const tlsConfig = new SslConfig(config.tls);
 
@@ -151,7 +154,7 @@ export class ServiceAPIClient {
                 Authorization: this.authorization,
               }
             : undefined,
-        httpsAgent: this.getHttpsAgent(),
+        httpsAgent: this.getHttpsAgent(url),
       });
     };
 
