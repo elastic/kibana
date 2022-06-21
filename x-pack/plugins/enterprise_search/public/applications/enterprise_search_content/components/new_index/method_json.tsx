@@ -24,6 +24,7 @@ export const MethodJson: React.FC = () => {
 
   return (
     <NewSearchIndexTemplate
+      title="json"
       description={i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.methodJson.description',
         {

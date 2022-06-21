@@ -26,6 +26,7 @@ export const MethodEs: React.FC = () => {
 
   return (
     <NewSearchIndexTemplate
+      title="Elasticsearch"
       description={i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.methodElasticsearch.description',
         {

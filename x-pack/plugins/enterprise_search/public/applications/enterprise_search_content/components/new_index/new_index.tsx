@@ -17,11 +17,9 @@ import React, { useState, useEffect } from 'react';
 import { useActions } from 'kea';
 
 import {
-  EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -40,11 +38,7 @@ import { MethodCrawler } from './method_crawler';
 import { MethodEs } from './method_es';
 import { MethodJson } from './method_json';
 
-interface CardLabelProps {
-  title: string;
-  description: React.ReactNode;
-  icon: string;
-}
+import './new_index.scss';
 
 interface ButtonGroupOption {
   id: string;
@@ -67,12 +61,26 @@ export const NewIndex: React.FC = () => {
       id: 'crawler',
       icon: 'globe',
       label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
-        defaultMessage: 'Web crawler',
+        defaultMessage: 'Use the web crawler',
       }),
       description: i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.description',
         {
-          defaultMessage: 'Automatically index content from your website or knowlege base',
+          defaultMessage: 'Index content from your websites',
+        }
+      ),
+    },
+    {
+      id: 'connector',
+      icon: 'package',
+      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.label', {
+        defaultMessage: 'Use a data integration',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
+        {
+          defaultMessage:
+            'Index content frrom third-party services such as SharePoint and Google Drive',
         }
       ),
     },
@@ -80,7 +88,7 @@ export const NewIndex: React.FC = () => {
       id: 'api',
       icon: 'visVega',
       label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.label', {
-        defaultMessage: 'API',
+        defaultMessage: 'Use the API',
       }),
       description: i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.buttonGroup.api.description',
@@ -90,45 +98,18 @@ export const NewIndex: React.FC = () => {
       ),
     },
     {
-      id: 'connector',
+      id: 'customIntegration',
       icon: 'package',
-      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.label', {
-        defaultMessage: 'Connector',
-      }),
-      description: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
-        {
-          defaultMessage:
-            'Ingest data from content sources like GitHub, Google Drive or SharePoint',
-        }
-      ),
-    },
-    {
-      id: 'elasticsearch',
-      icon: 'logoElasticsearch',
       label: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.elasticsearch.label',
+        'xpack.enterpriseSearch.content.newIndex.buttonGroup.customIntegration.label',
         {
-          defaultMessage: 'Elasticsearch index',
+          defaultMessage: 'Build a custom data integration',
         }
       ),
       description: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.elasticsearch.description',
+        'xpack.enterpriseSearch.content.newIndex.buttonGroup.customIntegration.description',
         {
-          defaultMessage: 'Connect to an existing Elasticsearch index',
-        }
-      ),
-    },
-    {
-      id: 'json',
-      icon: 'document',
-      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.json.label', {
-        defaultMessage: 'Paste or upload JSON',
-      }),
-      description: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.json.description',
-        {
-          defaultMessage: 'Manually upload JSON files',
+          defaultMessage: 'Clone the connector package repo and start customizing.',
         }
       ),
     },
@@ -150,37 +131,20 @@ export const NewIndex: React.FC = () => {
     </>
   );
 
-  const CardLabel: React.FC<CardLabelProps> = ({ title, description, icon }) => (
-    <span style={{ minWidth: '13rem', width: 'calc(100% - .5rem)', display: 'inline-block' }}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} color="text" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h4>{title}</h4>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      <EuiText size="xs">{description}</EuiText>
-    </span>
-  );
-
   const SelectSearchIndexLayout = () => (
     <>
       <EuiFlexGroup>
-        <EuiFlexItem grow={false} style={{ maxWidth: '22rem' }}>
-          <EuiPanel hasShadow={false} paddingSize="none" grow={false}>
+        <EuiFlexItem grow={false} style={{ maxWidth: '24rem' }}>
+          <EuiPanel hasShadow={false} paddingSize="m" grow={false} color="subdued">
             <EuiTitle size="xs">
               <h4>
                 {i18n.translate('xpack.enterpriseSearch.content.newIndex.selectSearchIndex.title', {
-                  defaultMessage: 'Create a search index',
+                  defaultMessage: 'Select an ingestion method',
                 })}
               </h4>
             </EuiTitle>
             <EuiSpacer size="xs" />
-            <EuiText size="s">
+            <EuiText size="xs">
               <p>
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.newIndex.selectSearchIndex.description',
@@ -195,32 +159,42 @@ export const NewIndex: React.FC = () => {
             <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
               {buttonGroupOptions.map((item) => (
                 <EuiFlexItem style={{ width: 'calc(100% - .5rem)' }}>
-                  <EuiCheckableCard
-                    id={`method_${item.id}`}
-                    label={
-                      <CardLabel
-                        title={item.label}
-                        description={item.description}
-                        icon={item.icon}
-                      />
+                  <EuiPanel
+                    className={
+                      selectedMethod.id === item.id
+                        ? 'entSearchNewIndexButtonGroupButton--selected'
+                        : 'entSearchNewIndexButtonGroupButton'
                     }
-                    value={item.id}
-                    name="method_options"
-                    onChange={() => handleMethodChange(item.id)}
-                    checked={selectedMethod.id === item.id}
-                  />
+                    hasShadow={false}
+                    onClick={() => {
+                      handleMethodChange(item.id);
+                    }}
+                  >
+                    <EuiFlexGroup alignItems="center" responsive={false}>
+                      <EuiFlexItem grow>
+                        <EuiFlexGroup direction="column" gutterSize="none">
+                          <EuiFlexItem grow={false}>
+                            <EuiTitle size="xs">
+                              <h4>{item.label}</h4>
+                            </EuiTitle>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow>
+                            <EuiText size="xs">
+                              <p>{item.description}</p>
+                            </EuiText>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <div className="rightArrow">
+                          <EuiIcon type="arrowRight" color="primary" />
+                        </div>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiLink href="#" target="_blank">
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.selectSearchIndex.learnMore.buttonText',
-                {
-                  defaultMessage: 'Learn more about search indices',
-                }
-              )}
-            </EuiLink>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
