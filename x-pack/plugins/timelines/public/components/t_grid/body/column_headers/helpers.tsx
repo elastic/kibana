@@ -21,6 +21,7 @@ import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
 } from '../constants';
 import { allowSorting } from '../helpers';
+import { defaultColumnHeaderType } from './default_headers';
 
 const defaultActions: EuiDataGridColumnActions = {
   showSortAsc: true,
@@ -116,6 +117,19 @@ export const getColumnHeaders = (
       })
     : [];
 };
+
+/**
+ * Returns the column header with field details from the defaultHeaders
+ */
+export const getColumnHeader = (
+  fieldName: string,
+  defaultHeaders: ColumnHeaderOptions[]
+): ColumnHeaderOptions => ({
+  columnHeaderType: defaultColumnHeaderType,
+  id: fieldName,
+  initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+  ...(defaultHeaders.find((c) => c.id === fieldName) ?? {}),
+});
 
 export const getColumnWidthFromType = (type: string): number =>
   type !== 'date' ? DEFAULT_COLUMN_MIN_WIDTH : DEFAULT_DATE_COLUMN_MIN_WIDTH;
