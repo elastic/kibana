@@ -3235,7 +3235,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-data-utils@link:bazel-bin/x-pack/packages/ml/data-utils":
+"@kbn/ml-data-utils@link:bazel-bin/x-pack/packages/ml/data_utils":
   version "0.0.0"
   uid ""
 
@@ -6614,7 +6614,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__ml-data-utils@link:bazel-bin/x-pack/packages/ml/data-utils/npm_module_types":
+"@types/kbn__ml-data-utils@link:bazel-bin/x-pack/packages/ml/data_utils/npm_module_types":
   version "0.0.0"
   uid ""
 

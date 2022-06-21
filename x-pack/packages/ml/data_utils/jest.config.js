@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/ml/data-utils'],
+  roots: ['<rootDir>/x-pack/packages/ml/data_utils'],
 };
