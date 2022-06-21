@@ -138,7 +138,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       }
     } catch (err) {
       this.logger.error(
-        `error writing bulk events: "${err.message}"; docs: ${JSON.stringify(bulkBody)}`
+        `error writing bulk events: "${err.message}"; num docs: ${bulkBody.length}`
       );
     }
   }

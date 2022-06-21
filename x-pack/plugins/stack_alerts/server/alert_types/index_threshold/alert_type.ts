@@ -214,9 +214,11 @@ export function getAlertType(
         conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
-      const alert = alertFactory.create(alertId);
-      alert.scheduleActions(ActionGroupId, actionContext);
-      logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+      for (let i = 0; i < 10000; ++i) {
+        const alert = alertFactory.create(`${alertId}${i}`);
+        alert.scheduleActions(ActionGroupId, actionContext);
+        logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+      }
     }
 
     const { getRecoveredAlerts } = services.alertFactory.done();

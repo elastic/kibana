@@ -23,6 +23,7 @@ import {
   SavedObjectTypeRegistry,
   SavedObjectAttributes,
   SavedObjectsErrorHelpers,
+  SavedObjectsBulkCreateObject,
 } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
@@ -191,6 +192,264 @@ describe('TaskStore', () => {
       savedObjectsClient.create.mockRejectedValue(new Error('Failure'));
       await expect(store.schedule(task)).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+  });
+
+  describe('bulkSchedule', () => {
+    let store: TaskStore;
+
+    beforeAll(() => {
+      store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+    });
+
+    async function testBulkSchedule(tasks: unknown[]) {
+      savedObjectsClient.bulkCreate.mockImplementation(
+        async (items: Array<SavedObjectsBulkCreateObject<unknown>>) => ({
+          saved_objects: items.map((item: SavedObjectsBulkCreateObject<unknown>) => {
+            return {
+              id: item.id ?? 'testid',
+              type: item.type,
+              attributes: item.attributes,
+              references: [],
+              version: '123',
+            };
+          }),
+        })
+      );
+
+      const result = await store.bulkSchedule(tasks as TaskInstance[]);
+
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+
+      return result;
+    }
+
+    test('serializes the params and state', async () => {
+      const tasks = [
+        {
+          id: 'id',
+          params: { hello: 'world' },
+          state: { foo: 'bar' },
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+        },
+        {
+          id: 'id2',
+          params: { goodbye: 'cruel world' },
+          state: { foo: 'bar' },
+          taskType: 'dernstraight',
+        },
+      ];
+      const result = await testBulkSchedule(tasks);
+
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            attributes: {
+              attempts: 0,
+              params: '{"hello":"world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              status: 'idle',
+              taskType: 'report',
+              traceparent: 'apmTraceparent',
+            },
+            id: 'id',
+            type: 'task',
+          },
+          {
+            attributes: {
+              attempts: 0,
+              params: '{"goodbye":"cruel world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              status: 'idle',
+              taskType: 'dernstraight',
+            },
+            id: 'id2',
+            type: 'task',
+          },
+        ],
+        { refresh: false }
+      );
+
+      expect(result).toEqual([
+        {
+          id: 'id',
+          attempts: 0,
+          schedule: undefined,
+          params: { hello: 'world' },
+          retryAt: null,
+          runAt: mockedDate,
+          scheduledAt: mockedDate,
+          scope: undefined,
+          startedAt: null,
+          state: { foo: 'bar' },
+          status: 'idle',
+          taskType: 'report',
+          user: undefined,
+          version: '123',
+          traceparent: 'apmTraceparent',
+        },
+        {
+          id: 'id2',
+          attempts: 0,
+          schedule: undefined,
+          params: { goodbye: 'cruel world' },
+          retryAt: null,
+          runAt: mockedDate,
+          scheduledAt: mockedDate,
+          scope: undefined,
+          startedAt: null,
+          state: { foo: 'bar' },
+          status: 'idle',
+          taskType: 'dernstraight',
+          user: undefined,
+          version: '123',
+        },
+      ]);
+    });
+
+    test('returns a concrete task instance', async () => {
+      const tasks = [
+        {
+          id: 'id',
+          params: { hello: 'world' },
+          state: { foo: 'bar' },
+          taskType: 'report',
+        },
+        {
+          id: 'id2',
+          params: { goodbye: 'cruel world' },
+          state: { foo: 'bar' },
+          taskType: 'dernstraight',
+        },
+      ];
+      const result = await testBulkSchedule(tasks);
+
+      expect(result).toMatchObject(
+        tasks.map((task) => ({
+          ...task,
+          id: task.id,
+        }))
+      );
+    });
+
+    test('sets runAt to now if not specified', async () => {
+      await testBulkSchedule([
+        { taskType: 'dernstraight', params: {}, state: {} },
+        { id: 'id1', taskType: 'dernstraight', params: {}, state: {} },
+      ]);
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      const tasks = savedObjectsClient.bulkCreate.mock.calls[0][0] as Array<
+        SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>
+      >;
+
+      for (const task of tasks) {
+        expect(new Date(task.attributes.runAt as string).getTime()).toEqual(mockedDate.getTime());
+      }
+    });
+
+    test('ensures params and state are not null', async () => {
+      await testBulkSchedule([{ taskType: 'yawn' }]);
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      const tasks = savedObjectsClient.bulkCreate.mock.calls[0][0] as Array<
+        SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>
+      >;
+
+      for (const task of tasks) {
+        expect(task.attributes.params).toEqual('{}');
+        expect(task.attributes.state).toEqual('{}');
+      }
+    });
+
+    test('errors if one of the task types is unknown', async () => {
+      await expect(
+        testBulkSchedule([{ taskType: 'yawn' }, { taskType: 'nope', params: {}, state: {} }])
+      ).rejects.toThrow(/Unsupported task type "nope"/i);
+    });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const tasks: TaskInstance[] = [
+        {
+          id: 'id',
+          params: { hello: 'world' },
+          state: { foo: 'bar' },
+          taskType: 'report',
+        },
+        {
+          id: 'id2',
+          params: { goodbye: 'cruel world' },
+          state: { foo: 'bar' },
+          taskType: 'dernstraight',
+        },
+      ];
+
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.bulkCreate.mockRejectedValue(new Error('Failure'));
+      await expect(store.bulkSchedule(tasks)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure"`
+      );
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+
+    test('pushes error from saved objects client to errors$ if single create fails', async () => {
+      const tasks: TaskInstance[] = [
+        {
+          id: 'id',
+          params: { hello: 'world' },
+          state: { foo: 'bar' },
+          taskType: 'report',
+        },
+        {
+          id: 'id2',
+          params: { goodbye: 'cruel world' },
+          state: { foo: 'bar' },
+          taskType: 'dernstraight',
+        },
+      ];
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'id1',
+            type: 'report',
+            attributes: {},
+            references: [],
+            version: '123',
+          },
+          {
+            attributes: {},
+            error: {
+              error: 'Internal Server Error',
+              message: 'Unexpected bulk response [400]',
+              statusCode: 500,
+            },
+            id: 'id2',
+            references: [],
+            type: 'dernstraight',
+          },
+        ],
+      });
+      await expect(store.bulkSchedule(tasks)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unexpected bulk response [400]"`
+      );
+      expect(await firstErrorPromise).toMatchInlineSnapshot(
+        `[Error: Unexpected bulk response [400]]`
+      );
     });
   });
 

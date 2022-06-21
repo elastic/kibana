@@ -13,7 +13,7 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { millisToNanos, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
+import { createExecutionHandler } from './create_execution_handler';
 import { Alert, createAlertFactory } from '../alert';
 import {
   ElasticsearchError,
@@ -225,30 +225,6 @@ export class TaskRunner<
     }
   }
 
-  private async executeAlert(
-    alertId: string,
-    alert: Alert<InstanceState, InstanceContext>,
-    executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
-    ruleRunMetricsStore: RuleRunMetricsStore
-  ) {
-    const {
-      actionGroup,
-      subgroup: actionSubgroup,
-      context,
-      state,
-    } = alert.getScheduledActionOptions()!;
-    alert.updateLastScheduledActions(actionGroup, actionSubgroup);
-    alert.unscheduleActions();
-    return executionHandler({
-      actionGroup,
-      actionSubgroup,
-      context,
-      state,
-      alertId,
-      ruleRunMetricsStore,
-    });
-  }
-
   private async executeRule(
     fakeRequest: KibanaRequest,
     rulesClient: RulesClientApi,
@@ -404,6 +380,7 @@ export class TaskRunner<
       throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
     }
 
+    const postprocessStart = new Date();
     this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
 
     const scopedClusterClientMetrics = wrappedScopedClusterClient.getMetrics();
@@ -490,12 +467,35 @@ export class TaskRunner<
         }
       );
 
-      await Promise.all(
-        alertsWithExecutableActions.map(
-          ([alertId, alert]: [string, Alert<InstanceState, InstanceContext>]) =>
-            this.executeAlert(alertId, alert, executionHandler, ruleRunMetricsStore)
-        )
-      );
+      try {
+        await executionHandler(
+          ruleRunMetricsStore,
+          alertsWithExecutableActions.map(
+            ([alertId, alert]: [string, Alert<InstanceState, InstanceContext>]) => {
+              const {
+                actionGroup,
+                subgroup: actionSubgroup,
+                context,
+                state,
+              } = alert.getScheduledActionOptions()!;
+
+              alert.updateLastScheduledActions(actionGroup, actionSubgroup);
+              alert.unscheduleActions();
+
+              return {
+                actionGroup,
+                actionSubgroup,
+                context,
+                state,
+                alertId,
+              };
+            }
+          )
+        );
+      } catch (err) {
+        this.logger.info('RULE EXECUTION - error while executing alert actions - moving on');
+        this.logger.info(err);
+      }
 
       await scheduleActionsForRecoveredAlerts<
         InstanceState,
@@ -527,6 +527,12 @@ export class TaskRunner<
       }
     }
 
+    const postprocessEnd = new Date();
+    this.logger.info(
+      `RULE EXECUTION - post process time ${
+        postprocessEnd.getTime() - postprocessStart.getTime()
+      }ms`
+    );
     return {
       metrics: ruleRunMetricsStore.getMetrics(),
       alertTypeState: updatedRuleTypeState || undefined,
@@ -952,6 +958,7 @@ async function scheduleActionsForRecoveredAlerts<
     ruleRunMetricsStore,
   } = params;
   const recoveredIds = Object.keys(recoveredAlerts);
+  const recoveryAlertsToExecute = [];
 
   for (const id of recoveredIds) {
     if (mutedAlertIdsSet.has(id)) {
@@ -962,16 +969,17 @@ async function scheduleActionsForRecoveredAlerts<
       const alert = recoveredAlerts[id];
       alert.updateLastScheduledActions(recoveryActionGroup.id);
       alert.unscheduleActions();
-      await executionHandler({
+      recoveryAlertsToExecute.push({
         actionGroup: recoveryActionGroup.id,
         context: alert.getContext(),
         state: {},
         alertId: id,
-        ruleRunMetricsStore,
       });
       alert.scheduleActions(recoveryActionGroup.id);
     }
   }
+
+  await executionHandler(ruleRunMetricsStore, recoveryAlertsToExecute);
 }
 
 function logActiveAndRecoveredAlerts<

@@ -483,7 +483,7 @@ export class ExecuteReportTask implements ReportingTask {
       params,
     };
 
-    return await this.getTaskManagerStart().schedule(taskInstance);
+    return await this.getTaskManagerStart().schedule({ taskInstance });
   }
 
   private async rescheduleTask(task: ReportTaskParams, logger: Logger) {
@@ -494,7 +494,7 @@ export class ExecuteReportTask implements ReportingTask {
       state: {},
       params: task,
     };
-    const newTask = await this.getTaskManagerStart().schedule(oldTaskInstance);
+    const newTask = await this.getTaskManagerStart().schedule({ taskInstance: oldTaskInstance });
     logger.debug(`Rescheduled task:${task.id}. New task: task:${newTask.id}`);
     return newTask;
   }

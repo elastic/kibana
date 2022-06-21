@@ -103,9 +103,11 @@ describe('managed configuration', () => {
     // Cause "too many requests" error to be thrown
     await expect(
       taskManagerStart.schedule({
-        taskType: 'foo',
-        state: {},
-        params: {},
+        taskInstance: {
+          taskType: 'foo',
+          state: {},
+          params: {},
+        },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Too Many Requests"`);
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
@@ -127,9 +129,11 @@ describe('managed configuration', () => {
     // Cause "too many requests" error to be thrown
     await expect(
       taskManagerStart.schedule({
-        taskType: 'foo',
-        state: {},
-        params: {},
+        taskInstance: {
+          taskType: 'foo',
+          state: {},
+          params: {},
+        },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Too Many Requests"`);
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);

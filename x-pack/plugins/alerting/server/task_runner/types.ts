@@ -142,5 +142,4 @@ export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
   alertId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
-  ruleRunMetricsStore: RuleRunMetricsStore;
 }

@@ -53,8 +53,8 @@ export function initRoutes(
           (chunkOfTasksToSpawn) => () =>
             Promise.all(
               chunkOfTasksToSpawn.map(async (taskIndex) =>
-                taskManager.schedule(
-                  {
+                taskManager.schedule({
+                  taskInstance: {
                     taskType: 'performanceTestTask',
                     params: {
                       startAt,
@@ -65,8 +65,8 @@ export function initRoutes(
                     state: {},
                     scope: [scope],
                   },
-                  { request: req }
-                )
+                  options: { request: req },
+                })
               )
             )
         )

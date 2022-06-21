@@ -77,7 +77,7 @@ export function initRoutes(
         scope: [scope],
       };
 
-      const taskResult = await taskManager.schedule(task, { req });
+      const taskResult = await taskManager.schedule({ taskInstance: task, options: { req } });
 
       return res.ok({ body: taskResult });
     }

@@ -232,22 +232,24 @@ describe('enable()', () => {
       }
     );
     expect(taskManager.schedule).toHaveBeenCalledWith({
-      id: '1',
-      taskType: `alerting:myType`,
-      params: {
-        alertId: '1',
-        spaceId: 'default',
-        consumer: 'myApp',
+      taskInstance: {
+        id: '1',
+        taskType: `alerting:myType`,
+        params: {
+          alertId: '1',
+          spaceId: 'default',
+          consumer: 'myApp',
+        },
+        schedule: {
+          interval: '10s',
+        },
+        state: {
+          alertInstances: {},
+          alertTypeState: {},
+          previousStartedAt: null,
+        },
+        scope: ['alerting'],
       },
-      schedule: {
-        interval: '10s',
-      },
-      state: {
-        alertInstances: {},
-        alertTypeState: {},
-        previousStartedAt: null,
-      },
-      scope: ['alerting'],
     });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
       scheduledTaskId: '1',
@@ -514,22 +516,24 @@ describe('enable()', () => {
       }
     );
     expect(taskManager.schedule).toHaveBeenCalledWith({
-      id: '1',
-      taskType: `alerting:myType`,
-      params: {
-        alertId: '1',
-        spaceId: 'default',
-        consumer: 'myApp',
+      taskInstance: {
+        id: '1',
+        taskType: `alerting:myType`,
+        params: {
+          alertId: '1',
+          spaceId: 'default',
+          consumer: 'myApp',
+        },
+        schedule: {
+          interval: '10s',
+        },
+        state: {
+          alertInstances: {},
+          alertTypeState: {},
+          previousStartedAt: null,
+        },
+        scope: ['alerting'],
       },
-      schedule: {
-        interval: '10s',
-      },
-      state: {
-        alertInstances: {},
-        alertTypeState: {},
-        previousStartedAt: null,
-      },
-      scope: ['alerting'],
     });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
       scheduledTaskId: '1',

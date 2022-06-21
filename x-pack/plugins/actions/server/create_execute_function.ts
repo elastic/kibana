@@ -5,19 +5,26 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { RunNowResult, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { chunk } from 'lodash';
+import { SavedObjectsClientContract, Logger, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import {
+  RunNowResult,
+  TaskManagerStartContract,
+  ScheduleOpts,
+} from '@kbn/task-manager-plugin/server';
 import {
   RawAction,
   ActionTypeRegistryContract,
   PreConfiguredAction,
   ActionTaskExecutorParams,
+  ActionTaskParams,
 } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
 import { RelatedSavedObjects } from './lib/related_saved_objects';
 
+const MAX_ACTIONS_NUMBER_FOR_BULK_EXECUTE = 500;
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   isESOCanEncrypt: boolean;
@@ -39,24 +46,22 @@ export type ExecutionEnqueuer<T> = (
   options: ExecuteOptions
 ) => Promise<T>;
 
+export type BulkExecutionEnqueuer<T> = (
+  unsecuredSavedObjectsClient: SavedObjectsClientContract,
+  options: ExecuteOptions[],
+  logger: Logger
+) => Promise<T>;
+
 export function createExecutionEnqueuerFunction({
   taskManager,
   actionTypeRegistry,
   isESOCanEncrypt,
   preconfiguredActions,
-}: CreateExecuteFunctionOptions): ExecutionEnqueuer<void> {
+}: CreateExecuteFunctionOptions): BulkExecutionEnqueuer<void> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    {
-      id,
-      params,
-      spaceId,
-      consumer,
-      source,
-      apiKey,
-      executionId,
-      relatedSavedObjects,
-    }: ExecuteOptions
+    actionsToExecute: ExecuteOptions[],
+    logger: Logger
   ) {
     if (!isESOCanEncrypt) {
       throw new Error(
@@ -64,58 +69,89 @@ export function createExecutionEnqueuerFunction({
       );
     }
 
-    const { action, isPreconfigured } = await getAction(
+    const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
+    const connectors = await getConnectors(
       unsecuredSavedObjectsClient,
       preconfiguredActions,
-      id
+      connectorIds
     );
-    validateCanActionBeUsed(action);
 
-    const { actionTypeId } = action;
-    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
-      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-    }
+    // Filter out invalid connectors
+    const validConnectors = getValidConnectors(connectors, actionTypeRegistry, logger);
 
-    // Get saved object references from action ID and relatedSavedObjects
-    const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
-      id,
-      isPreconfigured,
-      relatedSavedObjects
-    );
-    const executionSourceReference = executionSourceAsSavedObjectReferences(source);
+    const actionTaskParamsToCreate: Array<SavedObjectsBulkCreateObject<ActionTaskParams>> = [];
 
-    const taskReferences = [];
-    if (executionSourceReference.references) {
-      taskReferences.push(...executionSourceReference.references);
-    }
-    if (references) {
-      taskReferences.push(...references);
-    }
+    for (const action of actionsToExecute) {
+      const connector = validConnectors.find((c) => c.id === action.id);
 
-    const actionTaskParamsRecord = await unsecuredSavedObjectsClient.create(
-      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-      {
-        actionId: id,
-        params,
-        apiKey,
-        executionId,
-        consumer,
-        relatedSavedObjects: relatedSavedObjectWithRefs,
-      },
-      {
-        references: taskReferences,
+      if (connector) {
+        // Get saved object references from action ID and relatedSavedObjects
+        const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
+          action.id,
+          connector.isPreconfigured,
+          action.relatedSavedObjects
+        );
+        const executionSourceReference = executionSourceAsSavedObjectReferences(action.source);
+
+        const taskReferences = [];
+        if (executionSourceReference.references) {
+          taskReferences.push(...executionSourceReference.references);
+        }
+        if (references) {
+          taskReferences.push(...references);
+        }
+
+        actionTaskParamsToCreate.push({
+          type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+          attributes: {
+            actionId: action.id,
+            params: action.params,
+            ...(action.apiKey ? { apiKey: action.apiKey } : {}),
+            executionId: action.executionId,
+            consumer: action.consumer,
+            spaceId: action.spaceId,
+            relatedSavedObjects: relatedSavedObjectWithRefs,
+          } as ActionTaskParams,
+          references: taskReferences,
+        });
       }
+    }
+
+    const actionTaskParamChunks = chunk(
+      actionTaskParamsToCreate,
+      MAX_ACTIONS_NUMBER_FOR_BULK_EXECUTE
     );
 
-    await taskManager.schedule({
-      taskType: `actions:${action.actionTypeId}`,
-      params: {
-        spaceId,
-        actionTaskParamsId: actionTaskParamsRecord.id,
-      },
-      state: {},
-      scope: ['actions'],
-    });
+    for (const actionTaskParamChunk of actionTaskParamChunks) {
+      const actionTaskParamsSavedObject =
+        await unsecuredSavedObjectsClient.bulkCreate<ActionTaskParams>(actionTaskParamChunk);
+
+      const bulkScheduleOpts: ScheduleOpts[] = [];
+      for (const actionTaskParam of actionTaskParamsSavedObject.saved_objects) {
+        if (actionTaskParam.error) {
+          logger.error(
+            `Error creating action task params for action ${actionTaskParam.id}. Underlying task will not be scheduled - ${actionTaskParam.error.message}`
+          );
+        } else {
+          const connector = validConnectors.find(
+            (c) => c.id === actionTaskParam.attributes.actionId
+          )!;
+          bulkScheduleOpts.push({
+            taskInstance: {
+              taskType: `actions:${connector.connector.actionTypeId}`,
+              params: {
+                spaceId: actionTaskParam.attributes.spaceId,
+                actionTaskParamsId: actionTaskParam.id,
+              },
+              state: {},
+              scope: ['actions'],
+            },
+          });
+        }
+      }
+
+      await taskManager.bulkSchedule(bulkScheduleOpts);
+    }
   };
 }
 
@@ -129,7 +165,7 @@ export function createEphemeralExecutionEnqueuerFunction({
     { id, params, spaceId, source, consumer, apiKey, executionId }: ExecuteOptions
   ): Promise<RunNowResult> {
     const { action } = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
-    validateCanActionBeUsed(action);
+    validateCanConnectorBeUsed(action);
 
     const { actionTypeId } = action;
     if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
@@ -159,13 +195,51 @@ export function createEphemeralExecutionEnqueuerFunction({
   };
 }
 
-function validateCanActionBeUsed(action: PreConfiguredAction | RawAction) {
-  const { name, isMissingSecrets } = action;
+function validateCanConnectorBeUsed(connector: PreConfiguredAction | RawAction) {
+  const { name, isMissingSecrets } = connector;
   if (isMissingSecrets) {
     throw new Error(
       `Unable to execute action because no secrets are defined for the "${name}" connector.`
     );
   }
+}
+
+function getValidConnectors(
+  connectors: GetConnectorsResult[],
+  actionTypeRegistry: ActionTypeRegistryContract,
+  logger: Logger
+) {
+  const validConnectors: GetConnectorsResult[] = [];
+  for (const connector of connectors) {
+    if (connector.connector.isMissingSecrets) {
+      logger.error(
+        `Unable to execute action because no secrets are defined for the "${connector.connector.name}" connector.`
+      );
+    } else {
+      try {
+        const { actionTypeId } = connector.connector;
+        if (
+          !actionTypeRegistry.isActionExecutable(connector.id, actionTypeId, {
+            notifyUsage: true,
+          })
+        ) {
+          actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+        }
+
+        validConnectors.push(connector);
+      } catch (err) {
+        logger.error(
+          `Unable to execute action for the "${connector.connector.name}" connector. - ${err.message}`
+        );
+      }
+    }
+  }
+
+  if (validConnectors.length === 0) {
+    throw new Error(`Unable to execute actions because connectors are invalid.`);
+  }
+
+  return validConnectors;
 }
 
 function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorOptions['source']) {
@@ -193,4 +267,48 @@ async function getAction(
 
   const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
   return { action: attributes, isPreconfigured: false };
+}
+
+interface GetConnectorsResult {
+  id: string;
+  connector: PreConfiguredAction | RawAction;
+  isPreconfigured: boolean;
+}
+
+async function getConnectors(
+  unsecuredSavedObjectsClient: SavedObjectsClientContract,
+  preconfiguredConnectors: PreConfiguredAction[],
+  connectorIds: string[]
+): Promise<GetConnectorsResult[]> {
+  const result: GetConnectorsResult[] = [];
+
+  const connectorIdsToFetch = [];
+  for (const connectorId of connectorIds) {
+    const pcConnector = preconfiguredConnectors.find((connector) => connector.id === connectorId);
+    if (pcConnector) {
+      result.push({ connector: pcConnector, isPreconfigured: true, id: connectorId });
+    } else {
+      connectorIdsToFetch.push(connectorId);
+    }
+  }
+
+  if (connectorIdsToFetch.length > 0) {
+    const bulkGetResult = await unsecuredSavedObjectsClient.bulkGet<RawAction>(
+      connectorIdsToFetch.map((id) => ({
+        id,
+        type: 'action',
+      }))
+    );
+
+    for (const item of bulkGetResult.saved_objects) {
+      if (item.error) throw item.error;
+      result.push({
+        isPreconfigured: false,
+        connector: item.attributes,
+        id: item.id,
+      });
+    }
+  }
+
+  return result;
 }
