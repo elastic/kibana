@@ -12,8 +12,8 @@ export type OriginalColumn = { id: string; label: string } & (
   | { operationType: string; sourceField: never }
 );
 
-export type RenameColumnsExpressionFunction = ExpressionFunctionDefinition<
-  'lens_rename_columns',
+export type MapToColumnsExpressionFunction = ExpressionFunctionDefinition<
+  'lens_map_to_columns',
   Datatable,
   {
     idMap: string;

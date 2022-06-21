@@ -8,8 +8,13 @@
 import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { AggFunctionsMapping, METRIC_TYPES } from '@kbn/data-plugin/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  ExpressionAstExpressionBuilder,
+} from '@kbn/expressions-plugin/public';
+import { AggExpressionFunctionArgs } from '@kbn/data-plugin/common';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -142,6 +147,120 @@ export const percentileOperation: OperationDefinition<
         timeShift: column.filter ? undefined : column.timeShift,
       }
     ).toAst();
+  },
+  optimizeEsAggs: (_aggs, _esAggsIdMap, aggExpressionToEsAggsIdMap) => {
+    let aggs = [..._aggs];
+    const esAggsIdMap = { ..._esAggsIdMap };
+
+    const percentileExpressionsByArgs: Record<string, ExpressionAstExpressionBuilder[]> = {};
+
+    // group percentile dimensions by differentiating parameters
+    aggs.forEach((expressionBuilder) => {
+      const {
+        functions: [fnBuilder],
+      } = expressionBuilder;
+      if (fnBuilder.name === 'aggSinglePercentile') {
+        const groupByKey = `${fnBuilder.getArgument('field')?.[0]}-${
+          fnBuilder.getArgument('timeShift')?.[0]
+        }`;
+        if (!(groupByKey in percentileExpressionsByArgs)) {
+          percentileExpressionsByArgs[groupByKey] = [];
+        }
+
+        percentileExpressionsByArgs[groupByKey].push(expressionBuilder);
+      }
+    });
+
+    // collapse them into a single esAggs expression builder
+    Object.values(percentileExpressionsByArgs).forEach((expressionBuilders) => {
+      if (expressionBuilders.length <= 1) {
+        // don't need to optimize if there aren't more than one
+        return;
+      }
+
+      // we're going to merge these percentile builders into a single builder, so
+      // remove them from the aggs array
+      aggs = aggs.filter((aggBuilder) => !expressionBuilders.includes(aggBuilder));
+
+      const {
+        functions: [firstFnBuilder],
+      } = expressionBuilders[0];
+
+      const esAggsColumnId = firstFnBuilder.getArgument('id')![0];
+      const aggPercentilesConfig: AggExpressionFunctionArgs<typeof METRIC_TYPES.PERCENTILES> = {
+        id: esAggsColumnId,
+        enabled: firstFnBuilder.getArgument('enabled')?.[0],
+        schema: firstFnBuilder.getArgument('schema')?.[0],
+        field: firstFnBuilder.getArgument('field')?.[0],
+        percents: [],
+        // time shift is added to wrapping aggFilteredMetric if filter is set
+        timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
+      };
+
+      const percentileToBuilder: Record<number, ExpressionAstExpressionBuilder> = {};
+      for (const builder of expressionBuilders) {
+        const percentile = builder.functions[0].getArgument('percentile')![0] as number;
+        if (percentile in percentileToBuilder) {
+          // found a duplicate percentile so let's optimize
+
+          const duplicateExpressionBuilder = percentileToBuilder[percentile];
+
+          const idForDuplicate = aggExpressionToEsAggsIdMap.get(duplicateExpressionBuilder);
+          const idForThisOne = aggExpressionToEsAggsIdMap.get(builder);
+
+          if (!idForDuplicate || !idForThisOne) {
+            throw new Error(
+              "Couldn't find esAggs ID for percentile expression builder... this should never happen."
+            );
+          }
+
+          esAggsIdMap[idForDuplicate].push(...esAggsIdMap[idForThisOne]);
+
+          delete esAggsIdMap[idForThisOne];
+
+          // remove current builder
+          expressionBuilders = expressionBuilders.filter((b) => b !== builder);
+        } else {
+          percentileToBuilder[percentile] = builder;
+          aggPercentilesConfig.percents!.push(percentile);
+        }
+      }
+
+      const multiPercentilesAst = buildExpressionFunction<AggFunctionsMapping['aggPercentiles']>(
+        'aggPercentiles',
+        aggPercentilesConfig
+      ).toAst();
+
+      aggs.push(
+        buildExpression({
+          type: 'expression',
+          chain: [multiPercentilesAst],
+        })
+      );
+
+      expressionBuilders.forEach((expressionBuilder) => {
+        const currentEsAggsId = aggExpressionToEsAggsIdMap.get(expressionBuilder);
+        if (currentEsAggsId === undefined) {
+          throw new Error('Could not find current column ID for percentile agg expression builder');
+        }
+        // esAggs appends the percent number to the agg id to make distinct column IDs in the resulting datatable.
+        // We're anticipating that here by adding the `.<percentile>`.
+        // The agg index will be assigned when we update all the indices in the ID map based on the agg order in the
+        // datasource's toExpression fn so we mark it as '?' for now.
+        const newEsAggsId = `col-?-${esAggsColumnId}.${
+          expressionBuilder.functions[0].getArgument('percentile')![0]
+        }`;
+
+        esAggsIdMap[newEsAggsId] = esAggsIdMap[currentEsAggsId];
+
+        delete esAggsIdMap[currentEsAggsId];
+      });
+    });
+
+    return {
+      esAggsIdMap,
+      aggs,
+    };
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([

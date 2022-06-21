@@ -365,8 +365,6 @@
     "xpack.lens.functions.counterRate.args.outputColumnNameHelpText": "Nom de la colonne dans laquelle le taux de compteur résultant sera stocké",
     "xpack.lens.functions.counterRate.help": "Calcule le taux de compteur d'une colonne dans un tableau de données",
     "xpack.lens.functions.lastValue.missingSortField": "Cette vue de données ne contient aucun champ de date.",
-    "xpack.lens.functions.renameColumns.help": "Aide pour renommer les colonnes d'un tableau de données",
-    "xpack.lens.functions.renameColumns.idMap.help": "Un objet encodé JSON dans lequel les clés sont les anciens ID de colonne et les valeurs sont les nouveaux ID correspondants. Tous les autres ID de colonne sont conservés.",
     "xpack.lens.functions.timeScale.dateColumnMissingMessage": "L'ID de colonne de date {columnId} n'existe pas.",
     "xpack.lens.functions.timeScale.timeInfoMissingMessage": "Impossible de récupérer les informations d'histogramme des dates",
     "xpack.lens.gauge.addLayer": "Visualisation",

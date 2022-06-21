@@ -8,6 +8,6 @@
 export * from './counter_rate';
 export * from './collapse';
 export * from './format_column';
-export * from './rename_columns';
+export * from './map_to_columns';
 export * from './time_scale';
 export * from './datatable';

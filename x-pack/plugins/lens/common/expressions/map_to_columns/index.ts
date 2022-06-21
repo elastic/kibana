@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { renameColumns } from './rename_columns';
+export { mapToColumns } from './map_to_columns';
