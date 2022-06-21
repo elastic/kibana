@@ -39,7 +39,7 @@ function formatUptime(uptimeMs: number): string {
     const minutes = Math.floor(uptimeMs / MS_PER_MINUTE);
 
     if (minutes > 0) {
-      i18n.translate('xpack.infra.metricsTable.uptimeCell.lessThanOneMinuteLabel', {
+      i18n.translate('xpack.infra.metricsTable.uptimeCell.minutesLabel', {
         defaultMessage: '{minutes}m',
         values: {
           minutes,
