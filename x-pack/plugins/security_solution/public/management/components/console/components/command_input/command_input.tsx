@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, MouseEventHandler, useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+  memo,
+  MouseEventHandler,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { CommonProps, EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
@@ -68,6 +76,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   const textEntered = useWithInputTextEntered();
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
+  const [commandToExecute, setCommandToExecute] = useState('');
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
@@ -106,38 +115,55 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
   const handleKeyCapture = useCallback<KeyCaptureProps['onCapture']>(
     ({ value, eventDetails }) => {
-      let updatedTextEnteredState = textEntered + value;
+      const keyCode = eventDetails.keyCode;
 
-      switch (eventDetails.keyCode) {
-        // BACKSPACE
-        // remove the last character from the text entered
-        case 8:
-          if (updatedTextEnteredState.length) {
-            updatedTextEnteredState = updatedTextEnteredState.replace(/.$/, '');
-          }
-          break;
+      // UP arrow key
+      if (keyCode === 38) {
+        dispatch({ type: 'removeFocusFromKeyCapture' });
+        dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
 
-        // ENTER
-        // Execute command and blank out the input area
-        case 13:
-          dispatch({ type: 'executeCommand', payload: { input: updatedTextEnteredState } });
-          updatedTextEnteredState = '';
-          break;
-
-        // ARROW UP
-        case 38:
-          dispatch({ type: 'removeFocusFromKeyCapture' });
-          dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
-          break;
+        return;
       }
 
+      // Update the store with the updated text that was entered
       dispatch({
         type: 'updateInputTextEnteredState',
-        payload: { textEntered: updatedTextEnteredState },
+        payload: {
+          textEntered: (prevValue) => {
+            let updatedTextEnteredState = prevValue + value;
+
+            switch (keyCode) {
+              // BACKSPACE
+              // remove the last character from the text entered
+              case 8:
+                if (updatedTextEnteredState.length) {
+                  updatedTextEnteredState = updatedTextEnteredState.replace(/.$/, '');
+                }
+                break;
+
+              // ENTER
+              // Execute command and blank out the input area
+              case 13:
+                setCommandToExecute(updatedTextEnteredState);
+                updatedTextEnteredState = '';
+                break;
+            }
+
+            return updatedTextEnteredState;
+          },
+        },
       });
     },
-    [dispatch, textEntered]
+    [dispatch]
   );
+
+  // Execute the command if one was ENTER'd.
+  useEffect(() => {
+    if (commandToExecute) {
+      dispatch({ type: 'executeCommand', payload: { input: commandToExecute } });
+      setCommandToExecute('');
+    }
+  }, [commandToExecute, dispatch]);
 
   return (
     <InputAreaPopover width={popoverWidth}>

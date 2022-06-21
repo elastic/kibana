@@ -183,7 +183,7 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
 
   return (
     <KeyCaptureContainer data-test-subj={getTestId('keyCapture')} aria-hidden="true" tabIndex={-1}>
-      <input value="" ref={blurInputRef} tabIndex={-1} />
+      <input value="" ref={blurInputRef} tabIndex={-1} onChange={NOOP} />
 
       <input
         className="invisible-input"
