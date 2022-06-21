@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { useRedirectToPathOrRedirectPath } from './redirect_path';
+export { useRedirectPath as useRedirectToPathOrRedirectPath } from './redirect_path';

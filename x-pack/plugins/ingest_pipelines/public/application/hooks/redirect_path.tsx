@@ -10,7 +10,10 @@ import { useCallback, useMemo } from 'react';
 
 import { useKibana } from '../../shared_imports';
 
-export function useRedirectToPathOrRedirectPath(history: History) {
+/**
+ * This hook allow to redirect to the provided path or using redirect_path if it's provided in the query params.
+ */
+export function useRedirectPath(history: History) {
   const { services } = useKibana();
 
   const redirectPath = useMemo(() => {

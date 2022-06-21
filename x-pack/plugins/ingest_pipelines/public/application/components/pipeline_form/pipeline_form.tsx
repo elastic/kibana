@@ -27,6 +27,7 @@ export interface PipelineFormProps {
   saveError: any;
   defaultValue?: Pipeline;
   isEditing?: boolean;
+  // That fields is used to disable the name field when creating a pipeline with the name prepopulated
   canEditName?: boolean;
 }
 

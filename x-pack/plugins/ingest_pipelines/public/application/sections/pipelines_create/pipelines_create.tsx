@@ -60,6 +60,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
   sourcePipeline,
 }) => {
   const history = useHistory<LocationState>();
+
   const { services } = useKibana();
 
   const [isSaving, setIsSaving] = useState<boolean>(false);

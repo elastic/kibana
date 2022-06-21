@@ -7,13 +7,13 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
-import { useRedirectToPathOrRedirectPath } from './redirect_path';
+import { useRedirectPath } from './redirect_path';
 import { useKibana } from '../../shared_imports';
 
 const mockedUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 jest.mock('../../shared_imports');
 
-describe('useRedirectToPathOrRedirectPath', () => {
+describe('useRedirectPath', () => {
   const mockedNavigateToUrl = jest.fn();
   beforeEach(() => {
     mockedNavigateToUrl.mockReset();
@@ -33,7 +33,7 @@ describe('useRedirectToPathOrRedirectPath', () => {
 
     const {
       result: { current: redirectToPathOrRedirectPath },
-    } = renderHook(() => useRedirectToPathOrRedirectPath(history));
+    } = renderHook(() => useRedirectPath(history));
 
     redirectToPathOrRedirectPath('/test');
 
@@ -46,7 +46,7 @@ describe('useRedirectToPathOrRedirectPath', () => {
 
     const {
       result: { current: redirectToPathOrRedirectPath },
-    } = renderHook(() => useRedirectToPathOrRedirectPath(history));
+    } = renderHook(() => useRedirectPath(history));
 
     redirectToPathOrRedirectPath('/test');
 
