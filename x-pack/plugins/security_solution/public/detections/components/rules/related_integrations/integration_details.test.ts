@@ -6,16 +6,11 @@
  */
 
 import { calculateIntegrationDetails } from './integration_details';
-import { IntegrationPrivileges } from './integration_privileges';
 
 describe('Integration Details', () => {
   describe('calculateIntegrationDetails', () => {
-    const stubPrivileges: IntegrationPrivileges = {
-      canReadInstalledIntegrations: true,
-    };
-
     test('it returns a the correct integrationDetails', () => {
-      const integrationDetails = calculateIntegrationDetails(stubPrivileges, [], []);
+      const integrationDetails = calculateIntegrationDetails([], []);
 
       expect(integrationDetails.length).toEqual(0);
     });
@@ -23,7 +18,6 @@ describe('Integration Details', () => {
     describe('version is correctly computed', () => {
       test('Unknown integration that does not exist', () => {
         const integrationDetails = calculateIntegrationDetails(
-          stubPrivileges,
           [
             {
               package: 'foo1',
@@ -48,7 +42,6 @@ describe('Integration Details', () => {
 
       test('Integration that is not installed', () => {
         const integrationDetails = calculateIntegrationDetails(
-          stubPrivileges,
           [
             {
               package: 'aws',
@@ -69,7 +62,6 @@ describe('Integration Details', () => {
 
       test('Integration that is installed, and its version matches required version', () => {
         const integrationDetails = calculateIntegrationDetails(
-          stubPrivileges,
           [
             {
               package: 'aws',
@@ -114,7 +106,6 @@ describe('Integration Details', () => {
 
       test('Integration that is installed, and its version is less than required version', () => {
         const integrationDetails = calculateIntegrationDetails(
-          stubPrivileges,
           [
             {
               package: 'aws',
@@ -150,7 +141,6 @@ describe('Integration Details', () => {
 
       test('Integration that is installed, and its version is greater than required version', () => {
         const integrationDetails = calculateIntegrationDetails(
-          stubPrivileges,
           [
             {
               package: 'aws',

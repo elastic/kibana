@@ -347,9 +347,9 @@ describe('EngineCreationLogic', () => {
         jest.clearAllMocks();
       });
 
-      it('GETs to /internal/enterprise_search/indices', () => {
+      it('GETs to /internal/enterprise_search/search_indices', () => {
         EngineCreationLogic.actions.loadIndices();
-        expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/indices');
+        expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/search_indices');
       });
 
       it('calls onLoadIndicesSuccess with payload on load is successful', async () => {
