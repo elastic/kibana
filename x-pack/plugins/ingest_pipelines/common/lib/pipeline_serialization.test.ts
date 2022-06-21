@@ -81,6 +81,9 @@ describe('pipeline_serialization', () => {
           version: 1,
           processors: [],
           isManaged: true,
+          _meta: {
+            managed: true,
+          },
         },
       ]);
     });
