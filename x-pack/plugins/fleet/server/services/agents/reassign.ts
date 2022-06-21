@@ -131,6 +131,8 @@ export async function reassignAgents(
     })
   );
 
+  // TODO remove
+
   // Filter to agents that do not already use the new agent policy ID
   const agentsToUpdate = agentResults.reduce<Agent[]>((agents, result, index) => {
     if (result.status === 'fulfilled') {
