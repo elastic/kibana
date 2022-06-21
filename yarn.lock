@@ -3075,6 +3075,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-i18n-browser-mocks@link:bazel-bin/packages/core/i18n/core-i18n-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-i18n-browser@link:bazel-bin/packages/core/i18n/core-i18n-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal":
   version "0.0.0"
   uid ""
@@ -3351,6 +3363,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-button-toolbar@link:bazel-bin/packages/shared-ux/button_toolbar":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components":
   version "0.0.0"
   uid ""
@@ -3372,10 +3388,6 @@
   uid ""
 
 "@kbn/shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-button-toolbar@link:bazel-bin/packages/shared-ux/button_toolbar":
   version "0.0.0"
   uid ""
 
@@ -6462,6 +6474,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-i18n-browser-mocks@link:bazel-bin/packages/core/i18n/core-i18n-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-i18n-browser@link:bazel-bin/packages/core/i18n/core-i18n-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6722,6 +6746,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__shared-ux-button-toolbar@link:bazel-bin/packages/shared-ux/button_toolbar/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6743,10 +6771,6 @@
   uid ""
 
 "@types/kbn__shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__shared-ux-button-toolbar@link:bazel-bin/packages/shared-ux/button_toolbar/npm_module_types":
   version "0.0.0"
   uid ""
 

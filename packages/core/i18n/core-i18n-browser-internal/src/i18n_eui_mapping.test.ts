@@ -15,6 +15,7 @@ import { getEuiContextMapping } from './i18n_eui_mapping';
 
 /** Regexp to find {values} usage */
 const VALUES_REGEXP = /\{\w+\}/;
+type I18nTranslateCall = [ string, { defaultMessage: string; values?: object; description?: string } ];
 
 describe('@elastic/eui i18n tokens', () => {
   const i18nTranslateActual = jest.requireActual('@kbn/i18n').i18n.translate;
@@ -47,11 +48,7 @@ describe('@elastic/eui i18n tokens', () => {
 
   i18ntokens.forEach(({ token, defString }) => {
     describe(`Token "${token}"`, () => {
-      let i18nTranslateCall: [
-        string,
-        { defaultMessage: string; values?: object; description?: string }
-      ];
-
+      let i18nTranslateCall: I18nTranslateCall;
       beforeAll(() => {
         // If it's a function, call it, so we have the mock to register the call.
         const entry = euiContextMapping[token as keyof typeof euiContextMapping];

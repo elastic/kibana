@@ -11,6 +11,7 @@ import { EuiContext } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { getEuiContextMapping } from './i18n_eui_mapping';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 
 /**
  * Service that is responsible for i18n capabilities.
@@ -51,16 +52,3 @@ export class I18nService {
   }
 }
 
-/**
- * I18nStart.Context is required by any localizable React component from \@kbn/i18n and \@elastic/eui packages
- * and is supposed to be used as the topmost component for any i18n-compatible React tree.
- *
- * @public
- *
- */
-export interface I18nStart {
-  /**
-   * React Context provider required as the topmost component for any i18n-compatible React tree.
-   */
-  Context: ({ children }: { children: React.ReactNode }) => JSX.Element;
-}
