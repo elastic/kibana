@@ -13,7 +13,7 @@ import {
   EuiBadgeProps,
   EuiHeaderLinks,
   EuiToolTip,
-  ToolTipPositions,
+  EuiToolTipProps,
 } from '@elastic/eui';
 import classNames from 'classnames';
 
@@ -30,7 +30,7 @@ export type TopNavMenuProps = StatefulSearchBarProps &
     badges?: Array<
       EuiBadgeProps & {
         badgeText: string;
-        toolTipProps: { content: string; position: ToolTipPositions };
+        toolTipProps: EuiToolTipProps;
       }
     >;
     showSearchBar?: boolean;
@@ -86,16 +86,13 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
           (
             badge: EuiBadgeProps & {
               badgeText: string;
-              toolTipProps: { content: string; position: string };
+              toolTipProps: EuiToolTipProps;
             },
             i: number
           ) => {
             const { badgeText, toolTipProps, ...badgeProps } = badge;
             return (
-              <EuiToolTip
-                content={toolTipProps.content}
-                position={toolTipProps.position as ToolTipPositions}
-              >
+              <EuiToolTip {...toolTipProps} >
                 <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
                   {badgeText}
                 </EuiBadge>

@@ -8,9 +8,9 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Required } from '@kbn/utility-types';
-import { EuiHorizontalRule, ToolTipPositions } from '@elastic/eui';
+import { EuiHorizontalRule, EuiToolTipProps } from '@elastic/eui';
 import UseUnmount from 'react-use/lib/useUnmount';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
 
 import { OverlayRef } from '@kbn/core/public';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
@@ -518,11 +518,8 @@ export function DashboardTopNav({
               'data-test-subj': 'dashboardUnsavedChangesBadge',
               badgeText: unsavedChangesBadge.getUnsavedChangedBadgeText(),
               title: '',
-              toolTipProps: {
-                content: unsavedChangesBadge.getUnsavedChangedBadgeToolTipContent(),
-                position: 'bottom' as ToolTipPositions,
-              },
               color: 'warning',
+              toolTipProps: {content: unsavedChangesBadge.getUnsavedChangedBadgeToolTipContent(), position: 'bottom'} as EuiToolTipProps,
             },
           ]
         : undefined;
