@@ -86,9 +86,7 @@ export const ResponseActionsList = memo<
       isFetched,
       refetch: reFetchEndpointActionList,
     } = useGetEndpointActionList(queryParams, {
-      enabled: true,
-      refetchOnMount: true,
-      keepPreviousData: false,
+      keepPreviousData: true,
     });
 
     // total actions
@@ -126,7 +124,7 @@ export const ResponseActionsList = memo<
             return acc;
           }, []);
 
-          const descriptionListItems = [
+          const descriptionListLeft = [
             {
               title: OUTPUT_MESSAGES.expandSection.placedAt,
               description: `${startedAt}`,
@@ -145,6 +143,9 @@ export const ResponseActionsList = memo<
                   : OUTPUT_MESSAGES.hasFailed(command)
                 : OUTPUT_MESSAGES.isPending(command),
             },
+          ];
+
+          const descriptionListCenter = [
             {
               title: OUTPUT_MESSAGES.expandSection.startedAt,
               description: `${startedAt}`,
@@ -153,31 +154,22 @@ export const ResponseActionsList = memo<
               title: OUTPUT_MESSAGES.expandSection.parameters,
               description: responseData.length ? responseData[0].data.parameters ?? '-' : '-',
             },
+          ];
+
+          const descriptionListRight = [
             {
               title: OUTPUT_MESSAGES.expandSection.completedAt,
               description: `${completedAt ?? '-'}`,
             },
           ];
+
           itemIdToExpandedRowMapValues[item.id] = (
             <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiDescriptionList
-                  listItems={descriptionListItems.slice(0, 3)}
-                  compressed={true}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiDescriptionList
-                  listItems={descriptionListItems.slice(3, 5)}
-                  compressed={true}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiDescriptionList
-                  listItems={descriptionListItems.slice(5, 6)}
-                  compressed={true}
-                />
-              </EuiFlexItem>
+              {[descriptionListLeft, descriptionListCenter, descriptionListRight].map((list) => (
+                <EuiFlexItem>
+                  <EuiDescriptionList listItems={list} compressed={true} />
+                </EuiFlexItem>
+              ))}
             </EuiFlexGroup>
           );
         }
