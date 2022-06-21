@@ -337,7 +337,7 @@ export const getXyVisualization = ({
   },
 
   updateLayersConfigurationFromContext({ prevState, layerId, context }) {
-    const { chartType, axisPosition, palette, metrics } = context;
+    const { chartType, axisPosition, palette, metrics, collapseFn } = context;
     const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
     if (!foundLayer || !isDataLayer(foundLayer)) {
       return prevState;
@@ -356,6 +356,7 @@ export const getXyVisualization = ({
       ...foundLayer,
       ...(chartType && { seriesType: chartType as SeriesType }),
       ...(palette && { palette }),
+      collapseFn,
       yConfig,
       layerType: isReferenceLine ? layerTypes.REFERENCELINE : layerTypes.DATA,
     } as XYLayerConfig;
