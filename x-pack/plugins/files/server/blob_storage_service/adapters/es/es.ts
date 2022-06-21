@@ -84,13 +84,9 @@ export class ElasticsearchBlobStorage implements BlobStorage {
         },
         attributes,
       });
-      if (transforms) {
-        await pipeline.apply(null, [src, ...transforms, dest] as unknown as Parameters<
-          typeof pipeline
-        >);
-      } else {
-        await pipeline(src, dest);
-      }
+      await pipeline.apply(null, [src, ...(transforms ?? []), dest] as unknown as Parameters<
+        typeof pipeline
+      >);
 
       return {
         id: dest.getContentReferenceId()!,
