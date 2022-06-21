@@ -163,8 +163,8 @@ describe('Check detailed statistics API with multiple services', () => {
     cy.wait('@mainStatisticsRequest');
     cy.contains('Services');
     cy.get('.euiPagination__list').children().should('have.length', 5);
-    cy.wait('@detailedStatisticsRequest').then((interceptions) => {
-      expect(interceptions.request.body.serviceNames).eql(
+    cy.wait('@detailedStatisticsRequest').then((payload) => {
+      expect(payload.request.body.serviceNames).eql(
         JSON.stringify([
           '0',
           '1',
@@ -180,8 +180,8 @@ describe('Check detailed statistics API with multiple services', () => {
       );
     });
     cy.get('[data-test-subj="pagination-button-1"]').click();
-    cy.wait('@detailedStatisticsRequest').then((interceptions) => {
-      expect(interceptions.request.body.serviceNames).eql(
+    cy.wait('@detailedStatisticsRequest').then((payload) => {
+      expect(payload.request.body.serviceNames).eql(
         JSON.stringify([
           '18',
           '19',
