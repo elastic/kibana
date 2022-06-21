@@ -11,19 +11,20 @@ import type {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import type { SortState } from '../shared';
 import {
   MetricsNodeDetailsLink,
-  NodeMetricsTableData,
-  NumberCell,
-  StepwisePagination,
-  UptimeCell,
   MetricsTableEmptyIndicesContent,
   MetricsTableErrorContent,
   MetricsTableLoadingContent,
   MetricsTableNoIndicesContent,
+  NodeMetricsTableData,
+  NumberCell,
+  StepwisePagination,
+  UptimeCell,
 } from '../shared';
-import type { SortState } from '../shared';
 import type { PodNodeMetricsRow } from './use_pod_metrics_table';
 
 export interface PodMetricsTableProps {
@@ -76,7 +77,9 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
     return (
       <>
         <EuiBasicTable
-          tableCaption="Infrastructure metrics for pods"
+          tableCaption={i18n.translate('xpack.infra.metricsTable.pod.tableCaption', {
+            defaultMessage: 'Infrastructure metrics for pods',
+          })}
           items={data.rows}
           columns={columns}
           sorting={sorting}
@@ -89,7 +92,9 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <StepwisePagination
-              ariaLabel="Pod metrics pagination"
+              ariaLabel={i18n.translate('xpack.infra.metricsTable.pod.paginationAriaLabel', {
+                defaultMessage: 'Pod metrics pagination',
+              })}
               pageCount={data.pageCount}
               currentPageIndex={data.currentPageIndex}
               setCurrentPageIndex={setCurrentPageIndex}
@@ -109,7 +114,9 @@ function podNodeColumns(
 ): Array<EuiBasicTableColumn<PodNodeMetricsRow>> {
   return [
     {
-      name: 'Name',
+      name: i18n.translate('xpack.infra.metricsTable.pod.nameColumnHeader', {
+        defaultMessage: 'Name',
+      }),
       field: 'name',
       truncateText: true,
       textOnly: true,
@@ -120,13 +127,17 @@ function podNodeColumns(
       },
     },
     {
-      name: 'Uptime',
+      name: i18n.translate('xpack.infra.metricsTable.pod.uptimeColumnHeader', {
+        defaultMessage: 'Uptime',
+      }),
       field: 'uptime',
       align: 'right',
       render: (uptime: number) => <UptimeCell uptimeMs={uptime} />,
     },
     {
-      name: 'CPU usage (avg.)',
+      name: i18n.translate('xpack.infra.metricsTable.pod.averageCpuUsagePercentColumnHeader', {
+        defaultMessage: 'CPU usage (avg.)',
+      }),
       field: 'averageCpuUsagePercent',
       align: 'right',
       render: (averageCpuUsagePercent: number) => (
@@ -134,7 +145,9 @@ function podNodeColumns(
       ),
     },
     {
-      name: 'Memory usage (avg.)',
+      name: i18n.translate('xpack.infra.metricsTable.pod.averageMemoryUsageMegabytesColumnHeader', {
+        defaultMessage: 'Memory usage (avg.)',
+      }),
       field: 'averageMemoryUsageMegabytes',
       align: 'right',
       render: (averageMemoryUsageMegabytes: number) => (

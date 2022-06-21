@@ -16,8 +16,11 @@ export {
   UptimeCell,
 } from './components';
 export {
+  averageOfValues,
   createMetricByFieldLookup,
+  makeUnpackMetric,
   metricsToApiOptions,
+  scaleUpPercentage,
   useInfrastructureNodeMetrics,
 } from './hooks';
 export type { MetricsMap, MetricsQueryOptions, SortState } from './hooks';
@@ -27,3 +30,4 @@ export type {
   SourceProviderProps,
   UseNodeMetricsTableOptions,
 } from './types';
+

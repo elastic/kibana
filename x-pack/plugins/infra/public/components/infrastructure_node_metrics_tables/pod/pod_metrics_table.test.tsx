@@ -157,7 +157,7 @@ function createFetchMock(): NodeMetricsTableFetchMock {
 function createPod(
   id: string,
   name: string,
-  uptimeMs: number,
+  startTime: number,
   cpuUsagePct: number,
   memoryUsageBytes: number
 ): Partial<MetricsExplorerSeries> {
@@ -166,8 +166,8 @@ function createPod(
     keys: [id, name],
     rows: [
       {
-        [metricByField['kubernetes.pod.start_time']]: uptimeMs,
-        [metricByField['kubernetes.pod.cpu.usage.node.pct']]: cpuUsagePct,
+        [metricByField['kubernetes.pod.start_time']]: startTime,
+        [metricByField['kubernetes.pod.cpu.usage.limit.pct']]: cpuUsagePct,
         [metricByField['kubernetes.pod.memory.usage.bytes']]: memoryUsageBytes,
       } as MetricsExplorerSeries['rows'][number],
     ],
