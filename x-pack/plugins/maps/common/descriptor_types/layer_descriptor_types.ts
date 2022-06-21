@@ -7,8 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { Feature } from 'geojson';
 import {
   EMSVectorTileStyleDescriptor,

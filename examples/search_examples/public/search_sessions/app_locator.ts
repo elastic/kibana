@@ -7,8 +7,7 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { Filter, Query, isFilterPinned } from '@kbn/es-query';
-import type { TimeRange } from '@kbn/data-plugin/public';
+import { Filter, Query, isFilterPinned, TimeRange } from '@kbn/es-query';
 import { getStatesFromKbnUrl, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { LocatorDefinition } from '@kbn/share-plugin/common';
 

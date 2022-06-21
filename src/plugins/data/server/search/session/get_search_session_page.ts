@@ -9,11 +9,8 @@
 import { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import { from, Observable, EMPTY } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
-import {
-  SearchSessionSavedObjectAttributes,
-  SEARCH_SESSION_TYPE,
-  KueryNode,
-} from '../../../common';
+import type { KueryNode } from '@kbn/es-query';
+import { SearchSessionSavedObjectAttributes, SEARCH_SESSION_TYPE } from '../../../common';
 import { CheckSearchSessionsDeps, CheckSearchSessionsFn } from './types';
 import { SearchSessionsConfigSchema } from '../../../config';
 

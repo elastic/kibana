@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, Query } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 
 export type ControlWidth = 'small' | 'medium' | 'large';

@@ -14,7 +14,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { type Filter, compareFilters } from '@kbn/es-query';
+import { type Filter, compareFilters, type TimeRange, type Query } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
@@ -25,7 +25,7 @@ import {
   omitGenericEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { APPLY_FILTER_TRIGGER, TimeRange, Query } from '@kbn/data-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {

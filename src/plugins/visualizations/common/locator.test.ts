@@ -7,7 +7,7 @@
  */
 
 import { VisualizeLocatorDefinition } from './locator';
-import { FilterStateStore } from '@kbn/data-plugin/common';
+import { FilterStateStore } from '@kbn/es-query';
 
 describe('visualize locator', () => {
   let definition: VisualizeLocatorDefinition;

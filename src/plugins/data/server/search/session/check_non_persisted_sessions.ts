@@ -10,13 +10,12 @@ import { SavedObjectsFindResult } from '@kbn/core/server';
 import moment from 'moment';
 import { EMPTY } from 'rxjs';
 import { catchError, concatMap } from 'rxjs/operators';
+import { nodeBuilder, KueryNode } from '@kbn/es-query';
 import {
-  nodeBuilder,
   ENHANCED_ES_SEARCH_STRATEGY,
   SEARCH_SESSION_TYPE,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
-  KueryNode,
 } from '../../../common';
 import { checkSearchSessionsByPage, getSearchSessionsPage$ } from './get_search_session_page';
 import { CheckSearchSessionsDeps, SearchStatus } from './types';

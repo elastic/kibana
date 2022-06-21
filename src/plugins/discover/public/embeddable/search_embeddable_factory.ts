@@ -14,7 +14,7 @@ import {
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 
-import { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 
 import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';

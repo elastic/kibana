@@ -10,7 +10,8 @@ import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
 
 import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
-import { TimeHistoryContract, TimeRange, UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { TimeHistoryContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 
 import { useUrlState } from '../../util/url_state';
 import { useDataVisualizerKibana } from '../../../kibana_context';

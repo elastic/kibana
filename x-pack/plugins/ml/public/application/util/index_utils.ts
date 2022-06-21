@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SavedSearchSavedObject } from '../../../common/types/kibana';
 import { getToastNotifications, getSavedObjectsClient } from './dependency_cache';

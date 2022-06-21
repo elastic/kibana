@@ -28,8 +28,8 @@ import type {
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import type { Query, DataPublicPluginStart, TimeRange } from '@kbn/data-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { EmbeddableStart, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';

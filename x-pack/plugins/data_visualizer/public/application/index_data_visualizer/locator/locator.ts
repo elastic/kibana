@@ -7,8 +7,8 @@
 import { encode } from 'rison-node';
 import { stringify } from 'query-string';
 import { SerializableRecord } from '@kbn/utility-types';
-import { Filter } from '@kbn/es-query';
-import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import { Filter, TimeRange } from '@kbn/es-query';
+import { RefreshInterval } from '@kbn/data-plugin/common';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { Dictionary, isRisonSerializationRequired } from '../../common/util/url_state';

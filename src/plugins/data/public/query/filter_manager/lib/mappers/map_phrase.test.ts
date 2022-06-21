@@ -7,7 +7,7 @@
  */
 
 import { mapPhrase } from './map_phrase';
-import { PhraseFilter, Filter } from '../../../../../common';
+import type { PhraseFilter, Filter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapPhrase()', () => {

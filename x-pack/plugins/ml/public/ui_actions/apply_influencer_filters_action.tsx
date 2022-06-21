@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import { FilterStateStore } from '@kbn/data-plugin/common';
 import { MlCoreSetup } from '../plugin';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';

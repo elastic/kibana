@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from '@kbn/core/public';
 import { Adapters } from '@kbn/embeddable-plugin/public';
 import { Subscription } from 'rxjs';
-import { type Filter, FilterStateStore } from '@kbn/es-query';
-import type { Query, TimeRange, DataView } from '@kbn/data-plugin/common';
+import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-plugin/common';
 import { SavedQuery, QueryStateChange, QueryState } from '@kbn/data-plugin/public';
 import {
   getData,

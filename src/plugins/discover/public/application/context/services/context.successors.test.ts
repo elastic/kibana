@@ -11,7 +11,8 @@ import { get, last } from 'lodash';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { createContextSearchSourceStub } from './_stubs';
-import { DataPublicPluginStart, Query } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Query } from '@kbn/es-query';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { EsHitRecord, EsHitRecordList } from '../../types';
 

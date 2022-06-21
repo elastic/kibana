@@ -8,13 +8,8 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
-import { type Filter } from '@kbn/es-query';
-import type {
-  TimeRange,
-  Query,
-  GlobalQueryStateFromUrl,
-  RefreshInterval,
-} from '@kbn/data-plugin/public';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';

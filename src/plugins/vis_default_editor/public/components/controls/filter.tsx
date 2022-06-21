@@ -10,7 +10,8 @@ import React, { useState } from 'react';
 import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IAggConfig, Query, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { IAggConfig, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';

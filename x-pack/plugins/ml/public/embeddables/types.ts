@@ -6,8 +6,8 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { Filter, Query } from '@kbn/es-query';
-import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';

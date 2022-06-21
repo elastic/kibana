@@ -10,6 +10,7 @@ import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
@@ -20,7 +21,6 @@ import {
   getTime,
   getRelativeTime,
   RefreshInterval,
-  TimeRange,
 } from '../../../common';
 import { TimeHistoryContract } from './time_history';
 import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
