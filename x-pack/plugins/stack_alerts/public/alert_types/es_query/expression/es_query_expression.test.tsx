@@ -237,7 +237,7 @@ describe('EsQueryAlertTypeExpression', () => {
     const searchResponseMock$ = new Subject();
     dataMock.search.search.mockImplementation(() => searchResponseMock$);
     const wrapper = await setup(defaultEsQueryExpressionParams);
-    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
+    const testQueryButton = wrapper.find('EuiButtonEmpty[data-test-subj="testQuery"]');
 
     testQueryButton.simulate('click');
     expect(dataMock.search.search).toHaveBeenCalled();
