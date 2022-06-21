@@ -95,6 +95,7 @@ export interface RulesListProps {
   filteredSolutions: string[] | undefined;
   showActionFilter: boolean;
   ruleDetailsLink?: string | undefined;
+  showCreateRuleButton?: boolean;
 }
 
 interface RuleTypeState {
@@ -120,6 +121,7 @@ export const RulesList = ({
   filteredSolutions,
   showActionFilter = true,
   ruleDetailsLink,
+  showCreateRuleButton = true,
 }: RulesListProps) => {
   const history = useHistory();
   const {
@@ -512,7 +514,7 @@ export const RulesList = ({
             </BulkOperationPopover>
           </EuiFlexItem>
         )}
-        {authorizedToCreateAnyRules ? (
+        {authorizedToCreateAnyRules && showCreateRuleButton ? (
           <EuiFlexItem grow={false}>
             <EuiButton
               key="create-rule"

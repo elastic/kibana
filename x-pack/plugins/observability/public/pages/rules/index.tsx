@@ -440,6 +440,7 @@ function RulesPage() {
               filteredSolutions: OBSERVABILITY_SOLUTIONS,
               showActionFilter: false,
               ruleDetailsLink: 'alerts/rules/:ruleId',
+              showCreateRuleButton: false,
             })}
           </EuiFlexItem>
         </EuiFlexGroup>
