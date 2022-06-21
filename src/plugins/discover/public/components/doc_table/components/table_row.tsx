@@ -213,7 +213,7 @@ export const TableRow = ({
           <DocViewer
             columns={columns}
             filter={filter}
-            hit={row.raw}
+            hit={row}
             indexPattern={indexPattern}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}

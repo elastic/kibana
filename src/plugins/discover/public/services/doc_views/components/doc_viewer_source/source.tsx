@@ -56,7 +56,7 @@ export const DocViewerSource = ({
 
   useEffect(() => {
     if (reqState === ElasticRequestState.Found && hit) {
-      setJsonValue(JSON.stringify(hit, undefined, 2));
+      setJsonValue(JSON.stringify(hit.raw, undefined, 2));
     }
   }, [reqState, hit]);
 

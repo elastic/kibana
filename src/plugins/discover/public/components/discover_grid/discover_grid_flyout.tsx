@@ -210,7 +210,7 @@ export function DiscoverGridFlyout({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <DocViewer
-            hit={actualHit.raw}
+            hit={actualHit}
             columns={columns}
             indexPattern={indexPattern}
             filter={(mapping, value, mode) => {

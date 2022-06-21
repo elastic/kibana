@@ -11,7 +11,7 @@ import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
-import type { DataTableRecord, EsHitRecord } from '../../../types';
+import type { DataTableRecord } from '../../../types';
 
 interface RangeQuery {
   format: string;
@@ -79,9 +79,7 @@ export async function fetchHitsInInterval(
 
   const { rawResponse } = await lastValueFrom(fetch$);
   const dataView = searchSource.getField('index');
-  const records = rawResponse.hits?.hits.map((hit) =>
-    buildDataTableRecord(hit as EsHitRecord, dataView!)
-  );
+  const records = rawResponse.hits?.hits.map((hit) => buildDataTableRecord(hit, dataView!));
 
   return records ?? [];
 }

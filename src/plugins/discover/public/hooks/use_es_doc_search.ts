@@ -10,7 +10,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lastValueFrom } from 'rxjs';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { EsHitRecord } from '../types';
+import { buildDataTableRecord } from '../utils/build_data_record';
+import { DataTableRecord } from '../types';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../common';
@@ -26,9 +27,9 @@ export function useEsDocSearch({
   index,
   indexPattern,
   requestSource,
-}: DocProps): [ElasticRequestState, EsHitRecord | null, () => void] {
+}: DocProps): [ElasticRequestState, DataTableRecord | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
-  const [hit, setHit] = useState<EsHitRecord | null>(null);
+  const [hit, setHit] = useState<DataTableRecord | null>(null);
   const { data, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
@@ -48,7 +49,7 @@ export function useEsDocSearch({
 
       if (hits?.hits?.[0]) {
         setStatus(ElasticRequestState.Found);
-        setHit(hits.hits[0]);
+        setHit(buildDataTableRecord(hits.hits[0], indexPattern));
       } else {
         setStatus(ElasticRequestState.NotFound);
       }

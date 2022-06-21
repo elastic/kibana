@@ -31,7 +31,7 @@ const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS
  *
  * @param {SurrDocType} type - `successors` or `predecessors`
  * @param {DataView} indexPattern
- * @param {EsHitRecord} anchor - anchor record
+ * @param {DataTableRecord} anchor - anchor record
  * @param {string} tieBreakerField - name of the tie breaker, the 2nd sort field
  * @param {SortDirection} sortDir - direction of sorting
  * @param {number} size - number of records to retrieve

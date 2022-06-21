@@ -33,7 +33,6 @@ import {
   SavedSearchData,
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
-import { EsHitRecord } from '../../../types';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -143,7 +142,7 @@ export function fetchAll(
         }
         const dataView = searchSource.getField('index')!;
 
-        const resultDocs = docs.map((doc) => buildDataTableRecord(doc as EsHitRecord, dataView));
+        const resultDocs = docs.map((doc) => buildDataTableRecord(doc, dataView));
 
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,

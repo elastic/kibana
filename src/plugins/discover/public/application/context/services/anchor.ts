@@ -9,7 +9,7 @@ import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { DataTableRecord, EsHitRecord } from '../../../types';
+import { DataTableRecord } from '../../../types';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 export async function fetchAnchor(
@@ -30,7 +30,7 @@ export async function fetchAnchor(
       })
     );
   }
-  return buildDataTableRecord(doc as EsHitRecord, indexPattern, true);
+  return buildDataTableRecord(doc, indexPattern, true);
 }
 
 export function updateSearchSource(

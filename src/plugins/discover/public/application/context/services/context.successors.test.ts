@@ -13,7 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { createContextSearchSourceStub } from './_stubs';
 import { DataPublicPluginStart, Query } from '@kbn/data-plugin/public';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { DataTableRecord, EsHitRecord } from '../../../types';
+import { DataTableRecord } from '../../../types';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -63,11 +63,13 @@ describe('context successors', function () {
       fetchSuccessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
         const anchor = buildDataTableRecord(
           {
+            _index: 't',
+            _id: '1',
             _source: {
               [indexPattern.timeFieldName!]: timeValIso,
             },
             sort: [timeValNr, tieBreakerValue],
-          } as EsHitRecord,
+          },
           indexPattern
         );
 
@@ -202,11 +204,13 @@ describe('context successors', function () {
       fetchSuccessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
         const anchor = buildDataTableRecord(
           {
+            _id: '1',
+            _index: 'test',
             _source: {
               [indexPattern.timeFieldName!]: timeValIso,
             },
             sort: [timeValNr, tieBreakerValue],
-          } as EsHitRecord,
+          },
           indexPattern
         );
 

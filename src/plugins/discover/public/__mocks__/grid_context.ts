@@ -19,7 +19,7 @@ import { EsHitRecord } from '../types';
 
 const buildGridContext = (dataView: DataView, rows: EsHitRecord[]): GridContext => {
   const usedRows = rows.map((row) => {
-    return buildDataTableRecord(row as EsHitRecord, dataView);
+    return buildDataTableRecord(row, dataView);
   });
 
   return {
