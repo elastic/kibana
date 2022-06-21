@@ -71,9 +71,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   MockPluginsService.getOpaqueIds.mockReturnValue(new Map());
 
-  // @ts-expect-error 2339
   window.performance.mark = jest.fn();
-  // @ts-expect-error 2339
   window.performance.getEntriesByName = jest.fn().mockReturnValue([]);
 });
 

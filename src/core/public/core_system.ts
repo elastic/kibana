@@ -130,13 +130,13 @@ export class CoreSystem {
 
   private getLoadMarksInfo() {
     if (!performance) return [];
-    const reportData = {};
+    const reportData: Record<string, number> = {};
     performance.mark(KBN_LOAD_MARKS, {
       detail: 'start_done',
     });
     const marks = performance.getEntriesByName(KBN_LOAD_MARKS);
     for (const mark of marks) {
-      reportData[mark.detail] = mark.startTime;
+      reportData[(mark as PerformanceMark).detail] = mark.startTime;
     }
 
     return reportData;

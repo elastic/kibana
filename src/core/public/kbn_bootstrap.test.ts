@@ -22,7 +22,6 @@ describe('kbn_bootstrap', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // @ts-expect-error 2339
     window.performance.mark = jest.fn();
   });
 
