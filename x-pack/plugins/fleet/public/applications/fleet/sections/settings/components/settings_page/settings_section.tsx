@@ -54,7 +54,7 @@ export const SettingsSection: React.FunctionComponent<SettingsSectionProps> = ({
               <EuiLink href={docLinks.links.fleet.guide} target="_blank" external>
                 <FormattedMessage
                   id="xpack.fleet.settings.fleetUserGuideLink"
-                  defaultMessage="Fleet User Guide"
+                  defaultMessage="Fleet and Elastic Agent Guide"
                 />
               </EuiLink>
             ),
