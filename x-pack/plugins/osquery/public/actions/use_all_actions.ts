@@ -32,7 +32,6 @@ interface UseAllActions {
   direction: Direction;
   limit: number;
   sortField: string;
-  eventDetailId: string;
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
 }
@@ -96,7 +95,7 @@ export const useInfiniteAllActions = ({
   sortField,
   eventDetailId,
   filterQuery,
-}: UseAllActions) => {
+}: UseAllActions & { eventDetailId: string }) => {
   const { data } = useKibana().services;
   const setErrorToast = useErrorToast();
   const [nextPage, setNextPage] = useState(0);

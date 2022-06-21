@@ -63,5 +63,6 @@ export const buildActionsQuery = ({
     },
   };
 
+  // @ts-expect-error update types
   return dslQuery;
 };
