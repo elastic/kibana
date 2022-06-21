@@ -92,12 +92,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
       default: 5,
     },
-    numTiles: {
-      types: ['number'],
-      help: i18n.translate('expressionNewMetricVis.function.numTiles.help', {
-        defaultMessage: 'Constrains the total number of tiles to a fixed number.',
-      }),
-    },
   },
   fn(input, args, handlers) {
     validateAccessor(args.metric, input.columns);
