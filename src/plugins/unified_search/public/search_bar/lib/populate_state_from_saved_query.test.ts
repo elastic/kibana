@@ -10,7 +10,7 @@ import { populateStateFromSavedQuery } from './populate_state_from_saved_query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DataPublicPluginStart, SavedQuery } from '@kbn/data-plugin/public';
 import { getFilter } from '../../test_helpers/get_stub_filter';
-import { FilterStateStore } from '@kbn/data-plugin/common';
+import { FilterStateStore } from '@kbn/es-query';
 
 describe('populateStateFromSavedQuery', () => {
   let dataMock: jest.Mocked<DataPublicPluginStart>;

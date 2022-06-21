@@ -6,8 +6,15 @@
  */
 
 export { MetricsNodeDetailsLink, NumberCell, StepwisePagination, UptimeCell } from './components';
-export { metricsToApiOptions, useInfrastructureNodeMetrics } from './hooks';
-export type { MetricsMap, SortState } from './hooks';
+export {
+  averageOfValues,
+  createMetricByFieldLookup,
+  makeUnpackMetric,
+  metricsToApiOptions,
+  scaleUpPercentage,
+  useInfrastructureNodeMetrics,
+} from './hooks';
+export type { MetricsMap, MetricsQueryOptions, SortState } from './hooks';
 export type {
   IntegratedNodeMetricsTableProps,
   SourceProviderProps,
