@@ -484,10 +484,6 @@ export type DataViewSpec = {
    * Name of the data view. Human readable name used to differentiate data view.
    */
   name?: string;
-  /**
-   * Whether this data view is backed by a saved object or just a local (ad-hoc) data view.
-   */
-  isPersisted?: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

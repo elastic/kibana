@@ -224,7 +224,7 @@ describe('IndexPatterns', () => {
     expect(result.res.status).toBe(409);
   });
 
-  test('create with ID', async () => {
+  test('create', async () => {
     const title = 'kibana-*';
     const id = 'a54638bb-62cf-40f1-a1c2-195df3f0865a';
     indexPatterns.refreshFields = jest.fn();
@@ -237,22 +237,30 @@ describe('IndexPatterns', () => {
     await indexPatterns.create({ title });
     expect(indexPatterns.refreshFields).toBeCalled();
     expect(indexPattern.id).toBe(id);
-    expect(indexPattern.isPersisted).toBe(true);
+    expect(indexPattern.isPersisted()).toBe(false);
   });
 
-  test('create without ID', async () => {
+  test('createSavedObject', async () => {
     const title = 'kibana-*';
-    indexPatterns.refreshFields = jest.fn();
+    const version = '8.4.0';
+    const dataView = await indexPatterns.create({ title }, true);
 
-    const indexPattern = await indexPatterns.create({ title }, true);
+    savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({
+      ...savedObject,
+      id: dataView.id,
+      version,
+      attributes: {
+        ...savedObject.attributes,
+        title: dataView.title,
+      },
+    });
+
+    const indexPattern = await indexPatterns.createSavedObject(dataView);
     expect(indexPattern).toBeInstanceOf(DataView);
+    expect(indexPattern.id).toBe(dataView.id);
     expect(indexPattern.title).toBe(title);
-    expect(indexPatterns.refreshFields).not.toBeCalled();
-
-    await indexPatterns.create({ title });
-    expect(indexPatterns.refreshFields).toBeCalled();
-    expect(indexPattern.id).toBeDefined();
-    expect(indexPattern.isPersisted).toBe(false);
+    expect(indexPattern.isPersisted()).toBe(true);
   });
 
   test('find', async () => {

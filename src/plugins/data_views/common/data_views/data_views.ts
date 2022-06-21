@@ -768,8 +768,7 @@ export class DataViewsService {
     const metaFields = await this.config.get(META_FIELDS);
 
     const spec = {
-      id: id ?? `local-${uuid.v4()}`,
-      isPersisted: id !== undefined,
+      id: id ?? uuid.v4(),
       ...restOfSpec,
     };
 
