@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import {
@@ -14,64 +13,18 @@ import {
   SUMMARY_FILTER,
 } from '../../../../../../common/constants/client_defaults';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-
-const sortFieldMap: Record<string, string> = {
-  ['name.keyword']: 'monitor.name',
-  ['urls.keyword']: 'url.full',
-  ['type.keyword']: 'monitor.type',
-  '@timestamp': '@timestamp',
-};
-
-export const getInlineErrorFilters = () => [
-  {
-    exists: {
-      field: 'summary',
-    },
-  },
-  {
-    exists: {
-      field: 'error',
-    },
-  },
-  {
-    bool: {
-      minimum_should_match: 1,
-      should: [
-        {
-          match_phrase: {
-            'error.message': 'journey did not finish executing',
-          },
-        },
-        {
-          match_phrase: {
-            'error.message': 'ReferenceError:',
-          },
-        },
-      ],
-    },
-  },
-  {
-    range: {
-      'monitor.timespan': {
-        lte: moment().toISOString(),
-        gte: moment().subtract(5, 'minutes').toISOString(),
-      },
-    },
-  },
-  EXCLUDE_RUN_ONCE_FILTER,
-];
+import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../../../common/constants';
 
 export function useStatusByLocation() {
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  const { data } = useEsSearch(
+  const { data, loading } = useEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       body: {
-        size: 1000,
+        size: 0,
         query: {
           bool: {
             filter: [
@@ -86,11 +39,28 @@ export function useStatusByLocation() {
             ],
           },
         },
-        collapse: { field: 'observer.geo.name' },
         sort: [{ '@timestamp': 'desc' }],
+        aggs: {
+          locations: {
+            terms: {
+              field: 'observer.geo.name',
+              missing: UNNAMED_LOCATION,
+              size: 1000,
+            },
+            aggs: {
+              summary: {
+                top_hits: {
+                  size: 1,
+                },
+              },
+            },
+          },
+        },
       },
     },
     [lastRefresh, monitorId],
     { name: 'getMonitorStatusByLocation' }
   );
+
+  return { loading, data };
 }
