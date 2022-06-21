@@ -19,7 +19,8 @@ import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { withSuspense } from '../../../services/presentation_util';
-import { DashboardDataLoadedEvent } from '../grid/dashboard_grid';
+import { DashboardDataLoadedEvent } from '../types';
+
 
 export interface DashboardViewportProps {
   container: DashboardContainer;

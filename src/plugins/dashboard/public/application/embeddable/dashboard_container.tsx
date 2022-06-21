@@ -31,7 +31,7 @@ import {
 } from '../../services/embeddable';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
-import { DashboardPanelState } from './types';
+import { DashboardDataLoadedEvent, DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import {
   KibanaContextProvider,
@@ -48,7 +48,6 @@ import {
   combineDashboardFiltersWithControlGroupFilters,
   syncDashboardControlGroup,
 } from '../lib/dashboard_control_group';
-import { DashboardDataLoadedEvent } from './types';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
