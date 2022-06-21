@@ -25,6 +25,7 @@ import {
   deletePackagePolicyHandler,
   upgradePackagePolicyHandler,
   dryRunUpgradePackagePolicyHandler,
+  getOrphanedPackagePolicies,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -50,6 +51,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     getOnePackagePolicyHandler
+  );
+
+  router.get(
+    {
+      path: PACKAGE_POLICY_API_ROUTES.ORPHANED_INTEGRATION_POLICIES,
+      validate: {},
+      fleetAuthz: {
+        integrations: { readIntegrationPolicies: true },
+      },
+    },
+    getOrphanedPackagePolicies
   );
 
   // Create
