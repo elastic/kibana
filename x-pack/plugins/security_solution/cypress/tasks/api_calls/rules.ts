@@ -5,7 +5,28 @@
  * 2.0.
  */
 
-import { CustomRule, ThreatIndicatorRule } from '../../objects/rule';
+import { CustomRule, ThreatIndicatorRule, MachineLearningRule } from '../../objects/rule';
+
+export const createMachineLearningRule = (rule: MachineLearningRule, ruleId = 'ml_rule_testing') =>
+  cy.request({
+    method: 'POST',
+    url: 'api/detection_engine/rules',
+    body: {
+      rule_id: ruleId,
+      risk_score: parseInt(rule.riskScore, 10),
+      description: rule.description,
+      interval: rule.interval,
+      name: rule.name,
+      severity: rule.severity.toLocaleLowerCase(),
+      type: 'machine_learning',
+      from: 'now-50000h',
+      enabled: false,
+      machine_learning_job_id: rule.machineLearningJobs,
+      anomaly_threshold: rule.anomalyScoreThreshold,
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
 
 export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', interval = '100m') =>
   cy.request({

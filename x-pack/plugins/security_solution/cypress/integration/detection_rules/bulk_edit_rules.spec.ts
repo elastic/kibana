@@ -38,7 +38,8 @@ import {
   waitForBulkEditActionToFinish,
   confirmBulkEditForm,
   clickAddIndexPatternsMenuItem,
-  waitForElasticRulesBulkEditModal,
+  checkElasticRulesCannotBeModified,
+  checkMachineLearningRulesCannotBeModified,
   waitForMixedRulesBulkEditModal,
   openBulkEditAddTagsForm,
   openBulkEditDeleteTagsForm,
@@ -49,7 +50,7 @@ import { hasIndexPatterns } from '../../tasks/rule_details';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-import { createCustomRule } from '../../tasks/api_calls/rules';
+import { createCustomRule, createMachineLearningRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
   getExistingRule,
@@ -57,6 +58,7 @@ import {
   getNewRule,
   getNewThresholdRule,
   totalNumberOfPrebuiltRules,
+  getMachineLearningRule,
 } from '../../objects/rule';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
@@ -91,7 +93,9 @@ describe('Detection rules, bulk edit', () => {
     waitForRulesTableToBeLoaded();
   });
 
-  it('should show warning modal windows when machine learning rule getting updated with index pattern', () => {
+  it('should show warning modal windows when some of the selected rules cannot be edited', () => {
+    createMachineLearningRule(getMachineLearningRule(), '7');
+
     cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN)
       .pipe(($el) => $el.trigger('click'))
       .should('not.exist');
@@ -104,15 +108,21 @@ describe('Detection rules, bulk edit', () => {
     // check modal window for few selected rules
     selectNumberOfRules(5);
     clickAddIndexPatternsMenuItem();
-    waitForElasticRulesBulkEditModal(5);
+    checkElasticRulesCannotBeModified(5);
     cy.get(MODAL_CONFIRMATION_BTN).click();
 
-    // Select Elastic rules and custom rules, check mixed rules warning modal window, proceed with editing custom rules
+    // Select all rules(Elastic rules and custom)
     cy.get(ELASTIC_RULES_BTN).click();
     selectAllRules();
     clickAddIndexPatternsMenuItem();
-    waitForMixedRulesBulkEditModal(totalNumberOfPrebuiltRules, 6);
-    cy.get(MODAL_CONFIRMATION_BTN).should('have.text', 'Edit custom rules').click();
+    waitForMixedRulesBulkEditModal(6);
+
+    // check rules that cannot be edited for index patterns: immutable and ML
+    checkElasticRulesCannotBeModified(totalNumberOfPrebuiltRules);
+    checkMachineLearningRulesCannotBeModified(1);
+
+    // proceed with custom rule editing
+    cy.get(MODAL_CONFIRMATION_BTN).should('have.text', 'Edit 6 Custom rules').click();
 
     typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
     confirmBulkEditForm();
