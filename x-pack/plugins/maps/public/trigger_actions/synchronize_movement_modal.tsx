@@ -23,9 +23,33 @@ interface Props {
 
 export class SynchronizeMovementModal extends Component<Props> {
   _renderSwitches() {
-    return synchronizeMovement.getMapPanels().map((mapPanel) => {
+    const mapPanels = synchronizeMovement.getMapPanels();
+
+    let numEnabled = 0;
+    mapPanels.forEach((mapPanel) => {
+      if (mapPanel.getIsMovementSynchronized()) {
+        numEnabled++;
+      }
+    });
+
+    return mapPanels.map((mapPanel) => {
+      const hasErrors = numEnabled === 1 && mapPanel.getIsMovementSynchronized();
       return (
-        <EuiFormRow display="columnCompressedSwitch" key={mapPanel.id}>
+        <EuiFormRow
+          display="columnCompressedSwitch"
+          key={mapPanel.id}
+          isInvalid={hasErrors}
+          error={
+            hasErrors
+              ? [
+                  i18n.translate('xpack.maps.synchronizeMovementModal.onlyOneMapSelectedError', {
+                    defaultMessage:
+                      'Unable to synchronize map movement when only enabled for a single map',
+                  }),
+                ]
+              : []
+          }
+        >
           <EuiSwitch
             label={mapPanel.getTitle()}
             checked={mapPanel.getIsMovementSynchronized()}
@@ -33,6 +57,7 @@ export class SynchronizeMovementModal extends Component<Props> {
               mapPanel.setIsMovementSynchronized(event.target.checked);
               this.forceUpdate();
             }}
+            isInvalid={hasErrors}
             compressed
           />
         </EuiFormRow>
