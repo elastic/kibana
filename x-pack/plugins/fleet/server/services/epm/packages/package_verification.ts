@@ -7,17 +7,17 @@
 
 import { readFile } from 'fs/promises';
 
-import type { FleetConfigType } from '../../../../common/types';
+import { appContextService } from '../../app_context';
 
 let cachedKey: string = '';
 
-export async function getGpgKey(config: FleetConfigType['packageVerification']): Promise<string> {
+export async function getGpgKey(): Promise<string> {
   if (cachedKey) return cachedKey;
 
-  const gpgKeyPath = config?.gpgKeyPath;
+  const gpgKeyPath = appContextService.getConfig()?.packageVerification?.gpgKeyPath;
 
   if (!gpgKeyPath) {
-    throw new Error('No gpg key path specified, unable to get GPG key');
+    throw new Error('No path specified in "packageVerification.gpgKeyPath", unable to get GPG key');
   }
 
   const buffer = await readFile(gpgKeyPath);
