@@ -5,6 +5,7 @@ set -euo pipefail
 export KBN_NP_PLUGINS_BUILT=true
 
 echo "--- Build Kibana Distribution"
+echo is_pr_with_label "ci:build-os-packages"
 if is_pr_with_label "ci:build-all-platforms"; then
   node scripts/build --all-platforms --skip-os-packages
 elif is_pr_with_label "ci:build-os-packages"; then

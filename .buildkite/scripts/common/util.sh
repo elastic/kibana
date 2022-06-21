@@ -21,6 +21,7 @@ is_pr_with_label() {
 
   for label in "${labels[@]}"
   do
+    echo $label $match
     if [ "$label" == "$match" ]; then
       return
     fi
