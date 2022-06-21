@@ -17,10 +17,10 @@ import { IContainer } from './i_container';
 import { EmbeddableStart } from '../../plugin';
 import { EmbeddableError, EmbeddableOutput } from '../embeddables/i_embeddable';
 
-export type EmbeddableRenderStatus = 'loading' | 'loaded' | 'rendered' | 'error';
-export interface EmbeddableRenderedEvent {
+export type EmbeddablePhase = 'loading' | 'loaded' | 'rendered' | 'error';
+export interface EmbeddablePhaseEvent {
   id: string;
-  status: EmbeddableRenderStatus;
+  status: EmbeddablePhase;
   error?: EmbeddableError;
   timeToEvent: number;
 }
@@ -31,7 +31,7 @@ export interface EmbeddableChildPanelProps {
   className?: string;
   container: IContainer;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
-  onPanelStatusChange?: (info: EmbeddableRenderedEvent) => void;
+  onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
 }
 interface State {
   firstTimeLoading: boolean;
@@ -57,13 +57,13 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
     this.mounted = false;
   }
 
-  private getEventStatus(output: EmbeddableOutput): EmbeddableRenderStatus {
-    if (output.rendered === true) {
+  private getEventStatus(output: EmbeddableOutput): EmbeddablePhase {
+    if (output.error !== undefined) {
+      return 'error';
+    } else if (output.rendered === true) {
       return 'rendered';
     } else if (output.loading === false) {
       return 'loaded';
-    } else if (output.error !== undefined) {
-      return 'error';
     } else {
       return 'loading';
     }
@@ -73,7 +73,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
     this.mounted = true;
     const { container } = this.props;
 
-    let loadingTime = 0;
+    let loadingStartTime = 0;
 
     this.embeddable = await container.untilEmbeddableLoaded(this.props.embeddableId);
 
@@ -87,16 +87,16 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
         tap((output) => {
           if (output.loading === true) {
             // Record start time
-            loadingTime = performance.now();
+            loadingStartTime = performance.now();
           }
         }),
         // Map loaded event properties
-        map((output): EmbeddableRenderedEvent => {
+        map((output): EmbeddablePhaseEvent => {
           return {
             id: this.embeddable.id,
             status: this.getEventStatus(output),
             error: output.error,
-            timeToEvent: performance.now() - loadingTime,
+            timeToEvent: performance.now() - loadingStartTime,
           };
         }),
         // Dedupe

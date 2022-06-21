@@ -10,11 +10,7 @@ import React, { useState, useRef, useEffect, FC } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
-import {
-  EmbeddableChildPanel,
-  EmbeddableRenderedEvent,
-  ViewMode,
-} from '../../../services/embeddable';
+import { EmbeddableChildPanel, EmbeddablePhaseEvent, ViewMode } from '../../../services/embeddable';
 import { useLabs } from '../../../services/presentation_util';
 import { DashboardPanelState } from '../types';
 import { DashboardContainer } from '..';
@@ -31,7 +27,7 @@ interface Props extends PanelProps, DivProps {
   expandedPanelId?: string;
   key: string;
   isRenderable?: boolean;
-  onPanelStatusChange?: (info: EmbeddableRenderedEvent) => void;
+  onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
 }
 
 const Item = React.forwardRef<HTMLDivElement, Props>(

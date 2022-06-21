@@ -19,23 +19,12 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import { GridData } from '../../../../common';
-import { ViewMode, EmbeddableRenderedEvent } from '../../../services/embeddable';
+import { ViewMode, EmbeddablePhaseEvent } from '../../../services/embeddable';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
-import { DashboardPanelState } from '../types';
+import { DashboardDataEventStatus, DashboardDataLoadedEvent, DashboardPanelState } from '../types';
 import { withKibana } from '../../../services/kibana_react';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGridItem } from './dashboard_grid_item';
-
-export type DashboardDataEventStatus = 'done' | 'error';
-
-export interface DashboardDataLoadedEvent extends Record<string, unknown> {
-  // Time from start to when data is loaded
-  timeToData: number;
-  // Time from start until render or error
-  timeToDone: number;
-  numOfPanels: number;
-  status: DashboardDataEventStatus;
-}
 
 let lastValidGridSize = 0;
 
@@ -266,7 +255,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
      * @param info
      * @returns
      */
-    const onPanelStatusChange = (info: EmbeddableRenderedEvent) => {
+    const onPanelStatusChange = (info: EmbeddablePhaseEvent) => {
       if (!this.props.onDataLoaded) return;
 
       if (panelIds[info.id] === undefined || info.status === 'loading') {
