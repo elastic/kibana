@@ -205,7 +205,7 @@ export class AnalyticsManager {
     const details: any = {};
     let data: estypes.MlTrainedModelConfig | estypes.MlDataframeAnalyticsSummary;
     // fetch model data and create model elements
-    data = this.findTrainedModel(modelId); // change to a findModel function!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    data = this.findTrainedModel(modelId);
     const modelNodeId = `${data.model_id}-${JOB_MAP_NODE_TYPES.TRAINED_MODEL}`;
     // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
     const sourceJobId = data?.metadata?.analytics_config?.id;
