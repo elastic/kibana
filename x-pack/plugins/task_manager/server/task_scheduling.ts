@@ -8,37 +8,37 @@
 import { filter, take } from 'rxjs/operators';
 import pMap from 'p-map';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Option, map as mapOptional, getOrElse, isSome } from 'fp-ts/lib/Option';
+import { getOrElse, isSome, map as mapOptional, Option } from 'fp-ts/lib/Option';
 
 import uuid from 'uuid';
-import { pick, chunk } from 'lodash';
+import { chunk, pick } from 'lodash';
 import { merge, Subject } from 'rxjs';
 import agent from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
 import { mustBeAllOf } from './queries/query_clauses';
-import { asOk, either, map, mapErr, promiseResult, isErr, mapOk } from './lib/result_type';
+import { asOk, either, isErr, map, mapErr, promiseResult } from './lib/result_type';
 import {
-  isTaskRunEvent,
-  isTaskClaimEvent,
-  isTaskRunRequestEvent,
-  RanTask,
-  ErroredTask,
-  OkResultOf,
-  ErrResultOf,
   ClaimTaskErr,
+  ErroredTask,
+  ErrResultOf,
+  isTaskClaimEvent,
+  isTaskRunEvent,
+  isTaskRunRequestEvent,
+  OkResultOf,
+  RanTask,
   TaskClaimErrorType,
 } from './task_events';
 import { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import {
   ConcreteTaskInstance,
-  TaskInstanceWithId,
+  EphemeralTask,
+  IntervalSchedule,
   TaskInstanceWithDeprecatedFields,
+  TaskInstanceWithId,
   TaskLifecycle,
   TaskLifecycleResult,
   TaskStatus,
-  EphemeralTask,
-  IntervalSchedule,
 } from './task';
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
@@ -208,20 +208,18 @@ export class TaskScheduling {
    * @returns {Promise<ConcreteTaskInstance>}
    */
   public async runSoon(taskId: string): Promise<RunSoonResult> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        this.awaitTaskClaim(taskId) // don't expose state on runSoon
-          .then(({ id }) =>
-            resolve({
-              id,
-            })
-          )
-          .catch(reject);
-        this.taskPollingLifecycle.attemptToRun(taskId);
-      } catch (error) {
-        reject(error);
-      }
+    const task = await this.store.get(taskId);
+    if (task.status !== TaskStatus.Idle) {
+      throw Error('Already running');
+    }
+    const updatedTask = await this.store.update({
+      ...task,
+      scheduledAt: new Date(),
+      runAt: new Date(),
+      // status: TaskStatus.Idle,
+      ownerId: this.taskManagerId,
     });
+    return { id: updatedTask.id };
   }
 
   /**
@@ -298,48 +296,6 @@ export class TaskScheduling {
       }
       throw err;
     }
-  }
-
-  private awaitTaskClaim(taskId: string): Promise<RunSoonResult> {
-    return new Promise((resolve, reject) => {
-      // listen for all events related to the current task
-      const subscription = merge(
-        this.taskPollingLifecycle.events,
-        this.ephemeralTaskLifecycle.events
-      )
-        .pipe(filter(({ id }: TaskLifecycleEvent) => id === taskId))
-        .subscribe((taskEvent: TaskLifecycleEvent) => {
-          if (isTaskClaimEvent(taskEvent)) {
-            mapErr(async (error: ClaimTaskErr) => {
-              // reject if any error event takes place for the requested task
-              subscription.unsubscribe();
-              if (
-                isSome(error.task) &&
-                error.errorType === TaskClaimErrorType.CLAIMED_BY_ID_OUT_OF_CAPACITY
-              ) {
-                const task = error.task.value;
-                const definition = this.definitions.get(task.taskType);
-                return reject(
-                  new Error(
-                    `Failed to claim task "${taskId}" as we would exceed the max concurrency of "${
-                      definition?.title ?? task.taskType
-                    }" which is ${
-                      definition?.maxConcurrency
-                    }. Rescheduled the task to ensure it is picked up as soon as possible.`
-                  )
-                );
-              } else {
-                return reject(await this.identifyTaskFailureReason(taskId, error.task));
-              }
-            }, taskEvent.event);
-            mapOk(
-              (taskInstance: OkResultOf<TaskLifecycleEvent>) =>
-                resolve(pick(taskInstance as ConcreteTaskInstance, ['id'])),
-              taskEvent.event
-            );
-          }
-        });
-    });
   }
 
   private awaitTaskRunResult(taskId: string, cancel?: Promise<void>): Promise<RunNowResult> {

@@ -659,56 +659,6 @@ export default function ({ getService }: FtrProviderContext) {
       await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrencySecond');
     });
 
-    it('should return a task run error result when running a task now fails', async () => {
-      const originalTask = await scheduleTask({
-        taskType: 'sampleTask',
-        schedule: { interval: `30m` },
-        params: { failWith: 'this task was meant to fail!', failOn: 3 },
-      });
-
-      await retry.try(async () => {
-        const docs = await historyDocs();
-        expect(docs.filter((taskDoc) => taskDoc._source.taskId === originalTask.id).length).to.eql(
-          1
-        );
-
-        const task = await currentTask<{ count: number }>(originalTask.id);
-        expect(task.state.count).to.eql(1);
-        expect(task.status).to.eql('idle');
-
-        // ensure this task shouldn't run for another half hour
-        expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
-      });
-
-      await ensureTasksIndexRefreshed();
-
-      // second run should still be successful
-      const successfulRunSoonResult = await runTaskSoon({
-        id: originalTask.id,
-      });
-
-      expect(successfulRunSoonResult).to.eql({ id: originalTask.id });
-
-      await retry.try(async () => {
-        const task = await currentTask<{ count: number }>(originalTask.id);
-        expect(task.status).to.eql('idle');
-        expect(task.state.count).to.eql(2);
-      });
-
-      await ensureTasksIndexRefreshed();
-
-      await retry.try(async () => {
-        expect(
-          (await historyDocs()).filter((taskDoc) => taskDoc._source.taskId === originalTask.id)
-            .length
-        ).to.eql(2);
-
-        const task = await currentTask(originalTask.id);
-        expect(task.status).to.eql('idle');
-        expect(task.attempts).to.eql(1);
-      });
-    });
-
     it('should increment attempts when task fails on markAsRunning', async () => {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
