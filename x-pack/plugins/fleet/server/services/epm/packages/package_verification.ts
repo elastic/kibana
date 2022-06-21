@@ -32,7 +32,7 @@ export async function _readGpgKey(): Promise<string | undefined> {
   try {
     buffer = await readFile(gpgKeyPath);
   } catch (e) {
-    logger.warn(`Unable to retrieve GPG key from '${gpgKeyPath}': ${e}`);
+    logger.warn(`Unable to retrieve GPG key from '${gpgKeyPath}': ${e.code}`);
     return undefined;
   }
 
