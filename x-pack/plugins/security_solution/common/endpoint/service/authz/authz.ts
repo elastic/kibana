@@ -34,6 +34,7 @@ export const calculateEndpointAuthz = (
     canUnIsolateHost: hasAllAccessToFleet,
     canKillProcess: hasAllAccessToFleet && isPlatinumPlusLicense,
     canSuspendProcess: hasAllAccessToFleet && isPlatinumPlusLicense,
+    canGetRunningProcesses: hasAllAccessToFleet && isPlatinumPlusLicense,
   };
 };
 
@@ -46,5 +47,6 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canUnIsolateHost: true,
     canKillProcess: false,
     canSuspendProcess: false,
+    canGetRunningProcesses: false,
   };
 };

@@ -11713,7 +11713,9 @@
               },
               ", field: string | ",
               "DataViewFieldBase",
-              ", values: any, operation: string, index: string) => ",
+              ", values: any, operation: string, index: ",
+              "DataViewBase",
+              ") => ",
               "Filter",
               "[]"
             ],
@@ -11780,10 +11782,15 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.esFilters.generateFilters.$5",
-                "type": "string",
+                "type": "Object",
                 "tags": [],
                 "label": "index",
                 "description": [],
+                "signature": [
+                  "{ fields: ",
+                  "DataViewFieldBase",
+                  "[]; id?: string | undefined; title: string; }"
+                ],
                 "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
                 "deprecated": false
               }
@@ -13287,113 +13294,6 @@
                 ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-public.search.aggs.getNumberHistogramIntervalByDatatableColumn",
-                "type": "Function",
-                "tags": [],
-                "label": "getNumberHistogramIntervalByDatatableColumn",
-                "description": [],
-                "signature": [
-                  "(column: ",
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.DatatableColumn",
-                    "text": "DatatableColumn"
-                  },
-                  ") => number | undefined"
-                ],
-                "path": "src/plugins/data/public/index.ts",
-                "deprecated": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "data",
-                    "id": "def-public.search.aggs.getNumberHistogramIntervalByDatatableColumn.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "column",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "expressions",
-                        "scope": "common",
-                        "docId": "kibExpressionsPluginApi",
-                        "section": "def-common.DatatableColumn",
-                        "text": "DatatableColumn"
-                      }
-                    ],
-                    "path": "src/plugins/data/common/search/aggs/utils/get_number_histogram_interval.ts",
-                    "deprecated": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-public.search.aggs.getDateHistogramMetaDataByDatatableColumn",
-                "type": "Function",
-                "tags": [],
-                "label": "getDateHistogramMetaDataByDatatableColumn",
-                "description": [],
-                "signature": [
-                  "(column: ",
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.DatatableColumn",
-                    "text": "DatatableColumn"
-                  },
-                  ", defaults?: Partial<{ timeZone: string; }>) => { interval: string | undefined; timeZone: string | undefined; timeRange: ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataQueryPluginApi",
-                    "section": "def-common.TimeRange",
-                    "text": "TimeRange"
-                  },
-                  " | undefined; } | undefined"
-                ],
-                "path": "src/plugins/data/public/index.ts",
-                "deprecated": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "data",
-                    "id": "def-public.search.aggs.getDateHistogramMetaDataByDatatableColumn.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "column",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "expressions",
-                        "scope": "common",
-                        "docId": "kibExpressionsPluginApi",
-                        "section": "def-common.DatatableColumn",
-                        "text": "DatatableColumn"
-                      }
-                    ],
-                    "path": "src/plugins/data/common/search/aggs/utils/get_date_histogram_meta.ts",
-                    "deprecated": false
-                  },
-                  {
-                    "parentPluginId": "data",
-                    "id": "def-public.search.aggs.getDateHistogramMetaDataByDatatableColumn.$2",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "defaults",
-                    "description": [],
-                    "signature": [
-                      "{ timeZone?: string | undefined; }"
-                    ],
-                    "path": "src/plugins/data/common/search/aggs/utils/get_date_histogram_meta.ts",
-                    "deprecated": false
-                  }
-                ]
               }
             ]
           },
@@ -13600,50 +13500,6 @@
                 "label": "minimalColumns",
                 "description": [],
                 "path": "src/plugins/data/common/search/tabify/get_columns.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.search.checkColumnForPrecisionError",
-            "type": "Function",
-            "tags": [],
-            "label": "checkColumnForPrecisionError",
-            "description": [],
-            "signature": [
-              "(column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => ",
-              "Serializable"
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.search.checkColumnForPrecisionError.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "column",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.DatatableColumn",
-                    "text": "DatatableColumn"
-                  }
-                ],
-                "path": "src/plugins/data/common/search/tabify/utils.ts",
                 "deprecated": false
               }
             ]
@@ -22211,6 +22067,66 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DatatableUtilitiesService.getDateHistogramMeta",
+            "type": "Function",
+            "tags": [],
+            "label": "getDateHistogramMeta",
+            "description": [
+              "\nHelper function returning the used interval, used time zone and applied time filters for data table column created by the date_histogramm agg type.\n\"auto\" will get expanded to the actually used interval.\nIf the column is not a column created by a date_histogram aggregation of the esaggs data source,\nthis function will return undefined."
+            ],
+            "signature": [
+              "(column: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              ", defaults?: Partial<{ timeZone: string; }>) => DateHistogramMeta | undefined"
+            ],
+            "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DatatableUtilitiesService.getDateHistogramMeta.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "column",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.DatatableColumn",
+                    "text": "DatatableColumn"
+                  }
+                ],
+                "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DatatableUtilitiesService.getDateHistogramMeta.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "defaults",
+                "description": [],
+                "signature": [
+                  "Partial<{ timeZone: string; }>"
+                ],
+                "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DatatableUtilitiesService.getDataView",
             "type": "Function",
             "tags": [],
@@ -22411,6 +22327,52 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DatatableUtilitiesService.getNumberHistogramInterval",
+            "type": "Function",
+            "tags": [],
+            "label": "getNumberHistogramInterval",
+            "description": [
+              "\nHelper function returning the used interval for data table column created by the histogramm agg type.\n\"auto\" will get expanded to the actually used interval.\nIf the column is not a column created by a histogram aggregation of the esaggs data source,\nthis function will return undefined."
+            ],
+            "signature": [
+              "(column: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              ") => number | undefined"
+            ],
+            "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DatatableUtilitiesService.getNumberHistogramInterval.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "column",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.DatatableColumn",
+                    "text": "DatatableColumn"
+                  }
+                ],
+                "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DatatableUtilitiesService.getTotalCount",
             "type": "Function",
             "tags": [],
@@ -22444,6 +22406,51 @@
                     "docId": "kibExpressionsPluginApi",
                     "section": "def-common.Datatable",
                     "text": "Datatable"
+                  }
+                ],
+                "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DatatableUtilitiesService.hasPrecisionError",
+            "type": "Function",
+            "tags": [],
+            "label": "hasPrecisionError",
+            "description": [],
+            "signature": [
+              "(column: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              ") => ",
+              "Serializable"
+            ],
+            "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DatatableUtilitiesService.hasPrecisionError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "column",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.DatatableColumn",
+                    "text": "DatatableColumn"
                   }
                 ],
                 "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",

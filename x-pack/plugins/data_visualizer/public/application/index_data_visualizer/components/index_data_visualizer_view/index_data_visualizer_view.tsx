@@ -287,7 +287,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         field,
         values,
         operation,
-        String(currentDataView.id)
+        currentDataView
       );
       if (newFilters) {
         data.query.filterManager.addFilters(newFilters);

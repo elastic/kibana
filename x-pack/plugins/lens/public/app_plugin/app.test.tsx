@@ -410,7 +410,7 @@ describe('Lens App', () => {
         expect.objectContaining({
           currentDataViewId: 'mockip',
           onChangeDataView: expect.any(Function),
-          onDataViewCreated: expect.any(Function),
+          onDataViewCreated: undefined,
           onAddField: undefined,
         })
       );
@@ -418,7 +418,7 @@ describe('Lens App', () => {
 
     it('calls the nav component with the correct dataview picker props if permissions are given', async () => {
       const { instance, lensStore, services } = await mountWith({ preloadedState: {} });
-      services.dataViewFieldEditor.userPermissions.editIndexPattern = () => true;
+      services.dataViewEditor.userPermissions.editDataView = () => true;
       const document = {
         savedObjectId: defaultSavedObjectId,
         state: {
