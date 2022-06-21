@@ -80,7 +80,7 @@ describe('<PipelinesCreate />', () => {
       expect(find('apiRequestFlyout.apiRequestFlyoutTitle').text()).toBe('Request');
     });
 
-    test.only('should allow to prepopulate the name field', async () => {
+    test('should allow to prepopulate the name field', async () => {
       await act(async () => {
         testBed = await setup(httpSetup, '?name=test-pipeline');
       });
