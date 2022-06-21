@@ -9,24 +9,12 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders, mockBrowserFields, defaultHeaders } from '../../../../mock';
-import { mockGlobalState } from '../../../../mock/global_state';
-import { tGridActions } from '../../../../store/t_grid';
-
 import { FieldBrowserModal, FieldBrowserModalProps } from './field_browser_modal';
 
-import { createStore, State } from '../../../../types';
-import { createSecuritySolutionStorageMock } from '../../../../mock/mock_local_storage';
+const mockOnHide = jest.fn();
+const mockOnToggleColumn = jest.fn();
+const mockOnResetColumns = jest.fn();
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
-  return {
-    ...original,
-    useDispatch: () => mockDispatch,
-  };
-});
-const timelineId = 'test';
-const onHide = jest.fn();
 const testProps: FieldBrowserModalProps = {
   columnHeaders: [],
   filteredBrowserFields: mockBrowserFields,
@@ -34,15 +22,15 @@ const testProps: FieldBrowserModalProps = {
   appliedFilterInput: '',
   isSearching: false,
   setSelectedCategoryIds: jest.fn(),
-  onHide,
+  onHide: mockOnHide,
+  onResetColumns: mockOnResetColumns,
   onSearchInputChange: jest.fn(),
+  onToggleColumn: mockOnToggleColumn,
   restoreFocusTo: React.createRef<HTMLButtonElement>(),
   selectedCategoryIds: [],
-  timelineId,
   filterSelectedEnabled: false,
   onFilterSelectedChange: jest.fn(),
 };
-const { storage } = createSecuritySolutionStorageMock();
 
 describe('FieldBrowserModal', () => {
   beforeEach(() => {
@@ -67,7 +55,7 @@ describe('FieldBrowserModal', () => {
     );
 
     wrapper.find('[data-test-subj="close"]').first().simulate('click');
-    expect(onHide).toBeCalled();
+    expect(mockOnHide).toBeCalled();
   });
 
   test('it renders the Reset Fields button', () => {
@@ -80,7 +68,7 @@ describe('FieldBrowserModal', () => {
     expect(wrapper.find('[data-test-subj="reset-fields"]').first().text()).toEqual('Reset Fields');
   });
 
-  test('it invokes updateColumns action when the user clicks the Reset Fields button', () => {
+  test('it invokes onResetColumns callback when the user clicks the Reset Fields button', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldBrowserModal {...testProps} columnHeaders={defaultHeaders} />
@@ -88,13 +76,7 @@ describe('FieldBrowserModal', () => {
     );
 
     wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
-
-    expect(mockDispatch).toBeCalledWith(
-      tGridActions.updateColumns({
-        id: timelineId,
-        columns: defaultHeaders,
-      })
-    );
+    expect(mockOnResetColumns).toHaveBeenCalled();
   });
 
   test('it invokes onHide when the user clicks the Reset Fields button', () => {
@@ -106,7 +88,7 @@ describe('FieldBrowserModal', () => {
 
     wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
 
-    expect(onHide).toBeCalled();
+    expect(mockOnHide).toBeCalled();
   });
 
   test('it renders the search', () => {
@@ -173,40 +155,11 @@ describe('FieldBrowserModal', () => {
     expect(onSearchInputChange).toBeCalledWith(inputText);
   });
 
-  test('does not render the CreateFieldButton when it is provided but does not have a dataViewId', () => {
+  test('it renders the CreateFieldButton when it is provided', () => {
     const MyTestComponent = () => <div>{'test'}</div>;
 
     const wrapper = mount(
       <TestProviders>
-        <FieldBrowserModal
-          {...testProps}
-          options={{
-            createFieldButton: MyTestComponent,
-          }}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find(MyTestComponent).exists()).toBeFalsy();
-  });
-
-  test('it renders the CreateFieldButton when it is provided and have a dataViewId', () => {
-    const state: State = {
-      ...mockGlobalState,
-      timelineById: {
-        ...mockGlobalState.timelineById,
-        test: {
-          ...mockGlobalState.timelineById.test,
-          dataViewId: 'security-solution-default',
-        },
-      },
-    };
-    const store = createStore(state, storage);
-
-    const MyTestComponent = () => <div>{'test'}</div>;
-
-    const wrapper = mount(
-      <TestProviders store={store}>
         <FieldBrowserModal
           {...testProps}
           options={{

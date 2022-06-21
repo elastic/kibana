@@ -18,7 +18,7 @@ const StyledButton = styled(EuiButton)`
 `;
 
 export interface UseCreateFieldButtonProps {
-  hasFieldEditPermission: boolean;
+  isAllowed: boolean;
   loading: boolean;
   openFieldEditor: OpenFieldEditor;
 }
@@ -30,7 +30,7 @@ export type UseCreateFieldButton = (
  * Returns a memoised 'CreateFieldButton' with only an 'onClick' property.
  */
 export const useCreateFieldButton: UseCreateFieldButton = ({
-  hasFieldEditPermission,
+  isAllowed,
   loading,
   openFieldEditor,
 }) => {
@@ -52,5 +52,5 @@ export const useCreateFieldButton: UseCreateFieldButton = ({
     [loading, openFieldEditor]
   );
 
-  return hasFieldEditPermission ? createFieldButton : undefined;
+  return isAllowed ? createFieldButton : undefined;
 };

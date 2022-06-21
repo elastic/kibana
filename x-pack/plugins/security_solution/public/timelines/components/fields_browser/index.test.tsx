@@ -34,6 +34,22 @@ let mockIndexPatternFieldEditor: Start;
 jest.mock('../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
+const defaultDataviewState: {
+  missingPatterns: string[];
+  selectedDataViewId: string | null;
+} = {
+  missingPatterns: [],
+  selectedDataViewId: 'security-solution',
+};
+const mockScopeIdSelector = jest.fn(() => defaultDataviewState);
+jest.mock('../../../common/store', () => {
+  const original = jest.requireActual('../../../common/store');
+  return {
+    ...original,
+    sourcererSelectors: { scopeIdSelector: () => mockScopeIdSelector },
+  };
+});
+
 const mockIndexFieldsSearch = jest.fn();
 jest.mock('../../../common/containers/source/use_data_view', () => ({
   useDataView: () => ({
@@ -100,6 +116,7 @@ describe('useFieldBrowserOptions', () => {
       ...useKibanaMock().services.application.capabilities,
       indexPatterns: { save: true },
     };
+    mockScopeIdSelector.mockReturnValue(defaultDataviewState);
     jest.clearAllMocks();
   });
 
@@ -121,6 +138,22 @@ describe('useFieldBrowserOptions', () => {
     expect(result.current.getFieldTableColumns({ highlight: '', onHide: mockOnHide })).toHaveLength(
       4
     );
+  });
+
+  it('should return the button when a dataView is present', async () => {
+    const { result } = renderUseFieldBrowserOptions();
+
+    expect(result.current.createFieldButton).toBeDefined();
+    expect(result.current.getFieldTableColumns({ highlight: '', onHide: mockOnHide })).toHaveLength(
+      5
+    );
+  });
+
+  it('should not return the button when a dataView is not present', () => {
+    mockScopeIdSelector.mockReturnValue({ missingPatterns: [], selectedDataViewId: null });
+    const { result } = renderUseFieldBrowserOptions();
+
+    expect(result.current.createFieldButton).toBeUndefined();
   });
 
   it('should call onHide when button is pressed', async () => {

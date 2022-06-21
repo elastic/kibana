@@ -8,21 +8,11 @@
 import React from 'react';
 import { render, RenderResult } from '@testing-library/react';
 import { mockBrowserFields, TestProviders } from '../../../../mock';
-import { tGridActions } from '../../../../store/t_grid';
 import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
-import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../body/constants';
+import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../body/constants';
 
 import { ColumnHeaderOptions } from '../../../../../common';
 import { FieldTable, FieldTableProps } from './field_table';
-
-const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
-  return {
-    ...original,
-    useDispatch: () => mockDispatch,
-  };
-});
 
 const timestampFieldId = '@timestamp';
 
@@ -39,16 +29,18 @@ const columnHeaders: ColumnHeaderOptions[] = [
     initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
   },
 ];
-const timelineId = 'test';
+
+const mockOnToggleColumn = jest.fn();
+
 const defaultProps: FieldTableProps = {
   selectedCategoryIds: [],
   columnHeaders: [],
   filteredBrowserFields: {},
   searchInput: '',
-  timelineId,
   filterSelectedEnabled: false,
   onFilterSelectedChange: jest.fn(),
   onHide: jest.fn(),
+  onToggleColumn: mockOnToggleColumn,
 };
 
 describe('FieldTable', () => {
@@ -56,7 +48,7 @@ describe('FieldTable', () => {
   const defaultPageSize = 10;
 
   beforeEach(() => {
-    mockDispatch.mockClear();
+    jest.clearAllMocks();
   });
 
   it('should render empty field table', () => {
@@ -156,7 +148,7 @@ describe('FieldTable', () => {
   });
 
   describe('selection', () => {
-    it('should dispatch remove column action on field unchecked', () => {
+    it('should call onToggleColumn callback when field unchecked', () => {
       const result = render(
         <TestProviders>
           <FieldTable
@@ -170,13 +162,11 @@ describe('FieldTable', () => {
 
       result.getByTestId(`field-${timestampFieldId}-checkbox`).click();
 
-      expect(mockDispatch).toHaveBeenCalledTimes(1);
-      expect(mockDispatch).toHaveBeenCalledWith(
-        tGridActions.removeColumn({ id: timelineId, columnId: timestampFieldId })
-      );
+      expect(mockOnToggleColumn).toHaveBeenCalledTimes(1);
+      expect(mockOnToggleColumn).toHaveBeenCalledWith(timestampFieldId);
     });
 
-    it('should dispatch upsert column action on field checked', () => {
+    it('should call onToggleColumn callback when field checked', () => {
       const result = render(
         <TestProviders>
           <FieldTable
@@ -189,18 +179,8 @@ describe('FieldTable', () => {
 
       result.getByTestId(`field-${timestampFieldId}-checkbox`).click();
 
-      expect(mockDispatch).toHaveBeenCalledTimes(1);
-      expect(mockDispatch).toHaveBeenCalledWith(
-        tGridActions.upsertColumn({
-          id: timelineId,
-          column: {
-            columnHeaderType: defaultColumnHeaderType,
-            id: timestampFieldId,
-            initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-          },
-          index: 1,
-        })
-      );
+      expect(mockOnToggleColumn).toHaveBeenCalledTimes(1);
+      expect(mockOnToggleColumn).toHaveBeenCalledWith(timestampFieldId);
     });
   });
 
@@ -241,7 +221,7 @@ describe('FieldTable', () => {
       changePage(result);
 
       result.getAllByRole('checkbox').at(0)?.click();
-      expect(mockDispatch).toHaveBeenCalled(); // assert some field has been selected
+      expect(mockOnToggleColumn).toHaveBeenCalled(); // assert some field has been selected
 
       expect(isAtFirstPage(result)).toBeFalsy();
     });
