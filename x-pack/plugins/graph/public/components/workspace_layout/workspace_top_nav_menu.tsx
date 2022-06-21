@@ -118,6 +118,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
     run: () => {
       props.setShowInspect((prevShowInspect) => !prevShowInspect);
     },
+    testId: 'graphInspectButton',
   });
 
   topNavMenu.push({
@@ -164,6 +165,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
         }
       );
     },
+    testId: 'graphSettingsButton',
   });
 
   return (

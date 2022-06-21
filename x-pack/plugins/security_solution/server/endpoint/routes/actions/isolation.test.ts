@@ -28,7 +28,7 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import { HostIsolationRequestSchema } from '../../../../common/endpoint/schema/actions';
+import { NoParametersRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { registerHostIsolationRoutes } from './isolation';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { LicenseService } from '../../../../common/license';
@@ -74,13 +74,13 @@ describe('Host Isolation', () => {
   describe('schema', () => {
     it('should require at least 1 Endpoint ID', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({});
+        NoParametersRequestSchema.body.validate({});
       }).toThrow();
     });
 
     it('should accept an Endpoint ID as the only required field', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({
+        NoParametersRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
         });
       }).not.toThrow();
@@ -88,7 +88,7 @@ describe('Host Isolation', () => {
 
     it('should accept a comment', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({
+        NoParametersRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           comment: 'a user comment',
         });
@@ -97,7 +97,7 @@ describe('Host Isolation', () => {
 
     it('should accept alert IDs', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({
+        NoParametersRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           alert_ids: ['0000000-000-00'],
         });
@@ -106,7 +106,7 @@ describe('Host Isolation', () => {
 
     it('should accept case IDs', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({
+        NoParametersRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           case_ids: ['000000000-000-000'],
         });
