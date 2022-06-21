@@ -267,6 +267,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       return;
     }
 
+    if (this.props.embeddable.renderError) {
+      return this.props.embeddable.renderError(this.errorRoot.current, this.state.error);
+    }
+
     const errorEmbeddable = new ErrorEmbeddable(this.state.error, {
       id: this.props.embeddable.id,
     });
