@@ -1,0 +1,984 @@
+{
+  "id": "@kbn/core-logging-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.ConsoleAppenderConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConsoleAppenderConfig",
+        "description": [
+          "\nConfiguration of a console appender"
+        ],
+        "path": "packages/core/logging/core-logging-server/src/appenders/console.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.ConsoleAppenderConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"console\""
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/console.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.ConsoleAppenderConfig.layout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layout",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.PatternLayoutConfigType",
+                "text": "PatternLayoutConfigType"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.JsonLayoutConfigType",
+                "text": "JsonLayoutConfigType"
+              }
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/console.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.FileAppenderConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "FileAppenderConfig",
+        "description": [
+          "\nConfiguration of a file appender"
+        ],
+        "path": "packages/core/logging/core-logging-server/src/appenders/file.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.FileAppenderConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"file\""
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/file.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.FileAppenderConfig.layout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layout",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.PatternLayoutConfigType",
+                "text": "PatternLayoutConfigType"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.JsonLayoutConfigType",
+                "text": "JsonLayoutConfigType"
+              }
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/file.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.FileAppenderConfig.fileName",
+            "type": "string",
+            "tags": [],
+            "label": "fileName",
+            "description": [],
+            "path": "packages/core/logging/core-logging-server/src/appenders/file.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.JsonLayoutConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "JsonLayoutConfigType",
+        "description": [
+          "\nConfiguration of a json layout"
+        ],
+        "path": "packages/core/logging/core-logging-server/src/layout.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.JsonLayoutConfigType.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"json\""
+            ],
+            "path": "packages/core/logging/core-logging-server/src/layout.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.LoggerConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "LoggerConfigType",
+        "description": [
+          "\nDescribes the configuration of a given logger.\n"
+        ],
+        "path": "packages/core/logging/core-logging-server/src/logger.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.LoggerConfigType.appenders",
+            "type": "Array",
+            "tags": [],
+            "label": "appenders",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/logger.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.LoggerConfigType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/core/logging/core-logging-server/src/logger.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.LoggerConfigType.level",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "level",
+            "description": [],
+            "signature": [
+              "\"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\""
+            ],
+            "path": "packages/core/logging/core-logging-server/src/logger.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.LoggerContextConfigInput",
+        "type": "Interface",
+        "tags": [],
+        "label": "LoggerContextConfigInput",
+        "description": [
+          "\nInput used to configure logging dynamically using {@link LoggingServiceSetup.configure}"
+        ],
+        "path": "packages/core/logging/core-logging-server/src/contracts.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.LoggerContextConfigInput.appenders",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "appenders",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.AppenderConfigType",
+                "text": "AppenderConfigType"
+              },
+              "> | Map<string, ",
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.AppenderConfigType",
+                "text": "AppenderConfigType"
+              },
+              "> | undefined"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/contracts.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.LoggerContextConfigInput.loggers",
+            "type": "Array",
+            "tags": [],
+            "label": "loggers",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.LoggerConfigType",
+                "text": "LoggerConfigType"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/contracts.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.LoggingServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "LoggingServiceSetup",
+        "description": [
+          "\nProvides APIs to plugins for customizing the plugin's logger."
+        ],
+        "path": "packages/core/logging/core-logging-server/src/contracts.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.LoggingServiceSetup.configure",
+            "type": "Function",
+            "tags": [],
+            "label": "configure",
+            "description": [
+              "\nCustomizes the logging config for the plugin's context.\n"
+            ],
+            "signature": [
+              "(config$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.LoggerContextConfigInput",
+                "text": "LoggerContextConfigInput"
+              },
+              ">) => void"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/contracts.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-logging-server",
+                "id": "def-server.LoggingServiceSetup.configure.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config$",
+                "description": [],
+                "signature": [
+                  "Observable",
+                  "<",
+                  {
+                    "pluginId": "@kbn/core-logging-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLoggingServerPluginApi",
+                    "section": "def-server.LoggerContextConfigInput",
+                    "text": "LoggerContextConfigInput"
+                  },
+                  ">"
+                ],
+                "path": "packages/core/logging/core-logging-server/src/contracts.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.MetaRewritePolicyConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "MetaRewritePolicyConfig",
+        "description": [],
+        "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.MetaRewritePolicyConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"meta\""
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.MetaRewritePolicyConfig.mode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "mode",
+            "description": [
+              "\nThe 'mode' specifies what action to perform on the specified properties.\n  - 'update' updates an existing property at the provided 'path'.\n  - 'remove' removes an existing property at the provided 'path'."
+            ],
+            "signature": [
+              "\"update\" | \"remove\""
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.MetaRewritePolicyConfig.properties",
+            "type": "Array",
+            "tags": [],
+            "label": "properties",
+            "description": [
+              "\nThe properties to modify.\n"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.MetaRewritePolicyConfigProperty",
+                "text": "MetaRewritePolicyConfigProperty"
+              },
+              "[]"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.MetaRewritePolicyConfigProperty",
+        "type": "Interface",
+        "tags": [],
+        "label": "MetaRewritePolicyConfigProperty",
+        "description": [],
+        "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.MetaRewritePolicyConfigProperty.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.MetaRewritePolicyConfigProperty.value",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string | number | boolean | null | undefined"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.NumericRollingStrategyConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "NumericRollingStrategyConfig",
+        "description": [],
+        "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.NumericRollingStrategyConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"numeric\""
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.NumericRollingStrategyConfig.pattern",
+            "type": "string",
+            "tags": [],
+            "label": "pattern",
+            "description": [
+              "\nThe suffix pattern to apply when renaming a file. The suffix will be applied\nafter the `appender.fileName` file name, but before the file extension.\n\nMust include `%i`, as it is the value that will be converted to the file index\n"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.NumericRollingStrategyConfig.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [
+              "\nThe maximum number of files to keep. Once this number is reached, oldest\nfiles will be deleted. Defaults to `7`"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.PatternLayoutConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "PatternLayoutConfigType",
+        "description": [
+          "\nConfiguration of a pattern layout"
+        ],
+        "path": "packages/core/logging/core-logging-server/src/layout.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.PatternLayoutConfigType.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"pattern\""
+            ],
+            "path": "packages/core/logging/core-logging-server/src/layout.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.PatternLayoutConfigType.highlight",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "highlight",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/layout.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.PatternLayoutConfigType.pattern",
+            "type": "string",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/layout.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.RewriteAppenderConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "RewriteAppenderConfig",
+        "description": [
+          "\nConfiguration of a rewrite appender"
+        ],
+        "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.RewriteAppenderConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"rewrite\""
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.RewriteAppenderConfig.appenders",
+            "type": "Array",
+            "tags": [],
+            "label": "appenders",
+            "description": [
+              "\nThe {@link Appender | appender(s)} to pass the log event to after\nimplementing the specified rewrite policy."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.RewriteAppenderConfig.policy",
+            "type": "Object",
+            "tags": [],
+            "label": "policy",
+            "description": [
+              "\nThe {@link RewritePolicy | policy} to use to manipulate the provided data."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.MetaRewritePolicyConfig",
+                "text": "MetaRewritePolicyConfig"
+              }
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.RollingFileAppenderConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "RollingFileAppenderConfig",
+        "description": [
+          "\nConfiguration of a rolling-file appender"
+        ],
+        "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.RollingFileAppenderConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"rolling-file\""
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.RollingFileAppenderConfig.layout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layout",
+            "description": [
+              "\nThe layout to use when writing log entries"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.PatternLayoutConfigType",
+                "text": "PatternLayoutConfigType"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.JsonLayoutConfigType",
+                "text": "JsonLayoutConfigType"
+              }
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.RollingFileAppenderConfig.fileName",
+            "type": "string",
+            "tags": [],
+            "label": "fileName",
+            "description": [
+              "\nThe absolute path of the file to write to."
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.RollingFileAppenderConfig.policy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "policy",
+            "description": [
+              "\nThe {@link TriggeringPolicy | policy} to use to determine if a rollover should occur."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.SizeLimitTriggeringPolicyConfig",
+                "text": "SizeLimitTriggeringPolicyConfig"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.TimeIntervalTriggeringPolicyConfig",
+                "text": "TimeIntervalTriggeringPolicyConfig"
+              }
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.RollingFileAppenderConfig.strategy",
+            "type": "Object",
+            "tags": [],
+            "label": "strategy",
+            "description": [
+              "\nThe {@link RollingStrategy | rollout strategy} to use for rolling."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "server",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-server.NumericRollingStrategyConfig",
+                "text": "NumericRollingStrategyConfig"
+              }
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.SizeLimitTriggeringPolicyConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "SizeLimitTriggeringPolicyConfig",
+        "description": [],
+        "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.SizeLimitTriggeringPolicyConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"size-limit\""
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.SizeLimitTriggeringPolicyConfig.size",
+            "type": "Object",
+            "tags": [],
+            "label": "size",
+            "description": [
+              "\nThe minimum size the file must have to roll over."
+            ],
+            "signature": [
+              "ByteSizeValue"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.TimeIntervalTriggeringPolicyConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeIntervalTriggeringPolicyConfig",
+        "description": [],
+        "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.TimeIntervalTriggeringPolicyConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"time-interval\""
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.TimeIntervalTriggeringPolicyConfig.interval",
+            "type": "Object",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "\nHow often a rollover should occur.\n"
+            ],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-server.TimeIntervalTriggeringPolicyConfig.modulate",
+            "type": "boolean",
+            "tags": [],
+            "label": "modulate",
+            "description": [
+              "\nIndicates whether the interval should be adjusted to cause the next rollover to occur on the interval boundary.\n\nFor example, if the interval is `4h` and the current hour is 3 am then\nthe first rollover will occur at 4 am and then next ones will occur at 8 am, noon, 4pm, etc.\nThe default value is true."
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.AppenderConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "AppenderConfigType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.ConsoleAppenderConfig",
+            "text": "ConsoleAppenderConfig"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.FileAppenderConfig",
+            "text": "FileAppenderConfig"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.RewriteAppenderConfig",
+            "text": "RewriteAppenderConfig"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.RollingFileAppenderConfig",
+            "text": "RollingFileAppenderConfig"
+          }
+        ],
+        "path": "packages/core/logging/core-logging-server/src/appenders/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.LayoutConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "LayoutConfigType",
+        "description": [
+          "\nConfiguration of a logging layout.\nSee {@link JsonLayoutConfigType} and {@link PatternLayoutConfigType}"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.PatternLayoutConfigType",
+            "text": "PatternLayoutConfigType"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.JsonLayoutConfigType",
+            "text": "JsonLayoutConfigType"
+          }
+        ],
+        "path": "packages/core/logging/core-logging-server/src/layout.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.RewritePolicyConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "RewritePolicyConfig",
+        "description": [
+          "\nAvailable rewrite policies which specify what part of a {@link LogRecord}\ncan be modified."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.MetaRewritePolicyConfig",
+            "text": "MetaRewritePolicyConfig"
+          }
+        ],
+        "path": "packages/core/logging/core-logging-server/src/appenders/rewrite.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.RollingStrategyConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "RollingStrategyConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.NumericRollingStrategyConfig",
+            "text": "NumericRollingStrategyConfig"
+          }
+        ],
+        "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-server.TriggeringPolicyConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "TriggeringPolicyConfig",
+        "description": [
+          "\nAny of the existing policy's configuration\n\nSee {@link SizeLimitTriggeringPolicyConfig} and {@link TimeIntervalTriggeringPolicyConfig}"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.SizeLimitTriggeringPolicyConfig",
+            "text": "SizeLimitTriggeringPolicyConfig"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.TimeIntervalTriggeringPolicyConfig",
+            "text": "TimeIntervalTriggeringPolicyConfig"
+          }
+        ],
+        "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -1,0 +1,184 @@
+{
+  "id": "@kbn/core-logging-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-logging-server-internal",
+        "id": "def-server.getNextRollingTime",
+        "type": "Function",
+        "tags": [],
+        "label": "getNextRollingTime",
+        "description": [
+          "\nReturn the next rollout time, given current time and rollout interval"
+        ],
+        "signature": [
+          "(currentTime: number, interval: moment.Duration, modulate: boolean) => number"
+        ],
+        "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server-internal",
+            "id": "def-server.getNextRollingTime.$1",
+            "type": "number",
+            "tags": [],
+            "label": "currentTime",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server-internal",
+            "id": "def-server.getNextRollingTime.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server-internal",
+            "id": "def-server.getNextRollingTime.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "modulate",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/policies/time_interval/get_next_rolling_time.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-logging-server-internal",
+        "id": "def-server.PrebootDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrebootDeps",
+        "description": [],
+        "path": "packages/core/logging/core-logging-server-internal/src/logging_service.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server-internal",
+            "id": "def-server.PrebootDeps.loggingSystem",
+            "type": "Object",
+            "tags": [],
+            "label": "loggingSystem",
+            "description": [],
+            "signature": [
+              "ILoggingSystem"
+            ],
+            "path": "packages/core/logging/core-logging-server-internal/src/logging_service.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-logging-server-internal",
+        "id": "def-server.appendersSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "appendersSchema",
+        "description": [
+          "\nConfig schema for validting the shape of the `appenders` key in in {@link LoggerContextConfigType} or\n{@link LoggingConfigType}.\n"
+        ],
+        "signature": [
+          "Type",
+          "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; fileName: string; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{} & { type: \"rolling-file\"; strategy: ",
+          "NumericRollingStrategyConfig",
+          "; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; policy: Readonly<{} & { size: ",
+          "ByteSizeValue",
+          "; type: \"size-limit\"; }> | Readonly<{} & { interval: moment.Duration; type: \"time-interval\"; modulate: boolean; }>; fileName: string; }>>"
+        ],
+        "path": "packages/core/logging/core-logging-server-internal/src/appenders/appenders.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server-internal",
+        "id": "def-server.loggerContextConfigSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "loggerContextConfigSchema",
+        "description": [
+          "\nConfig schema for validating the inputs to the {@link LoggingServiceStart.configure} API.\nSee {@link LoggerContextConfigType}.\n"
+        ],
+        "signature": [
+          "ObjectType",
+          "<{ appenders: ",
+          "Type",
+          "<Map<string, ",
+          "AppenderConfigType",
+          ">>; loggers: ",
+          "Type",
+          "<Readonly<{} & { name: string; level: \"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; appenders: string[]; }>[]>; }>"
+        ],
+        "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server-internal",
+        "id": "def-server.loggerSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "loggerSchema",
+        "description": [
+          "\nConfig schema for validating the `loggers` key in {@link LoggerContextConfigType} or {@link LoggingConfigType}.\n"
+        ],
+        "signature": [
+          "ObjectType",
+          "<{ appenders: ",
+          "Type",
+          "<string[]>; name: ",
+          "Type",
+          "<string>; level: ",
+          "Type",
+          "<\"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\">; }>"
+        ],
+        "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
