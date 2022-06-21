@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
 
-  describe.skip('Search Sessions Management UI', () => {
+  describe('Search Sessions Management UI', () => {
     describe('New search sessions', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
