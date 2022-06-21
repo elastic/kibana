@@ -25,6 +25,7 @@ import {
   NETWORK_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
+  CASES_PATH,
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -37,7 +38,6 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
 import { useFetchIndex } from '../source';
-import { isDetectionPage } from '../../utils/route/helpers';
 import { registerUrlParam, updateUrlParam } from '../../utils/global_query_string';
 import { CONSTANTS } from '../../components/url_state/constants';
 
@@ -98,18 +98,17 @@ export const useInitSourcerer = (
 
     // Initialize the store with value from UrlParam.
     if (sourcererInitialState != null) {
-      const activeScopes: SourcererScopeName[] = Object.keys(sourcererInitialState).filter(
-        (key) => !(key === SourcererScopeName.default && scopeId === SourcererScopeName.detections)
-      ) as SourcererScopeName[];
-      activeScopes.forEach((scope) =>
-        dispatch(
-          sourcererActions.setSelectedDataView({
-            id: scope,
-            selectedDataViewId: sourcererInitialState[scope]?.id ?? null,
-            selectedPatterns: sourcererInitialState[scope]?.selectedPatterns ?? [],
-          })
-        )
-      );
+      (Object.keys(sourcererInitialState) as SourcererScopeName[]).forEach((scope) => {
+        if (!(scope === SourcererScopeName.default && scopeId === SourcererScopeName.detections)) {
+          dispatch(
+            sourcererActions.setSelectedDataView({
+              id: scope,
+              selectedDataViewId: sourcererInitialState[scope]?.id ?? null,
+              selectedPatterns: sourcererInitialState[scope]?.selectedPatterns ?? [],
+            })
+          );
+        }
+      });
     } else {
       // Initialize the UrlParam with values from the store.
       // It isn't strictly necessary but I am keeping it for compatibility with the previous implementation.
@@ -436,10 +435,17 @@ export const useSourcererDataView = (
   );
 };
 
+const detectionsPaths = [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:detailName`];
+
 export const getScopeFromPath = (
   pathname: string
 ): SourcererScopeName.default | SourcererScopeName.detections =>
-  isDetectionPage(pathname) ? SourcererScopeName.detections : SourcererScopeName.default;
+  matchPath(pathname, {
+    path: detectionsPaths,
+    strict: false,
+  }) == null
+    ? SourcererScopeName.default
+    : SourcererScopeName.detections;
 
 export const sourcererPaths = [
   ALERTS_PATH,

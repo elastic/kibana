@@ -25,11 +25,11 @@ export const globalUrlParamReducer = reducerWithInitialState(initialGlobalUrlPar
     };
   })
   .case(deregisterUrlParam, (state, { key }) => {
-    const nextStste = { ...state };
+    const nextState = { ...state };
 
-    delete nextStste[key];
+    delete nextState[key];
 
-    return nextStste;
+    return nextState;
   })
   .case(updateUrlParam, (state, { key, value }) => {
     // Only update the URL after the query param is registered and if the current value is different than the previous value

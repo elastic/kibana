@@ -23,7 +23,6 @@ import { getStore } from '../../store';
 import { globalUrlParamActions, globalUrlParamSelectors } from '../../store/global_url_param';
 import { useRouteSpy } from '../route/use_route_spy';
 import { getLinkInfo } from '../../links';
-import { SecurityPageName } from '../../../app/types';
 
 interface RegisterUrlParams<State> {
   urlParamKey: string;
@@ -79,7 +78,7 @@ export const useGlobalQueryString = (): string => {
   const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
 
   const globalQueryString = useMemo(
-    () => encodeQuerySrting(pickBy((value) => !isEmpty(value), globalUrlParam)),
+    () => encodeQueryString(pickBy((value) => !isEmpty(value), globalUrlParam)),
     [globalUrlParam]
   );
 
@@ -96,7 +95,7 @@ export const useSyncGlobalQueryString = () => {
   const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
 
   useEffect(() => {
-    const linkInfo = getLinkInfo(pageName as SecurityPageName) ?? { skipUrlState: true };
+    const linkInfo = getLinkInfo(pageName) ?? { skipUrlState: true };
     const params = Object.entries(globalUrlParam).map(([key, value]) => ({
       key,
       value: linkInfo.skipUrlState ? null : value,
@@ -108,7 +107,7 @@ export const useSyncGlobalQueryString = () => {
   }, [globalUrlParam, pageName, history]);
 };
 
-const encodeQuerySrting = (urlParams: ParsedQuery<string>): string =>
+const encodeQueryString = (urlParams: ParsedQuery<string>): string =>
   stringify(url.encodeQuery(urlParams), { sort: false, encode: false });
 
 const replaceUrlParams = (
@@ -125,7 +124,7 @@ const replaceUrlParams = (
     }
   });
 
-  const search = encodeQuerySrting(urlParams);
+  const search = encodeQueryString(urlParams);
 
   if (getQueryStringFromLocation(window.location.search) !== search) {
     history.replace({ search });

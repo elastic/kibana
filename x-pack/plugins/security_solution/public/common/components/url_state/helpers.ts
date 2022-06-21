@@ -47,8 +47,10 @@ export const encodeRisonUrlState = (state: any) => encode(state);
 
 export const getQueryStringFromLocation = (search: string) => search.substring(1);
 
-// getParamFromQueryString returns undefined despite of the type not alowing it.
-export const getParamFromQueryString = (queryString: string, key: string) => {
+export const getParamFromQueryString = (
+  queryString: string,
+  key: string
+): string | undefined | null => {
   const parsedQueryString = parse(queryString, { sort: false });
   const queryParam = parsedQueryString[key];
 
