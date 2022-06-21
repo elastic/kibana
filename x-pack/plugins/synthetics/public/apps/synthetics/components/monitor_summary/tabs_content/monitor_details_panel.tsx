@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  EuiSwitch,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
@@ -15,17 +14,27 @@ import {
   EuiSpacer,
   EuiLink,
   EuiLoadingSpinner,
-  EuiIcon,
 } from '@elastic/eui';
+import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
-import { useStatusByLocation } from '../hooks/use_status_by_location';
-import { selectMonitorStatus } from '../../../state/monitor_summary';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
+import { LocationsStatus } from './locations_status';
+import {
+  getSyntheticsMonitorAction,
+  selectMonitorStatus,
+  syntheticsMonitorSelector,
+} from '../../../state/monitor_summary';
 
 export const MonitorDetailsPanel = () => {
   const { data } = useSelector(selectMonitorStatus);
 
-  useStatusByLocation();
+  const { monitorId } = useParams<{ monitorId: string }>();
+
+  const dispatch = useDispatch();
+
+  const { data: monitor, loading } = useSelector(syntheticsMonitorSelector);
 
   if (!data) {
     return <EuiLoadingSpinner />;
@@ -37,23 +46,32 @@ export const MonitorDetailsPanel = () => {
       <EuiDescriptionList type="responsiveColumn" style={{ maxWidth: '400px' }}>
         <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <EuiSwitch checked={false} label={ENABLED_LABEL} onChange={() => {}} />
+          {monitor && (
+            <MonitorEnabled
+              initialLoading={loading}
+              id={monitorId}
+              monitor={monitor}
+              reloadPage={() => {
+                dispatch(getSyntheticsMonitorAction.get(monitorId));
+              }}
+            />
+          )}
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{MONITOR_TYPE_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <EuiBadge>{data.monitor.type}</EuiBadge>
+          <EuiBadge>{capitalize(data.monitor.type)}</EuiBadge>
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>Every 10 mins</EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{LOCATIONS_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <EuiBadge iconType={() => <EuiIcon type="dot" color="success" />} color="hollow">
-            US East
-          </EuiBadge>
+          <LocationsStatus />
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <EuiLink href={data.url?.full}>{data.url?.full}</EuiLink>
+          <EuiLink href={data.url?.full} external>
+            {data.url?.full}
+          </EuiLink>
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>

@@ -7,6 +7,8 @@
 
 import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Ping } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   getTimeSpanFilter,
@@ -62,5 +64,11 @@ export function useStatusByLocation() {
     { name: 'getMonitorStatusByLocation' }
   );
 
-  return { loading, data };
+  return useMemo(() => {
+    const locations = (data?.aggregations?.locations.buckets ?? []).map((loc) => {
+      return loc.summary.hits.hits?.[0]._source as Ping;
+    });
+
+    return { locations, loading };
+  }, [data, loading]);
 }

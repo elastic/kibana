@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObject } from '@kbn/core/types';
 import { apiService } from '../../../../utils/api_service';
 import { Ping, SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
@@ -20,5 +21,9 @@ export const fetchMonitorStatus = async (params: QueryParams): Promise<Ping> => 
 };
 
 export const fetchSyntheticsMonitor = async (monitorId: string): Promise<SyntheticsMonitor> => {
-  return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`);
+  const { attributes } = (await apiService.get(
+    `${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`
+  )) as SavedObject<SyntheticsMonitor>;
+
+  return attributes;
 };
