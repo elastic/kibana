@@ -25,7 +25,7 @@ import {
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useLicense } from '../../../../hooks';
-import { LICENCE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common';
+import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common';
 
 import type { SelectionMode } from './types';
 
@@ -50,7 +50,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   refreshAgents,
 }) => {
   const licenseService = useLicense();
-  const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENCE_FOR_SCHEDULE_UPGRADE);
+  const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
 
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
