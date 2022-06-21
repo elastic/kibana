@@ -14,7 +14,7 @@ import { createContextSearchSourceStub } from './_stubs';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { DataPublicPluginStart, Query } from '@kbn/data-plugin/public';
 import { DataTableRecord, EsHitRecord } from '../../../types';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { buildDataTableRecord, buildDataTableRecordList } from '../../../utils/build_data_record';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -69,7 +69,8 @@ describe('context predecessors', function () {
             },
             sort: [timeValNr, tieBreakerValue],
           } as EsHitRecord,
-          indexPattern
+          indexPattern,
+          true
         );
 
         return fetchSurroundingDocs(
@@ -97,7 +98,9 @@ describe('context predecessors', function () {
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
-          expect(hits).toMatchSnapshot();
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), indexPattern)
+          );
         }
       );
     });
@@ -128,6 +131,9 @@ describe('context predecessors', function () {
           expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'gte']);
           expect(intervals.length).toBeGreaterThan(1);
           expect(hits).toMatchSnapshot();
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), indexPattern)
+          );
         }
       );
     });
@@ -160,7 +166,10 @@ describe('context predecessors', function () {
           // should have stopped before reaching MS_PER_DAY * 1700
           expect(moment(last(intervals)?.lte).valueOf()).toBeLessThan(MS_PER_DAY * 1700);
           expect(intervals.length).toBeGreaterThan(1);
-          expect(hits).toMatchSnapshot();
+
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), indexPattern)
+          );
         }
       );
     });
@@ -211,7 +220,8 @@ describe('context predecessors', function () {
             },
             sort: [timeValNr, tieBreakerValue],
           } as EsHitRecord,
-          indexPattern
+          indexPattern,
+          true
         );
 
         return fetchSurroundingDocs(
@@ -244,7 +254,9 @@ describe('context predecessors', function () {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(removeFieldsSpy.calledOnce).toBe(true);
           expect(setFieldsSpy.calledOnce).toBe(true);
-          expect(hits).toMatchSnapshot();
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), indexPattern)
+          );
         }
       );
     });

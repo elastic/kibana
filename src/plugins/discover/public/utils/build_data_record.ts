@@ -29,3 +29,15 @@ export function buildDataTableRecord(
     isAnchor,
   };
 }
+
+/**
+ * Helper to build multiple DataTableRecords at once, saved a bit of testing code lines
+ * @param docs Array of documents returned from Elasticsearch
+ * @param dataView this current data view
+ */
+export function buildDataTableRecordList(
+  docs: EsHitRecord[],
+  dataView?: DataView
+): DataTableRecord[] {
+  return docs.map((doc) => buildDataTableRecord(doc, dataView));
+}
