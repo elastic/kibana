@@ -46,13 +46,13 @@ import { useKibana } from '../../lib/kibana';
 
 type EventViewTab = EuiTabbedContentTab;
 
-interface AlertRawEventData {
+export interface AlertRawEventData {
   fields: {
-    ['agent.id']: string[];
+    ['agent.id']?: string[];
   };
   _source: {
-    ['kibana.alert.rule.name']: string;
-    ['kibana.alert.rule.actions']: Array<Record<'action_type_id', string>>;
+    ['kibana.alert.rule.name']?: string;
+    ['kibana.alert.rule.actions']?: Array<Record<'action_type_id', string>>;
   };
   [key: string]: unknown;
 }
@@ -79,7 +79,7 @@ interface Props {
   indexName: string;
   isAlert: boolean;
   isDraggable?: boolean;
-  rawEventData: AlertRawEventData;
+  rawEventData: AlertRawEventData | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
   hostRisk: HostRisk | null;
@@ -353,7 +353,10 @@ const EventDetailsComponent: React.FC<Props> = ({
   );
 
   const osqueryTab = useMemo(() => {
-    const osqueryActionsLength = rawEventData?._source['kibana.alert.rule.actions'].filter(
+    if (!osqueryFeatureFlags.DETECTION_ACTION) {
+      return;
+    }
+    const osqueryActionsLength = rawEventData?._source['kibana.alert.rule.actions']?.filter(
       (action: { action_type_id: string }) => action.action_type_id === '.osquery'
     )?.length;
 
@@ -361,7 +364,7 @@ const EventDetailsComponent: React.FC<Props> = ({
     const ruleName = rawEventData?._source['kibana.alert.rule.name'];
     const ruleActions = rawEventData?._source['kibana.alert.rule.actions'];
 
-    return osqueryFeatureFlags.DETECTION_ACTION && osqueryActionsLength
+    return osqueryActionsLength
       ? {
           id: EventsViewType.osqueryView,
           'data-test-subj': 'osqueryViewTab',

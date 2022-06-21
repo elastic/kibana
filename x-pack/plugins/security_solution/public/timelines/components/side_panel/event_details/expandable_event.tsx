@@ -20,7 +20,10 @@ import styled from 'styled-components';
 
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
-import { EventDetails } from '../../../../common/components/event_details/event_details';
+import {
+  EventDetails,
+  AlertRawEventData,
+} from '../../../../common/components/event_details/event_details';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
@@ -35,7 +38,7 @@ interface Props {
   isDraggable?: boolean;
   loading: boolean;
   messageHeight?: number;
-  rawEventData: object | undefined;
+  rawEventData: AlertRawEventData | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
   hostRisk: HostRisk | null;
