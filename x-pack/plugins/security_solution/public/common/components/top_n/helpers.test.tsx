@@ -34,6 +34,7 @@ const otherTimelines = [
   TimelineId.casePage,
   TimelineId.test,
   TimelineId.alternateTest,
+  TimelineId.kubernetesPageSessions,
 ];
 
 const othersWithoutActive = otherTimelines.filter((x) => x !== TimelineId.active);
