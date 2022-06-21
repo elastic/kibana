@@ -62,6 +62,8 @@ jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => [mockRouteSpy],
 }));
 
+(registerUrlParam as jest.Mock).mockReturnValue({ state: null, deregister: () => {} });
+
 const mockSearch = jest.fn();
 
 const mockAddWarning = jest.fn();
@@ -202,9 +204,12 @@ describe('Sourcerer Hooks', () => {
     const selectedPatterns = ['testPattern-*'];
     const selectedDataViewId = 'security-solution-default';
     (registerUrlParam as jest.Mock).mockReturnValue({
-      [SourcererScopeName.default]: {
-        id: selectedDataViewId,
-        selectedPatterns,
+      deregister: () => {},
+      state: {
+        [SourcererScopeName.default]: {
+          id: selectedDataViewId,
+          selectedPatterns,
+        },
       },
     });
 
@@ -222,7 +227,7 @@ describe('Sourcerer Hooks', () => {
   });
 
   it('sets default selected patterns to the URL when there is no sorcerer URL param in the query string', async () => {
-    (registerUrlParam as jest.Mock).mockReturnValue(null);
+    (registerUrlParam as jest.Mock).mockReturnValue({ state: null, deregister: () => {} });
 
     renderHook<string, void>(() => useInitSourcerer(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
