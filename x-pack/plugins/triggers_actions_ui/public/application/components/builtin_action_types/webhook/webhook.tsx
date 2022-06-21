@@ -39,7 +39,7 @@ export function getActionType(): ActionTypeModel<
       };
       const validationResult = { errors };
       validationResult.errors = errors;
-      if (!actionParams.body?.length) {
+      if (!actionParams.body) {
         errors.body.push(translations.BODY_REQUIRED);
       }
       return validationResult;
