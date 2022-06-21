@@ -618,7 +618,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
         </EuiFlexGroup>
       ) : (
         <div>
-          <EuiSpacer size={'s'} />
+          <EuiSpacer size={'m'} />
+
           <EuiResizableContainer
             direction={isMobile ? 'vertical' : 'horizontal'}
             onPanelWidthChange={onPanelWidthChange}
@@ -651,8 +652,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
                           ${euiTheme.size.l} ${euiTheme.size.l} 0;
                       `}
                     >
-                      <EuiSpacer size={'s'} />
-
                       <EuiFlexGroup
                         direction="row"
                         gutterSize="xs"
@@ -703,7 +702,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                     mode="main"
                     minSize={'70%'}
                     initialSize={80}
-                    paddingSize={'s'}
+                    paddingSize={'none'}
                   >
                     {mainPanelContent}
                   </EuiResizablePanel>
