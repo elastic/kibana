@@ -72,7 +72,7 @@ exports[`getting started should render getting started component 1`] = `
       <EuiLink
         onClick={[Function]}
       >
-        Take me to the home page
+        No thanks, I’ll explore on my own.
       </EuiLink>
     </div>
   </div>

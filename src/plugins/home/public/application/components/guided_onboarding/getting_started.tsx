@@ -38,7 +38,7 @@ const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSel
     'Select a starting point for a quick tour of how Elastic can help you do even more with your data.',
 });
 const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
-  defaultMessage: 'Take me to the home page',
+  defaultMessage: `No thanks, I’ll explore on my own.`,
 });
 
 export const GettingStarted = () => {
