@@ -127,7 +127,8 @@ const KubernetesSecurityRoutesComponent = ({
                     content={
                       <FormattedMessage
                         id="xpack.kubernetesSecurity.sessionChart.tooltip"
-                        defaultMessage="Session Interactivity of a session depends on whether the session leader has a controlling terminal attached to it"
+                        defaultMessage="Interactive sessions have a controlling terminal and often
+                        imply that a human is entering the commands."
                       />
                     }
                   />
@@ -171,7 +172,9 @@ const KubernetesSecurityRoutesComponent = ({
                     content={
                       <FormattedMessage
                         id="xpack.kubernetesSecurity.entryUserChart.tooltip"
-                        defaultMessage="The session entry user is the native linux user who created the session"
+                        defaultMessage="The session user is the initial Linux user associated
+                        with the session. This user may be set from authentication of a remote
+                        login or automatically for service sessions started by init."
                       />
                     }
                   />
