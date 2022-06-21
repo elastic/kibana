@@ -45,6 +45,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(event.properties.setup_done).to.be.a('number');
         expect(event.properties).to.have.property('start_done');
         expect(event.properties.start_done).to.be.a('number');
+        expect(event.properties).to.have.property('first_app_nav');
+        expect(event.properties.start_done).to.be.a('number');
+        expect(event.properties).to.have.property('first_app');
+        expect(event.properties.start_done).to.be.a('string');
       }
     });
   });

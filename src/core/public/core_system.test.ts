@@ -72,6 +72,7 @@ beforeEach(() => {
   MockPluginsService.getOpaqueIds.mockReturnValue(new Map());
 
   window.performance.mark = jest.fn();
+  window.performance.clearMarks = jest.fn();
   window.performance.getEntriesByName = jest.fn().mockReturnValue([
     {
       detail: 'load_started',

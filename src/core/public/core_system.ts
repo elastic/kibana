@@ -15,7 +15,7 @@ import {
 } from '@kbn/core-injected-metadata-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
@@ -126,20 +126,31 @@ export class CoreSystem {
 
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
+
+    performance.mark(KBN_LOAD_MARKS, {
+      detail: 'core_created',
+    });
   }
 
   private getLoadMarksInfo() {
     if (!performance) return [];
     const reportData: Record<string, number> = {};
-    performance.mark(KBN_LOAD_MARKS, {
-      detail: 'start_done',
-    });
     const marks = performance.getEntriesByName(KBN_LOAD_MARKS);
     for (const mark of marks) {
       reportData[(mark as PerformanceMark).detail] = mark.startTime;
     }
 
     return reportData;
+  }
+
+  private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart, appId: string) {
+    analytics.reportEvent('Loaded Kibana', {
+      kibana_version: this.coreContext.env.packageInfo.version,
+      first_app: appId,
+      ...fetchOptionalMemoryInfo(),
+      ...this.getLoadMarksInfo(),
+    });
+    performance.clearMarks(KBN_LOAD_MARKS);
   }
 
   public async setup() {
@@ -186,6 +197,10 @@ export class CoreSystem {
 
       // Services that do not expose contracts at setup
       await this.plugins.setup(core);
+
+      performance.mark(KBN_LOAD_MARKS, {
+        detail: 'setup_done',
+      });
 
       return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
@@ -265,6 +280,17 @@ export class CoreSystem {
         deprecations,
       };
 
+      // Wait for the first app navifation to report Kibana Loaded
+      const appSub = application.currentAppId$.subscribe((appId) => {
+        if (appId === undefined) return;
+
+        performance.mark(KBN_LOAD_MARKS, {
+          detail: 'first_app_nav',
+        });
+        this.reportKibanaLoadedEvent(analytics, appId);
+        appSub.unsubscribe();
+      });
+
       await this.plugins.start(core);
 
       // ensure the rootDomElement is empty
@@ -283,10 +309,8 @@ export class CoreSystem {
         targetDomElement: coreUiTargetDomElement,
       });
 
-      analytics.reportEvent('Loaded Kibana', {
-        kibana_version: this.coreContext.env.packageInfo.version,
-        ...fetchOptionalMemoryInfo(),
-        ...this.getLoadMarksInfo(),
+      performance.mark(KBN_LOAD_MARKS, {
+        detail: 'start_done',
       });
 
       return {
@@ -359,6 +383,17 @@ export class CoreSystem {
         start_done: {
           type: 'long',
           _meta: { description: 'When core system start is complete', optional: true },
+        },
+        first_app_nav: {
+          type: 'long',
+          _meta: {
+            description: 'When the application emmits the first app navigation',
+            optional: true,
+          },
+        },
+        first_app: {
+          type: 'keyword',
+          _meta: { description: 'The first app loaded in this session' },
         },
       },
     });

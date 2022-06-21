@@ -15,6 +15,7 @@ export async function __kbnBootstrap__() {
   performance.mark(KBN_LOAD_MARKS, {
     detail: 'bootstrap_started',
   });
+
   const injectedMetadata = JSON.parse(
     document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
   );
@@ -36,17 +37,10 @@ export async function __kbnBootstrap__() {
     browserSupportsCsp: !(window as any).__kbnCspNotEnforced__,
   });
 
-  performance.mark(KBN_LOAD_MARKS, {
-    detail: 'core_created',
-  });
-
   const setup = await coreSystem.setup();
   if (i18nError && setup) {
     setup.fatalErrors.add(i18nError);
   }
-  performance.mark(KBN_LOAD_MARKS, {
-    detail: 'setup_done',
-  });
 
   const start = await coreSystem.start();
   await apmSystem.start(start);
