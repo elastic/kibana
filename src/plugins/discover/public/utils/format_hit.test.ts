@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { indexPatternMock as dataViewMock } from '../__mocks__/index_pattern';
 import { formatHit } from './format_hit';
 import { discoverServiceMock } from '../__mocks__/services';
-import { DataTableRecord } from '../types';
+import { DataTableRecord, EsHitRecord } from '../types';
 import { buildDataTableRecord } from './build_data_record';
 
 describe('formatHit', () => {
   let row: DataTableRecord;
-  let hit: estypes.SearchHit;
+  let hit: EsHitRecord;
   beforeEach(() => {
     hit = {
       _id: '1',

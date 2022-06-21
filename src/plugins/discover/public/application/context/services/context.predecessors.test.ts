@@ -130,7 +130,6 @@ describe('context predecessors', function () {
           // should have ended with a half-open interval
           expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'gte']);
           expect(intervals.length).toBeGreaterThan(1);
-          expect(hits).toMatchSnapshot();
           expect(hits).toEqual(
             buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), indexPattern)
           );
