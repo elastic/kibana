@@ -9,7 +9,7 @@ import React, { FC, useState, useEffect } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
