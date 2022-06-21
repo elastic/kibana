@@ -568,7 +568,7 @@ export const RulesList = ({
             color="primary"
           >
             <FormattedMessage
-              id="xpack.observability.rules.refreshRulesButtonLabel"
+              id="xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel"
               defaultMessage="Refresh"
             />
           </EuiButton>
