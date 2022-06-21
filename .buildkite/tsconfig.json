@@ -13,7 +13,8 @@
       "#pipeline-utils": ["./pipeline-utils/index.ts"],
       "#pipeline-utils/*": ["./pipeline-utils/*"]
     },
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "allowJs": true
   },
   "exclude": ["**/*.test.ts", "**/vm-filesystem/**", "**/dist"]
 }

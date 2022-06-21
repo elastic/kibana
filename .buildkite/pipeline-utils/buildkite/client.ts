@@ -9,22 +9,22 @@
 import axios, { AxiosInstance } from 'axios';
 import { execSync } from 'child_process';
 import { dump } from 'js-yaml';
-import parseLinkHeader from './parse_link_header';
+import { parseLinkHeader } from './parse_link_header';
 import { Artifact } from './types/artifact';
 import { Build, BuildStatus } from './types/build';
 import { Job, JobState } from './types/job';
 
-export type BuildkiteClientConfig = {
+export interface BuildkiteClientConfig {
   baseUrl?: string;
   token?: string;
-};
+}
 
-export type BuildkiteGroup = {
+export interface BuildkiteGroup {
   group: string;
   steps: BuildkiteStep[];
-};
+}
 
-export type BuildkiteStep = {
+export interface BuildkiteStep {
   command: string;
   label: string;
   parallelism?: number;
@@ -41,9 +41,9 @@ export type BuildkiteStep = {
     }>;
   };
   env?: { [key: string]: string };
-};
+}
 
-export type BuildkiteTriggerBuildParams = {
+export interface BuildkiteTriggerBuildParams {
   commit: string;
   branch: string;
   env?: Record<string, string>;
@@ -57,7 +57,7 @@ export type BuildkiteTriggerBuildParams = {
   pull_request_base_branch?: string;
   pull_request_id?: string | number;
   pull_request_repository?: string;
-};
+}
 
 export class BuildkiteClient {
   http: AxiosInstance;

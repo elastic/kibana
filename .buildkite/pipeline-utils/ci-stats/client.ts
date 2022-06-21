@@ -1,18 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 import axios, { Method, AxiosRequestConfig } from 'axios';
 
-export type CiStatsClientConfig = {
+export interface CiStatsClientConfig {
   baseUrl?: string;
   token?: string;
-};
+}
 
-export type CiStatsBuild = {
+export interface CiStatsBuild {
   id: string;
-};
+}
 
-export type CiStatsPrReport = {
+export interface CiStatsPrReport {
   md: string;
   success: boolean;
-};
+}
 
 export interface CompleteSuccessBuildSource {
   jobName: string;
@@ -173,7 +181,6 @@ export class CiStatsClient {
   private async request<T>({ method, path, params, body, maxAttempts = 3 }: RequestOptions) {
     let attempt = 0;
 
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       attempt += 1;
       try {

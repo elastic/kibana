@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
 
 const github = new Octokit({
@@ -12,13 +20,15 @@ export const getPrChanges = async (
   prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER,
 ) => {
   if (!owner || !repo || !prNumber) {
-    throw "Couldn't retrieve Github PR info from environment variables in order to retrieve PR changes";
+    throw Error(
+      "Couldn't retrieve Github PR info from environment variables in order to retrieve PR changes",
+    );
   }
 
   const files = await github.paginate(github.pulls.listFiles, {
     owner,
     repo,
-    pull_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber),
+    pull_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber, 10),
     per_page: 100,
   });
 

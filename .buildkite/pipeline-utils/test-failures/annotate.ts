@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 import { execSync } from 'child_process';
 import { mkdirSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
@@ -6,7 +14,7 @@ import { Artifact } from '../buildkite/types/artifact';
 
 const buildkite = new BuildkiteClient();
 
-export type TestFailure = {
+export interface TestFailure {
   name: string;
   classname: string;
   time: string;
@@ -21,7 +29,7 @@ export type TestFailure = {
   jobName: string;
   githubIssue?: string;
   failureCount?: number;
-};
+}
 
 const recursiveReadDir = (dirPath: string, allFiles: string[] = []) => {
   const files = readdirSync(dirPath);
