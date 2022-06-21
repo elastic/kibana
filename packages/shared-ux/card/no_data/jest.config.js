@@ -5,6 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { NoDataCard } from './no_data_card';
-export { ElasticAgentCard } from './elastic_agent_card';
-export type { NoDataCardProps, ElasticAgentCardProps } from './types';
+
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/shared-ux/card/no_data'],
+};

@@ -10,16 +10,27 @@ export { RedirectAppLinks as RedirectAppLinksContainer } from './redirect_app_li
 export { RedirectAppLinks as RedirectAppLinksComponent } from './redirect_app_links.component';
 export { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './services';
 
+export type {
+  Services as RedirectAppLinksServices,
+  KibanaDependencies as RedirectAppLinksKibanaDependencies,
+} from './services';
+
+export {
+  getMockServices as getRedirectAppLinksMockServices,
+  getStoryArgTypes as getRedirectAppLinksStoryArgTypes,
+  getStoryServices as getRedirectAppLinksStoryServices,
+} from './mocks';
+
 import React, { FC } from 'react';
 import { RedirectAppLinks as RedirectAppLinksContainer } from './redirect_app_links';
 import {
   Services,
-  KibanaServices,
+  KibanaDependencies,
   RedirectAppLinksKibanaProvider,
   RedirectAppLinksProvider,
 } from './services';
 
-const isKibanaContract = (services: any): services is KibanaServices => {
+const isKibanaContract = (services: any): services is KibanaDependencies => {
   return typeof services.coreStart !== 'undefined';
 };
 
@@ -28,12 +39,22 @@ const isKibanaContract = (services: any): services is KibanaServices => {
  * `RedirectAppLinksKibanaProvider` based on the services provided, creating a single component
  * with which consumers can wrap their components or solutions.
  */
-export const RedirectAppLinks: FC<Services | KibanaServices> = ({ children, ...services }) => {
+export const RedirectAppLinks: FC<Services | KibanaDependencies> = ({ children, ...services }) => {
   const container = <RedirectAppLinksContainer>{children}</RedirectAppLinksContainer>;
 
-  return isKibanaContract(services) ? (
-    <RedirectAppLinksKibanaProvider {...services}>{container}</RedirectAppLinksKibanaProvider>
-  ) : (
-    <RedirectAppLinksProvider {...services}>{container}</RedirectAppLinksProvider>
+  if (isKibanaContract(services)) {
+    const { coreStart } = services;
+    return (
+      <RedirectAppLinksKibanaProvider {...{ coreStart }}>
+        {container}
+      </RedirectAppLinksKibanaProvider>
+    );
+  }
+
+  const { navigateToUrl, currentAppId } = services;
+  return (
+    <RedirectAppLinksProvider {...{ currentAppId, navigateToUrl }}>
+      {container}
+    </RedirectAppLinksProvider>
   );
 };

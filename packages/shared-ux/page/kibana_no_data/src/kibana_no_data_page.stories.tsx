@@ -16,7 +16,7 @@ import { KibanaNoDataPageProvider } from './services';
 import mdx from '../README.mdx';
 
 export default {
-  title: 'No Data/Kibana',
+  title: 'No Data/Kibana Page',
   description: 'A component to display when there is no data available',
   parameters: {
     docs: {

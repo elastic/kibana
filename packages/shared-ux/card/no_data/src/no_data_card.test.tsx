@@ -6,11 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { render } from 'enzyme';
+import { render as enzymeRender } from 'enzyme';
 import React from 'react';
+
 import { NoDataCard } from './no_data_card';
+import { NoDataCardProvider } from './services';
+
+const services = {
+  addBasePath: (path: string) => path,
+  navigateToUrl: () => {},
+};
 
 describe('NoDataCard', () => {
+  const render = (element: React.ReactElement, canAccessFleet: boolean = true) =>
+    enzymeRender(
+      <NoDataCardProvider {...{ canAccessFleet, ...services }}>{element}</NoDataCardProvider>
+    );
+
   test('renders', () => {
     const component = render(<NoDataCard title="Card title" description="Description" />);
     expect(component).toMatchSnapshot();
@@ -31,14 +43,10 @@ describe('NoDataCard', () => {
       expect(component).toMatchSnapshot();
     });
 
-    test('isDisabled', () => {
+    test('no access to Fleet', () => {
       const component = render(
-        <NoDataCard
-          isDisabled={true}
-          button="Button"
-          title="Card title"
-          description="Description"
-        />
+        <NoDataCard button="Button" title="Card title" description="Description" />,
+        false
       );
       expect(component).toMatchSnapshot();
     });
