@@ -313,10 +313,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           core.getStartServices(),
         ]);
 
-        // Register alerts metadata
-        const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
-        registerAlertsTableConfiguration(alertsTableConfigurationRegistry);
-
         return renderApp({
           coreStart,
           pluginsSetup: pluginSetupDeps,
@@ -327,6 +323,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         });
       },
     });
+
+    // Register alerts metadata
+    const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
+    registerAlertsTableConfiguration(alertsTableConfigurationRegistry);
 
     registerApmAlerts(observabilityRuleTypeRegistry);
 

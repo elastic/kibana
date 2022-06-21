@@ -5,31 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiPanel } from '@elastic/eui';
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import React, { useState, useMemo } from 'react';
+import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { AlertsTableFlyoutState } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../hooks/use_time_range';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import {
+  AlertsStatusFilter,
+  ALL_ALERTS_FILTER,
+  AlertStatusFilterButton,
+} from '../../alerting/service_overview_alerts/alerts_status_filter';
 
 export function AlertsOverview() {
   const {
     path: { serviceName },
-    query: { rangeFrom, rangeTo },
+    query: { environment },
   } = useApmParams('/services/{serviceName}/alerts');
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  console.log(start);
-  console.log(end);
-
   const { services } = useKibana<ApmPluginStartDeps>();
+  const [alertStatusFilter, setAlertStatusFilter] = useState(ALL_ALERTS_FILTER);
 
-  console.log('serviceName', serviceName);
   const {
     triggersActionsUi: {
       getAlertsStateTable,
@@ -37,37 +36,69 @@ export function AlertsOverview() {
     },
   } = services;
 
-  const alertStateProps = {
-    alertsTableConfigurationRegistry,
-    id: 'apm',
-    configurationId: 'apm',
-    featureIds: [AlertConsumers.APM],
-    flyoutState: AlertsTableFlyoutState.external,
-    query: {
+  const alertQuery = useMemo(
+    () => ({
       bool: {
         filter: [
           {
-            term: {
-              [SERVICE_NAME]: serviceName,
+            bool: {
+              should: [
+                {
+                  term: { [SERVICE_NAME]: serviceName },
+                },
+              ],
+              minimum_should_match: 1,
             },
           },
-          {
-            range: {
-              ['@timestamp']: {
-                gte: start,
-                lte: end,
-              },
-            },
-          },
-          // ...rangeQuery(start, end),
+          ...(alertStatusFilter !== ALL_ALERTS_FILTER
+            ? [
+                {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          [ALERT_STATUS]: alertStatusFilter,
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ]
+            : []),
+          ...environmentQuery(environment),
         ],
       },
-    },
+    }),
+    [serviceName, alertStatusFilter, environment]
+  );
+
+  const alertStateProps = {
+    alertsTableConfigurationRegistry,
+    id: 'service-overview-alerts',
+    configurationId: AlertConsumers.APM,
+    featureIds: [AlertConsumers.APM],
+    flyoutState: AlertsTableFlyoutState.internal,
+    query: alertQuery,
     showExpandToDetails: false,
   };
+
   return (
     <EuiPanel borderRadius="none" hasShadow={false}>
-      {getAlertsStateTable(alertStateProps)}
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <AlertsStatusFilter
+                status={alertStatusFilter as AlertStatusFilterButton}
+                onChange={setAlertStatusFilter}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem>{getAlertsStateTable(alertStateProps)}</EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 }

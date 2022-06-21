@@ -173,8 +173,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     capabilities
   );
 
-  console.log('isAlertingAvailable');
-  console.log(canReadAlerts);
   const showInfraTab = core.uiSettings.get<boolean>(enableInfrastructureView);
 
   const router = useApmRouter();
