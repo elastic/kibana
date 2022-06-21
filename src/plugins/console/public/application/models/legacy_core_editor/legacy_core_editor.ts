@@ -458,4 +458,18 @@ export class LegacyCoreEditor implements CoreEditor {
       mode.autoOutdent(prevLineState, session, row);
     }
   }
+
+  getAllFoldRanges(): Range[] {
+    const session = this.editor.getSession();
+    // @ts-ignore
+    // missing type definition for getAllFolds method in brace. Ace editor provides this method. See https://github.com/ajaxorg/ace/blob/13dc911dbc0ea31ca343d5744b3f472767458fc3/ace.d.ts#L82
+    return session.getAllFolds().map((fold) => fold.range);
+  }
+
+  addFoldsAt(foldRanges: Range[]) {
+    const session = this.editor.getSession();
+    foldRanges.forEach((range) => {
+      session.addFold('...', _AceRange.fromPoints(range.start, range.end));
+    });
+  }
 }

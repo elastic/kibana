@@ -71,6 +71,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       esHostService,
       http,
       autocompleteInfo,
+      storage,
     },
     docLinkVersion,
   } = useServicesContext();
@@ -198,6 +199,22 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       }
     }
 
+    function restoreFolds() {
+      const foldRanges = storage.get('folds', []);
+      editor.getCoreEditor().addFoldsAt(foldRanges);
+    }
+
+    restoreFolds();
+
+    function saveFoldsOnChange() {
+      editor.getCoreEditor().on('changeFold', () => {
+        const foldRanges = editor.getCoreEditor().getAllFoldRanges();
+        storage.set('folds', foldRanges);
+      });
+    }
+
+    saveFoldsOnChange();
+
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
@@ -223,6 +240,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     settingsService,
     http,
     autocompleteInfo,
+    storage,
   ]);
 
   useEffect(() => {
