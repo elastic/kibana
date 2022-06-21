@@ -313,8 +313,7 @@ export class FleetPlugin
       PLUGIN_ID,
       async (context, request) => {
         const plugin = this;
-        const coreContext = await context.core;
-        const esClient = coreContext.elasticsearch.client;
+        const esClient = (await context.core).elasticsearch.client;
 
         return {
           get agentClient() {
@@ -441,15 +440,16 @@ export class FleetPlugin
       }
     })();
 
-    const soClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
-
     return {
       authz: {
         fromRequest: getAuthzFromRequest,
       },
       fleetSetupCompleted: () => fleetSetupPromise,
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
-      packageService: this.setupPackageService(core.elasticsearch.client.asInternalUser, soClient),
+      packageService: this.setupPackageService(
+        core.elasticsearch.client.asInternalUser,
+        new SavedObjectsClient(core.savedObjects.createInternalRepository())
+      ),
       agentService: this.setupAgentService(core.elasticsearch.client.asInternalUser),
       agentPolicyService: {
         get: agentPolicyService.get,

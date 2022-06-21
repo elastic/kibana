@@ -177,11 +177,7 @@ export async function getAllAgentsByKuery(
   agents: Agent[];
   total: number;
 }> {
-  const res = await getAgentsByKuery(esClient, {
-    ...options,
-    page: 1,
-    perPage: SO_SEARCH_LIMIT,
-  });
+  const res = await getAgentsByKuery(esClient, { ...options, page: 1, perPage: SO_SEARCH_LIMIT });
 
   return {
     agents: res.agents,
