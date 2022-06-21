@@ -125,7 +125,7 @@ export const CommandInputHistory = memo(() => {
   }, [checkObserverTrigger, dispatch, isMounted]);
 
   // When first loaded, clear out the current text entered, and when this component
-  // unloads, if no option from the history was selcted, then set the prior text
+  // unloads, if no option from the history was selected, then set the prior text
   // entered back
   useEffect(() => {
     dispatch({ type: 'updateInputTextEnteredState', payload: { textEntered: '' } });
@@ -133,6 +133,7 @@ export const CommandInputHistory = memo(() => {
     return () => {
       if (!optionWasSelected.current) {
         dispatch({ type: 'updateInputTextEnteredState', payload: { textEntered: priorInputText } });
+        dispatch({ type: 'updateInputPlaceholderState', payload: { placeholder: '' } });
       }
     };
   }, [dispatch, optionWasSelected, priorInputText]);
