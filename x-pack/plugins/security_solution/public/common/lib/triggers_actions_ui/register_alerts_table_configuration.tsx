@@ -10,9 +10,7 @@ import type {
   AlertsTableConfigurationRegistryContract,
   GetRenderCellValue,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import React from 'react';
 
-import { EuiButtonIcon } from '@elastic/eui';
 import { APP_ID } from '../../../../common/constants';
 import { getTimelinesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { TimelineId } from '../../../../common/types';
