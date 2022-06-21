@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { OverlayStart } from '../..';
 import type { I18nStart } from '@kbn/core-i18n-browser';
+import { OverlayStart } from '../..';
 
 interface ErrorToastProps {
   title: string;
