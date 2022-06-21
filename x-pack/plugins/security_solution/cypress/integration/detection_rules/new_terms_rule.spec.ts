@@ -8,7 +8,7 @@
 import { formatMitreAttackDescription } from '../../helpers/rules';
 import { getNewTermsRule, getIndexPatterns } from '../../objects/rule';
 
-import { ALERT_DATA_GRID, NUMBER_OF_ALERTS } from '../../screens/alerts';
+import { ALERT_DATA_GRID } from '../../screens/alerts';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
@@ -70,7 +70,6 @@ describe('New Terms rules', () => {
     const expectedTags = getNewTermsRule().tags.join('');
     const expectedMitre = formatMitreAttackDescription(getNewTermsRule().mitre);
     const expectedNumberOfRules = 1;
-    const expectedNumberOfAlerts = '1 alert';
 
     beforeEach(() => {
       deleteAlertsAndRules();
@@ -142,7 +141,6 @@ describe('New Terms rules', () => {
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
-      cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
       cy.get(ALERT_DATA_GRID)
         .invoke('text')
         .then((text) => {
