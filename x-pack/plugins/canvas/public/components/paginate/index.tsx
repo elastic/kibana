@@ -54,6 +54,12 @@ export const Paginate: React.FunctionComponent<InPaginateProps> = ({
     }
   }, [perPage, hasRenderedRef]);
 
+  useEffect(() => {
+    if (currentPage > maxPage) {
+      setPage(maxPage);
+    }
+  }, [currentPage, maxPage]);
+
   return (
     <Component
       rows={partialRows}
