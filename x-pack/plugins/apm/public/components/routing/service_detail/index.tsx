@@ -294,9 +294,7 @@ export const serviceDetail = {
         }),
         element: <AlertsOverview />,
         searchBarOptions: {
-          showKueryBar: false,
-          showTimeComparison: false,
-          showTransactionTypeSelector: false,
+          hidden: true,
         },
       }),
       '/services/{serviceName}/': {
