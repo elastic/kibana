@@ -7,35 +7,51 @@
 
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 
-import type { User } from '..';
 import type { AuthenticatedUser } from './authenticated_user';
 import { getUserDisplayName } from './user';
 
 /**
- * User information returned in user profile.
+ * Basic user information returned in user profile.
  */
-export interface UserInfo extends User {
-  active: boolean;
+export interface BasicUserProfileUserInfo {
+  username: string;
+  email?: string;
+  full_name?: string;
+  display_name?: string;
 }
+
+/**
+ * Extended user information returned in user profile (both basic and security related properties).
+ */
+export interface UserProfileUserInfo extends BasicUserProfileUserInfo {
+  roles: readonly string[];
+  realm_name: string;
+  realm_domain?: string;
+}
+
+/**
+ * Placeholder for data stored in user profile.
+ */
+export type UserProfileData = Record<string, unknown>;
+
+/**
+ * Type of the user profile labels structure (currently
+ */
+export type UserProfileLabels = Record<string, string>;
 
 /**
  * Avatar stored in user profile.
  */
-export interface UserAvatarData {
+export interface UserProfileAvatarData {
   initials?: string;
   color?: string;
   imageUrl?: string;
 }
 
 /**
- * Placeholder for data stored in user profile.
+ * Describes basic properties stored in user profile.
  */
-export type UserData = Record<string, unknown>;
-
-/**
- * Describes properties stored in user profile.
- */
-export interface UserProfile<T extends UserData = UserData> {
+export interface BasicUserProfile<D extends UserProfileData = UserProfileData> {
   /**
    * Unique ID for of the user profile.
    */
@@ -49,18 +65,37 @@ export interface UserProfile<T extends UserData = UserData> {
   /**
    * Information about the user that owns profile.
    */
-  user: UserInfo;
+  user: BasicUserProfileUserInfo;
 
   /**
    * User specific data associated with the profile.
    */
-  data: T;
+  data: D;
+}
+
+/**
+ * Describes all properties stored in user profile (both basic and security related properties).
+ */
+export interface UserProfile<
+  D extends UserProfileData = UserProfileData,
+  L extends UserProfileLabels = UserProfileLabels
+> extends BasicUserProfile<D> {
+  /**
+   * Information about the user that owns profile.
+   */
+  user: UserProfileUserInfo;
+
+  /**
+   * User specific _searchable_ labels associated with the profile.
+   */
+  labels: L;
 }
 
 /**
  * User profile enriched with session information.
  */
-export interface AuthenticatedUserProfile<T extends UserData = UserData> extends UserProfile<T> {
+export interface AuthenticatedUserProfile<D extends UserProfileData = UserProfileData>
+  extends UserProfile<D> {
   /**
    * Information about the currently authenticated user that owns the profile.
    */
@@ -75,12 +110,12 @@ export const USER_AVATAR_MAX_INITIALS = 2;
  * If a color is present on the user profile itself, then that is used.
  * Otherwise, a color is provided from EUI's Visualization Colors based on the display name.
  *
- * @param {UserInfo} user User info
- * @param {UserAvatarData} avatar User avatar
+ * @param {UserProfileUserInfo} user User info
+ * @param {UserProfileAvatarData} avatar User avatar
  */
 export function getUserAvatarColor(
-  user: Pick<UserInfo, 'username' | 'full_name'>,
-  avatar?: UserAvatarData
+  user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
+  avatar?: UserProfileAvatarData
 ) {
   if (avatar && avatar.color) {
     return avatar.color;
@@ -96,12 +131,12 @@ export function getUserAvatarColor(
  * If initials are present on the user profile itself, then that is used.
  * Otherwise, the initials are calculated based off the words in the display name, with a max length of 2 characters.
  *
- * @param {UserInfo} user User info
- * @param {UserAvatarData} avatar User avatar
+ * @param {UserProfileUserInfo} user User info
+ * @param {UserProfileAvatarData} avatar User avatar
  */
 export function getUserAvatarInitials(
-  user: Pick<UserInfo, 'username' | 'full_name'>,
-  avatar?: UserAvatarData
+  user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
+  avatar?: UserProfileAvatarData
 ) {
   if (avatar && avatar.initials) {
     return avatar.initials;

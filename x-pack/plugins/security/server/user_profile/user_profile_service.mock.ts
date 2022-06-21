@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { UserProfileServiceStart } from '.';
+import type { UserProfileServiceStartInternal } from '.';
 import { userProfileMock } from '../../common/model/user_profile.mock';
 
 export const userProfileServiceMock = {
-  createStart: (): jest.Mocked<UserProfileServiceStart> => ({
+  createStart: (): jest.Mocked<UserProfileServiceStartInternal> => ({
     activate: jest.fn().mockReturnValue(userProfileMock.create()),
     get: jest.fn(),
     update: jest.fn(),
+    suggest: jest.fn(),
+    bulkGet: jest.fn(),
   }),
 };

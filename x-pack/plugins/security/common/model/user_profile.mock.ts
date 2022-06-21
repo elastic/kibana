@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import { mockAuthenticatedUser } from './authenticated_user.mock';
 import type { AuthenticatedUserProfile } from './user_profile';
 
 export const userProfileMock = {
   create: (userProfile: Partial<AuthenticatedUserProfile> = {}): AuthenticatedUserProfile => {
-    const user = mockAuthenticatedUser({
-      username: 'some-username',
-      roles: [],
-      enabled: true,
-    });
     return {
       uid: 'some-profile-uid',
       enabled: true,
       user: {
-        ...user,
-        active: true,
+        username: 'some-username',
+        realm_name: 'some-realm',
+        roles: [],
+        email: 'some@email',
+        authentication_provider: { type: 'basic', name: 'basic1' },
+        ...userProfile.user,
       },
       data: {},
+      labels: {},
       ...userProfile,
     };
   },

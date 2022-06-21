@@ -187,6 +187,10 @@ describe('Security Plugin', () => {
               "useRbacForRequest": [Function],
             },
           },
+          "userProfiles": Object {
+            "bulkGet": [Function],
+            "suggest": [Function],
+          },
         }
       `);
     });

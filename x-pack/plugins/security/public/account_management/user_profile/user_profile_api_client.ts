@@ -10,17 +10,18 @@ import { Subject } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core/public';
 
-import type { AuthenticatedUserProfile, UserData } from '../../../common';
+import type { AuthenticatedUserProfile, UserProfileData } from '../../../common';
 
 const USER_PROFILE_URL = '/internal/security/user_profile';
 
 export class UserProfileAPIClient {
-  private readonly internalDataUpdates$: Subject<UserData> = new Subject();
+  private readonly internalDataUpdates$: Subject<UserProfileData> = new Subject();
 
   /**
    * Emits event whenever user profile is changed by the user.
    */
-  public readonly dataUpdates$: Observable<UserData> = this.internalDataUpdates$.asObservable();
+  public readonly dataUpdates$: Observable<UserProfileData> =
+    this.internalDataUpdates$.asObservable();
 
   constructor(private readonly http: HttpStart) {}
 
@@ -28,8 +29,8 @@ export class UserProfileAPIClient {
    * Retrieves the user profile of the current user.
    * @param dataPath By default `get()` returns user information, but does not return any user data. The optional "dataPath" parameter can be used to return personal data for this user.
    */
-  public get<T extends UserData>(dataPath?: string) {
-    return this.http.get<AuthenticatedUserProfile<T>>(USER_PROFILE_URL, {
+  public get<D extends UserProfileData>(dataPath?: string) {
+    return this.http.get<AuthenticatedUserProfile<D>>(USER_PROFILE_URL, {
       query: { data: dataPath },
     });
   }
@@ -38,7 +39,7 @@ export class UserProfileAPIClient {
    * Updates user profile data of the current user.
    * @param data Application data to be written (merged with existing data).
    */
-  public update<T extends UserData>(data: T) {
+  public update<D extends UserProfileData>(data: D) {
     return this.http.post(`${USER_PROFILE_URL}/_data`, { body: JSON.stringify(data) }).then(() => {
       this.internalDataUpdates$.next(data);
     });

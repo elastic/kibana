@@ -10,7 +10,7 @@ import React from 'react';
 
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
-import type { UserData } from '../../common';
+import type { UserProfileData } from '../../common';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
@@ -47,7 +47,7 @@ describe('<AccountManagementPage>', () => {
 
   it('should render user profile form and set breadcrumbs', async () => {
     const user = mockAuthenticatedUser();
-    const data: UserData = {};
+    const data: UserProfileData = {};
 
     authc.getCurrentUser.mockResolvedValue(user);
     coreStart.http.get.mockResolvedValue({ user, data });

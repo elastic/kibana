@@ -9,10 +9,13 @@ export type { ApiKey, ApiKeyToInvalidate, ApiKeyRoleDescriptors } from './api_ke
 export type { User, EditUser } from './user';
 export type {
   AuthenticatedUserProfile,
+  BasicUserProfile,
+  BasicUserProfileUserInfo,
   UserProfile,
-  UserData,
-  UserInfo,
-  UserAvatarData,
+  UserProfileData,
+  UserProfileLabels,
+  UserProfileUserInfo,
+  UserProfileAvatarData,
 } from './user_profile';
 export {
   getUserAvatarColor,
