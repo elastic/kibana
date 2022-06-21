@@ -40,6 +40,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
     });
 
+    after(async function () {
+      await kibanaServer.uiSettings.replace({ 'doc_table:legacy': false });
+    });
+
     it('should show records by default', async function () {
       // with the default range the number of hits is ~14000
       const rows = await PageObjects.discover.getDocTableRows();

@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:searchFieldsFromSource': false,
-    'doc_table:legacy': false,
   };
   describe('discover uses fields API test', function describeIndexTests() {
     before(async function () {

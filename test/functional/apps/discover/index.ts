@@ -35,7 +35,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_filter_editor'));
       loadTestFile(require.resolve('./_errors'));
       loadTestFile(require.resolve('./_field_data'));
+      loadTestFile(require.resolve('./classic/_field_data'));
       loadTestFile(require.resolve('./_field_data_with_fields_api'));
+      loadTestFile(require.resolve('./classic/_field_data_with_fields_api'));
       loadTestFile(require.resolve('./_shared_links'));
       loadTestFile(require.resolve('./_sidebar'));
       loadTestFile(require.resolve('./_source_filters'));

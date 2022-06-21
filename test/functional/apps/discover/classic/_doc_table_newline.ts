@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/message_with_newline');
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.unset('defaultIndex');
-      await kibanaServer.uiSettings.unset('doc_table:legacy');
+      await kibanaServer.uiSettings.replace({ 'doc_table:legacy': false });
     });
 
     it('should break text on newlines', async function () {
