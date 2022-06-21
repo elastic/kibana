@@ -29,6 +29,7 @@ import {
 import useObservable from 'react-use/lib/useObservable';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { HelpPopover } from '../components/help_popover';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -643,23 +644,39 @@ export const Explorer: FC<ExplorerUIProps> = ({
                   >
                     <div data-test-subj="mlAnomalyExplorerInfluencerList">
                       <EuiSpacer size={'s'} />
-                      <EuiTitle size={'xs'}>
-                        <h2>
-                          <FormattedMessage
-                            id="xpack.ml.explorer.topInfuencersTitle"
-                            defaultMessage="Top influencers"
-                          />
-                          <EuiIconTip
-                            content={
+
+                      <EuiFlexGroup
+                        direction="row"
+                        gutterSize="xs"
+                        responsive={false}
+                        alignItems="baseline"
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiTitle size={'xs'}>
+                            <h2>
+                              <FormattedMessage
+                                id="xpack.ml.explorer.topInfuencersTitle"
+                                defaultMessage="Top influencers"
+                              />
+                            </h2>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <HelpPopover
+                            anchorPosition="upCenter"
+                            title={i18n.translate('xpack.ml.explorer.topInfluencersPopoverTitle', {
+                              defaultMessage: 'Top influencers',
+                            })}
+                          >
+                            <p>
                               <FormattedMessage
                                 id="xpack.ml.explorer.topInfluencersTooltip"
                                 defaultMessage="View the relative impact of the top influencers in the selected time period and add them as filters on the results. Each influencer has a maximum anomaly score between 0-100 and a total anomaly score for that period."
                               />
-                            }
-                            position="right"
-                          />
-                        </h2>
-                      </EuiTitle>
+                            </p>
+                          </HelpPopover>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
 
                       <EuiSpacer size={'m'} />
 
