@@ -39,8 +39,7 @@ describe('formatHit', () => {
 
   it('formats a document as expected', () => {
     const formatted = formatHit(
-      row.raw,
-      row.flattened,
+      row,
       dataViewMock,
       ['message', 'extension', 'object.value'],
       220,
@@ -56,9 +55,16 @@ describe('formatHit', () => {
   });
 
   it('orders highlighted fields first', () => {
+    const highlightHit = buildDataTableRecord(
+      {
+        ...hit,
+        highlight: { message: ['%%'] },
+      },
+      dataViewMock
+    );
+
     const formatted = formatHit(
-      { ...row.raw, highlight: { message: ['%%'] } },
-      row.flattened,
+      highlightHit,
       dataViewMock,
       ['message', 'extension', 'object.value'],
       220,
@@ -75,8 +81,7 @@ describe('formatHit', () => {
 
   it('only limits count of pairs based on advanced setting', () => {
     const formatted = formatHit(
-      row.raw,
-      row.flattened,
+      row,
       dataViewMock,
       ['message', 'extension', 'object.value'],
       2,
@@ -91,8 +96,7 @@ describe('formatHit', () => {
 
   it('should not include fields not mentioned in fieldsToShow', () => {
     const formatted = formatHit(
-      row.raw,
-      row.flattened,
+      row,
       dataViewMock,
       ['message', 'object.value'],
       220,
@@ -108,8 +112,7 @@ describe('formatHit', () => {
 
   it('should filter fields based on their real name not displayName', () => {
     const formatted = formatHit(
-      row.raw,
-      row.flattened,
+      row,
       dataViewMock,
       ['bytes'],
       220,

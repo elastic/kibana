@@ -102,7 +102,7 @@ export const getRenderCellValueFn =
             0,
             maxDocFieldsDisplayed
           )
-        : formatHit(row.raw, row.flattened, dataView, fieldsToShow, maxEntries, fieldFormats);
+        : formatHit(row, dataView, fieldsToShow, maxEntries, fieldFormats);
 
       return (
         <EuiDescriptionList

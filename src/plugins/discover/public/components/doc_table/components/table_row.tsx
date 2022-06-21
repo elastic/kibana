@@ -73,7 +73,7 @@ export const TableRow = ({
     // If we're formatting the _source column, don't use the regular field formatter,
     // but our Discover mechanism to format a hit in a better human-readable way.
     if (fieldName === '_source') {
-      return formatRow(row.raw, indexPattern, fieldsToShow, maxEntries, fieldFormats);
+      return formatRow(row, indexPattern, fieldsToShow, maxEntries, fieldFormats);
     }
 
     const formattedField = formatFieldValue(
@@ -141,7 +141,7 @@ export const TableRow = ({
   }
 
   if (columns.length === 0 && useNewFieldsApi) {
-    const formatted = formatRow(row.raw, indexPattern, fieldsToShow, maxEntries, fieldFormats);
+    const formatted = formatRow(row, indexPattern, fieldsToShow, maxEntries, fieldFormats);
 
     rowCells.push(
       <TableCell
