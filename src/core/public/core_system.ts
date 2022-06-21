@@ -308,7 +308,7 @@ export class CoreSystem {
         performance.mark(KBN_LOAD_MARKS, {
           detail: 'first_app_nav',
         });
-        this.reportKibanaLoadedEvent(analytics, appId);
+        this.reportKibanaLoadedEvent(analytics);
         appSub.unsubscribe();
       });
 
