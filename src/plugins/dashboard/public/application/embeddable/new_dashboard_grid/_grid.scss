@@ -26,3 +26,9 @@ h1 {
     height: 100%;
   }
 }
+
+.grid-stack-placeholder > .placeholder-content {
+  background-color: rgba(189, 39, 30, .2);
+  border: 1px dashed rgba(189, 39, 30, .4) !important;
+  border-radius: 5px;
+}

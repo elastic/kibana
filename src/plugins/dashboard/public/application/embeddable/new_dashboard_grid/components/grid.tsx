@@ -86,7 +86,7 @@ export const Grid: FC<Props> = ({
     }
   }, [gridData]);
 
-  const addNewPanel = useCallback(() => {
+  const addNewPanel = useCallback(async () => {
     const grid = gridRef.current;
 
     if (!grid) {
@@ -106,6 +106,7 @@ export const Grid: FC<Props> = ({
 
     setPanels([...panels, panelNode]);
     grid.batchUpdate();
+    await new Promise((f) => setTimeout(f, 60));
     renderPanelInWidget(panelNode);
     grid.commit();
   }, [panels, setPanels, columns]);
