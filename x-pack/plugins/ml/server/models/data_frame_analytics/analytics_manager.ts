@@ -91,7 +91,7 @@ export class AnalyticsManager {
   private findJob(id: string): estypes.MlDataframeAnalyticsSummary {
     const job = this._jobs.find((js) => js.id === id);
     if (job === undefined) {
-      throw Error('Job cannot be found');
+      throw Error(`No known job with id '${id}'`);
     }
     return job;
   }
@@ -99,7 +99,7 @@ export class AnalyticsManager {
   private findTrainedModel(id: string): estypes.MlTrainedModelConfig {
     const trainedModel = this._trainedModels.find((js) => js.model_id === id);
     if (trainedModel === undefined) {
-      throw Error('Trained model cannot be found');
+      throw Error(`No known trained model with id '${id}'`);
     }
     return trainedModel;
   }
