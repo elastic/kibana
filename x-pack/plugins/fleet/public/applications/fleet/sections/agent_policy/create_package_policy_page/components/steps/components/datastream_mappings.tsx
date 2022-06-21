@@ -27,6 +27,7 @@ interface Props {
   packageInputStream: RegistryStream & { data_stream: { dataset: string; type: string } };
 }
 
+// Work in progress only here for demo for now
 export const DatastreamMappings: React.FunctionComponent<Props> = ({
   packagePolicyId,
   packageInputStream,

@@ -30,6 +30,7 @@
     { "path": "../security/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../cloud/tsconfig.json" },
+    { "path": "../ingest_pipelines/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
 

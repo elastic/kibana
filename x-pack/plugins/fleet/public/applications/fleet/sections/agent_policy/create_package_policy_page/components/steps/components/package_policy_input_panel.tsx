@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import type {
+  NewPackagePolicy,
   NewPackagePolicyInput,
   PackageInfo,
   PackagePolicyInputStream,
@@ -41,7 +42,7 @@ const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
 
 const shouldShowStreamsByDefault = (
   packageInput: RegistryInput,
-  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>,
+  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type: string } }>,
   packagePolicyInput: NewPackagePolicyInput
 ): boolean => {
   return (
@@ -65,7 +66,8 @@ const shouldShowStreamsByDefault = (
 export const PackagePolicyInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   packageInfo: PackageInfo;
-  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>;
+  packagePolicy: NewPackagePolicy;
+  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type: string } }>;
   packagePolicyInput: NewPackagePolicyInput;
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputValidationResults: PackagePolicyInputValidationResults;
@@ -76,6 +78,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     packageInfo,
     packageInputStreams,
     packagePolicyInput,
+    packagePolicy,
     updatePackagePolicyInput,
     inputValidationResults,
     forceShowErrors,
@@ -218,6 +221,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               <EuiFlexItem key={index}>
                 <PackagePolicyInputStreamConfig
                   packageInfo={packageInfo}
+                  packagePolicy={packagePolicy}
                   packageInputStream={packageInputStream}
                   packagePolicyInputStream={packagePolicyInputStream!}
                   updatePackagePolicyInputStream={(

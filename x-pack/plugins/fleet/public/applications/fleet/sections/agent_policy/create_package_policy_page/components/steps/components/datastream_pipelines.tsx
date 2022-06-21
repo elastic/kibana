@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiButtonEmpty,
@@ -18,28 +18,89 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { RegistryStream, PackageInfo } from '../../../../../../types';
-import { getPipelineNameForDatastream } from '../../../../../../../../../common';
+import type { RegistryStream, PackageInfo, NewPackagePolicy } from '../../../../../../types';
+import { useStartServices, useGetPipeline, useLink } from '../../../../../../hooks';
+import {
+  getPipelineNameForDatastream,
+  getCustomPipelineNameForDatastream,
+} from '../../../../../../../../../common';
+import { useRouteMatch } from 'react-router';
 
 interface Props {
-  packagePolicyId?: string;
+  packagePolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   packageInputStream: RegistryStream & { data_stream: { dataset: string; type: string } };
 }
 
-export const DatastreamPipeline: React.FunctionComponent<Props> = ({
-  packagePolicyId,
-  packageInputStream,
-  packageInfo,
-}) => {
-  if (!packageInputStream.data_stream) {
-    return null;
+interface PipelineItem {
+  pipelineName: string;
+  canEdit: boolean;
+}
+
+function toPipelineItem(pipelineName: string, canEdit = false): PipelineItem {
+  return { pipelineName, canEdit };
+}
+
+function useDatastreamIngestPipelines(
+  packageInfo: PackageInfo,
+  dataStream?: { dataset: string; type: string }
+) {
+  if (!dataStream) {
+    return { pipelines: [] };
   }
 
   const defaultPipelineName = getPipelineNameForDatastream({
-    dataStream: packageInputStream.data_stream,
+    dataStream,
     packageVersion: packageInfo.version,
   });
+
+  const customPipelineName = getCustomPipelineNameForDatastream(dataStream);
+
+  const res = useGetPipeline(customPipelineName);
+
+  const pipelines: PipelineItem[] = useMemo(() => {
+    if (res.data) {
+      return [toPipelineItem(defaultPipelineName), toPipelineItem(customPipelineName, true)];
+    }
+    return [toPipelineItem(defaultPipelineName)];
+  }, [defaultPipelineName, customPipelineName, res.data]);
+
+  return {
+    isLoading: res.isLoading,
+    hasCustom: !res.isLoading && res.error?.statusCode !== 404,
+    pipelines,
+  };
+}
+
+export const DatastreamPipeline: React.FunctionComponent<Props> = ({
+  packagePolicy,
+  packageInputStream,
+  packageInfo,
+}) => {
+  const {
+    params: { packagePolicyId, policyId },
+  } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
+  const { getHref } = useLink();
+
+  const pageUrl =
+    packagePolicyId && policyId
+      ? getHref('edit_integration', {
+          policyId,
+          packagePolicyId,
+        })
+      : null;
+
+  const { application, share } = useStartServices();
+  const ingestPipelineLocator = share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR');
+
+  const { pipelines, hasCustom } = useDatastreamIngestPipelines(
+    packageInfo,
+    packageInputStream.data_stream
+  );
+
+  if (!packageInputStream.data_stream) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
@@ -73,37 +134,69 @@ export const DatastreamPipeline: React.FunctionComponent<Props> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBasicTable
-          items={[{ label: defaultPipelineName }]}
+          items={pipelines}
           columns={[
-            // @ts-ignore
             {
-              field: 'label',
+              field: 'pipelineName',
+              name: '',
             },
             {
               width: '60px',
               actions: [
+                {
+                  icon: 'pencil',
+                  type: 'icon',
+                  description: 'edit',
+                  name: 'inspect',
+                  isPrimary: true,
+                  onClick: async (el) => {
+                    if (!ingestPipelineLocator) {
+                      return;
+                    }
+                    const url = await ingestPipelineLocator.getUrl({
+                      page: 'pipeline_edit',
+                      pipelineId: el.pipelineName,
+                    });
+
+                    application.navigateToUrl(`${url}?redirect_path=${pageUrl}`);
+                  },
+                  available: ({ canEdit }) => canEdit,
+                },
                 {
                   icon: 'inspect',
                   type: 'icon',
                   description: 'test',
                   name: 'inspect',
                   isPrimary: true,
-                  onClick: () => {},
+                  onClick: async (el) => {
+                    if (!ingestPipelineLocator) {
+                      return;
+                    }
+                    const url = await ingestPipelineLocator.getUrl({
+                      page: 'pipeline_list',
+                    });
+
+                    application.navigateToUrl(
+                      `${url}?pipeline=${el.pipelineName}&redirect_path=${pageUrl}`
+                    );
+                  },
                 },
               ],
             },
           ]}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="xs" />
-        <EuiButtonEmpty size="xs" flush="left" iconType="plusInCircle">
-          <FormattedMessage
-            id="xpack.fleet.packagePolicyEdotpr.datastreamIngestPipelines.addCustomButn"
-            defaultMessage="Add custom pipeline"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+      {!hasCustom && (
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="xs" />
+          <EuiButtonEmpty size="xs" flush="left" iconType="plusInCircle">
+            <FormattedMessage
+              id="xpack.fleet.packagePolicyEdotpr.datastreamIngestPipelines.addCustomButn"
+              defaultMessage="Add custom pipeline"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

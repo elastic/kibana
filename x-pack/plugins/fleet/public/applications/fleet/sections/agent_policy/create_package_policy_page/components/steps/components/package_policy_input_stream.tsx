@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import type {
+  NewPackagePolicy,
   NewPackagePolicyInputStream,
   PackageInfo,
   RegistryStream,
@@ -37,6 +38,7 @@ const FlexItemWithMaxWidth = styled(EuiFlexItem)`
 `;
 
 export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
+  packagePolicy: NewPackagePolicy;
   packageInputStream: RegistryStream & { data_stream: { dataset: string; type: string } };
   packageInfo: PackageInfo;
   packagePolicyInputStream: NewPackagePolicyInputStream;
@@ -45,6 +47,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
   forceShowErrors?: boolean;
 }> = memo(
   ({
+    packagePolicy,
     packageInputStream,
     packageInfo,
     packagePolicyInputStream,
@@ -202,6 +205,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                     })}
                     <EuiFlexItem>
                       <DatastreamPipeline
+                        packagePolicy={packagePolicy}
                         packageInputStream={packageInputStream}
                         packageInfo={packageInfo}
                       />

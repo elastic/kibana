@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { RegistryDataStream } from '../types';
-
 /**
  * Return the ingest pipeline name for a datastream
  */
@@ -23,6 +21,9 @@ export const getPipelineNameForDatastream = ({
 /**
  * Return the custom user ingest pipeline name for a datastream
  */
-export const getCustomPipelineNameForDatastream = (dataStream: RegistryDataStream): string => {
+export const getCustomPipelineNameForDatastream = (dataStream: {
+  dataset: string;
+  type: string;
+}): string => {
   return `${dataStream.type}-${dataStream.dataset}@custom`;
 };
