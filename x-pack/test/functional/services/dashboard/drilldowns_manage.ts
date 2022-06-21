@@ -18,7 +18,6 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
   const comboBox = getService('comboBox');
-  const esArchiver = getService('esArchiver');
   const find = getService('find');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
