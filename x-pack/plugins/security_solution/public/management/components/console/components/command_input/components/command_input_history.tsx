@@ -56,7 +56,7 @@ export const CommandInputHistory = memo(() => {
     };
   }, []);
 
-  const renderAsIs: EuiSelectableProps['children'] = useCallback((list) => {
+  const renderSelectionContent: EuiSelectableProps['children'] = useCallback((list, search) => {
     return list;
   }, []);
 
@@ -148,7 +148,7 @@ export const CommandInputHistory = memo(() => {
         singleSelection={true}
         emptyMessage={NO_HISTORY_EMPTY_MESSAGE}
       >
-        {renderAsIs}
+        {renderSelectionContent}
       </EuiSelectable>
     </div>
   );
