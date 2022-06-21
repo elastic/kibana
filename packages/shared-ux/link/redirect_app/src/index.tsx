@@ -42,9 +42,19 @@ const isKibanaContract = (services: any): services is KibanaDependencies => {
 export const RedirectAppLinks: FC<Services | KibanaDependencies> = ({ children, ...services }) => {
   const container = <RedirectAppLinksContainer>{children}</RedirectAppLinksContainer>;
 
-  return isKibanaContract(services) ? (
-    <RedirectAppLinksKibanaProvider {...services}>{container}</RedirectAppLinksKibanaProvider>
-  ) : (
-    <RedirectAppLinksProvider {...services}>{container}</RedirectAppLinksProvider>
+  if (isKibanaContract(services)) {
+    const { coreStart } = services;
+    return (
+      <RedirectAppLinksKibanaProvider {...{ coreStart }}>
+        {container}
+      </RedirectAppLinksKibanaProvider>
+    );
+  }
+
+  const { navigateToUrl, currentAppId } = services;
+  return (
+    <RedirectAppLinksProvider {...{ currentAppId, navigateToUrl }}>
+      {container}
+    </RedirectAppLinksProvider>
   );
 };

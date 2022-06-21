@@ -25,8 +25,9 @@ const RedirectAppLinksContext = React.createContext<Services | null>(null);
  * Contextual services Provider.
  */
 export const RedirectAppLinksProvider: FC<Services> = ({ children, ...services }) => {
+  const { navigateToUrl, currentAppId } = services;
   return (
-    <RedirectAppLinksContext.Provider value={{ ...services }}>
+    <RedirectAppLinksContext.Provider value={{ navigateToUrl, currentAppId }}>
       {children}
     </RedirectAppLinksContext.Provider>
   );
