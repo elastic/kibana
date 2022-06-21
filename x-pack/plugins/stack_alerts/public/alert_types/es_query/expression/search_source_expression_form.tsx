@@ -17,7 +17,7 @@ import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { mapAndFlattenFilters, SavedQuery, TimeHistory } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { EsQueryAlertParams, SearchType } from '../types';
+import { CommonAlertParams } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { useTriggersAndActionsUiDeps } from '../util';
@@ -33,9 +33,11 @@ interface LocalState {
   index: DataView;
   filter: Filter[];
   query: Query;
-  threshold: number[];
-  timeWindowSize: number;
-  size: number;
+  thresholdComparator: CommonAlertParams['thresholdComparator'];
+  threshold: CommonAlertParams['threshold'];
+  timeWindowSize: CommonAlertParams['timeWindowSize'];
+  timeWindowUnit: CommonAlertParams['timeWindowUnit'];
+  size: CommonAlertParams['size'];
 }
 
 interface LocalStateAction {
@@ -51,8 +53,12 @@ interface SearchSourceParamsAction {
 }
 
 interface SearchSourceExpressionFormProps {
+  thresholdComparator?: CommonAlertParams['thresholdComparator'];
+  threshold?: CommonAlertParams['threshold'];
+  timeWindowSize: CommonAlertParams['timeWindowSize'];
+  timeWindowUnit: CommonAlertParams['timeWindowUnit'];
+  size: CommonAlertParams['size'];
   searchSource: ISearchSource;
-  ruleParams: EsQueryAlertParams<SearchType.searchSource>;
   errors: IErrorObject;
   initialSavedQuery?: SavedQuery;
   setParam: (paramField: string, paramValue: unknown) => void;
@@ -64,8 +70,7 @@ const isSearchSourceParam = (action: LocalStateAction): action is SearchSourcePa
 
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
   const { data } = useTriggersAndActionsUiDeps();
-  const { searchSource, ruleParams, errors, initialSavedQuery, setParam } = props;
-  const { thresholdComparator, timeWindowUnit } = ruleParams;
+  const { searchSource, errors, initialSavedQuery, setParam } = props;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
 
   const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
@@ -86,19 +91,14 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       index: searchSource.getField('index')!,
       query: searchSource.getField('query')!,
       filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
-      threshold: ruleParams.threshold,
-      timeWindowSize: ruleParams.timeWindowSize,
-      size: ruleParams.size,
+      threshold: props.threshold ?? DEFAULT_VALUES.THRESHOLD,
+      thresholdComparator: props.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+      timeWindowSize: props.timeWindowSize,
+      timeWindowUnit: props.timeWindowUnit,
+      size: props.size,
     }
   );
-  const {
-    index: dataView,
-    query,
-    filter: filters,
-    threshold,
-    timeWindowSize,
-    size,
-  } = ruleConfiguration;
+  const { index: dataView, query, filter: filters } = ruleConfiguration;
   const dataViews = useMemo(() => [dataView], [dataView]);
 
   const onSelectDataView = useCallback(
@@ -173,7 +173,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     []
   );
   const onTestFetch = useCallback(async () => {
-    const timeWindow = `${timeWindowSize}${timeWindowUnit}`;
+    const timeWindow = `${ruleConfiguration.timeWindowSize}${ruleConfiguration.timeWindowUnit}`;
     const testSearchSource = searchSource.createCopy();
     const timeFilter = getTime(searchSource.getField('index')!, {
       from: `now-${timeWindow}`,
@@ -185,7 +185,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     );
     const { rawResponse } = await firstValueFrom(testSearchSource.fetch$());
     return { nrOfDocs: totalHitsToNumber(rawResponse.hits.total), timeWindow };
-  }, [searchSource, timeWindowSize, timeWindowUnit, ruleConfiguration]);
+  }, [searchSource, ruleConfiguration]);
 
   return (
     <Fragment>
@@ -240,11 +240,11 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       <EuiSpacer />
 
       <RuleCommonExpressions
-        threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
-        thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
-        timeWindowSize={timeWindowSize}
-        timeWindowUnit={timeWindowUnit}
-        size={size}
+        threshold={ruleConfiguration.threshold}
+        thresholdComparator={ruleConfiguration.thresholdComparator}
+        timeWindowSize={ruleConfiguration.timeWindowSize}
+        timeWindowUnit={ruleConfiguration.timeWindowUnit}
+        size={ruleConfiguration.size}
         onChangeThreshold={onChangeSelectedThreshold}
         onChangeThresholdComparator={onChangeSelectedThresholdComparator}
         onChangeWindowSize={onChangeWindowSize}

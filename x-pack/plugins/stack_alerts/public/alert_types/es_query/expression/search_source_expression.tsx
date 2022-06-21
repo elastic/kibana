@@ -89,9 +89,13 @@ export const SearchSourceExpression = ({
 
   return (
     <SearchSourceExpressionForm
+      threshold={ruleParams.threshold}
+      thresholdComparator={ruleParams.thresholdComparator}
+      timeWindowSize={ruleParams.timeWindowSize}
+      timeWindowUnit={ruleParams.timeWindowUnit}
+      size={ruleParams.size}
       searchSource={searchSource}
       errors={errors}
-      ruleParams={ruleParams}
       initialSavedQuery={savedQuery}
       setParam={setParam}
     />
