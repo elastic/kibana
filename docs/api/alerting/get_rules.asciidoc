@@ -1,5 +1,5 @@
 [[get-rule-api]]
-=== Get rule API
+== Get rule API
 ++++
 <titleabbrev>Get rule</titleabbrev>
 ++++
@@ -7,35 +7,36 @@
 Retrieve a rule by ID.
 
 [[get-rule-api-request]]
-==== Request
+=== {api-request-title}
 
 `GET <kibana host>:<port>/api/alerting/rule/<id>`
 
 `GET <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
 
 [[get-rule-api-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `id`::
-  (Required, string) The ID of the rule to retrieve.
+(Required, string) The identifier of the rule to retrieve.
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+(Optional, string) An identifier for the space. If `space_id` is not provided in
+the URL, the default space is used.
 
 [[get-rule-api-codes]]
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
-    Indicates a successful call.
+Indicates a successful call.
 
 [[get-rule-api-example]]
-==== Example
+=== {api-examples-title}
 
 Retrieve the rule object with the ID `41893910-6bca-11eb-9e0d-85d233e3ee35`:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35
+GET api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35
 --------------------------------------------------
 // KIBANA
 

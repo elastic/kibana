@@ -1,38 +1,39 @@
 [[get-alerting-framework-health-api]]
-=== Get Alerting framework health API
+== Get alerting framework health API
 ++++
-<titleabbrev>Get Alerting framework health</titleabbrev>
+<titleabbrev>Get alerting framework health</titleabbrev>
 ++++
 
-Retrieve the health status of the Alerting framework.
+Retrieve the health status of the alerting framework.
 
 [[get-alerting-framework-health-api-request]]
-==== Request
+=== {api-request-title}
 
 `GET <kibana host>:<port>/api/alerting/_health`
 
 `GET <kibana host>:<port>/s/<space_id>/api/alerting/_health`
 
 [[get-alerting-framework-health-api-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+(Optional, string) An identifier for the space. If `space_id` is not provided in
+the URL, the default space is used.
 
 [[get-alerting-framework-health-api-codes]]
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
-    Indicates a successful call.
+Indicates a successful call.
 
 [[get-alerting-framework-health-api-example]]
-==== Example
+=== {api-examples-title}
 
-Retrieve the health status of the Alerting framework:
+Retrieve the health status of the alerting framework:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/alerting/_health
+GET api/alerting/_health
 --------------------------------------------------
 // KIBANA
 
