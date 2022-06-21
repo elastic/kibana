@@ -102,7 +102,7 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config');
       buildkite-agent meta-data set ES_SNAPSHOT_VERSION '${VERSION}'
       buildkite-agent meta-data set ES_SNAPSHOT_ID '${SNAPSHOT_ID}'
     `,
-      { shell: '/bin/bash' }
+      { shell: '/bin/bash' },
     );
   } catch (ex) {
     console.error(ex);

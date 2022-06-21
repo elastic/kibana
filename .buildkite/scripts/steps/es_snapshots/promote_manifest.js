@@ -45,7 +45,7 @@ const { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } = require('./bucket_config');
       gsutil -m cp -r gs://${bucket}/* gs://${BASE_BUCKET_PERMANENT}/${version}/
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest.json gs://${BASE_BUCKET_PERMANENT}/${version}/
     `,
-      { shell: '/bin/bash' }
+      { shell: '/bin/bash' },
     );
   } catch (ex) {
     console.error(ex);

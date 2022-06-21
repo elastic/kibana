@@ -31,12 +31,12 @@ for (const deployment of prDeployments) {
       deploymentsToPurge.push(deployment);
     } else if (!pullRequest.labels.filter((label) => label.name === 'ci:deploy-cloud')) {
       console.log(
-        `Pull Request #${prNumber} no longer has the ci:deploy-cloud label, will delete associated deployment`
+        `Pull Request #${prNumber} no longer has the ci:deploy-cloud label, will delete associated deployment`,
       );
       deploymentsToPurge.push(deployment);
     } else if (lastCommitTimestamp < NOW - 60 * 60 * 24 * 7) {
       console.log(
-        `Pull Request #${prNumber} has not been updated in more than 7 days, will delete associated deployment`
+        `Pull Request #${prNumber} has not been updated in more than 7 days, will delete associated deployment`,
       );
       deploymentsToPurge.push(deployment);
     }
