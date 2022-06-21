@@ -7,7 +7,7 @@
 
 import { Readable, Writable, pipeline } from 'stream';
 import { promisify } from 'util';
-import { MaxByteSize } from './max_byte_size_stream';
+import { MaxByteSizeTransform } from './max_byte_size_transform';
 
 const pipe = promisify(pipeline);
 
@@ -19,13 +19,13 @@ class DummyWrite extends Writable {
   }
 }
 
-describe('MaxByteSizeStream', () => {
+describe('MaxByteSizeTransform', () => {
   it('should allow data to stream through it', async () => {
     const data = 'abc'.repeat(10);
     const dataStream = [data, data, data];
     const src = Readable.from(dataStream);
     const dest = new DummyWrite();
-    await pipe(src, MaxByteSize.create({ maxByteSize: Infinity }), dest);
+    await pipe(src, MaxByteSizeTransform.create({ maxByteSize: Infinity }), dest);
     expect(dest.chunks.join('')).toEqual(dataStream.join(''));
   });
   it('should throw an error when the max number of bytes has been reached', async () => {
@@ -34,7 +34,7 @@ describe('MaxByteSizeStream', () => {
     const src = Readable.from(dataStream);
     const dest = new DummyWrite();
     await expect(() =>
-      pipe(src, MaxByteSize.create({ maxByteSize: 5 }), dest)
+      pipe(src, MaxByteSizeTransform.create({ maxByteSize: 5 }), dest)
     ).rejects.toThrowError(new Error('Maximum of 5 bytes exceeded'));
   });
 });

@@ -6,9 +6,9 @@
  */
 
 import { Transform } from 'stream';
-import { MaxByteSizeExceeded } from './errors';
+import { MaxByteSizeExceededError } from './errors';
 
-export class MaxByteSize extends Transform {
+export class MaxByteSizeTransform extends Transform {
   private bytesSeen = 0;
 
   constructor(
@@ -29,7 +29,7 @@ export class MaxByteSize extends Transform {
       this.bytesSeen += Buffer.byteLength(chunk, this.encoding);
     }
     if (this.bytesSeen > this.maxByteSize) {
-      cb(new MaxByteSizeExceeded(this.maxByteSize));
+      cb(new MaxByteSizeExceededError(this.maxByteSize));
     } else {
       cb(null, chunk);
     }
@@ -42,6 +42,6 @@ export class MaxByteSize extends Transform {
     maxByteSize: number;
     encoding?: 'utf8' | 'base64';
   }): Transform {
-    return new MaxByteSize(maxByteSize, encoding);
+    return new MaxByteSizeTransform(maxByteSize, encoding);
   }
 }

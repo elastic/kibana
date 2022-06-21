@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { MaxByteSizeTransform } from './max_byte_size_transform';
+export class MaxByteSizeExceededError extends Error {
+  constructor(expectedSize: number) {
+    super(`Maximum of ${expectedSize} bytes exceeded`);
+    Error.captureStackTrace(this);
+  }
+}
