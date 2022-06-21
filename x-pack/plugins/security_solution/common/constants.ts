@@ -426,3 +426,10 @@ export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
+
+/**
+ * Error messages that can be thrown during _bulk_action API dry_run call and be processed and displayed to end user
+ */
+export const BULK_ACTIONS_DRY_RUN_IMMUTABLE_ERROR_MSG = "Elastic rule can't be edited";
+export const BULK_ACTIONS_DRY_RUN_EDIT_MACHINE_LEARNING_INDEX_ERROR_MSG =
+  "Machine learning rule doesn't have index patterns property";

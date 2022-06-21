@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { DryRunResult } from '../use_bulk_actions_dry_run';
+import type { DryRunResult } from '../use_bulk_actions_dry_run';
 import type { FilterOptions } from '../../../../../../containers/detection_engine/rules/types';
+
 import { convertRulesFilterToKQL } from '../../../../../../containers/detection_engine/rules/utils';
+import {
+  BULK_ACTIONS_DRY_RUN_EDIT_MACHINE_LEARNING_INDEX_ERROR_MSG,
+  BULK_ACTIONS_DRY_RUN_IMMUTABLE_ERROR_MSG,
+} from '../../../../../../../../common/constants';
 
 interface PrepareSearchFilterProps {
   dryRunResult?: DryRunResult;
@@ -42,10 +47,10 @@ export const prepareSearchParams = ({
   let modifiedFilterOptions = filterOptions;
   dryRunResult?.ruleErrors.forEach(({ message }) => {
     switch (message) {
-      case 'Immutable':
+      case BULK_ACTIONS_DRY_RUN_IMMUTABLE_ERROR_MSG:
         modifiedFilterOptions = { ...modifiedFilterOptions, showCustomRules: true };
         break;
-      case 'ML rule cant have index':
+      case BULK_ACTIONS_DRY_RUN_EDIT_MACHINE_LEARNING_INDEX_ERROR_MSG:
         modifiedFilterOptions = {
           ...modifiedFilterOptions,
           excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'machine_learning'],

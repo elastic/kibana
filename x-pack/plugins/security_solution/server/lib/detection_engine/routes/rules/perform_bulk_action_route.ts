@@ -19,6 +19,8 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
+  BULK_ACTIONS_DRY_RUN_IMMUTABLE_ERROR_MSG,
+  BULK_ACTIONS_DRY_RUN_EDIT_MACHINE_LEARNING_INDEX_ERROR_MSG,
 } from '../../../../../common/constants';
 import {
   BulkAction,
@@ -521,7 +523,7 @@ export const performBulkActionRoute = (
               items: rules,
               executor: async (rule) => {
                 if (rule.params.immutable) {
-                  throw Error('Immutable');
+                  throw Error(BULK_ACTIONS_DRY_RUN_IMMUTABLE_ERROR_MSG);
                 }
 
                 // if rule is machine_learning, index pattern action can't be applied to it
@@ -535,7 +537,7 @@ export const performBulkActionRoute = (
                     ].includes(action.type)
                   )
                 ) {
-                  throw Error('ML rule cant have index');
+                  throw Error(BULK_ACTIONS_DRY_RUN_EDIT_MACHINE_LEARNING_INDEX_ERROR_MSG);
                 }
                 return rule;
               },

@@ -9,7 +9,11 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DryRunResult } from './use_bulk_actions_dry_run';
+import type { DryRunResult } from './use_bulk_actions_dry_run';
+import {
+  BULK_ACTIONS_DRY_RUN_EDIT_MACHINE_LEARNING_INDEX_ERROR_MSG,
+  BULK_ACTIONS_DRY_RUN_IMMUTABLE_ERROR_MSG,
+} from '../../../../../../../common/constants';
 
 interface BulkEditRuleErrorsListProps {
   ruleErrors: DryRunResult['ruleErrors'];
@@ -31,7 +35,7 @@ const BulkEditRuleErrorsListComponent = ({ ruleErrors = [] }: BulkEditRuleErrors
         {ruleErrors.map(({ message, ruleIds }) => {
           const rulesCount = ruleIds.length;
           switch (message) {
-            case 'Immutable':
+            case BULK_ACTIONS_DRY_RUN_IMMUTABLE_ERROR_MSG:
               return (
                 <li>
                   <FormattedMessage
@@ -41,7 +45,7 @@ const BulkEditRuleErrorsListComponent = ({ ruleErrors = [] }: BulkEditRuleErrors
                   />
                 </li>
               );
-            case 'ML rule cant have index':
+            case BULK_ACTIONS_DRY_RUN_EDIT_MACHINE_LEARNING_INDEX_ERROR_MSG:
               return (
                 <li>
                   <FormattedMessage
