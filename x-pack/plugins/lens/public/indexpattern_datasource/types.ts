@@ -111,7 +111,7 @@ export interface IndexPatternRef {
   name?: string;
 }
 
-export interface DataViewLensOperation extends DragDropOperation {
+export interface DataViewDragDropOperation extends DragDropOperation {
   dataView: IndexPattern;
   column?: GenericIndexPatternColumn;
 }

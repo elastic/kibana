@@ -307,7 +307,7 @@ export const getXyVisualization = ({
       (l) => l.layerId === props.target.layerId
     );
     if (!targetLayer) {
-      return props.prevState;
+      throw new Error('target layer should exist');
     }
 
     if (isAnnotationsLayer(targetLayer)) {

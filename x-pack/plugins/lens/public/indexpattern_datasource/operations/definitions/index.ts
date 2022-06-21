@@ -52,7 +52,7 @@ import type {
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
 import {
-  DataViewLensOperation,
+  DataViewDragDropOperation,
   IndexPattern,
   IndexPatternField,
   IndexPatternLayer,
@@ -250,11 +250,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    * Based on the current column and the other updated columns, this function has to
    * return an updated column. If not implemented, the `id` function is used instead.
    */
-  onOtherColumnChanged?: (
-    layer: IndexPatternLayer,
-    thisColumnId: string,
-    changedColumnId?: string
-  ) => C;
+  onOtherColumnChanged?: (layer: IndexPatternLayer, thisColumnId: string) => C;
   /**
    * React component for operation specific settings shown in the flyout editor
    */
@@ -614,8 +610,8 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
    */
   createCopy: (
     layers: Record<string, IndexPatternLayer>,
-    source: DataViewLensOperation,
-    target: DataViewLensOperation,
+    source: DataViewDragDropOperation,
+    target: DataViewDragDropOperation,
     operationDefinitionMap: Record<string, GenericOperationDefinition>
   ) => Record<string, IndexPatternLayer>;
 }

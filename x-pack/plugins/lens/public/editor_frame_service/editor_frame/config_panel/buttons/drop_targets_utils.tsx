@@ -14,7 +14,7 @@ import {
   Datasource,
   DropType,
   FramePublicAPI,
-  GetDropProps,
+  GetDropPropsArgs,
   isOperation,
   Visualization,
   DragDropOperation,
@@ -167,7 +167,7 @@ export function getDropPropsForSameGroup(
 }
 
 export const getDropProps = (
-  dropProps: GetDropProps,
+  dropProps: GetDropPropsArgs,
   sharedDatasource?: Datasource<unknown, unknown>
 ): { dropTypes: DropType[]; nextLabel?: string } | undefined => {
   if (sharedDatasource) {

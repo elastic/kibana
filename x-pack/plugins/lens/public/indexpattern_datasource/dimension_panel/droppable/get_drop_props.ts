@@ -21,14 +21,14 @@ import {
   IndexPattern,
   IndexPatternField,
   DraggedField,
-  DataViewLensOperation,
+  DataViewDragDropOperation,
 } from '../../types';
 import {
   getDropPropsForSameGroup,
   isOperationFromTheSameGroup,
 } from '../../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 
-interface GetDropProps {
+interface GetDropPropsArgs {
   state: IndexPatternPrivateState;
   source?: DragContextState['dragging'];
   target: DragDropOperation;
@@ -69,12 +69,12 @@ export function getField(column: GenericIndexPatternColumn | undefined, dataView
   return field;
 }
 
-export function getDropProps(props: GetDropProps) {
+export function getDropProps(props: GetDropPropsArgs) {
   const { state, source, target } = props;
   if (!source) {
     return;
   }
-  const targetProps: DataViewLensOperation = {
+  const targetProps: DataViewDragDropOperation = {
     ...target,
     column: state.layers[target.layerId].columns[target.columnId],
     dataView: state.indexPatterns[state.layers[target.layerId].indexPatternId],
@@ -85,7 +85,7 @@ export function getDropProps(props: GetDropProps) {
   }
 
   if (isOperation(source)) {
-    const sourceProps: DataViewLensOperation = {
+    const sourceProps: DataViewDragDropOperation = {
       ...source,
       column: state.layers[source.layerId]?.columns[source.columnId],
       dataView: state.indexPatterns[state.layers[source.layerId]?.indexPatternId],
@@ -126,7 +126,7 @@ function getDropPropsForField({
   state,
   source,
   target,
-}: GetDropProps & { source: DraggedField }): DropProps {
+}: GetDropPropsArgs & { source: DraggedField }): DropProps {
   const targetColumn = state.layers[target.layerId].columns[target.columnId];
   const isTheSameIndexPattern =
     state.layers[target.layerId].indexPatternId === source.indexPatternId;
@@ -158,8 +158,8 @@ function getDropPropsForField({
 }
 
 function getDropPropsForCompatibleGroup(
-  sourceProps: DataViewLensOperation,
-  targetProps: DataViewLensOperation
+  sourceProps: DataViewDragDropOperation,
+  targetProps: DataViewDragDropOperation
 ): DropProps {
   if (!targetProps.column) {
     return { dropTypes: ['move_compatible', 'duplicate_compatible'] };
@@ -187,8 +187,8 @@ function getDropPropsForCompatibleGroup(
 }
 
 function getDropPropsFromIncompatibleGroup(
-  sourceProps: DataViewLensOperation,
-  targetProps: DataViewLensOperation
+  sourceProps: DataViewDragDropOperation,
+  targetProps: DataViewDragDropOperation
 ): DropProps {
   if (!targetProps.dataView || !sourceProps.column) {
     return;

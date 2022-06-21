@@ -474,7 +474,7 @@ describe('xy_visualization', () => {
       });
       it('should copy previous column if passed and assign a new id', () => {
         expect(
-          xyVisualization.onDrop?.({
+          xyVisualization.onDrop!({
             frame,
             prevState: {
               ...exampleState(),
@@ -509,7 +509,7 @@ describe('xy_visualization', () => {
       });
       it('should reorder a dimension to a annotation layer', () => {
         expect(
-          xyVisualization.onDrop?.({
+          xyVisualization.onDrop!({
             frame,
             prevState: {
               ...exampleState(),
@@ -546,7 +546,7 @@ describe('xy_visualization', () => {
 
       it('should duplicate the annotations and replace the target in another annotation layer', () => {
         expect(
-          xyVisualization.onDrop?.({
+          xyVisualization.onDrop!({
             frame,
             prevState: {
               ...exampleState(),
@@ -594,7 +594,7 @@ describe('xy_visualization', () => {
       });
       it('should swap the annotations between layers', () => {
         expect(
-          xyVisualization.onDrop?.({
+          xyVisualization.onDrop!({
             frame,
             prevState: {
               ...exampleState(),
@@ -642,7 +642,7 @@ describe('xy_visualization', () => {
       });
       it('should replace the target in another annotation layer', () => {
         expect(
-          xyVisualization.onDrop?.({
+          xyVisualization.onDrop!({
             frame,
             prevState: {
               ...exampleState(),
@@ -690,7 +690,7 @@ describe('xy_visualization', () => {
       });
       it('should move compatible to another annotation layer', () => {
         expect(
-          xyVisualization.onDrop?.({
+          xyVisualization.onDrop!({
             frame,
             prevState: {
               ...exampleState(),

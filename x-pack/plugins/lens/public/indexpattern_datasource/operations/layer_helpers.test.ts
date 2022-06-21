@@ -1369,8 +1369,7 @@ describe('state_helpers', () => {
           },
           incompleteColumns: {},
         },
-        'col1',
-        'col2'
+        'col1'
       );
     });
 
@@ -1436,8 +1435,7 @@ describe('state_helpers', () => {
           },
           incompleteColumns: {},
         }),
-        'col1',
-        'willBeReference'
+        'col1'
       );
     });
 
@@ -2388,8 +2386,7 @@ describe('state_helpers', () => {
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
         { indexPatternId: '1', columnOrder: ['col1', 'col2'], columns: { col1: termsColumn } },
-        'col1',
-        'col2'
+        'col1'
       );
     });
 

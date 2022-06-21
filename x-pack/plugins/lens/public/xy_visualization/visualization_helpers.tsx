@@ -332,9 +332,9 @@ export function validateLayersForDimension(
   };
 }
 
-export const isNumericMetric = (op: OperationMetadata) => {
-  return !op.isBucketed && op.dataType === 'number';
-};
+export const isNumericMetric = (op: OperationMetadata) =>
+  !op.isBucketed && op.dataType === 'number';
+
 export const isNumericDynamicMetric = (op: OperationMetadata) =>
   isNumericMetric(op) && !op.isStaticValue;
 export const isBucketed = (op: OperationMetadata) => op.isBucketed;

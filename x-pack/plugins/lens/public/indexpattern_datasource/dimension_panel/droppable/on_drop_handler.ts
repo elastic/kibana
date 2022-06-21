@@ -26,10 +26,10 @@ import {
 import { mergeLayer, mergeLayers } from '../../state_helpers';
 import { isDraggedField } from '../../pure_utils';
 import { getNewOperation, getField } from './get_drop_props';
-import { IndexPatternPrivateState, DraggedField, DataViewLensOperation } from '../../types';
+import { IndexPatternPrivateState, DraggedField, DataViewDragDropOperation } from '../../types';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 
-interface DropHandlerProps<T = DataViewLensOperation> {
+interface DropHandlerProps<T = DataViewDragDropOperation> {
   state: IndexPatternPrivateState;
   setState: StateSetter<
     IndexPatternPrivateState,
@@ -41,15 +41,12 @@ interface DropHandlerProps<T = DataViewLensOperation> {
   dimensionGroups: VisualizationDimensionGroupConfig[];
   dropType?: DropType;
   source: T;
-  target: DataViewLensOperation;
+  target: DataViewDragDropOperation;
 }
 
 export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
   const { target, source, dropType, state } = props;
 
-  if (!source) {
-    return false;
-  }
   if (isDraggedField(source) && isFieldDropType(dropType)) {
     return onFieldDrop(
       {
@@ -168,7 +165,7 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
 }
 
 function onMoveCompatible(
-  { setState, state, source, target, dimensionGroups }: DropHandlerProps<DataViewLensOperation>,
+  { setState, state, source, target, dimensionGroups }: DropHandlerProps<DataViewDragDropOperation>,
   shouldDeleteSource?: boolean
 ) {
   const modifiedLayers = copyColumn({
@@ -208,7 +205,12 @@ function onMoveCompatible(
   }
 }
 
-function onReorder({ setState, state, source, target }: DropHandlerProps<DataViewLensOperation>) {
+function onReorder({
+  setState,
+  state,
+  source,
+  target,
+}: DropHandlerProps<DataViewDragDropOperation>) {
   function reorderElements(items: string[], targetId: string, sourceId: string) {
     const result = items.filter((c) => c !== sourceId);
     const targetIndex = items.findIndex((c) => c === sourceId);
@@ -236,7 +238,7 @@ function onReorder({ setState, state, source, target }: DropHandlerProps<DataVie
 }
 
 function onMoveIncompatible(
-  { setState, state, source, dimensionGroups, target }: DropHandlerProps<DataViewLensOperation>,
+  { setState, state, source, dimensionGroups, target }: DropHandlerProps<DataViewDragDropOperation>,
   shouldDeleteSource?: boolean
 ) {
   const targetLayer = state.layers[target.layerId];
@@ -400,7 +402,7 @@ function onSwapCompatible({
   source,
   dimensionGroups,
   target,
-}: DropHandlerProps<DataViewLensOperation>) {
+}: DropHandlerProps<DataViewDragDropOperation>) {
   if (target.layerId === source.layerId) {
     const layer = state.layers[target.layerId];
     const newColumns = {
@@ -464,7 +466,7 @@ function onCombine({
   source,
   target,
   dimensionGroups,
-}: DropHandlerProps<DataViewLensOperation>) {
+}: DropHandlerProps<DataViewDragDropOperation>) {
   const targetLayer = state.layers[target.layerId];
   const targetColumn = targetLayer.columns[target.columnId];
   const targetField = getField(targetColumn, target.dataView);

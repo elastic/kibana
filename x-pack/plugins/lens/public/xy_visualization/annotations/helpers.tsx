@@ -118,21 +118,23 @@ export const getAnnotationsSupportedLayer = (
   };
 };
 
-const createCopyAnnotation = (
+const getDefaultAnnotationConfig = (id: string, timestamp: string): EventAnnotationConfig => ({
+  label: defaultAnnotationLabel,
+  key: {
+    type: 'point_in_time',
+    timestamp,
+  },
+  icon: 'triangle',
+  id,
+});
+
+const createCopiedAnnotation = (
   newId: string,
   timestamp: string,
   source?: EventAnnotationConfig
 ): EventAnnotationConfig => {
   if (!source) {
-    return {
-      label: defaultAnnotationLabel,
-      key: {
-        type: 'point_in_time',
-        timestamp,
-      },
-      icon: 'triangle',
-      id: newId,
-    };
+    return getDefaultAnnotationConfig(newId, timestamp);
   }
   return {
     ...source,
@@ -252,7 +254,7 @@ export const onAnnotationDrop: Visualization<XYState>['onDrop'] = ({
                   ...targetLayer,
                   annotations: [
                     ...targetLayer.annotations,
-                    createCopyAnnotation(
+                    createCopiedAnnotation(
                       target.columnId,
                       getStaticDate(getDataLayers(prevState.layers), frame),
                       sourceAnnotation
@@ -275,7 +277,7 @@ export const onAnnotationDrop: Visualization<XYState>['onDrop'] = ({
               annotations: [
                 ...targetLayer.annotations.map((a) =>
                   a === targetAnnotation
-                    ? createCopyAnnotation(
+                    ? createCopiedAnnotation(
                         target.columnId,
                         getStaticDate(getDataLayers(prevState.layers), frame),
                         sourceAnnotation
@@ -340,7 +342,7 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
             ...targetLayer,
             annotations: [
               ...targetLayer.annotations,
-              createCopyAnnotation(
+              createCopiedAnnotation(
                 columnId,
                 getStaticDate(getDataLayers(prevState.layers), frame),
                 sourceAnnotation

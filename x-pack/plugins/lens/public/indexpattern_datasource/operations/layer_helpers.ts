@@ -26,7 +26,7 @@ import {
   TermsIndexPatternColumn,
 } from './definitions';
 import type {
-  DataViewLensOperation,
+  DataViewDragDropOperation,
   IndexPattern,
   IndexPatternField,
   IndexPatternLayer,
@@ -70,8 +70,8 @@ interface ColumnChange {
 
 interface ColumnCopy {
   layers: Record<string, IndexPatternLayer>;
-  target: DataViewLensOperation;
-  source: DataViewLensOperation;
+  target: DataViewDragDropOperation;
+  source: DataViewDragDropOperation;
   shouldDeleteSource?: boolean;
 }
 
@@ -80,7 +80,7 @@ export const deleteColumnInLayers = ({
   source,
 }: {
   layers: Record<string, IndexPatternLayer>;
-  source: DataViewLensOperation;
+  source: DataViewDragDropOperation;
 }) => ({
   ...layers,
   [source.layerId]: deleteColumn({
@@ -107,8 +107,8 @@ export function copyColumn({
 
 function createCopiedColumn(
   layers: Record<string, IndexPatternLayer>,
-  target: DataViewLensOperation,
-  source: DataViewLensOperation
+  target: DataViewDragDropOperation,
+  source: DataViewDragDropOperation
 ): Record<string, IndexPatternLayer> {
   const sourceLayer = layers[source.layerId];
   const sourceColumn = sourceLayer.columns[source.columnId];
@@ -1205,8 +1205,7 @@ export function adjustColumnReferencesForChangedColumn(
       newColumns[currentColumnId] = operationDefinition.onOtherColumnChanged
         ? operationDefinition.onOtherColumnChanged(
             { ...layer, columns: newColumns },
-            currentColumnId,
-            changedColumnId
+            currentColumnId
           )
         : currentColumn;
     }
@@ -1570,8 +1569,11 @@ export function isColumnValidAsReference({
   if (!column) return false;
   const operationType = column.operationType;
   const operationDefinition = operationDefinitionMap[operationType];
+  if (!operationDefinition) {
+    throw new Error('No suitable operation definition found for ' + operationType);
+  }
   return (
-    validation.input.includes(operationDefinition?.input) &&
+    validation.input.includes(operationDefinition.input) &&
     maybeValidateOperations({
       column,
       validation,

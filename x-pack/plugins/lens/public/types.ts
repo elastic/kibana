@@ -199,7 +199,7 @@ interface ChartSettings {
   };
 }
 
-export interface GetDropProps<T = unknown> {
+export interface GetDropPropsArgs<T = unknown> {
   state: T;
   source?: DraggingIdentifier;
   target: {
@@ -264,7 +264,7 @@ export interface Datasource<T = unknown, P = unknown> {
     props: DatasourceLayerPanelProps<T>
   ) => ((cleanupElement: Element) => void) | void;
   getDropProps: (
-    props: GetDropProps<T>
+    props: GetDropPropsArgs<T>
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean | undefined;
   /**
@@ -490,7 +490,7 @@ export interface DatasourceDimensionDropProps<T> {
 }
 
 export type DatasourceDimensionDropHandlerProps<S> = DatasourceDimensionDropProps<S> & {
-  source?: DragDropIdentifier;
+  source: DragDropIdentifier;
   dropType: DropType;
 };
 
@@ -854,6 +854,9 @@ export interface Visualization<T = unknown> {
    * look at its internal state to determine which dimension is being affected.
    */
   removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
+  /**
+   * Allow defining custom behavior for the visualization when the drop action occurs.
+   */
   onDrop?: (props: {
     prevState: T;
     target: DragDropOperation;

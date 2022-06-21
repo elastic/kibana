@@ -118,7 +118,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             columns: expect.objectContaining({
               col1: expect.objectContaining({
                 dataType: 'number',
-                sourceField: 'bytes',
+                sourceField: mockedDraggedField.field.name,
               }),
             }),
           }),
@@ -149,7 +149,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
               ...state.layers.first.columns,
               col2: expect.objectContaining({
                 dataType: 'number',
-                sourceField: 'bytes',
+                sourceField: mockedDraggedField.field.name,
               }),
             },
           },
@@ -222,7 +222,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
               ...state.layers.first.columns,
               col2: expect.objectContaining({
                 dataType: 'number',
-                sourceField: 'bytes',
+                sourceField: mockedDraggedField.field.name,
               }),
             },
           },
@@ -262,7 +262,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
             columns: {
               newCol: expect.objectContaining({
                 dataType: 'number',
-                sourceField: 'bytes',
+                sourceField: mockedDraggedField.field.name,
               }),
               col1: testState.layers.first.columns.col1,
               col2: testState.layers.first.columns.col2,
@@ -294,7 +294,9 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
               col1: expect.objectContaining({
                 dataType: 'string',
                 sourceField: 'dest',
-                params: expect.objectContaining({ secondaryFields: ['bytes'] }),
+                params: expect.objectContaining({
+                  secondaryFields: [mockedDraggedField.field.name],
+                }),
               }),
             }),
           }),
@@ -1188,7 +1190,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
               columns: {
                 newCol: expect.objectContaining({
                   dataType: 'number',
-                  sourceField: 'bytes',
+                  sourceField: mockedDraggedField.field.name,
                 }),
                 col1: testState.layers.first.columns.col1,
                 col2: testState.layers.first.columns.col2,
