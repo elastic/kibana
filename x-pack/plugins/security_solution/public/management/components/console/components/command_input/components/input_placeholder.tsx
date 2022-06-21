@@ -14,7 +14,7 @@ import { useWithInputPlaceholder } from '../../../hooks/state_selectors/use_with
 const InputPlaceholderContainer = styled(EuiText)`
   position: absolute;
   pointer-events: none;
-  padding-left: 1em;
+  padding-left: 0.5em;
   width: 96%;
 `;
 

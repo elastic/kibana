@@ -81,6 +81,7 @@ export const ReleaseActionResult = memo<
   if (completedActionDetails?.errors) {
     return (
       <ResultComponent
+        showAs="failure"
         title={i18n.translate(
           'xpack.securitySolution.endpointResponseActions.release.errorMessageTitle',
           { defaultMessage: 'Error. Release action failed.' }
