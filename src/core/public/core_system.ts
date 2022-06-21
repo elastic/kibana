@@ -280,17 +280,6 @@ export class CoreSystem {
         deprecations,
       };
 
-      // Wait for the first app navifation to report Kibana Loaded
-      const appSub = application.currentAppId$.subscribe((appId) => {
-        if (appId === undefined) return;
-
-        performance.mark(KBN_LOAD_MARKS, {
-          detail: 'first_app_nav',
-        });
-        this.reportKibanaLoadedEvent(analytics, appId);
-        appSub.unsubscribe();
-      });
-
       await this.plugins.start(core);
 
       // ensure the rootDomElement is empty
@@ -313,6 +302,17 @@ export class CoreSystem {
         detail: 'start_done',
       });
 
+      // Wait for the first app navifation to report Kibana Loaded
+      const appSub = application.currentAppId$.subscribe((appId) => {
+        if (appId === undefined) return;
+
+        performance.mark(KBN_LOAD_MARKS, {
+          detail: 'first_app_nav',
+        });
+        this.reportKibanaLoadedEvent(analytics, appId);
+        appSub.unsubscribe();
+      });
+      
       return {
         application,
         executionContext,

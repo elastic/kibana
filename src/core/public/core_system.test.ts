@@ -234,7 +234,9 @@ describe('#start()', () => {
     });
 
     await core.setup();
-    await core.start();
+
+    const services = await core.start();
+    await services?.application.navigateToApp('home');
   }
 
   it('clears the children of the rootDomElement and appends container for rendering service with #kibana-body, notifications, overlays', async () => {
@@ -253,6 +255,7 @@ describe('#start()', () => {
       kibana_version: '1.2.3',
       load_started: 456,
       bootstrap_started: 123,
+      first_app: 'home',
     });
   });
 
@@ -260,6 +263,7 @@ describe('#start()', () => {
     fetchOptionalMemoryInfoMock.mockReturnValue({
       load_started: 456,
       bootstrap_started: 123,
+      first_app: 'home',
       memory_js_heap_size_limit: 3,
       memory_js_heap_size_total: 2,
       memory_js_heap_size_used: 1,
@@ -271,6 +275,7 @@ describe('#start()', () => {
       load_started: 456,
       bootstrap_started: 123,
       kibana_version: '1.2.3',
+      first_app: 'home',
       memory_js_heap_size_limit: 3,
       memory_js_heap_size_total: 2,
       memory_js_heap_size_used: 1,
