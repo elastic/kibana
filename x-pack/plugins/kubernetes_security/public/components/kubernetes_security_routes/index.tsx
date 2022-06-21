@@ -12,7 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiLoadingContent,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -31,7 +30,7 @@ import { PercentWidget } from '../percent_widget';
 import { KubernetesSecurityDeps } from '../../types';
 import { AggregateResult } from '../../../common/types/aggregate';
 import { useStyles } from './styles';
-import { TreeView } from '../tree_view';
+import { TreeViewPanel } from '../tree_view_panel';
 
 const KubernetesSecurityRoutesComponent = ({
   filter,
@@ -41,8 +40,8 @@ const KubernetesSecurityRoutesComponent = ({
   const styles = useStyles();
 
   const onReduceInteractiveAggs = useCallback(
-    (result: AggregateResult[]): Record<string, number> =>
-      result.reduce((groupedByKeyValue, aggregate) => {
+    (result: AggregateResult): Record<string, number> =>
+      result.buckets.reduce((groupedByKeyValue, aggregate) => {
         groupedByKeyValue[aggregate.key_as_string || (aggregate.key.toString() as string)] =
           aggregate.count_by_aggs.value;
         return groupedByKeyValue;
@@ -51,9 +50,9 @@ const KubernetesSecurityRoutesComponent = ({
   );
 
   const onReduceRootAggs = useCallback(
-    (result: AggregateResult[]): Record<string, number> =>
-      result.reduce((groupedByKeyValue, aggregate) => {
-        if (aggregate.key === '0') {
+    (result: AggregateResult): Record<string, number> =>
+      result.buckets.reduce((groupedByKeyValue, aggregate) => {
+        if (aggregate.key === 0) {
           groupedByKeyValue[aggregate.key] = aggregate.count_by_aggs.value;
         } else {
           groupedByKeyValue.nonRoot =
@@ -204,7 +203,7 @@ const KubernetesSecurityRoutesComponent = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <TreeView />
+        <TreeViewPanel indexPattern={indexPattern} globalFilter={globalFilter} />
       </Route>
     </Switch>
   );

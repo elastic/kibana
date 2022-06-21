@@ -14,6 +14,7 @@ import {
   AGGREGATE_PAGE_SIZE,
   AGGREGATE_MAX_BUCKETS,
 } from '../../common/constants';
+import { AggregateBucketPaginationResult } from '../../common/types/aggregate';
 
 // sort by values
 const ASC = 'asc';
@@ -29,6 +30,7 @@ export const registerAggregateRoute = (router: IRouter) => {
           countBy: schema.maybe(schema.string()),
           groupBy: schema.string(),
           page: schema.number(),
+          perPage: schema.maybe(schema.number()),
           index: schema.maybe(schema.string()),
           sortByCount: schema.maybe(schema.string()),
         }),
@@ -36,10 +38,19 @@ export const registerAggregateRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const { query, countBy, sortByCount, groupBy, page, index } = request.query;
+      const { query, countBy, sortByCount, groupBy, page, perPage, index } = request.query;
 
       try {
-        const body = await doSearch(client, query, groupBy, page, index, countBy, sortByCount);
+        const body = await doSearch(
+          client,
+          query,
+          groupBy,
+          page,
+          perPage,
+          index,
+          countBy,
+          sortByCount
+        );
 
         return response.ok({ body });
       } catch (err) {
@@ -54,10 +65,11 @@ export const doSearch = async (
   query: string,
   groupBy: string,
   page: number, // zero based
+  perPage = AGGREGATE_PAGE_SIZE,
   index?: string,
   countBy?: string,
   sortByCount?: string
-) => {
+): Promise<AggregateBucketPaginationResult> => {
   const queryDSL = JSON.parse(query);
 
   const countByAggs = countBy
@@ -80,6 +92,23 @@ export const doSearch = async (
     body: {
       query: queryDSL,
       size: 0,
+      runtime_mappings: {
+        'container.image.name': {
+          type: 'keyword',
+        },
+        'orchestrator.namespace': {
+          type: 'keyword',
+        },
+        'orchestrator.cluster.name': {
+          type: 'keyword',
+        },
+        'orchestrator.resource.type': {
+          type: 'keyword',
+        },
+        'orchestrator.resource.name': {
+          type: 'keyword',
+        },
+      },
       aggs: {
         custom_agg: {
           terms: {
@@ -91,8 +120,8 @@ export const doSearch = async (
             bucket_sort: {
               bucket_sort: {
                 sort: [sort], // defaulting to alphabetic sort
-                size: AGGREGATE_PAGE_SIZE,
-                from: AGGREGATE_PAGE_SIZE * page,
+                size: perPage + 1, // check if there's a "next page"
+                from: perPage * page,
               },
             },
           },
@@ -102,6 +131,16 @@ export const doSearch = async (
   });
 
   const agg: any = search.aggregations?.custom_agg;
+  const buckets = agg?.buckets || [];
 
-  return agg?.buckets || [];
+  const hasNextPage = buckets.length > perPage;
+
+  if (hasNextPage) {
+    buckets.pop();
+  }
+
+  return {
+    buckets,
+    hasNextPage,
+  };
 };

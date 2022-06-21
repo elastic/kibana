@@ -32,7 +32,7 @@ export interface PercentWidgetDeps {
   globalFilter: GlobalFilter;
   groupedBy: string;
   countBy?: string;
-  onReduce: (result: AggregateResult[]) => Record<string, number>;
+  onReduce: (result: AggregateResult) => Record<string, number>;
 }
 
 interface FilterButtons {
