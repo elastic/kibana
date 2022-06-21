@@ -118,7 +118,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
 
   const addFilter = useCallback(
     async (field: DataViewField | string, values: unknown, operation: string) => {
-      const newFilters = generateFilters(filterManager, field, values, operation, indexPattern.id!);
+      const newFilters = generateFilters(filterManager, field, values, operation, indexPattern);
       filterManager.addFilters(newFilters);
       if (indexPatterns) {
         const fieldName = typeof field === 'string' ? field : field.name;

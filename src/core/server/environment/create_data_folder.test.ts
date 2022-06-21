@@ -7,9 +7,9 @@
  */
 
 import { PathConfigType } from '@kbn/utils';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createDataFolder } from './create_data_folder';
 import { mkdir } from './fs';
-import { loggingSystemMock } from '../logging/logging_system.mock';
 
 jest.mock('./fs', () => ({
   mkdir: jest.fn(() => Promise.resolve('')),

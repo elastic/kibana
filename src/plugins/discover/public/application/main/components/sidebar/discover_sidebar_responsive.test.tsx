@@ -48,6 +48,11 @@ const mockServices = {
     },
   },
   docLinks: { links: { discover: { fieldTypeHelp: '' } } },
+  dataViewEditor: {
+    userPermissions: {
+      editDataView: jest.fn(() => true),
+    },
+  },
 } as unknown as DiscoverServices;
 
 const mockfieldCounts: Record<string, number> = {};
@@ -105,6 +110,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     onEditRuntimeField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onDataViewCreated: jest.fn(),
+    useNewFieldsApi: true,
   };
 }
 
@@ -153,5 +159,32 @@ describe('discover responsive sidebar', function () {
     comp.update();
     expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(4);
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
+  });
+
+  it('should show "Add a field" button to create a runtime field', () => {
+    expect(mockServices.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
+    expect(findTestSubject(comp, 'indexPattern-add-field_btn').length).toBe(1);
+  });
+
+  it('should not show "Add a field" button in viewer mode', () => {
+    const mockedServicesInViewerMode = {
+      ...mockServices,
+      dataViewEditor: {
+        ...mockServices.dataViewEditor,
+        userPermissions: {
+          ...mockServices.dataViewEditor.userPermissions,
+          editDataView: jest.fn(() => false),
+        },
+      },
+    };
+    const compInViewerMode = mountWithIntl(
+      <KibanaContextProvider services={mockedServicesInViewerMode}>
+        <DiscoverSidebarResponsive {...props} />
+      </KibanaContextProvider>
+    );
+    expect(
+      mockedServicesInViewerMode.dataViewEditor.userPermissions.editDataView
+    ).toHaveBeenCalled();
+    expect(findTestSubject(compInViewerMode, 'indexPattern-add-field_btn').length).toBe(0);
   });
 });
