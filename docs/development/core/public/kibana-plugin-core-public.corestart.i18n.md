@@ -4,7 +4,6 @@
 
 ## CoreStart.i18n property
 
-[I18nStart](./kibana-plugin-core-public.i18nstart.md)
 
 <b>Signature:</b>
 

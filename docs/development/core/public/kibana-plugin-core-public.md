@@ -73,7 +73,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpRequestInit](./kibana-plugin-core-public.httprequestinit.md) | Fetch API options available to [HttpHandler](./kibana-plugin-core-public.httphandler.md)<!-- -->s. |
 |  [HttpResponse](./kibana-plugin-core-public.httpresponse.md) |  |
 |  [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |  |
-|  [I18nStart](./kibana-plugin-core-public.i18nstart.md) | I18nStart.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
 |  [IAnonymousPaths](./kibana-plugin-core-public.ianonymouspaths.md) | APIs for denoting paths as not requiring authentication |
 |  [IBasePath](./kibana-plugin-core-public.ibasepath.md) | APIs for manipulating the basePath on URL segments. |
 |  [IExternalUrl](./kibana-plugin-core-public.iexternalurl.md) | APIs for working with external URLs. |
