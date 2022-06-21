@@ -13,9 +13,10 @@ import {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { buildEqlSearchRequest } from '../build_events_query';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
-import { getInputIndex } from '../get_input_output_index';
 
 import {
   BulkCreate,
@@ -36,6 +37,8 @@ import {
 } from '../../../../../common/detection_engine/schemas/alerts';
 
 export const eqlExecutor = async ({
+  inputIndex,
+  runtimeMappings,
   completeRule,
   tuple,
   exceptionItems,
@@ -47,6 +50,8 @@ export const eqlExecutor = async ({
   wrapHits,
   wrapSequences,
 }: {
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<EqlRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
@@ -69,21 +74,16 @@ export const eqlExecutor = async ({
       result.warning = true;
     }
 
-    const inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
-    });
-
     const request = buildEqlSearchRequest(
       ruleParams.query,
       inputIndex,
       tuple.from.toISOString(),
       tuple.to.toISOString(),
       completeRule.ruleParams.maxSignals,
+      ruleParams.filters,
       ruleParams.timestampOverride,
       exceptionItems,
+      runtimeMappings,
       ruleParams.eventCategoryOverride,
       ruleParams.timestampField,
       ruleParams.tiebreakerField

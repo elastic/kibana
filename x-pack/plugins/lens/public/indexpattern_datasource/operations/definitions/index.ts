@@ -12,13 +12,18 @@ import {
   CoreStart,
 } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { ExpressionAstFunction } from '@kbn/expressions-plugin/public';
+import {
+  ExpressionAstExpressionBuilder,
+  ExpressionAstFunction,
+} from '@kbn/expressions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { termsOperation } from './terms';
 import { filtersOperation } from './filters';
 import { cardinalityOperation } from './cardinality';
 import { percentileOperation } from './percentile';
+import { percentileRanksOperation } from './percentile_ranks';
 import {
   minOperation,
   averageOperation,
@@ -53,6 +58,7 @@ import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types'
 import { DateRange, LayerType } from '../../../../common';
 import { rangeOperation } from './ranges';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
+import type { OriginalColumn } from '../../to_expression';
 
 export type {
   IncompleteColumn,
@@ -65,6 +71,7 @@ export type { TermsIndexPatternColumn } from './terms';
 export type { FiltersIndexPatternColumn, Filter } from './filters';
 export type { CardinalityIndexPatternColumn } from './cardinality';
 export type { PercentileIndexPatternColumn } from './percentile';
+export type { PercentileRanksIndexPatternColumn } from './percentile_ranks';
 export type {
   MinIndexPatternColumn,
   AvgIndexPatternColumn,
@@ -104,6 +111,7 @@ const internalOperationDefinitions = [
   sumOperation,
   medianOperation,
   percentileOperation,
+  percentileRanksOperation,
   lastValueOperation,
   countOperation,
   rangeOperation,
@@ -127,6 +135,7 @@ export { filtersOperation } from './filters';
 export { dateHistogramOperation } from './date_histogram';
 export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 export { percentileOperation } from './percentile';
+export { percentileRanksOperation } from './percentile_ranks';
 export { countOperation } from './count';
 export { lastValueOperation } from './last_value';
 export {
@@ -165,6 +174,7 @@ export interface ParamEditorProps<C> {
   dateRange: DateRange;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   activeData?: IndexPatternDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   paramEditorCustomProps?: ParamEditorCustomProps;
@@ -372,6 +382,17 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    * Title for the help component
    */
   helpComponentTitle?: string;
+  /**
+   * Optimizes EsAggs expression. Invoked only once per operation type.
+   */
+  optimizeEsAggs?: (
+    aggs: ExpressionAstExpressionBuilder[],
+    esAggsIdMap: Record<string, OriginalColumn[]>,
+    aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string>
+  ) => {
+    aggs: ExpressionAstExpressionBuilder[];
+    esAggsIdMap: Record<string, OriginalColumn[]>;
+  };
 }
 
 interface BaseBuildColumnArgs {

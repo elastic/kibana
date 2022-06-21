@@ -27,8 +27,8 @@ import { defaultMonacoEditorWidth } from './constants';
 import { EsHitRecord } from '../../application/types';
 import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';
-import { ElasticSearchHit } from '../../types';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { ElasticSearchHit, HitsFlattened } from '../../types';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
 
 const CELL_CLASS = 'dscDiscoverGrid__cellValue';
@@ -37,7 +37,7 @@ export const getRenderCellValueFn =
   (
     dataView: DataView,
     rows: ElasticSearchHit[] | undefined,
-    rowsFlattened: Array<Record<string, unknown>>,
+    rowsFlattened: HitsFlattened,
     useNewFieldsApi: boolean,
     fieldsToShow: string[],
     maxDocFieldsDisplayed: number,
@@ -61,7 +61,12 @@ export const getRenderCellValueFn =
         setCellProps({
           className: 'dscDocsGrid__cell--highlight',
         });
-      } else if (ctx.expanded && row && ctx.expanded._id === row._id) {
+      } else if (
+        ctx.expanded &&
+        row &&
+        ctx.expanded._id === row._id &&
+        ctx.expanded._index === row._index
+      ) {
         setCellProps({
           style: {
             backgroundColor: ctx.isDarkMode
@@ -257,7 +262,6 @@ function getTopLevelObjectPairs(
         formatter.convert(val, 'html', {
           field: subField,
           hit: row,
-          indexPattern: dataView,
         })
       )
       .join(', ');

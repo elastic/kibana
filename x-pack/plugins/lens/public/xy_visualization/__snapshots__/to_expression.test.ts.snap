@@ -167,7 +167,7 @@ Object {
                   "legendSize": Array [],
                   "maxLines": Array [],
                   "position": Array [
-                    "bottom",
+                    "left",
                   ],
                   "shouldTruncate": Array [
                     true,
@@ -210,6 +210,22 @@ Object {
         "valuesInLegend": Array [
           false,
         ],
+        "xExtent": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "lowerBound": Array [],
+                  "mode": Array [],
+                  "upperBound": Array [],
+                },
+                "function": "axisExtentConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
         "xTitle": Array [
           "",
         ],
@@ -219,9 +235,7 @@ Object {
               Object {
                 "arguments": Object {
                   "lowerBound": Array [],
-                  "mode": Array [
-                    "full",
-                  ],
+                  "mode": Array [],
                   "upperBound": Array [],
                 },
                 "function": "axisExtentConfig",

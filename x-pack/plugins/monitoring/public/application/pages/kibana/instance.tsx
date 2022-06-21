@@ -37,6 +37,11 @@ import { RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
   const { zoomInfo, onBrush } = useCharts();
 
+  const showRules =
+    data.metrics.kibana_instance_rule_executions &&
+    data.metrics.kibana_instance_rule_executions.length &&
+    data.metrics.kibana_instance_rule_executions[0].indices_found.metricbeat;
+
   return (
     <EuiPage>
       <EuiPageBody>
@@ -95,6 +100,42 @@ const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
               />
               <EuiSpacer />
             </EuiFlexItem>
+            {showRules && (
+              <>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_instance_rule_executions}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                  <EuiSpacer />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_instance_rule_failures}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                  <EuiSpacer />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_instance_action_executions}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                  <EuiSpacer />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_instance_action_failures}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                  <EuiSpacer />
+                </EuiFlexItem>
+              </>
+            )}
           </EuiFlexGrid>
         </EuiPageContent>
       </EuiPageBody>

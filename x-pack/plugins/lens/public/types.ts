@@ -14,7 +14,7 @@ import type {
 import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
-import { Filter } from '@kbn/es-query';
+import { Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   ExpressionRendererEvent,
@@ -22,7 +22,7 @@ import type {
   Datatable,
 } from '@kbn/expressions-plugin/public';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
-import type { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
   RowClickContext,
@@ -369,15 +369,20 @@ export interface DatasourcePublicAPI {
    */
   getSourceId: () => string | undefined;
   /**
-   * Collect all defined filters from all the operations in the layer
+   * Collect all defined filters from all the operations in the layer. If it returns undefined, this means that filters can't be constructed for the current layer
    */
-  getFilters: (activeData?: FramePublicAPI['activeData']) => Record<
-    'enabled' | 'disabled',
-    {
-      kuery: Query[][];
-      lucene: Query[][];
-    }
-  >;
+  getFilters: (
+    activeData?: FramePublicAPI['activeData'],
+    timeRange?: TimeRange
+  ) =>
+    | { error: string }
+    | Record<
+        'enabled' | 'disabled',
+        {
+          kuery: Query[][];
+          lucene: Query[][];
+        }
+      >;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {

@@ -10,12 +10,12 @@ import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/utils';
 import { schema } from '@kbn/config-schema';
+import { Env } from '@kbn/config';
 
-import { Env } from '../config';
-import { CoreContext } from '../core_context';
+import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '../mocks';
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import { configServiceMock, getEnvOptions } from '../config/mocks';
 
 import { PluginWrapper } from './plugin';
 import { PluginManifest, PluginType } from './types';

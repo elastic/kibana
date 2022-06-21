@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -25,13 +25,7 @@ import {
   useIsWithinBreakpoints,
   EuiSuperUpdateButton,
 } from '@elastic/eui';
-import {
-  IDataPluginServices,
-  TimeRange,
-  TimeHistoryContract,
-  Query,
-  getQueryLog,
-} from '@kbn/data-plugin/public';
+import { IDataPluginServices, TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';

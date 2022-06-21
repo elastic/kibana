@@ -27,6 +27,7 @@ export type {
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
@@ -52,6 +53,7 @@ export interface IndexPattern {
   fields: IndexPatternField[];
   getFieldByName(name: string): IndexPatternField | undefined;
   title: string;
+  name?: string;
   timeFieldName?: string;
   fieldFormatMap?: Record<
     string,
@@ -105,4 +107,5 @@ export interface IndexPatternPrivateState {
 export interface IndexPatternRef {
   id: string;
   title: string;
+  name?: string;
 }

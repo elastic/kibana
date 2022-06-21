@@ -8,20 +8,17 @@
 
 import { Subscription } from 'rxjs';
 
-import { IUiSettingsClient } from '@kbn/core/public';
-import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { calculateBounds, TimeRange } from '../../../common';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
   aggsRequiredUiSettings,
   AggsCommonStartDependencies,
   AggsCommonService,
-  AggConfigs,
-  AggTypesDependencies,
 } from '../../../common/search/aggs';
-import { AggsSetup, AggsStart } from './types';
-import { IndexPatternsContract } from '../..';
-import { NowProviderInternalContract } from '../../now_provider';
+import type { AggsSetup, AggsStart } from './types';
+import type { NowProviderInternalContract } from '../../now_provider';
 
 /**
  * Aggs needs synchronous access to specific uiSettings. Since settings can change
@@ -50,16 +47,15 @@ export function createGetConfig(
 
 /** @internal */
 export interface AggsSetupDependencies {
-  registerFunction: ExpressionsServiceSetup['registerFunction'];
   uiSettings: IUiSettingsClient;
-  nowProvider: NowProviderInternalContract;
+  registerFunction: ExpressionsServiceSetup['registerFunction'];
 }
 
 /** @internal */
 export interface AggsStartDependencies {
   fieldFormats: FieldFormatsStart;
-  uiSettings: IUiSettingsClient;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
+  nowProvider: NowProviderInternalContract;
 }
 
 /**
@@ -68,77 +64,34 @@ export interface AggsStartDependencies {
  * output the correct DSL when you are ready to send your request to ES.
  */
 export class AggsService {
-  private readonly aggsCommonService = new AggsCommonService();
-  private readonly initializedAggTypes = new Map();
+  private readonly aggsCommonService = new AggsCommonService({
+    shouldDetectTimeZone: true,
+  });
   private getConfig?: AggsCommonStartDependencies['getConfig'];
   private subscriptions: Subscription[] = [];
-  private nowProvider!: NowProviderInternalContract;
 
-  /**
-   * NowGetter uses window.location, so we must have a separate implementation
-   * of calculateBounds on the client and the server.
-   */
-  private calculateBounds = (timeRange: TimeRange) =>
-    calculateBounds(timeRange, { forceNow: this.nowProvider.get() });
-
-  public setup({ registerFunction, uiSettings, nowProvider }: AggsSetupDependencies): AggsSetup {
-    this.nowProvider = nowProvider;
+  public setup({ registerFunction, uiSettings }: AggsSetupDependencies): AggsSetup {
     this.getConfig = createGetConfig(uiSettings, aggsRequiredUiSettings, this.subscriptions);
 
-    return this.aggsCommonService.setup({ registerFunction });
+    return this.aggsCommonService.setup({
+      registerFunction,
+    });
   }
 
-  public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
-    const isDefaultTimezone = () => uiSettings.isDefault('dateFormat:tz');
-
-    const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
+  public start({ indexPatterns, fieldFormats, nowProvider }: AggsStartDependencies): AggsStart {
+    const { calculateAutoTimeExpression, types, createAggConfigs } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
       getIndexPattern: indexPatterns.get,
-      isDefaultTimezone,
-    });
-
-    const aggTypesDependencies: AggTypesDependencies = {
-      calculateBounds: this.calculateBounds,
-      getConfig: this.getConfig!,
-      getFieldFormatsStart: () => ({
-        deserialize: fieldFormats.deserialize,
-        getDefaultInstance: fieldFormats.getDefaultInstance,
-      }),
-      isDefaultTimezone,
-    };
-
-    // initialize each agg type and store in memory
-    types.getAll().buckets.forEach((type) => {
-      const agg = type(aggTypesDependencies);
-      this.initializedAggTypes.set(agg.name, agg);
-    });
-    types.getAll().metrics.forEach((type) => {
-      const agg = type(aggTypesDependencies);
-      this.initializedAggTypes.set(agg.name, agg);
-    });
-
-    const typesRegistry = {
-      get: (name: string) => {
-        return this.initializedAggTypes.get(name);
+      fieldFormats,
+      calculateBoundsOptions: {
+        forceNow: nowProvider.get(),
       },
-      getAll: () => {
-        return {
-          buckets: Array.from(this.initializedAggTypes.values()).filter(
-            (agg) => agg.type === 'buckets'
-          ),
-          metrics: Array.from(this.initializedAggTypes.values()).filter(
-            (agg) => agg.type === 'metrics'
-          ),
-        };
-      },
-    };
+    });
 
     return {
       calculateAutoTimeExpression,
-      createAggConfigs: (indexPattern, configStates = []) => {
-        return new AggConfigs(indexPattern, configStates, { typesRegistry });
-      },
-      types: typesRegistry,
+      createAggConfigs,
+      types,
     };
   }
 

@@ -7,6 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
   ENDPOINTS_PATH,
@@ -33,6 +34,7 @@ import {
   RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
+import { licenseService } from '../common/hooks/use_license';
 import { LinkItem } from '../common/links/types';
 import { StartPlugins } from '../types';
 
@@ -44,6 +46,7 @@ import { IconExceptionLists } from './icons/exception_lists';
 import { IconHostIsolation } from './icons/host_isolation';
 import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
+import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
 const categories = [
   {
@@ -67,13 +70,14 @@ const categories = [
   },
 ];
 
-const links: LinkItem = {
+export const links: LinkItem = {
   id: SecurityPageName.administration,
   title: MANAGE,
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
-  globalNavEnabled: false,
+  globalNavEnabled: true,
+  globalNavOrder: 6,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
@@ -92,7 +96,6 @@ const links: LinkItem = {
 
       landingIcon: IconSiemRules,
       path: RULES_PATH,
-      globalNavEnabled: false,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.rules', {
           defaultMessage: 'Rules',
@@ -103,7 +106,6 @@ const links: LinkItem = {
           id: SecurityPageName.rulesCreate,
           title: CREATE_NEW_RULE,
           path: RULES_CREATE_PATH,
-          globalNavEnabled: false,
           skipUrlState: true,
           hideTimeline: true,
         },
@@ -117,7 +119,6 @@ const links: LinkItem = {
       }),
       landingIcon: IconExceptionLists,
       path: EXCEPTIONS_PATH,
-      globalNavEnabled: false,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.exceptions', {
           defaultMessage: 'Exception lists',
@@ -130,9 +131,7 @@ const links: LinkItem = {
         defaultMessage: 'Hosts running endpoint security.',
       }),
       landingIcon: IconEndpoints,
-      globalNavEnabled: true,
       title: ENDPOINTS,
-      globalNavOrder: 9006,
       path: ENDPOINTS_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -201,7 +200,35 @@ const links: LinkItem = {
   ],
 };
 
-export const getManagementLinkItems = async (core: CoreStart, plugins: StartPlugins) => {
-  // TODO: implement async logic to exclude links
+const getFilteredLinks = (linkIds: SecurityPageName[]) => ({
+  ...links,
+  links: links.links?.filter((link) => !linkIds.includes(link.id)),
+});
+
+export const getManagementFilteredLinks = async (
+  core: CoreStart,
+  plugins: StartPlugins
+): Promise<LinkItem> => {
+  try {
+    const currentUserResponse = await plugins.security.authc.getCurrentUser();
+    const privileges = calculateEndpointAuthz(
+      licenseService,
+      plugins.fleet?.authz,
+      currentUserResponse.roles
+    );
+    const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
+      core.http
+    );
+
+    if (!privileges.canIsolateHost) {
+      const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
+      if (!summaryResponse.total) {
+        return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+      }
+    }
+  } catch {
+    return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+  }
+
   return links;
 };

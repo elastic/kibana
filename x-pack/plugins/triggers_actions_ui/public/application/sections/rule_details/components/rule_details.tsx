@@ -327,10 +327,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   <RuleStatusDropdown
                     disableRule={async () => await disableRule(rule)}
                     enableRule={async () => await enableRule(rule)}
-                    snoozeRule={async (snoozeEndTime: string | -1) =>
-                      await snoozeRule(rule, snoozeEndTime)
-                    }
-                    unsnoozeRule={async () => await unsnoozeRule(rule)}
+                    snoozeRule={async (snoozeSchedule) => {
+                      await snoozeRule(rule, snoozeSchedule);
+                    }}
+                    unsnoozeRule={async (scheduleIds) => await unsnoozeRule(rule, scheduleIds)}
                     rule={rule as RuleTableItem}
                     onRuleChanged={requestRefresh}
                     direction="row"

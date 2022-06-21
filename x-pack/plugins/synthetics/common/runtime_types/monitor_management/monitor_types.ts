@@ -315,11 +315,19 @@ export const EncryptedSyntheticsMonitorWithIdCodec = t.intersection([
   t.interface({ id: t.string }),
 ]);
 
+// TODO: Remove EncryptedSyntheticsMonitorWithIdCodec (as well as SyntheticsMonitorWithIdCodec if possible) along with respective TypeScript types in favor of EncryptedSyntheticsSavedMonitorCodec
+export const EncryptedSyntheticsSavedMonitorCodec = t.intersection([
+  EncryptedSyntheticsMonitorCodec,
+  t.interface({ id: t.string, updated_at: t.string }),
+]);
+
 export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;
 
 export type EncryptedSyntheticsMonitorWithId = t.TypeOf<
   typeof EncryptedSyntheticsMonitorWithIdCodec
 >;
+
+export type EncryptedSyntheticsSavedMonitor = t.TypeOf<typeof EncryptedSyntheticsSavedMonitorCodec>;
 
 export const MonitorDefaultsCodec = t.interface({
   [DataStream.HTTP]: HTTPFieldsCodec,
@@ -341,6 +349,7 @@ export const MonitorManagementListResultCodec = t.type({
   page: t.number,
   perPage: t.number,
   total: t.union([t.number, t.null]),
+  absoluteTotal: t.union([t.number, t.null]),
   syncErrors: t.union([ServiceLocationErrors, t.null]),
 });
 

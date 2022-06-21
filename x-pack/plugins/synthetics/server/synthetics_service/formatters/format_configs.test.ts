@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { omit } from 'lodash';
 import { FormattedValue } from './common';
 import { formatMonitorConfig, formatHeartbeatRequest } from './format_configs';
 import {
@@ -64,7 +64,8 @@ const testBrowserConfig: Partial<MonitorFields> = {
   'source.zip_url.proxy_url': '',
   'source.inline.script':
     "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
-  params: '',
+  params: '{"a":"param"}',
+  playwright_options: '{"playwright":"option"}',
   screenshots: 'on',
   synthetics_args: ['--hasTouch true'],
   'filter_journeys.match': '',
@@ -125,6 +126,12 @@ describe('formatMonitorConfig', () => {
         timeout: '16s',
         type: 'browser',
         synthetics_args: ['--hasTouch true'],
+        params: {
+          a: 'param',
+        },
+        playwright_options: {
+          playwright: 'option',
+        },
       };
     });
 
@@ -135,6 +142,16 @@ describe('formatMonitorConfig', () => {
       );
 
       expect(yamlConfig).toEqual(formattedBrowserConfig);
+    });
+
+    it('does not set empty strings or empty objects for params and playwright options', () => {
+      const yamlConfig = formatMonitorConfig(Object.keys(testBrowserConfig) as ConfigKey[], {
+        ...testBrowserConfig,
+        playwright_options: '{}',
+        params: '',
+      });
+
+      expect(yamlConfig).toEqual(omit(formattedBrowserConfig, ['params', 'playwright_options']));
     });
 
     it('excludes UI fields', () => {
@@ -233,6 +250,28 @@ describe('formatHeartbeatRequest', () => {
   it('sets project fields as null when project id is not defined', () => {
     const monitorId = 'test-monitor-id';
     const monitor = { ...testBrowserConfig, project_id: undefined } as SyntheticsMonitor;
+    const actual = formatHeartbeatRequest({
+      monitor,
+      monitorId,
+    });
+
+    expect(actual).toEqual({
+      ...monitor,
+      id: monitorId,
+      fields: {
+        config_id: monitorId,
+        'monitor.project.name': undefined,
+        'monitor.project.id': undefined,
+        run_once: undefined,
+        test_run_id: undefined,
+      },
+      fields_under_root: true,
+    });
+  });
+
+  it('sets project fields as null when project id is empty', () => {
+    const monitorId = 'test-monitor-id';
+    const monitor = { ...testBrowserConfig, project_id: '' } as SyntheticsMonitor;
     const actual = formatHeartbeatRequest({
       monitor,
       monitorId,

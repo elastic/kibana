@@ -10,7 +10,6 @@ import moment from 'moment';
 import pMap from 'p-map';
 
 import type { Agent, BulkActionResult, FleetServerAgentAction, CurrentUpgrade } from '../../types';
-import { agentPolicyService } from '..';
 import {
   AgentReassignmentError,
   HostedAgentPolicyRestrictionRelatedError,
@@ -30,6 +29,7 @@ import {
   getAgentPolicyForAgent,
 } from './crud';
 import { searchHitToAgent } from './helpers';
+import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
 const MINIMUM_EXECUTION_DURATION_SECONDS = 1800; // 30m
 
@@ -107,38 +107,26 @@ export async function sendUpgradeAgentsActions(
     givenAgents = await getAgents(esClient, options);
   }
 
-  // get any policy ids from upgradable agents
-  const policyIdsToGet = new Set(
-    givenAgents.filter((agent) => agent.policy_id).map((agent) => agent.policy_id!)
-  );
-
-  // get the agent policies for those ids
-  const agentPolicies = await agentPolicyService.getByIDs(soClient, Array.from(policyIdsToGet), {
-    fields: ['is_managed'],
-  });
-  const hostedPolicies = agentPolicies.reduce<Record<string, boolean>>((acc, policy) => {
-    acc[policy.id] = policy.is_managed;
-    return acc;
-  }, {});
-  const isHostedAgent = (agent: Agent) => agent.policy_id && hostedPolicies[agent.policy_id];
+  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
 
   // results from getAgents with options.kuery '' (or even 'active:false') may include hosted agents
   // filter them out unless options.force
   const agentsToCheckUpgradeable =
     'kuery' in options && !options.force
-      ? givenAgents.filter((agent: Agent) => !isHostedAgent(agent))
+      ? givenAgents.filter((agent: Agent) => !isHostedAgent(hostedPolicies, agent))
       : givenAgents;
 
   const kibanaVersion = appContextService.getKibanaVersion();
   const upgradeableResults = await Promise.allSettled(
     agentsToCheckUpgradeable.map(async (agent) => {
       // Filter out agents currently unenrolling, unenrolled, or not upgradeable b/c of version check
-      const isAllowed = options.force || isAgentUpgradeable(agent, kibanaVersion);
-      if (!isAllowed) {
+      const isNotAllowed =
+        !options.force && !isAgentUpgradeable(agent, kibanaVersion, options.version);
+      if (isNotAllowed) {
         throw new IngestManagerError(`${agent.id} is not upgradeable`);
       }
 
-      if (!options.force && isHostedAgent(agent)) {
+      if (!options.force && isHostedAgent(hostedPolicies, agent)) {
         throw new HostedAgentPolicyRestrictionRelatedError(
           `Cannot upgrade agent in hosted agent policy ${agent.policy_id}`
         );
@@ -315,11 +303,6 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
             },
           },
           {
-            exists: {
-              field: 'start_time',
-            },
-          },
-          {
             range: {
               expiration: { gte: now },
             },
@@ -342,7 +325,7 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
           complete: false,
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
-          startTime: hit._source.start_time as string,
+          startTime: hit._source?.start_time,
         };
       }
 

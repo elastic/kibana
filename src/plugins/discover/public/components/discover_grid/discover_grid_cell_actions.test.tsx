@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-const mockCopyToClipboard = jest.fn();
+const mockCopyToClipboard = jest.fn((value) => true);
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -14,13 +14,13 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../utils/use_discover_services', () => {
+jest.mock('../../hooks/use_discover_services', () => {
   const services = {
     toastNotifications: {
       addInfo: jest.fn(),
     },
   };
-  const originalModule = jest.requireActual('../../utils/use_discover_services');
+  const originalModule = jest.requireActual('../../hooks/use_discover_services');
   return {
     ...originalModule,
     useDiscoverServices: () => services,
@@ -33,22 +33,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { FilterInBtn, FilterOutBtn, buildCellActions, CopyBtn } from './discover_grid_cell_actions';
 import { DiscoverGridContext } from './discover_grid_context';
 import { EuiButton } from '@elastic/eui';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { esHits } from '../../__mocks__/es_hits';
+import { discoverGridContextMock } from '../../__mocks__/grid_context';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { flattenHit } from '@kbn/data-plugin/common';
-
-const contextMock = {
-  expanded: undefined,
-  setExpanded: jest.fn(),
-  rows: esHits,
-  rowsFlattened: esHits.map((hit) => flattenHit(hit, indexPatternMock)),
-  onFilter: jest.fn(),
-  indexPattern: indexPatternMock,
-  isDarkMode: false,
-  selectedDocs: [],
-  setSelectedDocs: jest.fn(),
-};
 
 describe('Discover cell actions ', function () {
   it('should not show cell actions for unfilterable fields', async () => {
@@ -57,7 +43,7 @@ describe('Discover cell actions ', function () {
 
   it('triggers filter function when FilterInBtn is clicked', async () => {
     const component = mountWithIntl(
-      <DiscoverGridContext.Provider value={contextMock}>
+      <DiscoverGridContext.Provider value={discoverGridContextMock}>
         <FilterInBtn
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
@@ -70,15 +56,15 @@ describe('Discover cell actions ', function () {
     );
     const button = findTestSubject(component, 'filterForButton');
     await button.simulate('click');
-    expect(contextMock.onFilter).toHaveBeenCalledWith(
-      indexPatternMock.fields.getByName('extension'),
+    expect(discoverGridContextMock.onFilter).toHaveBeenCalledWith(
+      discoverGridContextMock.indexPattern.fields.getByName('extension'),
       'jpg',
       '+'
     );
   });
   it('triggers filter function when FilterOutBtn is clicked', async () => {
     const component = mountWithIntl(
-      <DiscoverGridContext.Provider value={contextMock}>
+      <DiscoverGridContext.Provider value={discoverGridContextMock}>
         <FilterOutBtn
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
@@ -91,15 +77,15 @@ describe('Discover cell actions ', function () {
     );
     const button = findTestSubject(component, 'filterOutButton');
     await button.simulate('click');
-    expect(contextMock.onFilter).toHaveBeenCalledWith(
-      indexPatternMock.fields.getByName('extension'),
+    expect(discoverGridContextMock.onFilter).toHaveBeenCalledWith(
+      discoverGridContextMock.indexPattern.fields.getByName('extension'),
       'jpg',
       '-'
     );
   });
   it('triggers clipboard copy when CopyBtn is clicked', async () => {
     const component = mountWithIntl(
-      <DiscoverGridContext.Provider value={contextMock}>
+      <DiscoverGridContext.Provider value={discoverGridContextMock}>
         <CopyBtn
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}

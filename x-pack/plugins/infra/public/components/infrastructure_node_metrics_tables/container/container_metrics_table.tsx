@@ -17,9 +17,10 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
-import { MetricsNodeDetailsLink, NumberCell, StepwisePagination, UptimeCell } from '../shared';
 import type { SortState } from '../shared';
+import { MetricsNodeDetailsLink, NumberCell, StepwisePagination, UptimeCell } from '../shared';
 import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
 export interface ContainerMetricsTableProps {
@@ -78,7 +79,9 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
   return (
     <>
       <EuiBasicTable
-        tableCaption="Infrastructure metrics for containers"
+        tableCaption={i18n.translate('xpack.infra.metricsTable.container.tableCaption', {
+          defaultMessage: 'Infrastructure metrics for containers',
+        })}
         items={containers}
         columns={columns}
         sorting={sortSettings}
@@ -89,7 +92,9 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <StepwisePagination
-            ariaLabel="Container metrics pagination"
+            ariaLabel={i18n.translate('xpack.infra.metricsTable.container.paginationAriaLabel', {
+              defaultMessage: 'Container metrics pagination',
+            })}
             pageCount={pageCount}
             currentPageIndex={currentPageIndex}
             setCurrentPageIndex={setCurrentPageIndex}
@@ -106,21 +111,38 @@ function containerNodeColumns(
 ): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
   return [
     {
-      name: 'Name',
+      name: i18n.translate('xpack.infra.metricsTable.container.nameColumnHeader', {
+        defaultMessage: 'Name',
+      }),
       field: 'name',
       truncateText: true,
+      textOnly: true,
       render: (name: string) => {
-        return <MetricsNodeDetailsLink id={name} nodeType={'container'} timerange={timerange} />;
+        return (
+          <MetricsNodeDetailsLink
+            id={name}
+            label={name}
+            nodeType={'container'}
+            timerange={timerange}
+          />
+        );
       },
     },
     {
-      name: 'Uptime',
+      name: i18n.translate('xpack.infra.metricsTable.container.uptimeColumnHeader', {
+        defaultMessage: 'Uptime',
+      }),
       field: 'uptime',
       align: 'right',
       render: (uptime: number) => <UptimeCell uptimeMs={uptime} />,
     },
     {
-      name: 'CPU usage (avg.)',
+      name: i18n.translate(
+        'xpack.infra.metricsTable.container.averageCpuUsagePercentColumnHeader',
+        {
+          defaultMessage: 'CPU usage (avg.)',
+        }
+      ),
       field: 'averageCpuUsagePercent',
       align: 'right',
       render: (averageCpuUsagePercent: number) => (
@@ -128,7 +150,12 @@ function containerNodeColumns(
       ),
     },
     {
-      name: 'Memory usage(avg.)',
+      name: i18n.translate(
+        'xpack.infra.metricsTable.container.averageMemoryUsageMegabytesColumnHeader',
+        {
+          defaultMessage: 'Memory usage(avg.)',
+        }
+      ),
       field: 'averageMemoryUsageMegabytes',
       align: 'right',
       render: (averageMemoryUsageMegabytes: number) => (

@@ -96,6 +96,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     http: props.http,
     storage: props.storage,
     unifiedSearch: props.unifiedSearch,
+    dataViews: props.dataViews,
   };
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
@@ -808,6 +809,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   selectedOperationDefinition.shiftable &&
                   selectedColumn.timeShift !== undefined ? (
                     <TimeShift
+                      datatableUtilities={services.data.datatableUtilities}
                       indexPattern={currentIndexPattern}
                       selectedColumn={selectedColumn}
                       columnId={columnId}
