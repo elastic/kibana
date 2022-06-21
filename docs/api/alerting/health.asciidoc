@@ -13,6 +13,10 @@ Retrieve the health status of the alerting framework.
 
 `GET <kibana host>:<port>/s/<space_id>/api/alerting/_health`
 
+=== {api-prereq-title}
+
+You must have `read` privileges for the *Management* > *Stack Rules* feature.
+
 [[get-alerting-framework-health-api-params]]
 === {api-path-parms-title}
 
@@ -42,56 +46,46 @@ The API returns the following:
 [source,sh]
 --------------------------------------------------
 {
-   "is_sufficiently_secure":true,
-   "has_permanent_encryption_key":true,
-   "alerting_framework_health":{
+   "is_sufficiently_secure":true, <1>
+   "has_permanent_encryption_key":true, <2>
+   "alerting_framework_health":{ <3>
       "decryption_health":{
          "status":"ok",
-         "timestamp":"2021-02-10T23:35:04.949Z"
+         "timestamp":"2022-06-21T21:46:15.023Z"
       },
       "execution_health":{
          "status":"ok",
-         "timestamp":"2021-02-10T23:35:04.949Z"
+         "timestamp":"2022-06-21T21:46:15.023Z"
       },
       "read_health":{
          "status":"ok",
-         "timestamp":"2021-02-10T23:35:04.949Z"
+         "timestamp":"2022-06-21T21:46:15.023Z"
+      }
+   },
+   "alerting_framework_heath":{ <4>
+      "_deprecated":"This state property has a typo, use \"alerting_framework_health\" instead.","decryption_health":{
+         "status":"ok",
+         "timestamp":"2022-06-21T21:46:15.023Z"
+      },
+      "execution_health":{
+         "status":"ok",
+         "timestamp":"2022-06-21T21:46:15.023Z"
+      },
+      "read_health":{
+         "status":"ok",
+         "timestamp":"2022-06-21T21:46:15.023Z"
       }
    }
 }
 --------------------------------------------------
-
-The health API response contains the following properties:
-
-[cols="2*<"]
-|===
-
-| `is_sufficiently_secure`
-| Returns `false` if security is enabled, but TLS is not.
-
-| `has_permanent_encryption_key`
-| Return the state `false` if Encrypted Saved Object plugin has not a permanent encryption Key.
-
-| `alerting_framework_health`
-| This state property has three substates that identify the health of the alerting framework API: `decryption_health`, `execution_health`, and `read_health`.
-
-| deprecated::`alerting_framework_heath`
-| This state property has a typo, use `alerting_framework_health` instead. It has three substates that identify the health of the alerting framework API: `decryption_health`, `execution_health`, and `read_health`.
-
-|===
-
-`alerting_framework_health` consists of the following properties:
-
-[cols="2*<"]
-|===
-
-| `decryption_health`
-| Returns the timestamp and status of the rule decryption: `ok`, `warn` or `error` .
-
-| `execution_health`
-| Returns the timestamp and status of the rule execution: `ok`, `warn` or `error`.
-
-| `read_health`
-| Returns the timestamp and status of the rule reading events: `ok`, `warn` or `error`.
-
-|===
+<1> `is_sufficiently_secure` is `false` when security is enabled, but TLS is not.
+<2> `has_permanent_encryption_key` is `false` when the encrypted saved object
+plugin does not have a permanent encryption key.
+<3> `alerting_framework_health` has three substates that identify the health of
+the alerting framework: `decryption_health`, `execution_health`, and
+`read_health`. `decryption_health` returns the timestamp and status of the rule
+decryption: `ok`, `warn` or `error`. `execution_health` returns the timestamp
+and status of the rule execution: `ok`, `warn` or `error`. `read_health` returns
+the timestamp and status of the rule reading events: `ok`, `warn` or `error`.
+<4> `alerting_framework_heath` has a typo, use `alerting_framework_health`
+instead. deprecated:[8.0.0]

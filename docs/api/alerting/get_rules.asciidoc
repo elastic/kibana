@@ -13,6 +13,15 @@ Retrieve a rule by ID.
 
 `GET <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
 
+=== {api-prereq-title}
+
+You must have `read` privileges for the *Management* > *Stack Rules* feature or
+for the *{ml-app}*, *{observability}*, or *Security* features or the
+`monitoring_user` built-in role, depending on the `consumer` and `rule_type_id`
+of the rule you're creating. If the rule has `actions`, you must also have `read`
+privileges for the *Management* > *Actions and Connectors* feature. For more
+details, refer to <<kibana-feature-privileges>>.
+
 [[get-rule-api-params]]
 === {api-path-parms-title}
 
@@ -70,7 +79,8 @@ The API returns the following:
   "scheduled_task_id": "0b092d90-6b62-11eb-9e0d-85d233e3ee35",
   "execution_status": {
     "last_execution_date": "2021-02-10T17:55:14.262Z",
-    "status": "ok"
+    "status": "ok",
+    "last_duration": 359
   }
 }
 --------------------------------------------------

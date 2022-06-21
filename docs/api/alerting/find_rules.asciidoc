@@ -13,6 +13,13 @@ Retrieve a paginated set of rules based on condition.
 
 `GET <kibana host>:<port>/s/<space_id>/api/alerting/rules/_find`
 
+=== {api-prereq-title}
+
+You must have `read` privileges for the *Management* > *Stack Rules* feature or
+for the *{ml-app}*, *{observability}*, or *Security* features or the
+`monitoring_user` built-in role, depending on the `consumer` and `rule_type_id`
+of the rule you're creating.
+
 === {api-description-title}
 
 As rules change in {kib}, the results on each page of the response also change.
@@ -126,7 +133,7 @@ The API returns the following:
         "last_execution_date": "2021-02-10T17:55:14.262Z",
         "status": "ok"
       }
-    },
+    }
   ]
 }
 --------------------------------------------------
