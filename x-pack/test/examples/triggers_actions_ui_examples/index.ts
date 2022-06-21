@@ -6,6 +6,7 @@
  */
 import { FtrProviderContext } from '../../../../test/functional/ftr_provider_context';
 
+// eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   describe('Triggers Actions UI Example', function () {
     loadTestFile(require.resolve('./rule_status_dropdown'));
