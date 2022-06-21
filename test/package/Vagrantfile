@@ -3,7 +3,7 @@ Vagrant.configure("2") do |config|
   config.vm.boot_timeout = 600
   config.vm.define "deb" do |deb|
     deb.vm.provider :virtualbox do |vb|
-      vb.memory = 2048
+      vb.memory = 4096
     end
     deb.vm.box = 'ubuntu/jammy64'
     deb.vm.provision "ansible" do |ansible|
@@ -14,7 +14,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "rpm" do |rpm|
     rpm.vm.provider :virtualbox do |vb|
-      vb.memory = 2048
+      vb.memory = 4096
     end
     rpm.vm.box = 'almalinux/9'
     rpm.vm.provision "ansible" do |ansible|
@@ -25,7 +25,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "docker" do |docker|
     docker.vm.provider :virtualbox do |vb|
-      vb.memory = 2048
+      vb.memory = 4096
     end
     docker.vm.box = 'ubuntu/jammy64'
     docker.vm.provision "ansible" do |ansible|
