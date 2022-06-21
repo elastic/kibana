@@ -7,6 +7,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { PrivilegeType } from '@kbn/apm-plugin/common/privilege_type';
+import { isEmpty } from 'lodash';
 import { SecurityServiceProvider } from '../../../../test/common/services/security';
 
 type SecurityService = Awaited<ReturnType<typeof SecurityServiceProvider>>;
@@ -109,17 +110,19 @@ export async function createApmUser(security: SecurityService, apmUser: ApmUser,
     throw new Error(`No configuration found for ${apmUser}`);
   }
 
-  if ('applications' in role) {
-    // Add application privileges with es client as they are not supported by
-    // security.user.create. They are preserved when updating the role below
-    await es.security.putRole({
-      name: apmUser,
-      body: role,
-    });
-    delete (role as any).applications;
-  }
+  if (!isEmpty(role)) {
+    if ('applications' in role) {
+      // Add application privileges with es client as they are not supported by
+      // security.user.create. They are preserved when updating the role below
+      await es.security.putRole({
+        name: apmUser,
+        body: role,
+      });
+      delete (role as any).applications;
+    }
 
-  await security.role.create(apmUser, role);
+    await security.role.create(apmUser, role);
+  }
 
   await security.user.create(apmUser, {
     full_name: apmUser,
