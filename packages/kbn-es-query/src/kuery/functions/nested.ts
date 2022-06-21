@@ -37,6 +37,9 @@ export function toElasticsearchQuery(
         nested: { path: fullPath },
       }) as estypes.QueryDslQueryContainer,
       score_mode: 'none',
+      ...(typeof config.nestedIgnoreUnmapped === 'boolean' && {
+        ignore_unmapped: config.nestedIgnoreUnmapped,
+      }),
     },
   };
 }
