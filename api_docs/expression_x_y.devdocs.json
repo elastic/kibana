@@ -1108,6 +1108,26 @@
           },
           {
             "parentPluginId": "expressionXY",
+            "id": "def-common.XYArgs.xExtent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "xExtent",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxisExtentConfigResult",
+                "text": "AxisExtentConfigResult"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionXY",
             "id": "def-common.XYArgs.yLeftExtent",
             "type": "CompoundType",
             "tags": [],
