@@ -7525,7 +7525,7 @@
         "tags": [],
         "label": "AnalyticsServiceSetup",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the setup phase.\n{@link AnalyticsClient}"
+          "\r\nExposes the public APIs of the AnalyticsClient during the setup phase.\r\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -7546,7 +7546,7 @@
           "ContextProviderOpts",
           "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
         ],
-        "path": "src/core/public/analytics/analytics_service.ts",
+        "path": "node_modules/@types/kbn__core-analytics-browser/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7557,7 +7557,7 @@
         "tags": [],
         "label": "AnalyticsServiceStart",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the start phase\n{@link AnalyticsClient}"
+          "\r\nExposes the public APIs of the AnalyticsClient during the start phase\r\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -7568,7 +7568,7 @@
           "TelemetryCounter",
           ">; }"
         ],
-        "path": "src/core/public/analytics/analytics_service.ts",
+        "path": "node_modules/@types/kbn__core-analytics-browser/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7948,11 +7948,11 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: ",
+          "{ metric?: { type: string; name: string; } | undefined; type?: ",
           "UiSettingsType",
           " | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
-          " | undefined; metric?: { type: string; name: string; } | undefined; }"
+          " | undefined; }"
         ],
         "path": "src/core/types/ui_settings.ts",
         "deprecated": false,
@@ -11089,13 +11089,7 @@
               "{@link LoggingServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.LoggingServiceSetup",
-                "text": "LoggingServiceSetup"
-              }
+              "LoggingServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -19430,12 +19424,65 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.LoggerConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "LoggerConfigType",
+        "description": [
+          "\r\nDescribes the configuration of a given logger.\r\n"
+        ],
+        "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.LoggerConfigType.appenders",
+            "type": "Array",
+            "tags": [],
+            "label": "appenders",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.LoggerConfigType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.LoggerConfigType.level",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "level",
+            "description": [],
+            "signature": [
+              "\"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\""
+            ],
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.LoggerContextConfigInput",
         "type": "Interface",
         "tags": [],
         "label": "LoggerContextConfigInput",
-        "description": [],
-        "path": "src/core/server/logging/logging_config.ts",
+        "description": [
+          "\r\nInput used to configure logging dynamically using {@link LoggingServiceSetup.configure}"
+        ],
+        "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -19447,24 +19494,12 @@
             "description": [],
             "signature": [
               "Record<string, ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.AppenderConfigType",
-                "text": "AppenderConfigType"
-              },
+              "AppenderConfigType",
               "> | Map<string, ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.AppenderConfigType",
-                "text": "AppenderConfigType"
-              },
+              "AppenderConfigType",
               "> | undefined"
             ],
-            "path": "src/core/server/logging/logging_config.ts",
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -19475,9 +19510,10 @@
             "label": "loggers",
             "description": [],
             "signature": [
-              "Readonly<{} & { name: string; level: \"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; appenders: string[]; }>[] | undefined"
+              "LoggerConfigType",
+              "[] | undefined"
             ],
-            "path": "src/core/server/logging/logging_config.ts",
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -19540,9 +19576,9 @@
         "tags": [],
         "label": "LoggingServiceSetup",
         "description": [
-          "\nProvides APIs to plugins for customizing the plugin's logger."
+          "\r\nProvides APIs to plugins for customizing the plugin's logger."
         ],
-        "path": "src/core/server/logging/logging_service.ts",
+        "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -19552,22 +19588,16 @@
             "tags": [],
             "label": "configure",
             "description": [
-              "\nCustomizes the logging config for the plugin's context.\n"
+              "\r\nCustomizes the logging config for the plugin's context.\r\n"
             ],
             "signature": [
               "(config$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.LoggerContextConfigInput",
-                "text": "LoggerContextConfigInput"
-              },
+              "LoggerContextConfigInput",
               ">) => void"
             ],
-            "path": "src/core/server/logging/logging_service.ts",
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -19580,16 +19610,10 @@
                 "signature": [
                   "Observable",
                   "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.LoggerContextConfigInput",
-                    "text": "LoggerContextConfigInput"
-                  },
+                  "LoggerContextConfigInput",
                   ">"
                 ],
-                "path": "src/core/server/logging/logging_service.ts",
+                "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -24263,7 +24287,7 @@
           " | ",
           "RollingFileAppenderConfig"
         ],
-        "path": "src/core/server/logging/appenders/appenders.ts",
+        "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24607,7 +24631,7 @@
         "label": "EcsEventKind",
         "description": [],
         "signature": [
-          "\"alert\" | \"state\" | \"metric\" | \"event\" | \"signal\" | \"pipeline_error\""
+          "\"metric\" | \"alert\" | \"state\" | \"event\" | \"signal\" | \"pipeline_error\""
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -26784,20 +26808,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.LoggerConfigType",
-        "type": "Type",
-        "tags": [],
-        "label": "LoggerConfigType",
-        "description": [],
-        "signature": [
-          "{ readonly name: string; readonly level: \"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; readonly appenders: string[]; }"
-        ],
-        "path": "src/core/server/logging/logging_config.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.LogMeta",
         "type": "Type",
         "tags": [],
@@ -26986,11 +26996,11 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: ",
+          "{ metric?: { type: string; name: string; } | undefined; type?: ",
           "UiSettingsType",
           " | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
-          " | undefined; metric?: { type: string; name: string; } | undefined; }"
+          " | undefined; }"
         ],
         "path": "src/core/types/ui_settings.ts",
         "deprecated": false,
