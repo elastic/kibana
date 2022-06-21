@@ -42,6 +42,7 @@ import {
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
 import { OBSERVABILITY_SOLUTIONS } from '../rules/config';
@@ -78,7 +79,7 @@ export function RuleDetailsPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
   const { isLoadingExecutionLog, executionLog } = useFetchLast24hRuleExecutionLog({ http, ruleId });
-  const { ruleTypes, ruleTypeIndex } = useLoadRuleTypes({
+  const { ruleTypes } = useLoadRuleTypes({
     filteredSolutions: OBSERVABILITY_SOLUTIONS,
   });
 
@@ -158,19 +159,6 @@ export function RuleDetailsPage() {
     (ruleTypeRegistry.has(rule.ruleTypeId)
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
-
-  const getRuleConditionsWording = () => {
-    const numberOfConditions = rule?.params.criteria ? (rule?.params.criteria as any[]).length : 0;
-    return (
-      <>
-        {numberOfConditions}&nbsp;
-        {i18n.translate('xpack.observability.ruleDetails.conditions', {
-          defaultMessage: 'condition{s}',
-          values: { s: numberOfConditions > 1 ? 's' : '' },
-        })}
-      </>
-    );
-  };
 
   const alertStateProps = {
     alertsTableConfigurationRegistry,
@@ -412,10 +400,7 @@ export function RuleDetailsPage() {
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
-
-        {/* Right side of Rule Summary */}
-
-        {getRuleDefinition({ rule })}
+        {getRuleDefinition({ rule } as RuleDefinitionProps)}
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />
