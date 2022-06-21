@@ -26,22 +26,24 @@ export function createUpdateUsedDataViewAction(filterManager: FilterManager): Ac
       newDataView,
       usedDataViews,
     }: UpdateUsedDataViewActionContext) => {
+      const countOfInitialDataView = usedDataViews.filter((i) => i === initialDataView).length;
       const filters = filterManager.getFilters();
-      const changedIndexIdFilters = filters.map((filter) => {
-        if (filter.meta.index === initialDataView) {
-          return {
-            ...filter,
-            meta: {
-              ...filter.meta,
-              index: newDataView,
-            },
-          };
-        } else {
-          return filter;
-        }
-      });
 
-      filterManager.setFilters(changedIndexIdFilters);
+      /** no action needed **/
+      if (countOfInitialDataView > 1 || !filters.length || !initialDataView) {
+        return;
+      }
+
+      /** removing layer **/
+      if (initialDataView && !newDataView) {
+        if (usedDataViews.length > 1) {
+          newDataView = usedDataViews[0];
+        } else {
+          newDataView = '@todo'; // <= for that case Unified Search Data view should be used
+        }
+      }
+
+      filterManager.updateDataViewReferences(filters, initialDataView, newDataView);
     },
   });
 }

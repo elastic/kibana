@@ -31,6 +31,7 @@ import { getRemoveOperation } from '../../../utils';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const visualization = useLensSelector(selectVisualization);
+
   const activeVisualization = visualization.activeId
     ? props.visualizationMap[visualization.activeId]
     : null;
@@ -46,7 +47,9 @@ export function LayerPanels(
   }
 ) {
   const { activeVisualization, datasourceMap } = props;
-  const { activeDatasourceId, visualization } = useLensSelector((state) => state.lens);
+  const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
+    (state) => state.lens
+  );
 
   const dispatchLens = useLensDispatch();
 
@@ -115,6 +118,7 @@ export function LayerPanels(
                 typeof newDatasourceState === 'function'
                   ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
                   : newDatasourceState;
+
               const updatedVisualizationState =
                 typeof newVisualizationState === 'function'
                   ? newVisualizationState(prevState.visualization.state)
@@ -124,20 +128,17 @@ export function LayerPanels(
                 prevState.datasourceStates[datasourceId].state.currentIndexPatternId;
               const newDataView = newDatasourceState.currentIndexPatternId;
 
-              const dataViewsInLayerKeys = Object.values(
-                prevState.datasourceStates[datasourceId].state.layers
-              );
-              const dataViewsInLayer = dataViewsInLayerKeys.map((layer) => layer.indexPatternId);
-
-              if (!dataViewsInLayer.includes(newDataView)) {
-                const executeContext = {
-                  ...getActionContext(),
-                  initialDataView,
-                  newDataView,
-                };
-                const action = props.uiActions.getAction('ACTION_UPDATE_USED_DATA_VIEWS');
-                action.execute(executeContext);
-              }
+              const action = props.uiActions.getAction('ACTION_UPDATE_USED_DATA_VIEWS');
+              action.execute({
+                ...getActionContext(),
+                initialDataView,
+                newDataView,
+                usedDataViews: Object.values(
+                  Object.values(prevState.datasourceStates[datasourceId].state.layers).map(
+                    ({ indexPatternId }) => indexPatternId
+                  )
+                ),
+              });
 
               return {
                 ...prevState,
@@ -158,7 +159,7 @@ export function LayerPanels(
         );
       }, 0);
     },
-    [dispatchLens, props.uiActions]
+    [dispatchLens, props]
   );
 
   const toggleFullscreen = useMemo(
@@ -206,8 +207,12 @@ export function LayerPanels(
               );
             }
           }}
-          onRemoveLayer={(indexPatternId: string) => {
-            // console.log('layerId', indexPatternId);
+          onRemoveLayer={() => {
+            const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
+            const datasourceId = datasourcePublicAPI?.datasourceId;
+            const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
+
+            // todo
 
             dispatchLens(
               removeOrClearLayer({

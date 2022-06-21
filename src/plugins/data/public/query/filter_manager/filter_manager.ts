@@ -214,6 +214,28 @@ export class FilterManager implements PersistableStateService<Filter[]> {
     }
   }
 
+  public updateDataViewReferences(
+    filters: Filter[],
+    initialDataViewId: string,
+    newDataViewId: string
+  ) {
+    this.setFilters(
+      filters.map((filter) => {
+        if (filter.meta.index === initialDataViewId) {
+          return {
+            ...filter,
+            meta: {
+              ...filter.meta,
+              index: newDataViewId,
+            },
+          };
+        } else {
+          return filter;
+        }
+      })
+    );
+  }
+
   public removeAll() {
     this.setFilters([]);
   }
