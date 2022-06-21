@@ -80,26 +80,29 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
     this.embeddable
       .getOutput$()
       .pipe(
-        /**
-         * Record start time if loading === true
-         * Forward events only if loading === false
-         */
+        // Map loaded event properties
+        map((output) => {
+          return {
+            id: this.embeddable.id,
+            status: this.getEventStatus(output),
+            error: output.error,
+          };
+        }),
+        // Dedupe
+        distinct(output => output.id + output.status + !!output.error),
+        // Record start time if loading === true
         tap((output) => {
-          if (output.loading === true) {
+          if (output.status === 'loading') {
             loadingStartTime = performance.now();
           }
         }),
         // Map loaded event properties
         map((output): EmbeddablePhaseEvent => {
           return {
-            id: this.embeddable.id,
-            status: this.getEventStatus(output),
-            error: output.error,
+            ...output,
             timeToEvent: performance.now() - loadingStartTime,
           };
         }),
-        // Dedupe
-        distinct()
       )
       .subscribe((statusOutput) => {
         if (this.props.onPanelStatusChange) {
