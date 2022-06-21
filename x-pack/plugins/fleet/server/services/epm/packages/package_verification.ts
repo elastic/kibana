@@ -9,21 +9,34 @@ import { readFile } from 'fs/promises';
 
 import { appContextService } from '../../app_context';
 
-let cachedKey: string = '';
+let cachedKey: string | undefined | null = null;
 
-export async function getGpgKey(): Promise<string> {
-  if (cachedKey) return cachedKey;
+export async function getGpgKeyOrUndefined(): Promise<string | undefined> {
+  if (cachedKey !== null) return cachedKey;
 
-  const gpgKeyPath = appContextService.getConfig()?.packageVerification?.gpgKeyPath;
+  cachedKey = await _readGpgKey();
+  return cachedKey;
+}
+
+export async function _readGpgKey(): Promise<string | undefined> {
+  const config = appContextService.getConfig();
+  const logger = appContextService.getLogger();
+  const gpgKeyPath = config?.packageVerification?.gpgKeyPath;
 
   if (!gpgKeyPath) {
-    throw new Error('No path specified in "packageVerification.gpgKeyPath", unable to get GPG key');
+    logger.warn('GPG key path not configured at "xpack.fleet.packageVerification.gpgKeyPath"');
+    return undefined;
   }
 
-  const buffer = await readFile(gpgKeyPath);
+  let buffer: Buffer;
+  try {
+    buffer = await readFile(gpgKeyPath);
+  } catch (e) {
+    logger.warn(`Unable to retrieve GPG key from '${gpgKeyPath}': ${e}`);
+    return undefined;
+  }
 
   const key = buffer.toString();
-
   cachedKey = key;
   return key;
 }
