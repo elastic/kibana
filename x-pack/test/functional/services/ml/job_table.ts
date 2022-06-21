@@ -279,6 +279,15 @@ export function MachineLearningJobTableProvider(
       });
     }
 
+    public async assertJobRowJobId(jobId: string) {
+      await retry.tryForTime(5000, async () => {
+        await this.refreshJobList();
+        const rows = await this.parseJobTable();
+        const jobRowMatch = rows.find((row) => row.id === jobId);
+        expect(jobRowMatch).to.not.eql(undefined, `Expected row with job ID ${jobId} to exist`);
+      });
+    }
+
     public async assertJobRowDetailsCounts(
       jobId: string,
       expectedCounts: object,
