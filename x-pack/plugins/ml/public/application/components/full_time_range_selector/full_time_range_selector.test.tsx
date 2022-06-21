@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { FullTimeRangeSelector } from '.';
-import type { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 // Create a mock for the setFullTimeRange function in the service.

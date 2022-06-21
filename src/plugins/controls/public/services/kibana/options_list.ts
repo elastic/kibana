@@ -9,8 +9,7 @@
 import { memoize } from 'lodash';
 
 import dateMath from '@kbn/datemath';
-import { buildEsQuery } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/public';
+import { buildEsQuery, type TimeRange } from '@kbn/es-query';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import {
