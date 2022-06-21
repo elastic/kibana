@@ -13,7 +13,7 @@ import { map } from 'rxjs/operators';
 import { PriorityMap } from './priority_map';
 import { BannersList } from './banners_list';
 import { IUiSettingsClient } from '../../ui_settings';
-import { I18nStart } from '../../i18n';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import { MountPoint } from '../../types';
 import { UserBannerService } from './user_banner_service';
 
