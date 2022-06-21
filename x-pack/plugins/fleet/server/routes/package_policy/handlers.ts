@@ -113,7 +113,7 @@ export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = 
     const usedPackages = installedPackages.saved_objects.filter(
       ({ attributes: { name } }) => !!packagePoliciesByPackage[name]
     );
-    usedPackages.forEach(({ attributes: { name, version } }) => {
+    usedPackages.forEach(({ attributes: { name } }) => {
       packagePoliciesByPackage[name].forEach((packagePolicy) => {
         if (!agentPoliciesById[packagePolicy.policy_id]) {
           orphanedPackagePolicies.push(packagePolicy);
