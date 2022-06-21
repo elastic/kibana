@@ -157,17 +157,4 @@ describe('RedirectWithOffset', () => {
     const query = qs.parse(history.entries[0].search);
     expect(query.offset).toBeUndefined();
   });
-
-  it('redirects with hash preserved', () => {
-    renderUrl(
-      {
-        pathname: '',
-        search: location.search,
-        hash: 'services',
-      },
-      true
-    );
-
-    expect(history.entries[0].hash).toBe('#services');
-  });
 });
