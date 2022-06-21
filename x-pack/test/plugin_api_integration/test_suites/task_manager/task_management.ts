@@ -614,51 +614,6 @@ export default function ({ getService }: FtrProviderContext) {
       await releaseTasksWaitingForEventToComplete('releaseSecondWaveOfTasks');
     });
 
-    it('should return a task run error result when RunSoon is called at a time that would cause the task to exceed its maxConcurrency', async () => {
-      // should run as there's only one and maxConcurrency on this TaskType is 1
-      const firstWithSingleConcurrency = await scheduleTask({
-        taskType: 'sampleTaskWithSingleConcurrency',
-        // include a schedule so that the task isn't deleted after completion
-        schedule: { interval: `30m` },
-        params: {
-          waitForEvent: 'releaseRunningTaskWithSingleConcurrencyFirst',
-        },
-      });
-
-      // should not run as the first is running
-      const secondWithSingleConcurrency = await scheduleTask({
-        taskType: 'sampleTaskWithSingleConcurrency',
-        params: {
-          waitForEvent: 'releaseRunningTaskWithSingleConcurrencySecond',
-        },
-      });
-
-      // run the first tasks once just so that we can be sure it runs in response to our
-      // runSoon call, rather than the initial execution
-      await retry.try(async () => {
-        expect((await historyDocs(firstWithSingleConcurrency.id)).length).to.eql(1);
-      });
-      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrencyFirst');
-
-      // wait for second task to stall
-      await retry.try(async () => {
-        expect((await historyDocs(secondWithSingleConcurrency.id)).length).to.eql(1);
-      });
-
-      // run the first task again using runSoon - should fail due to concurrency concerns
-      const failedRunSoonResult = await runTaskSoon({
-        id: firstWithSingleConcurrency.id,
-      });
-
-      expect(failedRunSoonResult).to.eql({
-        id: firstWithSingleConcurrency.id,
-        error: `Error: Failed to claim task "${firstWithSingleConcurrency.id}" as we would exceed the max concurrency of "Sample Task With Single Concurrency" which is 1. Rescheduled the task to ensure it is picked up as soon as possible.`,
-      });
-
-      // release the second task
-      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrencySecond');
-    });
-
     it('should increment attempts when task fails on markAsRunning', async () => {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
