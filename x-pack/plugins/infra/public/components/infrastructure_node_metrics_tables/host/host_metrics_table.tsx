@@ -129,7 +129,7 @@ function hostMetricsColumns(
       ),
     },
     {
-      name: 'Memory total (avg.)',
+      name: 'Memory total',
       field: 'totalMemoryMegabytes',
       align: 'right',
       render: (totalMemoryMegabytes: number) => (
