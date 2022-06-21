@@ -24,16 +24,9 @@ import {
 } from '../../../../common/lib/utils';
 import {
   secOnly,
-  secOnlyRead,
-  globalRead,
-  obsOnlyRead,
-  obsSecRead,
-  noKibanaPrivileges,
   obsOnly,
   superUser,
   secOnlyCreate,
-  secOnlyUpdate,
-  secOnlyPush,
   secOnlyDelete,
 } from '../../../../common/lib/authentication/users';
 
