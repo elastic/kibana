@@ -26,6 +26,13 @@
 
 import './index.scss';
 
+import type {
+  InjectedMetadataSetup,
+  InjectedMetadataStart,
+} from '@kbn/core-injected-metadata-browser';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -46,6 +53,7 @@ import {
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
   NavType,
+  ChromeHelpMenuActions,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -55,12 +63,9 @@ import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
-import type { ThemeServiceSetup, ThemeServiceStart } from './theme';
 import { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
-import type { AnalyticsServiceSetup, AnalyticsServiceStart } from './analytics';
 
 export type {
   PackageInfo,
@@ -68,13 +73,13 @@ export type {
   IExternalUrlPolicy,
   DomainDeprecationDetails,
 } from '../server/types';
-export type { CoreContext, CoreSystem } from './core_system';
+export type { CoreContext } from '@kbn/core-base-browser-internal';
+export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
 
+export type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 export type {
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
   AnalyticsClient,
   Event,
   EventContext,
@@ -85,8 +90,8 @@ export type {
   OptInConfig,
   ContextProviderOpts,
   TelemetryCounter,
-} from './analytics';
-export { TelemetryCounterType } from './analytics';
+} from '@kbn/analytics-client';
+export { TelemetryCounterType } from '@kbn/analytics-client';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {
@@ -136,7 +141,6 @@ export type {
   SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
   SavedObjectsClientContract,
-  SavedObjectsClient,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
@@ -199,7 +203,7 @@ export type {
   ErrorToastOptions,
 } from './notifications';
 
-export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from './theme';
+export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
 
 export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
 
@@ -242,16 +246,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   uiSettings: IUiSettingsClient;
   /** {@link ExecutionContextSetup} */
   executionContext: ExecutionContextSetup;
-  /**
-   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
-   * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform.
-   * @deprecated
-   * @removeBy 8.8.0
-   * */
-  injectedMetadata: {
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  };
+  /** {@link InjectedMetadataSetup} */
+  injectedMetadata: InjectedMetadataSetup;
   /** {@link ThemeServiceSetup} */
   theme: ThemeServiceSetup;
   /** {@link StartServicesAccessor} */
@@ -308,16 +304,8 @@ export interface CoreStart {
   deprecations: DeprecationsServiceStart;
   /** {@link ThemeServiceStart} */
   theme: ThemeServiceStart;
-  /**
-   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
-   * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform.
-   * @deprecated
-   * @removeBy 8.8.0
-   * */
-  injectedMetadata: {
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  };
+  /** {@link InjectedMetadataStart} */
+  injectedMetadata: InjectedMetadataStart;
 }
 
 export type {
@@ -325,6 +313,7 @@ export type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeHelpMenuActions,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,

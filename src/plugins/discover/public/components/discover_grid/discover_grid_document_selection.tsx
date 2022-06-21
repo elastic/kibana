@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
 import { ElasticSearchHit } from '../../types';
 
@@ -36,8 +37,13 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   const id = useMemo(() => getDocId(doc), [doc]);
   const checked = useMemo(() => selectedDocs.includes(id), [selectedDocs, id]);
 
+  const toggleDocumentSelectionLabel = i18n.translate('discover.grid.selectDoc', {
+    defaultMessage: `Select document '{rowNumber}'`,
+    values: { rowNumber: rowIndex + 1 },
+  });
+
   useEffect(() => {
-    if (expanded && doc && expanded._id === doc._id) {
+    if (expanded && doc && expanded._id === doc._id && expanded._index === doc._index) {
       setCellProps({
         style: {
           backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
@@ -51,7 +57,7 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   return (
     <EuiCheckbox
       id={id}
-      label=""
+      aria-label={toggleDocumentSelectionLabel}
       checked={checked}
       data-test-subj={`dscGridSelectDoc-${id}`}
       onChange={() => {

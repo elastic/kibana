@@ -19,7 +19,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../../test/common/config.js')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.js')
+    require.resolve('../../../test/functional/config.base.js')
   );
 
   const kibanaConfig = readKibanaConfig();
@@ -63,6 +63,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
             : 'localKibanaIntegrationTestsUser'
         }`,
         `--xpack.uptime.service.password=${servicePassword}`,
+        `--xpack.uptime.service.showExperimentalLocations=${true}`,
       ],
     },
   };

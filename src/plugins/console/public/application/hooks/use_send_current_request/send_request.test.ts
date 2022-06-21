@@ -49,34 +49,43 @@ describe('sendRequest', () => {
     expect(mockedSendRequest).toHaveBeenCalledTimes(1);
   });
 
-  it('should send multiple requests', async () => {
-    mockedSendRequest.mockResolvedValue([
-      {
-        response: {
-          statusCode: 200,
+  describe('with multiple requests', () => {
+    it('should return results with exceptions', async () => {
+      mockedSendRequest.mockResolvedValue([
+        {
+          response: {
+            statusCode: 200,
+          },
         },
-      },
-      {
-        response: {
-          statusCode: 200,
+        {
+          response: {
+            statusCode: 200,
+          },
         },
-      },
-    ]);
+        {
+          response: {
+            statusCode: 400,
+          },
+        },
+      ]);
 
-    const args = {
-      http: mockContextValue.services.http,
-      requests: [
-        { method: 'GET', url: 'test-1', data: [] },
-        { method: 'GET', url: 'test-2', data: [] },
-      ],
-    };
-    const results = await sendRequest(args);
+      const args = {
+        http: mockContextValue.services.http,
+        requests: [
+          { method: 'GET', url: 'success', data: [] },
+          { method: 'GET', url: 'success', data: [] },
+          { method: 'GET', url: 'fail', data: [] },
+        ],
+      };
+      const results = await sendRequest(args);
 
-    const [firstRequest, secondRequest] = results;
-    expect(firstRequest.response.statusCode).toEqual(200);
-    expect(secondRequest.response.statusCode).toEqual(200);
-    expect(mockedSendRequest).toHaveBeenCalledWith(args);
-    expect(mockedSendRequest).toHaveBeenCalledTimes(1);
+      const [firstCall, secondCall, thirdCall] = results;
+      expect(firstCall.response.statusCode).toEqual(200);
+      expect(secondCall.response.statusCode).toEqual(200);
+      expect(thirdCall.response.statusCode).toEqual(400);
+      expect(mockedSendRequest).toHaveBeenCalledWith(args);
+      expect(mockedSendRequest).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should handle errors', async () => {

@@ -7,13 +7,8 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeModel,
-  GenericValidationResult,
-  ConnectorValidationResult,
-  ALERT_HISTORY_PREFIX,
-} from '../../../../types';
-import { EsIndexActionConnector, EsIndexConfig, IndexActionParams } from '../types';
+import { ActionTypeModel, GenericValidationResult, ALERT_HISTORY_PREFIX } from '../../../../types';
+import { EsIndexConfig, IndexActionParams } from '../types';
 
 export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexActionParams> {
   return {
@@ -31,19 +26,6 @@ export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexAc
         defaultMessage: 'Index data',
       }
     ),
-    validateConnector: async (
-      action: EsIndexActionConnector
-    ): Promise<ConnectorValidationResult<Pick<EsIndexConfig, 'index'>, unknown>> => {
-      const translations = await import('./translations');
-      const configErrors = {
-        index: new Array<string>(),
-      };
-      const validationResult = { config: { errors: configErrors }, secrets: { errors: {} } };
-      if (!action.config.index) {
-        configErrors.index.push(translations.INDEX_REQUIRED);
-      }
-      return validationResult;
-    },
     actionConnectorFields: lazy(() => import('./es_index_connector')),
     actionParamsFields: lazy(() => import('./es_index_params')),
     validateParams: async (

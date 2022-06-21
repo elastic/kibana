@@ -18,7 +18,7 @@ import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
-import { getPreserveDrawingBuffer } from '../../kibana_services';
+import { getPreserveDrawingBuffer, isScreenshotMode } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { IVectorSource } from '../../classes/sources/vector_source';
 import { MapSettings } from '../../reducers/map';
@@ -304,7 +304,9 @@ export class MbMap extends Component<Props, State> {
 
   async _loadMakiSprites(mbMap: MapboxMap) {
     if (this._isMounted) {
-      const pixelRatio = Math.floor(window.devicePixelRatio);
+      // Math.floor rounds values < 1 to 0. This occurs when browser is zoomed out
+      // Math.max wrapper ensures value is always at least 1 in these cases
+      const pixelRatio = Math.max(Math.floor(window.devicePixelRatio), 1);
       for (const [symbolId, { svg }] of Object.entries(MAKI_ICONS)) {
         if (!mbMap.hasImage(symbolId)) {
           const imageData = await createSdfIcon({ renderSize: MAKI_ICON_SIZE, svg });
@@ -387,8 +389,9 @@ export class MbMap extends Component<Props, State> {
     }
 
     if (
-      this._prevDisableInteractive === undefined ||
-      this._prevDisableInteractive !== this.props.settings.disableInteractive
+      !isScreenshotMode() &&
+      (this._prevDisableInteractive === undefined ||
+        this._prevDisableInteractive !== this.props.settings.disableInteractive)
     ) {
       this._prevDisableInteractive = this.props.settings.disableInteractive;
       if (this.props.settings.disableInteractive) {

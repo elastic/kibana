@@ -43,14 +43,10 @@ export const getTimeseriesVisRenderer: (deps: {
   name: 'timeseries_vis',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
-    // Build optimization. Move app styles from main bundle
-    // @ts-expect-error TS error, cannot find type declaration for scss
-    import('./application/index.scss');
-
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
-    const { visParams: model, visData, syncColors } = config;
+    const { visParams: model, visData, syncColors, syncTooltips } = config;
 
     const showNoResult = !checkIfDataExists(visData, model);
 
@@ -70,6 +66,7 @@ export const getTimeseriesVisRenderer: (deps: {
               model={model}
               visData={visData as TimeseriesVisData}
               syncColors={syncColors}
+              syncTooltips={syncTooltips}
               uiState={handlers.uiState! as PersistedState}
             />
           </VisualizationContainer>

@@ -45,7 +45,7 @@ module.exports = {
     '^(!!)?file-loader!': '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/file_mock.js',
     ...Object.fromEntries(
       Array.from(pkgMap.entries()).map(([pkgId, repoRelativeDir]) => [
-        `^${pkgId}(/?.*)$`,
+        `^${pkgId}(/.*)?$`,
         `<rootDir>/${repoRelativeDir}$1`,
       ])
     ),
@@ -63,12 +63,16 @@ module.exports = {
         rootDirectory: '.',
       },
     ],
-    [
-      '@kbn/test/target_node/jest/ci_stats_jest_reporter',
-      {
-        testGroupType: 'Jest Unit Tests',
-      },
-    ],
+    ...(process.env.TEST_GROUP_TYPE_UNIT
+      ? [
+          [
+            '@kbn/test/target_node/jest/ci_stats_jest_reporter',
+            {
+              testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
+            },
+          ],
+        ]
+      : []),
   ],
 
   // The paths to modules that run some code to configure or set up the testing environment before each test

@@ -39,7 +39,6 @@ import { asDuration } from '../../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../../rules/create_observability_rule_type_registry';
 import { parseAlert } from '../parse_alert';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
-import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { translations, paths } from '../../../../config';
 
 type AlertsFlyoutProps = {
@@ -77,8 +76,7 @@ export function AlertsFlyout({
   }
 
   const ruleId = alertData.fields['kibana.alert.rule.uuid'] ?? null;
-  const linkToRule = ruleId && prepend ? prepend(paths.management.ruleDetails(ruleId)) : null;
-
+  const linkToRule = ruleId && prepend ? prepend(paths.observability.ruleDetails(ruleId)) : null;
   const overviewListItems = [
     {
       title: translations.alertsFlyout.statusLabel,
@@ -89,9 +87,17 @@ export function AlertsFlyout({
       ),
     },
     {
-      title: translations.alertsFlyout.lastUpdatedLabel,
+      title: translations.alertsFlyout.startedAtLabel,
       description: (
         <span title={alertData.start.toString()}>{moment(alertData.start).format(dateFormat)}</span>
+      ),
+    },
+    {
+      title: translations.alertsFlyout.lastUpdatedLabel,
+      description: (
+        <span title={alertData.lastUpdated.toString()}>
+          {moment(alertData.lastUpdated).format(dateFormat)}
+        </span>
       ),
     },
     {
@@ -115,7 +121,6 @@ export function AlertsFlyout({
   return (
     <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
       <EuiFlyoutHeader hasBorder>
-        <ExperimentalBadge />
         <EuiSpacer size="s" />
         <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
           <h2>{alertData.fields[ALERT_RULE_NAME]}</h2>

@@ -12,7 +12,7 @@ import React, { memo } from 'react';
 
 export const EuiPanelStyled = styled(EuiPanel)`
   &.artifactEntryCard + &.artifactEntryCard {
-    margin-top: ${({ theme }) => theme.eui.spacerSizes.l};
+    margin-top: ${({ theme }) => theme.eui.euiSizeL};
   }
 `;
 

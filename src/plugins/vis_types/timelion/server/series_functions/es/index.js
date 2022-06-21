@@ -104,7 +104,7 @@ export default new Datasource('es', {
       fit: 'nearest',
     });
     const indexPatternsService = tlConfig.getIndexPatternsService();
-    const indexPatternSpec = (await indexPatternsService.find(config.index)).find(
+    const indexPatternSpec = (await indexPatternsService.find(config.index, 1)).find(
       (index) => index.title === config.index
     );
 

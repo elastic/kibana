@@ -7,7 +7,7 @@
 
 import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { YAxisMode, YConfig } from '@kbn/expression-xy-plugin/common';
+import type { YAxisMode, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { layerTypes } from '../../common';
 import type { DatasourceLayers, FramePublicAPI, Visualization } from '../types';
@@ -34,7 +34,7 @@ export interface ReferenceLineBase {
  * * what groups are current defined in data layers
  * * what existing reference line are currently defined in reference layers
  */
-export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig[] }>(
+export function getGroupsToShow<T extends ReferenceLineBase & { config?: ExtendedYConfig[] }>(
   referenceLayers: T[],
   state: XYState | undefined,
   datasourceLayers: DatasourceLayers,
@@ -104,6 +104,7 @@ export function getStaticValue(
     untouchedDataLayers,
     accessors,
   } = getAccessorCriteriaForGroup(groupId, dataLayers, activeData);
+
   if (
     groupId === 'x' &&
     filteredLayers.length &&
@@ -111,6 +112,7 @@ export function getStaticValue(
   ) {
     return fallbackValue;
   }
+
   const computedValue = computeStaticValueForGroup(
     filteredLayers,
     accessors,
@@ -118,6 +120,7 @@ export function getStaticValue(
     groupId !== 'x', // histogram axis should compute the min based on the current data
     groupId !== 'x'
   );
+
   return computedValue ?? fallbackValue;
 }
 
@@ -165,6 +168,7 @@ export function computeOverallDataDomain(
   const accessorMap = new Set(accessorIds);
   let min: number | undefined;
   let max: number | undefined;
+
   const [stacked, unstacked] = partition(
     dataLayers,
     ({ seriesType }) => isStackedChart(seriesType) && allowStacking
@@ -268,13 +272,17 @@ export const getReferenceSupportedLayer = (
       label: 'x' as const,
     },
   ];
+
   const referenceLineGroups = getGroupsRelatedToData(
     referenceLineGroupIds,
     state,
     frame?.datasourceLayers || {},
     frame?.activeData
   );
-  const dataLayers = getDataLayers(state?.layers || []);
+
+  const layers = state?.layers || [];
+  const dataLayers = getDataLayers(layers);
+
   const filledDataLayers = dataLayers.filter(
     ({ accessors, xAccessor }) => accessors.length || xAccessor
   );
@@ -289,7 +297,7 @@ export const getReferenceSupportedLayer = (
         groupId: id,
         columnId: generateId(),
         dataType: 'number',
-        label: getAxisName(label, { isHorizontal: isHorizontalChart(state?.layers || []) }),
+        label: getAxisName(label, { isHorizontal: isHorizontalChart(layers) }),
         staticValue: getStaticValue(
           dataLayers,
           label,
@@ -317,6 +325,7 @@ export const getReferenceSupportedLayer = (
     initialDimensions,
   };
 };
+
 export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
   prevState,
   layerId,
@@ -361,7 +370,7 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
   };
 };
 
-const getSingleColorConfig = (id: string, color = defaultReferenceLineColor) => ({
+export const getSingleColorConfig = (id: string, color = defaultReferenceLineColor) => ({
   columnId: id,
   triggerIcon: 'color' as const,
   color,
@@ -397,6 +406,7 @@ export const getReferenceConfiguration = ({
       return axisMode;
     }
   );
+
   const groupsToShow = getGroupsToShow(
     [
       // When a reference layer panel is added, a static reference line should automatically be included by default
@@ -422,7 +432,7 @@ export const getReferenceConfiguration = ({
     ],
     state,
     frame.datasourceLayers,
-    frame?.activeData
+    frame.activeData
   );
   const isHorizontal = isHorizontalChart(state.layers);
   return {

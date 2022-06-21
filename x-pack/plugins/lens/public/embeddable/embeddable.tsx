@@ -12,6 +12,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { DataViewBase, Filter } from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
+  DataPublicPluginStart,
   ExecutionContextSearch,
   Query,
   TimefilterContract,
@@ -51,6 +52,7 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import {
@@ -58,8 +60,6 @@ import {
   isLensFilterEvent,
   isLensEditEvent,
   isLensTableRowContextMenuClickEvent,
-  LensBrushEvent,
-  LensFilterEvent,
   LensTableRowContextMenuEvent,
   VisualizationMap,
   Visualization,
@@ -94,9 +94,9 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   renderMode?: RenderMode;
   style?: React.CSSProperties;
   className?: string;
-  onBrushEnd?: (data: LensBrushEvent['data']) => void;
+  onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
   onLoad?: (isLoading: boolean) => void;
-  onFilter?: (data: LensFilterEvent['data']) => void;
+  onFilter?: (data: ClickTriggerEvent['data']) => void;
   onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 }
 
@@ -113,6 +113,7 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
+  data: DataPublicPluginStart;
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
@@ -179,6 +180,7 @@ function getViewUnderlyingDataArgs({
     activeDatasource,
     activeDatasourceState,
     activeData,
+    timeRange,
     capabilities
   );
 
@@ -348,6 +350,7 @@ export class Embeddable
     if (!this.savedVis || !this.savedVis.visualizationType) {
       return [];
     }
+
     return this.deps.visualizationMap[this.savedVis.visualizationType]?.triggers || [];
   }
 
@@ -458,6 +461,7 @@ export class Embeddable
       this.embeddableTitle = this.getTitle();
       isDirty = true;
     }
+
     return isDirty;
   }
 
@@ -529,6 +533,7 @@ export class Embeddable
           interactive={!input.disableTriggers}
           renderMode={input.renderMode}
           syncColors={input.syncColors}
+          syncTooltips={input.syncTooltips}
           hasCompatibleActions={this.hasCompatibleActions}
           className={input.className}
           style={input.style}
@@ -546,7 +551,7 @@ export class Embeddable
   private readonly hasCompatibleActions = async (
     event: ExpressionRendererEvent
   ): Promise<boolean> => {
-    if (isLensTableRowContextMenuClickEvent(event)) {
+    if (isLensTableRowContextMenuClickEvent(event) || isLensFilterEvent(event)) {
       const { getTriggerCompatibleActions } = this.deps;
       if (!getTriggerCompatibleActions) {
         return false;
@@ -609,7 +614,9 @@ export class Embeddable
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: {
           ...event.data,
-          timeFieldName: event.data.timeFieldName || inferTimeField(event.data),
+          timeFieldName:
+            event.data.timeFieldName ||
+            inferTimeField(this.deps.data.datatableUtilities, event.data),
         },
         embeddable: this,
       });
@@ -622,7 +629,9 @@ export class Embeddable
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: {
           ...event.data,
-          timeFieldName: event.data.timeFieldName || inferTimeField(event.data),
+          timeFieldName:
+            event.data.timeFieldName ||
+            inferTimeField(this.deps.data.datatableUtilities, event.data),
         },
         embeddable: this,
       });
@@ -796,6 +805,10 @@ export class Embeddable
   public getDescription() {
     // mind that savedViz is loaded in async way here
     return this.savedVis && this.savedVis.description;
+  }
+
+  public getSavedVis(): Readonly<Document | undefined> {
+    return this.savedVis;
   }
 
   destroy() {

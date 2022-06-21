@@ -17,7 +17,6 @@ import {
 
 import { Config } from '../../config';
 import { Runner } from '../../../fake_mocha_types';
-import { TestMetadata, ScreenshotRecord } from '../../test_metadata';
 import { Lifecycle } from '../../lifecycle';
 import { getSnapshotOfRunnableLogs } from '../../../../mocha';
 
@@ -36,7 +35,6 @@ interface Runnable {
   file: string;
   title: string;
   parent: Suite;
-  _screenshots?: ScreenshotRecord[];
 }
 
 function getHookType(hook: Runnable): CiStatsTestType {
@@ -60,15 +58,18 @@ export function setupCiStatsFtrTestGroupReporter({
   config,
   lifecycle,
   runner,
-  testMetadata,
   reporter,
 }: {
   config: Config;
   lifecycle: Lifecycle;
   runner: Runner;
-  testMetadata: TestMetadata;
   reporter: CiStatsReporter;
 }) {
+  const testGroupType = process.env.TEST_GROUP_TYPE_FUNCTIONAL;
+  if (!testGroupType) {
+    throw new Error('missing process.env.TEST_GROUP_TYPE_FUNCTIONAL');
+  }
+
   let startMs: number | undefined;
   runner.on('start', () => {
     startMs = Date.now();
@@ -78,8 +79,9 @@ export function setupCiStatsFtrTestGroupReporter({
   const group: CiStatsReportTestsOptions['group'] = {
     startTime: new Date(start).toJSON(),
     durationMs: 0,
-    type: config.path.startsWith('x-pack') ? 'X-Pack Functional Tests' : 'Functional Tests',
+    type: testGroupType,
     name: Path.relative(REPO_ROOT, config.path),
+    result: 'skip',
     meta: {
       ciGroup: config.get('suiteTags.include').find((t: string) => t.startsWith('ciGroup')),
       tags: [
@@ -105,10 +107,6 @@ export function setupCiStatsFtrTestGroupReporter({
       type,
       error: error?.stack,
       stdout: getSnapshotOfRunnableLogs(runnable),
-      screenshots: testMetadata.getScreenshots(runnable).map((s) => ({
-        base64Png: s.base64Png,
-        name: s.name,
-      })),
     });
   }
 
@@ -116,6 +114,11 @@ export function setupCiStatsFtrTestGroupReporter({
   runner.on('fail', (test: Runnable, error: Error) => {
     errors.set(test, error);
   });
+
+  let passCount = 0;
+  let failCount = 0;
+  runner.on('pass', () => (passCount += 1));
+  runner.on('fail', () => (failCount += 1));
 
   runner.on('hook end', (hook: Runnable) => {
     if (hook.isFailed()) {
@@ -150,6 +153,7 @@ export function setupCiStatsFtrTestGroupReporter({
 
     // update the durationMs
     group.durationMs = Date.now() - startMs;
+    group.result = failCount ? 'fail' : passCount ? 'pass' : 'skip';
   });
 
   lifecycle.cleanup.add(async () => {

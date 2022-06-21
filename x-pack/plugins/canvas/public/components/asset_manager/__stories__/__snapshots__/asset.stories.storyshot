@@ -29,7 +29,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
         </figure>
       </div>
       <div
-        className="euiSpacer euiSpacer--s"
+        className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
       />
       <div
         className="euiText euiText--extraSmall eui-textBreakAll"
@@ -54,7 +54,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
         </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--s"
+        className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow"
@@ -216,7 +216,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
         </figure>
       </div>
       <div
-        className="euiSpacer euiSpacer--s"
+        className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
       />
       <div
         className="euiText euiText--extraSmall eui-textBreakAll"
@@ -241,7 +241,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
         </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--s"
+        className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow"

@@ -21,8 +21,8 @@ export * from './deprecated';
 export { getEsQueryConfig, FilterStateStore } from '../common';
 export {
   getDisplayValueFromFilter,
+  getFieldDisplayValueFromFilter,
   generateFilters,
-  extractTimeRange,
   getIndexPatternFromFilter,
 } from './query';
 
@@ -58,8 +58,6 @@ import {
   validateDataView,
 } from './data_views';
 
-export type { IndexPatternsService } from './data_views';
-
 // Index patterns namespace:
 export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
@@ -74,13 +72,9 @@ export const indexPatterns = {
   validate: validateDataView,
 };
 
-export type { IndexPatternsContract, DataViewsContract, TypeMeta } from './data_views';
-export { IndexPattern, IndexPatternField } from './data_views';
+export type { DataViewsContract, TypeMeta } from './data_views';
 
 export type {
-  IIndexPattern,
-  IFieldType,
-  IndexPatternAttributes,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternLoadExpressionFunctionDefinition,
   GetFieldsOptions,
@@ -121,13 +115,10 @@ import {
   parseInterval,
   toAbsoluteDates,
   boundsDescendingRaw,
-  getNumberHistogramIntervalByDatatableColumn,
-  getDateHistogramMetaDataByDatatableColumn,
   getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
-  checkColumnForPrecisionError,
 } from '../common';
 
 export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
@@ -231,13 +222,10 @@ export const search = {
     termsAggFilter,
     toAbsoluteDates,
     boundsDescendingRaw,
-    getNumberHistogramIntervalByDatatableColumn,
-    getDateHistogramMetaDataByDatatableColumn,
   },
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
-  checkColumnForPrecisionError,
 };
 
 /*
@@ -254,6 +242,7 @@ export {
   createSavedQueryService,
   connectToQueryState,
   syncQueryStateWithUrl,
+  syncGlobalQueryStateWithUrl,
   getDefaultQuery,
   FilterManager,
   TimeHistory,
@@ -263,10 +252,11 @@ export {
 } from './query';
 
 export { NowProvider } from './now_provider';
-export type { NowProviderInternalContract } from './now_provider';
+export type { NowProviderInternalContract, NowProviderPublicContract } from './now_provider';
 
 export type {
   QueryState,
+  QueryState$,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
@@ -279,6 +269,7 @@ export type {
   QueryStringContract,
   QuerySetup,
   TimefilterSetup,
+  GlobalQueryStateFromUrl,
 } from './query';
 
 export type { AggsStart } from './search/aggs';

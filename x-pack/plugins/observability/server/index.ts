@@ -31,12 +31,6 @@ export const config: PluginConfigDescriptor = {
       enabled: schema.boolean({ defaultValue: true }),
       index: schema.string({ defaultValue: 'observability-annotations' }),
     }),
-    unsafe: schema.object({
-      alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
-      rules: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
-      cases: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
-      overviewNext: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    }),
   }),
 };
 

@@ -42,7 +42,7 @@ import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-ty
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
-import { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
+import { RulesClient, PartialRule, BulkEditOperation } from '@kbn/alerting-plugin/server';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
@@ -91,8 +91,14 @@ import {
   TimestampOverrideOrUndefined,
   BuildingBlockTypeOrUndefined,
   RuleNameOverrideOrUndefined,
+  TimestampFieldOrUndefined,
   EventCategoryOverrideOrUndefined,
+  TiebreakerFieldOrUndefined,
   NamespaceOrUndefined,
+  DataViewIdOrUndefined,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
 } from '../../../../common/detection_engine/schemas/common';
 
 import { PartialFilter } from '../types';
@@ -144,7 +150,9 @@ export interface CreateRulesOptions {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   enabled: Enabled;
+  timestampField: TimestampFieldOrUndefined;
   eventCategoryOverride: EventCategoryOverrideOrUndefined;
+  tiebreakerField: TiebreakerFieldOrUndefined;
   falsePositives: FalsePositives;
   from: From;
   query: QueryOrUndefined;
@@ -158,14 +166,18 @@ export interface CreateRulesOptions {
   ruleId: RuleId;
   immutable: Immutable;
   index: IndexOrUndefined;
+  dataViewId: DataViewIdOrUndefined;
   interval: Interval;
   license: LicenseOrUndefined;
   maxSignals: MaxSignals;
+  relatedIntegrations: RelatedIntegrationArray | undefined;
+  requiredFields: RequiredFieldArray | undefined;
   riskScore: RiskScore;
   riskScoreMapping: RiskScoreMapping;
   ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndex;
   name: Name;
+  setup: SetupGuide | undefined;
   severity: Severity;
   severityMapping: SeverityMapping;
   tags: Tags;
@@ -210,7 +222,9 @@ interface PatchRulesFieldsOptions {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
   enabled: EnabledOrUndefined;
+  timestampField: TimestampFieldOrUndefined;
   eventCategoryOverride: EventCategoryOverrideOrUndefined;
+  tiebreakerField: TiebreakerFieldOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
   from: FromOrUndefined;
   query: QueryOrUndefined;
@@ -222,14 +236,18 @@ interface PatchRulesFieldsOptions {
   machineLearningJobId: MachineLearningJobIdOrUndefined;
   filters: PartialFilter[];
   index: IndexOrUndefined;
+  dataViewId: DataViewIdOrUndefined;
   interval: IntervalOrUndefined;
   license: LicenseOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
+  relatedIntegrations: RelatedIntegrationArray | undefined;
+  requiredFields: RequiredFieldArray | undefined;
   riskScore: RiskScoreOrUndefined;
   riskScoreMapping: RiskScoreMappingOrUndefined;
   ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndexOrUndefined;
   name: NameOrUndefined;
+  setup: SetupGuide | undefined;
   severity: SeverityOrUndefined;
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
@@ -275,6 +293,15 @@ export interface FindRuleOptions {
   filter: QueryFilterOrUndefined;
   fields: FieldsOrUndefined;
   sortOrder: SortOrderOrUndefined;
+}
+
+export interface BulkEditRulesOptions {
+  isRuleRegistryEnabled: boolean;
+  rulesClient: RulesClient;
+  operations: BulkEditOperation[];
+  filter?: QueryFilterOrUndefined;
+  ids?: string[];
+  paramsModifier?: (params: RuleParams) => Promise<RuleParams>;
 }
 
 export interface LegacyMigrateParams {

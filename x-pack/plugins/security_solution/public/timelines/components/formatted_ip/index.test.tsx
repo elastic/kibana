@@ -60,6 +60,8 @@ describe('FormattedIp', () => {
     value: '192.168.1.1',
     contextId: 'test-context-id',
     eventId: 'test-event-id',
+    isAggregatable: true,
+    fieldType: 'ip',
     isDraggable: false,
     fieldName: 'host.ip',
   };
@@ -104,7 +106,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
+    wrapper.find('[data-test-subj="network-details"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
@@ -126,7 +128,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
+    wrapper.find('[data-test-subj="network-details"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
         panelView: 'networkDetail',
@@ -155,7 +157,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
+    wrapper.find('[data-test-subj="network-details"]').last().simulate('click');
     await waitFor(() => {
       expect(toggleExpandedDetail).toHaveBeenCalledWith({
         panelView: 'networkDetail',
@@ -182,7 +184,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
+    wrapper.find('[data-test-subj="network-details"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
         panelView: 'networkDetail',

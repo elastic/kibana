@@ -29,6 +29,10 @@ import {
   getAccessorByDimension,
   getFormatByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+} from '@kbn/visualizations-plugin/common/constants';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
 import {
@@ -127,6 +131,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     timeZone,
     formatFactory,
     chartsThemeService,
+    datatableUtilities,
     onClickValue,
     onSelectRange,
     paletteService,
@@ -311,7 +316,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const xValuesFormatter = formatFactory(xAxisMeta?.params);
     const metricFormatter = formatFactory(getFormatByAccessor(args.valueAccessor!, table.columns));
     const dateHistogramMeta = xAxisColumn
-      ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
+      ? datatableUtilities.getDateHistogramMeta(xAxisColumn)
       : undefined;
 
     // Fallback to the ordinal scale type when a single row of data is provided.
@@ -485,7 +490,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
               showLegend={showLegend ?? args.legend.isVisible}
               legendPosition={args.legend.position}
-              legendSize={args.legend.legendSize}
+              legendSize={LegendSizeToPixels[args.legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
               tooltip={tooltip}

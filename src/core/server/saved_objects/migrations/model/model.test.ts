@@ -59,6 +59,8 @@ describe('migrations v2 model', () => {
     retryAttempts: 15,
     batchSize: 1000,
     maxBatchSizeBytes: 1e8,
+    discardUnknownObjects: false,
+    discardCorruptObjects: false,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
     targetIndexMappings: {
@@ -81,7 +83,7 @@ describe('migrations v2 model', () => {
     versionAlias: '.kibana_7.11.0',
     versionIndex: '.kibana_7.11.0_001',
     tempIndex: '.kibana_7.11.0_reindex_temp',
-    unusedTypesQuery: {
+    excludeOnUpgradeQuery: {
       bool: {
         must_not: [
           {
@@ -95,7 +97,10 @@ describe('migrations v2 model', () => {
     knownTypes: ['dashboard', 'config'],
     excludeFromUpgradeFilterHooks: {},
     migrationDocLinks: {
-      resolveMigrationFailures: 'resolveMigrationFailures',
+      resolveMigrationFailures: 'https://someurl.co/',
+      repeatedTimeoutRequests: 'repeatedTimeoutRequests',
+      routingAllocationDisabled: 'routingAllocationDisabled',
+      clusterShardLimitExceeded: 'clusterShardLimitExceeded',
     },
   };
 
@@ -280,16 +285,21 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('INIT -> FATAL when cluster routing allocation is not enabled', () => {
+      test('INIT -> INIT when cluster routing allocation is incompatible', () => {
         const res: ResponseType<'INIT'> = Either.left({
-          type: 'unsupported_cluster_routing_allocation',
+          type: 'incompatible_cluster_routing_allocation',
         });
         const newState = model(initState, res) as FatalState;
 
-        expect(newState.controlState).toEqual('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(
-          `"The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {\\"transient\\": {\\"cluster.routing.allocation.enable\\": null}, \\"persistent\\": {\\"cluster.routing.allocation.enable\\": null}}"`
-        );
+        expect(newState.controlState).toEqual('INIT');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[incompatible_cluster_routing_allocation] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to routingAllocationDisabled for more information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
       test("INIT -> FATAL when .kibana points to newer version's index", () => {
         const res: ResponseType<'INIT'> = Either.right({
@@ -572,6 +582,12 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('LEGACY_CREATE_REINDEX_TARGET');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
       test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_REINDEX resets retry count and retry delay if action succeeds', () => {
         const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> =
@@ -585,6 +601,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('LEGACY_REINDEX');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('LEGACY_CREATE_REINDEX_TARGET -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
+        const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> = Either.left({
+          type: 'cluster_shard_limit_exceeded',
+        });
+        const newState = model(legacyCreateReindexTargetState, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
       });
     });
 
@@ -740,6 +766,12 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('WAIT_FOR_YELLOW_SOURCE');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
 
       test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS resets retry count and delay if action succeeds', () => {
@@ -775,7 +807,7 @@ describe('migrations v2 model', () => {
         },
       } as const;
 
-      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds', () => {
+      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds and no unknown docs are found', () => {
         const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
           ...baseState,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
@@ -823,29 +855,76 @@ describe('migrations v2 model', () => {
         expect(newState.logs).toEqual([]);
       });
 
-      test('CHECK_UNKNOWN_DOCUMENTS -> FATAL if action fails and unknown docs were found', () => {
-        const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
-          ...baseState,
-          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-          sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
-          sourceIndexMappings: mappingsWithUnknownType,
-        };
+      describe('when unknown docs are found', () => {
+        test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if discardUnknownObjects=true', () => {
+          const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
+            ...baseState,
+            discardUnknownObjects: true,
+            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+            sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
+            sourceIndexMappings: mappingsWithUnknownType,
+          };
 
-        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.left({
-          type: 'unknown_docs_found',
-          unknownDocs: [
-            { id: 'dashboard:12', type: 'dashboard' },
-            { id: 'foo:17', type: 'foo' },
-          ],
+          const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
+            type: 'unknown_docs_found',
+            unknownDocs: [
+              { id: 'dashboard:12', type: 'dashboard' },
+              { id: 'foo:17', type: 'foo' },
+            ],
+          });
+          const newState = model(checkUnknownDocumentsSourceState, res);
+
+          expect(newState).toMatchObject({
+            controlState: 'SET_SOURCE_WRITE_BLOCK',
+            sourceIndex: Option.some('.kibana_3'),
+            targetIndex: '.kibana_7.11.0_001',
+          });
+
+          expect(newState.excludeOnUpgradeQuery).toEqual({
+            bool: {
+              must_not: [
+                { term: { type: 'unused-fleet-agent-events' } },
+                { term: { type: 'dashboard' } },
+                { term: { type: 'foo' } },
+              ],
+              must: [{ exists: { field: 'type' } }],
+            },
+          });
+
+          // we should have a warning in the logs about the ignored types
+          expect(
+            newState.logs.find(({ level, message }) => {
+              return (
+                level === 'warning' && message.includes('dashboard') && message.includes('foo')
+              );
+            })
+          ).toBeDefined();
         });
-        const newState = model(checkUnknownDocumentsSourceState, res);
-        expect(newState.controlState).toEqual('FATAL');
 
-        expect(newState).toMatchObject({
-          controlState: 'FATAL',
-          reason: expect.stringContaining(
-            'Migration failed because documents were found for unknown saved object types'
-          ),
+        test('CHECK_UNKNOWN_DOCUMENTS -> FATAL if discardUnknownObjects=false', () => {
+          const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
+            ...baseState,
+            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+            sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
+            sourceIndexMappings: mappingsWithUnknownType,
+          };
+
+          const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
+            type: 'unknown_docs_found',
+            unknownDocs: [
+              { id: 'dashboard:12', type: 'dashboard' },
+              { id: 'foo:17', type: 'foo' },
+            ],
+          });
+          const newState = model(checkUnknownDocumentsSourceState, res);
+          expect(newState.controlState).toEqual('FATAL');
+
+          expect(newState).toMatchObject({
+            controlState: 'FATAL',
+            reason: expect.stringContaining(
+              'Migration failed because some documents were found which use unknown saved object types'
+            ),
+          });
         });
       });
     });
@@ -896,30 +975,27 @@ describe('migrations v2 model', () => {
         const newState = model(state, res);
         expect(newState.controlState).toEqual('CALCULATE_EXCLUDE_FILTERS');
       });
-      test('CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP if action succeeds with filters', () => {
+      it('CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP if action succeeds with filters', () => {
         const res: ResponseType<'CALCULATE_EXCLUDE_FILTERS'> = Either.right({
-          excludeFilter: { bool: { must: { term: { fieldA: 'abc' } } } },
+          mustNotClauses: [{ term: { fieldA: 'abc' } }],
           errorsByType: { type1: new Error('an error!') },
         });
         const newState = model(state, res);
         expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
-        expect(newState.unusedTypesQuery).toEqual({
-          // New filter should be combined unused type query and filter from response
+
+        expect(newState.excludeOnUpgradeQuery).toEqual({
+          // new filters should be added inside a must_not clause, enriching excludeOnUpgradeQuery
           bool: {
-            filter: [
+            must_not: [
               {
-                bool: {
-                  must_not: [
-                    {
-                      term: {
-                        type: 'unused-fleet-agent-events',
-                      },
-                    },
-                  ],
+                term: {
+                  type: 'unused-fleet-agent-events',
                 },
               },
               {
-                bool: { must: { term: { fieldA: 'abc' } } },
+                term: {
+                  fieldA: 'abc',
+                },
               },
             ],
           },
@@ -959,6 +1035,12 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
       it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT resets retry count if action succeeds', () => {
         const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
@@ -971,6 +1053,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('CREATE_REINDEX_TEMP -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
+        const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.left({
+          type: 'cluster_shard_limit_exceeded',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
       });
     });
 
@@ -1047,24 +1139,56 @@ describe('migrations v2 model', () => {
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
 
-      it('REINDEX_SOURCE_TO_TEMP_READ -> FATAL if no outdated documents to reindex and transform failures seen with previous outdated documents', () => {
-        const testState: ReindexSourceToTempRead = {
-          ...state,
-          corruptDocumentIds: ['a:b'],
-          transformErrors: [],
-        };
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
-          outdatedDocuments: [],
-          lastHitSortValue: undefined,
-          totalHits: undefined,
+      describe('when transform failures or corrupt documents are found', () => {
+        it('REINDEX_SOURCE_TO_TEMP_READ -> FATAL if no outdated documents to reindex and transform failures seen with previous outdated documents', () => {
+          const testState: ReindexSourceToTempRead = {
+            ...state,
+            corruptDocumentIds: ['a:b'],
+            transformErrors: [],
+          };
+          const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+            outdatedDocuments: [],
+            lastHitSortValue: undefined,
+            totalHits: undefined,
+          });
+          const newState = model(testState, res) as FatalState;
+          expect(newState.controlState).toBe('FATAL');
+          expect(newState.reason).toMatchInlineSnapshot(`
+            "Migrations failed. Reason: 1 corrupt saved object documents were found: a:b
+
+            To allow migrations to proceed, please delete or fix these documents.
+            Note that you can configure Kibana to automatically discard corrupt documents and transform errors for this migration.
+            Please refer to https://someurl.co/ for more information."
+          `);
+          expect(newState.logs).toStrictEqual([]); // No logs because no hits
         });
-        const newState = model(testState, res) as FatalState;
-        expect(newState.controlState).toBe('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(`
-          "Migrations failed. Reason: 1 corrupt saved object documents were found: a:b
-          To allow migrations to proceed, please delete or fix these documents."
-        `);
-        expect(newState.logs).toStrictEqual([]); // No logs because no hits
+
+        it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if discardCorruptObjects=true', () => {
+          const testState: ReindexSourceToTempRead = {
+            ...state,
+            discardCorruptObjects: true,
+            corruptDocumentIds: ['a:b'],
+            transformErrors: [{ rawId: 'c:d', err: new Error('Oops!') }],
+          };
+          const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+            outdatedDocuments: [],
+            lastHitSortValue: undefined,
+            totalHits: undefined,
+          });
+          const newState = model(testState, res) as ReindexSourceToTempClosePit;
+          expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT');
+          expect(newState.logs.length).toEqual(1);
+          expect(newState.logs[0]).toMatchInlineSnapshot(`
+            Object {
+              "level": "warning",
+              "message": "Kibana has been configured to discard corrupt documents and documents that cause transform errors for this migration.
+            Therefore, the following documents will not be taken into account and they will not be available after the migration:
+            - \\"a:b\\" (corrupt)
+            - \\"c:d\\" (Oops!)
+            ",
+            }
+          `);
+        });
       });
     });
 
@@ -1159,6 +1283,7 @@ describe('migrations v2 model', () => {
           type: 'documents_transform_failed',
           corruptDocumentIds: ['a:b'],
           transformErrors: [],
+          processedDocs: [],
         });
         const newState = model(state, res) as ReindexSourceToTempRead;
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
@@ -1188,6 +1313,8 @@ describe('migrations v2 model', () => {
         sourceIndexPitId: 'pit_id',
         targetIndex: '.kibana_7.11.0_001',
         lastHitSortValue: undefined,
+        transformErrors: [],
+        corruptDocumentIds: [],
         progress: createInitialProgress(),
       };
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded', () => {
@@ -1293,8 +1420,14 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('CLONE_TEMP_TO_TARGET');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
-      it('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY resets the retry count and delay', () => {
+      it('CLONE_TEMP_TO_TARGET -> MARK_VERSION_INDEX_READY resets the retry count and delay', () => {
         const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.right({
           acknowledged: true,
           shardsAcknowledged: true,
@@ -1308,6 +1441,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toBe('REFRESH_TARGET');
         expect(newState.retryCount).toBe(0);
         expect(newState.retryDelay).toBe(0);
+      });
+      test('CLONE_TEMP_TO_TARGET -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
+        const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.left({
+          type: 'cluster_shard_limit_exceeded',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
       });
     });
 
@@ -1564,6 +1707,7 @@ describe('migrations v2 model', () => {
             type: 'documents_transform_failed',
             corruptDocumentIds,
             transformErrors: [],
+            processedDocs: [],
           });
           const newState = model(
             outdatedDocumentsTransformState,
@@ -1584,6 +1728,7 @@ describe('migrations v2 model', () => {
             type: 'documents_transform_failed',
             corruptDocumentIds: newFailedTransformDocumentIds,
             transformErrors: transformationErrors,
+            processedDocs: [],
           });
           const newState = model(
             outdatedDocumentsTransformStateWithFailedDocuments,
@@ -1817,6 +1962,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('CREATE_NEW_TARGET -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
+        const res: ResponseType<'CREATE_NEW_TARGET'> = Either.left({
+          type: 'cluster_shard_limit_exceeded',
+        });
+        const newState = model(createNewTargetState, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
       });
     });
 

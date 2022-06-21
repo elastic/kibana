@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
-
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { USER } from '../../../../functional/services/ml/security_common';
@@ -26,18 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
         const ecIndexPattern = 'ft_module_sample_ecommerce';
         const ecExpectedTotalCount = '287';
 
-        const uploadFilePath = path.join(
-          __dirname,
-          '..',
-          '..',
-          '..',
-          '..',
-          'functional',
-          'apps',
-          'ml',
-          'data_visualizer',
-          'files_to_import',
-          'artificial_server_log'
+        const uploadFilePath = require.resolve(
+          '../../../../functional/apps/ml/data_visualizer/files_to_import/artificial_server_log'
         );
         const expectedUploadFileTitle = 'artificial_server_log';
 

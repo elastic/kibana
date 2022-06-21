@@ -13,43 +13,44 @@ import { getServicesFromErrorAndMetricDocuments } from './get_services_from_erro
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
 import { ServiceGroup } from '../../../../common/service_groups';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 export type ServicesItemsSetup = Setup;
 
-const MAX_NUMBER_OF_SERVICES = 50;
+const MAX_NUMBER_OF_SERVICES = 500;
 
 export async function getServicesItems({
   environment,
   kuery,
-  probability,
   setup,
   searchAggregatedTransactions,
   logger,
   start,
   end,
   serviceGroup,
+  randomSampler,
 }: {
   environment: string;
   kuery: string;
-  probability: number;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   logger: Logger;
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
+  randomSampler: RandomSampler;
 }) {
   return withApmSpan('get_services_items', async () => {
     const params = {
       environment,
       kuery,
-      probability,
       setup,
       searchAggregatedTransactions,
       maxNumServices: MAX_NUMBER_OF_SERVICES,
       start,
       end,
       serviceGroup,
+      randomSampler,
     };
 
     const [

@@ -12,7 +12,7 @@ import { TypeOf } from '@kbn/config-schema';
 import { CommentType } from '@kbn/cases-plugin/common';
 import { CasesByAlertId } from '@kbn/cases-plugin/common/api/cases/case';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import { HostIsolationRequestSchema } from '../../../../common/endpoint/schema/actions';
+import { NoParametersRequestSchema } from '../../../../common/endpoint/schema/actions';
 import {
   ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTION_RESPONSES_DS,
@@ -49,7 +49,7 @@ export function registerHostIsolationRoutes(
   router.post(
     {
       path: ISOLATE_HOST_ROUTE,
-      validate: HostIsolationRequestSchema,
+      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
@@ -63,7 +63,7 @@ export function registerHostIsolationRoutes(
   router.post(
     {
       path: UNISOLATE_HOST_ROUTE,
-      validate: HostIsolationRequestSchema,
+      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
@@ -107,7 +107,7 @@ export const isolationRequestHandler = function (
 ): RequestHandler<
   unknown,
   unknown,
-  TypeOf<typeof HostIsolationRequestSchema.body>,
+  TypeOf<typeof NoParametersRequestSchema.body>,
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
@@ -190,6 +190,7 @@ export const isolationRequestHandler = function (
             body: {
               ...doc,
             },
+            refresh: 'wait_for',
           },
           { meta: true }
         );
@@ -221,6 +222,7 @@ export const isolationRequestHandler = function (
             timeout: 300, // 5 minutes
             user_id: doc.user.id,
           },
+          refresh: 'wait_for',
         },
         { meta: true }
       );

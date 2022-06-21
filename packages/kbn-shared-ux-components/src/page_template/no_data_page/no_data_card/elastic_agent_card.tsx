@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useApplication, useHttp, usePermissions } from '@kbn/shared-ux-services';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import useObservable from 'react-use/lib/useObservable';
 
 import { ElasticAgentCardProps } from './types';
 import { ElasticAgentCardComponent } from './elastic_agent_card.component';
@@ -16,27 +18,28 @@ export const ElasticAgentCard = (props: ElasticAgentCardProps) => {
   const { canAccessFleet } = usePermissions();
   const { addBasePath } = useHttp();
   const { navigateToUrl, currentAppId$ } = useApplication();
+  const currentAppId = useObservable(currentAppId$);
 
-  const createHref = () => {
-    const { href, category } = props;
-    if (href) {
-      return href;
+  const { href: srcHref, category, description } = props;
+
+  const href = useMemo(() => {
+    if (srcHref) {
+      return srcHref;
     }
+
     // TODO: get this URL from a locator
     const prefix = '/app/integrations/browse';
+
     if (category) {
       return addBasePath(`${prefix}/${category}`);
     }
-    return prefix;
-  };
+
+    return addBasePath(prefix);
+  }, [addBasePath, srcHref, category]);
 
   return (
-    <ElasticAgentCardComponent
-      {...props}
-      href={createHref()}
-      canAccessFleet={canAccessFleet}
-      navigateToUrl={navigateToUrl}
-      currentAppId$={currentAppId$}
-    />
+    <RedirectAppLinks {...{ currentAppId, navigateToUrl }}>
+      <ElasticAgentCardComponent {...{ ...props, href, canAccessFleet, description }} />
+    </RedirectAppLinks>
   );
 };

@@ -319,6 +319,7 @@ function mockSeriesStorageContext({
     firstSeries: mockDataSeries[0],
     allSeries: mockDataSeries,
     setReportType: jest.fn(),
+    setChartTimeRangeContext: jest.fn(),
     storage: {
       get: jest
         .fn()

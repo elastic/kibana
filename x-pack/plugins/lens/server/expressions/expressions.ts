@@ -13,9 +13,8 @@ import {
   renameColumns,
   getTimeScale,
   getDatatable,
-  lensMultitable,
 } from '../../common/expressions';
-import { getFormatFactory, getTimeZoneFactory } from './utils';
+import { getDatatableUtilitiesFactory, getFormatFactory, getTimeZoneFactory } from './utils';
 
 import type { PluginStartContract } from '../plugin';
 
@@ -23,13 +22,11 @@ export const setupExpressions = (
   core: CoreSetup<PluginStartContract>,
   expressions: ExpressionsServerSetup
 ) => {
-  [lensMultitable].forEach((expressionType) => expressions.registerType(expressionType));
-
   [
     counterRate,
     formatColumn,
     renameColumns,
     getDatatable(getFormatFactory(core)),
-    getTimeScale(getTimeZoneFactory(core)),
+    getTimeScale(getDatatableUtilitiesFactory(core), getTimeZoneFactory(core)),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));
 };

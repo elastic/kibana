@@ -5,21 +5,9 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import { Observable, ExternalServiceSIR, ObservableResponse, ServiceFactory } from './types';
 
-import { Logger } from '@kbn/core/server';
-import {
-  ExternalServiceCredentials,
-  SNProductsConfigValue,
-  Observable,
-  ExternalServiceSIR,
-  ObservableResponse,
-  ServiceFactory,
-} from './types';
-
-import { ServiceNowSecretConfigurationType } from './types';
 import { request } from '../lib/axios_utils';
-import { ActionsConfigurationUtilities } from '../../actions_config';
 import { createExternalService } from './service';
 import { createServiceError } from './utils';
 
@@ -29,22 +17,19 @@ const getAddObservableToIncidentURL = (url: string, incidentID: string) =>
 const getBulkAddObservableToIncidentURL = (url: string, incidentID: string) =>
   `${url}/api/x_elas2_sir_int/elastic_api/incident/${incidentID}/observables/bulk`;
 
-export const createExternalServiceSIR: ServiceFactory<ExternalServiceSIR> = (
-  credentials: ExternalServiceCredentials,
-  logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities,
-  serviceConfig: SNProductsConfigValue
-): ExternalServiceSIR => {
-  const snService = createExternalService(
+export const createExternalServiceSIR: ServiceFactory<ExternalServiceSIR> = ({
+  credentials,
+  logger,
+  configurationUtilities,
+  serviceConfig,
+  axiosInstance,
+}): ExternalServiceSIR => {
+  const snService = createExternalService({
     credentials,
     logger,
     configurationUtilities,
-    serviceConfig
-  );
-
-  const { username, password } = credentials.secrets as ServiceNowSecretConfigurationType;
-  const axiosInstance = axios.create({
-    auth: { username, password },
+    serviceConfig,
+    axiosInstance,
   });
 
   const _addObservable = async (data: Observable | Observable[], url: string) => {

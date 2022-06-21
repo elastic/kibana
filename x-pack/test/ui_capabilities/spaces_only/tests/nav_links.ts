@@ -17,7 +17,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
   const featuresService: FeaturesService = getService('features');
 
   const uiCapabilitiesExceptions = [
-    // enterprise_search plugin is loaded but disabled because security isn't enabled in ES. That means the following 4 capabilities are disabled
+    // enterprise_search plugin is loaded but disabled because security isn't enabled in ES. That means the following capabilities are disabled
     'enterpriseSearch',
     'enterpriseSearchContent',
     'appSearch',

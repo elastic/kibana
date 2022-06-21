@@ -30,9 +30,6 @@ Object {
         "curveType": Array [
           "LINEAR",
         ],
-        "description": Array [
-          "",
-        ],
         "emphasizeFitting": Array [
           true,
         ],
@@ -135,6 +132,12 @@ Object {
                   "splitAccessor": Array [
                     "d",
                   ],
+                  "table": Array [
+                    Object {
+                      "chain": Array [],
+                      "type": "expression",
+                    },
+                  ],
                   "xAccessor": Array [
                     "a",
                   ],
@@ -142,11 +145,8 @@ Object {
                     "linear",
                   ],
                   "yConfig": Array [],
-                  "yScaleType": Array [
-                    "linear",
-                  ],
                 },
-                "function": "dataLayer",
+                "function": "extendedDataLayer",
                 "type": "function",
               },
             ],
@@ -167,7 +167,7 @@ Object {
                   "legendSize": Array [],
                   "maxLines": Array [],
                   "position": Array [
-                    "bottom",
+                    "left",
                   ],
                   "shouldTruncate": Array [
                     true,
@@ -204,14 +204,27 @@ Object {
             "type": "expression",
           },
         ],
-        "title": Array [
-          "",
-        ],
         "valueLabels": Array [
           "hide",
         ],
         "valuesInLegend": Array [
           false,
+        ],
+        "xExtent": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "lowerBound": Array [],
+                  "mode": Array [],
+                  "upperBound": Array [],
+                },
+                "function": "axisExtentConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
         ],
         "xTitle": Array [
           "",
@@ -222,9 +235,7 @@ Object {
               Object {
                 "arguments": Object {
                   "lowerBound": Array [],
-                  "mode": Array [
-                    "full",
-                  ],
+                  "mode": Array [],
                   "upperBound": Array [],
                 },
                 "function": "axisExtentConfig",
@@ -233,6 +244,9 @@ Object {
             ],
             "type": "expression",
           },
+        ],
+        "yLeftScale": Array [
+          "linear",
         ],
         "yRightExtent": Array [
           Object {
@@ -256,6 +270,9 @@ Object {
             "type": "expression",
           },
         ],
+        "yRightScale": Array [
+          "linear",
+        ],
         "yRightTitle": Array [
           "",
         ],
@@ -263,7 +280,7 @@ Object {
           "",
         ],
       },
-      "function": "xyVis",
+      "function": "layeredXyVis",
       "type": "function",
     },
   ],

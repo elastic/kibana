@@ -10,7 +10,7 @@ import { services } from './services';
 import { pageObjects } from './page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
     ...functionalConfig.getAll(),
@@ -36,6 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/upgrade_assistant'),
       require.resolve('./apps/canvas'),
       require.resolve('./apps/maps'),
+      require.resolve('./apps/graph'),
       require.resolve('./apps/security_solution'),
       require.resolve('./apps/ml_embeddables_in_dashboard'),
       require.resolve('./apps/remote_clusters'),
@@ -44,6 +45,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/license_management'),
       require.resolve('./apps/tags'),
       require.resolve('./apps/search_sessions'),
+      require.resolve('./apps/stack_monitoring'),
     ],
 
     pageObjects,

@@ -11,13 +11,7 @@ import { EuiAccordion } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import {
-  ValidationResult,
-  Rule,
-  RuleAction,
-  ConnectorValidationResult,
-  GenericValidationResult,
-} from '../../../types';
+import { ValidationResult, Rule, RuleAction, GenericValidationResult } from '../../../types';
 import ActionForm from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import {
@@ -53,9 +47,6 @@ describe('action_form', () => {
     id: 'my-action-type',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-      return Promise.resolve({});
-    },
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);
@@ -68,9 +59,6 @@ describe('action_form', () => {
     id: 'disabled-by-config',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-      return Promise.resolve({});
-    },
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);
@@ -83,9 +71,6 @@ describe('action_form', () => {
     id: '.jira',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-      return Promise.resolve({});
-    },
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);
@@ -98,9 +83,6 @@ describe('action_form', () => {
     id: 'disabled-by-license',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-      return Promise.resolve({});
-    },
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);
@@ -113,9 +95,6 @@ describe('action_form', () => {
     id: 'preconfigured',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-      return Promise.resolve({});
-    },
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);
@@ -133,6 +112,7 @@ describe('action_form', () => {
       name: 'Test connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -142,6 +122,7 @@ describe('action_form', () => {
       name: 'Test connector 2',
       config: {},
       isPreconfigured: true,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -151,6 +132,7 @@ describe('action_form', () => {
       name: 'Preconfigured Only',
       config: {},
       isPreconfigured: true,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -160,6 +142,7 @@ describe('action_form', () => {
       name: 'Regular connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -169,6 +152,7 @@ describe('action_form', () => {
       name: 'Non consumer connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -178,6 +162,7 @@ describe('action_form', () => {
       name: 'Connector with disabled action group',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: null,
@@ -187,6 +172,7 @@ describe('action_form', () => {
       name: 'Connector with disabled action group',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
   ];
 

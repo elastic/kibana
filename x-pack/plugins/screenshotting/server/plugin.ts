@@ -16,6 +16,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ChromiumArchivePaths, HeadlessChromiumDriverFactory, install } from './browsers';
 import { ConfigType, createConfig } from './config';
 import { Screenshots } from './screenshots';
@@ -23,6 +24,7 @@ import { getChromiumPackage } from './utils';
 
 interface SetupDeps {
   screenshotMode: ScreenshotModePluginSetup;
+  cloud?: CloudSetup;
 }
 
 /**
@@ -57,7 +59,7 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
     this.packageInfo = context.env.packageInfo;
   }
 
-  setup({ http }: CoreSetup, { screenshotMode }: SetupDeps) {
+  setup({ http }: CoreSetup, { screenshotMode, cloud }: SetupDeps) {
     this.screenshotMode = screenshotMode;
     this.browserDriverFactory = (async () => {
       const paths = new ChromiumArchivePaths();
@@ -83,9 +85,14 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
 
     this.screenshots = (async () => {
       const browserDriverFactory = await this.browserDriverFactory;
-      const logger = this.logger.get('screenshot');
-
-      return new Screenshots(browserDriverFactory, logger, this.packageInfo, http, this.config);
+      return new Screenshots(
+        browserDriverFactory,
+        this.logger,
+        this.packageInfo,
+        http,
+        this.config,
+        cloud
+      );
     })();
     // Already handled in `browserDriverFactory`
     this.screenshots.catch(() => {});

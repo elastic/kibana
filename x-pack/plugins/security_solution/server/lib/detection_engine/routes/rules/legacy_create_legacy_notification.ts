@@ -16,8 +16,6 @@ import { legacyReadNotifications } from '../../notifications/legacy_read_notific
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRuleNotificationAlertTypeParams } from '../../notifications/legacy_types';
 // eslint-disable-next-line no-restricted-imports
-import { legacyAddTags } from '../../notifications/legacy_add_tags';
-// eslint-disable-next-line no-restricted-imports
 import { legacyCreateNotifications } from '../../notifications/legacy_create_notifications';
 
 /**
@@ -72,7 +70,7 @@ export const legacyCreateLegacyNotificationRoute = (
           await rulesClient.update<LegacyRuleNotificationAlertTypeParams>({
             id: notification.id,
             data: {
-              tags: legacyAddTags([], ruleAlertId),
+              tags: [],
               name,
               schedule: {
                 interval,

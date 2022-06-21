@@ -32,6 +32,7 @@ import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { MapsStartApi } from '@kbn/maps-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -52,6 +53,12 @@ export interface ApmPluginStartDeps {
   maps?: MapsStartApi;
   inspector: InspectorPluginStart;
   observability: ObservabilityPublicStart;
+  dataViews: DataViewsPublicPluginStart;
+}
+
+async function getDataStartPlugin(core: CoreSetup) {
+  const [_, startPlugins] = await core.getStartServices();
+  return (startPlugins as ApmPluginStartDeps).data;
 }
 
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
@@ -74,11 +81,19 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         appName: 'ux',
         hasData: async (params?: HasDataParams) => {
           const dataHelper = await getUxDataHelper();
-          return await dataHelper.hasRumData(params!);
+          const dataStartPlugin = await getDataStartPlugin(core);
+          return dataHelper.hasRumData({
+            ...params!,
+            dataStartPlugin,
+          });
         },
         fetchData: async (params: FetchDataParams) => {
+          const dataStartPlugin = await getDataStartPlugin(core);
           const dataHelper = await getUxDataHelper();
-          return await dataHelper.fetchUxOverviewDate(params);
+          return dataHelper.fetchUxOverviewDate({
+            ...params,
+            dataStartPlugin,
+          });
         },
       });
     }

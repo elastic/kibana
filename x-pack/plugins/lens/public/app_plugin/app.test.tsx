@@ -118,6 +118,7 @@ describe('Lens App', () => {
     );
 
     const frame = props.editorFrame as ReturnType<typeof createMockFrame>;
+    lensStore.dispatch(setState({ ...preloadedState }));
     return { instance, frame, props, services, lensStore };
   }
 
@@ -376,6 +377,75 @@ describe('Lens App', () => {
       expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({ showDatePicker: false }),
         {}
+      );
+    });
+  });
+
+  describe('TopNavMenu#dataViewPickerProps', () => {
+    it('calls the nav component with the correct dataview picker props if no permissions are given', async () => {
+      const { instance, lensStore } = await mountWith({ preloadedState: {} });
+      const document = {
+        savedObjectId: defaultSavedObjectId,
+        state: {
+          query: 'fake query',
+          filters: [{ query: { match_phrase: { src: 'test' } } }],
+        },
+        references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
+      } as unknown as Document;
+
+      act(() => {
+        lensStore.dispatch(
+          setState({
+            query: 'fake query' as unknown as Query,
+            persistedDoc: document,
+          })
+        );
+      });
+      instance.update();
+      const props = instance
+        .find('[data-test-subj="lnsApp_topNav"]')
+        .prop('dataViewPickerComponentProps') as TopNavMenuData[];
+      expect(props).toEqual(
+        expect.objectContaining({
+          currentDataViewId: 'mockip',
+          onChangeDataView: expect.any(Function),
+          onDataViewCreated: expect.any(Function),
+          onAddField: undefined,
+        })
+      );
+    });
+
+    it('calls the nav component with the correct dataview picker props if permissions are given', async () => {
+      const { instance, lensStore, services } = await mountWith({ preloadedState: {} });
+      services.dataViewFieldEditor.userPermissions.editIndexPattern = () => true;
+      const document = {
+        savedObjectId: defaultSavedObjectId,
+        state: {
+          query: 'fake query',
+          filters: [{ query: { match_phrase: { src: 'test' } } }],
+        },
+        references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
+      } as unknown as Document;
+
+      act(() => {
+        lensStore.dispatch(
+          setState({
+            query: 'fake query' as unknown as Query,
+            persistedDoc: document,
+          })
+        );
+      });
+      instance.update();
+      const props = instance
+        .find('[data-test-subj="lnsApp_topNav"]')
+        .prop('dataViewPickerComponentProps') as TopNavMenuData[];
+      expect(props).toEqual(
+        expect.objectContaining({
+          currentDataViewId: 'mockip',
+          onChangeDataView: expect.any(Function),
+          onDataViewCreated: expect.any(Function),
+          onAddField: expect.any(Function),
+        })
       );
     });
   });
@@ -928,7 +998,7 @@ describe('Lens App', () => {
         min: moment('2021-01-09T04:00:00.000Z'),
         max: moment('2021-01-09T08:00:00.000Z'),
       });
-      act(() =>
+      await act(async () =>
         instance.find(services.navigation.ui.TopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
           query: { query: 'new', language: 'lucene' },

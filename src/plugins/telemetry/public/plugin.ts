@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
+
 import type {
   Plugin,
   CoreStart,
@@ -20,7 +22,7 @@ import type {
 
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import type {
   TelemetrySavedObjectAttributes,
@@ -151,6 +153,12 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     getStartServices().then(([{ docLinks }]) => {
       telemetryConstants = getTelemetryConstants(docLinks);
+    });
+
+    analytics.registerShipper(ElasticV3BrowserShipper, {
+      channelName: 'kibana-browser',
+      version: currentKibanaVersion,
+      sendTo: config.sendUsageTo === 'prod' ? 'production' : 'staging',
     });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {

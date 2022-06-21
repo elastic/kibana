@@ -410,3 +410,8 @@ This page has been deleted. Refer to <<install>>.
 == View a document
 
 This page has been deleted. Refer to <<document-explorer>>.
+
+[role="exclude",id="advanced-osquery"]
+== Advanced Osquery
+
+This page has been deleted. Refer to <<osquery>>.

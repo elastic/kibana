@@ -17,6 +17,7 @@ interface RunElasticsearchOptions {
   log: ToolingLog;
   esFrom?: string;
   config: Config;
+  onEarlyExit?: (msg: string) => void;
 }
 
 interface CcsConfig {
@@ -92,7 +93,8 @@ export async function runElasticsearch(
 async function startEsNode(
   log: ToolingLog,
   name: string,
-  config: EsConfig & { transportPort?: number }
+  config: EsConfig & { transportPort?: number },
+  onEarlyExit?: (msg: string) => void
 ) {
   const cluster = createTestEsCluster({
     clusterName: `cluster-${name}`,
@@ -112,6 +114,7 @@ async function startEsNode(
       },
     ],
     transportPort: config.transportPort,
+    onEarlyExit,
   });
 
   await cluster.start();

@@ -8,14 +8,14 @@
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '..';
 import { ActionTypeModel } from '../../../../types';
-import { XmattersActionConnector } from '../types';
+import { registrationServicesMock } from '../../../../mocks';
 
 const ACTION_TYPE_ID = '.xmatters';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry });
+  registerBuiltInActionTypes({ actionTypeRegistry, services: registrationServicesMock });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
@@ -26,132 +26,6 @@ describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
     expect(actionTypeModel.actionTypeTitle).toEqual('xMatters data');
-  });
-});
-
-describe('xmatters connector validation', () => {
-  test('connector validation succeeds when usesBasic is true and connector config is valid', async () => {
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.xmatters',
-      name: 'xmatters',
-      isPreconfigured: false,
-      config: {
-        configUrl: 'http://test.com',
-        usesBasic: true,
-      },
-    } as XmattersActionConnector;
-
-    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
-      config: {
-        errors: {
-          configUrl: [],
-        },
-      },
-      secrets: {
-        errors: {
-          user: [],
-          password: [],
-          secretsUrl: [],
-        },
-      },
-    });
-  });
-
-  test('connector validation succeeds when usesBasic is false and connector config is valid', async () => {
-    const actionConnector = {
-      secrets: {
-        user: '',
-        password: '',
-        secretsUrl: 'https://test.com?apiKey=someKey',
-      },
-      id: 'test',
-      actionTypeId: '.xmatters',
-      name: 'xmatters',
-      isPreconfigured: false,
-      config: {
-        usesBasic: false,
-      },
-    } as XmattersActionConnector;
-
-    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
-      config: {
-        errors: {
-          configUrl: [],
-        },
-      },
-      secrets: {
-        errors: {
-          user: [],
-          password: [],
-          secretsUrl: [],
-        },
-      },
-    });
-  });
-
-  test('connector validation fails when connector config is not valid', async () => {
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-      },
-      id: 'test',
-      actionTypeId: '.xmatters',
-      name: 'xmatters',
-      config: {
-        usesBasic: true,
-      },
-    } as XmattersActionConnector;
-
-    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
-      config: {
-        errors: {
-          configUrl: ['URL is required.'],
-        },
-      },
-      secrets: {
-        errors: {
-          user: [],
-          password: ['Password is required when username is used.'],
-          secretsUrl: [],
-        },
-      },
-    });
-  });
-
-  test('connector validation fails when url in config is not valid', async () => {
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.xmatters',
-      name: 'xmatters',
-      config: {
-        configUrl: 'invalid.url',
-        usesBasic: true,
-      },
-    } as XmattersActionConnector;
-
-    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
-      config: {
-        errors: {
-          configUrl: ['URL is invalid.'],
-        },
-      },
-      secrets: {
-        errors: {
-          user: [],
-          password: [],
-          secretsUrl: [],
-        },
-      },
-    });
   });
 });
 

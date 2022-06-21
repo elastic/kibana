@@ -10,7 +10,7 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DocViewerSource } from './source';
-import * as hooks from '../../../../utils/use_es_doc_search';
+import * as hooks from '../../../../hooks/use_es_doc_search';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../../../../components/json_code_editor/json_code_editor_common';
@@ -70,7 +70,7 @@ describe('Source Viewer component', () => {
         />
       </KibanaContextProvider>
     );
-    expect(comp.children()).toMatchSnapshot();
+    expect(comp.children().render()).toMatchSnapshot();
     const errorPrompt = comp.find(EuiEmptyPrompt);
     expect(errorPrompt.length).toBe(1);
     const refreshButton = comp.find(EuiButton);

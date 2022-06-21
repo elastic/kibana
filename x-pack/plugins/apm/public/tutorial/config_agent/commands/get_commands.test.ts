@@ -181,7 +181,7 @@ describe('getCommands', () => {
         ELASTIC_APM = {
         # Set the required service name. Allowed characters:
         # a-z, A-Z, 0-9, -, _, and space
-        'SERVICE_NAME': '',
+        #'SERVICE_NAME': 'unknown-python-service',
 
         # Use if APM Server requires a secret token
         'SECRET_TOKEN': '',
@@ -219,7 +219,7 @@ describe('getCommands', () => {
         ELASTIC_APM = {
         # Set the required service name. Allowed characters:
         # a-z, A-Z, 0-9, -, _, and space
-        'SERVICE_NAME': '',
+        #'SERVICE_NAME': 'unknown-python-service',
 
         # Use if APM Server requires a secret token
         'SECRET_TOKEN': 'foobar',
@@ -257,7 +257,7 @@ describe('getCommands', () => {
         app.config['ELASTIC_APM'] = {
         # Set the required service name. Allowed characters:
         # a-z, A-Z, 0-9, -, _, and space
-        'SERVICE_NAME': '',
+        #'SERVICE_NAME': 'unknown-python-service',
 
         # Use if APM Server requires a secret token
         'SECRET_TOKEN': '',
@@ -292,7 +292,7 @@ describe('getCommands', () => {
         app.config['ELASTIC_APM'] = {
         # Set the required service name. Allowed characters:
         # a-z, A-Z, 0-9, -, _, and space
-        'SERVICE_NAME': '',
+        #'SERVICE_NAME': 'unknown-python-service',
 
         # Use if APM Server requires a secret token
         'SECRET_TOKEN': 'foobar',
@@ -511,7 +511,7 @@ describe('getCommands', () => {
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "elastic_apm.server_url=\\"\\"
-        elastic.apm.secret_token=\\"\\"
+        elastic_apm.secret_token=\\"\\"
         elastic_apm.service_name=\\"My service\\"
         "
       `);
@@ -527,7 +527,7 @@ describe('getCommands', () => {
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "elastic_apm.server_url=\\"localhost:8220\\"
-        elastic.apm.secret_token=\\"foobar\\"
+        elastic_apm.secret_token=\\"foobar\\"
         elastic_apm.service_name=\\"My service\\"
         "
       `);
