@@ -202,6 +202,22 @@ function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: 
   return true;
 }
 
+function isEndpointAdvancedPolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
+  if (isAtLeast(license, 'platinum')) {
+    // platinum allows all advanced features
+    return true;
+  }
+
+  const defaults = policyFactoryWithoutPaidFeatures();
+
+  // only platinum or higher may use rollback
+  if (policy.windows.advanced?.rollback !== defaults.windows.advanced?.rollback) {
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * Given an endpoint package policy, verifies that all enabled features that
  * require a certain license level have a valid license for them.
@@ -214,7 +230,8 @@ export const isEndpointPolicyValidForLicense = (
     isEndpointMalwarePolicyValidForLicense(policy, license) &&
     isEndpointRansomwarePolicyValidForLicense(policy, license) &&
     isEndpointMemoryPolicyValidForLicense(policy, license) &&
-    isEndpointBehaviorPolicyValidForLicense(policy, license)
+    isEndpointBehaviorPolicyValidForLicense(policy, license) &&
+    isEndpointAdvancedPolicyValidForLicense(policy, license)
   );
 };
 
