@@ -35,6 +35,7 @@ import {
   putAgentsReassignHandler,
   postBulkAgentsReassignHandler,
   getAgentDataHandler,
+  getAllAgentsHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -91,6 +92,18 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     getAgentsHandler
+  );
+
+  // For testing
+  router.get(
+    {
+      path: AGENT_API_ROUTES.INTERNAL_LIST_PATTERN,
+      validate: GetAgentsRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getAllAgentsHandler
   );
 
   // Agent actions
