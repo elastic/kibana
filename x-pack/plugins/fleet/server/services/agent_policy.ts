@@ -844,7 +844,7 @@ class AgentPolicyService {
   }
 
   /**
-   * Remove an output from all agent policies that are using it, and replace the output by the default ones.
+   * Remove a download source from all agent policies that are using it, and replace the output by the default ones.
    * @param soClient
    * @param esClient
    * @param downloadSourceId

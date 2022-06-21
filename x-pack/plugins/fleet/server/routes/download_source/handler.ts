@@ -55,9 +55,9 @@ export const getOneDownloadSourcesHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    if (error.isBoom && error.downloadSource.statusCode === 404) {
+    if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
-        body: { message: `Donwload source ${request.params.sourceId} not found` },
+        body: { message: `Download source ${request.params.sourceId} not found` },
       });
     }
 
@@ -90,7 +90,7 @@ export const putDownloadSourcesHandler: RequestHandler<
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
-        body: { message: `Donwload source ${request.params.sourceId} not found` },
+        body: { message: `Download source ${request.params.sourceId} not found` },
       });
     }
 

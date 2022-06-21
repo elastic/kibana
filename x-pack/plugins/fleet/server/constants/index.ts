@@ -60,6 +60,7 @@ export {
   // Download sources
   DEFAULT_DOWNLOAD_SOURCE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  DEFAULT_DOWNLOAD_SOURCE_ID,
 } from '../../common';
 
 export {

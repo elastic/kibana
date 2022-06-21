@@ -6,7 +6,11 @@
  */
 import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 
-import { DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE } from '../constants'; // DEFAULT_DOWNLOAD_SOURCE,
+import {
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  DEFAULT_DOWNLOAD_SOURCE,
+  DEFAULT_DOWNLOAD_SOURCE_ID,
+} from '../constants';
 
 import type { DownloadSource, DownloadSourceAttributes, DownloadSourceBase } from '../types';
 import { DownloadSourceError } from '../errors';
@@ -14,8 +18,6 @@ import { SO_SEARCH_LIMIT } from '../../common';
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
-
-import { idToUuid } from '.';
 
 function savedObjectToDownloadSource(so: SavedObject<DownloadSourceAttributes>) {
   const { source_id: sourceId, ...attributes } = so.attributes;
@@ -30,7 +32,7 @@ class DownloadSourceService {
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<DownloadSource> {
     const soResponse = await soClient.get<DownloadSourceAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-      idToUuid(id)
+      id
     );
 
     if (soResponse.error) {
@@ -103,7 +105,7 @@ class DownloadSourceService {
     }
     const soResponse = await soClient.update<DownloadSourceAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-      idToUuid(id),
+      id,
       updateData
     );
     if (soResponse.error) {
@@ -129,7 +131,7 @@ class DownloadSourceService {
       id
     );
 
-    return soClient.delete(DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE, idToUuid(id));
+    return soClient.delete(DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE, id);
   }
 
   public async getDefaultDownloadSourceId(soClient: SavedObjectsClientContract) {
@@ -140,6 +142,26 @@ class DownloadSourceService {
     }
 
     return savedObjectToDownloadSource(results.saved_objects[0]).id;
+  }
+
+  public async ensureDefault(soClient: SavedObjectsClientContract) {
+    const downloadSources = await this.list(soClient);
+
+    const defaultDS = downloadSources.items.find((o) => o.is_default);
+
+    if (!defaultDS) {
+      const newDefaultDS: DownloadSourceBase = {
+        name: 'default',
+        is_default: true,
+        host: DEFAULT_DOWNLOAD_SOURCE,
+      };
+
+      return await this.create(soClient, newDefaultDS, {
+        id: DEFAULT_DOWNLOAD_SOURCE_ID,
+      });
+    }
+
+    return defaultDS;
   }
 
   private async _getDefaultDownloadSourceSO(soClient: SavedObjectsClientContract) {

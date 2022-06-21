@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export const DEFAULT_DOWNLOAD_SOURCE = 'artifactory.elastic.co';
-
-export const DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE = 'ingest-download-sources';
-
-export const DEFAULT_DOWNLOAD_SOURCE_ID = 'fleet-default-download-source';
+export default function loadTests({ loadTestFile }) {
+  describe('Agent Download Source Endpoints', () => {
+    loadTestFile(require.resolve('./crud'));
+  });
+}
