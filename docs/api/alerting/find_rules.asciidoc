@@ -131,7 +131,8 @@ The API returns the following:
       "scheduled_task_id": "0b092d90-6b62-11eb-9e0d-85d233e3ee35",
       "execution_status": {
         "last_execution_date": "2021-02-10T17:55:14.262Z",
-        "status": "ok"
+        "status": "ok",
+        "last_duration": 384
       }
     }
   ]
