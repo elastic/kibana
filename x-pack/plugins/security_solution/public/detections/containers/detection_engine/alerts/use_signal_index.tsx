@@ -52,10 +52,8 @@ export const useSignalIndex = (): ReturnSignalIndex => {
         const signal = await getSignalIndex({ signal: abortCtrl.signal });
 
         if (isSubscribed && signal != null) {
-          // console.log(signal.indexExists);
           setSignalIndex({
-            signalIndexExists: signal?.indexExists,
-            // signalIndexExists: true,
+            signalIndexExists: true,
             signalIndexName: signal.name,
             signalIndexMappingOutdated: signal.index_mapping_outdated,
             createDeSignalIndex: createIndex,

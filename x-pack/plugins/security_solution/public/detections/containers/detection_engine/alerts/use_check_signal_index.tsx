@@ -4,19 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import { useEffect, useState } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { checkSignalIndex, createSignalIndex, getSignalIndex } from './api';
+import { checkSignalIndex } from './api';
 import * as i18n from './translations';
 import { useAlertsPrivileges } from './use_alerts_privileges';
 
@@ -54,10 +48,8 @@ export const useChcekSignalIndex = (): ReturnSignalIndex => {
         const signal = await checkSignalIndex({ signal: abortCtrl.signal });
 
         if (isSubscribed && signal != null) {
-          // console.log(signal.indexExists);
           setSignalIndex({
             signalIndexExists: signal?.indexExists,
-            // signalIndexExists: true,
             signalIndexName: signal.name,
             signalIndexMappingOutdated: signal.index_mapping_outdated,
           });

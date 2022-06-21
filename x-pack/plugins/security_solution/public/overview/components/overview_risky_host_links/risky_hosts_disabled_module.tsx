@@ -13,13 +13,14 @@ import { RiskyHostsPanelView } from './risky_hosts_panel_view';
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 import { DANGER_BUTTON } from './translations';
 import { devToolConsoleUrl } from '../../../../common/constants';
-import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { OpenInDevConsoleButton } from '../../../common/components/open_in_dev_console';
-import { useUserData, useUserInfo } from '../../../detections/components/user_info';
 import { useChcekSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
+import { LinkPanelListItem } from '../link_panel';
 
 export const RISKY_HOSTS_DOC_LINK =
   'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';
+
+const emptyList: LinkPanelListItem[] = [];
 
 export const RiskyHostsDisabledModuleComponent = () => {
   const hostRiskScoreConsoleId = '61c3927a-e933-4404-b986-188680950a95';
@@ -33,18 +34,18 @@ export const RiskyHostsDisabledModuleComponent = () => {
   return (
     <DisabledLinkPanel
       bodyCopy={i18n.DANGER_BODY}
-      learnMore={i18n.LEARN_MORE}
       dataTestSubjPrefix="risky-hosts"
       docLink={RISKY_HOSTS_DOC_LINK}
-      listItems={[]}
-      signalIndexExists={signalIndexExists}
+      listItems={emptyList}
       titleCopy={i18n.DANGER_TITLE}
       LinkPanelViewComponent={RiskyHostsPanelView}
       moreButtons={
         <OpenInDevConsoleButton
           loadFromUrl={loadFromUrl}
-          enableButton={signalIndexExists}
+          enableButton={!!signalIndexExists}
           title={DANGER_BUTTON}
+          popoverContent={i18n.ENABLE_RISK_SCORE_TOOLTIP}
+          learnMoreUrl="https://www.elastic.co/guide/en/security/current/detection-engine-overview.html"
         />
       }
     />

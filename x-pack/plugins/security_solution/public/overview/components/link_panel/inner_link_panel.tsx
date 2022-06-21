@@ -8,6 +8,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSplitPanel, EuiText } from '@elastic/eui';
+import { LEARN_MORE } from '../overview_risky_host_links/translations';
 
 const ButtonContainer = styled(EuiFlexGroup)`
   padding: ${({ theme }) => theme.eui.paddingSizes.s};
@@ -35,7 +36,6 @@ export const InnerLinkPanel = ({
   button,
   color,
   dataTestSubj,
-  learnMore,
   learnMoreLink,
   title,
 }: {
@@ -43,7 +43,6 @@ export const InnerLinkPanel = ({
   button?: JSX.Element;
   color: 'primary' | 'warning';
   dataTestSubj: string;
-  learnMore?: string;
   learnMoreLink?: string;
   title: string;
 }) => (
@@ -60,14 +59,14 @@ export const InnerLinkPanel = ({
         </EuiFlexGroup>
         <p>
           {body}{' '}
-          {learnMore && (
+          {learnMoreLink && (
             <EuiLink
               href={learnMoreLink}
               target="_blank"
               data-test-subj={`${dataTestSubj}-learn-more`}
               external
             >
-              {learnMore}
+              {LEARN_MORE}
             </EuiLink>
           )}
         </p>

@@ -64,3 +64,23 @@ export const PANEL_TITLE = i18n.translate(
 export const IMPORT_DASHBOARD = i18n.translate('xpack.securitySolution.overview.importDasboard', {
   defaultMessage: 'Import dashboard',
 });
+
+export const IMPORT_DASHBOARD_SUCCESS = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.overview.importDasboardSuccessTitle', {
+    values: { totalCount },
+    defaultMessage: `Following {totalCount, plural, =1 {saved object} other {saved objects}} has been imported successfully`,
+  });
+
+export const IMPORT_DASHBOARD_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.overview.importDasboardPopoverTitle',
+  {
+    defaultMessage: 'Make sure you have enabled Host risk score before importing the dashboard.',
+  }
+);
+
+export const ENABLE_RISK_SCORE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.overview.enableRiskScorePopoverTitle',
+  {
+    defaultMessage: 'Make sure you have alerts available before enabling the module.',
+  }
+);

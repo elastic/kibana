@@ -14,7 +14,7 @@ import {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { uriTooLong } from '@hapi/boom';
+import { getOr } from 'lodash/fp';
 import { InnerLinkPanel, LinkPanel, LinkPanelListItem } from '../link_panel';
 import { LinkPanelViewProps } from '../link_panel/types';
 import { Link } from '../link_panel/link';
@@ -24,12 +24,8 @@ import { NavigateToHost } from './navigate_to_host';
 import { HostRiskScoreQueryId } from '../../../risk_score/containers';
 import { importFile } from '../link_panel/import_file';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
-import { useSpaceId } from '../../../risk_score/containers/common';
-import {
-  DASHBOARD_REQUEST_BODY_SEARCH,
-  useRiskyHostsDashboardButtonHref,
-} from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
-import { setState } from '../../../../../../../src/plugins/discover/public/application/main/services/discover_state';
+import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
+import { SavedObjectsImportSuccess } from '../../../../../../../src/core/public';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   {
@@ -79,7 +75,6 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
   isInspectEnabled,
   listItems,
   splitPanel,
-  signalIndexExists,
   totalCount = 0,
   to,
   from,
@@ -91,9 +86,9 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
         : undefined
       : splitPanel;
 
-  const [response, setResponse] = useState(null);
+  const [response, setResponse] = useState<SavedObjectsImportSuccess[] | null>(null);
   const [status, setStatus] = useState('idle');
-  const [dashboardUrl, setDashboardUrl] = useState(null);
+  const [dashboardUrl, setDashboardUrl] = useState<string | null>(null);
   const [error, setError] = useState(undefined);
   const { buttonHref } = useRiskyHostsDashboardButtonHref(to, from);
   const {
@@ -106,7 +101,8 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
 
     try {
       const res = await importFile(http);
-      setResponse(res);
+      const savedObjects = getOr([], ['data', 'createDashboards', 'message', 'saved_objects'], res);
+      setResponse(savedObjects);
       setStatus('success');
     } catch (e) {
       setStatus('error');
@@ -132,31 +128,25 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
           },
         });
 
-        setDashboardUrl(targetUrl);
+        setDashboardUrl(targetUrl ?? null);
       }
     };
 
-    if (status === 'success' && response != null) {
-      const targetDashboard = response?.data?.createDashboards?.message?.saved_objects?.find(
+    if (status === 'success') {
+      const targetDashboard = (response ?? []).find(
         (obj) => obj.type === 'dashboard' && obj.attributes.title === 'Current Risk Score for Hosts'
       );
 
-      fetchDashboardUrl(targetDashboard.id);
+      fetchDashboardUrl(targetDashboard?.id);
     }
-  }, [
-    dashboard?.locator,
-    from,
-    response,
-    response?.data?.createDashboards?.message?.saved_objects,
-    status,
-    to,
-  ]);
+  }, [dashboard?.locator, from, response, status, to]);
 
   useEffect(() => {
+    const res = response ?? [];
     if (status === 'success' && response != null) {
       toasts.addSuccess(
-        `Imported following saved objects: ${response?.data?.createDashboards?.message?.saved_objects
-          ?.map((o, idx) => `${idx + 1}. ) ${o?.attributes?.title ?? o?.attributes?.name}`)
+        `${i18n.IMPORT_DASHBOARD_SUCCESS(res.length)}: ${(response ?? [])
+          .map((o, idx) => `${idx + 1}. ) ${o?.attributes?.title ?? o?.attributes?.name}`)
           .join(' ,')}`
       );
     }
@@ -164,16 +154,7 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
     if (status === 'error' && error != null) {
       toasts.addError(error, { title: 'Import dashboard failed', toastMessage: error.message });
     }
-  }, [
-    dashboard?.locator,
-    error,
-    from,
-    response,
-    response?.data?.createDashboards?.message?.saved_objects,
-    status,
-    to,
-    toasts,
-  ]);
+  }, [dashboard?.locator, error, from, response, status, to, toasts]);
 
   return (
     <LinkPanel
@@ -182,7 +163,7 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
           () =>
             dashboardUrl || buttonHref || status === 'sccess' ? (
               <EuiButton
-                href={buttonHref || dashboardUrl}
+                href={(buttonHref || dashboardUrl) ?? undefined}
                 isDisabled={!buttonHref && !dashboardUrl}
                 data-test-subj="risky-hosts-view-dashboard-button"
                 target="_blank"
@@ -215,7 +196,7 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
                   </EuiButton>
                 }
               >
-                {`Make sure you have enabled Host risk score before importing the dashboard.`}
+                {i18n.IMPORT_DASHBOARD_TOOLTIP}
               </EuiPopover>
             ),
           [buttonHref, dashboardUrl, importMyFile, isPopoverOpen, listItems.length, status]

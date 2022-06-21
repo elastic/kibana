@@ -6,18 +6,23 @@
  */
 import React, { useState } from 'react';
 import { EuiButton, EuiFlexItem, EuiLink, EuiPopover } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface OpenInDevConsoleButtonProps {
   dataTestSubjPrefix?: string;
-  loadFromUrl: string;
   enableButton: boolean;
+  learnMoreUrl?: string;
+  loadFromUrl: string;
+  popoverContent?: string;
   title: string;
 }
 
 const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = ({
   dataTestSubjPrefix = 'open-in-dev-console',
-  loadFromUrl,
   enableButton,
+  learnMoreUrl,
+  loadFromUrl,
+  popoverContent,
   title,
 }) => {
   const href = `/app/dev_tools#/console?load_from=${loadFromUrl}`;
@@ -40,7 +45,7 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
         >
           {title}
         </EuiButton>
-      ) : (
+      ) : popoverContent ? (
         <EuiPopover
           isOpen={isPopoverOpen}
           closePopover={closePopover}
@@ -57,16 +62,27 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
           }
         >
           <p>
-            {`Make sure you have alerts available before enabling the module.`}{' '}
-            <EuiLink
-              href="https://www.elastic.co/guide/en/security/current/detection-engine-overview.html"
-              target="_blank"
-              external={false}
-            >
-              {'Learn More'}
-            </EuiLink>
+            {popoverContent}{' '}
+            {learnMoreUrl && (
+              <EuiLink href={learnMoreUrl} target="_blank" external={false}>
+                <FormattedMessage
+                  defaultMessage="Learn More"
+                  id="xpack.securitySolution.openInDevConsole.tooltipTitle"
+                />
+              </EuiLink>
+            )}
           </p>
         </EuiPopover>
+      ) : (
+        <EuiButton
+          href={href}
+          color="warning"
+          isDisabled={true}
+          data-test-subj={`${dataTestSubjPrefix}-disabled-module-button`}
+          onMouseEnter={onMouseEnter}
+        >
+          {title}
+        </EuiButton>
       )}
     </EuiFlexItem>
   ) : null;

@@ -6,20 +6,20 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { windowCount } from 'rxjs';
 import { InnerLinkPanel } from './inner_link_panel';
 import { LinkPanelListItem, LinkPanelViewProps } from './types';
+import { LinkButton } from '../../../common/components/links';
 
 interface DisabledLinkPanelProps {
   bodyCopy: string;
-  buttonCopy: string;
+  buttonCopy?: string;
   dataTestSubjPrefix: string;
   docLink: string;
   LinkPanelViewComponent: React.ComponentType<LinkPanelViewProps>;
   listItems: LinkPanelListItem[];
-  moreButtons: React.ReactElement;
+  moreButtons?: React.ReactElement;
   titleCopy: string;
 }
 
@@ -28,11 +28,9 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
   buttonCopy,
   dataTestSubjPrefix,
   docLink,
-  learnMore,
   LinkPanelViewComponent,
   listItems,
   moreButtons,
-  signalIndexExists,
   titleCopy,
 }) => {
   const openDocLink = useCallback(
@@ -45,7 +43,6 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
   return (
     <LinkPanelViewComponent
       listItems={listItems}
-      signalIndexExists={signalIndexExists}
       splitPanel={
         <InnerLinkPanel
           body={bodyCopy}
@@ -53,14 +50,14 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
             <EuiFlexGroup>
               {buttonCopy && (
                 <EuiFlexItem>
-                  <EuiButton
+                  <LinkButton
                     color="warning"
                     onClick={openDocLink}
                     href={docLink}
                     data-test-subj={`${dataTestSubjPrefix}-enable-module-button`}
                   >
                     {buttonCopy}
-                  </EuiButton>
+                  </LinkButton>
                 </EuiFlexItem>
               )}
               {moreButtons && moreButtons}
@@ -68,7 +65,6 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
           }
           color="warning"
           dataTestSubj={`${dataTestSubjPrefix}-inner-panel-danger`}
-          learnMore={learnMore}
           learnMoreLink={docLink}
           title={titleCopy}
         />
