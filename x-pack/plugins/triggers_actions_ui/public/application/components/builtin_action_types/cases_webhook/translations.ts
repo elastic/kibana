@@ -16,7 +16,7 @@ export const CREATE_URL_REQUIRED = i18n.translate(
 export const CREATE_INCIDENT_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredCreateIncidentText',
   {
-    defaultMessage: 'Create incident object is required.',
+    defaultMessage: 'Create incident object is required and must be valid JSON.',
   }
 );
 
@@ -43,7 +43,7 @@ export const UPDATE_URL_REQUIRED = i18n.translate(
 export const UPDATE_INCIDENT_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredUpdateIncidentText',
   {
-    defaultMessage: 'Update incident object is required.',
+    defaultMessage: 'Update incident object is required and must be valid JSON.',
   }
 );
 
@@ -60,10 +60,10 @@ export const CREATE_COMMENT_URL_REQUIRED = i18n.translate(
     defaultMessage: 'Create comment URL is required.',
   }
 );
-export const CREATE_COMMENT_INCIDENT_REQUIRED = i18n.translate(
+export const CREATE_COMMENT_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredCreateCommentIncidentText',
   {
-    defaultMessage: 'Create comment object is required.',
+    defaultMessage: 'Create comment object is required and must be valid JSON.',
   }
 );
 
@@ -98,7 +98,7 @@ export const GET_RESPONSE_EXTERNAL_UPDATED_KEY_REQUIRED = i18n.translate(
     defaultMessage: 'Get incident response updated date key is required.',
   }
 );
-export const GET_INCIDENT_VIEW_URL = i18n.translate(
+export const GET_INCIDENT_VIEW_URL_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredGetIncidentViewUrlKeyText',
   {
     defaultMessage: 'View incident URL is required.',
