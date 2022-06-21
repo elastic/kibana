@@ -9,13 +9,12 @@ import { EuiButton, EuiFormRow, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestQuery } from './use_test_query';
 
-export function TestQueryRow({
-  fetch,
-  hasValidationErrors,
-}: {
+export interface TestQueryRowProps {
   fetch: () => Promise<{ nrOfDocs: number; timeWindow: string }>;
   hasValidationErrors: boolean;
-}) {
+}
+
+export const TestQueryRow: React.FC<TestQueryRowProps> = ({ fetch, hasValidationErrors }) => {
   const { onTestQuery, testQueryResult, testQueryError, testQueryLoading } = useTestQuery(fetch);
 
   return (
@@ -65,4 +64,4 @@ export function TestQueryRow({
       )}
     </>
   );
-}
+};

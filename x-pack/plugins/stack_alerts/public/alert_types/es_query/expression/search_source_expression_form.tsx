@@ -13,21 +13,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView, Query, ISearchSource, getTime } from '@kbn/data-plugin/common';
-import {
-  ForLastExpression,
-  IErrorObject,
-  ThresholdExpression,
-  ValueExpression,
-} from '@kbn/triggers-actions-ui-plugin/public';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { mapAndFlattenFilters, SavedQuery, TimeHistory } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { useTriggersAndActionsUiDeps } from '../util';
-import { totalHitsToNumber } from './use_test_query';
-import { TestQueryRow } from './test_query_row';
+import { RuleCommonExpressions } from '../rule_common_expressions';
+import { totalHitsToNumber } from '../test_query_row';
+
+const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
+  'pinFilter',
+  'disableFilter',
+];
 
 interface LocalState {
   index: DataView;
@@ -234,62 +234,27 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         dateRangeFrom={undefined}
         dateRangeTo={undefined}
         timeHistory={timeHistory}
-        hiddenFilterPanelOptions={['pinFilter', 'disableFilter']}
+        hiddenFilterPanelOptions={HIDDEN_FILTER_PANEL_OPTIONS}
       />
 
-      <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.searchSource.ui.conditionPrompt"
-            defaultMessage="When the number of matches"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <ThresholdExpression
-        data-test-subj="thresholdExpression"
-        thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
+      <EuiSpacer />
+
+      <RuleCommonExpressions
         threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
-        errors={errors}
-        display="fullWidth"
-        popupPosition={'upLeft'}
-        onChangeSelectedThreshold={onChangeSelectedThreshold}
-        onChangeSelectedThresholdComparator={onChangeSelectedThresholdComparator}
-      />
-      <ForLastExpression
-        data-test-subj="forLastExpression"
-        popupPosition={'upLeft'}
+        thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
         timeWindowSize={timeWindowSize}
         timeWindowUnit={timeWindowUnit}
-        display="fullWidth"
-        errors={errors}
+        size={size}
+        onChangeThreshold={onChangeSelectedThreshold}
+        onChangeThresholdComparator={onChangeSelectedThresholdComparator}
         onChangeWindowSize={onChangeWindowSize}
         onChangeWindowUnit={onChangeWindowUnit}
+        onChangeSizeValue={onChangeSizeValue}
+        errors={errors}
+        hasValidationErrors={false}
+        onTestFetch={onTestFetch}
       />
-      <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.searchSource.ui.selectSizePrompt"
-            defaultMessage="Select a size"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <ValueExpression
-        description={i18n.translate('xpack.stackAlerts.searchSource.ui.sizeExpression', {
-          defaultMessage: 'Size',
-        })}
-        data-test-subj="sizeValueExpression"
-        value={size}
-        errors={errors.size}
-        display="fullWidth"
-        popupPosition={'upLeft'}
-        onChangeSelectedValue={onChangeSizeValue}
-      />
-      <EuiSpacer size="s" />
-      <TestQueryRow fetch={onTestFetch} hasValidationErrors={false} />
+
       <EuiSpacer />
     </Fragment>
   );

@@ -11,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 
 import 'brace/theme/github';
 
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiHorizontalRule } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ErrorKey, EsQueryAlertParams } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
@@ -63,30 +63,33 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     </>
   );
 
-  // on Discover page
-  if (isSearchSource) {
-    return (
-      <>
-        {expressionError}
-        <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
-      </>
-    );
-  }
-
-  // on Stack Management page
   return (
     <>
       {expressionError}
 
-      {activeEsQueryFormType ? (
-        <EsQueryExpression
-          {...props}
-          ruleParams={ruleParams}
-          activeEsQueryFormType={activeEsQueryFormType}
-        />
+      {isSearchSource ? (
+        <>
+          {/* From Discover page */}
+          <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
+        </>
       ) : (
-        <EsQueryFormTypeChooser onFormTypeSelect={setActiveEsQueryFormType} />
+        <>
+          {/* From Stack Management page */}
+          <EsQueryFormTypeChooser
+            activeFormType={activeEsQueryFormType}
+            onFormTypeSelect={setActiveEsQueryFormType}
+          />
+          {activeEsQueryFormType && (
+            <EsQueryExpression
+              {...props}
+              ruleParams={ruleParams}
+              activeEsQueryFormType={activeEsQueryFormType}
+            />
+          )}
+        </>
       )}
+
+      <EuiHorizontalRule />
     </>
   );
 };

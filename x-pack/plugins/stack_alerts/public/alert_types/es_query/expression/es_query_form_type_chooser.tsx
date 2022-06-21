@@ -6,7 +6,16 @@
  */
 
 import React from 'react';
-import { EuiListGroup, EuiListGroupItem, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -50,17 +59,54 @@ const FORM_TYPE_ITEMS: Array<{ formType: EsQueryFormType; label: string; descrip
 ];
 
 export interface EsQueryFormTypeProps {
-  onFormTypeSelect: (formType: EsQueryFormType) => void;
+  activeFormType: EsQueryFormType | null;
+  onFormTypeSelect: (formType: EsQueryFormType | null) => void;
 }
 
-export const EsQueryFormTypeChooser: React.FC<EsQueryFormTypeProps> = ({ onFormTypeSelect }) => {
+export const EsQueryFormTypeChooser: React.FC<EsQueryFormTypeProps> = ({
+  activeFormType,
+  onFormTypeSelect,
+}) => {
+  if (activeFormType) {
+    const activeFormTypeItem = FORM_TYPE_ITEMS.find((item) => item.formType === activeFormType);
+
+    return (
+      <>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem>
+            <EuiTitle size="s" data-test-subj="selectedRuleFormTypeTitle">
+              <h5>{activeFormTypeItem?.label}</h5>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="cross"
+              color="danger"
+              aria-label={i18n.translate(
+                'xpack.stackAlerts.esQuery.ui.selectQueryFormType.deleteAriaLabel',
+                {
+                  defaultMessage: 'Delete',
+                }
+              )}
+              onClick={() => onFormTypeSelect(null)}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiText color="subdued" size="s" data-test-subj="selectedRuleFormTypeDescription">
+          {activeFormTypeItem?.description}
+        </EuiText>
+        <EuiSpacer />
+      </>
+    );
+  }
+
   return (
     <>
-      <EuiTitle size="xxs">
+      <EuiTitle size="xs">
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectQueryFormTypeLabel"
-            defaultMessage="Select query type"
+            defaultMessage="Select a query type"
           />
         </h5>
       </EuiTitle>
@@ -83,6 +129,7 @@ export const EsQueryFormTypeChooser: React.FC<EsQueryFormTypeProps> = ({ onFormT
           />
         ))}
       </EuiListGroup>
+      <EuiSpacer />
     </>
   );
 };

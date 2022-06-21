@@ -1,0 +1,146 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  ForLastExpression,
+  IErrorObject,
+  ThresholdExpression,
+  ValueExpression,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { CommonAlertParams } from '../types';
+import { DEFAULT_VALUES } from '../constants';
+import { TestQueryRow, TestQueryRowProps } from '../test_query_row';
+
+export interface RuleCommonExpressionsProps {
+  thresholdComparator?: CommonAlertParams['thresholdComparator'];
+  threshold?: CommonAlertParams['threshold'];
+  timeWindowSize: CommonAlertParams['timeWindowSize'];
+  timeWindowUnit: CommonAlertParams['timeWindowUnit'];
+  size: CommonAlertParams['size'];
+  errors: IErrorObject;
+  hasValidationErrors: boolean;
+  onChangeThreshold: Parameters<typeof ThresholdExpression>[0]['onChangeSelectedThreshold'];
+  onChangeThresholdComparator: Parameters<
+    typeof ThresholdExpression
+  >[0]['onChangeSelectedThresholdComparator'];
+  onChangeWindowSize: Parameters<typeof ForLastExpression>[0]['onChangeWindowSize'];
+  onChangeWindowUnit: Parameters<typeof ForLastExpression>[0]['onChangeWindowUnit'];
+  onChangeSizeValue: Parameters<typeof ValueExpression>[0]['onChangeSelectedValue'];
+  onTestFetch: TestQueryRowProps['fetch'];
+}
+
+export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
+  thresholdComparator,
+  threshold,
+  timeWindowSize,
+  timeWindowUnit,
+  size,
+  errors,
+  hasValidationErrors,
+  onChangeThreshold,
+  onChangeThresholdComparator,
+  onChangeWindowSize,
+  onChangeWindowUnit,
+  onChangeSizeValue,
+  onTestFetch,
+}) => {
+  return (
+    <>
+      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
+                defaultMessage="When number of matches"
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            position="right"
+            color="subdued"
+            type="questionInCircle"
+            iconProps={{
+              className: 'eui-alignTop',
+            }}
+            content={i18n.translate('xpack.stackAlerts.esQuery.ui.conditionPrompt.toolTip', {
+              defaultMessage: 'The time window defined below applies only to the first rule check.',
+            })}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <ThresholdExpression
+        data-test-subj="thresholdExpression"
+        thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
+        threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
+        errors={errors}
+        display="fullWidth"
+        popupPosition="upLeft"
+        onChangeSelectedThreshold={onChangeThreshold}
+        onChangeSelectedThresholdComparator={onChangeThresholdComparator}
+      />
+      <ForLastExpression
+        data-test-subj="forLastExpression"
+        popupPosition="upLeft"
+        timeWindowSize={timeWindowSize}
+        timeWindowUnit={timeWindowUnit}
+        display="fullWidth"
+        errors={errors}
+        onChangeWindowSize={onChangeWindowSize}
+        onChangeWindowUnit={onChangeWindowUnit}
+      />
+      <EuiSpacer size="s" />
+      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.selectSizePrompt"
+                defaultMessage="Select a size"
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            position="right"
+            color="subdued"
+            type="questionInCircle"
+            iconProps={{
+              className: 'eui-alignTop',
+            }}
+            content={i18n.translate('xpack.stackAlerts.esQuery.ui.selectSizePrompt.toolTip', {
+              defaultMessage:
+                'Specifies the number of documents to pass to the configured actions when the threshold condition is met.',
+            })}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <ValueExpression
+        description={i18n.translate('xpack.stackAlerts.esQuery.ui.sizeExpression', {
+          defaultMessage: 'Size',
+        })}
+        data-test-subj="sizeValueExpression"
+        value={size}
+        errors={errors.size}
+        display="fullWidth"
+        popupPosition="upLeft"
+        onChangeSelectedValue={onChangeSizeValue}
+      />
+      <EuiSpacer size="s" />
+      <TestQueryRow fetch={onTestFetch} hasValidationErrors={hasValidationErrors} />
+    </>
+  );
+};
