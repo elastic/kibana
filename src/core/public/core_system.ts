@@ -312,7 +312,7 @@ export class CoreSystem {
         this.reportKibanaLoadedEvent(analytics, appId);
         appSub.unsubscribe();
       });
-      
+
       return {
         application,
         executionContext,
