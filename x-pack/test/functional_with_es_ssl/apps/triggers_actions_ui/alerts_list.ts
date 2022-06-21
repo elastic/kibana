@@ -560,7 +560,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const failingAlert = await createFailingAlert({ supertest, objectRemover });
       await refreshAlertsList();
       await testSubjects.click('ruleTypeFilterButton');
-      expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).to.eql('Alerts');
+
+      await retry.try(async () => {
+        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).to.eql('Alerts');
+      });
+
       await testSubjects.click('ruleTypetest.failingFilterOption');
 
       await retry.try(async () => {
