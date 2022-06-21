@@ -8,13 +8,17 @@
 import { TypeOf } from '@kbn/config-schema';
 import {
   ActionStatusRequestSchema,
-  HostIsolationRequestSchema,
+  NoParametersRequestSchema,
   ResponseActionBodySchema,
 } from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
-export type ResponseActions = ISOLATION_ACTIONS | 'kill-process' | 'suspend-process';
+export type ResponseActions =
+  | ISOLATION_ACTIONS
+  | 'kill-process'
+  | 'suspend-process'
+  | 'running-processes';
 
 export type OutputActionContentEntry = OutputActionRunningProcess;
 export interface OutputActionRunningProcess {
@@ -204,7 +208,7 @@ export interface ActivityLog {
   data: ActivityLogEntry[];
 }
 
-export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
+export type HostIsolationRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
 
 export type ResponseActionRequestBody = TypeOf<typeof ResponseActionBodySchema>;
 
