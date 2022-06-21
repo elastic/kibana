@@ -157,9 +157,9 @@ export const DocTableWrapper = forwardRef(
 
     const renderRows = useCallback(
       (rowsToRender: DataTableRecord[]) => {
-        return rowsToRender.map((current, index) => (
+        return rowsToRender.map((current) => (
           <TableRow
-            key={`${current.raw._index}${current.raw._id}${current.raw._score}${current.raw._version}${current.raw._routing}`}
+            key={`${current.id}${current.raw._score}${current.raw._version}`}
             columns={columns}
             filter={onFilter}
             indexPattern={indexPattern}
