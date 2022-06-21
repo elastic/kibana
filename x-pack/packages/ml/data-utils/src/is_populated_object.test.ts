@@ -7,7 +7,7 @@
 
 import { isPopulatedObject } from './is_populated_object';
 
-describe('isPopulatedObject()', () => {
+describe('isPopulatedObject', () => {
   it('does not allow numbers', () => {
     expect(isPopulatedObject(0)).toBe(false);
   });
