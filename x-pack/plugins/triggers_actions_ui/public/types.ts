@@ -339,6 +339,11 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   ruleTypeIndex?: RuleTypeIndex;
   filteredSolutions?: string[] | undefined;
 }
+export interface RuleDefinitionProps {
+  rule: Rule;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+}
 
 export enum Percentiles {
   P50 = 'P50',
