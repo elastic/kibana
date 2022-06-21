@@ -97,6 +97,7 @@ export interface VisualizeEditorLayersContext {
   termsParams?: Record<string, unknown>;
   splitFields?: string[];
   splitMode?: string;
+  collapseFn?: string;
   splitFilters?: SplitByFilters[];
   palette?: PaletteOutput;
   metrics: VisualizeEditorMetricContext[];
