@@ -9,11 +9,11 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import { type Filter, buildPhraseFilter } from '@kbn/es-query';
+import { type Filter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { SortDirection, SortDirectionNumeric, TimeRange } from '@kbn/data-plugin/common';
+import { SortDirection, SortDirectionNumeric } from '@kbn/data-plugin/common';
 import { AbstractESSource } from '../es_source';
 import {
   getHttp,
