@@ -124,13 +124,21 @@ export function LayerPanels(
                 prevState.datasourceStates[datasourceId].state.currentIndexPatternId;
               const newDataView = newDatasourceState.currentIndexPatternId;
 
-              const executeContext = {
-                ...getActionContext(),
-                initialDataView,
-                newDataView,
-              };
-              const action = props.uiActions.getAction('ACTION_UPDATE_USED_DATA_VIEWS');
-              action.execute(executeContext);
+              const dataViewsInLayerKeys = Object.values(
+                prevState.datasourceStates[datasourceId].state.layers
+              );
+              const dataViewsInLayer = dataViewsInLayerKeys.map((layer) => layer.indexPatternId);
+
+              if (!dataViewsInLayer.includes(newDataView)) {
+                const executeContext = {
+                  ...getActionContext(),
+                  initialDataView,
+                  newDataView,
+                };
+                const action = props.uiActions.getAction('ACTION_UPDATE_USED_DATA_VIEWS');
+                action.execute(executeContext);
+              }
+
               return {
                 ...prevState,
                 datasourceStates: {
@@ -198,7 +206,9 @@ export function LayerPanels(
               );
             }
           }}
-          onRemoveLayer={() => {
+          onRemoveLayer={(indexPatternId: string) => {
+            // console.log('layerId', indexPatternId);
+
             dispatchLens(
               removeOrClearLayer({
                 visualizationId: activeVisualization.id,

@@ -55,7 +55,7 @@ export function LayerPanel(
       newDatasourcestate: unknown,
       newVisualizationState: unknown
     ) => void;
-    onRemoveLayer: () => void;
+    onRemoveLayer: (indexPatternId: string) => void;
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
     toggleFullscreen: () => void;
     onEmptyDimensionAdd: (columnId: string, group: { groupId: string }) => void;
@@ -329,6 +329,11 @@ export function LayerPanel(
     ]
   );
 
+  const onRemoveLayerInternal = () => {
+    const currentIndexPatternId = layerDatasourceState.currentIndexPatternId;
+    onRemoveLayer(currentIndexPatternId);
+  };
+
   return (
     <>
       <section tabIndex={-1} ref={registerLayerRef} className="lnsLayerPanel">
@@ -346,7 +351,7 @@ export function LayerPanel(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <RemoveLayerButton
-                  onRemoveLayer={onRemoveLayer}
+                  onRemoveLayer={onRemoveLayerInternal}
                   layerIndex={layerIndex}
                   isOnlyLayer={isOnlyLayer}
                   activeVisualization={activeVisualization}

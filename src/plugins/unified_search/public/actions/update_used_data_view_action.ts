@@ -14,13 +14,18 @@ export const ACTION_UPDATE_USED_DATA_VIEWS = 'ACTION_UPDATE_USED_DATA_VIEWS';
 export interface UpdateUsedDataViewActionContext {
   initialDataView: string;
   newDataView: string; // null in case of removing
+  usedDataViews: string[] | [];
 }
 
 export function createUpdateUsedDataViewAction(filterManager: FilterManager): Action {
   return createAction({
     type: ACTION_UPDATE_USED_DATA_VIEWS,
     id: ACTION_UPDATE_USED_DATA_VIEWS,
-    execute: async ({ initialDataView, newDataView }: UpdateUsedDataViewActionContext) => {
+    execute: async ({
+      initialDataView,
+      newDataView,
+      usedDataViews,
+    }: UpdateUsedDataViewActionContext) => {
       const filters = filterManager.getFilters();
       const changedIndexIdFilters = filters.map((filter) => {
         if (filter.meta.index === initialDataView) {
@@ -35,6 +40,7 @@ export function createUpdateUsedDataViewAction(filterManager: FilterManager): Ac
           return filter;
         }
       });
+
       filterManager.setFilters(changedIndexIdFilters);
     },
   });
