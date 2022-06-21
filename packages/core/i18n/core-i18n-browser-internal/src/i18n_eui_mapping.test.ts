@@ -15,7 +15,10 @@ import { getEuiContextMapping } from './i18n_eui_mapping';
 
 /** Regexp to find {values} usage */
 const VALUES_REGEXP = /\{\w+\}/;
-type I18nTranslateCall = [ string, { defaultMessage: string; values?: object; description?: string } ];
+type I18nTranslateCall = [
+  string,
+  { defaultMessage: string; values?: object; description?: string }
+];
 
 describe('@elastic/eui i18n tokens', () => {
   const i18nTranslateActual = jest.requireActual('@kbn/i18n').i18n.translate;
