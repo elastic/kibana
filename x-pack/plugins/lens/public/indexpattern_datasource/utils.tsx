@@ -9,12 +9,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from '@kbn/core/public';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
-import { DatatableColumn } from '@kbn/expressions-plugin';
+import type { DatatableColumn } from '@kbn/expressions-plugin';
 import { groupBy, escape } from 'lodash';
-import { checkColumnForPrecisionError, Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/data-plugin/common';
 import type { FramePublicAPI, StateSetter } from '../types';
 import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
@@ -159,6 +160,7 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
 );
 
 export function getPrecisionErrorWarningMessages(
+  datatableUtilities: DatatableUtilitiesService,
   state: IndexPatternPrivateState,
   { activeData }: FramePublicAPI,
   docLinks: DocLinksStart,
@@ -178,7 +180,7 @@ export function getPrecisionErrorWarningMessages(
       .forEach(({ layerId, column }) => {
         const currentLayer = state.layers[layerId];
         const currentColumn = currentLayer?.columns[column.id];
-        if (currentLayer && currentColumn && checkColumnForPrecisionError(column)) {
+        if (currentLayer && currentColumn && datatableUtilities.hasPrecisionError(column)) {
           const indexPattern = state.indexPatterns[currentLayer.indexPatternId];
           // currentColumnIsTerms is mostly a type guard. If there's a precision error,
           // we already know that we're dealing with a terms-based operation (at least for now).

@@ -5333,10 +5333,10 @@
                 "pluginId": "expressionXY",
                 "scope": "common",
                 "docId": "kibExpressionXYPluginApi",
-                "section": "def-common.AxisExtentConfig",
-                "text": "AxisExtentConfig"
+                "section": "def-common.AxisExtentConfigResult",
+                "text": "AxisExtentConfigResult"
               },
-              " & { type: \"axisExtentConfig\"; }"
+              " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false

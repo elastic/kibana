@@ -13,7 +13,6 @@ import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
 import {
-  ActionForm,
   ActionType,
   loadActionTypes,
   ActionVariables,
@@ -84,7 +83,7 @@ export const RuleActionsField: React.FC<Props> = ({
   const { isSubmitted, isSubmitting, isValid } = form;
   const {
     http,
-    triggersActionsUi: { actionTypeRegistry },
+    triggersActionsUi: { getActionForm },
   } = useKibana().services;
 
   const actions: RuleAction[] = useMemo(
@@ -135,6 +134,29 @@ export const RuleActionsField: React.FC<Props> = ({
     [field.setValue, actions]
   );
 
+  const actionForm = useMemo(
+    () =>
+      getActionForm({
+        actions,
+        messageVariables,
+        defaultActionGroupId: DEFAULT_ACTION_GROUP_ID,
+        setActionIdByIndex,
+        setActions: setAlertActionsProperty,
+        setActionParamsProperty,
+        actionTypes: supportedActionTypes,
+        defaultActionMessage: DEFAULT_ACTION_MESSAGE,
+      }),
+    [
+      actions,
+      getActionForm,
+      messageVariables,
+      setActionIdByIndex,
+      setActionParamsProperty,
+      setAlertActionsProperty,
+      supportedActionTypes,
+    ]
+  );
+
   useEffect(() => {
     (async function () {
       const actionTypes = convertArrayToCamelCase(await loadActionTypes({ http })) as ActionType[];
@@ -168,17 +190,7 @@ export const RuleActionsField: React.FC<Props> = ({
           <EuiSpacer />
         </>
       ) : null}
-      <ActionForm
-        actions={actions}
-        messageVariables={messageVariables}
-        defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
-        setActionIdByIndex={setActionIdByIndex}
-        setActions={setAlertActionsProperty}
-        setActionParamsProperty={setActionParamsProperty}
-        actionTypeRegistry={actionTypeRegistry}
-        actionTypes={supportedActionTypes}
-        defaultActionMessage={DEFAULT_ACTION_MESSAGE}
-      />
+      {actionForm}
     </ContainerActions>
   );
 };
