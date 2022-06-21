@@ -33,10 +33,8 @@ interface MapEmbeddableState {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
-
-  // action state
-  filterByMapExtent: boolean;
-  linkMapView: boolean;
+  filterByMapExtent?: boolean;
+  isMovementSynchronized?: boolean;
 }
 export type MapByValueInput = {
   attributes: MapSavedObjectAttributes;

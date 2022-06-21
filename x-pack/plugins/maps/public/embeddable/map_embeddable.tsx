@@ -80,9 +80,7 @@ import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
-import { synchronizeMaps } from './synchronize_maps';
-import { mapEmbeddableCounter } from './map_embeddable_counter';
-import { getLinkMapView } from '../trigger_actions/link_map_view_action';
+import { synchronizeMovement } from './synchronize_movement';
 import { getFilterByMapExtent } from '../trigger_actions/filter_by_map_extent_action';
 
 import {
@@ -120,7 +118,6 @@ export class MapEmbeddable
   private _prevFilters: Filter[] = [];
   private _prevSyncColors?: boolean;
   private _prevSearchSessionId?: string;
-  private _prevLinkMapView: boolean;
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
@@ -146,7 +143,6 @@ export class MapEmbeddable
     this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
     this._controlledBy = `mapEmbeddablePanel${this.id}`;
     this._prevFilterByMapExtent = getFilterByMapExtent(this.input);
-    this._prevLinkMapView = getLinkMapView(this.input);
   }
 
   private async _initializeSaveMap() {
@@ -283,20 +279,6 @@ export class MapEmbeddable
       }
     }
 
-    const linkMapView = getLinkMapView(this.input);
-    if (this._prevLinkMapView !== linkMapView) {
-      this._prevLinkMapView = linkMapView;
-      // work around for multiple embebeddable instances for same panel
-      if (!this._domNode) {
-        return;
-      }
-      if (linkMapView) {
-        this._linkMapView();
-      } else {
-        this._unlinkMapView();
-      }
-    }
-
     if (
       !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
       !_.isEqual(this.input.query, this._prevQuery) ||
@@ -324,10 +306,12 @@ export class MapEmbeddable
     }
   }
 
-  _linkMapView() {
-    synchronizeMaps.register(this.input.id, this._mapSyncHandler);
+  _getIsMovementSynchronized = () => {
+    return this.input.isMovementSynchronized === undefined ? true : this.input.isMovementSynchronized;
+  }
 
-    const syncedLocation = synchronizeMaps.getLocation();
+  _gotoSynchronizedLocation() {
+    const syncedLocation = synchronizeMovement.getLocation();
     if (syncedLocation) {
       // set map to synchronized view
       this._mapSyncHandler(syncedLocation.lat, syncedLocation.lon, syncedLocation.zoom);
@@ -339,7 +323,7 @@ export class MapEmbeddable
       // Use goto because un-rendered map will not have accurate mapCenter and mapZoom.
       const goto = getGoto(this._savedMap.getStore().getState());
       if (goto && goto.center) {
-        synchronizeMaps.setLocation(
+        synchronizeMovement.setLocation(
           this.input.id,
           goto.center.lat,
           goto.center.lon,
@@ -352,11 +336,7 @@ export class MapEmbeddable
     // Initialize synchroinzed view to map's view
     const center = getMapCenter(this._savedMap.getStore().getState());
     const zoom = getMapZoom(this._savedMap.getStore().getState());
-    synchronizeMaps.setLocation(this.input.id, center.lat, center.lon, zoom);
-  }
-
-  _unlinkMapView() {
-    synchronizeMaps.unregister(this.input.id);
+    synchronizeMovement.setLocation(this.input.id, center.lat, center.lon, zoom);
   }
 
   _getFilters() {
@@ -421,9 +401,25 @@ export class MapEmbeddable
       return;
     }
 
-    mapEmbeddableCounter.increment();
-    if (getLinkMapView(this.input)) {
-      this._linkMapView();
+    synchronizeMovement.register(
+      this.input.id,
+      {
+        getTitle: () => {
+          const title = this.getOutput().title;
+          return title ? title : this.input.id;
+        },
+        onLocationChange: this._mapSyncHandler,
+        getIsMovementSynchronized: this._getIsMovementSynchronized,
+        setIsMovementSynchronized: (isMovementSynchronized: boolean) => {
+          this.updateInput({ isMovementSynchronized });
+          if (isMovementSynchronized) {
+            this._gotoSynchronizedLocation();
+          }
+        },
+      }
+    );
+    if (this._getIsMovementSynchronized()) {
+      this._gotoSynchronizedLocation();
     }
 
     const sharingSavedObjectProps = this._savedMap.getSharingSavedObjectProps();
@@ -599,8 +595,7 @@ export class MapEmbeddable
 
   destroy() {
     super.destroy();
-    mapEmbeddableCounter.decrement();
-    this._unlinkMapView();
+    synchronizeMovement.unregister(this.input.id);
     this._isActive = false;
     if (this._unsubscribeFromStore) {
       this._unsubscribeFromStore();
@@ -654,8 +649,8 @@ export class MapEmbeddable
       mapCenter.lon !== center.lon ||
       mapCenter.zoom !== zoom
     ) {
-      if (getLinkMapView(this.input)) {
-        synchronizeMaps.setLocation(this.input.id, center.lat, center.lon, zoom);
+      if (this._getIsMovementSynchronized()) {
+        synchronizeMovement.setLocation(this.input.id, center.lat, center.lon, zoom);
       }
       this.updateInput({
         mapCenter: {
