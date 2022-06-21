@@ -17,8 +17,8 @@ export const FleetDownloadElasticGpgKey: Task = {
 
   async run(config, log, build) {
     const gpgKeyUrl = ARTIFACTS_URL + GPG_KEY_NAME;
-    log.info(`Downloading Elastic GPG key from ${gpgKeyUrl}`);
     const destination = build.resolvePath(BUNDLED_KEYS_DIR, GPG_KEY_NAME);
+    log.info(`Downloading Elastic GPG key from ${gpgKeyUrl} to ${destination}`);
 
     try {
       await downloadToDisk({
