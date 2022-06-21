@@ -6,6 +6,19 @@
  */
 
 import { wrapErrorAndRejectPromise } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
+import {
+  ACTION_STATUS_ROUTE,
+  AGENT_POLICY_SUMMARY_ROUTE,
+  BASE_POLICY_RESPONSE_ROUTE,
+  GET_RUNNING_PROCESSES_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
+  ISOLATE_HOST_ROUTE,
+  ISOLATE_HOST_ROUTE_V2,
+  KILL_PROCESS_ROUTE,
+  SUSPEND_PROCESS_ROUTE,
+  UNISOLATE_HOST_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
+} from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   createUserAndRole,
@@ -30,17 +43,17 @@ export default function ({ getService }: FtrProviderContext) {
     const apiList = [
       {
         method: 'get',
-        path: '/api/endpoint/metadata',
+        path: HOST_METADATA_LIST_ROUTE,
         body: undefined,
       },
       {
         method: 'get',
-        path: '/api/endpoint/action_status?agent_ids=1',
+        path: `${ACTION_STATUS_ROUTE}?agent_ids=1`,
         body: undefined,
       },
       {
         method: 'get',
-        path: '/api/endpoint/policy/summaries?package_name=endpoint',
+        path: `${AGENT_POLICY_SUMMARY_ROUTE}?package_name=endpoint`,
         body: undefined,
       },
       {
@@ -50,18 +63,43 @@ export default function ({ getService }: FtrProviderContext) {
       },
       {
         method: 'get',
-        path: '/api/endpoint/policy_response?agentId=1',
+        path: `${BASE_POLICY_RESPONSE_ROUTE}?agentId=1`,
         body: undefined,
       },
       {
         method: 'post',
-        path: '/api/endpoint/isolate',
+        path: ISOLATE_HOST_ROUTE,
         body: { endpoint_ids: ['one'] },
       },
       {
         method: 'post',
-        path: '/api/endpoint/unisolate',
+        path: UNISOLATE_HOST_ROUTE,
         body: { endpoint_ids: ['one'] },
+      },
+      {
+        method: 'post',
+        path: ISOLATE_HOST_ROUTE_V2,
+        body: { endpoint_ids: ['one'] },
+      },
+      {
+        method: 'post',
+        path: UNISOLATE_HOST_ROUTE_V2,
+        body: { endpoint_ids: ['one'] },
+      },
+      {
+        method: 'post',
+        path: GET_RUNNING_PROCESSES_ROUTE,
+        body: { endpoint_ids: ['one'] },
+      },
+      {
+        method: 'post',
+        path: KILL_PROCESS_ROUTE,
+        body: { endpoint_ids: ['one'], parameters: { entity_id: 1234 } },
+      },
+      {
+        method: 'post',
+        path: SUSPEND_PROCESS_ROUTE,
+        body: { endpoint_ids: ['one'], parameters: { entity_id: 1234 } },
       },
     ];
 
