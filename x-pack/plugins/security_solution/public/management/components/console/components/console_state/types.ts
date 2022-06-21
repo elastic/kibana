@@ -105,7 +105,7 @@ export type ConsoleDataAction =
   | {
       type: 'updateInputTextEnteredState';
       payload: {
-        textEntered: string;
+        textEntered: string | ((prevState: string) => string);
       };
     }
   | {

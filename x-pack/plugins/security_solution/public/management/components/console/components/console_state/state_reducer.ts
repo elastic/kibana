@@ -54,44 +54,51 @@ export const initiateState = (
 };
 
 export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
+  let newState = state;
+
   switch (action.type) {
     case 'scrollDown':
       state.scrollToBottom();
-      return state;
+      break;
 
     case 'addFocusToKeyCapture':
       state.keyCapture?.current?.focus();
-      return state;
+      break;
 
     case 'removeFocusFromKeyCapture':
       state.keyCapture?.current?.blur();
-      return state;
+      break;
 
     case 'updateFooterContent':
       if (state.footerContent !== action.payload.value) {
-        return { ...state, footerContent: action.payload.value };
+        newState = { ...state, footerContent: action.payload.value };
       }
       break;
 
     case 'executeCommand':
-      return handleExecuteCommand(state, action);
+      newState = handleExecuteCommand(state, action);
+      break;
 
     case 'updateCommandStatusState':
     case 'updateCommandStoreState':
-      return handleUpdateCommandState(state, action);
+      newState = handleUpdateCommandState(state, action);
+      break;
 
     case 'showSidePanel':
-      return handleSidePanel(state, action);
+      newState = handleSidePanel(state, action);
+      break;
 
     case 'updateInputPopoverState':
     case 'updateInputHistoryState':
     case 'updateInputTextEnteredState':
     case 'updateInputPlaceholderState':
-      return handleInputAreaState(state, action);
+      newState = handleInputAreaState(state, action);
+      break;
 
     case 'clear':
-      return { ...state, commandHistory: [] };
+      newState = { ...state, commandHistory: [] };
+      break;
   }
 
-  return state;
+  return newState;
 };
