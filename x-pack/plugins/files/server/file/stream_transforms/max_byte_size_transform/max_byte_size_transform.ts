@@ -23,11 +23,9 @@ export class MaxByteSizeTransform extends Transform {
     encoding: BufferEncoding,
     cb: (err: Error | null | undefined, chunk?: Buffer | string) => void
   ) => {
-    if (Buffer.isBuffer(chunk)) {
-      this.bytesSeen += chunk.byteLength;
-    } else {
-      this.bytesSeen += Buffer.byteLength(chunk, this.encoding);
-    }
+    this.bytesSeen += Buffer.isBuffer(chunk)
+      ? chunk.byteLength
+      : Buffer.byteLength(chunk, this.encoding);
     if (this.bytesSeen > this.maxByteSize) {
       cb(new MaxByteSizeExceededError(this.maxByteSize));
     } else {
