@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { TestQueryRow, TestQueryRowProps } from './test_query_row';
+export { TestQueryRow } from './test_query_row';
+export type { TestQueryRowProps } from './test_query_row';
 export { useTestQuery, totalHitsToNumber } from './use_test_query';
