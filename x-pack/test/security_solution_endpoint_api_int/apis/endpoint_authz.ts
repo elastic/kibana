@@ -6,12 +6,6 @@
  */
 
 import { wrapErrorAndRejectPromise } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
-import { FtrProviderContext } from '../ftr_provider_context';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-  ROLES,
-} from '../../common/services/security_solution';
 import {
   ACTION_STATUS_ROUTE,
   AGENT_POLICY_SUMMARY_ROUTE,
@@ -24,7 +18,13 @@ import {
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
-} from '../../../plugins/security_solution/common/endpoint/constants';
+} from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { FtrProviderContext } from '../ftr_provider_context';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+  ROLES,
+} from '../../common/services/security_solution';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
