@@ -58,6 +58,7 @@ describe('duplicateRule', () => {
       timelineTitle: undefined,
       ruleNameOverride: undefined,
       timestampOverride: undefined,
+      dataViewId: undefined,
     },
     schedule: {
       interval: '5m',
