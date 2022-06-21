@@ -1179,18 +1179,6 @@
           {
             "plugin": "osquery",
             "path": "x-pack/plugins/osquery/public/components/empty_state.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
           }
         ],
         "children": [
@@ -2091,26 +2079,6 @@
           {
             "plugin": "kibanaOverview",
             "path": "src/plugins/kibana_overview/public/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
           },
           {
             "plugin": "home",
@@ -4362,14 +4330,6 @@
           {
             "plugin": "enterpriseSearch",
             "path": "x-pack/plugins/enterprise_search/public/applications/shared/layout/page_template.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/overview/overview.tsx"
           }
         ],
         "initialIsOpen": false
@@ -4383,13 +4343,7 @@
         "description": [],
         "signature": [
           "{ analytics?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.AnalyticsServiceStart",
-            "text": "AnalyticsServiceStart"
-          },
+          "AnalyticsServiceStart",
           " | undefined; application?: ",
           {
             "pluginId": "core",

@@ -7,58 +7,8 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  GenericValidationResult,
-  ActionTypeModel,
-  ConnectorValidationResult,
-} from '../../../../types';
-import { JiraActionConnector, JiraConfig, JiraSecrets, JiraActionParams } from './types';
-import { isValidUrl } from '../../../lib/value_validators';
-
-const validateConnector = async (
-  action: JiraActionConnector
-): Promise<ConnectorValidationResult<JiraConfig, JiraSecrets>> => {
-  const translations = await import('./translations');
-  const configErrors = {
-    apiUrl: new Array<string>(),
-    projectKey: new Array<string>(),
-  };
-  const secretsErrors = {
-    email: new Array<string>(),
-    apiToken: new Array<string>(),
-  };
-
-  const validationResult = {
-    config: { errors: configErrors },
-    secrets: { errors: secretsErrors },
-  };
-
-  if (!action.config.apiUrl) {
-    configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRED];
-  }
-
-  if (action.config.apiUrl) {
-    if (!isValidUrl(action.config.apiUrl)) {
-      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_INVALID];
-    } else if (!isValidUrl(action.config.apiUrl, 'https:')) {
-      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRE_HTTPS];
-    }
-  }
-
-  if (!action.config.projectKey) {
-    configErrors.projectKey = [...configErrors.projectKey, translations.JIRA_PROJECT_KEY_REQUIRED];
-  }
-
-  if (!action.secrets.email) {
-    secretsErrors.email = [...secretsErrors.email, translations.JIRA_EMAIL_REQUIRED];
-  }
-
-  if (!action.secrets.apiToken) {
-    secretsErrors.apiToken = [...secretsErrors.apiToken, translations.JIRA_API_TOKEN_REQUIRED];
-  }
-
-  return validationResult;
-};
+import { GenericValidationResult, ActionTypeModel } from '../../../../types';
+import { JiraConfig, JiraSecrets, JiraActionParams } from './types';
 
 export const JIRA_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.selectMessageText',
@@ -80,7 +30,6 @@ export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraAc
     iconClass: lazy(() => import('./logo')),
     selectMessage: JIRA_DESC,
     actionTypeTitle: JIRA_TITLE,
-    validateConnector,
     actionConnectorFields: lazy(() => import('./jira_connectors')),
     validateParams: async (
       actionParams: JiraActionParams
