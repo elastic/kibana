@@ -7,13 +7,14 @@
 
 import { Logger } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import { ListClient } from '@kbn/lists-plugin/server';
-import { getInputIndex } from '../get_input_output_index';
 import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
@@ -24,6 +25,8 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 
 export const threatMatchExecutor = async ({
+  inputIndex,
+  runtimeMappings,
   completeRule,
   tuple,
   listClient,
@@ -38,6 +41,8 @@ export const threatMatchExecutor = async ({
   bulkCreate,
   wrapHits,
 }: {
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<ThreatRuleParams>;
   tuple: RuleRangeTuple;
   listClient: ListClient;
@@ -55,12 +60,6 @@ export const threatMatchExecutor = async ({
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('threatMatchExecutor', async () => {
-    const inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
-    });
     return createThreatSignals({
       alertId: completeRule.alertId,
       buildRuleMessage,
@@ -89,6 +88,7 @@ export const threatMatchExecutor = async ({
       tuple,
       type: ruleParams.type,
       wrapHits,
+      runtimeMappings,
     });
   });
 };

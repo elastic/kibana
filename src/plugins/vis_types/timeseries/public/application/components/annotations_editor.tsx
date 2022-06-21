@@ -18,6 +18,8 @@ import { collectionActions, CollectionActionsProps } from './lib/collection_acti
 import type { Panel, Annotation } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
 
+import './_annotations_editor.scss';
+
 interface AnnotationsEditorProps {
   fields: VisFields;
   model: Panel;
