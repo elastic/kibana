@@ -25,7 +25,9 @@ import {
   EuiBadge,
   EuiResizableContainer,
   useIsWithinBreakpoints,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
@@ -349,7 +351,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const {
     services: { charts: chartsService },
   } = useMlKibana();
-
+  const { euiTheme } = useEuiTheme();
   const mlLocator = useMlLocator();
 
   const {
@@ -639,10 +641,16 @@ export const Explorer: FC<ExplorerUIProps> = ({
                     ]}
                     minSize={'200px'}
                     initialSize={20}
-                    paddingSize={'m'}
+                    paddingSize={'none'}
                     onToggleCollapsed={onToggleCollapsed}
                   >
-                    <div data-test-subj="mlAnomalyExplorerInfluencerList">
+                    <div
+                      data-test-subj="mlAnomalyExplorerInfluencerList"
+                      css={css`
+                        padding: calc(${euiTheme.size.base} + ${euiTheme.border.width.thin})
+                          ${euiTheme.size.l} ${euiTheme.size.l} 0;
+                      `}
+                    >
                       <EuiSpacer size={'s'} />
 
                       <EuiFlexGroup
