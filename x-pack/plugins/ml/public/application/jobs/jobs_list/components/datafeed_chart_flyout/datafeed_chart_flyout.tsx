@@ -418,28 +418,6 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           })}
                           position={Position.Left}
                         />
-                        {showModelSnapshots ? (
-                          <LineAnnotation
-                            id={i18n.translate(
-                              'xpack.ml.jobsList.datafeedChart.modelSnapshotsLineSeriesId',
-                              {
-                                defaultMessage: 'Model snapshots',
-                              }
-                            )}
-                            key="model-snapshots-results-line"
-                            domainType={AnnotationDomainType.XDomain}
-                            dataValues={modelSnapshotDataForTimeRange}
-                            marker={<EuiIcon type="asterisk" />}
-                            markerPosition={Position.Top}
-                            style={{
-                              line: {
-                                strokeWidth: 3,
-                                stroke: euiTheme.euiColorVis1,
-                                opacity: 0.5,
-                              },
-                            }}
-                          />
-                        ) : null}
                         {showAnnotations ? (
                           <>
                             <LineAnnotation
@@ -475,6 +453,28 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                               style={{ fill: euiTheme.euiColorDangerText }}
                             />
                           </>
+                        ) : null}
+                        {showModelSnapshots ? (
+                          <LineAnnotation
+                            id={i18n.translate(
+                              'xpack.ml.jobsList.datafeedChart.modelSnapshotsLineSeriesId',
+                              {
+                                defaultMessage: 'Model snapshots',
+                              }
+                            )}
+                            key="model-snapshots-results-line"
+                            domainType={AnnotationDomainType.XDomain}
+                            dataValues={modelSnapshotDataForTimeRange}
+                            marker={<EuiIcon type="asterisk" />}
+                            markerPosition={Position.Top}
+                            style={{
+                              line: {
+                                strokeWidth: 3,
+                                stroke: euiTheme.euiColorVis1,
+                                opacity: 0.5,
+                              },
+                            }}
+                          />
                         ) : null}
                         {messageData.length > 0 ? (
                           <>
