@@ -33,7 +33,7 @@ export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
     dateRangeStart,
     dateRangeEnd,
     monitorIds,
-    settings?.heartbeatIndices || 'heartbeat-*'
+    settings?.heartbeatIndices
   );
 
   const { data, loading } = useEsSearch<Ping, typeof queryParams>(
