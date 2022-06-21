@@ -17,7 +17,7 @@ export const COLUMN_SESSION_START = i18n.translate(
 export const COLUMN_EXECUTABLE = i18n.translate(
   'xpack.securitySolution.kubernetes.columnExecutable',
   {
-    defaultMessage: 'Session Leader',
+    defaultMessage: 'Session leader',
   }
 );
 
@@ -28,7 +28,7 @@ export const COLUMN_NODE = i18n.translate('xpack.securitySolution.kubernetes.col
 export const COLUMN_ENTRY_USER = i18n.translate(
   'xpack.securitySolution.kubernetes.columnEntryUser',
   {
-    defaultMessage: 'Login User',
+    defaultMessage: 'Session entry users',
   }
 );
 
