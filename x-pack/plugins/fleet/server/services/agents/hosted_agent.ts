@@ -34,3 +34,5 @@ export async function getHostedPolicies(
 export function isHostedAgent(hostedPolicies: { [key: string]: boolean }, agent: Agent) {
   return agent.policy_id && hostedPolicies[agent.policy_id];
 }
+
+// test
