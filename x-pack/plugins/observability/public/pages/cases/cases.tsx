@@ -13,6 +13,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { LazyAlertsFlyout } from '../..';
 import { useFetchAlertDetail } from './use_fetch_alert_detail';
 import { useFetchAlertData } from './use_fetch_alert_data';
+import { paths } from '../../config';
 
 interface CasesProps {
   userCanCrud: boolean;
@@ -20,7 +21,7 @@ interface CasesProps {
 export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
   const {
     cases,
-    application: { getUrlForApp, navigateToApp },
+    application: { navigateToUrl },
   } = useKibana().services;
   const { observabilityRuleTypeRegistry } = usePluginContext();
   const [selectedAlertId, setSelectedAlertId] = useState<string>('');
@@ -53,17 +54,18 @@ export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
         },
         ruleDetailsNavigation: {
           href: (ruleId) => {
-            return getUrlForApp('management', {
-              path: `/insightsAndAlerting/triggersActions/rule/${ruleId}`,
-            });
+            return ruleId ? paths.observability.ruleDetails(ruleId) : paths.observability.rules;
           },
           onClick: async (ruleId, ev) => {
+            const linkToRule = ruleId
+              ? paths.observability.ruleDetails(ruleId)
+              : paths.observability.rules;
+
             if (ev != null) {
               ev.preventDefault();
             }
-            return navigateToApp('management', {
-              path: `/insightsAndAlerting/triggersActions/rule/${ruleId}`,
-            });
+
+            return navigateToUrl(linkToRule);
           },
         },
       })}
