@@ -69,6 +69,7 @@ export type GetAgentsOptions =
   | {
       kuery: string;
       showInactive?: boolean;
+      perPage?: number;
     };
 
 export async function getAgents(esClient: ElasticsearchClient, options: GetAgentsOptions) {
@@ -80,6 +81,7 @@ export async function getAgents(esClient: ElasticsearchClient, options: GetAgent
       await getAllAgentsByKuery(esClient, {
         kuery: options.kuery,
         showInactive: options.showInactive ?? false,
+        perPage: options.perPage,
       })
     ).agents;
   } else {
@@ -271,10 +273,9 @@ export async function getAgentsByKuery(
   };
 }
 
-// TODO instead of query all at once, do bulk action in batches
 export async function getAllAgentsByKuery(
   esClient: ElasticsearchClient,
-  options: Omit<ListWithKuery, 'page' | 'perPage'> & {
+  options: Omit<ListWithKuery, 'page'> & {
     showInactive: boolean;
   }
 ): Promise<{
@@ -283,29 +284,33 @@ export async function getAllAgentsByKuery(
 }> {
   const pitId = await openAgentsPointInTime(esClient);
 
+  const perPage = options.perPage ?? SO_SEARCH_LIMIT;
+
   const res = await getAgentsByKueryPit(esClient, {
     ...options,
     page: 1,
-    perPage: SO_SEARCH_LIMIT,
+    perPage,
     pitId,
   });
 
-  while (res.agents.length < res.total) {
-    const lastAgent = res.agents[res.agents.length - 1];
+  let allAgents = res.agents;
+
+  while (allAgents.length < res.total) {
+    const lastAgent = allAgents[allAgents.length - 1];
     const nextPage = await getAgentsByKueryPit(esClient, {
       ...options,
       page: 1,
-      perPage: SO_SEARCH_LIMIT,
+      perPage,
       pitId,
       searchAfter: lastAgent.sort!,
     });
-    res.agents = [...res.agents, ...nextPage.agents];
+    allAgents = allAgents.concat(nextPage.agents);
   }
 
   await closeAgentsPointInTime(esClient, pitId);
 
   return {
-    agents: res.agents,
+    agents: allAgents,
     total: res.total,
   };
 }
