@@ -25,9 +25,11 @@ import {
   ENTRY_LEADER_INTERACTIVE,
   ENTRY_LEADER_USER_ID,
   ENTRY_LEADER_ENTITY_ID,
+  CONTAINER_IMAGE_NAME,
 } from '../../../common/constants';
 import { KubernetesWidget } from '../kubernetes_widget';
 import { PercentWidget } from '../percent_widget';
+import { ContainerNameWidget } from '../container_name_widget';
 import { KubernetesSecurityDeps } from '../../types';
 import { AggregateResult } from '../../../common/types/aggregate';
 import { useStyles } from './styles';
@@ -58,6 +60,16 @@ const KubernetesSecurityRoutesComponent = ({
           groupedByKeyValue.nonRoot =
             (groupedByKeyValue.nonRoot || 0) + aggregate.count_by_aggs.value;
         }
+        return groupedByKeyValue;
+      }, {} as Record<string, number>),
+    []
+  );
+
+  const onReduceContainerAggs = useCallback(
+    (result: AggregateResult[]): Record<string, number> =>
+      result.reduce((groupedByKeyValue, aggregate) => {
+        groupedByKeyValue[aggregate.key_as_string || (aggregate.key.toString() as string)] =
+          aggregate.count_by_aggs.value;
         return groupedByKeyValue;
       }, {} as Record<string, number>),
     []
@@ -200,6 +212,16 @@ const KubernetesSecurityRoutesComponent = ({
               groupedBy={ENTRY_LEADER_USER_ID}
               countBy={ENTRY_LEADER_ENTITY_ID}
               onReduce={onReduceRootAggs}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ContainerNameWidget
+              widgetKey="containerNameSessions"
+              indexPattern={indexPattern}
+              globalFilter={globalFilter}
+              groupedBy={CONTAINER_IMAGE_NAME}
+              countBy={ENTRY_LEADER_ENTITY_ID}
+              onReduce={onReduceContainerAggs}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

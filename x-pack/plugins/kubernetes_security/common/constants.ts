@@ -24,3 +24,5 @@ export const DEFAULT_QUERY = '{"bool":{"must":[],"filter":[],"should":[],"must_n
 export const ENTRY_LEADER_INTERACTIVE = 'process.entry_leader.interactive';
 export const ENTRY_LEADER_USER_ID = 'process.entry_leader.user.id';
 export const ENTRY_LEADER_ENTITY_ID = 'process.entry_leader.entity_id';
+
+export const CONTAINER_IMAGE_NAME = 'container.image.name';
