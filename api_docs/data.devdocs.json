@@ -635,7 +635,17 @@
               "\nReturns a serialized field format for the field used in this agg.\nThis can be passed to fieldFormats.deserialize to get the field\nformat instance.\n"
             ],
             "signature": [
-              "() => {}"
+              "<T extends ",
+              "SerializableRecord",
+              ">() => ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<T>"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
             "deprecated": false,
@@ -1186,32 +1196,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.AggConfigs.partialRows",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "partialRows",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.AggConfigs.hierarchical",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hierarchical",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-public.AggConfigs.timeZone",
             "type": "string",
             "tags": [],
@@ -1316,6 +1300,26 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.AggConfigs.hierarchical",
+            "type": "boolean",
+            "tags": [],
+            "label": "hierarchical",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.AggConfigs.partialRows",
+            "type": "boolean",
+            "tags": [],
+            "label": "partialRows",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+            "deprecated": false
           },
           {
             "parentPluginId": "data",
@@ -1444,7 +1448,15 @@
             "label": "clone",
             "description": [],
             "signature": [
-              "({ enabledOnly }?: { enabledOnly?: boolean | undefined; }) => ",
+              "({ enabledOnly, opts, }?: { enabledOnly?: boolean | undefined; opts?: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfigsOptions",
+                "text": "AggConfigsOptions"
+              },
+              "> | undefined; }) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1461,14 +1473,46 @@
                 "id": "def-public.AggConfigs.clone.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ enabledOnly = true }",
+                "label": "{\n    enabledOnly = true,\n    opts,\n  }",
                 "description": [],
-                "signature": [
-                  "{ enabledOnly?: boolean | undefined; }"
-                ],
                 "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
                 "deprecated": false,
-                "isRequired": true
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.AggConfigs.clone.$1.enabledOnly",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "enabledOnly",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.AggConfigs.clone.$1.opts",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "opts",
+                    "description": [],
+                    "signature": [
+                      "Partial<",
+                      {
+                        "pluginId": "data",
+                        "scope": "common",
+                        "docId": "kibDataSearchPluginApi",
+                        "section": "def-common.AggConfigsOptions",
+                        "text": "AggConfigsOptions"
+                      },
+                      "> | undefined"
+                    ],
+                    "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -3881,7 +3925,9 @@
         "signature": [
           "(timeRange: ",
           "TimeRange",
-          ", options: CalculateBoundsOptions) => ",
+          ", options: ",
+          "CalculateBoundsOptions",
+          ") => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -6814,6 +6860,19 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.DataViewListItem.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -8249,59 +8308,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.TypeMeta",
-        "type": "Interface",
-        "tags": [],
-        "label": "TypeMeta",
-        "description": [
-          "\nInterface for metadata about rollup indices"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.TypeMeta.aggs",
-            "type": "Object",
-            "tags": [],
-            "label": "aggs",
-            "description": [
-              "\nAggregation restrictions for rollup fields"
-            ],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.AggregationRestrictions",
-                "text": "AggregationRestrictions"
-              },
-              "> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.TypeMeta.params",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [
-              "\nParams for retrieving rollup field data"
-            ],
-            "signature": [
-              "{ rollup_index: string; } | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -8323,9 +8329,6 @@
         "tags": [],
         "label": "ES_FIELD_TYPES",
         "description": [],
-        "signature": [
-          "ES_FIELD_TYPES"
-        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -8339,9 +8342,6 @@
         "description": [
           "\r\n Filter,\r\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
         ],
-        "signature": [
-          "FilterStateStore"
-        ],
         "path": "node_modules/@types/kbn__es-query/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -8353,9 +8353,6 @@
         "tags": [],
         "label": "KBN_FIELD_TYPES",
         "description": [],
-        "signature": [
-          "KBN_FIELD_TYPES"
-        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -8529,7 +8526,15 @@
             "section": "def-common.CreateAggConfigParams",
             "text": "CreateAggConfigParams"
           },
-          "[] | undefined) => ",
+          "[] | undefined, options?: Partial<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggConfigsOptions",
+            "text": "AggConfigsOptions"
+          },
+          "> | undefined) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -8537,15 +8542,39 @@
             "section": "def-common.AggConfigs",
             "text": "AggConfigs"
           },
-          "; types: ",
+          "; types: { get: (name: string) => ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.AggTypesRegistryStart",
-            "text": "AggTypesRegistryStart"
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
           },
-          "; }"
+          "<any> | ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<any>; getAll: () => { buckets: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<any>[]; metrics: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<any>[]; }; }; }"
         ],
         "path": "src/plugins/data/common/search/aggs/types.ts",
         "deprecated": false,
@@ -9553,9 +9582,6 @@
         ],
         "label": "KueryNode",
         "description": [],
-        "signature": [
-          "KueryNode"
-        ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
@@ -9732,9 +9758,6 @@
         ],
         "label": "RangeFilterParams",
         "description": [],
-        "signature": [
-          "RangeFilterParams"
-        ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
@@ -9974,27 +9997,27 @@
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/customize_time_range_modal.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/customize_time_range_modal.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/customize_time_range_modal.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/customize_time_range_modal.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/custom_time_range_action.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/custom_time_range_action.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/custom_time_range_action.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/custom_time_range_action.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/custom_time_range_badge.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/custom_time_range_badge.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/custom_time_range_badge.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/custom_time_range_badge.tsx"
           },
           {
             "plugin": "lens",
@@ -10015,14 +10038,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/trigger_actions/open_in_discover_helpers.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/trigger_actions/open_in_discover_helpers.ts"
           },
           {
             "plugin": "lens",
@@ -10031,14 +10046,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/trigger_actions/open_in_discover_drilldown.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx"
           },
           {
             "plugin": "maps",
@@ -10063,6 +10070,14 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/actions/map_actions.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx"
           },
           {
             "plugin": "maps",
@@ -10273,34 +10288,6 @@
             "path": "x-pack/plugins/security_solution/public/common/components/search_bar/index.tsx"
           },
           {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/can_inherit_time_range.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/can_inherit_time_range.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
-          },
-          {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/variables/context_variables.ts"
           },
@@ -10317,20 +10304,40 @@
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/url_drilldown.tsx"
           },
           {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable_factory.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable_factory.ts"
-          },
-          {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
           },
           {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/can_inherit_time_range.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/can_inherit_time_range.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
           },
           {
             "plugin": "visDefaultEditor",
@@ -10363,6 +10370,14 @@
           {
             "plugin": "visDefaultEditor",
             "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar.tsx"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable_factory.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable_factory.ts"
           },
           {
             "plugin": "visTypeTimelion",
@@ -10641,6 +10656,30 @@
             "path": "src/plugins/vis_types/vega/public/data_model/time_cache.ts"
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.TypeMeta",
+        "type": "Type",
+        "tags": [],
+        "label": "TypeMeta",
+        "description": [
+          "\nInterface for metadata about rollup indices"
+        ],
+        "signature": [
+          "{ aggs?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AggregationRestrictions",
+            "text": "AggregationRestrictions"
+          },
+          "> | undefined; params?: { rollup_index: string; } | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
@@ -10813,7 +10852,9 @@
                 "label": "field",
                 "description": [],
                 "signature": [
-                  "DataViewFieldBase"
+                  "{ name: string; type: string; subType?: ",
+                  "IFieldSubType",
+                  " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -10839,7 +10880,9 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "DataViewBase"
+                  "{ fields: ",
+                  "DataViewFieldBase",
+                  "[]; id?: string | undefined; title: string; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -10873,7 +10916,9 @@
                 "label": "field",
                 "description": [],
                 "signature": [
-                  "DataViewFieldBase"
+                  "{ name: string; type: string; subType?: ",
+                  "IFieldSubType",
+                  " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -10886,7 +10931,9 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "DataViewBase"
+                  "{ fields: ",
+                  "DataViewFieldBase",
+                  "[]; id?: string | undefined; title: string; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -10922,7 +10969,9 @@
                 "label": "field",
                 "description": [],
                 "signature": [
-                  "DataViewFieldBase"
+                  "{ name: string; type: string; subType?: ",
+                  "IFieldSubType",
+                  " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -10948,7 +10997,9 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "DataViewBase"
+                  "{ fields: ",
+                  "DataViewFieldBase",
+                  "[]; id?: string | undefined; title: string; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -11055,7 +11106,9 @@
                 "label": "field",
                 "description": [],
                 "signature": [
-                  "DataViewFieldBase"
+                  "{ name: string; type: string; subType?: ",
+                  "IFieldSubType",
+                  " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -11660,7 +11713,9 @@
               },
               ", field: string | ",
               "DataViewFieldBase",
-              ", values: any, operation: string, index: string) => ",
+              ", values: any, operation: string, index: ",
+              "DataViewBase",
+              ") => ",
               "Filter",
               "[]"
             ],
@@ -11727,10 +11782,15 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.esFilters.generateFilters.$5",
-                "type": "string",
+                "type": "Object",
                 "tags": [],
                 "label": "index",
                 "description": [],
+                "signature": [
+                  "{ fields: ",
+                  "DataViewFieldBase",
+                  "[]; id?: string | undefined; title: string; }"
+                ],
                 "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
                 "deprecated": false
               }
@@ -11848,19 +11908,6 @@
           }
         ],
         "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.esKuery.nodeTypes",
-            "type": "Object",
-            "tags": [],
-            "label": "nodeTypes",
-            "description": [],
-            "signature": [
-              "NodeTypes"
-            ],
-            "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false
-          },
           {
             "parentPluginId": "data",
             "id": "def-public.esKuery.fromKueryExpression",
@@ -13247,113 +13294,6 @@
                 ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-public.search.aggs.getNumberHistogramIntervalByDatatableColumn",
-                "type": "Function",
-                "tags": [],
-                "label": "getNumberHistogramIntervalByDatatableColumn",
-                "description": [],
-                "signature": [
-                  "(column: ",
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.DatatableColumn",
-                    "text": "DatatableColumn"
-                  },
-                  ") => number | undefined"
-                ],
-                "path": "src/plugins/data/public/index.ts",
-                "deprecated": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "data",
-                    "id": "def-public.search.aggs.getNumberHistogramIntervalByDatatableColumn.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "column",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "expressions",
-                        "scope": "common",
-                        "docId": "kibExpressionsPluginApi",
-                        "section": "def-common.DatatableColumn",
-                        "text": "DatatableColumn"
-                      }
-                    ],
-                    "path": "src/plugins/data/common/search/aggs/utils/get_number_histogram_interval.ts",
-                    "deprecated": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-public.search.aggs.getDateHistogramMetaDataByDatatableColumn",
-                "type": "Function",
-                "tags": [],
-                "label": "getDateHistogramMetaDataByDatatableColumn",
-                "description": [],
-                "signature": [
-                  "(column: ",
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.DatatableColumn",
-                    "text": "DatatableColumn"
-                  },
-                  ", defaults?: Partial<{ timeZone: string; }>) => { interval: string | undefined; timeZone: string | undefined; timeRange: ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataQueryPluginApi",
-                    "section": "def-common.TimeRange",
-                    "text": "TimeRange"
-                  },
-                  " | undefined; } | undefined"
-                ],
-                "path": "src/plugins/data/public/index.ts",
-                "deprecated": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "data",
-                    "id": "def-public.search.aggs.getDateHistogramMetaDataByDatatableColumn.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "column",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "expressions",
-                        "scope": "common",
-                        "docId": "kibExpressionsPluginApi",
-                        "section": "def-common.DatatableColumn",
-                        "text": "DatatableColumn"
-                      }
-                    ],
-                    "path": "src/plugins/data/common/search/aggs/utils/get_date_histogram_meta.ts",
-                    "deprecated": false
-                  },
-                  {
-                    "parentPluginId": "data",
-                    "id": "def-public.search.aggs.getDateHistogramMetaDataByDatatableColumn.$2",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "defaults",
-                    "description": [],
-                    "signature": [
-                      "{ timeZone?: string | undefined; }"
-                    ],
-                    "path": "src/plugins/data/common/search/aggs/utils/get_date_histogram_meta.ts",
-                    "deprecated": false
-                  }
-                ]
               }
             ]
           },
@@ -13560,50 +13500,6 @@
                 "label": "minimalColumns",
                 "description": [],
                 "path": "src/plugins/data/common/search/tabify/get_columns.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.search.checkColumnForPrecisionError",
-            "type": "Function",
-            "tags": [],
-            "label": "checkColumnForPrecisionError",
-            "description": [],
-            "signature": [
-              "(column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => ",
-              "Serializable"
-            ],
-            "path": "src/plugins/data/public/index.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.search.checkColumnForPrecisionError.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "column",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.DatatableColumn",
-                    "text": "DatatableColumn"
-                  }
-                ],
-                "path": "src/plugins/data/common/search/tabify/utils.ts",
                 "deprecated": false
               }
             ]
@@ -14585,6 +14481,18 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataView.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the data view. Human readable name used to differentiate data view."
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -14615,6 +14523,23 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataView.getName",
+            "type": "Function",
+            "tags": [],
+            "label": "getName",
+            "description": [
+              "\nGet name of Data View"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -15736,13 +15661,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               ">) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -15782,13 +15701,7 @@
                     "text": "SerializedFieldFormat"
                   },
                   "<",
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatParams",
-                    "text": "FieldFormatParams"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -16886,7 +16799,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>"
+              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -19432,9 +19353,6 @@
         "tags": [],
         "label": "ES_FIELD_TYPES",
         "description": [],
-        "signature": [
-          "ES_FIELD_TYPES"
-        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -19446,9 +19364,6 @@
         "tags": [],
         "label": "KBN_FIELD_TYPES",
         "description": [],
-        "signature": [
-          "KBN_FIELD_TYPES"
-        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -19672,9 +19587,6 @@
         ],
         "label": "KueryNode",
         "description": [],
-        "signature": [
-          "KueryNode"
-        ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
@@ -19872,27 +19784,27 @@
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/customize_time_range_modal.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/customize_time_range_modal.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/customize_time_range_modal.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/customize_time_range_modal.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/custom_time_range_action.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/custom_time_range_action.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/custom_time_range_action.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/custom_time_range_action.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/custom_time_range_badge.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/custom_time_range_badge.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/custom_time_range_badge.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/custom_time_range_badge.tsx"
           },
           {
             "plugin": "lens",
@@ -19913,14 +19825,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/trigger_actions/open_in_discover_helpers.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/trigger_actions/open_in_discover_helpers.ts"
           },
           {
             "plugin": "lens",
@@ -19929,14 +19833,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/trigger_actions/open_in_discover_drilldown.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx"
           },
           {
             "plugin": "maps",
@@ -19961,6 +19857,14 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/actions/map_actions.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx"
           },
           {
             "plugin": "maps",
@@ -20171,34 +20075,6 @@
             "path": "x-pack/plugins/security_solution/public/common/components/search_bar/index.tsx"
           },
           {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/can_inherit_time_range.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/can_inherit_time_range.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
-          },
-          {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/variables/context_variables.ts"
           },
@@ -20215,20 +20091,40 @@
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/url_drilldown.tsx"
           },
           {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable_factory.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable_factory.ts"
-          },
-          {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
           },
           {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/can_inherit_time_range.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/can_inherit_time_range.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
           },
           {
             "plugin": "visDefaultEditor",
@@ -20261,6 +20157,14 @@
           {
             "plugin": "visDefaultEditor",
             "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar.tsx"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable_factory.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable_factory.ts"
           },
           {
             "plugin": "visTypeTimelion",
@@ -20778,7 +20682,9 @@
                 "label": "field",
                 "description": [],
                 "signature": [
-                  "DataViewFieldBase"
+                  "{ name: string; type: string; subType?: ",
+                  "IFieldSubType",
+                  " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -20791,7 +20697,9 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "DataViewBase"
+                  "{ fields: ",
+                  "DataViewFieldBase",
+                  "[]; id?: string | undefined; title: string; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -20831,7 +20739,9 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "DataViewBase"
+                  "{ fields: ",
+                  "DataViewFieldBase",
+                  "[]; id?: string | undefined; title: string; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -20844,7 +20754,9 @@
                 "label": "field",
                 "description": [],
                 "signature": [
-                  "DataViewFieldBase"
+                  "{ name: string; type: string; subType?: ",
+                  "IFieldSubType",
+                  " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -20955,7 +20867,9 @@
                 "label": "field",
                 "description": [],
                 "signature": [
-                  "DataViewFieldBase"
+                  "{ name: string; type: string; subType?: ",
+                  "IFieldSubType",
+                  " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -20981,7 +20895,9 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "DataViewBase"
+                  "{ fields: ",
+                  "DataViewFieldBase",
+                  "[]; id?: string | undefined; title: string; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -21015,7 +20931,9 @@
                 "label": "field",
                 "description": [],
                 "signature": [
-                  "DataViewFieldBase"
+                  "{ name: string; type: string; subType?: ",
+                  "IFieldSubType",
+                  " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -21041,7 +20959,9 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "DataViewBase"
+                  "{ fields: ",
+                  "DataViewFieldBase",
+                  "[]; id?: string | undefined; title: string; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -21080,7 +21000,9 @@
                 "label": "field",
                 "description": [],
                 "signature": [
-                  "DataViewFieldBase"
+                  "{ name: string; type: string; subType?: ",
+                  "IFieldSubType",
+                  " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
                 ],
                 "path": "node_modules/@types/kbn__es-query/index.d.ts",
                 "deprecated": false
@@ -21175,19 +21097,6 @@
         "path": "src/plugins/data/server/deprecated.ts",
         "deprecated": false,
         "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.esKuery.nodeTypes",
-            "type": "Object",
-            "tags": [],
-            "label": "nodeTypes",
-            "description": [],
-            "signature": [
-              "NodeTypes"
-            ],
-            "path": "src/plugins/data/server/deprecated.ts",
-            "deprecated": false
-          },
           {
             "parentPluginId": "data",
             "id": "def-server.esKuery.fromKueryExpression",
@@ -22158,6 +22067,66 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DatatableUtilitiesService.getDateHistogramMeta",
+            "type": "Function",
+            "tags": [],
+            "label": "getDateHistogramMeta",
+            "description": [
+              "\nHelper function returning the used interval, used time zone and applied time filters for data table column created by the date_histogramm agg type.\n\"auto\" will get expanded to the actually used interval.\nIf the column is not a column created by a date_histogram aggregation of the esaggs data source,\nthis function will return undefined."
+            ],
+            "signature": [
+              "(column: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              ", defaults?: Partial<{ timeZone: string; }>) => DateHistogramMeta | undefined"
+            ],
+            "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DatatableUtilitiesService.getDateHistogramMeta.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "column",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.DatatableColumn",
+                    "text": "DatatableColumn"
+                  }
+                ],
+                "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DatatableUtilitiesService.getDateHistogramMeta.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "defaults",
+                "description": [],
+                "signature": [
+                  "Partial<{ timeZone: string; }>"
+                ],
+                "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DatatableUtilitiesService.getDataView",
             "type": "Function",
             "tags": [],
@@ -22358,6 +22327,52 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DatatableUtilitiesService.getNumberHistogramInterval",
+            "type": "Function",
+            "tags": [],
+            "label": "getNumberHistogramInterval",
+            "description": [
+              "\nHelper function returning the used interval for data table column created by the histogramm agg type.\n\"auto\" will get expanded to the actually used interval.\nIf the column is not a column created by a histogram aggregation of the esaggs data source,\nthis function will return undefined."
+            ],
+            "signature": [
+              "(column: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              ") => number | undefined"
+            ],
+            "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DatatableUtilitiesService.getNumberHistogramInterval.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "column",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.DatatableColumn",
+                    "text": "DatatableColumn"
+                  }
+                ],
+                "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DatatableUtilitiesService.getTotalCount",
             "type": "Function",
             "tags": [],
@@ -22391,6 +22406,51 @@
                     "docId": "kibExpressionsPluginApi",
                     "section": "def-common.Datatable",
                     "text": "Datatable"
+                  }
+                ],
+                "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DatatableUtilitiesService.hasPrecisionError",
+            "type": "Function",
+            "tags": [],
+            "label": "hasPrecisionError",
+            "description": [],
+            "signature": [
+              "(column: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              ") => ",
+              "Serializable"
+            ],
+            "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DatatableUtilitiesService.hasPrecisionError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "column",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.DatatableColumn",
+                    "text": "DatatableColumn"
                   }
                 ],
                 "path": "src/plugins/data/common/datatable_utilities/datatable_utilities_service.ts",
@@ -22805,6 +22865,18 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataView.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the data view. Human readable name used to differentiate data view."
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -22835,6 +22907,23 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataView.getName",
+            "type": "Function",
+            "tags": [],
+            "label": "getName",
+            "description": [
+              "\nGet name of Data View"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -23956,13 +24045,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               ">) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -24002,13 +24085,7 @@
                     "text": "SerializedFieldFormat"
                   },
                   "<",
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.FieldFormatParams",
-                    "text": "FieldFormatParams"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -24081,18 +24158,31 @@
           {
             "parentPluginId": "data",
             "id": "def-common.DataViewField.spec",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "spec",
             "description": [],
             "signature": [
+              "DataViewFieldBase",
+              " & { count?: number | undefined; conflictDescriptions?: Record<string, string[]> | undefined; format?: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<",
+              "SerializableRecord",
+              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              }
+                "section": "def-common.RuntimeFieldSpec",
+                "text": "RuntimeFieldSpec"
+              },
+              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -24117,7 +24207,7 @@
               {
                 "parentPluginId": "data",
                 "id": "def-common.DataViewField.Unnamed.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "spec",
                 "description": [
@@ -24166,7 +24256,7 @@
           {
             "parentPluginId": "data",
             "id": "def-common.DataViewField.runtimeField",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "runtimeField",
             "description": [
@@ -24188,7 +24278,7 @@
           {
             "parentPluginId": "data",
             "id": "def-common.DataViewField.runtimeField",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "runtimeField",
             "description": [
@@ -25800,7 +25890,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>"
+              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -25986,9 +26084,6 @@
         "tags": [],
         "label": "KbnFieldType",
         "description": [],
-        "signature": [
-          "KbnFieldType"
-        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "children": [
@@ -26340,7 +26435,9 @@
             "label": "field",
             "description": [],
             "signature": [
-              "DataViewFieldBase"
+              "{ name: string; type: string; subType?: ",
+              "IFieldSubType",
+              " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
             ],
             "path": "node_modules/@types/kbn__es-query/index.d.ts",
             "deprecated": false
@@ -26353,7 +26450,9 @@
             "label": "indexPattern",
             "description": [],
             "signature": [
-              "DataViewBase"
+              "{ fields: ",
+              "DataViewFieldBase",
+              "[]; id?: string | undefined; title: string; }"
             ],
             "path": "node_modules/@types/kbn__es-query/index.d.ts",
             "deprecated": false
@@ -26398,7 +26497,9 @@
             "label": "indexPattern",
             "description": [],
             "signature": [
-              "DataViewBase"
+              "{ fields: ",
+              "DataViewFieldBase",
+              "[]; id?: string | undefined; title: string; }"
             ],
             "path": "node_modules/@types/kbn__es-query/index.d.ts",
             "deprecated": false
@@ -26411,7 +26512,9 @@
             "label": "field",
             "description": [],
             "signature": [
-              "DataViewFieldBase"
+              "{ name: string; type: string; subType?: ",
+              "IFieldSubType",
+              " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
             ],
             "path": "node_modules/@types/kbn__es-query/index.d.ts",
             "deprecated": false
@@ -26527,7 +26630,9 @@
             "label": "field",
             "description": [],
             "signature": [
-              "DataViewFieldBase"
+              "{ name: string; type: string; subType?: ",
+              "IFieldSubType",
+              " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
             ],
             "path": "node_modules/@types/kbn__es-query/index.d.ts",
             "deprecated": false
@@ -26553,7 +26658,9 @@
             "label": "indexPattern",
             "description": [],
             "signature": [
-              "DataViewBase"
+              "{ fields: ",
+              "DataViewFieldBase",
+              "[]; id?: string | undefined; title: string; }"
             ],
             "path": "node_modules/@types/kbn__es-query/index.d.ts",
             "deprecated": false
@@ -26592,7 +26699,9 @@
             "label": "field",
             "description": [],
             "signature": [
-              "DataViewFieldBase"
+              "{ name: string; type: string; subType?: ",
+              "IFieldSubType",
+              " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
             ],
             "path": "node_modules/@types/kbn__es-query/index.d.ts",
             "deprecated": false
@@ -26618,7 +26727,9 @@
             "label": "indexPattern",
             "description": [],
             "signature": [
-              "DataViewBase"
+              "{ fields: ",
+              "DataViewFieldBase",
+              "[]; id?: string | undefined; title: string; }"
             ],
             "path": "node_modules/@types/kbn__es-query/index.d.ts",
             "deprecated": false
@@ -26802,7 +26913,9 @@
             "label": "field",
             "description": [],
             "signature": [
-              "DataViewFieldBase"
+              "{ name: string; type: string; subType?: ",
+              "IFieldSubType",
+              " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
             ],
             "path": "node_modules/@types/kbn__es-query/index.d.ts",
             "deprecated": false
@@ -28663,6 +28776,21 @@
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewAttributes.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the data view. Human readable name used to differentiate data view."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -28754,569 +28882,18 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.DataViewSpec",
-        "type": "Interface",
-        "tags": [],
-        "label": "DataViewSpec",
-        "description": [
-          "\nStatic data view format\nSerialized data object, representing data view attributes and state"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
+          },
           {
             "parentPluginId": "data",
-            "id": "def-common.DataViewSpec.id",
+            "id": "def-common.DataViewListItem.name",
             "type": "string",
             "tags": [],
-            "label": "id",
-            "description": [
-              "\nSaved object id"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DataViewSpec.version",
-            "type": "string",
-            "tags": [],
-            "label": "version",
-            "description": [
-              "\nSaved object version string"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DataViewSpec.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [
-              "\nData view title"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DataViewSpec.timeFieldName",
-            "type": "string",
-            "tags": [],
-            "label": "timeFieldName",
-            "description": [
-              "\nName of timestamp field"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DataViewSpec.sourceFilters",
-            "type": "Array",
-            "tags": [],
-            "label": "sourceFilters",
-            "description": [
-              "\nList of filters which discover uses to hide fields"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.SourceFilter",
-                "text": "SourceFilter"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DataViewSpec.fields",
-            "type": "Object",
-            "tags": [],
-            "label": "fields",
-            "description": [
-              "\nMap of fields by name"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewFieldMap",
-                "text": "DataViewFieldMap"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DataViewSpec.typeMeta",
-            "type": "Object",
-            "tags": [],
-            "label": "typeMeta",
-            "description": [
-              "\nMetadata about data view, only used by rollup data views"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.TypeMeta",
-                "text": "TypeMeta"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DataViewSpec.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nDefault or rollup"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DataViewSpec.fieldFormats",
-            "type": "Object",
-            "tags": [],
-            "label": "fieldFormats",
-            "description": [
-              "\nMap of serialized field formats by field name"
-            ],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.SerializedFieldFormat",
-                "text": "SerializedFieldFormat"
-              },
-              "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
-              ">> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DataViewSpec.runtimeFieldMap",
-            "type": "Object",
-            "tags": [],
-            "label": "runtimeFieldMap",
-            "description": [
-              "\nMap of runtime fields by field name"
-            ],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeFieldSpec",
-                "text": "RuntimeFieldSpec"
-              },
-              "> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DataViewSpec.fieldAttrs",
-            "type": "Object",
-            "tags": [],
-            "label": "fieldAttrs",
-            "description": [
-              "\nMap of field attributes by field name, currently customName and count"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DataViewSpec.allowNoIndex",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "allowNoIndex",
-            "description": [
-              "\nDetermines whether failure to load field list should be reported as error"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DataViewSpec.namespaces",
-            "type": "Array",
-            "tags": [],
-            "label": "namespaces",
-            "description": [
-              "\nArray of namespace ids"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.FieldAttrs",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldAttrs",
-        "description": [
-          "\nSet of field attributes"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldAttrs.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[key: string]: FieldAttrSet",
+            "label": "name",
             "description": [],
             "signature": [
-              "[key: string]:  ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrSet",
-                "text": "FieldAttrSet"
-              }
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.FieldAttrSet",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldAttrSet",
-        "description": [
-          "\nField attributes that are stored on the data view"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldAttrSet.customLabel",
-            "type": "string",
-            "tags": [],
-            "label": "customLabel",
-            "description": [
-              "\nCustom field label"
-            ],
-            "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldAttrSet.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [
-              "\nPopularity count - used for discover"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.FieldSpec",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldSpec",
-        "description": [
-          "\nSerialized version of DataViewField"
-        ],
-        "signature": [
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldSpec",
-            "text": "FieldSpec"
-          },
-          " extends ",
-          "DataViewFieldBase"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [
-              "\nPopularity count is used by discover"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.conflictDescriptions",
-            "type": "Object",
-            "tags": [],
-            "label": "conflictDescriptions",
-            "description": [
-              "\nDescription of field type conflicts across indices"
-            ],
-            "signature": [
-              "Record<string, string[]> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.format",
-            "type": "Object",
-            "tags": [],
-            "label": "format",
-            "description": [
-              "\nField formatting in serialized format"
-            ],
-            "signature": [
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.SerializedFieldFormat",
-                "text": "SerializedFieldFormat"
-              },
-              "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
-              "> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.esTypes",
-            "type": "Array",
-            "tags": [],
-            "label": "esTypes",
-            "description": [
-              "\nElasticsearch field types used by backing indices"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.searchable",
-            "type": "boolean",
-            "tags": [],
-            "label": "searchable",
-            "description": [
-              "\nTrue if field is searchable"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.aggregatable",
-            "type": "boolean",
-            "tags": [],
-            "label": "aggregatable",
-            "description": [
-              "\nTrue if field is aggregatable"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.readFromDocValues",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "readFromDocValues",
-            "description": [
-              "\nTrue if can be read from doc values"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.indexed",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "indexed",
-            "description": [
-              "\nTrue if field is indexed"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.customLabel",
-            "type": "string",
-            "tags": [],
-            "label": "customLabel",
-            "description": [
-              "\nCustom label for field, used for display in kibana"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.runtimeField",
-            "type": "Object",
-            "tags": [],
-            "label": "runtimeField",
-            "description": [
-              "\nRuntime field definition"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeFieldSpec",
-                "text": "RuntimeFieldSpec"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.shortDotsEnable",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "shortDotsEnable",
-            "description": [
-              "\nWhether short dots are enabled, based on uiSettings."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.FieldSpec.isMapped",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isMapped",
-            "description": [
-              "\nIs this field in the mapping? False if a scripted or runtime field defined on the data view."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false
           }
         ],
@@ -29605,13 +29182,57 @@
               "\nValue - DataViewSpec"
             ],
             "signature": [
+              "{ id?: string | undefined; version?: string | undefined; title?: string | undefined; timeFieldName?: string | undefined; sourceFilters?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              }
+                "section": "def-common.SourceFilter",
+                "text": "SourceFilter"
+              },
+              "[] | undefined; fields?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewFieldMap",
+                "text": "DataViewFieldMap"
+              },
+              " | undefined; typeMeta?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.TypeMeta",
+                "text": "TypeMeta"
+              },
+              " | undefined; type?: string | undefined; fieldFormats?: Record<string, ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<",
+              "SerializableRecord",
+              ">> | undefined; runtimeFieldMap?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.RuntimeFieldSpec",
+                "text": "RuntimeFieldSpec"
+              },
+              "> | undefined; fieldAttrs?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldAttrs",
+                "text": "FieldAttrs"
+              },
+              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
             "deprecated": false
@@ -29626,9 +29247,6 @@
         "tags": [],
         "label": "KbnFieldTypeOptions",
         "description": [],
-        "signature": [
-          "KbnFieldTypeOptions"
-        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "children": [
@@ -29858,82 +29476,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.SourceFilter",
-        "type": "Interface",
-        "tags": [],
-        "label": "SourceFilter",
-        "description": [],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SourceFilter.value",
-            "type": "string",
-            "tags": [],
-            "label": "value",
-            "description": [],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.TypeMeta",
-        "type": "Interface",
-        "tags": [],
-        "label": "TypeMeta",
-        "description": [
-          "\nInterface for metadata about rollup indices"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.TypeMeta.aggs",
-            "type": "Object",
-            "tags": [],
-            "label": "aggs",
-            "description": [
-              "\nAggregation restrictions for rollup fields"
-            ],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.AggregationRestrictions",
-                "text": "AggregationRestrictions"
-              },
-              "> | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.TypeMeta.params",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [
-              "\nParams for retrieving rollup field data"
-            ],
-            "signature": [
-              "{ rollup_index: string; } | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.UiSettingsCommon",
         "type": "Interface",
         "tags": [],
@@ -30104,9 +29646,6 @@
         "tags": [],
         "label": "ES_FIELD_TYPES",
         "description": [],
-        "signature": [
-          "ES_FIELD_TYPES"
-        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -30120,9 +29659,6 @@
         "description": [
           "\r\n Filter,\r\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
         ],
-        "signature": [
-          "FilterStateStore"
-        ],
         "path": "node_modules/@types/kbn__es-query/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -30134,9 +29670,6 @@
         "tags": [],
         "label": "KBN_FIELD_TYPES",
         "description": [],
-        "signature": [
-          "KBN_FIELD_TYPES"
-        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -30423,7 +29956,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; getDefaultDataView: () => Promise<",
+          ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; getDefaultDataView: () => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -30434,6 +29975,72 @@
           " | null>; }"
         ],
         "path": "src/plugins/data_views/common/data_views/data_views.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.DataViewSpec",
+        "type": "Type",
+        "tags": [],
+        "label": "DataViewSpec",
+        "description": [
+          "\nStatic data view format\nSerialized data object, representing data view attributes and state"
+        ],
+        "signature": [
+          "{ id?: string | undefined; version?: string | undefined; title?: string | undefined; timeFieldName?: string | undefined; sourceFilters?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.SourceFilter",
+            "text": "SourceFilter"
+          },
+          "[] | undefined; fields?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewFieldMap",
+            "text": "DataViewFieldMap"
+          },
+          " | undefined; typeMeta?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.TypeMeta",
+            "text": "TypeMeta"
+          },
+          " | undefined; type?: string | undefined; fieldFormats?: Record<string, ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<",
+          "SerializableRecord",
+          ">> | undefined; runtimeFieldMap?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.RuntimeFieldSpec",
+            "text": "RuntimeFieldSpec"
+          },
+          "> | undefined; fieldAttrs?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldAttrs",
+            "text": "FieldAttrs"
+          },
+          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -30491,6 +30098,81 @@
         "deprecated": true,
         "removeBy": "8.1",
         "references": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.FieldAttrs",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldAttrs",
+        "description": [
+          "\nSet of field attributes"
+        ],
+        "signature": [
+          "{ [key: string]: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldAttrSet",
+            "text": "FieldAttrSet"
+          },
+          "; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.FieldAttrSet",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldAttrSet",
+        "description": [
+          "\nField attributes that are stored on the data view"
+        ],
+        "signature": [
+          "{ customLabel?: string | undefined; count?: number | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.FieldSpec",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldSpec",
+        "description": [
+          "\nSerialized version of DataViewField"
+        ],
+        "signature": [
+          "DataViewFieldBase",
+          " & { count?: number | undefined; conflictDescriptions?: Record<string, string[]> | undefined; format?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<",
+          "SerializableRecord",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.RuntimeFieldSpec",
+            "text": "RuntimeFieldSpec"
+          },
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -30752,9 +30434,6 @@
         ],
         "label": "KueryNode",
         "description": [],
-        "signature": [
-          "KueryNode"
-        ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
@@ -30867,13 +30546,24 @@
         ],
         "label": "RangeFilterParams",
         "description": [],
-        "signature": [
-          "RangeFilterParams"
-        ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
         "references": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SourceFilter",
+        "type": "Type",
+        "tags": [],
+        "label": "SourceFilter",
+        "description": [],
+        "signature": [
+          "{ value: string; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -31037,27 +30727,27 @@
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/customize_time_range_modal.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/customize_time_range_modal.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/customize_time_range_modal.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/customize_time_range_modal.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/custom_time_range_action.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/custom_time_range_action.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/custom_time_range_action.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/custom_time_range_action.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/custom_time_range_badge.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/custom_time_range_badge.tsx"
           },
           {
             "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/custom_time_range_badge.tsx"
+            "path": "src/plugins/ui_actions_enhanced/public/custom_time_range_badge.tsx"
           },
           {
             "plugin": "lens",
@@ -31078,14 +30768,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/trigger_actions/open_in_discover_helpers.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/trigger_actions/open_in_discover_helpers.ts"
           },
           {
             "plugin": "lens",
@@ -31094,14 +30776,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/trigger_actions/open_in_discover_drilldown.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx"
           },
           {
             "plugin": "maps",
@@ -31126,6 +30800,14 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/actions/map_actions.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx"
           },
           {
             "plugin": "maps",
@@ -31336,34 +31018,6 @@
             "path": "x-pack/plugins/security_solution/public/common/components/search_bar/index.tsx"
           },
           {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/can_inherit_time_range.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/can_inherit_time_range.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
-          },
-          {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/variables/context_variables.ts"
           },
@@ -31380,20 +31034,40 @@
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/url_drilldown.tsx"
           },
           {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable_factory.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "x-pack/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable_factory.ts"
-          },
-          {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
           },
           {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/can_inherit_time_range.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/can_inherit_time_range.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_container.ts"
           },
           {
             "plugin": "visDefaultEditor",
@@ -31426,6 +31100,14 @@
           {
             "plugin": "visDefaultEditor",
             "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar.tsx"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable_factory.ts"
+          },
+          {
+            "plugin": "uiActionsEnhanced",
+            "path": "src/plugins/ui_actions_enhanced/public/test_helpers/time_range_embeddable_factory.ts"
           },
           {
             "plugin": "visTypeTimelion",
@@ -31704,6 +31386,30 @@
             "path": "src/plugins/vis_types/vega/public/data_model/time_cache.ts"
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.TypeMeta",
+        "type": "Type",
+        "tags": [],
+        "label": "TypeMeta",
+        "description": [
+          "\nInterface for metadata about rollup indices"
+        ],
+        "signature": [
+          "{ aggs?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AggregationRestrictions",
+            "text": "AggregationRestrictions"
+          },
+          "> | undefined; params?: { rollup_index: string; } | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -31857,24 +31563,6 @@
           "[]) => ",
           "KueryNode",
           "; }"
-        ],
-        "path": "src/plugins/data/common/es_query/index.ts",
-        "deprecated": true,
-        "removeBy": "8.1",
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.nodeTypes",
-        "type": "Object",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "nodeTypes",
-        "description": [],
-        "signature": [
-          "NodeTypes"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
