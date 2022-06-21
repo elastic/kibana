@@ -243,7 +243,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
           createdAlert.name,
           'statusDropdown',
-          'snoozed'
+          'enabled'
         );
       });
     });
