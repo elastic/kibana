@@ -26,12 +26,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.properties.kibana_version).to.be.a('string');
 
       if (browser.isChromium) {
+        // Kibana Loaded memory
         expect(event.properties).to.have.property('memory_js_heap_size_limit');
         expect(event.properties.memory_js_heap_size_limit).to.be.a('number');
         expect(event.properties).to.have.property('memory_js_heap_size_total');
         expect(event.properties.memory_js_heap_size_total).to.be.a('number');
         expect(event.properties).to.have.property('memory_js_heap_size_used');
         expect(event.properties.memory_js_heap_size_used).to.be.a('number');
+
+        // Kibana Loaded timings
+        expect(event.properties).to.have.property('load_started');
+        expect(event.properties.load_started).to.be.a('number');
+        expect(event.properties).to.have.property('bootstrap_started');
+        expect(event.properties.bootstrap_started).to.be.a('number');
+        expect(event.properties).to.have.property('core_created');
+        expect(event.properties.core_created).to.be.a('number');
+        expect(event.properties).to.have.property('setup_done');
+        expect(event.properties.setup_done).to.be.a('number');
+        expect(event.properties).to.have.property('start_done');
+        expect(event.properties.start_done).to.be.a('number');
       }
     });
   });

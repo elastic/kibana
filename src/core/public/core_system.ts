@@ -340,15 +340,15 @@ export class CoreSystem {
           type: 'long',
           _meta: { description: 'The used size of the heap', optional: true },
         },
-        load_start: {
+        load_started: {
           type: 'long',
           _meta: { description: 'When the render template starts loading assets', optional: true },
         },
-        bootstrap: {
+        bootstrap_started: {
           type: 'long',
           _meta: { description: 'When kbnBootstrap callback is called', optional: true },
         },
-        core_create: {
+        core_created: {
           type: 'long',
           _meta: { description: 'When core system is created', optional: true },
         },

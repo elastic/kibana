@@ -72,7 +72,16 @@ beforeEach(() => {
   MockPluginsService.getOpaqueIds.mockReturnValue(new Map());
 
   window.performance.mark = jest.fn();
-  window.performance.getEntriesByName = jest.fn().mockReturnValue([]);
+  window.performance.getEntriesByName = jest.fn().mockReturnValue([
+    {
+      detail: 'load_started',
+      startTime: 456,
+    },
+    {
+      detail: 'bootstrap_started',
+      startTime: 123,
+    },
+  ]);
 });
 
 function createCoreSystem(params = {}) {
@@ -241,11 +250,15 @@ describe('#start()', () => {
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
       kibana_version: '1.2.3',
+      load_started: 456,
+      bootstrap_started: 123,
     });
   });
 
   it('reports the event Loaded Kibana (with memory)', async () => {
     fetchOptionalMemoryInfoMock.mockReturnValue({
+      load_started: 456,
+      bootstrap_started: 123,
       memory_js_heap_size_limit: 3,
       memory_js_heap_size_total: 2,
       memory_js_heap_size_used: 1,
@@ -254,6 +267,8 @@ describe('#start()', () => {
     await startCore();
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
+      load_started: 456,
+      bootstrap_started: 123,
       kibana_version: '1.2.3',
       memory_js_heap_size_limit: 3,
       memory_js_heap_size_total: 2,

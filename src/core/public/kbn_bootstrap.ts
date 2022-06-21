@@ -13,7 +13,7 @@ import { ApmSystem } from './apm_system';
 /** @internal */
 export async function __kbnBootstrap__() {
   performance.mark(KBN_LOAD_MARKS, {
-    detail: 'bootstrap',
+    detail: 'bootstrap_started',
   });
   const injectedMetadata = JSON.parse(
     document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
@@ -37,7 +37,7 @@ export async function __kbnBootstrap__() {
   });
 
   performance.mark(KBN_LOAD_MARKS, {
-    detail: 'core_create',
+    detail: 'core_created',
   });
 
   const setup = await coreSystem.setup();
