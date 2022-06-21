@@ -9,6 +9,7 @@ import { useInfiniteQuery, useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
+import { useState } from 'react';
 import {
   createFilter,
   generateTablePaginationOptions,
@@ -17,8 +18,6 @@ import {
 } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
-  ActionEdges,
-  PageInfoPaginated,
   OsqueryQueries,
   ActionsRequestOptions,
   ActionsStrategyResponse,
@@ -28,20 +27,12 @@ import { ESTermQuery } from '../../common/typed_json';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
-export interface ActionsArgs {
-  actions: ActionEdges;
-  id: string;
-  inspect: InspectResponse;
-  isInspected: boolean;
-  pageInfo: PageInfoPaginated;
-  totalCount: number;
-}
-
 interface UseAllActions {
   activePage: number;
   direction: Direction;
   limit: number;
   sortField: string;
+  eventDetailId: string;
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
 }
@@ -103,14 +94,17 @@ export const useInfiniteAllActions = ({
   direction,
   limit,
   sortField,
+  eventDetailId,
   filterQuery,
 }: UseAllActions) => {
   const { data } = useKibana().services;
   const setErrorToast = useErrorToast();
+  const [nextPage, setNextPage] = useState(0);
 
   return useInfiniteQuery(
-    ['actions', { activePage, direction, limit, sortField }],
+    [`actions-${eventDetailId}`, { activePage, direction, limit, sortField }],
     async ({ pageParam = activePage }) => {
+      setNextPage(pageParam + 1);
       const responseData = await lastValueFrom(
         data.search.search<ActionsRequestOptions, ActionsStrategyResponse>(
           {
@@ -135,7 +129,8 @@ export const useInfiniteAllActions = ({
       };
     },
     {
-      getNextPageParam: (lastPage) => lastPage.pageInfo.activePage + 1 ?? undefined,
+      getNextPageParam: (lastPage) =>
+        limit * nextPage < lastPage.totalCount ? nextPage : undefined,
       keepPreviousData: true,
       onSuccess: () => setErrorToast(),
       onError: (error: Error) =>

@@ -75,3 +75,17 @@ export interface OsqueryManagerPackagePolicy extends Omit<PackagePolicy, 'inputs
   inputs: OsqueryManagerPackagePolicyInput[];
   read_only?: boolean;
 }
+
+export interface OsqueryActionType {
+  action_id: string;
+  '@timestamp': string;
+  expiration: string;
+  type: string;
+  input_type: string;
+  agents: string[];
+  user_id?: string;
+  data?: {
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}

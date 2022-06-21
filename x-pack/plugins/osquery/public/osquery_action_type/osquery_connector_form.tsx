@@ -59,7 +59,7 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
     [permissions.readSavedQueries, permissions.runSavedQueries]
   );
 
-  const prepareEcsMapping = (mapping: Record<string, Record<string, string>>) =>
+  const prepareEcsMapping = (mapping?: Record<string, Record<string, string>>) =>
     mapping
       ? map(mapping, (value, key) => ({
           key,
@@ -153,31 +153,31 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
   const componentProps = useMemo(() => ({ onChange: handleUpdate }), [handleUpdate]);
 
   return (
-    <Form form={form}>
-      {!isSavedQueryDisabled && (
-        <>
-          <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <Form form={form}>
+        {!isSavedQueryDisabled && (
+          <>
             <SavedQueriesDropdown
               disabled={isSavedQueryDisabled}
               onChange={handleSavedQueryChange}
             />
-          </QueryClientProvider>
+          </>
+        )}
+        <UseField path="query" component={LiveQueryQueryField} componentProps={componentProps} />
+        <>
+          <EuiSpacer size="m" />
+          <StyledEuiAccordion
+            id="advanced"
+            forceState={advancedContentState}
+            onToggle={handleToggle}
+            buttonContent="Advanced"
+          >
+            <EuiSpacer size="xs" />
+            <ECSMappingEditorField euiFieldProps={ecsFieldProps} />
+          </StyledEuiAccordion>
         </>
-      )}
-      <UseField path="query" component={LiveQueryQueryField} componentProps={componentProps} />
-      <>
-        <EuiSpacer size="m" />
-        <StyledEuiAccordion
-          id="advanced"
-          forceState={advancedContentState}
-          onToggle={handleToggle}
-          buttonContent="Advanced"
-        >
-          <EuiSpacer size="xs" />
-          <ECSMappingEditorField euiFieldProps={ecsFieldProps} />
-        </StyledEuiAccordion>
-      </>
-    </Form>
+      </Form>
+    </QueryClientProvider>
   );
 };
 

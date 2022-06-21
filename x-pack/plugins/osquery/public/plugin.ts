@@ -14,6 +14,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { INTERNAL_OSQUERY_FEATURE_FLAGS } from '../common/constants';
 import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 import { getActionType } from './osquery_action_type';
 import {
@@ -66,8 +67,10 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       },
     });
 
-    const actionType = getActionType();
-    plugins.triggersActionsUi.actionTypeRegistry.register(actionType);
+    if (INTERNAL_OSQUERY_FEATURE_FLAGS.DETECTION_ACTION) {
+      const actionType = getActionType();
+      plugins.triggersActionsUi.actionTypeRegistry.register(actionType);
+    }
 
     // Return methods that should be available to other plugins
     return {};
@@ -109,6 +112,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),
+      featureFlags: INTERNAL_OSQUERY_FEATURE_FLAGS,
       isOsqueryAvailable: useIsOsqueryAvailableSimple,
     };
   }

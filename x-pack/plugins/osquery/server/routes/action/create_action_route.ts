@@ -21,7 +21,7 @@ import {
 
 import { incrementCount } from '../usage';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
-import { savedQuerySavedObjectType } from '../../../common/types';
+import { OsqueryActionType, savedQuerySavedObjectType } from '../../../common/types';
 
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -82,7 +82,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
       try {
         const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
-        const action = {
+        const action: OsqueryActionType = {
           action_id: uuid.v4(),
           '@timestamp': moment().toISOString(),
           expiration: moment().add(5, 'minutes').toISOString(),

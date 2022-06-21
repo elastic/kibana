@@ -9,17 +9,11 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { osqueryActionTypeBase } from '../../common/actions/osquery_type';
 import { OsqueryActionParams } from './osquery_connector_form';
 
 export const getActionType = (): ActionTypeModel => ({
-  id: '.osquery',
-  iconClass: 'logoOsquery',
-  selectMessage: i18n.translate('xpack.osquery.connector.selectActionText', {
-    defaultMessage: 'Example Action is used to show how to create new action type UI.',
-  }),
-  actionTypeTitle: i18n.translate('xpack.osquery.connector.actionTypeTitle', {
-    defaultMessage: 'Example Action',
-  }),
+  ...osqueryActionTypeBase,
   // @ts-expect-error update types
   validateParams: (actionParams: OsqueryActionParams): ValidationResult => {
     const validationResult = { errors: {} };

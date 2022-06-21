@@ -7,7 +7,7 @@
 
 import { curry, uniq } from 'lodash';
 import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { i18n } from '@kbn/i18n';
+import { osqueryActionTypeBase } from '../../../common/actions/osquery_type';
 import { createActionHandler } from './create_action_handler';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
@@ -18,16 +18,7 @@ interface IAlert {
 }
 
 export const getOsqueryActionType = (osqueryContext: OsqueryAppContext) => ({
-  id: '.osquery',
-  name: 'Osquery',
-  minimumLicenseRequired: 'gold' as const,
-  iconClass: 'logoOsquery',
-  selectMessage: i18n.translate('xpack.osquery.connector.selectActionText', {
-    defaultMessage: 'Example Action is used to show how to create new action type UI.',
-  }),
-  actionTypeTitle: i18n.translate('xpack.osquery.connector.actionTypeTitle', {
-    defaultMessage: 'Example Action',
-  }),
+  ...osqueryActionTypeBase,
   executor: curry(executor)({
     osqueryContext,
   }),
@@ -35,8 +26,7 @@ export const getOsqueryActionType = (osqueryContext: OsqueryAppContext) => ({
 
 // @ts-expect-error update types
 async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<unknown>> {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { query, ecs_mapping, alerts, id } = execOptions.params.message;
+  const { query, ecs_mapping: ecsMapping, alerts, id } = execOptions.params.message;
 
   const parsedAlerts: IAlert[] = JSON.parse(alerts);
 
@@ -54,7 +44,7 @@ async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<
       query: {
         id,
         query,
-        ecs_mapping,
+        ecs_mapping: ecsMapping,
       },
     }
   );

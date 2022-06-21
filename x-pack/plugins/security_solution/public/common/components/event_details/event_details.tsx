@@ -20,7 +20,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
-import { OsqueryView } from './osquery_view';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import { ThreatSummaryView } from './cti_details/threat_summary_view';
@@ -43,8 +42,19 @@ import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
 import { HostRisk } from '../../../risk_score/containers';
 import { RelatedCases } from './related_cases';
+import { useKibana } from '../../lib/kibana';
 
 type EventViewTab = EuiTabbedContentTab;
+
+interface AlertRawEventData {
+  fields: {
+    ['agent.id']: string[];
+  };
+  _source: {
+    ['kibana.alert.rule.name']: string;
+    ['kibana.alert.rule.actions']: Array<Record<'action_type_id', string>>;
+  };
+}
 
 export type EventViewId =
   | EventsViewType.tableView
@@ -149,6 +159,13 @@ const EventDetailsComponent: React.FC<Props> = ({
     setRange,
     range,
   } = useInvestigationTimeEnrichment(eventFields);
+
+  const {
+    services: { osquery },
+  } = useKibana();
+
+  // @ts-expect-error the types are there
+  const { OsqueryResults, featureFlags: osqueryFeatureFlags } = osquery;
 
   const allEnrichments = useMemo(() => {
     if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
@@ -334,40 +351,52 @@ const EventDetailsComponent: React.FC<Props> = ({
     [rawEventData]
   );
 
-  const osqueryTab = useMemo(
-    () =>
-      rawEventData?.fields['kibana.alert.rule.actions.id']?.length
-        ? {
-            id: EventsViewType.osqueryView,
-            'data-test-subj': 'osqueryViewTab',
-            name: (
-              <EuiFlexGroup
-                direction="row"
-                alignItems={'center'}
-                justifyContent={'spaceAround'}
-                gutterSize="xs"
-              >
-                <EuiFlexItem>
-                  <span>{i18n.OSQUERY_VIEW}</span>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiNotificationBadge data-test-subj="osquery-actions-notification">
-                    {rawEventData?.fields['kibana.alert.rule.actions.id']?.length}
-                  </EuiNotificationBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-            content: (
-              <>
-                <TabContentWrapper data-test-subj="jsonViewWrapper">
-                  <OsqueryView rawEventData={rawEventData} />
-                </TabContentWrapper>
-              </>
-            ),
-          }
-        : undefined,
-    [rawEventData]
-  );
+  const osqueryTab = useMemo(() => {
+    const alertData = rawEventData as AlertRawEventData;
+    const osqueryActionsLength = alertData?._source['kibana.alert.rule.actions'].filter(
+      (action: { action_type_id: string }) => action.action_type_id === '.osquery'
+    )?.length;
+
+    const agentIds = alertData?.fields['agent.id'];
+    const ruleName = alertData?._source['kibana.alert.rule.name'];
+    const ruleActions = alertData?._source['kibana.alert.rule.actions'];
+
+    return osqueryFeatureFlags.DETECTION_ACTION && osqueryActionsLength
+      ? {
+          id: EventsViewType.osqueryView,
+          'data-test-subj': 'osqueryViewTab',
+          name: (
+            <EuiFlexGroup
+              direction="row"
+              alignItems={'center'}
+              justifyContent={'spaceAround'}
+              gutterSize="xs"
+            >
+              <EuiFlexItem>
+                <span>{i18n.OSQUERY_VIEW}</span>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiNotificationBadge data-test-subj="osquery-actions-notification">
+                  {osqueryActionsLength}
+                </EuiNotificationBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          content: (
+            <>
+              <TabContentWrapper data-test-subj="jsonViewWrapper">
+                <OsqueryResults
+                  agentIds={agentIds}
+                  ruleName={ruleName}
+                  ruleActions={ruleActions}
+                  eventDetailId={id}
+                />
+              </TabContentWrapper>
+            </>
+          ),
+        }
+      : undefined;
+  }, [OsqueryResults, id, osqueryFeatureFlags.DETECTION_ACTION, rawEventData]);
 
   const tabs = useMemo(() => {
     return [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(

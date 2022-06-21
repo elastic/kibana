@@ -25,6 +25,7 @@ export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
   OsqueryResults?: ReturnType<typeof getLazyOsqueryResults>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
+  featureFlags: Record<string, boolean>;
 }
 
 export interface AppPluginStartDependencies {

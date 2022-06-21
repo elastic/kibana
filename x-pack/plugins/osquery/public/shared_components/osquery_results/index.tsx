@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary, EuiCodeBlock, EuiComment, EuiLoadingContent } from '@elastic/eui';
+import {
+  EuiErrorBoundary,
+  EuiCodeBlock,
+  EuiComment,
+  EuiLoadingContent,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { QueryClientProvider } from 'react-query';
 import { CoreStart } from '@kbn/core/public';
@@ -14,9 +21,9 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { useInView } from 'react-intersection-observer';
 
 import { map } from 'lodash';
+import { OsqueryActionType } from '../../../common/types';
 import { useInfiniteAllActions } from '../../actions/use_all_actions';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
-// TODO change translations
 import { KibanaContextProvider } from '../../common/lib/kibana';
 
 import { queryClient } from '../../query_client';
@@ -25,29 +32,19 @@ import { StartPlugins } from '../../types';
 import { Direction } from '../../../common/search_strategy';
 
 interface OsqueryResultsProps {
-  rawEventData: object | undefined;
+  agentIds: string[];
+  ruleName: string;
+  ruleActions: string[];
+  eventDetailId: string;
 }
 
-const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({ rawEventData }) => {
+const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
+  agentIds,
+  ruleName,
+  ruleActions,
+  eventDetailId,
+}) => {
   const { ref, inView } = useInView();
-  //
-  // const permissions = useKibana().services.application.capabilities.osquery;
-  //
-  // const emptyPrompt = useMemo(
-  //   () => (
-  //     <EuiEmptyPrompt
-  //       icon={<OsqueryIcon />}
-  //       title={<h2>{SHORT_EMPTY_TITLE}</h2>}
-  //       titleSize="xs"
-  //       body={<p>{EMPTY_PROMPT}</p>}
-  //     />
-  //   ),
-  //   []
-  // );
-
-  const agentIds = rawEventData?.fields['agent.id'];
-  const ruleName = rawEventData?._source['kibana.alert.rule.name'];
-  const ruleActions = rawEventData?._source['kibana.alert.rule.actions'];
 
   const {
     data: actionsData,
@@ -58,6 +55,8 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({ rawEventData }
     limit: 100,
     direction: Direction.desc,
     sortField: '@timestamp',
+    eventDetailId,
+    // @ts-expect-error terms is fine
     filterQuery: { terms: { 'data.id': map(ruleActions, 'params.message.id') } },
   });
 
@@ -70,9 +69,9 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({ rawEventData }
   return (
     <>
       {actionsData?.pages.map((page) =>
-        page.actions?.map((ruleAction) => {
+        (page.actions as Array<{ _source: OsqueryActionType; _id: string }>)?.map((ruleAction) => {
           const actionId = ruleAction._source.action_id;
-          const query = ruleAction._source.data.query;
+          const query = ruleAction._source.data?.query as string;
           const startDate = ruleAction?._source['@timestamp'];
 
           return (
@@ -82,7 +81,10 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({ rawEventData }
               event={'attached query'}
               key={ruleAction._id}
             >
-              Agent
+              <EuiSpacer size="m" />
+              <EuiText>
+                <h6>Agent</h6>
+              </EuiText>
               <EuiCodeBlock
                 language="sql"
                 fontSize="m"
@@ -91,7 +93,10 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({ rawEventData }
               >
                 {agentIds[0]}
               </EuiCodeBlock>
-              Query
+              <EuiSpacer size="m" />
+              <EuiText>
+                <h6>Query</h6>
+              </EuiText>
               <EuiCodeBlock
                 language="sql"
                 fontSize="m"
@@ -100,6 +105,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({ rawEventData }
               >
                 {query}
               </EuiCodeBlock>
+              <EuiSpacer size="xxl" />
               <ResultTabs
                 actionId={actionId}
                 agentIds={agentIds}
@@ -122,13 +128,13 @@ type OsqueryResultsWrapperProps = { services: CoreStart & StartPlugins } & Osque
 
 const OsqueryResultsWrapperComponent: React.FC<OsqueryResultsWrapperProps> = ({
   services,
-  rawEventData,
+  ...restProps
 }) => (
   <KibanaThemeProvider theme$={services.theme.theme$}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <OsqueryResults rawEventData={rawEventData} />
+          <OsqueryResults {...restProps} />
         </QueryClientProvider>
       </EuiErrorBoundary>
     </KibanaContextProvider>
