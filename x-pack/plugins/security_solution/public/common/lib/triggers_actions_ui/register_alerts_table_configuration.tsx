@@ -39,18 +39,6 @@ const registerAlertsTableConfiguration = (
       const { header, body, footer } = useToGetInternalFlyout();
       return { header, body, footer };
     },
-    useActionsColumn: () => {
-      return {
-        actionsColumn: (
-          <>
-            <EuiButtonIcon size="s" iconType="analyzeEvent" color="primary" onClick={() => {}} />
-            <EuiButtonIcon size="s" iconType="invert" color="primary" onClick={() => {}} />
-            <EuiButtonIcon size="s" iconType="invert" color="primary" onClick={() => {}} />
-            <EuiButtonIcon size="s" iconType="invert" color="primary" onClick={() => {}} />
-          </>
-        ),
-      };
-    },
   });
 };
 
