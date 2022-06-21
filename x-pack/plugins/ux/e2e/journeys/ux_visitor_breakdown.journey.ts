@@ -38,7 +38,6 @@ const uaNames = [
   'HeadlessChrome',
   'Opera',
   'Other',
-  'Other',
   'Chrome Mobile WebView',
   'Mobile Safari',
 ];
