@@ -17,9 +17,10 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
-import { MetricsNodeDetailsLink, NumberCell, StepwisePagination } from '../shared';
 import type { SortState } from '../shared';
+import { MetricsNodeDetailsLink, NumberCell, StepwisePagination } from '../shared';
 import type { HostNodeMetricsRow } from './use_host_metrics_table';
 
 export interface HostMetricsTableProps {
@@ -78,7 +79,9 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
   return (
     <>
       <EuiBasicTable
-        tableCaption="Infrastructure metrics for hosts"
+        tableCaption={i18n.translate('xpack.infra.metricsTable.host.tableCaption', {
+          defaultMessage: 'Infrastructure metrics for hosts',
+        })}
         items={hosts}
         columns={columns}
         sorting={sortSettings}
@@ -89,7 +92,9 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <StepwisePagination
-            ariaLabel="Host metrics pagination"
+            ariaLabel={i18n.translate('xpack.infra.metricsTable.host.paginationAriaLabel', {
+              defaultMessage: 'Host metrics pagination',
+            })}
             pageCount={pageCount}
             currentPageIndex={currentPageIndex}
             setCurrentPageIndex={setCurrentPageIndex}
@@ -106,7 +111,9 @@ function hostMetricsColumns(
 ): Array<EuiBasicTableColumn<HostNodeMetricsRow>> {
   return [
     {
-      name: 'Name',
+      name: i18n.translate('xpack.infra.metricsTable.host.nameColumnHeader', {
+        defaultMessage: 'Name',
+      }),
       field: 'name',
       truncateText: true,
       textOnly: true,
@@ -115,13 +122,17 @@ function hostMetricsColumns(
       ),
     },
     {
-      name: '# of CPUs',
+      name: i18n.translate('xpack.infra.metricsTable.host.CpuCountColumnHeader', {
+        defaultMessage: '# of CPUs',
+      }),
       field: 'cpuCount',
       align: 'right',
       render: (cpuCount: number) => <NumberCell value={cpuCount} />,
     },
     {
-      name: 'CPU usage (avg.)',
+      name: i18n.translate('xpack.infra.metricsTable.host.averageCpuUsagePercentColumnHeader', {
+        defaultMessage: 'CPU usage (avg.)',
+      }),
       field: 'averageCpuUsagePercent',
       align: 'right',
       render: (averageCpuUsagePercent: number) => (
@@ -129,7 +140,9 @@ function hostMetricsColumns(
       ),
     },
     {
-      name: 'Memory total',
+      name: i18n.translate('xpack.infra.metricsTable.host.totalMemoryMegabytesColumnHeader', {
+        defaultMessage: 'Memory total',
+      }),
       field: 'totalMemoryMegabytes',
       align: 'right',
       render: (totalMemoryMegabytes: number) => (
@@ -137,7 +150,9 @@ function hostMetricsColumns(
       ),
     },
     {
-      name: 'Memory usage (avg.)',
+      name: i18n.translate('xpack.infra.metricsTable.host.averageMemoryUsagePercentColumnHeader', {
+        defaultMessage: 'Memory usage (avg.)',
+      }),
       field: 'averageMemoryUsagePercent',
       align: 'right',
       render: (averageMemoryUsagePercent: number) => (
