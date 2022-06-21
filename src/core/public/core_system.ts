@@ -301,7 +301,7 @@ export class CoreSystem {
         detail: 'start_done',
       });
 
-      // Wait for the first app navifation to report Kibana Loaded
+      // Wait for the first app navigation to report Kibana Loaded
       const appSub = application.currentAppId$.subscribe((appId) => {
         if (appId === undefined) return;
 
@@ -386,7 +386,7 @@ export class CoreSystem {
         first_app_nav: {
           type: 'long',
           _meta: {
-            description: 'When the application emmits the first app navigation',
+            description: 'When the application emits the first app navigation',
             optional: true,
           },
         },
