@@ -63,7 +63,6 @@ describe('New Terms rules', () => {
   before(() => {
     cleanKibana();
     login();
-    deleteAlertsAndRules();
   });
   describe('Detection rules, New Terms', () => {
     const expectedUrls = getNewTermsRule().referenceUrls.join('');
@@ -74,6 +73,7 @@ describe('New Terms rules', () => {
     const expectedNumberOfAlerts = '1 alert';
 
     beforeEach(() => {
+      deleteAlertsAndRules();
       createTimeline(getNewTermsRule().timeline).then((response) => {
         cy.wrap({
           ...getNewTermsRule(),
