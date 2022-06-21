@@ -55,30 +55,61 @@ export const getMetricVisRenderer = (
         ? getColumnByAccessor(visConfig.dimensions.secondaryMetric, visData.columns)
         : undefined;
 
+      const breakdownByColumn = visConfig.dimensions.breakdownBy
+        ? getColumnByAccessor(visConfig.dimensions.breakdownBy, visData.columns)
+        : undefined;
+
       const extraText = secondaryMetricColumn
         ? visData.rows[0][secondaryMetricColumn.id]
         : visConfig.metric.extraText;
 
-      const data = [
-        [
-          {
-            value: visData.rows[0][primaryMetricColumn.id],
-            color: '#5e5e5e',
-            title: primaryMetricColumn.name,
-            subtitle: visConfig.metric.subtitle,
-            valueFormatter: (d: unknown) => '' + d,
-            domain: { min: visConfig.metric.progressMin, max: visConfig.metric.progressMax },
-            progressBarDirection: visConfig.metric.progressDirection,
-            extra: <span>{extraText}</span>,
-          },
-        ],
-      ];
+      const formatValue = (val: unknown) => String(val);
+
+      const data = [];
+
+      const commonProps = {
+        color: '#5e5e5e',
+        valueFormatter: formatValue,
+        domain: { min: visConfig.metric.progressMin, max: visConfig.metric.progressMax },
+        progressBarDirection: visConfig.metric.progressDirection,
+        extra: <span>{extraText}</span>,
+      };
+
+      if (!breakdownByColumn) {
+        data.push({
+          ...commonProps,
+          // TODO - what if no rows?
+          value: visData.rows[0][primaryMetricColumn.id],
+          title: primaryMetricColumn.name,
+          subtitle: secondaryMetricColumn?.name ?? visConfig.metric.subtitle,
+        });
+      }
+
+      if (breakdownByColumn) {
+        // TODO - what if no rows?
+        for (const row of visData.rows) {
+          data.push({
+            ...commonProps,
+            value: row[primaryMetricColumn.id],
+            title: row[breakdownByColumn.id],
+            subtitle: primaryMetricColumn.name,
+          });
+        }
+      }
+
+      const gridData = [];
+      const {
+        metric: { maxCols },
+      } = visConfig;
+      for (let i = 0; i < data.length; i += maxCols) {
+        gridData.push(data.slice(i, i + maxCols));
+      }
 
       const themeService = getThemeService();
 
       render(
         <KibanaThemeProvider theme$={theme.theme$}>
-          <MetricVis data={data} themeService={themeService} />
+          <MetricVis data={gridData} themeService={themeService} />
         </KibanaThemeProvider>,
         domNode
       );

@@ -28,8 +28,7 @@ export interface MetricArguments {
   progressMax?: number;
   progressDirection: LayoutDirection;
   palette?: PaletteOutput<CustomPaletteState>;
-  maxCols?: number;
-  numTiles?: number;
+  maxCols: number;
 }
 
 export type MetricInput = Datatable;
