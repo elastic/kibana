@@ -23,6 +23,7 @@ test('onSaveSearch', async () => {
     },
   } as unknown as DiscoverServices;
   const stateMock = {} as unknown as GetStateReturn;
+  const anchorElement = document.createElement('div');
 
   await onSaveSearch({
     indexPattern: indexPatternMock,
@@ -30,6 +31,7 @@ test('onSaveSearch', async () => {
     savedSearch: savedSearchMock,
     services: serviceMock,
     state: stateMock,
+    anchorElement,
   });
 
   expect(showSaveModal).toHaveBeenCalled();
