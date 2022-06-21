@@ -226,17 +226,16 @@ describe('IndexPatterns', () => {
 
   test('create', async () => {
     const title = 'kibana-*';
-    const id = 'a54638bb-62cf-40f1-a1c2-195df3f0865a';
     indexPatterns.refreshFields = jest.fn();
 
-    const indexPattern = await indexPatterns.create({ id, title }, true);
+    const indexPattern = await indexPatterns.create({ title }, true);
     expect(indexPattern).toBeInstanceOf(DataView);
     expect(indexPattern.title).toBe(title);
     expect(indexPatterns.refreshFields).not.toBeCalled();
 
     await indexPatterns.create({ title });
     expect(indexPatterns.refreshFields).toBeCalled();
-    expect(indexPattern.id).toBe(id);
+    expect(indexPattern.id).toBeDefined();
     expect(indexPattern.isPersisted()).toBe(false);
   });
 
