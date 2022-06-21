@@ -85,6 +85,7 @@ export function ServiceLogs() {
 
   return (
     <LogStream
+      logView={{ type: 'log-view-reference', logViewId: 'default' }}
       columns={[{ type: 'timestamp' }, { type: 'message' }]}
       height={'60vh'}
       startTimestamp={moment(start).valueOf()}

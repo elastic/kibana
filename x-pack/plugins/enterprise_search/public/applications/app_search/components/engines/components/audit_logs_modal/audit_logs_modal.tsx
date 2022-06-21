@@ -55,7 +55,10 @@ export const AuditLogsModal: React.FC = () => {
         </EuiText>
         <EuiSpacer size="m" />
         <EntSearchLogStream
-          sourceId={ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID}
+          logView={{
+            type: 'log-view-reference',
+            logViewId: ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
+          }}
           columns={[
             {
               type: 'timestamp',

@@ -106,7 +106,7 @@ export const useLogView = ({
   const update = useCallback(
     async (logViewAttributes: Partial<LogViewAttributes>) => {
       const updatedLogView = await updateLogView(logViewId, logViewAttributes);
-      const resolvedUpdatedLogView = await resolveLogView(updatedLogView.attributes);
+      const resolvedUpdatedLogView = await resolveLogView(updatedLogView?.attributes);
       const resolvedLogViewStatus = await loadLogViewStatus(resolvedUpdatedLogView);
 
       return [updatedLogView, resolvedUpdatedLogView, resolvedLogViewStatus];

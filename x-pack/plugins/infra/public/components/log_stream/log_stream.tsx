@@ -64,8 +64,13 @@ export interface LogStreamProps extends LogStreamContentProps {
   height?: string | number;
 }
 
+interface LogView {
+  type: 'log-view-reference';
+  logViewId: string;
+}
+
 interface LogStreamContentProps {
-  sourceId?: string;
+  logView: LogView;
   startTimestamp: number;
   endTimestamp: number;
   query?: string | Query | BuiltEsQuery;
@@ -76,7 +81,7 @@ interface LogStreamContentProps {
   showFlyoutAction?: boolean;
 }
 
-export const LogStream: React.FC<LogStreamProps> = ({ height = 400, ...contentProps }) => {
+export const LogStream = ({ height = 400, ...contentProps }: LogStreamProps) => {
   return (
     <LogStreamContainer style={{ height }}>
       <LogStreamErrorBoundary resetOnChange={[contentProps.query]}>
@@ -86,8 +91,8 @@ export const LogStream: React.FC<LogStreamProps> = ({ height = 400, ...contentPr
   );
 };
 
-export const LogStreamContent: React.FC<LogStreamContentProps> = ({
-  sourceId = 'default',
+export const LogStreamContent = ({
+  logView,
   startTimestamp,
   endTimestamp,
   query,
@@ -96,7 +101,7 @@ export const LogStreamContent: React.FC<LogStreamContentProps> = ({
   highlight,
   columns,
   showFlyoutAction = false,
-}) => {
+}: LogStreamProps) => {
   const customColumns = useMemo(
     () => (columns ? convertLogColumnDefinitionToLogSourceColumnDefinition(columns) : undefined),
     [columns]
@@ -115,7 +120,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
     );
   }
 
-  const { openLogEntryFlyout } = useLogEntryFlyout(sourceId);
+  const { openLogEntryFlyout } = useLogEntryFlyout(logView.logViewId);
 
   const kibanaQuerySettings = useKibanaQuerySettings();
 
@@ -130,7 +135,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
     load: loadLogView,
     resolvedLogView,
   } = useLogView({
-    logViewId: sourceId,
+    logViewId: logView.logViewId,
     logViews,
     fetch: http.fetch,
   });
@@ -162,7 +167,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
     isLoadingMore,
     isReloading: isLoadingEntries,
   } = useLogStream({
-    sourceId,
+    sourceId: logView.logViewId,
     startTimestamp,
     endTimestamp,
     query: parsedQuery,
