@@ -24038,7 +24038,6 @@
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.takeActionTitle": "采取操作",
     "xpack.securitySolution.detectionEngine.alertTitle": "告警",
     "xpack.securitySolution.detectionEngine.buttonManageRules": "管理规则",
-    "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel": "编辑定制规则",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationCancelButtonLabel": "取消",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxHelpText": "从下拉列表中选择 Elasticsearch 索引的默认索引模式。您可以添加定制索引模式，然后按 Enter 键以开始新索引。",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxLabel": "为选定规则添加索引模式",

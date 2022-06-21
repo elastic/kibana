@@ -57,9 +57,13 @@ export const convertRulesFilterToKQL = ({
     filters.push(`(${searchQuery})`);
   }
 
-  excludeRuleTypes.forEach((ruleType) => {
-    filters.push(`NOT alert.attributes.params.type: ${ruleType}`);
-  });
+  if (excludeRuleTypes.length) {
+    filters.push(
+      `NOT alert.attributes.params.type: (${excludeRuleTypes
+        .map((ruleType) => `"${escapeKuery(ruleType)}"`)
+        .join(' OR ')})`
+    );
+  }
 
   return filters.join(' AND ');
 };

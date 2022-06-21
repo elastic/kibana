@@ -373,7 +373,10 @@ export const performBulkActionRoute = (
                   if (!rule.enabled) {
                     throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
                   }
-                  return rule;
+                  return {
+                    ...rule,
+                    enabled: true,
+                  };
                 }
 
                 const migratedRule = await migrateRuleActions({
@@ -407,7 +410,10 @@ export const performBulkActionRoute = (
                   if (rule.enabled) {
                     throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
                   }
-                  return rule;
+                  return {
+                    ...rule,
+                    enabled: false,
+                  };
                 }
 
                 const migratedRule = await migrateRuleActions({
@@ -438,7 +444,7 @@ export const performBulkActionRoute = (
               items: rules,
               executor: async (rule) => {
                 if (isDryRun) {
-                  return rule;
+                  return null;
                 }
                 const migratedRule = await migrateRuleActions({
                   rulesClient,

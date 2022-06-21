@@ -425,6 +425,19 @@ describe('perform_bulk_action', () => {
         expect.stringContaining('Invalid value "[]" supplied to "edit"')
       );
     });
+
+    it('rejects payloads if search query dry_run is invalid', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: getPerformBulkActionEditSchemaMock(),
+        query: { dry_run: 'invalid' },
+      });
+      const result = server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid value "invalid" supplied to "dry_run"')
+      );
+    });
   });
 
   it('should process large number of rules, larger than configured concurrency', async () => {

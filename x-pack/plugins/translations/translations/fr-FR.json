@@ -23870,7 +23870,6 @@
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.takeActionTitle": "Entreprendre une action",
     "xpack.securitySolution.detectionEngine.alertTitle": "Alertes",
     "xpack.securitySolution.detectionEngine.buttonManageRules": "Gérer les règles",
-    "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel": "Modifier les règles personnalisées",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationCancelButtonLabel": "Annuler",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxHelpText": "Sélectionnez les modèles d'indexation par défaut des index Elasticsearch à partir de la liste déroulante. Vous pouvez ajouter des modèles d'indexation personnalisés, puis appuyer sur Entrée pour en ajouter un nouveau.",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxLabel": "Ajouter des modèles d'indexation pour les règles sélectionnées",
