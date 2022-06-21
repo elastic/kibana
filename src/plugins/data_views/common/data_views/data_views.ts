@@ -95,7 +95,7 @@ export interface DataViewsServiceDeps {
    */
   fieldFormats: FieldFormatsStartCommon;
   /**
-   * Hander for service notifications
+   * Handler for service notifications
    */
   onNotification: OnNotification;
   /**
@@ -110,6 +110,10 @@ export interface DataViewsServiceDeps {
    * Determines whether the user can save data views
    */
   getCanSave: () => Promise<boolean>;
+  /**
+   * Determines whether the user can save advancedSettings (used for defaultIndex)
+   */
+  getCanSaveAdvancedSettings: () => Promise<boolean>;
 }
 
 /**
@@ -187,7 +191,7 @@ export interface DataViewsServicePublicMethods {
   /**
    * Get default data view, if it doesn't exist, choose and save new default data view and return it.
    */
-  getDefaultDataView: (update?: boolean) => Promise<DataView | null>;
+  getDefaultDataView: () => Promise<DataView | null>;
   /**
    * Get fields for data view
    * @param dataView - Data view instance or spec
@@ -278,6 +282,10 @@ export class DataViewsService {
    * Can the user save data views?
    */
   public getCanSave: () => Promise<boolean>;
+  /**
+   * Can the user save advanced settings?
+   */
+  public getCanSaveAdvancedSettings: () => Promise<boolean>;
 
   /**
    * DataViewsService constructor
@@ -292,6 +300,7 @@ export class DataViewsService {
       onNotification,
       onError,
       getCanSave = () => Promise.resolve(false),
+      getCanSaveAdvancedSettings,
     } = deps;
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -300,6 +309,7 @@ export class DataViewsService {
     this.onNotification = onNotification;
     this.onError = onError;
     this.getCanSave = getCanSave;
+    this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
     this.dataViewCache = createDataViewCache();
   }
@@ -831,9 +841,10 @@ export class DataViewsService {
   }
 
   /**
-   * Save existing dat aview. Will attempt to merge differences if there are conflicts.
+   * Save existing data view. Will attempt to merge differences if there are conflicts.
    * @param indexPattern
    * @param saveAttempts
+   * @param ignoreErrors
    */
 
   async updateSavedObject(
@@ -944,19 +955,19 @@ export class DataViewsService {
    * If no default is found, or it is missing
    * another data view is selected as default and returned.
    * If no possible data view found to become a default returns null.
-   * @param update: update uiSettings if necessary (no/invalid defaultIndex set)
    *
    * @returns default data view
    */
-  async getDefaultDataView(update = true): Promise<DataView | null> {
+  async getDefaultDataView(): Promise<DataView | null> {
     const patterns = await this.getIdsWithTitle();
     let defaultId: string | undefined = await this.config.get('defaultIndex');
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
 
     if (defaultId && !exists) {
-      if (update) {
+      if (await this.getCanSaveAdvancedSettings()) {
         await this.config.remove('defaultIndex');
       }
+
       defaultId = undefined;
     }
 
@@ -970,7 +981,7 @@ export class DataViewsService {
       );
 
       defaultId = userDataViews[0]?.id ?? patterns[0].id;
-      if (update) {
+      if (await this.getCanSaveAdvancedSettings()) {
         await this.config.set('defaultIndex', defaultId);
       }
     }

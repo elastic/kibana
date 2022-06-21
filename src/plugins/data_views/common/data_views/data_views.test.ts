@@ -103,6 +103,7 @@ describe('IndexPatterns', () => {
       onError: () => {},
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(true),
+      getCanSaveAdvancedSettings: () => Promise.resolve(true),
     });
 
     indexPatternsNoAccess = new DataViewsService({
@@ -114,6 +115,7 @@ describe('IndexPatterns', () => {
       onError: () => {},
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(false),
+      getCanSaveAdvancedSettings: () => Promise.resolve(false),
     });
   });
 
@@ -353,26 +355,6 @@ describe('IndexPatterns', () => {
       expect(uiSettings.set).toBeCalledTimes(1);
     });
 
-    test("default doesn't exist, grabs another data view, but don't update uiSettings", async () => {
-      uiSettings.get = jest.fn().mockResolvedValue('foo');
-      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
-
-      savedObjectsClient.get = jest.fn().mockResolvedValue({
-        id: 'bar',
-        version: 'foo',
-        attributes: {
-          title: 'something',
-        },
-      });
-
-      expect(await indexPatterns.getDefaultDataView(false)).toBeInstanceOf(DataView);
-      // make sure we're not pulling from cache
-      expect(savedObjectsClient.get).toBeCalledTimes(1);
-      expect(savedObjectsClient.find).toBeCalledTimes(1);
-      expect(uiSettings.remove).toBeCalledTimes(0);
-      expect(uiSettings.set).toBeCalledTimes(0);
-    });
-
     test("when default exists, it isn't overridden with first data view", async () => {
       uiSettings.get = jest.fn().mockResolvedValue('id2');
 
@@ -433,7 +415,7 @@ describe('IndexPatterns', () => {
       expect(uiSettings.remove).toBeCalledTimes(0);
       expect(uiSettings.set).toBeCalledTimes(1);
     });
-    test('dont set default default if update param is set to false', async () => {
+    test('dont set defaultIndex without capability allowing advancedSettings save', async () => {
       savedObjectsClient.find = jest.fn().mockResolvedValue([
         {
           id: 'id1',
@@ -453,7 +435,7 @@ describe('IndexPatterns', () => {
           Promise.resolve({ id, version: 'a', attributes: { title: '1' } })
         );
 
-      const defaultDataViewResult = await indexPatterns.getDefaultDataView(false);
+      const defaultDataViewResult = await indexPatternsNoAccess.getDefaultDataView();
       expect(defaultDataViewResult).toBeInstanceOf(DataView);
       expect(defaultDataViewResult?.id).toBe('id1');
       expect(uiSettings.set).toBeCalledTimes(0);
