@@ -11,7 +11,7 @@ import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
-import { esKuery } from '@kbn/data-plugin/public';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -29,8 +29,8 @@ interface State {
 }
 
 function convertKueryToEsQuery(kuery: string, dataView: DataView) {
-  const ast = esKuery.fromKueryExpression(kuery);
-  return esKuery.toElasticsearchQuery(ast, dataView);
+  const ast = fromKueryExpression(kuery);
+  return toElasticsearchQuery(ast, dataView);
 }
 
 export function KueryBar(props: {

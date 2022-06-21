@@ -8,9 +8,7 @@
 import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { TimelineId } from '../../../../types';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
-import { defaultHeaders } from '../../../../store/t_grid/defaults';
 import { ColumnHeaderOptions } from '../../../../../common';
 
 export const LoadingSpinner = styled(EuiLoadingSpinner)`
@@ -148,11 +146,6 @@ export const filterSelectedBrowserFields = ({
   }
   return result;
 };
-
-export const getAlertColumnHeader = (timelineId: string, fieldId: string) =>
-  timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage
-    ? defaultHeaders.find((c) => c.id === fieldId) ?? {}
-    : {};
 
 export const CATEGORY_TABLE_CLASS_NAME = 'category-table';
 export const CLOSE_BUTTON_CLASS_NAME = 'close-button';

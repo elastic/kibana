@@ -87,6 +87,14 @@ export const errors = {
     i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
       defaultMessage: 'Only line charts can be fit to the data bounds',
     }),
+  extentFullModeIsInvalidError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.extentFullModeIsInvalid', {
+      defaultMessage: 'For x axis extent, the full mode is not supported.',
+    }),
+  extentModeNotSupportedError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.extentModeNotSupportedError', {
+      defaultMessage: 'X axis extent is only supported for numeric histograms.',
+    }),
   timeMarkerForNotTimeChartsError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.timeMarkerForNotTimeChartsError', {
       defaultMessage: 'Only time charts can have current time marker',
@@ -133,6 +141,20 @@ export const validateExtentForDataBounds = (
   const lineSeries = layers.filter(({ seriesType }) => seriesType.includes('line'));
   if (!lineSeries.length && extent.mode === AxisExtentModes.DATA_BOUNDS) {
     throw new Error(errors.dataBoundsForNotLineChartError());
+  }
+};
+
+export const validateXExtent = (
+  extent: AxisExtentConfigResult | undefined,
+  dataLayers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
+) => {
+  if (extent) {
+    if (extent.mode === AxisExtentModes.FULL) {
+      throw new Error(errors.extentFullModeIsInvalidError());
+    }
+    if (isTimeChart(dataLayers) || dataLayers.every(({ isHistogram }) => !isHistogram)) {
+      throw new Error(errors.extentModeNotSupportedError());
+    }
   }
 };
 
