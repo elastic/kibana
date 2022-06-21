@@ -86,7 +86,6 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
          */
         tap((output) => {
           if (output.loading === true) {
-            // Record start time
             loadingStartTime = performance.now();
           }
         }),
