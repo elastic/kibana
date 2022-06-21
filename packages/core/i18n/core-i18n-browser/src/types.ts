@@ -14,10 +14,9 @@ import React from 'react';
  *
  * @public
  */
- export interface I18nStart {
+export interface I18nStart {
   /**
    * React Context provider required as the topmost component for any i18n-compatible React tree.
    */
   Context: ({ children }: { children: React.ReactNode }) => JSX.Element;
 }
-

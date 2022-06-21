@@ -10,8 +10,8 @@ import React from 'react';
 import { EuiContext } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { getEuiContextMapping } from './i18n_eui_mapping';
 import type { I18nStart } from '@kbn/core-i18n-browser';
+import { getEuiContextMapping } from './i18n_eui_mapping';
 
 /**
  * Service that is responsible for i18n capabilities.
@@ -51,4 +51,3 @@ export class I18nService {
     // nothing to do here currently
   }
 }
-
