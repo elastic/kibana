@@ -15,7 +15,7 @@ import {
   request,
 } from '@kbn/core/test_helpers/kbn_server';
 
-import type { UpdatableFileAttributes } from '../../../../common/types';
+import type { FileJSON, UpdatableFileAttributes } from '../../../../common/types';
 import { fileKindsRegistry } from '../../../file_kinds_registry';
 
 describe('File kind HTTP API', () => {
@@ -80,7 +80,7 @@ describe('File kind HTTP API', () => {
 
   const createFile = async (
     fileAttrs: Partial<{ name: string; alt: string; meta: Record<string, any>; mime: string }> = {}
-  ) => {
+  ): Promise<FileJSON> => {
     const result = await request
       .post(root, `/api/files/${fileKind}/create`)
       .send(
@@ -94,22 +94,31 @@ describe('File kind HTTP API', () => {
       .expect(200);
     disposables.push(async () => {
       await request
-        .delete(root, `/api/files/${fileKind}/${result.body.id}/delete`)
+        .delete(root, `/api/files/${fileKind}/${result.body.file.id}/delete`)
         .send()
         .expect(200);
     });
-    return result;
+    return result.body.file;
   };
 
   test('create', async () => {
-    const result = await createFile();
-    expect(result.body).toEqual({ id: expect.any(String) });
+    expect(await createFile()).toEqual({
+      id: expect.any(String),
+      created_at: expect.any(String),
+      updated_at: expect.any(String),
+      name: 'myFile',
+      file_kind: fileKind,
+      status: 'AWAITING_UPLOAD',
+      mime: 'image/png',
+      meta: {},
+      alt: 'a picture of my dog',
+    });
   });
 
   test('upload', async () => {
-    const { body } = await createFile();
+    const { id } = await createFile();
     const result = await request
-      .put(root, `/api/files/${fileKind}/${body.id}/upload`)
+      .put(root, `/api/files/${fileKind}/${id}/upload`)
       .set('Content-Type', 'application/octet-stream')
       .send('what have you')
       .expect(200);
@@ -117,9 +126,7 @@ describe('File kind HTTP API', () => {
   });
 
   test('download', async () => {
-    const {
-      body: { id },
-    } = await createFile();
+    const { id } = await createFile();
     await request
       .put(root, `/api/files/${fileKind}/${id}/upload`)
       .set('content-type', 'application/octet-stream')
@@ -134,9 +141,7 @@ describe('File kind HTTP API', () => {
   });
 
   test('update', async () => {
-    const {
-      body: { id },
-    } = await createFile({ name: 'acoolfilename' });
+    const { id } = await createFile({ name: 'acoolfilename' });
 
     const {
       body: { file },

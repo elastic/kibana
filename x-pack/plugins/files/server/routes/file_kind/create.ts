@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { FileJSON } from '../../../common';
 import type { FileKindsRequestHandler } from './types';
 
 export const method = 'post' as const;
@@ -20,7 +21,7 @@ export const bodySchema = schema.object({
 type Body = TypeOf<typeof bodySchema>;
 
 interface Response {
-  id: string;
+  file: FileJSON;
 }
 
 export const handler: FileKindsRequestHandler<unknown, unknown, Body> = async (
@@ -34,7 +35,7 @@ export const handler: FileKindsRequestHandler<unknown, unknown, Body> = async (
   } = req;
   const file = await fileService.asCurrentUser().create({ fileKind, name, alt, meta, mime });
   const body: Response = {
-    id: file.id,
+    file: file.toJSON(),
   };
   return res.ok({ body });
 };
