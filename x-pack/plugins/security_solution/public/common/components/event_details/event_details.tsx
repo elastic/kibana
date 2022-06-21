@@ -54,6 +54,7 @@ interface AlertRawEventData {
     ['kibana.alert.rule.name']: string;
     ['kibana.alert.rule.actions']: Array<Record<'action_type_id', string>>;
   };
+  [key: string]: unknown;
 }
 
 export type EventViewId =
@@ -78,7 +79,7 @@ interface Props {
   indexName: string;
   isAlert: boolean;
   isDraggable?: boolean;
-  rawEventData: object | undefined;
+  rawEventData: AlertRawEventData;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
   hostRisk: HostRisk | null;
@@ -352,14 +353,13 @@ const EventDetailsComponent: React.FC<Props> = ({
   );
 
   const osqueryTab = useMemo(() => {
-    const alertData = rawEventData as AlertRawEventData;
-    const osqueryActionsLength = alertData?._source['kibana.alert.rule.actions'].filter(
+    const osqueryActionsLength = rawEventData?._source['kibana.alert.rule.actions'].filter(
       (action: { action_type_id: string }) => action.action_type_id === '.osquery'
     )?.length;
 
-    const agentIds = alertData?.fields['agent.id'];
-    const ruleName = alertData?._source['kibana.alert.rule.name'];
-    const ruleActions = alertData?._source['kibana.alert.rule.actions'];
+    const agentIds = rawEventData?.fields['agent.id'];
+    const ruleName = rawEventData?._source['kibana.alert.rule.name'];
+    const ruleActions = rawEventData?._source['kibana.alert.rule.actions'];
 
     return osqueryFeatureFlags.DETECTION_ACTION && osqueryActionsLength
       ? {
@@ -384,7 +384,7 @@ const EventDetailsComponent: React.FC<Props> = ({
           ),
           content: (
             <>
-              <TabContentWrapper data-test-subj="jsonViewWrapper">
+              <TabContentWrapper data-test-subj="osqueryViewWrapper">
                 <OsqueryResults
                   agentIds={agentIds}
                   ruleName={ruleName}
