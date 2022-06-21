@@ -3375,6 +3375,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-button-toolbar@link:bazel-bin/packages/shared-ux/button_toolbar":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-storybook@link:bazel-bin/packages/kbn-shared-ux-storybook":
   version "0.0.0"
   uid ""
@@ -6739,6 +6743,10 @@
   uid ""
 
 "@types/kbn__shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-button-toolbar@link:bazel-bin/packages/shared-ux/button_toolbar/npm_module_types":
   version "0.0.0"
   uid ""
 

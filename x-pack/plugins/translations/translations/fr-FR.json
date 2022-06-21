@@ -5343,7 +5343,7 @@
     "sharedUXComponents.noDataPage.elasticAgentCard.noPermission.title": "Contactez votre administrateur",
     "sharedUXComponents.noDataPage.elasticAgentCard.title": "Ajouter Elastic Agent",
     "sharedUXComponents.pageTemplate.noDataCard.description": "Continuer sans collecter de données",
-    "sharedUXComponents.toolbar.buttons.addFromLibrary.libraryButtonLabel": "Ajouter depuis la bibliothèque",
+    "sharedUXPackages.buttonToolbar.buttons.addFromLibrary.libraryButtonLabel": "Ajouter depuis la bibliothèque",
     "sharedUXPackages.noDataViewsPrompt.learnMore": "Envie d'en savoir plus ?",
     "sharedUXPackages.noDataViewsPrompt.readDocumentation": "Lisez les documents",
     "telemetry.callout.appliesSettingTitle": "Les modifications apportées à ce paramètre s'appliquent dans {allOfKibanaText} et sont enregistrées automatiquement.",

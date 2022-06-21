@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { ToolbarButton, IconButtonGroup, AddFromLibraryButton, ToolbarPopover } from './toolbar';
 export { KibanaPageTemplateSolutionNav } from './page_template/solution_nav';
 
 // TODO: clintandrewhall - NoDataPageProps is a temporary addition until it is split into its own package

@@ -5456,7 +5456,7 @@
     "sharedUXComponents.noDataPage.elasticAgentCard.noPermission.title": "请联系您的管理员",
     "sharedUXComponents.noDataPage.elasticAgentCard.title": "添加 Elastic 代理",
     "sharedUXComponents.pageTemplate.noDataCard.description": "继续，而不收集数据",
-    "sharedUXComponents.toolbar.buttons.addFromLibrary.libraryButtonLabel": "从库中添加",
+    "sharedUXPackages.buttonToolbar.buttons.addFromLibrary.libraryButtonLabel": "从库中添加",
     "sharedUXPackages.noDataViewsPrompt.learnMore": "希望了解详情？",
     "sharedUXPackages.noDataViewsPrompt.readDocumentation": "阅读文档",
     "telemetry.callout.appliesSettingTitle": "对此设置的更改将应用到{allOfKibanaText} 且会自动保存。",

@@ -5445,7 +5445,7 @@
     "sharedUXComponents.noDataPage.elasticAgentCard.noPermission.title": "管理者にお問い合わせください",
     "sharedUXComponents.noDataPage.elasticAgentCard.title": "Elasticエージェントの追加",
     "sharedUXComponents.pageTemplate.noDataCard.description": "データを収集せずに続行",
-    "sharedUXComponents.toolbar.buttons.addFromLibrary.libraryButtonLabel": "ライブラリから追加",
+    "sharedUXPackages.buttonToolbar.buttons.addFromLibrary.libraryButtonLabel": "ライブラリから追加",
     "sharedUXPackages.noDataViewsPrompt.learnMore": "詳細について",
     "sharedUXPackages.noDataViewsPrompt.readDocumentation": "<b>ドキュメント</b><b>を読む</b>",
     "telemetry.callout.appliesSettingTitle": "この設定に加えた変更は {allOfKibanaText} に適用され、自動的に保存されます。",
