@@ -13,7 +13,6 @@ import {
   createAlertManualCleanup,
   createFailingAlert,
   disableAlert,
-  muteAlert,
   snoozeAlert,
 } from '../../lib/alert_api_actions';
 import { ObjectRemover } from '../../lib/object_remover';
@@ -105,7 +104,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts('b');
-
+      await find.byCssSelector(
+        '.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)'
+      );
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResults.length).to.equal(1);
       expect(searchResults[0].name).to.equal('bTest: Noop');
@@ -194,71 +195,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'statusDropdown',
         'enabled'
       );
-    });
-
-    it('should mute single alert', async () => {
-      const createdAlert = await createAlert({
-        supertest,
-        objectRemover,
-      });
-      await refreshAlertsList();
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      await testSubjects.click('muteButton');
-
-      await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-          createdAlert.name,
-          'statusDropdown',
-          'snoozed'
-        );
-      });
-    });
-
-    it('should be able to mute the rule with non "alerts" consumer from a non editable context', async () => {
-      const createdAlert = await createAlert({
-        supertest,
-        objectRemover,
-        overwrites: { consumer: 'siem' },
-      });
-      await refreshAlertsList();
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      await testSubjects.click('muteButton');
-
-      await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-          createdAlert.name,
-          'statusDropdown',
-          'snoozed'
-        );
-      });
-    });
-
-    it('should unmute single alert', async () => {
-      const createdAlert = await createAlert({
-        supertest,
-        objectRemover,
-      });
-      await muteAlert({ supertest, alertId: createdAlert.id });
-      await refreshAlertsList();
-
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      await testSubjects.click('muteButton');
-      await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-          createdAlert.name,
-          'statusDropdown',
-          'enabled'
-        );
-      });
     });
 
     it('should delete single alert', async () => {
