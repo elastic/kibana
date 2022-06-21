@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { Query, TimeRange } from '@kbn/data-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
