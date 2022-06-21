@@ -78,8 +78,11 @@ export interface RenderAppProps {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
 }
 
-export interface CasesUiStart {
+export interface CasesUiSetup {
   attachmentFramework: AttachmentFramework;
+}
+
+export interface CasesUiStart {
   api: {
     getRelatedCases: (alertId: string, query: CasesByAlertIDRequest) => Promise<CasesByAlertId>;
     cases: {

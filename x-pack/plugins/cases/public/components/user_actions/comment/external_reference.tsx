@@ -82,7 +82,7 @@ export const createExternalReferenceAttachmentUserActionBuilder = ({
         type: externalReferenceViewObject.type,
         className: `comment-external-reference${comment.externalReferenceAttachmentTypeId}`,
         event: externalReferenceViewObject.event,
-        'data-test-subj': `comment-external-reference${comment.externalReferenceAttachmentTypeId}`,
+        'data-test-subj': `comment-external-reference-${comment.externalReferenceAttachmentTypeId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
         timelineIcon: externalReferenceViewObject.timelineIcon,
         actions: (
@@ -91,11 +91,11 @@ export const createExternalReferenceAttachmentUserActionBuilder = ({
             {externalReferenceViewObject.actions}
           </>
         ),
-        children: (
+        children: externalReferenceViewObject.children ? (
           <Suspense fallback={<EuiLoadingSpinner />}>
-            {externalReferenceViewObject.children}
+            {React.createElement(externalReferenceViewObject.children)}
           </Suspense>
-        ),
+        ) : undefined,
       },
     ];
   },

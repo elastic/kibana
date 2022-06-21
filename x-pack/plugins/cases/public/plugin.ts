@@ -8,7 +8,7 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { CasesUiStart, CasesPluginSetup, CasesPluginStart } from './types';
+import { CasesUiStart, CasesPluginSetup, CasesPluginStart, CasesUiSetup } from './types';
 import { KibanaServices } from './common/lib/kibana';
 import { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
@@ -47,7 +47,7 @@ export class CasesUiPlugin
       new AttachmentTypeRegistry<ExternalReferenceAttachmentType>();
   }
 
-  public setup(core: CoreSetup, plugins: CasesPluginSetup) {
+  public setup(core: CoreSetup, plugins: CasesPluginSetup): CasesUiSetup {
     const kibanaVersion = this.kibanaVersion;
     const storage = this.storage;
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
@@ -88,8 +88,13 @@ export class CasesUiPlugin
       },
     });
 
-    // Return methods that should be available to other plugins
-    return {};
+    return {
+      attachmentFramework: {
+        registerExternalReference: (externalReferenceAttachmentType) => {
+          this.externalReferenceAttachmentTypeRegistry.register(externalReferenceAttachmentType);
+        },
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: CasesPluginStart): CasesUiStart {
@@ -97,11 +102,6 @@ export class CasesUiPlugin
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
 
     return {
-      attachmentFramework: {
-        registerExternalReference: (externalReferenceAttachmentType) => {
-          this.externalReferenceAttachmentTypeRegistry.register(externalReferenceAttachmentType);
-        },
-      },
       api: createClientAPI({ http: core.http }),
       ui: {
         getCases: (props) =>
