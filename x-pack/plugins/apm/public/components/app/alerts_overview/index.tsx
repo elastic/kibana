@@ -16,10 +16,10 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
-  AlertsStatusFilter,
+  AlertsTableStatusFilter,
   ALL_ALERTS_FILTER,
   AlertStatusFilterButton,
-} from '../../alerting/service_overview_alerts/alerts_status_filter';
+} from '../../alerting/service_overview_alerts/alerts_table_status_filter';
 
 export function AlertsOverview() {
   const {
@@ -78,7 +78,7 @@ export function AlertsOverview() {
     id: 'service-overview-alerts',
     configurationId: AlertConsumers.APM,
     featureIds: [AlertConsumers.APM],
-    flyoutState: AlertsTableFlyoutState.internal,
+    flyoutState: AlertsTableFlyoutState.external,
     query: alertQuery,
     showExpandToDetails: false,
   };
@@ -89,7 +89,7 @@ export function AlertsOverview() {
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <AlertsStatusFilter
+              <AlertsTableStatusFilter
                 status={alertStatusFilter as AlertStatusFilterButton}
                 onChange={setAlertStatusFilter}
               />

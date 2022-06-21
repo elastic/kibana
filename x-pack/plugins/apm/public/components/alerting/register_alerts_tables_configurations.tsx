@@ -4,16 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { AlertsTableConfigurationRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import { get } from 'lodash';
+import type {
+  AlertsTableConfigurationRegistryContract,
+  GetRenderCellValue,
+  AlertTableFlyoutComponent,
+  AlertsTableFlyoutBaseProps,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import {
   AlertConsumers,
   TIMESTAMP,
   EVENT_ACTION,
   ALERT_DURATION,
   ALERT_REASON,
+  ALERT_STATUS,
+  ALERT_RULE_TYPE,
 } from '@kbn/rule-data-utils';
-
+import { getRenderCellValue } from './service_overview_alerts/get_render_cell_value';
+import { AlertTableFlyoutBody } from './service_overview_alerts/alerts_table_flyout_body';
 export const registerAlertsTableConfiguration = (
   registry: AlertsTableConfigurationRegistryContract
 ) => {
@@ -60,5 +71,9 @@ export const registerAlertsTableConfiguration = (
         }),
       },
     ],
+    getRenderCellValue: getRenderCellValue as GetRenderCellValue,
+    externalFlyout: {
+      body: AlertTableFlyoutBody as AlertTableFlyoutComponent,
+    },
   });
 };

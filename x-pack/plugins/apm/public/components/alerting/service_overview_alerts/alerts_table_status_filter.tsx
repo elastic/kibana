@@ -76,10 +76,10 @@ const options: EuiButtonGroupOptionProps[] = [
   },
 ];
 
-export function AlertsStatusFilter({
+export function AlertsTableStatusFilter({
   status,
   onChange,
-}: AlertStatusFilterProps) {
+}: AlertTableStatusFilterProps) {
   return (
     <EuiButtonGroup
       legend="Filter by"
