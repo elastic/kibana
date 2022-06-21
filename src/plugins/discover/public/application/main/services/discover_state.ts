@@ -10,7 +10,13 @@ import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
-import { Filter, FilterStateStore, compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
+import {
+  Filter,
+  FilterStateStore,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Query,
+} from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
@@ -24,7 +30,6 @@ import {
   connectToQueryState,
   DataPublicPluginStart,
   FilterManager,
-  Query,
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';

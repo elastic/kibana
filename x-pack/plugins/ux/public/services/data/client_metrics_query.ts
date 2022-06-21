@@ -5,27 +5,22 @@
  * 2.0.
  */
 
-import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
-import { mergeProjection } from '../../projections/util/merge_projection';
-import { SetupUX } from './route';
+import { mergeProjection } from '../../../common/utils/merge_projection';
+import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import {
   TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
+import { getRumPageLoadTransactionsProjection } from './projections';
 
-export async function getClientMetrics({
-  setup,
-  urlQuery,
-  percentile = 50,
-  start,
-  end,
-}: {
-  setup: SetupUX;
-  urlQuery?: string;
-  percentile?: number;
-  start: number;
-  end: number;
-}) {
+export function clientMetricsQuery(
+  start: number,
+  end: number,
+  percentile: number = 50,
+  urlQuery?: string,
+  uiFilters?: UxUIFilters
+) {
+  const setup: SetupUX = { uiFilters: uiFilters ? uiFilters : {} };
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
@@ -68,22 +63,5 @@ export async function getClientMetrics({
     },
   });
 
-  const { apmEventClient } = setup;
-  const response = await apmEventClient.search('get_client_metrics', params);
-  const {
-    hasFetchStartField: { backEnd, totalPageLoadDuration },
-  } = response.aggregations!;
-
-  const pkey = percentile.toFixed(1);
-
-  const totalPageLoadDurationValue = totalPageLoadDuration.values[pkey] ?? 0;
-  const totalPageLoadDurationValueMs = totalPageLoadDurationValue / 1000; // Microseconds to milliseconds
-  const backendValue = backEnd.values[pkey] ?? 0;
-
-  return {
-    pageViews: { value: response.hits.total.value ?? 0 },
-    totalPageLoadDuration: { value: totalPageLoadDurationValueMs },
-    backEnd: { value: backendValue },
-    frontEnd: { value: totalPageLoadDurationValueMs - backendValue },
-  };
+  return params;
 }
