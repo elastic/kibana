@@ -6,6 +6,8 @@
  */
 
 import { EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
 interface UptimeCellProps {
@@ -14,7 +16,15 @@ interface UptimeCellProps {
 
 export function UptimeCell({ uptimeMs }: UptimeCellProps) {
   if (uptimeMs === null || uptimeMs === undefined || isNaN(uptimeMs)) {
-    return <EuiTextColor color="subdued">N/A</EuiTextColor>;
+    return (
+      <EuiTextColor color="subdued">
+        <FormattedMessage
+          id="xpack.infra.metricsTable.uptimeCell.metricNotAvailableLabel"
+          defaultMessage="N/A"
+          description="N/A is short for not available"
+        />
+      </EuiTextColor>
+    );
   }
 
   return <span>{formatUptime(uptimeMs)}</span>;
@@ -29,10 +39,18 @@ function formatUptime(uptimeMs: number): string {
     const minutes = Math.floor(uptimeMs / MS_PER_MINUTE);
 
     if (minutes > 0) {
-      return `${minutes}m`;
+      i18n.translate('xpack.infra.metricsTable.uptimeCell.minutesLabel', {
+        defaultMessage: '{minutes}m',
+        values: {
+          minutes,
+        },
+        description: 'm is short for minutes',
+      });
     }
 
-    return '< a minute';
+    return i18n.translate('xpack.infra.metricsTable.uptimeCell.lessThanOneMinuteLabel', {
+      defaultMessage: '< a minute',
+    });
   }
 
   if (uptimeMs < MS_PER_DAY) {
@@ -41,10 +59,23 @@ function formatUptime(uptimeMs: number): string {
     const minutes = Math.floor(remainingUptimeMs / MS_PER_MINUTE);
 
     if (minutes > 0) {
-      return `${hours}h ${minutes}m`;
+      return i18n.translate('xpack.infra.metricsTable.uptimeCell.hoursAndMinutesLabel', {
+        defaultMessage: '{hours}h {minutes}m',
+        values: {
+          hours,
+          minutes,
+        },
+        description: 'h is short for hours, m for minutes',
+      });
     }
 
-    return `${hours}h`;
+    return i18n.translate('xpack.infra.metricsTable.uptimeCell.hoursLabel', {
+      defaultMessage: '{hours}h',
+      values: {
+        hours,
+      },
+      description: 'h is short for hours',
+    });
   }
 
   const days = Math.floor(uptimeMs / MS_PER_DAY);
@@ -52,8 +83,21 @@ function formatUptime(uptimeMs: number): string {
   const hours = Math.floor(remainingUptimeMs / MS_PER_HOUR);
 
   if (hours > 0) {
-    return `${days}d ${hours}h`;
+    return i18n.translate('xpack.infra.metricsTable.uptimeCell.daysAndHoursLabel', {
+      defaultMessage: '{days}d {hours}h',
+      values: {
+        days,
+        hours,
+      },
+      description: 'd is short for days, h for hours',
+    });
   }
 
-  return `${days}d`;
+  return i18n.translate('xpack.infra.metricsTable.uptimeCell.daysLabel', {
+    defaultMessage: '{days}d',
+    values: {
+      days,
+    },
+    description: 'd is short for days',
+  });
 }
