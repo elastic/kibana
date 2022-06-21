@@ -65,7 +65,7 @@ export const getMetricVisRenderer = (
 
       const formatValue = (val: unknown) => String(val);
 
-      const data = [];
+      const metricConfigs: MetricSpec['data'][number] = [];
 
       const commonProps = {
         color: '#5e5e5e',
@@ -76,7 +76,7 @@ export const getMetricVisRenderer = (
       };
 
       if (!breakdownByColumn) {
-        data.push({
+        metricConfigs.push({
           ...commonProps,
           // TODO - what if no rows?
           value: visData.rows[0][primaryMetricColumn.id],
@@ -88,7 +88,7 @@ export const getMetricVisRenderer = (
       if (breakdownByColumn) {
         // TODO - what if no rows?
         for (const row of visData.rows) {
-          data.push({
+          metricConfigs.push({
             ...commonProps,
             value: row[primaryMetricColumn.id],
             title: row[breakdownByColumn.id],
@@ -97,19 +97,19 @@ export const getMetricVisRenderer = (
         }
       }
 
-      const gridData = [];
+      const grid: MetricSpec['data'] = [];
       const {
         metric: { maxCols },
       } = visConfig;
-      for (let i = 0; i < data.length; i += maxCols) {
-        gridData.push(data.slice(i, i + maxCols));
+      for (let i = 0; i < metricConfigs.length; i += maxCols) {
+        grid.push(metricConfigs.slice(i, i + maxCols));
       }
 
       const themeService = getThemeService();
 
       render(
         <KibanaThemeProvider theme$={theme.theme$}>
-          <MetricVis data={gridData} themeService={themeService} />
+          <MetricVis data={grid} themeService={themeService} />
         </KibanaThemeProvider>,
         domNode
       );
