@@ -84,6 +84,7 @@ export const convertToBuildEsQuery = ({
           queries,
           filters.filter((f) => f.meta.disabled === false),
           {
+            nestedIgnoreUnmapped: true, // by default, prevent shard failures when unmapped `nested` fields are queried: https://github.com/elastic/kibana/issues/130340
             ...config,
             dateFormatTZ: undefined,
           }
