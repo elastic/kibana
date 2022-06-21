@@ -18,6 +18,30 @@ import {
 
 import GAUGE_GRAPH from './images/unique_visitors_gauge.svg';
 import RESPONSE_CODE_GRAPH from './images/response_codes_graph.png';
+import { number } from 'joi';
+
+export type ColumnOptions = 12 | 24 | 48;
+
+export const GRID_CLASS = 'dshGrid';
+export const HANDLE_CLASS = 'dshPanel__wrapper';
+export const PANEL_CLASS = 'embPanel';
+export const NUM_COLUMNS = 48;
+export const DEFAULT_CELL_HEIGHT = 24;
+export const DEFAULT_GROUP_HEIGHT = NUM_COLUMNS / 3;
+export const DEFAULT_GUTTERSIZE = 4;
+
+type GridConfig = {
+  [columns in ColumnOptions]: {
+    class: string;
+    cellHeight: number;
+  };
+};
+
+export const GRID_CONFIG: GridConfig = {
+  12: { class: 'dshLayout__grid--small', cellHeight: DEFAULT_CELL_HEIGHT * 4 },
+  24: { class: 'dshLayout__grid--medium', cellHeight: DEFAULT_CELL_HEIGHT * 2 },
+  48: { class: 'dshLayout__grid--large', cellHeight: DEFAULT_CELL_HEIGHT },
+};
 
 export const MarkdownGridPanel = () => (
   <div>

@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
-import { renderToString } from 'react-dom/server';
 import 'gridstack/dist/h5/gridstack-dd-native';
 import { Grid } from '../components/grid';
 import { smallGridData, mediumGridData, largeGridData } from './fixtures';
@@ -26,6 +25,7 @@ import SANKEY_CHART_GRAPH from '../images/sankey_chart.png';
 import DESTINATION_HEATMAP from '../images/destination_heatmap.png';
 import REQUEST_MAP from '../images/total_requests_map.png';
 import BYTES_BAR_GRAPH from '../images/bytes_bar_graph.png';
+import { TestReactGrid } from '../components/test_grid';
 
 export default {
   component: EuiPanel,
@@ -36,6 +36,10 @@ export default {
 
 export const UncontrolledExample = () => {
   return <Grid columns={12} />;
+};
+
+export const TestExample = () => {
+  return <TestReactGrid columns={12} gridData={smallGridData} />;
 };
 
 export const SmallGridExample = () => {

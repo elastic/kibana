@@ -6,12 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiAccordion, htmlIdGenerator } from '@elastic/eui';
-import { GridItemHTMLElement, GridStack, GridStackNode, GridStackWidget } from 'gridstack';
-// import 'gridstack/dist/h5/gridstack-dd-native';
-import React, { FC, useCallback, useEffect, useState, useMemo, useRef } from 'react';
-import { GridItem } from './grid_item';
-
+import { EuiAccordion, EuiButton, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { GridStack, GridStackNode, GridStackWidget } from 'gridstack';
+import React, {
+  createRef,
+  FC,
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   ColumnOptions,
   DEFAULT_GUTTERSIZE,
@@ -21,6 +27,7 @@ import {
   NUM_COLUMNS,
   PANEL_CLASS,
 } from '../constants';
+import { TestGridItem } from './test_grid_item';
 
 interface Props {
   gridData?: GridStackWidget[];
@@ -28,15 +35,14 @@ interface Props {
   guttersize?: number; // in pixels
 }
 
-export const Grid: FC<Props> = ({
+export const TestReactGrid: FC<Props> = ({
   gridData = [],
   columns = NUM_COLUMNS,
   guttersize = DEFAULT_GUTTERSIZE, // TODO: do we want to allow 0 or should we set a min value?
 }) => {
-  const gridRef = useRef<GridStack>();
-  const panelRefs = useRef<{ [key: string]: HTMLDivElement }>({});
   const [panels, setPanels] = useState<GridStackNode[]>(gridData);
-  const [info, setInfo] = useState<string>('');
+  const panelRefs = useRef<{ [key: string]: MutableRefObject<HTMLDivElement> }>({});
+  const gridRef = useRef<GridStack>();
 
   const sharedGridParams = useMemo(
     () => ({
@@ -52,33 +58,28 @@ export const Grid: FC<Props> = ({
     [columns, guttersize]
   );
 
-  const renderPanelInWidget = (panel: GridStackNode) => {
-    if (gridRef.current) gridRef.current.addWidget(panelRefs.current[panel.id!], panel);
-  };
+  if (Object.keys(panelRefs.current).length !== panels.length) {
+    panels.forEach((panel) => {
+      panelRefs.current[panel.id!] = panelRefs.current[panel.id!] || createRef();
+    });
+  }
 
   useEffect(() => {
-    gridRef.current = GridStack.init({
-      ...sharedGridParams,
-      class: GRID_CLASS,
-    });
-
-    gridRef.current.on('drag', (event, element) => {
-      const node = (element as GridItemHTMLElement)?.gridstackNode;
-      if (!node) return;
-      setInfo(`you just dragged node #${node.id} to ${node.x},${node.y} – good job!`);
-    });
-  });
-
-  useEffect(() => {
+    gridRef.current =
+      gridRef.current ||
+      GridStack.init({
+        ...sharedGridParams,
+        class: GRID_CLASS,
+      });
     const grid = gridRef.current;
 
     if (grid && gridData.length) {
       grid.batchUpdate();
       grid.removeAll(false);
-      gridData.map(renderPanelInWidget);
+      panels.forEach((panel) => grid.makeWidget(panelRefs.current[panel.id!].current));
       grid.commit();
     }
-  }, [gridData]);
+  });
 
   const addNewPanel = useCallback(async () => {
     const grid = gridRef.current;
@@ -99,26 +100,22 @@ export const Grid: FC<Props> = ({
     };
 
     setPanels([...panels, panelNode]);
-    grid.batchUpdate();
-    await new Promise((f) => setTimeout(f, 60));
-    renderPanelInWidget(panelNode);
-    grid.commit();
-  }, [panels, setPanels, columns]);
+    if (panelRefs.current[id]) {
+      // wait for reference to exist before making the widget
+      grid.makeWidget(panelRefs.current[id].current);
+    }
+  }, [panels, columns, setPanels]);
 
   return (
     <div>
-      <EuiButton onClick={addNewPanel}>Add Panel</EuiButton>&nbsp;
-      <div>{info}</div>
+      <EuiButton onClick={addNewPanel}>Add Panel</EuiButton>
       <div>Count:{panels.length}</div>
       <EuiAccordion id={`accordion`} buttonContent="Panel data">
         <div>{JSON.stringify(panels)}</div>
       </EuiAccordion>
       <div className={`grid-stack dshLayout--editing ${GRID_CONFIG[columns].class}`}>
-        {panels.map((panel) => {
-          const callbackRef = (element: HTMLDivElement) => {
-            panelRefs.current[panel.id!] = element;
-          };
-          return <GridItem panel={panel} callbackRef={callbackRef} />;
+        {panels.map((panel, i) => {
+          return <TestGridItem panel={panel} ref={panelRefs.current[panel.id!]} />;
         })}
       </div>
     </div>
