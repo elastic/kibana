@@ -173,8 +173,8 @@ describe('validateMonitor', () => {
       [ConfigKey.SOURCE_ZIP_PASSWORD]: 'password',
       [ConfigKey.SOURCE_ZIP_PROXY_URL]: 'http://proxy-url.com',
       [ConfigKey.PARAMS]: '',
-      [ConfigKey.URLS]: undefined,
-      [ConfigKey.PORT]: undefined,
+      [ConfigKey.URLS]: null,
+      [ConfigKey.PORT]: null,
     };
 
     testBrowserAdvancedFields = {
