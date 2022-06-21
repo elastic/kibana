@@ -7,7 +7,7 @@
 
 import React from 'react';
 import 'brace';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -179,7 +179,7 @@ describe('EsQueryAlertTypeExpression', () => {
     expect(wrapper.find('[data-test-subj="thresholdExpression"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="forLastExpression"]').exists()).toBeTruthy();
 
-    const testQueryButton = wrapper.find('EuiButtonEmpty[data-test-subj="testQuery"]');
+    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
     expect(testQueryButton.exists()).toBeTruthy();
     expect(testQueryButton.prop('disabled')).toBe(false);
   });
@@ -189,7 +189,7 @@ describe('EsQueryAlertTypeExpression', () => {
       ...defaultEsQueryExpressionParams,
       timeField: null,
     } as unknown as EsQueryAlertParams<SearchType.esQuery>);
-    const testQueryButton = wrapper.find('EuiButtonEmpty[data-test-subj="testQuery"]');
+    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
     expect(testQueryButton.exists()).toBeTruthy();
     expect(testQueryButton.prop('disabled')).toBe(true);
   });
@@ -204,11 +204,47 @@ describe('EsQueryAlertTypeExpression', () => {
     });
     dataMock.search.search.mockImplementation(() => searchResponseMock$);
     const wrapper = await setup(defaultEsQueryExpressionParams);
-    const testQueryButton = wrapper.find('EuiButtonEmpty[data-test-subj="testQuery"]');
+    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
 
     testQueryButton.simulate('click');
     expect(dataMock.search.search).toHaveBeenCalled();
     await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="testQuerySuccess"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="testQueryError"]').exists()).toBeFalsy();
+    expect(wrapper.find('EuiText[data-test-subj="testQuerySuccess"]').text()).toEqual(
+      `Query matched 1234 documents in the last 15s.`
+    );
+  });
+
+  test('should show success message if Test Query is successful (with partial result)', async () => {
+    const partial = {
+      isRunning: true,
+      isPartial: true,
+    };
+    const complete = {
+      isRunning: false,
+      isPartial: false,
+      rawResponse: {
+        hits: {
+          total: 1234,
+        },
+      },
+    };
+    const searchResponseMock$ = new Subject();
+    dataMock.search.search.mockImplementation(() => searchResponseMock$);
+    const wrapper = await setup(defaultEsQueryExpressionParams);
+    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
+
+    testQueryButton.simulate('click');
+    expect(dataMock.search.search).toHaveBeenCalled();
+    await act(async () => {
+      searchResponseMock$.next(partial);
+      searchResponseMock$.next(complete);
+      searchResponseMock$.complete();
       await nextTick();
       wrapper.update();
     });
@@ -225,7 +261,7 @@ describe('EsQueryAlertTypeExpression', () => {
       throw new Error('What is this query');
     });
     const wrapper = await setup(defaultEsQueryExpressionParams);
-    const testQueryButton = wrapper.find('EuiButtonEmpty[data-test-subj="testQuery"]');
+    const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
 
     testQueryButton.simulate('click');
     expect(dataMock.search.search).toHaveBeenCalled();
