@@ -42,11 +42,17 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
+  RectAnnotationEvent,
+  LineAnnotationEvent,
 } from '@elastic/charts';
 
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
-import { CombinedJobWithStats } from '../../../../../../common/types/anomaly_detection_jobs';
+import {
+  CombinedJobWithStats,
+  ModelSnapshot,
+} from '../../../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../../../common/types/audit_message';
+import { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useMlApiContext } from '../../../../contexts/kibana';
 import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
@@ -58,14 +64,23 @@ import { checkPermission } from '../../../../capabilities/check_capabilities';
 
 const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
 const MAX_CHART_POINTS = 480;
+const revertSnapshotMessage = i18n.translate(
+  'xpack.ml.jobsList.datafeedChart.revertSnapshotMessage',
+  {
+    defaultMessage: 'Click to revert to this model snapshot.',
+  }
+);
 
 interface DatafeedChartFlyoutProps {
   jobId: string;
   end: number;
   onClose: () => void;
+  onModelSnapshotAnnotationClick: (modelSnapshot: ModelSnapshot) => void;
 }
 
-function setLineAnnotationHeader(lineDatum: LineAnnotationDatum) {
+function setLineAnnotationHeader(
+  lineDatum: LineAnnotationDatum | LineAnnotationDatumWithModelSnapshot
+) {
   lineDatum.header = dateFormatter(lineDatum.dataValue);
   return lineDatum;
 }
@@ -78,12 +93,23 @@ const customTooltip: CustomAnnotationTooltip = ({ details, datum }) => (
   </div>
 );
 
-export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, onClose }) => {
+export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
+  jobId,
+  end,
+  onClose,
+  onModelSnapshotAnnotationClick,
+}) => {
   const [data, setData] = useState<{
     datafeedConfig: CombinedJobWithStats['datafeed_config'] | undefined;
     bucketSpan: string | undefined;
     isInitialized: boolean;
-  }>({ datafeedConfig: undefined, bucketSpan: undefined, isInitialized: false });
+    modelSnapshotData: LineAnnotationDatumWithModelSnapshot[];
+  }>({
+    datafeedConfig: undefined,
+    bucketSpan: undefined,
+    isInitialized: false,
+    modelSnapshotData: [],
+  });
   const [endDate, setEndDate] = useState<any>(moment(end));
   const [isLoadingChartData, setIsLoadingChartData] = useState<boolean>(false);
   const [bucketData, setBucketData] = useState<number[][]>([]);
@@ -91,15 +117,20 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
     rect: RectAnnotationDatum[];
     line: LineAnnotationDatum[];
   }>({ rect: [], line: [] });
-  const [modelSnapshotData, setModelSnapshotData] = useState<LineAnnotationDatum[]>([]);
+  const [modelSnapshotDataForTimeRange, setModelSnapshotDataForTimeRange] = useState<
+    LineAnnotationDatumWithModelSnapshot[]
+  >([]);
   const [messageData, setMessageData] = useState<LineAnnotationDatum[]>([]);
   const [sourceData, setSourceData] = useState<number[][]>([]);
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
   const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(true);
   const [range, setRange] = useState<{ start: string; end: string } | undefined>();
   const canUpdateDatafeed = useMemo(() => checkPermission('canUpdateDatafeed'), []);
+  const canCreateJob = useMemo(() => checkPermission('canCreateJob'), []);
+  const canStartStopDatafeed = useMemo(() => checkPermission('canStartStopDatafeed'), []);
 
   const {
+    getModelSnapshots,
     results: { getDatafeedResultChartData },
   } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
@@ -144,7 +175,11 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
         rect: chartData.annotationResultsRect,
         line: chartData.annotationResultsLine.map(setLineAnnotationHeader),
       });
-      setModelSnapshotData(chartData.modelSnapshotResultsLine.map(setLineAnnotationHeader));
+      setModelSnapshotDataForTimeRange(
+        data.modelSnapshotData.filter(
+          (datum) => datum.dataValue >= startTimestamp && datum.dataValue <= endTimestamp
+        )
+      );
     } catch (error) {
       const title = i18n.translate('xpack.ml.jobsList.datafeedChart.errorToastTitle', {
         defaultMessage: 'Error fetching data',
@@ -154,21 +189,37 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
     setIsLoadingChartData(false);
   }, [endDate, data.bucketSpan]);
 
-  const getJobData = useCallback(async () => {
+  const getJobAndSnapshotData = useCallback(async () => {
     try {
       const job: CombinedJobWithStats = await loadFullJob(jobId);
+      const modelSnapshotResultsLine: LineAnnotationDatumWithModelSnapshot[] = [];
+      const modelSnapshotsResp = await getModelSnapshots(jobId);
+      const modelSnapshots = modelSnapshotsResp.model_snapshots ?? [];
+      modelSnapshots.forEach((modelSnapshot) => {
+        const timestamp = Number(modelSnapshot.latest_record_time_stamp);
+
+        modelSnapshotResultsLine.push({
+          dataValue: timestamp,
+          details: `${modelSnapshot.description}. ${
+            canCreateJob && canStartStopDatafeed ? revertSnapshotMessage : ''
+          }`,
+          modelSnapshot,
+        });
+      });
+
       setData({
         datafeedConfig: job.datafeed_config,
         bucketSpan: job.analysis_config.bucket_span,
         isInitialized: true,
+        modelSnapshotData: modelSnapshotResultsLine.map(setLineAnnotationHeader),
       });
     } catch (error) {
       displayErrorToast(error);
     }
   }, [jobId]);
 
-  useEffect(function loadJobWithDatafeed() {
-    getJobData();
+  useEffect(function loadInitialData() {
+    getJobAndSnapshotData();
   }, []);
 
   useEffect(
@@ -323,6 +374,24 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                         <Settings
                           showLegend
                           legendPosition={Position.Bottom}
+                          onAnnotationClick={(annotations: {
+                            rects: RectAnnotationEvent[];
+                            lines: LineAnnotationEvent[];
+                          }) => {
+                            // If it's not a line annotation or if it's not a model snapshot annotation then do nothing
+                            if (
+                              !(canCreateJob && canStartStopDatafeed) ||
+                              annotations.lines?.length === 0 ||
+                              (annotations.lines &&
+                                !annotations.lines[0].id.includes('Model snapshots'))
+                            )
+                              return;
+
+                            onModelSnapshotAnnotationClick(
+                              // @ts-expect-error property 'modelSnapshot' does not exist on type
+                              annotations.lines[0].datum.modelSnapshot
+                            );
+                          }}
                           // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                           theme={{
                             lineSeriesStyle: {
@@ -349,28 +418,6 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                           })}
                           position={Position.Left}
                         />
-                        {showModelSnapshots ? (
-                          <LineAnnotation
-                            id={i18n.translate(
-                              'xpack.ml.jobsList.datafeedChart.modelSnapshotsLineSeriesId',
-                              {
-                                defaultMessage: 'Model snapshots',
-                              }
-                            )}
-                            key="model-snapshots-results-line"
-                            domainType={AnnotationDomainType.XDomain}
-                            dataValues={modelSnapshotData}
-                            marker={<EuiIcon type="asterisk" />}
-                            markerPosition={Position.Top}
-                            style={{
-                              line: {
-                                strokeWidth: 3,
-                                stroke: euiTheme.euiColorVis1,
-                                opacity: 0.5,
-                              },
-                            }}
-                          />
-                        ) : null}
                         {showAnnotations ? (
                           <>
                             <LineAnnotation
@@ -406,6 +453,28 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                               style={{ fill: euiTheme.euiColorDangerText }}
                             />
                           </>
+                        ) : null}
+                        {showModelSnapshots ? (
+                          <LineAnnotation
+                            id={i18n.translate(
+                              'xpack.ml.jobsList.datafeedChart.modelSnapshotsLineSeriesId',
+                              {
+                                defaultMessage: 'Model snapshots',
+                              }
+                            )}
+                            key="model-snapshots-results-line"
+                            domainType={AnnotationDomainType.XDomain}
+                            dataValues={modelSnapshotDataForTimeRange}
+                            marker={<EuiIcon type="asterisk" />}
+                            markerPosition={Position.Top}
+                            style={{
+                              line: {
+                                strokeWidth: 3,
+                                stroke: euiTheme.euiColorVis1,
+                                opacity: 0.5,
+                              },
+                            }}
+                          />
                         ) : null}
                         {messageData.length > 0 ? (
                           <>
