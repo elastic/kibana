@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: '',
           ...overrides?.query,
         },
-        body: { groupIds: JSON.stringify(['foo']) },
+        body: { groupIds: JSON.stringify(['foo']), ...overrides?.body },
       },
     });
   }
