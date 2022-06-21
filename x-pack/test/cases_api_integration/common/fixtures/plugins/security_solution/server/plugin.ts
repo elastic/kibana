@@ -53,6 +53,103 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           ui: [],
         },
       },
+      subFeatures: [
+        {
+          name: 'Custom privileges',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Create',
+                  id: 'cases_create',
+                  includeIn: 'all',
+                  cases: {
+                    create: ['securitySolutionFixture'],
+                  },
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Read',
+                  id: 'cases_read',
+                  includeIn: 'read',
+                  cases: {
+                    read: ['securitySolutionFixture'],
+                  },
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Update',
+                  id: 'cases_update',
+                  includeIn: 'all',
+                  cases: {
+                    update: ['securitySolutionFixture'],
+                  },
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Delete',
+                  id: 'cases_delete',
+                  includeIn: 'all',
+                  cases: {
+                    delete: ['securitySolutionFixture'],
+                  },
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Push',
+                  id: 'cases_push',
+                  includeIn: 'all',
+                  cases: {
+                    push: ['securitySolutionFixture'],
+                  },
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
 
     features.registerKibanaFeature({

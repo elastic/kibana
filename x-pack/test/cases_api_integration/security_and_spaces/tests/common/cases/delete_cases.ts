@@ -31,6 +31,10 @@ import {
   noKibanaPrivileges,
   obsOnly,
   superUser,
+  secOnlyCreate,
+  secOnlyUpdate,
+  secOnlyPush,
+  secOnlyDelete,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -99,25 +103,29 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCases({ supertest, caseIDs: ['fake-id'], expectedHttpCode: 404 });
     });
 
-    describe('rbac', () => {
-      it('User: security solution only - should delete a case', async () => {
-        const postedCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-          200,
-          {
-            user: secOnly,
-            space: 'space1',
-          }
-        );
+    describe.only('rbac', () => {
+      for (const user of [secOnly, secOnlyDelete]) {
+        it(`User ${
+          user.username
+        } with role(s) ${user.roles.join()} - should delete a case`, async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user,
+              space: 'space1',
+            }
+          );
 
-        await deleteCases({
-          supertest: supertestWithoutAuth,
-          caseIDs: [postedCase.id],
-          expectedHttpCode: 204,
-          auth: { user: secOnly, space: 'space1' },
+          await deleteCases({
+            supertest: supertestWithoutAuth,
+            caseIDs: [postedCase.id],
+            expectedHttpCode: 204,
+            auth: { user, space: 'space1' },
+          });
         });
-      });
+      }
 
       it('User: security solution only - should NOT delete a case of different owner', async () => {
         const postedCase = await createCase(
@@ -182,8 +190,17 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
-        it(`User ${
+      for (const user of [
+        // globalRead,
+        // secOnlyRead,
+        secOnlyCreate,
+        // secOnlyUpdate,
+        // secOnlyPush,
+        // obsOnlyRead,
+        // obsSecRead,
+        // noKibanaPrivileges,
+      ]) {
+        it.only(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should NOT delete a case`, async () => {
           const postedCase = await createCase(

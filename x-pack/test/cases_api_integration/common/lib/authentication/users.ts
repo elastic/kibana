@@ -17,6 +17,10 @@ import {
   observabilityOnlyAllSpacesAll,
   observabilityOnlyReadSpacesAll,
   testDisabledPluginAll,
+  securitySolutionOnlyCreate,
+  securitySolutionOnlyUpdate,
+  securitySolutionOnlyDelete,
+  securitySolutionOnlyPush,
 } from './roles';
 import { User } from './types';
 
@@ -36,6 +40,30 @@ export const secOnly: User = {
   username: 'sec_only',
   password: 'sec_only',
   roles: [securitySolutionOnlyAll.name],
+};
+
+export const secOnlyCreate: User = {
+  username: 'sec_only_create',
+  password: 'sec_only_create',
+  roles: [securitySolutionOnlyCreate.name],
+};
+
+export const secOnlyUpdate: User = {
+  username: 'sec_only_update',
+  password: 'sec_only_update',
+  roles: [securitySolutionOnlyUpdate.name],
+};
+
+export const secOnlyDelete: User = {
+  username: 'sec_only_delete',
+  password: 'sec_only_delete',
+  roles: [securitySolutionOnlyDelete.name],
+};
+
+export const secOnlyPush: User = {
+  username: 'sec_only_push',
+  password: 'sec_only_push',
+  roles: [securitySolutionOnlyPush.name],
 };
 
 export const secOnlyRead: User = {
@@ -83,7 +111,11 @@ export const noKibanaPrivileges: User = {
 export const users = [
   superUser,
   secOnly,
+  secOnlyCreate,
   secOnlyRead,
+  secOnlyUpdate,
+  secOnlyDelete,
+  secOnlyPush,
   obsOnly,
   obsOnlyRead,
   obsSec,
