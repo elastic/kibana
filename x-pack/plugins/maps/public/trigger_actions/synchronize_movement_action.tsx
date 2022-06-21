@@ -48,9 +48,7 @@ export const synchronizeMovementAction = createAction<SynchronizeMovementActionC
     const { SynchronizeMovementModal } = await import('./synchronize_movement_modal');
     const { openModal } = createReactOverlays(getCore());
     const modalSession = openModal(
-      <SynchronizeMovementModal
-        onClose={() => modalSession.close()}
-      />
+      <SynchronizeMovementModal onClose={() => modalSession.close()} />
     );
   },
 });

@@ -307,8 +307,10 @@ export class MapEmbeddable
   }
 
   _getIsMovementSynchronized = () => {
-    return this.input.isMovementSynchronized === undefined ? true : this.input.isMovementSynchronized;
-  }
+    return this.input.isMovementSynchronized === undefined
+      ? true
+      : this.input.isMovementSynchronized;
+  };
 
   _gotoSynchronizedLocation() {
     const syncedLocation = synchronizeMovement.getLocation();
@@ -401,23 +403,20 @@ export class MapEmbeddable
       return;
     }
 
-    synchronizeMovement.register(
-      this.input.id,
-      {
-        getTitle: () => {
-          const title = this.getOutput().title;
-          return title ? title : this.input.id;
-        },
-        onLocationChange: this._mapSyncHandler,
-        getIsMovementSynchronized: this._getIsMovementSynchronized,
-        setIsMovementSynchronized: (isMovementSynchronized: boolean) => {
-          this.updateInput({ isMovementSynchronized });
-          if (isMovementSynchronized) {
-            this._gotoSynchronizedLocation();
-          }
-        },
-      }
-    );
+    synchronizeMovement.register(this.input.id, {
+      getTitle: () => {
+        const title = this.getOutput().title;
+        return title ? title : this.input.id;
+      },
+      onLocationChange: this._mapSyncHandler,
+      getIsMovementSynchronized: this._getIsMovementSynchronized,
+      setIsMovementSynchronized: (isMovementSynchronized: boolean) => {
+        this.updateInput({ isMovementSynchronized });
+        if (isMovementSynchronized) {
+          this._gotoSynchronizedLocation();
+        }
+      },
+    });
     if (this._getIsMovementSynchronized()) {
       this._gotoSynchronizedLocation();
     }

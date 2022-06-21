@@ -22,11 +22,11 @@ export const synchronizeMovement = {
     return location;
   },
   getMapPanels() {
-    return Object.keys(registry).map(key => {
+    return Object.keys(registry).map((key) => {
       return {
         ...registry[key],
         id: key,
-      }
+      };
     });
   },
   hasMultipleMaps() {

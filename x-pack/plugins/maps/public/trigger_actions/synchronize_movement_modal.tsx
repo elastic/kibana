@@ -1,9 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -23,9 +22,8 @@ interface Props {
 }
 
 export class SynchronizeMovementModal extends Component<Props> {
-
   _renderSwitches() {
-    return synchronizeMovement.getMapPanels().map(mapPanel => {
+    return synchronizeMovement.getMapPanels().map((mapPanel) => {
       return (
         <EuiFormRow display="columnCompressedSwitch" key={mapPanel.id}>
           <EuiSwitch
@@ -53,9 +51,7 @@ export class SynchronizeMovementModal extends Component<Props> {
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
-        <EuiModalBody>
-          {this._renderSwitches()}
-        </EuiModalBody>
+        <EuiModalBody>{this._renderSwitches()}</EuiModalBody>
       </Fragment>
     );
   }
