@@ -164,22 +164,18 @@ export default function createActionsTelemetryTests({ getService }: FtrProviderC
         .send({ taskId: 'Actions-actions_telemetry' })
         .expect(200);
 
-      let taskState: any;
-      // get telemetry task doc
+      let telemetry: any;
       await retry.try(async () => {
         const telemetryTask = await es.get<TaskManagerDoc>({
           id: `task:Actions-actions_telemetry`,
           index: '.kibana_task_manager',
         });
         expect(telemetryTask!._source!.task?.status).to.be('idle');
-        taskState = telemetryTask!._source!.task?.state;
+        const taskState = telemetryTask!._source!.task?.state;
+        expect(taskState).not.to.be(undefined);
+        telemetry = JSON.parse(taskState!);
+        expect(telemetry.count_total).to.equal(19);
       });
-
-      expect(taskState).not.to.be(undefined);
-      const telemetry = JSON.parse(taskState!);
-
-      // total number of connectors
-      expect(telemetry.count_total).to.equal(19);
 
       // total number of active connectors (used by a rule)
       expect(telemetry.count_active_total).to.equal(7);

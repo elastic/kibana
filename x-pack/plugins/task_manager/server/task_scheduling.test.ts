@@ -277,7 +277,6 @@ describe('TaskScheduling', () => {
           status: TaskStatus.Idle,
           runAt: expect.any(Date),
           scheduledAt: expect.any(Date),
-          ownerId: taskSchedulingOpts.taskManagerId,
         })
       );
       expect(mockTaskStore.get).toHaveBeenCalledWith(id);
@@ -295,7 +294,18 @@ describe('TaskScheduling', () => {
       await expect(result).rejects.toEqual(409);
     });
 
-    test('rejects when the task is not idle', async () => {
+    test('rejects when the task is being claimed', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Claiming }));
+      mockTaskStore.update.mockRejectedValueOnce(409);
+
+      const result = taskScheduling.runSoon(id);
+      await expect(result).rejects.toEqual(Error('Task is being claimed'));
+    });
+
+    test('rejects when the task is already running', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
@@ -303,7 +313,29 @@ describe('TaskScheduling', () => {
       mockTaskStore.update.mockRejectedValueOnce(409);
 
       const result = taskScheduling.runSoon(id);
-      await expect(result).rejects.toEqual(Error('Already running'));
+      await expect(result).rejects.toEqual(Error('Task is already running'));
+    });
+
+    test('rejects when the task status is failed', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Failed }));
+      mockTaskStore.update.mockRejectedValueOnce(409);
+
+      const result = taskScheduling.runSoon(id);
+      await expect(result).rejects.toEqual(Error('Task was already failed'));
+    });
+
+    test('rejects when the task status is Unrecognized', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Unrecognized }));
+      mockTaskStore.update.mockRejectedValueOnce(409);
+
+      const result = taskScheduling.runSoon(id);
+      await expect(result).rejects.toEqual(Error('Task status is unrecognised'));
     });
 
     test('rejects when the task does not exist', async () => {

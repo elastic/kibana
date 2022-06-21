@@ -208,18 +208,13 @@ export class TaskScheduling {
    * @returns {Promise<ConcreteTaskInstance>}
    */
   public async runSoon(taskId: string): Promise<RunSoonResult> {
-    const task = await this.store.get(taskId);
-    if (task.status !== TaskStatus.Idle) {
-      throw Error('Already running');
-    }
-    const updatedTask = await this.store.update({
+    const task = await this.getTask(taskId);
+    await this.store.update({
       ...task,
       scheduledAt: new Date(),
       runAt: new Date(),
-      // status: TaskStatus.Idle,
-      ownerId: this.taskManagerId,
     });
-    return { id: updatedTask.id };
+    return { id: task.id };
   }
 
   /**
@@ -396,6 +391,22 @@ export class TaskScheduling {
           `Failed to run task "${taskId}" and failed to get current Status:${getLifecycleError}`
         )
     );
+  }
+
+  private async getTask(taskId: string) {
+    const task = await this.store.get(taskId);
+    switch (task.status) {
+      case TaskStatus.Claiming:
+        throw Error('Task is being claimed');
+      case TaskStatus.Running:
+        throw Error('Task is already running');
+      case TaskStatus.Failed:
+        throw Error('Task was already failed');
+      case TaskStatus.Unrecognized:
+        throw Error('Task status is unrecognised');
+      default:
+        return task;
+    }
   }
 }
 

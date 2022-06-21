@@ -83,9 +83,9 @@ export class DashboardPlugin
     this.logger.debug('dashboard: Started');
 
     if (plugins.taskManager) {
-      scheduleDashboardTelemetry(this.logger, plugins.taskManager);
-
-      plugins.taskManager.runSoon(TASK_ID);
+      scheduleDashboardTelemetry(this.logger, plugins.taskManager)!.then(() => {
+        plugins.taskManager.runSoon(TASK_ID);
+      });
     }
 
     return {};
