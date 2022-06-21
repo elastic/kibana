@@ -89,7 +89,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
           };
         }),
         // Dedupe
-        distinct(output => output.id + output.status + !!output.error),
+        distinct((output) => output.id + output.status + !!output.error),
         // Record start time if loading === true
         tap((output) => {
           if (output.status === 'loading') {
@@ -102,7 +102,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
             ...output,
             timeToEvent: performance.now() - loadingStartTime,
           };
-        }),
+        })
       )
       .subscribe((statusOutput) => {
         if (this.props.onPanelStatusChange) {
