@@ -1536,7 +1536,9 @@
         "label": "snoozeRule",
         "description": [],
         "signature": [
-          "({\n  id,\n  snoozeEndTime,\n  http,\n}: { id: string; snoozeEndTime: string | -1; http: ",
+          "({\n  id,\n  snoozeSchedule,\n  http,\n}: { id: string; snoozeSchedule: ",
+          "SnoozeSchedule",
+          "; http: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1554,7 +1556,7 @@
             "id": "def-public.snoozeRule.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  id,\n  snoozeEndTime,\n  http,\n}",
+            "label": "{\n  id,\n  snoozeSchedule,\n  http,\n}",
             "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
             "deprecated": false,
@@ -1571,13 +1573,13 @@
               },
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.snoozeRule.$1.snoozeEndTime",
-                "type": "CompoundType",
+                "id": "def-public.snoozeRule.$1.snoozeSchedule",
+                "type": "Object",
                 "tags": [],
-                "label": "snoozeEndTime",
+                "label": "snoozeSchedule",
                 "description": [],
                 "signature": [
-                  "string | -1"
+                  "SnoozeSchedule"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
                 "deprecated": false
@@ -1758,7 +1760,7 @@
         "label": "unsnoozeRule",
         "description": [],
         "signature": [
-          "({ id, http }: { id: string; http: ",
+          "({\n  id,\n  http,\n  scheduleIds,\n}: { id: string; http: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1766,7 +1768,7 @@
             "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
-          "; }) => Promise<void>"
+          "; scheduleIds?: string[] | undefined; }) => Promise<void>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
         "deprecated": false,
@@ -1776,7 +1778,7 @@
             "id": "def-public.unsnoozeRule.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ id, http }",
+            "label": "{\n  id,\n  http,\n  scheduleIds,\n}",
             "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
             "deprecated": false,
@@ -1806,6 +1808,19 @@
                     "section": "def-public.HttpSetup",
                     "text": "HttpSetup"
                   }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.unsnoozeRule.$1.scheduleIds",
+                "type": "Array",
+                "tags": [],
+                "label": "scheduleIds",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
                 "deprecated": false
