@@ -7,13 +7,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import {
-  EuiBadge,
-  EuiBadgeGroup,
-  EuiBadgeProps,
-  EuiHeaderLinks,
-  EuiToolTipProps,
-} from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiBadgeProps, EuiHeaderLinks } from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '@kbn/core/public';
@@ -26,7 +20,7 @@ import { TopNavMenuItem } from './top_nav_menu_item';
 export type TopNavMenuProps = StatefulSearchBarProps &
   Omit<SearchBarProps, 'kibana' | 'intl' | 'timeHistory'> & {
     config?: TopNavMenuData[];
-    badges?: Array<EuiBadgeProps & { badgeText: string; tooltipProps: EuiToolTipProps }>;
+    badges?: Array<EuiBadgeProps & { badgeText: string }>;
     showSearchBar?: boolean;
     showQueryBar?: boolean;
     showQueryInput?: boolean;
