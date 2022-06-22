@@ -157,7 +157,7 @@ describe('ES search strategy', () => {
       });
     });
 
-    describe('with sessionId', () => {
+    describe.skip('with sessionId', () => {
       it('makes a POST request with params (long keepalive)', async () => {
         mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
 

@@ -32,7 +32,6 @@ const mockSavedObject: SearchSessionSavedObject = {
     created: new Date().toISOString(),
     expires: new Date().toISOString(),
     status: SearchSessionStatus.COMPLETE,
-    persisted: true,
     version: '8.0.0',
   },
   references: [],
@@ -48,7 +47,13 @@ describe('Session service', () => {
   let sessionsClient: jest.Mocked<ISessionsClient>;
 
   beforeEach(() => {
-    const initializerContext = coreMock.createPluginInitializerContext();
+    const initializerContext = coreMock.createPluginInitializerContext({
+      search: {
+        sessions: {
+          notTouchedTimeout: '5m',
+        },
+      },
+    });
     const startService = coreMock.createSetup().getStartServices;
     const startServicesMock = coreMock.createStart();
     toastService = startServicesMock.notifications.toasts;
@@ -83,6 +88,7 @@ describe('Session service', () => {
         ]),
       sessionsClient,
       nowProvider,
+      undefined,
       { freezeState: false } // needed to use mocks inside state container
     );
     state$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
@@ -132,30 +138,40 @@ describe('Session service', () => {
     });
 
     it('Tracks searches for current session', () => {
-      expect(() => sessionService.trackSearch({ abort: () => {} })).toThrowError();
+      expect(() =>
+        sessionService.trackSearch({ abort: () => {}, poll: async () => {} })
+      ).toThrowError();
       expect(state$.getValue()).toBe(SearchSessionState.None);
 
       sessionService.start();
-      const untrack1 = sessionService.trackSearch({ abort: () => {} });
+      const complete1 = sessionService.trackSearch({
+        abort: () => {},
+        poll: async () => {},
+      }).complete;
       expect(state$.getValue()).toBe(SearchSessionState.Loading);
-      const untrack2 = sessionService.trackSearch({ abort: () => {} });
+      const complete2 = sessionService.trackSearch({
+        abort: () => {},
+        poll: async () => {},
+      }).complete;
+
       expect(state$.getValue()).toBe(SearchSessionState.Loading);
-      untrack1();
+      complete1();
       expect(state$.getValue()).toBe(SearchSessionState.Loading);
-      untrack2();
+      complete2();
       expect(state$.getValue()).toBe(SearchSessionState.Completed);
     });
 
     it('Cancels all tracked searches within current session', async () => {
       const abort = jest.fn();
+      const poll = jest.fn();
 
       sessionService.start();
-      sessionService.trackSearch({ abort });
-      sessionService.trackSearch({ abort });
-      sessionService.trackSearch({ abort });
-      const untrack = sessionService.trackSearch({ abort });
+      sessionService.trackSearch({ abort, poll });
+      sessionService.trackSearch({ abort, poll });
+      sessionService.trackSearch({ abort, poll });
+      const complete = sessionService.trackSearch({ abort, poll }).complete;
+      complete();
 
-      untrack();
       await sessionService.cancel();
 
       expect(abort).toBeCalledTimes(3);
@@ -213,7 +229,7 @@ describe('Session service', () => {
   it('Continue drops client side loading state', async () => {
     const sessionId = sessionService.start();
 
-    sessionService.trackSearch({ abort: () => {} });
+    sessionService.trackSearch({ abort: () => {}, poll: async () => {} });
     expect(state$.getValue()).toBe(SearchSessionState.Loading);
 
     sessionService.clear(); // even allow to call clear multiple times

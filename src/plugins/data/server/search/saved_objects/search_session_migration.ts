@@ -39,11 +39,20 @@ export type SearchSessionSavedObjectAttributesPre$7$14$0 = Omit<
  * from using `urlGeneratorId` to `locatorId`.
  */
 export type SearchSessionSavedObjectAttributesPre$8$0$0 = Omit<
-  SearchSessionSavedObjectAttributesLatest,
+  SearchSessionSavedObjectAttributesPre$8$4$0,
   'locatorId'
 > & {
   urlGeneratorId?: string;
 };
+
+/**
+ * In 8.4.0 with search session refactoring and moving away from using task manager we are no longer track `completed` and `persisted`
+ */
+export type SearchSessionSavedObjectAttributesPre$8$4$0 =
+  SearchSessionSavedObjectAttributesLatest & {
+    completed?: string | null;
+    persisted: boolean;
+  };
 
 function getLocatorId(urlGeneratorId?: string) {
   if (!urlGeneratorId) return;

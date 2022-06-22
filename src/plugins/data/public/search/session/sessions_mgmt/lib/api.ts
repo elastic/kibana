@@ -142,8 +142,6 @@ export class SearchSessionsMgmtAPI {
         perPage: mgmtConfig.maxSessions,
         sortField: 'created',
         sortOrder: 'asc',
-        searchFields: ['persisted'],
-        search: 'true',
       })
     );
     const timeout$ = timer(refreshTimeout.asMilliseconds()).pipe(

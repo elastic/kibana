@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               "[eCommerce] Orders Test 6",
               "16 Feb, 2021, 00:00:00",
               "--",
-              "error",
+              "expired",
             ],
             Array [
               "lens",

@@ -19,7 +19,7 @@ const getMockSearchSessionsConfig = ({
     defaultExpiration,
   } as SearchSessionsConfigSchema);
 
-describe('request utils', () => {
+describe.skip('request utils', () => {
   describe('getDefaultAsyncSubmitParams', () => {
     test('Uses `keep_alive` from default params if no `sessionId` is provided', async () => {
       const mockConfig = getMockSearchSessionsConfig({

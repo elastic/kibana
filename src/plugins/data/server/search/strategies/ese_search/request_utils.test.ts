@@ -29,7 +29,7 @@ const getMockSearchSessionsConfig = ({
     defaultExpiration,
   } as SearchSessionsConfigSchema);
 
-describe('request utils', () => {
+describe.skip('request utils', () => {
   describe('getIgnoreThrottled', () => {
     test('does not return `ignore_throttled` when `includeFrozen` is `false`', async () => {
       const mockUiSettingsClient = getMockUiSettingsClient({

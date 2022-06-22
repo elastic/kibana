@@ -104,11 +104,11 @@ export function getTimelionRequestHandler({
 
     // parse the time range client side to make sure it behaves like other charts
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
-    const untrackSearch =
-      dataSearch.session.isCurrentSession(searchSessionId) &&
-      dataSearch.session.trackSearch({
-        abort: () => abortController.abort(),
-      });
+    // const untrackSearch =
+    //   dataSearch.session.isCurrentSession(searchSessionId) &&
+    //   dataSearch.session.trackSearch({
+    //     abort: () => abortController.abort(),
+    //   });
 
     try {
       const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
@@ -146,10 +146,10 @@ export function getTimelionRequestHandler({
         throw e;
       }
     } finally {
-      if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
-        // call `untrack` if this search still belongs to current session
-        untrackSearch();
-      }
+      // if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
+      //   // call `untrack` if this search still belongs to current session
+      //   untrackSearch();
+      // }
       expressionAbortSignal.removeEventListener('abort', expressionAbortHandler);
     }
   };

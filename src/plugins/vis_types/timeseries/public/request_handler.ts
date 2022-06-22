@@ -51,11 +51,11 @@ export const metricsRequestHandler = async ({
     const parsedTimeRange = data.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
 
     if (visParams && visParams.id && !visParams.isModelInvalid && !expressionAbortSignal.aborted) {
-      const untrackSearch =
-        dataSearch.session.isCurrentSession(searchSessionId) &&
-        dataSearch.session.trackSearch({
-          abort: () => abortController.abort(),
-        });
+      // const untrackSearch =
+      //   dataSearch.session.isCurrentSession(searchSessionId) &&
+      //   dataSearch.session.trackSearch({
+      //     abort: () => abortController.abort(),
+      //   });
 
       try {
         const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
@@ -93,10 +93,10 @@ export const metricsRequestHandler = async ({
 
         return visData;
       } finally {
-        if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
-          // untrack if this search still belongs to current session
-          untrackSearch();
-        }
+        // if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
+        //   // untrack if this search still belongs to current session
+        //   untrackSearch();
+        // }
         expressionAbortSignal.removeEventListener('abort', expressionAbortHandler);
       }
     }
