@@ -49,6 +49,7 @@ import {
   Pagination,
   Percentiles,
   TriggersActionsUiConfig,
+  SnoozeSchedule,
 } from '../../../../types';
 import { RuleAdd, RuleEdit } from '../../rule_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -405,12 +406,12 @@ export const RulesList: React.FunctionComponent = () => {
     return enableRule({ http, id: rule.id });
   };
 
-  const onSnoozeRule = (rule: RuleTableItem, snoozeEndTime: string | -1) => {
-    return snoozeRule({ http, id: rule.id, snoozeEndTime });
+  const onSnoozeRule = (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => {
+    return snoozeRule({ http, id: rule.id, snoozeSchedule });
   };
 
-  const onUnsnoozeRule = (rule: RuleTableItem) => {
-    return unsnoozeRule({ http, id: rule.id });
+  const onUnsnoozeRule = (rule: RuleTableItem, scheduleIds?: string[]) => {
+    return unsnoozeRule({ http, id: rule.id, scheduleIds });
   };
 
   const toolsRight = [
@@ -543,7 +544,7 @@ export const RulesList: React.FunctionComponent = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="baseline" gutterSize="none">
+          <EuiFlexGroup alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued" data-test-subj="totalRulesCount">
                 <FormattedMessage
@@ -683,10 +684,11 @@ export const RulesList: React.FunctionComponent = () => {
         onEnableRule={onEnableRule}
         onSnoozeRule={onSnoozeRule}
         onUnsnoozeRule={onUnsnoozeRule}
-        renderCollapsedItemActions={(rule) => (
+        renderCollapsedItemActions={(rule, onLoading) => (
           <CollapsedItemActions
             key={rule.id}
             item={rule}
+            onLoading={onLoading}
             onRuleChanged={() => loadData()}
             setRulesToDelete={setRulesToDelete}
             onEditRule={() => onRuleEdit(rule)}

@@ -23,9 +23,11 @@ import {
 
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { applicationServiceMock } from '../application/application_service.mock';
-import { i18nServiceMock } from '../i18n/i18n_service.mock';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
@@ -35,9 +37,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
-import { themeServiceMock } from '../theme/theme_service.mock';
 import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
-import { analyticsServiceMock } from '../analytics/analytics_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 

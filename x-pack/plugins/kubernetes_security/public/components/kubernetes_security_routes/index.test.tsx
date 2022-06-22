@@ -8,12 +8,17 @@
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { MemoryRouterProps } from 'react-router';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { KubernetesSecurityRoutes } from '.';
+import { createAppRootMockRenderer } from '../../test';
 
 jest.mock('../kubernetes_widget', () => ({
   KubernetesWidget: () => <div>{'Mock kubernetes widget'}</div>,
+}));
+
+jest.mock('../percent_widget', () => ({
+  PercentWidget: () => <div>{'Mock percent widget'}</div>,
 }));
 
 const renderWithRouter = (
@@ -40,9 +45,18 @@ const renderWithRouter = (
       },
     };
   });
-  return render(
+  const mockedContext = createAppRootMockRenderer();
+  return mockedContext.render(
     <MemoryRouter initialEntries={initialEntries}>
-      <KubernetesSecurityRoutes filter={<div>{'Mock filters'}</div>} />
+      <KubernetesSecurityRoutes
+        filter={<div>{'Mock filters'}</div>}
+        globalFilter={{
+          filterQuery: '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}',
+          startDate: '2022-03-08T18:52:15.532Z',
+          endDate: '2022-06-09T17:52:15.532Z',
+        }}
+        renderSessionsView={jest.fn()}
+      />
     </MemoryRouter>
   );
 };
@@ -51,5 +65,6 @@ describe('Kubernetes security routes', () => {
   it('navigates to the kubernetes page', () => {
     renderWithRouter();
     expect(screen.getAllByText('Mock kubernetes widget')).toHaveLength(3);
+    expect(screen.getAllByText('Mock percent widget')).toHaveLength(2);
   });
 });
