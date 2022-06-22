@@ -23,13 +23,12 @@ import { getRemediationList } from '../findings/findings_flyout/overview_tab';
 import type { RuleSavedObject } from './use_csp_rules';
 import * as TEXT from './translations';
 import * as TEST_SUBJECTS from './test_subjects';
-import type { CspUiCapabilities } from '../../common/hooks/use_ui_capabilities';
 
 interface RuleFlyoutProps {
   onClose(): void;
   toggleRule(rule: RuleSavedObject): void;
   rule: RuleSavedObject;
-  canUpdate: CspUiCapabilities['canUpdate'];
+  canUpdate: boolean;
 }
 
 const tabs = [

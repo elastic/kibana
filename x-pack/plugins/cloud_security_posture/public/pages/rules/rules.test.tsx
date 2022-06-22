@@ -17,12 +17,7 @@ import type { PageUrlParams } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
-import { useKibana } from '../../common/hooks/use_kibana';
-import { httpServiceMock } from '@kbn/core/public/mocks';
-
-jest.mock('../../common/hooks/use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegrationInfo: jest.fn(),
@@ -37,9 +32,20 @@ const queryClient = new QueryClient({
 
 const getTestComponent =
   (params: PageUrlParams): React.FC =>
-  () =>
-    (
-      <TestProvider>
+  () => {
+    const coreStart = coreMock.createStart();
+    const core = {
+      ...coreStart,
+      application: {
+        ...coreStart.application,
+        capabilities: {
+          ...coreStart.application.capabilities,
+          siem: { crud: true },
+        },
+      },
+    };
+    return (
+      <TestProvider core={core}>
         <Rules
           {...({
             match: { params },
@@ -47,20 +53,12 @@ const getTestComponent =
         />
       </TestProvider>
     );
+  };
 
 describe('<Rules />', () => {
   beforeEach(() => {
     queryClient.clear();
     jest.clearAllMocks();
-
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        http: httpServiceMock.createStartContract(),
-        application: {
-          capabilities: { siem: { crud: true } },
-        },
-      },
-    });
 
     (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
       data: { item: { status: 'installed' } },

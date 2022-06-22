@@ -42,7 +42,7 @@ export const defineGetComplianceDashboardRoute = (
       path: STATS_ROUTE_PATH,
       validate: false,
       options: {
-        tags: ['access:csp-read'],
+        tags: ['access:cloud-security-posture-read'],
       },
     },
     async (context, _, response) => {

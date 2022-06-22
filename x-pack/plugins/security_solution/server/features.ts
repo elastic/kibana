@@ -100,6 +100,11 @@ export const getAlertsSubFeature = (ruleTypes: string[]): SubFeatureConfig => ({
   ],
 });
 
+// Same as the plugin id defined by Cloud Security Posture
+const CLOUD_POSTURE_APP_ID = 'csp';
+// Same as the saved-object type for rules defined by Cloud Security Posture
+const CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE = 'csp_rule';
+
 export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): KibanaFeatureConfig => ({
   id: SERVER_APP_ID,
   name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
@@ -107,7 +112,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
   }),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  app: [APP_ID, 'csp', 'kibana'],
+  app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -116,9 +121,16 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
   subFeatures: [],
   privileges: {
     all: {
-      app: [APP_ID, 'csp', 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'lists-all', 'lists-read', 'lists-summary', 'rac', 'csp-all'],
+      api: [
+        APP_ID,
+        'lists-all',
+        'lists-read',
+        'lists-summary',
+        'rac',
+        'cloud-security-posture-all',
+      ],
       savedObject: {
         all: [
           'alert',
@@ -126,7 +138,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
           'exception-list-agnostic',
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
-          'csp_rule',
+          CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
         ],
         read: [],
       },
@@ -144,9 +156,9 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
       ui: ['show', 'crud'],
     },
     read: {
-      app: [APP_ID, 'csp', 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'lists-read', 'rac', 'csp-read'],
+      api: [APP_ID, 'lists-read', 'rac', 'cloud-security-posture-read'],
       savedObject: {
         all: [],
         read: [
@@ -154,7 +166,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
           'exception-list-agnostic',
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
-          'csp_rule',
+          CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
         ],
       },
       alerting: {

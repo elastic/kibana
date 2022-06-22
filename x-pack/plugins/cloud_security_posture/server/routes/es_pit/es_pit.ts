@@ -24,7 +24,7 @@ export const defineEsPitRoute = (router: CspRouter, cspContext: CspAppContext): 
       path: ES_PIT_ROUTE_PATH,
       validate: { query: esPitInputSchema },
       options: {
-        tags: ['access:csp-read'],
+        tags: ['access:cloud-security-posture-read'],
       },
     },
     async (context, request, response) => {

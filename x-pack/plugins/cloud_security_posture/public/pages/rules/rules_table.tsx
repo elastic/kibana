@@ -19,7 +19,6 @@ import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import * as TEXT from './translations';
 import type { RuleSavedObject } from './use_csp_rules';
-import type { CspUiCapabilities } from '../../common/hooks/use_ui_capabilities';
 
 type RulesTableProps = Pick<
   RulesState,
@@ -32,7 +31,7 @@ type RulesTableProps = Pick<
   selectedRuleId: string | null;
   // ForwardRef makes this ref not available in parent callbacks
   tableRef: React.RefObject<EuiBasicTable<RuleSavedObject>>;
-  canUpdate: CspUiCapabilities['canUpdate'];
+  canUpdate: boolean;
 };
 
 export const RulesTable = ({
