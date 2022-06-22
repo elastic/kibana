@@ -44,34 +44,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           after(async () => {
             await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
           });
-          it('indice list', async () => {
+          it('index list', async () => {
             await a11y.testAppSnapshot();
           });
 
-          it('index panel - summary', async () => {
-            await PageObjects.settings.clickIndexManagement();
-            await PageObjects.indexManagement.clickIndiceAt(0);
-            await a11y.testAppSnapshot();
-          });
+          describe('index panel', async () => {
+            it('index panel - summary', async () => {
+              await PageObjects.settings.clickIndexManagement();
+              await PageObjects.indexManagement.clickIndiceAt(0);
+              await a11y.testAppSnapshot();
+            });
 
-          it('index panel - settings', async () => {
-            await PageObjects.indexManagement.clickDetailPanelTabAt(0);
-            await a11y.testAppSnapshot();
-          });
+            it('index panel - settings', async () => {
+              await PageObjects.indexManagement.clickDetailPanelTabAt(0);
+              await a11y.testAppSnapshot();
+            });
 
-          it('index panel - mappings', async () => {
-            await PageObjects.indexManagement.clickDetailPanelTabAt(1);
-            await a11y.testAppSnapshot();
-          });
+            it('index panel - mappings', async () => {
+              await PageObjects.indexManagement.clickDetailPanelTabAt(1);
+              await a11y.testAppSnapshot();
+            });
 
-          it('index panel - stats', async () => {
-            await PageObjects.indexManagement.clickDetailPanelTabAt(2);
-            await a11y.testAppSnapshot();
-          });
+            it('index panel - stats', async () => {
+              await PageObjects.indexManagement.clickDetailPanelTabAt(2);
+              await a11y.testAppSnapshot();
+            });
 
-          it('index panel - edit settings', async () => {
-            await PageObjects.indexManagement.clickDetailPanelTabAt(3);
-            await a11y.testAppSnapshot();
+            it('index panel - edit settings', async () => {
+              await PageObjects.indexManagement.clickDetailPanelTabAt(3);
+              await a11y.testAppSnapshot();
+            });
           });
         });
       });
