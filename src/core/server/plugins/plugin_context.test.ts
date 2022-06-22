@@ -12,13 +12,13 @@ import { REPO_ROOT } from '@kbn/utils';
 import { fromRoot } from '@kbn/utils';
 import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   createPluginInitializerContext,
   createPluginPrebootSetupContext,
   InstanceInfo,
 } from './plugin_context';
 
-import { loggingSystemMock } from '../logging/logging_system.mock';
 import { PluginManifest, PluginType } from './types';
 import { Server } from '../server';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
