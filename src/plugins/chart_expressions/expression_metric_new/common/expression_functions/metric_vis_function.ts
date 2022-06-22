@@ -110,6 +110,16 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           }),
         ],
       ];
+
+      if (args.secondaryMetric) {
+        argsTable.push([
+          [args.secondaryMetric],
+          i18n.translate('expressionNewMetricVis.function.dimension.secondaryMetric', {
+            defaultMessage: 'Secondary Metric',
+          }),
+        ]);
+      }
+
       if (args.breakdownBy) {
         argsTable.push([
           [args.breakdownBy],
@@ -132,7 +142,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           metric: {
             subtitle: args.subtitle,
             extraText: args.extraText,
-            palette: args.palette?.params,
+            palette: args.palette?.name ?? args.palette?.params,
             progressMin: args.progressMin,
             progressMax: args.progressMax,
             progressDirection: args.progressDirection,
