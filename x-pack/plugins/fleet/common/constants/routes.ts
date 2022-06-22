@@ -54,6 +54,7 @@ export const PACKAGE_POLICY_API_ROUTES = {
   DELETE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/delete`,
   UPGRADE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/upgrade`,
   DRYRUN_PATTERN: `${PACKAGE_POLICY_API_ROOT}/upgrade/dryrun`,
+  ORPHANED_INTEGRATION_POLICIES: `${INTERNAL_ROOT}/orphaned_integration_policies`,
 };
 
 // Agent policy API routes
@@ -92,6 +93,7 @@ export const SETTINGS_API_ROUTES = {
 
 // App API routes
 export const APP_API_ROUTES = {
+  HEALTH_CHECK_PATTERN: `${API_ROOT}/health_check`,
   CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
   GENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service_tokens`,
   // deprecated since 8.0
