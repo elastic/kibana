@@ -48,10 +48,10 @@ export const runActionColumnTests = (wrapper: ReactWrapper) => {
       wrapper.find('[data-test-subj="AnalyticsTableEditQueryButton"]').first().simulate('click');
       await nextTick();
 
-      expect(http.get).toHaveBeenCalledWith(
+      expect(http.post).toHaveBeenCalledWith(
         '/internal/app_search/engines/some-engine/curations/find_or_create',
         {
-          query: { query: 'some search' },
+          body: JSON.stringify({ query: 'some search' }),
         }
       );
       expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations/cur-123456789');
@@ -62,10 +62,10 @@ export const runActionColumnTests = (wrapper: ReactWrapper) => {
       wrapper.find('[data-test-subj="AnalyticsTableEditQueryButton"]').last().simulate('click');
       await nextTick();
 
-      expect(http.get).toHaveBeenCalledWith(
+      expect(http.post).toHaveBeenCalledWith(
         '/internal/app_search/engines/some-engine/curations/find_or_create',
         {
-          query: { query: '""' },
+          body: JSON.stringify({ query: '""' }),
         }
       );
       expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations/cur-987654321');
