@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 export const OUTPUT_MESSAGES = Object.freeze({
   hasExpired: (command: string) =>
     i18n.translate('xpack.securitySolution.responseActionsList.list.item.hasExpired', {
-      defaultMessage: `{command} has expired`,
+      defaultMessage: `{command} failed: action expired`,
       values: { command },
     }),
   wasSuccessful: (command: string) =>
     i18n.translate('xpack.securitySolution.responseActionsList.list.item.wasSuccessful', {
-      defaultMessage: `{command} has completed successfully`,
+      defaultMessage: `{command} completed successfully`,
       values: { command },
     }),
   isPending: (command: string) =>
@@ -25,7 +25,7 @@ export const OUTPUT_MESSAGES = Object.freeze({
     }),
   hasFailed: (command: string) =>
     i18n.translate('xpack.securitySolution.responseActionsList.list.item.hasFailed', {
-      defaultMessage: `{command} has failed`,
+      defaultMessage: `{command} failed`,
       values: { command },
     }),
   expandSection: {
@@ -69,8 +69,8 @@ export const OUTPUT_MESSAGES = Object.freeze({
 });
 
 export const TABLE_COLUMN_NAMES = Object.freeze({
-  placedAt: i18n.translate('xpack.securitySolution.responseActionsList.list.placedAt', {
-    defaultMessage: 'Placed at',
+  time: i18n.translate('xpack.securitySolution.responseActionsList.list.time', {
+    defaultMessage: 'Time',
   }),
   command: i18n.translate('xpack.securitySolution.responseActionsList.list.command', {
     defaultMessage: 'Command/action',
@@ -83,9 +83,6 @@ export const TABLE_COLUMN_NAMES = Object.freeze({
   }),
   comments: i18n.translate('xpack.securitySolution.responseActionsList.list.comments', {
     defaultMessage: 'Comments',
-  }),
-  duration: i18n.translate('xpack.securitySolution.responseActionsList.list.duration', {
-    defaultMessage: 'Duration',
   }),
   status: i18n.translate('xpack.securitySolution.responseActionsList.list.status', {
     defaultMessage: 'Status',

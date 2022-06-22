@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import {
   CriteriaWithPagination,
   EuiAvatar,
@@ -52,416 +51,372 @@ const StyledFacetButton = styled(EuiFacetButton)`
 
 export const ResponseActionsList = memo<
   EndpointActionListRequestQuery & { hideHeader?: boolean; hideHostNameColumn?: boolean }
->(
-  ({
+>(({ agentIds, commands, userIds, hideHeader = false, hideHostNameColumn = false }) => {
+  const getTestId = useTestIdGenerator('response-actions-list');
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
+    [k: ActionDetails['id']]: React.ReactNode;
+  }>({});
+
+  const [queryParams, setQueryParams] = useState<EndpointActionListRequestQuery>({
+    page: 0,
+    pageSize: 10,
     agentIds,
     commands,
-    endDate,
-    startDate,
     userIds,
-    hideHeader = false,
-    hideHostNameColumn = false,
-  }) => {
-    const getTestId = useTestIdGenerator('response-actions-list');
+  });
 
-    const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
-      [k: ActionDetails['id']]: React.ReactNode;
-    }>({});
+  // initial fetch of list data
+  const {
+    error,
+    data: actionList,
+    isFetching,
+    isFetched,
+    refetch: reFetchEndpointActionList,
+  } = useGetEndpointActionList(queryParams, {
+    keepPreviousData: true,
+  });
 
-    const [queryParams, setQueryParams] = useState<EndpointActionListRequestQuery>({
-      page: 0,
-      pageSize: 10,
-      agentIds,
-      commands,
-      endDate,
-      startDate,
-      userIds,
-    });
+  // total actions
+  const totalItemCount = useMemo(() => actionList?.total, [actionList]);
 
-    // initial fetch of list data
-    const {
-      error,
-      data: actionList,
-      isFetching,
-      isFetched,
-      refetch: reFetchEndpointActionList,
-    } = useGetEndpointActionList(queryParams, {
-      keepPreviousData: true,
-    });
+  // expanded tray contents
+  const toggleDetails = useCallback(
+    (item: ActionDetails) => {
+      const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+      if (itemIdToExpandedRowMapValues[item.id]) {
+        delete itemIdToExpandedRowMapValues[item.id];
+      } else {
+        const {
+          startedAt,
+          completedAt,
+          isCompleted,
+          wasSuccessful,
+          isExpired,
+          command,
+          logEntries,
+        } = item;
 
-    // total actions
-    const totalItemCount = useMemo(() => actionList?.total, [actionList]);
+        // TODO: Remove this once we have
+        // ActionDetails.output, ActionDetails.parameters and ActionDetails.comments
+        const responseData = logEntries.reduce<
+          Array<LogsEndpointActionResponse['EndpointActions']['data']>
+        >((acc, curr) => {
+          if (curr.type === 'response') {
+            acc.push(curr.item.data.EndpointActions.data);
+          }
+          return acc;
+        }, []);
 
-    // expanded tray contents
-    const toggleDetails = useCallback(
-      (item: ActionDetails) => {
-        const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-        if (itemIdToExpandedRowMapValues[item.id]) {
-          delete itemIdToExpandedRowMapValues[item.id];
-        } else {
-          const {
-            startedAt,
-            completedAt,
-            isCompleted,
-            wasSuccessful,
-            isExpired,
-            command,
-            logEntries,
-          } = item;
+        const descriptionListLeft = [
+          {
+            title: OUTPUT_MESSAGES.expandSection.placedAt,
+            description: `${startedAt}`,
+          },
+          {
+            title: OUTPUT_MESSAGES.expandSection.input,
+            description: `${command}`,
+          },
+          {
+            title: OUTPUT_MESSAGES.expandSection.output,
+            description: isExpired
+              ? OUTPUT_MESSAGES.hasExpired(command)
+              : isCompleted
+              ? wasSuccessful
+                ? OUTPUT_MESSAGES.wasSuccessful(command)
+                : OUTPUT_MESSAGES.hasFailed(command)
+              : OUTPUT_MESSAGES.isPending(command),
+          },
+        ];
 
-          const responseData = logEntries.reduce<
-            Array<{
-              data: LogsEndpointActionResponse['EndpointActions']['data'];
-              error: LogsEndpointActionResponse['error'];
-            }>
-          >((acc, curr) => {
-            if (curr.type === 'response') {
-              acc.push({
-                data: curr.item.data.EndpointActions.data,
-                error: curr.item.data.error,
-              });
-            }
-            return acc;
-          }, []);
+        const descriptionListCenter = [
+          {
+            title: OUTPUT_MESSAGES.expandSection.startedAt,
+            description: `${startedAt}`,
+          },
+          {
+            title: OUTPUT_MESSAGES.expandSection.parameters,
+            description: responseData.length ? responseData[0].parameters ?? '-' : '-',
+          },
+        ];
 
-          const descriptionListLeft = [
-            {
-              title: OUTPUT_MESSAGES.expandSection.placedAt,
-              description: `${startedAt}`,
-            },
-            {
-              title: OUTPUT_MESSAGES.expandSection.input,
-              description: `${command}`,
-            },
-            {
-              title: OUTPUT_MESSAGES.expandSection.output,
-              description: isExpired
-                ? OUTPUT_MESSAGES.hasExpired(command)
-                : isCompleted
-                ? wasSuccessful
-                  ? OUTPUT_MESSAGES.wasSuccessful(command)
-                  : OUTPUT_MESSAGES.hasFailed(command)
-                : OUTPUT_MESSAGES.isPending(command),
-            },
-          ];
+        const descriptionListRight = [
+          {
+            title: OUTPUT_MESSAGES.expandSection.completedAt,
+            description: `${completedAt ?? '-'}`,
+          },
+        ];
 
-          const descriptionListCenter = [
-            {
-              title: OUTPUT_MESSAGES.expandSection.startedAt,
-              description: `${startedAt}`,
-            },
-            {
-              title: OUTPUT_MESSAGES.expandSection.parameters,
-              description: responseData.length ? responseData[0].data.parameters ?? '-' : '-',
-            },
-          ];
+        itemIdToExpandedRowMapValues[item.id] = (
+          <EuiFlexGroup>
+            {[descriptionListLeft, descriptionListCenter, descriptionListRight].map((list) => (
+              <EuiFlexItem>
+                <EuiDescriptionList listItems={list} compressed={true} />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        );
+      }
+      setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+    },
+    [itemIdToExpandedRowMap]
+  );
 
-          const descriptionListRight = [
-            {
-              title: OUTPUT_MESSAGES.expandSection.completedAt,
-              description: `${completedAt ?? '-'}`,
-            },
-          ];
-
-          itemIdToExpandedRowMapValues[item.id] = (
-            <EuiFlexGroup>
-              {[descriptionListLeft, descriptionListCenter, descriptionListRight].map((list) => (
-                <EuiFlexItem>
-                  <EuiDescriptionList listItems={list} compressed={true} />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+  // table column
+  const responseActionListColumns = useMemo(() => {
+    const columns = [
+      {
+        field: 'startedAt',
+        name: TABLE_COLUMN_NAMES.time,
+        width: '15%',
+        truncateText: true,
+        render: (startedAt: ActionDetails['startedAt']) => {
+          return (
+            <FormattedDate
+              fieldName={TABLE_COLUMN_NAMES.time}
+              value={startedAt}
+              className="eui-textTruncate"
+            />
           );
-        }
-        setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+        },
       },
-      [itemIdToExpandedRowMap]
-    );
-
-    // table column
-    const responseActionListColumns = useMemo(() => {
-      const columns = [
-        {
-          field: 'startedAt',
-          name: TABLE_COLUMN_NAMES.placedAt,
-          width: '12%',
-          truncateText: true,
-          render: (startedAt: ActionDetails['startedAt']) => {
-            return (
-              <FormattedDate
-                fieldName={TABLE_COLUMN_NAMES.placedAt}
-                value={startedAt}
-                className="eui-textTruncate"
+      {
+        field: 'command',
+        name: TABLE_COLUMN_NAMES.command,
+        width: '10%',
+        truncateText: true,
+        render: (command: ActionDetails['command']) => {
+          return (
+            <EuiToolTip content={command} anchorClassName="eui-textTruncate">
+              <FormattedMessage
+                id="xpack.securitySolution.responseActionsList.list.item.command"
+                defaultMessage="{command}"
+                values={{ command }}
               />
-            );
-          },
+            </EuiToolTip>
+          );
         },
-        {
-          field: 'command',
-          name: TABLE_COLUMN_NAMES.command,
-          width: '10%',
-          truncateText: true,
-          render: (command: ActionDetails['command']) => {
-            return (
-              <EuiToolTip content={command} anchorClassName="eui-textTruncate">
-                <EuiBadge data-test-subj={getTestId('column-command')}>
-                  <FormattedMessage
-                    id="xpack.securitySolution.responseActionsList.list.item.command"
-                    defaultMessage="{command}"
-                    values={{ command }}
-                  />
-                </EuiBadge>
+      },
+      {
+        field: 'logEntries',
+        name: TABLE_COLUMN_NAMES.user,
+        width: '14%',
+        truncateText: true,
+        render: (logEntries: ActionDetails['logEntries']) => {
+          const userId =
+            (logEntries.filter((e) => e.type === 'action')[0] as EndpointActivityLogAction).item
+              .data.user.id || '-';
+          return (
+            <StyledFacetButton
+              icon={
+                <EuiAvatar
+                  name={userId}
+                  data-test-subj={getTestId('column-user-avatar')}
+                  size="s"
+                />
+              }
+            >
+              <EuiToolTip content={userId} anchorClassName="eui-textTruncate">
+                <EuiText
+                  size="s"
+                  className="eui-textTruncate eui-fullWidth"
+                  data-test-subj={getTestId('column-user-name')}
+                >
+                  <p className="eui-displayInline eui-TextTruncate">{userId}</p>
+                </EuiText>
               </EuiToolTip>
-            );
-          },
+            </StyledFacetButton>
+          );
         },
-        {
-          field: 'logEntries',
-          name: TABLE_COLUMN_NAMES.user,
-          width: '10%',
-          truncateText: true,
-          render: (logEntries: ActionDetails['logEntries']) => {
-            const userId =
-              (logEntries.filter((e) => e.type === 'action')[0] as EndpointActivityLogAction).item
-                .data.user.id || '-';
-            return (
-              <StyledFacetButton
-                icon={
-                  <EuiAvatar
-                    name={userId}
-                    data-test-subj={getTestId('column-user-avatar')}
-                    size="s"
-                  />
+      },
+      {
+        field: 'agents',
+        name: TABLE_COLUMN_NAMES.host,
+        width: '20%',
+        truncateText: true,
+        render: (agents: ActionDetails['agents']) => {
+          // TODO: compute host names later with hostMetadata? (using agent Ids for now)
+          const hostname = agents?.[0] ?? '';
+          return (
+            <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
+              <EuiText
+                size="s"
+                className="eui-textTruncate eui-fullWidth"
+                data-test-subj={getTestId('column-hostname')}
+              >
+                <p className="eui-displayInline eui-TextTruncate">{hostname}</p>
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
+      },
+      // conditional hostname column
+      {
+        field: 'logEntries',
+        name: TABLE_COLUMN_NAMES.comments,
+        width: '30%',
+        truncateText: true,
+        render: (logEntries: ActionDetails['logEntries']) => {
+          const comment =
+            (logEntries.filter((e) => e.type === 'action')[0] as EndpointActivityLogAction).item
+              .data.EndpointActions.data.comment || '-';
+          return (
+            <EuiToolTip content={comment} anchorClassName="eui-textTruncate">
+              <EuiText
+                size="s"
+                className="eui-textTruncate eui-fullWidth"
+                data-test-subj={getTestId('column-comments')}
+              >
+                <p className="eui-displayInline eui-TextTruncate">{comment}</p>
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
+      },
+      {
+        field: 'isCompleted',
+        name: TABLE_COLUMN_NAMES.status,
+        width: '10%',
+        render: (isCompleted: ActionDetails['isCompleted'], data: ActionDetails) => {
+          const status = data.isExpired
+            ? UX_MESSAGES.badge.failed
+            : isCompleted
+            ? data.wasSuccessful
+              ? UX_MESSAGES.badge.completed
+              : UX_MESSAGES.badge.failed
+            : UX_MESSAGES.badge.pending;
+
+          return (
+            <EuiToolTip content={status} anchorClassName="eui-textTruncate">
+              <EuiBadge
+                data-test-subj={getTestId('column-status')}
+                color={
+                  data.isExpired
+                    ? 'danger'
+                    : isCompleted
+                    ? data.wasSuccessful
+                      ? 'success'
+                      : 'danger'
+                    : 'warning'
                 }
               >
-                <EuiToolTip content={userId} anchorClassName="eui-textTruncate">
-                  <EuiText
-                    size="s"
-                    className="eui-textTruncate eui-fullWidth"
-                    data-test-subj={getTestId('column-user-name')}
-                  >
-                    <p className="eui-displayInline eui-TextTruncate">{userId}</p>
-                  </EuiText>
-                </EuiToolTip>
-              </StyledFacetButton>
-            );
-          },
+                <FormattedMessage
+                  id="xpack.securitySolution.responseActionsList.list.item.status"
+                  defaultMessage="{status}"
+                  values={{ status }}
+                />
+              </EuiBadge>
+            </EuiToolTip>
+          );
         },
-        {
-          field: 'agents',
-          name: TABLE_COLUMN_NAMES.host,
-          width: '20%',
-          truncateText: true,
-          render: (agents: ActionDetails['agents']) => {
-            // TODO: compute host names later with hostMetadata? (using agent Ids for now)
-            const hostname = agents?.[0] ?? '';
-            return (
-              <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
-                <EuiText
-                  size="s"
-                  className="eui-textTruncate eui-fullWidth"
-                  data-test-subj={getTestId('column-hostname')}
-                >
-                  <p className="eui-displayInline eui-TextTruncate">{hostname}</p>
-                </EuiText>
-              </EuiToolTip>
-            );
-          },
-        },
-        // conditional hostname column
-        {
-          field: 'logEntries',
-          name: TABLE_COLUMN_NAMES.comments,
-          width: '30%',
-          truncateText: true,
-          render: (logEntries: ActionDetails['logEntries']) => {
-            const comment =
-              (logEntries.filter((e) => e.type === 'action')[0] as EndpointActivityLogAction).item
-                .data.EndpointActions.data.comment || '-';
-            return (
-              <EuiToolTip content={comment} anchorClassName="eui-textTruncate">
-                <EuiText
-                  size="s"
-                  className="eui-textTruncate eui-fullWidth"
-                  data-test-subj={getTestId('column-comments')}
-                >
-                  <p className="eui-displayInline eui-TextTruncate">{comment}</p>
-                </EuiText>
-              </EuiToolTip>
-            );
-          },
-        },
-        {
-          field: 'completedAt',
-          name: TABLE_COLUMN_NAMES.duration,
-          truncateText: true,
-          width: '10%',
-          render: (completedAt: ActionDetails['completedAt'], data: ActionDetails) => {
-            let duration: string = '-';
-            if (completedAt) {
-              duration = moment
-                .duration(moment(completedAt).diff(moment(data.startedAt)))
-                .humanize();
-            }
-            return (
-              <EuiToolTip content={duration} anchorClassName="eui-textTruncate">
-                <EuiText
-                  size="s"
-                  className="eui-textTruncate eui-fullWidth"
-                  data-test-subj={getTestId('column-duration')}
-                >
-                  <p className="eui-displayInline eui-TextTruncate">{duration}</p>
-                </EuiText>
-              </EuiToolTip>
-            );
-          },
-        },
-        {
-          field: 'isCompleted',
-          name: TABLE_COLUMN_NAMES.status,
-          width: '10%',
-          render: (isCompleted: ActionDetails['isCompleted'], data: ActionDetails) => {
-            const status = data.isExpired
-              ? UX_MESSAGES.badge.failed
-              : isCompleted
-              ? data.wasSuccessful
-                ? UX_MESSAGES.badge.completed
-                : UX_MESSAGES.badge.failed
-              : UX_MESSAGES.badge.pending;
-
-            return (
-              <EuiToolTip content={status} anchorClassName="eui-textTruncate">
-                <EuiBadge
-                  data-test-subj={getTestId('column-status')}
-                  color={
-                    data.isExpired
-                      ? 'danger'
-                      : isCompleted
-                      ? data.wasSuccessful
-                        ? 'success'
-                        : 'danger'
-                      : 'warning'
-                  }
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.responseActionsList.list.item.status"
-                    defaultMessage="{status}"
-                    values={{ status }}
-                  />
-                </EuiBadge>
-              </EuiToolTip>
-            );
-          },
-        },
-        {
-          field: '',
-          align: RIGHT_ALIGNMENT as HorizontalAlignment,
-          width: '40px',
-          isExpander: true,
-          name: (
-            <EuiScreenReaderOnly>
-              <span>{UX_MESSAGES.screenReaderExpand}</span>
-            </EuiScreenReaderOnly>
-          ),
-          render: (data: ActionDetails) => {
-            return (
-              <EuiButtonIcon
-                onClick={() => toggleDetails(data)}
-                aria-label={itemIdToExpandedRowMap[data.id] ? 'Collapse' : 'Expand'}
-                iconType={itemIdToExpandedRowMap[data.id] ? 'arrowUp' : 'arrowDown'}
-              />
-            );
-          },
-        },
-      ];
-      if (hideHostNameColumn) {
-        columns.splice(3, 1);
-      }
-      return columns;
-    }, [getTestId, hideHostNameColumn, itemIdToExpandedRowMap, toggleDetails]);
-
-    // table pagination
-    const tablePagination = useMemo(() => {
-      return {
-        pageIndex: queryParams.page || 0,
-        pageSize: queryParams.pageSize || 10,
-        totalItemCount: totalItemCount || 0,
-        pageSizeOptions: MANAGEMENT_PAGE_SIZE_OPTIONS as number[],
-      };
-    }, [queryParams, totalItemCount]);
-
-    // handle onChange
-    const handleTableOnChange = useCallback(
-      ({ page: _page }: CriteriaWithPagination<ActionDetails>) => {
-        const { index, size } = _page;
-        setQueryParams((prevState) => ({
-          ...prevState,
-          page: index,
-          pageSize: size,
-        }));
-        reFetchEndpointActionList();
       },
-      [reFetchEndpointActionList, setQueryParams]
-    );
-
-    return (
-      <AdministrationListPage
-        data-test-subj="responseActionsPage"
-        title={hideHeader ? undefined : UX_MESSAGES.pageTitle}
-      >
-        {isFetched && !totalItemCount ? (
-          <ManagementEmptyStateWrapper>
-            <EuiFlexItem data-test-subj={getTestId('empty-prompt')}>
-              <EuiEmptyPrompt
-                iconType="editorUnorderedList"
-                titleSize="s"
-                title={
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.securitySolution.responseActionsList.empty.title"
-                      defaultMessage="No response actions log"
-                    />
-                  </h2>
-                }
-                body={
-                  <p>
-                    <FormattedMessage
-                      id="xpack.securitySolution.responseActionsList.empty.body"
-                      defaultMessage="Try a different set of filters"
-                    />
-                  </p>
-                }
-                data-test-subj="responseActions-empty"
-              />
-            </EuiFlexItem>
-          </ManagementEmptyStateWrapper>
-        ) : (
-          <>
-            <EuiText color="subdued" size="xs" data-test-subj={getTestId('endpointListTableTotal')}>
-              <FormattedMessage
-                id="xpack.securitySolution.responseActionsList.list.totalCount"
-                defaultMessage="Showing {totalItemCount, plural, one {# response action} other {# response actions}}"
-                values={{ totalItemCount }}
-              />
-            </EuiText>
-            <EuiHorizontalRule margin="xs" />
-            <EuiBasicTable
-              data-test-subj={getTestId('table-view')}
-              items={actionList?.data || []}
-              columns={responseActionListColumns}
-              itemId="id"
-              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-              isExpandable={true}
-              pagination={tablePagination}
-              onChange={handleTableOnChange}
-              loading={isFetching}
-              error={error !== null ? UX_MESSAGES.fetchError : undefined}
+      {
+        field: '',
+        align: RIGHT_ALIGNMENT as HorizontalAlignment,
+        width: '40px',
+        isExpander: true,
+        name: (
+          <EuiScreenReaderOnly>
+            <span>{UX_MESSAGES.screenReaderExpand}</span>
+          </EuiScreenReaderOnly>
+        ),
+        render: (data: ActionDetails) => {
+          return (
+            <EuiButtonIcon
+              onClick={() => toggleDetails(data)}
+              aria-label={itemIdToExpandedRowMap[data.id] ? 'Collapse' : 'Expand'}
+              iconType={itemIdToExpandedRowMap[data.id] ? 'arrowUp' : 'arrowDown'}
             />
-          </>
-        )}
-      </AdministrationListPage>
-    );
-  }
-);
+          );
+        },
+      },
+    ];
+    if (hideHostNameColumn) {
+      columns.splice(3, 1);
+    }
+    return columns;
+  }, [getTestId, hideHostNameColumn, itemIdToExpandedRowMap, toggleDetails]);
+
+  // table pagination
+  const tablePagination = useMemo(() => {
+    return {
+      pageIndex: queryParams.page || 0,
+      pageSize: queryParams.pageSize || 10,
+      totalItemCount: totalItemCount || 0,
+      pageSizeOptions: MANAGEMENT_PAGE_SIZE_OPTIONS as number[],
+    };
+  }, [queryParams, totalItemCount]);
+
+  // handle onChange
+  const handleTableOnChange = useCallback(
+    ({ page: _page }: CriteriaWithPagination<ActionDetails>) => {
+      const { index, size } = _page;
+      setQueryParams((prevState) => ({
+        ...prevState,
+        page: index,
+        pageSize: size,
+      }));
+      reFetchEndpointActionList();
+    },
+    [reFetchEndpointActionList, setQueryParams]
+  );
+
+  return (
+    <AdministrationListPage
+      data-test-subj="responseActionsPage"
+      title={hideHeader ? undefined : UX_MESSAGES.pageTitle}
+    >
+      {isFetched && !totalItemCount ? (
+        <ManagementEmptyStateWrapper>
+          <EuiFlexItem data-test-subj={getTestId('empty-prompt')}>
+            <EuiEmptyPrompt
+              iconType="editorUnorderedList"
+              titleSize="s"
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="xpack.securitySolution.responseActionsList.empty.title"
+                    defaultMessage="No response actions log"
+                  />
+                </h2>
+              }
+              body={
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.responseActionsList.empty.body"
+                    defaultMessage="Try a different set of filters"
+                  />
+                </p>
+              }
+              data-test-subj="responseActions-empty"
+            />
+          </EuiFlexItem>
+        </ManagementEmptyStateWrapper>
+      ) : (
+        <>
+          <EuiText color="subdued" size="xs" data-test-subj={getTestId('endpointListTableTotal')}>
+            <FormattedMessage
+              id="xpack.securitySolution.responseActionsList.list.totalCount"
+              defaultMessage="Showing {totalItemCount, plural, one {# response action} other {# response actions}}"
+              values={{ totalItemCount }}
+            />
+          </EuiText>
+          <EuiHorizontalRule margin="xs" />
+          <EuiBasicTable
+            data-test-subj={getTestId('table-view')}
+            items={actionList?.data || []}
+            columns={responseActionListColumns}
+            itemId="id"
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            isExpandable={true}
+            pagination={tablePagination}
+            onChange={handleTableOnChange}
+            loading={isFetching}
+            error={error !== null ? UX_MESSAGES.fetchError : undefined}
+          />
+        </>
+      )}
+    </AdministrationListPage>
+  );
+});
 
 ResponseActionsList.displayName = 'ResponseActionsList';
