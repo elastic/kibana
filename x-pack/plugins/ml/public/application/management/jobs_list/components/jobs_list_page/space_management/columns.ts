@@ -61,35 +61,6 @@ const adColumns = [
   },
 ];
 
-// const filters: EuiSearchBarProps['filters'] = [
-//   {
-//     type: 'field_value_selection',
-//     field: 'job_type',
-//     name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
-//       defaultMessage: 'Type',
-//     }),
-//     multiSelect: 'or',
-//     options: Object.values(ANALYSIS_CONFIG_TYPE).map((val) => ({
-//       value: val,
-//       name: val,
-//       view: getJobTypeBadge(val),
-//     })),
-//   },
-//   {
-//     type: 'field_value_selection',
-//     field: 'state',
-//     name: i18n.translate('xpack.ml.dataframe.analyticsList.statusFilter', {
-//       defaultMessage: 'Status',
-//     }),
-//     multiSelect: 'or',
-//     options: Object.values(DATA_FRAME_TASK_STATE).map((val) => ({
-//       value: val,
-//       name: val,
-//       view: getTaskStateBadge(val),
-//     })),
-//   },
-// ];
-
 const dfaColumns = [
   {
     field: 'id',
@@ -129,7 +100,7 @@ const dfaColumns = [
     'data-test-subj': 'mlAnalyticsSelectorColumnSourceIndex',
   },
   {
-    field: 'type',
+    field: 'job_type',
     name: i18n.translate('xpack.ml.analyticsSelector.sourceIndex', {
       defaultMessage: 'Type',
     }),
@@ -138,7 +109,7 @@ const dfaColumns = [
     'data-test-subj': 'mlAnalyticsSelectorColumnSourceIndex',
   },
   {
-    field: 'status',
+    field: 'state',
     name: i18n.translate('xpack.ml.analyticsSelector.sourceIndex', {
       defaultMessage: 'Status',
     }),

@@ -23,6 +23,7 @@ import type { AnomalyDetectionManagementItems } from '../../../../../../../commo
 import { managementApiProvider } from '../../../../../services/ml_api_service/management';
 import { getColumns } from './columns';
 import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
+import { getFilters } from './filters';
 
 interface Props {
   isMlEnabledInSpace: boolean;
@@ -40,7 +41,8 @@ export const SpaceManagement: FC<Props> = ({
   const { getList } = managementApiProvider(httpService);
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
   const [jobs, setJobs] = useState<AnomalyDetectionManagementItems[]>();
-  const [columns, setColumns] = useState<any[]>([]);
+  const [columns, setColumns] = useState<any[]>([]); // TODO change any !!!!!!!!!!!!!!!!!!!!!!!!!!
+  const [filters, setFilters] = useState<any[] | undefined>([]); // TODO change any !!!!!!!!!!!!!!!!!!!!!!!!!!
   const [isLoading, setIsLoading] = useState(false);
 
   const refresh = useCallback(() => {
@@ -49,10 +51,11 @@ export const SpaceManagement: FC<Props> = ({
       .then((jobList) => {
         setJobs(jobList);
         setIsLoading(false);
+        setFilters(getFilters(currentTabId, jobList));
       })
       .catch(() => {
-        // console.log('error error');
         setJobs([]);
+        setFilters([]);
         setIsLoading(false);
       });
   }, [getList, currentTabId]);
@@ -92,15 +95,6 @@ export const SpaceManagement: FC<Props> = ({
     ];
   }, [currentTabId, spacesApi, refresh]);
 
-  // const search: EuiSearchBarProps = {
-  //   query: searchQueryText,
-  //   onChange: handleSearchOnChange,
-  //   box: {
-  //     incremental: true,
-  //   },
-  //   filters,
-  // };
-
   const getTable = useCallback(() => {
     return (
       <>
@@ -116,6 +110,12 @@ export const SpaceManagement: FC<Props> = ({
             <EuiInMemoryTable
               items={jobs}
               columns={columns}
+              search={{
+                box: {
+                  incremental: true,
+                },
+                filters,
+              }}
               pagination={{
                 pageSizeOptions: [10, 25, 50],
               }}
@@ -130,7 +130,7 @@ export const SpaceManagement: FC<Props> = ({
         )}
       </>
     );
-  }, [jobs, columns, isLoading]);
+  }, [jobs, columns, isLoading, filters]);
 
   const tabs = [
     {
