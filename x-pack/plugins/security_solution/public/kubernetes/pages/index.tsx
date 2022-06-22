@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';
@@ -21,6 +21,9 @@ import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
+import { SessionsView } from '../../common/components/sessions_viewer';
+import { TimelineId } from '../../../common/types/timeline';
+import { kubernetesSessionsHeaders } from './constants';
 
 export const KubernetesContainer = React.memo(() => {
   const { kubernetesSecurity, uiSettings } = useKibana().services;
@@ -60,6 +63,21 @@ export const KubernetesContainer = React.memo(() => {
     endDate: to,
   });
 
+  const renderSessionsView = useCallback(
+    (sessionsFilterQuery: string | undefined) => (
+      <SessionsView
+        timelineId={TimelineId.kubernetesPageSessions}
+        endDate={to}
+        pageFilters={[]}
+        startDate={from}
+        filterQuery={sessionsFilterQuery}
+        columns={kubernetesSessionsHeaders}
+        defaultColumns={kubernetesSessionsHeaders}
+      />
+    ),
+    [from, to]
+  );
+
   return (
     <SecuritySolutionPageWrapper noPadding>
       {kubernetesSecurity.getKubernetesPage({
@@ -74,6 +92,7 @@ export const KubernetesContainer = React.memo(() => {
           startDate: from,
           endDate: to,
         },
+        renderSessionsView,
       })}
       <SpyRoute pageName={SecurityPageName.kubernetes} />
     </SecuritySolutionPageWrapper>

@@ -1476,13 +1476,13 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.2.0-canary.2":
-  version "8.2.0-canary.2"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.2.0-canary.2.tgz#2513926cdbfe7c070e1fa6926f7829171b27cdba"
-  integrity sha512-Ki2lQ3/UlOnBaf5EjNw0WmCdXiW+J020aYtdVnIuCNhPSLoNPKoM7P+MlggdfeRnENvINlStrMy4bkYF/h6Vbw==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.3.0-canary.1":
+  version "8.3.0-canary.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.3.0-canary.1.tgz#31dc18f724433c4135ed85fde5fd018393134552"
+  integrity sha512-CSNP4vTL/90VRD3MbvfBggy4VBxEgNmlHQf7mlWiPRTxo24t68PqNS+TnsfzO7fbY/nOALoX9hE8VlxRcMo0iA==
   dependencies:
-    "@elastic/transport" "^8.0.2"
-    tslib "^2.3.0"
+    "@elastic/transport" "^8.2.0"
+    tslib "^2.4.0"
 
 "@elastic/ems-client@8.3.3":
   version "8.3.3"
@@ -1504,10 +1504,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@58.0.0":
-  version "58.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-58.0.0.tgz#12aad69385edbd56253a70108ed34f8ef572a980"
-  integrity sha512-LE6yzfu2PfiPVcgyiTURm1ypYtLiVX8YlAgypqN3f6QB89Q1UBeb2njeqyBubzpzOpC/OU1a98CgWy2YWl+0mg==
+"@elastic/eui@59.0.1":
+  version "59.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-59.0.1.tgz#54bf17c058292a9045b99b2ad30c88f52b98fa20"
+  integrity sha512-oaYyT4jK4Nyftp/w/VTF+GxZ3rUpbEfLyxkN240oioAcQC1gnn/v791SkhCNqm72PDAtv/buqsgWd4oAnqdC5g==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -1661,17 +1661,17 @@
     ts-node "^10.5.0"
     typescript "^4.5.5"
 
-"@elastic/transport@^8.0.2":
-  version "8.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.0.2.tgz#715f06c7739516867508108df30c33973ca8e81c"
-  integrity sha512-OlDz3WO3pKE9vSxW4wV/mn7rYCtBmSsDwxr64h/S1Uc/zrIBXb0iUsRMSkiybXugXhjwyjqG2n1Wc7jjFxrskQ==
+"@elastic/transport@^8.2.0":
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.2.0.tgz#f292cb79c918a36268dd853431e41f13544814ad"
+  integrity sha512-H/HmefMNQfLiBSVTmNExu2lYs5EzwipUnQB53WLr17RCTDaQX0oOLHcWpDsbKQSRhDAMPPzp5YZsZMJxuxPh7A==
   dependencies:
-    debug "^4.3.2"
-    hpagent "^0.1.2"
+    debug "^4.3.4"
+    hpagent "^1.0.0"
     ms "^2.1.3"
     secure-json-parse "^2.4.0"
-    tslib "^2.3.0"
-    undici "^4.14.1"
+    tslib "^2.4.0"
+    undici "^5.1.1"
 
 "@emotion/babel-plugin-jsx-pragmatic@^0.1.5":
   version "0.1.5"
@@ -3027,6 +3027,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-analytics-server-internal@link:bazel-bin/packages/core/analytics/core-analytics-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-analytics-server-mocks@link:bazel-bin/packages/core/analytics/core-analytics-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-analytics-server@link:bazel-bin/packages/core/analytics/core-analytics-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal":
   version "0.0.0"
   uid ""
@@ -3051,6 +3063,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-config-server-internal@link:bazel-bin/packages/core/config/core-config-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-config-server-mocks@link:bazel-bin/packages/core/config/core-config-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-doc-links-browser-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-internal":
   version "0.0.0"
   uid ""
@@ -3072,6 +3092,18 @@
   uid ""
 
 "@kbn/core-doc-links-server@link:bazel-bin/packages/core/doc-links/core-doc-links-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-i18n-browser-mocks@link:bazel-bin/packages/core/i18n/core-i18n-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-i18n-browser@link:bazel-bin/packages/core/i18n/core-i18n-browser":
   version "0.0.0"
   uid ""
 
@@ -3348,6 +3380,14 @@
   uid ""
 
 "@kbn/shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-button-toolbar@link:bazel-bin/packages/shared-ux/button_toolbar":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data":
   version "0.0.0"
   uid ""
 
@@ -6398,6 +6438,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-analytics-server-internal@link:bazel-bin/packages/core/analytics/core-analytics-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-analytics-server-mocks@link:bazel-bin/packages/core/analytics/core-analytics-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-analytics-server@link:bazel-bin/packages/core/analytics/core-analytics-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6434,6 +6486,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-config-server-internal@link:bazel-bin/packages/core/config/core-config-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-config-server-mocks@link:bazel-bin/packages/core/config/core-config-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-doc-links-browser-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6455,6 +6515,18 @@
   uid ""
 
 "@types/kbn__core-doc-links-server@link:bazel-bin/packages/core/doc-links/core-doc-links-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-i18n-browser-mocks@link:bazel-bin/packages/core/i18n/core-i18n-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-i18n-browser@link:bazel-bin/packages/core/i18n/core-i18n-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6715,6 +6787,14 @@
   uid ""
 
 "@types/kbn__shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-button-toolbar@link:bazel-bin/packages/shared-ux/button_toolbar/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7025,10 +7105,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@12.20.24", "@types/node@16.11.7", "@types/node@>= 8", "@types/node@>=8.9.0", "@types/node@^10.1.0", "@types/node@^14.0.10", "@types/node@^14.14.31":
-  version "16.11.7"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.7.tgz#36820945061326978c42a01e56b61cd223dfdc42"
-  integrity sha512-QB5D2sqfSjCmTuWcBWyJ+/44bcjO7VbjSbOE0ucoVbAsSNQc4Lt6QkgkVXkTDwkL4z/beecZNDvVX15D4P8Jbw==
+"@types/node@*", "@types/node@12.20.24", "@types/node@16.11.41", "@types/node@>= 8", "@types/node@>=8.9.0", "@types/node@^10.1.0", "@types/node@^14.0.10", "@types/node@^14.14.31":
+  version "16.11.41"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.41.tgz#88eb485b1bfdb4c224d878b7832239536aa2f813"
+  integrity sha512-mqoYK2TnVjdkGk8qXAVGc/x9nSaTpSrFaGFm43BUH3IdoBV0nta6hYaGmdOvIMlbHJbUEVen3gvwpwovAZKNdQ==
 
 "@types/nodemailer@^6.4.0":
   version "6.4.0"
@@ -12522,6 +12602,13 @@ debug@4.3.2:
   dependencies:
     ms "2.1.2"
 
+debug@^4.3.4:
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.4.tgz#1319f6579357f2338d3337d2cdd4914bb5dcc865"
+  integrity sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==
+  dependencies:
+    ms "2.1.2"
+
 debuglog@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/debuglog/-/debuglog-1.0.1.tgz#aa24ffb9ac3df9a2351837cfb2d279360cd78492"
@@ -16574,10 +16661,10 @@ hpack.js@^2.1.6:
     readable-stream "^2.0.1"
     wbuf "^1.1.0"
 
-hpagent@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/hpagent/-/hpagent-0.1.2.tgz#cab39c66d4df2d4377dbd212295d878deb9bdaa9"
-  integrity sha512-ePqFXHtSQWAFXYmj+JtOTHr84iNrII4/QRlAAPPE+zqnKy4xJo7Ie1Y4kC7AdB+LxLxSTTzBMASsEcy0q8YyvQ==
+hpagent@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/hpagent/-/hpagent-1.0.0.tgz#c68f68b3df845687dbdc4896546713ce09cc6bee"
+  integrity sha512-SCleE2Uc1bM752ymxg8QXYGW0TWtAV4ZW3TqH1aOnyi6T6YW2xadCcclm5qeVjvMvfQ2RKNtZxO7uVb9CTPt1A==
 
 hsl-regex@^1.0.0:
   version "1.0.0"
@@ -28432,7 +28519,7 @@ tsd@^0.20.0:
     path-exists "^4.0.0"
     read-pkg-up "^7.0.0"
 
-tslib@2.3.1, tslib@^2.0.3, tslib@^2.1.0, tslib@^2.3.0, tslib@^2.3.1, tslib@~2.3.1:
+tslib@2.3.1, tslib@^2.0.3, tslib@^2.1.0, tslib@^2.3.1, tslib@~2.3.1:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.1.tgz#e8a335add5ceae51aa261d32a490158ef042ef01"
   integrity sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==
@@ -28446,6 +28533,11 @@ tslib@^2.0.0, tslib@^2.0.1, tslib@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.2.0.tgz#fb2c475977e35e241311ede2693cee1ec6698f5c"
   integrity sha512-gS9GVHRU+RGn5KQM2rllAlR3dU6m7AcpJKdtH8gFvQiC4Otgk98XnmMU+nZenHt/+VhnBPWwgrJsyrdcw6i23w==
+
+tslib@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
+  integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
 
 tslib@~2.1.0:
   version "2.1.0"
@@ -28711,10 +28803,10 @@ undertaker@^1.2.1:
     object.reduce "^1.0.0"
     undertaker-registry "^1.0.0"
 
-undici@^4.14.1:
-  version "4.14.1"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-4.14.1.tgz#7633b143a8a10d6d63335e00511d071e8d52a1d9"
-  integrity sha512-WJ+g+XqiZcATcBaUeluCajqy4pEDcQfK1vy+Fo+bC4/mqXI9IIQD/XWHLS70fkGUT6P52Drm7IFslO651OdLPQ==
+undici@^5.1.1:
+  version "5.5.1"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.5.1.tgz#baaf25844a99eaa0b22e1ef8d205bffe587c8f43"
+  integrity sha512-MEvryPLf18HvlCbLSzCW0U00IMftKGI5udnjrQbC5D4P0Hodwffhv+iGfWuJwg16Y/TK11ZFK8i+BPVW2z/eAw==
 
 unfetch@^4.2.0:
   version "4.2.0"
