@@ -17,6 +17,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { AllRulesTabs } from './rules_table_toolbar';
+import { BulkAction } from '../../../../../../common/detection_engine/schemas/common/schemas';
 import { Loader } from '../../../../../common/components/loader';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
@@ -167,7 +168,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         : { ids: selectedRuleIds },
       editAction: bulkActionEdit,
       enabled: isBulkEditConfirmationVisible,
-      action: bulkAction,
+      action: bulkAction === BulkAction.export ? undefined : bulkAction,
     });
 
     const paginationMemo = useMemo(

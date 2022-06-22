@@ -36,15 +36,15 @@ export interface DryRunResult {
 
 /**
  * helper utility that transforms raw BulkActionResponse response into more usable format
- * @param {BulkActionResponse | undefined} result - raw bulk_actions API response
- * @returns {DryRunResult}
+ * @param response - raw bulk_actions API response ({@link BulkActionResponse})
+ * @returns dry run result ({@link DryRunResult})
  */
-const processDryRunResult = (result: BulkActionResponse | undefined): DryRunResult => {
+const processDryRunResult = (response: BulkActionResponse | undefined): DryRunResult => {
   const processed = {
-    succeededRulesCount: result?.attributes.summary.succeeded,
-    failedRulesCount: result?.attributes.summary.failed,
+    succeededRulesCount: response?.attributes.summary.succeeded,
+    failedRulesCount: response?.attributes.summary.failed,
     ruleErrors:
-      result?.attributes.errors?.map(({ message, err_code: errorCode, rules }) => ({
+      response?.attributes.errors?.map(({ message, err_code: errorCode, rules }) => ({
         message,
         errorCode,
         ruleIds: rules.map(({ id }) => id),
@@ -55,7 +55,7 @@ const processDryRunResult = (result: BulkActionResponse | undefined): DryRunResu
 };
 
 interface UseBulkActionsDryRunProps {
-  action?: BulkAction;
+  action?: Exclude<BulkAction, BulkAction.export>;
   searchParams: { query?: string } | { ids?: string[] };
   enabled: boolean;
   editAction?: BulkActionEditType;
@@ -77,18 +77,6 @@ export const useBulkActionsDryRun: UseBulkActionsDryRun = ({
     async () => {
       if (!action) {
         return undefined;
-      }
-
-      if (action === BulkAction.export) {
-        return {
-          success: true,
-          rules_count: 0,
-          attributes: {
-            summary: { succeeded: 0, total: 0, failed: 0 },
-            results: { updated: [], created: [], deleted: [] },
-            errors: [],
-          },
-        };
       }
 
       let result: BulkActionResponse;

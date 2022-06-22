@@ -50,6 +50,8 @@ import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { legacyMigrate } from '../../rules/utils';
+import { DryRunError, throwDryRunError } from '../../rules/bulk_edit/dry_run';
+
 import { RuleParams } from '../../schemas/rule_schemas';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
@@ -116,11 +118,13 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
 const buildBulkResponse = (
   response: KibanaResponseFactory,
   {
+    isDryRun = false,
     errors = [],
     updated = [],
     created = [],
     deleted = [],
   }: {
+    isDryRun?: boolean;
     errors?: BulkActionError[];
     updated?: RuleAlertType[];
     created?: RuleAlertType[];
@@ -135,11 +139,19 @@ const buildBulkResponse = (
     total: numSucceeded + numFailed,
   };
 
-  const results = {
-    updated: updated.map((rule) => internalRuleToAPIResponse(rule)),
-    created: created.map((rule) => internalRuleToAPIResponse(rule)),
-    deleted: deleted.map((rule) => internalRuleToAPIResponse(rule)),
-  };
+  // if response is for dry_run, empty lists of rule returned, as rules are not actually updated and stored within ES
+  // thus, it's impossible ti return reliably updated/copied/...etc rules
+  const results = isDryRun
+    ? {
+        updated: [],
+        created: [],
+        deleted: [],
+      }
+    : {
+        updated: updated.map((rule) => internalRuleToAPIResponse(rule)),
+        created: created.map((rule) => internalRuleToAPIResponse(rule)),
+        deleted: deleted.map((rule) => internalRuleToAPIResponse(rule)),
+      };
 
   if (numFailed > 0) {
     return response.custom({
@@ -249,26 +261,6 @@ export const migrateRuleActions = async ({
   return migratedRule;
 };
 
-class DryRunError extends Error {
-  public readonly errorCode: BULK_ACTIONS_DRY_RUN_ERR_CODE;
-  public readonly statusCode: number;
-
-  constructor(message: string, errorCode: BULK_ACTIONS_DRY_RUN_ERR_CODE, statusCode?: number) {
-    super(message);
-    this.name = 'BulkActionDryRunError';
-    this.errorCode = errorCode;
-    this.statusCode = statusCode ?? 500;
-  }
-}
-
-const throwDryRunError = async (executor: () => void, errorCode: BULK_ACTIONS_DRY_RUN_ERR_CODE) => {
-  try {
-    await executor();
-  } catch (e) {
-    throw new DryRunError(e.message, errorCode, e.statusCode);
-  }
-};
-
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
@@ -309,6 +301,15 @@ export const performBulkActionRoute = (
       }
 
       const isDryRun = request.query.dry_run === 'true';
+
+      // dry run is not supported for export, as it doesn't change ES state and has different response format(exported JSON file)
+      if (isDryRun && body.action === BulkAction.export) {
+        return siemResponse.error({
+          body: `Export action doesn't support dry_run mode`,
+          statusCode: 400,
+        });
+      }
+
       const abortController = new AbortController();
 
       // subscribing to completed$, because it handles both cases when request was completed and aborted.
@@ -404,10 +405,7 @@ export const performBulkActionRoute = (
                   if (!rule.enabled) {
                     await throwDryRunMlAuth(rule.params.type);
                   }
-                  return {
-                    ...rule,
-                    enabled: true,
-                  };
+                  return rule;
                 }
 
                 const migratedRule = await migrateRuleActions({
@@ -441,10 +439,7 @@ export const performBulkActionRoute = (
                   if (rule.enabled) {
                     await throwDryRunMlAuth(rule.params.type);
                   }
-                  return {
-                    ...rule,
-                    enabled: false,
-                  };
+                  return rule;
                 }
 
                 const migratedRule = await migrateRuleActions({
@@ -469,6 +464,7 @@ export const performBulkActionRoute = (
               .map(({ result }) => result)
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
+
           case BulkAction.delete:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
@@ -477,6 +473,7 @@ export const performBulkActionRoute = (
                 if (isDryRun) {
                   return null;
                 }
+
                 const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
@@ -497,6 +494,7 @@ export const performBulkActionRoute = (
               .map(({ item }) => item)
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
+
           case BulkAction.duplicate:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
@@ -527,6 +525,7 @@ export const performBulkActionRoute = (
               .map(({ result }) => result)
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
+
           case BulkAction.export:
             const exported = await getExportByObjectIds(
               rulesClient,
@@ -545,6 +544,7 @@ export const performBulkActionRoute = (
               },
               body: responseBody,
             });
+
           // will be processed only when isDryRun === true
           case BulkAction.edit:
             bulkActionOutcome = await initPromisePool({
@@ -553,6 +553,7 @@ export const performBulkActionRoute = (
               executor: async (rule) => {
                 await throwDryRunMlAuth(rule.params.type);
 
+                // if rule is immutable, it can't be edited
                 await throwDryRunError(
                   () => invariant(rule.params.immutable === false, "Elastic rule can't be edited"),
                   BULK_ACTIONS_DRY_RUN_ERR_CODE.IMMUTABLE
