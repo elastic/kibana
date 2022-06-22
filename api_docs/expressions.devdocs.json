@@ -240,6 +240,21 @@
                 "path": "src/plugins/expressions/common/execution/execution.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "Logger",
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -965,7 +980,9 @@
             "label": "createWithDefaults",
             "description": [],
             "signature": [
-              "<Ctx extends Record<string, unknown> = Record<string, unknown>>(state?: ",
+              "<Ctx extends Record<string, unknown> = Record<string, unknown>>(logger?: ",
+              "Logger",
+              " | undefined, state?: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -989,6 +1006,21 @@
               {
                 "parentPluginId": "expressions",
                 "id": "def-public.Executor.createWithDefaults.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "Logger",
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Executor.createWithDefaults.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -1100,26 +1132,6 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-public.Executor.parent",
-            "type": "Object",
-            "tags": [],
-            "label": "parent",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Executor",
-                "text": "Executor"
-              },
-              "<Context> | undefined"
-            ],
-            "path": "src/plugins/expressions/common/executor/executor.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressions",
             "id": "def-public.Executor.Unnamed",
             "type": "Function",
             "tags": [],
@@ -1134,6 +1146,21 @@
               {
                 "parentPluginId": "expressions",
                 "id": "def-public.Executor.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "Logger",
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Executor.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -1917,29 +1944,6 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.Executor.fork",
-            "type": "Function",
-            "tags": [],
-            "label": "fork",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Executor",
-                "text": "Executor"
-              },
-              "<Context>"
-            ],
-            "path": "src/plugins/expressions/common/executor/executor.ts",
-            "deprecated": false,
-            "children": [],
             "returnComment": []
           }
         ],
@@ -3975,7 +3979,7 @@
                 "id": "def-public.ExpressionsService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    executor = Executor.createWithDefaults(),\n    renderers = new ExpressionRendererRegistry(),\n  }",
+                "label": "{\n    logger,\n    executor = Executor.createWithDefaults(logger),\n    renderers = new ExpressionRendererRegistry(),\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -12673,6 +12677,21 @@
                 "path": "src/plugins/expressions/common/execution/execution.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "Logger",
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -13189,7 +13208,9 @@
             "label": "createWithDefaults",
             "description": [],
             "signature": [
-              "<Ctx extends Record<string, unknown> = Record<string, unknown>>(state?: ",
+              "<Ctx extends Record<string, unknown> = Record<string, unknown>>(logger?: ",
+              "Logger",
+              " | undefined, state?: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -13213,6 +13234,21 @@
               {
                 "parentPluginId": "expressions",
                 "id": "def-server.Executor.createWithDefaults.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "Logger",
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Executor.createWithDefaults.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -13324,26 +13360,6 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-server.Executor.parent",
-            "type": "Object",
-            "tags": [],
-            "label": "parent",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Executor",
-                "text": "Executor"
-              },
-              "<Context> | undefined"
-            ],
-            "path": "src/plugins/expressions/common/executor/executor.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressions",
             "id": "def-server.Executor.Unnamed",
             "type": "Function",
             "tags": [],
@@ -13358,6 +13374,21 @@
               {
                 "parentPluginId": "expressions",
                 "id": "def-server.Executor.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "Logger",
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Executor.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -14141,29 +14172,6 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-server.Executor.fork",
-            "type": "Function",
-            "tags": [],
-            "label": "fork",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Executor",
-                "text": "Executor"
-              },
-              "<Context>"
-            ],
-            "path": "src/plugins/expressions/common/executor/executor.ts",
-            "deprecated": false,
-            "children": [],
             "returnComment": []
           }
         ],
@@ -15388,7 +15396,7 @@
                 "id": "def-server.ExpressionsServerPlugin.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "initializerContext",
+                "label": "context",
                 "description": [],
                 "signature": [
                   {
@@ -21047,6 +21055,21 @@
                 "path": "src/plugins/expressions/common/execution/execution.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "Logger",
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -21772,7 +21795,9 @@
             "label": "createWithDefaults",
             "description": [],
             "signature": [
-              "<Ctx extends Record<string, unknown> = Record<string, unknown>>(state?: ",
+              "<Ctx extends Record<string, unknown> = Record<string, unknown>>(logger?: ",
+              "Logger",
+              " | undefined, state?: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -21796,6 +21821,21 @@
               {
                 "parentPluginId": "expressions",
                 "id": "def-common.Executor.createWithDefaults.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "Logger",
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Executor.createWithDefaults.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -21907,26 +21947,6 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-common.Executor.parent",
-            "type": "Object",
-            "tags": [],
-            "label": "parent",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Executor",
-                "text": "Executor"
-              },
-              "<Context> | undefined"
-            ],
-            "path": "src/plugins/expressions/common/executor/executor.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressions",
             "id": "def-common.Executor.Unnamed",
             "type": "Function",
             "tags": [],
@@ -21941,6 +21961,21 @@
               {
                 "parentPluginId": "expressions",
                 "id": "def-common.Executor.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "Logger",
+                  " | undefined"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Executor.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -22724,29 +22759,6 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.Executor.fork",
-            "type": "Function",
-            "tags": [],
-            "label": "fork",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Executor",
-                "text": "Executor"
-              },
-              "<Context>"
-            ],
-            "path": "src/plugins/expressions/common/executor/executor.ts",
-            "deprecated": false,
-            "children": [],
             "returnComment": []
           }
         ],
@@ -24094,7 +24106,7 @@
                 "id": "def-common.ExpressionsService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    executor = Executor.createWithDefaults(),\n    renderers = new ExpressionRendererRegistry(),\n  }",
+                "label": "{\n    logger,\n    executor = Executor.createWithDefaults(logger),\n    renderers = new ExpressionRendererRegistry(),\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -30938,6 +30950,20 @@
                 "text": "Executor"
               },
               "<Record<string, unknown>> | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionServiceParams.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              "Logger",
+              " | undefined"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false

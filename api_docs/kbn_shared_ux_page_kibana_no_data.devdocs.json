@@ -72,7 +72,7 @@
           "\nReturns the Storybook arguments for `KibanaNoDataPage`, for its stories for and for\nconsuming component stories."
         ],
         "signature": [
-          "() => { canCreateNewDataView: { control: string; defaultValue: boolean; }; dataViewsDocLink: { options: (string | undefined)[]; control: { type: string; }; }; solution: { control: string; defaultValue: string; }; logo: { control: { type: string; }; options: (string | undefined)[]; defaultValue: undefined; }; hasESData: { control: string; defaultValue: boolean; }; hasUserDataView: { control: string; defaultValue: boolean; }; }"
+          "() => { canAccessFleet: { control: string; defaultValue: boolean; }; category: { control: { type: string; }; defaultValue: string; }; title: { control: { type: string; }; defaultValue: string; }; description: { control: { type: string; }; defaultValue: string; }; button: { control: { type: string; }; defaultValue: string; }; canCreateNewDataView: { control: string; defaultValue: boolean; }; dataViewsDocLink: { options: (string | undefined)[]; control: { type: string; }; }; solution: { control: string; defaultValue: string; }; logo: { control: { type: string; }; options: (string | undefined)[]; defaultValue: undefined; }; hasESData: { control: string; defaultValue: boolean; }; hasUserDataView: { control: string; defaultValue: boolean; }; }"
         ],
         "path": "packages/shared-ux/page/kibana_no_data/src/mocks.ts",
         "deprecated": false,
