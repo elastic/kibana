@@ -263,14 +263,15 @@ export const metrics = {
 
   kibana_instance_rule_failures: new KibanaInstanceRuleMetric({
     derivative: true,
+    derivativeNormalizedUnits: false,
     field: 'kibana.node_rules.failures',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleInstanceFailuresLabel', {
-      defaultMessage: 'Rule Failures Rate',
+      defaultMessage: 'Rule Failures',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.ruleInstanceFailuresDescription',
       {
-        defaultMessage: 'Rate of rule failures for the Kibana instance.',
+        defaultMessage: 'Total rule failures for the Kibana instance.',
       }
     ),
     format: SMALL_FLOAT,
@@ -280,14 +281,15 @@ export const metrics = {
   }),
   kibana_instance_rule_executions: new KibanaInstanceRuleMetric({
     derivative: true,
+    derivativeNormalizedUnits: false,
     field: 'kibana.node_rules.executions',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleInstanceExecutionsLabel', {
-      defaultMessage: 'Rule Executions Rate',
+      defaultMessage: 'Rule Executions',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.ruleInstanceExecutionsDescription',
       {
-        defaultMessage: 'Rate of rule executions for the Kibana instance.',
+        defaultMessage: 'Total rule executions for the Kibana instance.',
       }
     ),
     format: SMALL_FLOAT,
@@ -297,14 +299,15 @@ export const metrics = {
   }),
   kibana_instance_action_failures: new KibanaInstanceActionMetric({
     derivative: true,
+    derivativeNormalizedUnits: false,
     field: 'kibana.node_actions.failures',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.actionInstanceFailuresLabel', {
-      defaultMessage: 'Action Failures Rate',
+      defaultMessage: 'Action Failures',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.actionInstanceFailuresDescription',
       {
-        defaultMessage: 'Rate of action failures for the Kibana instance.',
+        defaultMessage: 'Total action failures for the Kibana instance.',
       }
     ),
     format: SMALL_FLOAT,
@@ -314,14 +317,15 @@ export const metrics = {
   }),
   kibana_instance_action_executions: new KibanaInstanceActionMetric({
     derivative: true,
+    derivativeNormalizedUnits: false,
     field: 'kibana.node_actions.executions',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.actionInstanceExecutionsLabel', {
-      defaultMessage: 'Action Executions Rate',
+      defaultMessage: 'Action Executions',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.actionInstanceExecutionsDescription',
       {
-        defaultMessage: 'Rate of action executions for the Kibana instance.',
+        defaultMessage: 'Total action executions for the Kibana instance.',
       }
     ),
     format: SMALL_FLOAT,

@@ -28,6 +28,7 @@ interface OptionalMetricOptions {
 
 interface DefaultMetricOptions {
   derivative?: boolean;
+  derivativeNormalizedUnits?: boolean;
 }
 
 export type MetricOptions = RequiredMetricOptions & OptionalMetricOptions & DefaultMetricOptions;
@@ -44,6 +45,7 @@ export class Metric {
   public metricAgg?: string;
   public mbField?: string;
   public derivative: boolean = false;
+  public derivativeNormalizedUnits: boolean = true;
   public aggs?: object;
   public dateHistogramSubAggs?: object;
   public getDateHistogramSubAggs?: (options: any) => object;
@@ -62,6 +64,7 @@ export class Metric {
   constructor(opts: MetricOptions) {
     const props: Required<DefaultMetricOptions> = {
       derivative: false,
+      derivativeNormalizedUnits: true,
     };
 
     const requireds = {

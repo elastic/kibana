@@ -87,7 +87,7 @@ function createMetricAggs(metric: Metric) {
             derivative: {
               buckets_path: 'metric_mb',
               gap_policy: 'skip',
-              unit: NORMALIZED_DERIVATIVE_UNIT,
+              ...(metric.derivativeNormalizedUnits ? { units: NORMALIZED_DERIVATIVE_UNIT } : {}),
             },
           },
         }
@@ -97,7 +97,7 @@ function createMetricAggs(metric: Metric) {
         derivative: {
           buckets_path: 'metric',
           gap_policy: 'skip',
-          unit: NORMALIZED_DERIVATIVE_UNIT,
+          ...(metric.derivativeNormalizedUnits ? { units: NORMALIZED_DERIVATIVE_UNIT } : {}),
         },
       },
       ...mbDerivative,
@@ -275,7 +275,12 @@ function handleSeries(
   timezone: string,
   response: ElasticsearchResponse
 ) {
-  const { derivative, calculation: customCalculation, isNotSupportedInInternalCollection } = metric;
+  const {
+    derivative,
+    derivativeNormalizedUnits,
+    calculation: customCalculation,
+    isNotSupportedInInternalCollection,
+  } = metric;
 
   function getAggregatedData(buckets: SeriesBucket[]) {
     const firstUsableBucketIndex = findFirstUsableBucketIndex(buckets, min);
@@ -291,7 +296,11 @@ function handleSeries(
 
     if (firstUsableBucketIndex <= lastUsableBucketIndex) {
       // map buckets to values for charts
-      const key = derivative ? 'metric_deriv.normalized_value' : 'metric.value';
+      const key = derivative
+        ? derivativeNormalizedUnits
+          ? 'metric_deriv.normalized_value'
+          : 'metric_deriv.value'
+        : 'metric.value';
       const calculation = customCalculation !== undefined ? customCalculation : defaultCalculation;
       const usableBuckets = buckets.slice(firstUsableBucketIndex, lastUsableBucketIndex + 1); // take only the buckets we know are usable
 
