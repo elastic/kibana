@@ -18,9 +18,9 @@ BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/k
 export BUILDKITE_TOKEN
 
 echo '--- Install/build buildkite dependencies'
-npm install -g ts-node # TODO move this to agent image
+npm install -g ts-node
 cd '.buildkite'
-retry 5 15 npm ci # TODO no dev
+retry 5 15 npm ci
 cd ..
 
 echo '--- Agent Debug/SSH Info'
