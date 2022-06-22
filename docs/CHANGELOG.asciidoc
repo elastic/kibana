@@ -197,8 +197,8 @@ Dashboard::
 Enables the new controls by default {kibana-pull}131341[#131341]
 
 Discover::
-* Adds the ability to edit dataView, query, & filters {kibana-pull}131688[#131688]
-* Extend Elasticsearch query rule with search source based data fetching {kibana-pull}124534[#124534]
+* To enable Threshold Alerts, adds the ability to edit dataView, query, & filters {kibana-pull}131688[#131688]
+* To enable Threshold Alerts, extended the {es} query rule with search source-based data fetching {kibana-pull}124534[#124534]
 
 Elastic Security::
 For the Elastic Security 8.3.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -238,10 +238,6 @@ Adds `xyVis` and `layeredXyVis` {kibana-pull}128255[#128255]
 
 Querying & Filtering::
 Improves the current filter/search experience {kibana-pull}128401[#128401]
-
-Security::
-* Adds a manual refresh button {kibana-pull}132766[#132766]
-* Adds the metadata tab {kibana-pull}131465[#131465]
 
 Sharing::
 Adds method to re-link visualizations with missing index-pattern {kibana-pull}132336[#132336]
@@ -371,7 +367,6 @@ Querying & Filtering::
 
 Security::
 * Disallow creating a role with the existing name in the role management page. Introduce a new optional boolean `createOnly` parameter in the create role API to prevent overwriting existing roles {kibana-pull}132218[#132218]
-* Improves Sessions tab {kibana-pull}131583[#131583]
 * Adds experimental `csp.disableUnsafeEval` config option. Set this to `true` to remove the link:https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions[`unsafe-eval`] source expression from the `script-src` Content Security Policy (CSP) directive. The default value is `false`, which is identical to the original Kibana behavior {kibana-pull}124484[#124484]
 
 [float]
@@ -382,12 +377,14 @@ Alerting::
 * Adds cloud icon "ess-icon" at the end of the config keys in "alerting" {kibana-pull}131735[#131735]
 * Fixes optional spaceId in rules_client {kibana-pull}130704[#130704]
 
+Content Managment::
+Fixes the listingLimit settings url {kibana-pull}129701[#129701]
+
 Dashboard::
 * Adds Fatal Error Handling {kibana-pull}133579[#133579]
 * Hide in Print Mode {kibana-pull}133446[#133446]
 * Send Control State to Reporting Via Locator {kibana-pull}133425[#133425]
 * Fixes new controls causing unsaved changes bug {kibana-pull}132850[#132850]
-* Fixes the listingLimit settings url {kibana-pull}129701[#129701]
 
 Design::
 * Keyboard shortcut popup {kibana-pull}133069[#133069]
