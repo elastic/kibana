@@ -511,7 +511,6 @@ Remove controls from reports {kibana-pull}134240[#134240]
 
 Security::
 * Session view process events index will now match on prefixed index {kibana-pull}133984[#133984]
-* Fixed minor UI sizing problems when attempting to share saved objects {kibana-pull}133949[#133949]
 * Timestamp issue fix + updated Jest to include mock date format {kibana-pull}132290[#132290]
 * Session view alerts loading improvements, and other polish / bug fixes {kibana-pull}131773[#131773]
 
