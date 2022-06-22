@@ -115,6 +115,9 @@ export const TestReactGrid: FC<Props> = ({
       <EuiAccordion id={`accordion`} buttonContent="Panel data">
         <div>{JSON.stringify(panels)}</div>
       </EuiAccordion>
+      <EuiAccordion id={`accordion`} buttonContent="Serialized grid data">
+        <div>{JSON.stringify(gridRef.current?.save(true, true))}</div>
+      </EuiAccordion>
       <div className={`grid-stack ${GRID_CLASS} dshLayout--editing ${GRID_CONFIG[columns].class}`}>
         {panels.map((panel, i) => {
           return <TestGridItem panel={panel} ref={panelRefs.current[panel.id!]} />;
