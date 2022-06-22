@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dateMath from '@kbn/datemath';
 import {
   CriteriaWithPagination,
   EuiAvatar,
@@ -23,10 +24,15 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
+import type {
+  DurationRange,
+  OnRefreshChangeProps,
+} from '@elastic/eui/src/components/date_picker/types';
 import type { HorizontalAlignment } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
+import { ACTION_LIST_DATE_RANGE_FILTER_STORAGE_KEY } from '../../../../../common/constants';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import {
   ActionDetails,
@@ -40,6 +46,19 @@ import { useGetEndpointActionList } from '../../../hooks';
 import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { ActionListDateRangePicker } from './components/action_list_date_range_picker';
+import type { DateRangePickerValues } from './components/action_list_date_range_picker';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+
+const defaultDateRangeOptions = Object.freeze({
+  autoRefreshOptions: {
+    enabled: false,
+    duration: 10000,
+  },
+  startDate: 'now-1d',
+  endDate: 'now',
+  recentlyUsedDateRanges: [],
+});
 
 // Truncated usernames
 const StyledFacetButton = styled(EuiFacetButton)`
@@ -52,6 +71,7 @@ const StyledFacetButton = styled(EuiFacetButton)`
 export const ResponseActionsList = memo<
   EndpointActionListRequestQuery & { hideHeader?: boolean; hideHostNameColumn?: boolean }
 >(({ agentIds, commands, userIds, hideHeader = false, hideHostNameColumn = false }) => {
+  const { storage } = useKibana().services;
   const getTestId = useTestIdGenerator('response-actions-list');
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
     [k: ActionDetails['id']]: React.ReactNode;
@@ -65,6 +85,73 @@ export const ResponseActionsList = memo<
     userIds,
   });
 
+  // date range picker settings
+  const [dateRangePickerStorage, setDateRangePickerStorage] = useState<DateRangePickerValues>(
+    storage.get(ACTION_LIST_DATE_RANGE_FILTER_STORAGE_KEY) || defaultDateRangeOptions
+  );
+
+  const updateActionListDateRanges = useCallback(
+    ({ start, end }) => {
+      setDateRangePickerStorage((prevState) => ({
+        ...prevState,
+        startDate: dateMath.parse(start)?.toISOString(),
+        endDate: dateMath.parse(end)?.toISOString(),
+      }));
+      storage.set(ACTION_LIST_DATE_RANGE_FILTER_STORAGE_KEY, dateRangePickerStorage);
+    },
+    [setDateRangePickerStorage, storage, dateRangePickerStorage]
+  );
+
+  const updateActionListRecentlyUsedDateRanges = useCallback(
+    (recentlyUsedDateRanges) => {
+      setDateRangePickerStorage((prevState) => ({
+        ...prevState,
+        recentlyUsedDateRanges,
+      }));
+      storage.set(ACTION_LIST_DATE_RANGE_FILTER_STORAGE_KEY, dateRangePickerStorage);
+    },
+    [storage, setDateRangePickerStorage, dateRangePickerStorage]
+  );
+
+  const onRefreshChange = useCallback(
+    (evt: OnRefreshChangeProps) => {
+      setDateRangePickerStorage((prevState) => ({
+        ...prevState,
+        autoRefreshOptions: { enabled: !evt.isPaused, duration: evt.refreshInterval },
+      }));
+      storage.set(ACTION_LIST_DATE_RANGE_FILTER_STORAGE_KEY, dateRangePickerStorage);
+    },
+    [setDateRangePickerStorage, storage, dateRangePickerStorage]
+  );
+
+  const onRefresh = useCallback(() => {
+    storage.set(ACTION_LIST_DATE_RANGE_FILTER_STORAGE_KEY, dateRangePickerStorage);
+  }, [storage, dateRangePickerStorage]);
+
+  const onTimeChange = useCallback(
+    ({ start: newStart, end: newEnd }: DurationRange) => {
+      const newRecentlyUsedDateRanges = [
+        { start: newStart, end: newEnd },
+        ...dateRangePickerStorage.recentlyUsedDateRanges
+          .filter(
+            (recentlyUsedRange: DurationRange) =>
+              !(recentlyUsedRange.start === newStart && recentlyUsedRange.end === newEnd)
+          )
+          .slice(0, 9),
+      ];
+
+      // update date ranges
+      updateActionListDateRanges({ start: newStart, end: newEnd });
+      // update recently used date ranges
+      updateActionListRecentlyUsedDateRanges(newRecentlyUsedDateRanges);
+    },
+    [
+      dateRangePickerStorage.recentlyUsedDateRanges,
+      updateActionListDateRanges,
+      updateActionListRecentlyUsedDateRanges,
+    ]
+  );
+
   // initial fetch of list data
   const {
     error,
@@ -72,9 +159,16 @@ export const ResponseActionsList = memo<
     isFetching,
     isFetched,
     refetch: reFetchEndpointActionList,
-  } = useGetEndpointActionList(queryParams, {
-    keepPreviousData: true,
-  });
+  } = useGetEndpointActionList(
+    {
+      ...queryParams,
+      startDate: dateRangePickerStorage.startDate,
+      endDate: dateRangePickerStorage.endDate,
+    },
+    {
+      keepPreviousData: true,
+    }
+  );
 
   // total actions
   const totalItemCount = useMemo(() => actionList?.total, [actionList]);
@@ -365,6 +459,13 @@ export const ResponseActionsList = memo<
       data-test-subj="responseActionsPage"
       title={hideHeader ? undefined : UX_MESSAGES.pageTitle}
     >
+      <ActionListDateRangePicker
+        dateRangePickerStorage={dateRangePickerStorage}
+        isDataLoading={isFetching}
+        onRefresh={onRefresh}
+        onRefreshChange={onRefreshChange}
+        onTimeChange={onTimeChange}
+      />
       {isFetched && !totalItemCount ? (
         <ManagementEmptyStateWrapper>
           <EuiFlexItem data-test-subj={getTestId('empty-prompt')}>

@@ -429,3 +429,9 @@ export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
+
+/**
+ * local storage key for response actions log filters
+ */
+export const ACTION_LIST_DATE_RANGE_FILTER_STORAGE_KEY =
+  'securitySolution.management.endpoint.actionList.dateRangeFilter';
