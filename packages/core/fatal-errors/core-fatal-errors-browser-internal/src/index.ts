@@ -7,3 +7,4 @@
  */
 
 export { FatalErrorsService } from './fatal_errors_service';
+export type { Deps } from './fatal_errors_service';

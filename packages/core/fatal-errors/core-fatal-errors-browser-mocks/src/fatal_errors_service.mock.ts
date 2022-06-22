@@ -8,7 +8,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
-import { FatalErrorsService } from './fatal_errors_service';
+import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<FatalErrorsSetup> = {

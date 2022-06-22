@@ -18,6 +18,7 @@ import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
 import { FatalErrorsScreen } from './fatal_errors_screen';
 import { getErrorInfo } from './get_error_info';
 
+/** @internal */
 export interface Deps {
   i18n: I18nStart;
   theme: ThemeServiceSetup;
