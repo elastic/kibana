@@ -19,7 +19,7 @@ import type { AuditLogger } from '../audit';
 import { auditLoggerMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
-import { getSessionIndexTemplate, SessionIndex } from './session_index';
+import { getSessionIndexSettings, SessionIndex } from './session_index';
 import { sessionIndexMock } from './session_index.mock';
 
 describe('Session index', () => {
@@ -55,7 +55,7 @@ describe('Session index', () => {
         name: indexTemplateName,
       });
       expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledWith({
-        index: getSessionIndexTemplate(indexTemplateName, indexName).index_patterns[0],
+        index: getSessionIndexSettings(indexName).index,
       });
     }
 
@@ -88,59 +88,42 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
     });
 
-    it('deletes legacy index template if needed and creates both index template and index if they do not exist', async () => {
+    it('deletes legacy index template if needed and creates index if it does not exist', async () => {
       mockElasticsearchClient.indices.existsTemplate.mockResponse(true);
       mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
       mockElasticsearchClient.indices.exists.mockResponse(false);
 
       await sessionIndex.initialize();
 
-      const expectedIndexTemplate = getSessionIndexTemplate(indexTemplateName, indexName);
       assertExistenceChecksPerformed();
       expect(mockElasticsearchClient.indices.deleteTemplate).toHaveBeenCalledWith({
         name: indexTemplateName,
       });
-      expect(mockElasticsearchClient.indices.putIndexTemplate).toHaveBeenCalledWith(
-        expectedIndexTemplate
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
+        getSessionIndexSettings(indexName)
       );
-      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith({
-        index: expectedIndexTemplate.index_patterns[0],
-      });
     });
 
-    it('creates both index template and index if they do not exist', async () => {
-      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
-      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+    it('deletes legacy & modern index templates if needed and creates index if it does not exist', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(true);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
       mockElasticsearchClient.indices.exists.mockResponse(false);
 
       await sessionIndex.initialize();
 
-      const expectedIndexTemplate = getSessionIndexTemplate(indexTemplateName, indexName);
       assertExistenceChecksPerformed();
-      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
-      expect(mockElasticsearchClient.indices.putIndexTemplate).toHaveBeenCalledWith(
-        expectedIndexTemplate
-      );
-      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith({
-        index: expectedIndexTemplate.index_patterns[0],
+      expect(mockElasticsearchClient.indices.deleteTemplate).toHaveBeenCalledWith({
+        name: indexTemplateName,
       });
-    });
-
-    it('creates only index template if it does not exist even if index exists', async () => {
-      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
-      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
-      mockElasticsearchClient.indices.exists.mockResponse(true);
-
-      await sessionIndex.initialize();
-
-      assertExistenceChecksPerformed();
-      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
-      expect(mockElasticsearchClient.indices.putIndexTemplate).toHaveBeenCalledWith(
-        getSessionIndexTemplate(indexTemplateName, indexName)
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).toHaveBeenCalledWith({
+        name: indexTemplateName,
+      });
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
+        getSessionIndexSettings(indexName)
       );
     });
 
-    it('creates only index if it does not exist even if index template exists', async () => {
+    it('deletes modern index template if needed and creates index if it does not exist', async () => {
       mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
       mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
       mockElasticsearchClient.indices.exists.mockResponse(false);
@@ -149,10 +132,27 @@ describe('Session index', () => {
 
       assertExistenceChecksPerformed();
       expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
-      expect(mockElasticsearchClient.indices.putIndexTemplate).not.toHaveBeenCalled();
-      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith({
-        index: getSessionIndexTemplate(indexTemplateName, indexName).index_patterns[0],
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).toHaveBeenCalledWith({
+        name: indexTemplateName,
       });
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
+        getSessionIndexSettings(indexName)
+      );
+    });
+
+    it('creates index if it does not exist', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(false);
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
+        getSessionIndexSettings(indexName)
+      );
     });
 
     it('does not fail if tries to create index when it exists already', async () => {

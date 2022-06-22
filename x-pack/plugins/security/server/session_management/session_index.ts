@@ -59,35 +59,32 @@ const SESSION_INDEX_CLEANUP_BATCH_LIMIT = 10;
 const SESSION_INDEX_CLEANUP_KEEP_ALIVE = '5m';
 
 /**
- * Returns index template that is used for the current version of the session index.
+ * Returns index settings that are used for the current version of the session index.
  */
-export function getSessionIndexTemplate(templateName: string, indexName: string) {
+export function getSessionIndexSettings(indexName: string) {
   return Object.freeze({
-    name: templateName,
-    index_patterns: [indexName],
-    template: {
-      settings: {
-        index: {
-          number_of_shards: 1,
-          number_of_replicas: 0,
-          auto_expand_replicas: '0-1',
-          priority: 1000,
-          refresh_interval: '1s',
-          hidden: true,
-        },
+    index: indexName,
+    settings: {
+      index: {
+        number_of_shards: 1,
+        number_of_replicas: 0,
+        auto_expand_replicas: '0-1',
+        priority: 1000,
+        refresh_interval: '1s',
+        hidden: true,
       },
-      mappings: {
-        dynamic: 'strict',
-        properties: {
-          usernameHash: { type: 'keyword' },
-          provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
-          idleTimeoutExpiration: { type: 'date' },
-          lifespanExpiration: { type: 'date' },
-          accessAgreementAcknowledged: { type: 'boolean' },
-          content: { type: 'binary' },
-        },
-      } as const,
     },
+    mappings: {
+      dynamic: 'strict',
+      properties: {
+        usernameHash: { type: 'keyword' },
+        provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
+        idleTimeoutExpiration: { type: 'date' },
+        lifespanExpiration: { type: 'date' },
+        accessAgreementAcknowledged: { type: 'boolean' },
+        content: { type: 'binary' },
+      },
+    } as const,
   });
 }
 
@@ -372,7 +369,7 @@ export class SessionIndex {
           }
         }
 
-        // Check if required index template exists.
+        // Check if index template exists.
         let indexTemplateExists = false;
         try {
           indexTemplateExists = await this.options.elasticsearchClient.indices.existsIndexTemplate({
@@ -385,17 +382,16 @@ export class SessionIndex {
           return reject(err);
         }
 
-        // Create index template if it doesn't exist.
+        // Delete index template if it does.
         if (indexTemplateExists) {
-          this.options.logger.debug('Session index template already exists.');
-        } else {
+          this.options.logger.debug('Deleting unused session index template.');
           try {
-            await this.options.elasticsearchClient.indices.putIndexTemplate(
-              getSessionIndexTemplate(sessionIndexTemplateName, this.indexName)
-            );
-            this.options.logger.debug('Successfully created session index template.');
+            await this.options.elasticsearchClient.indices.deleteIndexTemplate({
+              name: sessionIndexTemplateName,
+            });
+            this.options.logger.debug('Successfully deleted session index template.');
           } catch (err) {
-            this.options.logger.error(`Failed to create session index template: ${err.message}`);
+            this.options.logger.error(`Failed to delete session index template: ${err.message}`);
             return reject(err);
           }
         }
@@ -417,7 +413,9 @@ export class SessionIndex {
           this.options.logger.debug('Session index already exists.');
         } else {
           try {
-            await this.options.elasticsearchClient.indices.create({ index: this.indexName });
+            await this.options.elasticsearchClient.indices.create(
+              getSessionIndexSettings(this.indexName)
+            );
             this.options.logger.debug('Successfully created session index.');
           } catch (err) {
             // There can be a race condition if index is created by another Kibana instance.
