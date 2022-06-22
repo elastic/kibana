@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { HttpFetchOptions } from '@kbn/core/public';
+import { CoreProviders } from '../../../apps/common_providers';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import type { HttpFetchOptions } from '@kbn/core/public';
+import type { MetricsExplorerSeries } from '../../../../common/http_api';
 import type {
   DataResponseMock,
   NodeMetricsTableFetchMock,
@@ -16,8 +18,8 @@ import type {
 import { createStartServicesAccessorMock } from '../test_helpers';
 import { createLazyPodMetricsTable } from './create_lazy_pod_metrics_table';
 import IntegratedPodMetricsTable from './integrated_pod_metrics_table';
+import { PodMetricsTable } from './pod_metrics_table';
 import { metricByField } from './use_pod_metrics_table';
-import type { MetricsExplorerSeries } from '../../../../common/http_api';
 
 describe('PodMetricsTable', () => {
   const timerange = {
@@ -40,6 +42,8 @@ describe('PodMetricsTable', () => {
 
   const fetchMock = createFetchMock();
 
+  const loadingIndicatorTestId = 'metricsTableLoadingContent';
+
   describe('createLazyPodMetricsTable', () => {
     it('should lazily load and render the table', async () => {
       const { fetch, getStartServices } = createStartServicesAccessorMock(fetchMock);
@@ -47,7 +51,7 @@ describe('PodMetricsTable', () => {
 
       render(<LazyPodMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
 
-      expect(screen.queryByTestId('podMetricsTableLoader')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('podMetricsTable')).not.toBeInTheDocument();
 
       // Using longer time out since resolving dynamic import can be slow
@@ -56,7 +60,7 @@ describe('PodMetricsTable', () => {
         timeout: 10000,
       });
 
-      expect(screen.queryByTestId('podMetricsTableLoader')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('podMetricsTable')).toBeInTheDocument();
     }, 10000);
   });
@@ -79,6 +83,44 @@ describe('PodMetricsTable', () => {
       expect(await findByText(/some-pod/)).toBeInTheDocument();
     });
   });
+
+  it('should render a loading indicator on first load', () => {
+    const { coreProvidersPropsMock } = createStartServicesAccessorMock(jest.fn());
+
+    const { queryByTestId } = render(
+      <CoreProviders {...coreProvidersPropsMock}>
+        <PodMetricsTable
+          data={{ state: 'unknown' }}
+          isLoading={true}
+          setCurrentPageIndex={jest.fn()}
+          setSortState={jest.fn()}
+          sortState={{ field: 'id', direction: 'asc' }}
+          timerange={{ from: new Date().toISOString(), to: new Date().toISOString() }}
+        />
+      </CoreProviders>
+    );
+
+    expect(queryByTestId(loadingIndicatorTestId)).toBeInTheDocument();
+  });
+
+  it('should render a prompt when indices are missing', () => {
+    const { coreProvidersPropsMock } = createStartServicesAccessorMock(jest.fn());
+
+    const { queryByTestId } = render(
+      <CoreProviders {...coreProvidersPropsMock}>
+        <PodMetricsTable
+          data={{ state: 'no-indices' }}
+          isLoading={false}
+          setCurrentPageIndex={jest.fn()}
+          setSortState={jest.fn()}
+          sortState={{ field: 'id', direction: 'asc' }}
+          timerange={{ from: new Date().toISOString(), to: new Date().toISOString() }}
+        />
+      </CoreProviders>
+    );
+
+    expect(queryByTestId('metricsTableLoadingContent')).toBeInTheDocument();
+  });
 });
 
 function createFetchMock(): NodeMetricsTableFetchMock {
@@ -86,6 +128,9 @@ function createFetchMock(): NodeMetricsTableFetchMock {
     source: {
       configuration: {
         metricAlias: 'some-index-pattern',
+      },
+      status: {
+        metricIndicesExist: true,
       },
     },
   };
@@ -97,7 +142,7 @@ function createFetchMock(): NodeMetricsTableFetchMock {
     ],
   };
 
-  return (path: string, options: HttpFetchOptions) => {
+  return (path: string, _options: HttpFetchOptions) => {
     // options can be used to read body for filter clause
     if (path === '/api/metrics/source/default') {
       return Promise.resolve(sourceMock);
@@ -112,7 +157,7 @@ function createFetchMock(): NodeMetricsTableFetchMock {
 function createPod(
   id: string,
   name: string,
-  uptimeMs: number,
+  startTime: number,
   cpuUsagePct: number,
   memoryUsageBytes: number
 ): Partial<MetricsExplorerSeries> {
@@ -121,8 +166,8 @@ function createPod(
     keys: [id, name],
     rows: [
       {
-        [metricByField['kubernetes.pod.start_time']]: uptimeMs,
-        [metricByField['kubernetes.pod.cpu.usage.node.pct']]: cpuUsagePct,
+        [metricByField['kubernetes.pod.start_time']]: startTime,
+        [metricByField['kubernetes.pod.cpu.usage.limit.pct']]: cpuUsagePct,
         [metricByField['kubernetes.pod.memory.usage.bytes']]: memoryUsageBytes,
       } as MetricsExplorerSeries['rows'][number],
     ],

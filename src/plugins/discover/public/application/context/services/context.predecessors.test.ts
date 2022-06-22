@@ -10,9 +10,10 @@ import moment from 'moment';
 import { get, last } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
+import { Query } from '@kbn/es-query';
 import { createContextSearchSourceStub } from './_stubs';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { DataPublicPluginStart, Query } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataTableRecord, EsHitRecord } from '../../../types';
 import { buildDataTableRecord, buildDataTableRecordList } from '../../../utils/build_data_record';
 
