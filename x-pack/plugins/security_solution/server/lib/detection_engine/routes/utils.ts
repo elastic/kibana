@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { has, snakeCase } from 'lodash/fp';
+import { has, snakeCase, T } from 'lodash/fp';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 
 import {
@@ -158,7 +158,7 @@ const statusToErrorMessage = (statusCode: number) => {
 export class SiemResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
- error<T>({ statusCode,body,headers }: CustomHttpResponseOptions<T>) {
+ error<T>({ statusCode,body,headers}: CustomHttpResponseOptions<T>,attributes?:T){
   const contentType: CustomHttpResponseOptions<T>['headers'] = {
     'content-type': 'application/json',
   };
@@ -166,19 +166,20 @@ export class SiemResponseFactory {
     ...contentType,
     ...(headers ?? {}),
   };
+  const new_attributes:CustomHttpResponseOptions<T>['body']=body;
+
   return this.response.custom({
-    message:statusToErrorMessage(statusCode),
-    error_code:statusCode,
-    attributes:Buffer.from(
+    headers:defaultedHeaders,
+    statusCode,
+    body:Buffer.from(
         JSON.stringify({
          status_code:statusCode,
-          message:body,
-          
+         message:body ?? statusToErrorMessage(statusCode),
+         attributes:new_attributes,
           
         })
       ),
-      headers:defaultedHeaders,
-      statusCode:0
+      
     });
   }
 }
