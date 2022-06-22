@@ -135,6 +135,7 @@ export const RulesList = ({
     kibanaFeatures,
   } = useKibana().services;
   const { lastResponse, setLastResponse } = useRulesPageStateContainer();
+  const { status, setStatus } = useRulesPageStateContainer();
 
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
@@ -147,8 +148,7 @@ export const RulesList = ({
   const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
-  // const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>([]);
-  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
+  // const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
@@ -204,7 +204,7 @@ export const RulesList = ({
     typesFilter: typesFilter.length > 0 ? typesFilter : filteredRulesTypes,
     actionTypesFilter,
     ruleExecutionStatusesFilter: lastResponse,
-    ruleStatusesFilter,
+    ruleStatusesFilter: status,
     tagsFilter,
     sort,
     onPage: setPage,
@@ -218,6 +218,13 @@ export const RulesList = ({
     [setLastResponse]
   );
 
+  const setRuleStatusFilter = useCallback(
+    (ids: RuleStatus[]) => {
+      setStatus(ids);
+    },
+    [setStatus]
+  );
+
   const { tags, loadTags } = useLoadTags({
     onError,
   });
@@ -227,7 +234,7 @@ export const RulesList = ({
     typesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter: lastResponse,
-    ruleStatusesFilter,
+    ruleStatusesFilter: status,
     tagsFilter,
     onError,
   });
@@ -419,9 +426,7 @@ export const RulesList = ({
 
   const renderRuleStatusFilter = () => {
     if (isRuleStatusFilterEnabled) {
-      return (
-        <RuleStatusFilter selectedStatuses={ruleStatusesFilter} onChange={setRuleStatusesFilter} />
-      );
+      return <RuleStatusFilter selectedStatuses={status} onChange={setRuleStatusFilter} />;
     }
     return null;
   };
