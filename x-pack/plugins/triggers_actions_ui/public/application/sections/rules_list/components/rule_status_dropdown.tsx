@@ -458,6 +458,7 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            disabled={!intervalValue || intervalValue < 1}
             isLoading={isLoading}
             onClick={onClickApplyButton}
             data-test-subj="ruleSnoozeApply"
