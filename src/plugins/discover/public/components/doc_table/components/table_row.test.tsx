@@ -17,6 +17,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { EsHitRecord } from '../../../types';
 
 jest.mock('../utils/row_formatter', () => {
   const originalModule = jest.requireActual('../utils/row_formatter');
@@ -64,7 +66,7 @@ const mockHit = {
     },
   ],
   _source: { message: 'mock_message', bytes: 20 },
-};
+} as unknown as EsHitRecord;
 
 const mockFilterManager = createFilterManagerMock();
 
@@ -74,7 +76,7 @@ describe('Doc table row component', () => {
     columns: ['_source'],
     filter: mockInlineFilter,
     indexPattern: indexPatternWithTimefieldMock,
-    row: mockHit,
+    row: buildDataTableRecord(mockHit, indexPatternWithTimefieldMock),
     useNewFieldsApi: true,
     filterManager: mockFilterManager,
     addBasePath: (path: string) => path,

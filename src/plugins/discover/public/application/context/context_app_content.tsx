@@ -20,10 +20,9 @@ import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
-import { EsHitRecordList } from '../types';
-import { SortPairArr } from '../../components/doc_table/utils/get_sort';
-import { ElasticSearchHit } from '../../types';
+import type { SortPairArr } from '../../components/doc_table/utils/get_sort';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import type { DataTableRecord } from '../../types';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -33,9 +32,9 @@ export interface ContextAppContentProps {
   indexPattern: DataView;
   predecessorCount: number;
   successorCount: number;
-  rows: EsHitRecordList;
-  predecessors: EsHitRecordList;
-  successors: EsHitRecordList;
+  rows: DataTableRecord[];
+  predecessors: DataTableRecord[];
+  successors: DataTableRecord[];
   anchorStatus: LoadingStatus;
   predecessorsStatus: LoadingStatus;
   successorsStatus: LoadingStatus;
@@ -76,7 +75,7 @@ export function ContextAppContent({
 }: ContextAppContentProps) {
   const { uiSettings: config } = useDiscoverServices();
 
-  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>();
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
   const arePredecessorsLoading =

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { Fragment } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { formatHit } from '../../../utils/format_hit';
+import type { DataTableRecord } from '../../../types';
 
 import './row_formatter.scss';
 
@@ -38,7 +38,7 @@ const TemplateComponent = ({ defPairs }: Props) => {
 };
 
 export const formatRow = (
-  hit: estypes.SearchHit,
+  hit: DataTableRecord,
   indexPattern: DataView,
   fieldsToShow: string[],
   maxEntries: number,
@@ -65,7 +65,7 @@ export const formatTopLevelObject = (
     const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const formatter = field
       ? indexPattern.getFormatterForField(field)
-      : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
+      : { convert: (v: unknown, ..._: unknown[]) => String(v) };
     if (!values.map) return;
     const formatted = values
       .map((val: unknown) =>

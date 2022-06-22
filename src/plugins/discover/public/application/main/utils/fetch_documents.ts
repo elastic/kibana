@@ -18,7 +18,7 @@ import { FetchDeps } from './fetch_all';
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  { abortController, inspectorAdapters, searchSessionId, services, savedSearch }: FetchDeps
+  { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps
 ) => {
   searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);

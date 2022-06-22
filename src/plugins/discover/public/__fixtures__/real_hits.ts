@@ -5,7 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { cloneDeep } from 'lodash';
+import { buildDataTableRecord } from '../utils/build_data_record';
+import type { EsHitRecord } from '../types';
 /*
   Extensions:
   gif: 5
@@ -23,10 +26,9 @@
   All have the same index, ids are unique
 */
 
-export default [
+export const realHits: EsHitRecord[] = [
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '61',
     _score: 1,
     _source: {
@@ -36,7 +38,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '388',
     _score: 1,
     _source: {
@@ -46,7 +47,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '403',
     _score: 1,
     _source: {
@@ -56,7 +56,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '415',
     _score: 1,
     _source: {
@@ -66,7 +65,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '460',
     _score: 1,
     _source: {
@@ -77,7 +75,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '496',
     _score: 1,
     _source: {
@@ -87,7 +84,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '511',
     _score: 1,
     _source: {
@@ -97,7 +93,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '701',
     _score: 1,
     _source: {
@@ -107,7 +102,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '838',
     _score: 1,
     _source: {
@@ -118,7 +112,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '890',
     _score: 1,
     _source: {
@@ -129,7 +122,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'nginx',
     _id: '927',
     _score: 1,
     _source: {
@@ -140,7 +132,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '1034',
     _score: 1,
     _source: {
@@ -150,7 +141,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '1142',
     _score: 1,
     _source: {
@@ -161,7 +151,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '1180',
     _score: 1,
     _source: {
@@ -171,7 +160,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'nginx',
     _id: '1224',
     _score: 1,
     _source: {
@@ -181,7 +169,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '1243',
     _score: 1,
     _source: {
@@ -191,7 +178,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '1510',
     _score: 1,
     _source: {
@@ -201,7 +187,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '1628',
     _score: 1,
     _source: {
@@ -211,7 +196,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '1729',
     _score: 1,
     _source: {
@@ -221,7 +205,6 @@ export default [
   },
   {
     _index: 'logstash-2014.09.09',
-    _type: 'apache',
     _id: '1945',
     _score: 1,
     _source: {
@@ -230,3 +213,7 @@ export default [
     },
   },
 ];
+
+export function getDataTableRecords(dataView: DataView) {
+  return cloneDeep(realHits).map((hit: EsHitRecord) => buildDataTableRecord(hit, dataView));
+}

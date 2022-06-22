@@ -21,8 +21,8 @@ import {
 } from '../services/context_query_state';
 import { AppState } from '../services/context_state';
 import { getFirstSortableField } from '../utils/sorting';
-import { EsHitRecord } from '../../types';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import type { DataTableRecord } from '../../../types';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },
@@ -117,7 +117,7 @@ export function useContextAppFetch({
   ]);
 
   const fetchSurroundingRows = useCallback(
-    async (type: SurrDocType, fetchedAnchor?: EsHitRecord) => {
+    async (type: SurrDocType, fetchedAnchor?: DataTableRecord) => {
       const filters = filterManager.getFilters();
 
       const count =
@@ -133,7 +133,7 @@ export function useContextAppFetch({
         const rows = await fetchSurroundingDocs(
           type,
           indexPattern,
-          anchor as EsHitRecord,
+          anchor,
           tieBreakerField,
           SortDirection.desc,
           count,
@@ -167,7 +167,7 @@ export function useContextAppFetch({
   );
 
   const fetchContextRows = useCallback(
-    (anchor?: EsHitRecord) =>
+    (anchor?: DataTableRecord) =>
       Promise.allSettled([
         fetchSurroundingRows(SurrDocType.PREDECESSORS, anchor),
         fetchSurroundingRows(SurrDocType.SUCCESSORS, anchor),

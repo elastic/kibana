@@ -10,7 +10,6 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
-import { flattenHit } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { formatFieldValue } from '../../../utils/format_value';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
@@ -18,19 +17,19 @@ import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
 import { useNavigationProps } from '../../../hooks/use_navigation_props';
 import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
-import { ElasticSearchHit } from '../../../types';
+import { DataTableRecord, EsHitRecord } from '../../../types';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 
-export type DocTableRow = ElasticSearchHit & {
+export type DocTableRow = EsHitRecord & {
   isAnchor?: boolean;
 };
 
 export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
-  row: DocTableRow;
+  row: DataTableRecord;
   indexPattern: DataView;
   useNewFieldsApi: boolean;
   fieldsToShow: string[];
@@ -62,10 +61,6 @@ export const TableRow = ({
   });
   const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';
 
-  const flattenedRow = useMemo(
-    () => flattenHit(row, indexPattern, { includeIgnoredValues: true }),
-    [indexPattern, row]
-  );
   const mapping = useMemo(() => indexPattern.fields.getByName, [indexPattern]);
 
   // toggle display of the rows details, a full list of the fields from each row
@@ -82,8 +77,8 @@ export const TableRow = ({
     }
 
     const formattedField = formatFieldValue(
-      flattenedRow[fieldName],
-      row,
+      row.flattened[fieldName],
+      row.raw,
       fieldFormats,
       indexPattern,
       mapping(fieldName)
@@ -98,15 +93,15 @@ export const TableRow = ({
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {
       const field = indexPattern.fields.getByName(column);
-      filter(field!, flattenedRow[column], type);
+      filter(field!, row.flattened, type);
     },
-    [filter, flattenedRow, indexPattern.fields]
+    [filter, indexPattern.fields, row.flattened]
   );
 
   const { singleDocProps, surrDocsProps } = useNavigationProps({
     indexPatternId: indexPattern.id!,
-    rowIndex: row._index,
-    rowId: row._id,
+    rowIndex: row.raw._index,
+    rowId: row.raw._id,
     filterManager,
     addBasePath,
     columns,
@@ -161,9 +156,9 @@ export const TableRow = ({
     );
   } else {
     columns.forEach(function (column: string) {
-      if (useNewFieldsApi && !mapping(column) && row.fields && !row.fields[column]) {
+      if (useNewFieldsApi && !mapping(column) && row.raw.fields && !row.raw.fields[column]) {
         const innerColumns = Object.fromEntries(
-          Object.entries(row.fields).filter(([key]) => {
+          Object.entries(row.raw.fields).filter(([key]) => {
             return key.indexOf(`${column}.`) === 0;
           })
         );
@@ -185,7 +180,7 @@ export const TableRow = ({
         // We should improve this and show a helpful tooltip why the filter buttons are not
         // there/disabled when there are ignored values.
         const isFilterable = Boolean(
-          mapping(column)?.filterable && filter && !row._ignored?.includes(column)
+          mapping(column)?.filterable && filter && !row.raw._ignored?.includes(column)
         );
         rowCells.push(
           <TableCell
