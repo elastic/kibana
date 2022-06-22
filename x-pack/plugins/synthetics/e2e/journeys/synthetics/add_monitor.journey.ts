@@ -1,0 +1,256 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import uuid from 'uuid';
+import { journey, step, expect, before, after, Page } from '@elastic/synthetics';
+import { MONITOR_TYPE_CONFIG } from '../../../public/apps/synthetics/components/monitor_add_edit/form/config';
+import { DataStream, FormMonitorType } from '../../../common/runtime_types/monitor_management';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { byTestId } from '../utils';
+
+const customLocation = process.env.SYNTHETICS_TEST_LOCATION;
+
+const basicMonitorDetails = {
+  location: customLocation || 'US Central',
+  schedule: '3',
+};
+const httpName = `http monitor ${uuid.v4()}`;
+const icmpName = `icmp monitor ${uuid.v4()}`;
+const tcpName = `tcp monitor ${uuid.v4()}`;
+const browserName = `browser monitor ${uuid.v4()}`;
+const browserRecorderName = `browser monitor recorder ${uuid.v4()}`;
+const apmServiceName = 'apmServiceName';
+
+const configuration = {
+  [FormMonitorType.HTTP]: {
+    monitorType: FormMonitorType.HTTP,
+    monitorConfig: {
+      ...basicMonitorDetails,
+      name: httpName,
+      url: 'https://elastic.co',
+      locations: [basicMonitorDetails.location],
+      apmServiceName,
+    },
+    monitorListDetails: {
+      ...basicMonitorDetails,
+      name: httpName,
+    },
+    monitorEditDetails: [
+      ['[data-test-subj=syntheticsMonitorConfigSchedule]', '3'],
+      ['[data-test-subj=syntheticsMonitorConfigName]', httpName],
+      ['[data-test-subj=syntheticsMonitorConfigURL]', 'https://elastic.co'],
+      ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
+    ],
+  },
+  [FormMonitorType.TCP]: {
+    monitorType: FormMonitorType.TCP,
+    monitorConfig: {
+      ...basicMonitorDetails,
+      name: tcpName,
+      host: 'smtp.gmail.com:587',
+      locations: [basicMonitorDetails.location],
+      apmServiceName,
+    },
+    monitorListDetails: {
+      ...basicMonitorDetails,
+      name: tcpName,
+    },
+    monitorEditDetails: [
+      ['[data-test-subj=syntheticsMonitorConfigSchedule]', '3'],
+      ['[data-test-subj=syntheticsMonitorConfigName]', tcpName],
+      ['[data-test-subj=syntheticsMonitorConfigHost]', 'smtp.gmail.com:587'],
+      ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
+    ],
+  },
+  [FormMonitorType.ICMP]: {
+    monitorType: FormMonitorType.ICMP,
+    monitorConfig: {
+      ...basicMonitorDetails,
+      name: icmpName,
+      host: '1.1.1.1',
+      locations: [basicMonitorDetails.location],
+      apmServiceName,
+    },
+    monitorListDetails: {
+      ...basicMonitorDetails,
+      name: icmpName,
+    },
+    monitorEditDetails: [
+      ['[data-test-subj=syntheticsMonitorConfigSchedule]', '3'],
+      ['[data-test-subj=syntheticsMonitorConfigName]', icmpName],
+      ['[data-test-subj=syntheticsMonitorConfigHost]', '1.1.1.1'],
+      ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
+      // name: httpName,
+    ],
+  },
+  [FormMonitorType.MULTISTEP]: {
+    monitorType: FormMonitorType.MULTISTEP,
+    monitorConfig: {
+      ...basicMonitorDetails,
+      schedule: '10',
+      name: browserName,
+      inlineScript: 'step("test step", () => {})',
+      locations: [basicMonitorDetails.location],
+      apmServiceName,
+    },
+    monitorListDetails: {
+      ...basicMonitorDetails,
+      schedule: '10',
+      name: browserName,
+    },
+    monitorEditDetails: [
+      ['[data-test-subj=syntheticsMonitorConfigSchedule]', '10'],
+      ['[data-test-subj=syntheticsMonitorConfigName]', browserName],
+      ['[data-test-subj=codeEditorContainer] textarea', 'step("test step", () => {})'],
+      ['[data-test-subj=syntheticsMonitorConfigAPMServiceName]', apmServiceName],
+    ],
+  },
+  [`${FormMonitorType.MULTISTEP}__recorder`]: {
+    monitorType: FormMonitorType.MULTISTEP,
+    monitorConfig: {
+      ...basicMonitorDetails,
+      schedule: '10',
+      name: browserRecorderName,
+      recorderScript: 'step("test step", () => {})',
+      locations: [basicMonitorDetails.location],
+      apmServiceName: 'Sample APM Service',
+    },
+    monitorListDetails: {
+      ...basicMonitorDetails,
+      schedule: '10',
+      name: browserRecorderName,
+    },
+    monitorEditDetails: [
+      ['[data-test-subj=syntheticsMonitorConfigSchedule]', '10'],
+      ['[data-test-subj=syntheticsMonitorConfigName]', browserRecorderName],
+      ['[data-test-subj=codeEditorContainer] textarea', 'step("test step", () => {})'],
+      // name: httpName,
+    ],
+  },
+};
+
+const createMonitorJourney = ({
+  monitorName,
+  monitorType,
+  monitorConfig,
+  monitorListDetails,
+  monitorEditDetails,
+}: {
+  monitorName: string;
+  monitorType: FormMonitorType;
+  monitorConfig: Record<string, string | string[]>;
+  monitorListDetails: Record<string, string>;
+  monitorEditDetails: Array<[string, string]>;
+}) => {
+  journey(
+    `Synthetics - add monitor - ${monitorName}`,
+    async ({ page, params }: { page: Page; params: any }) => {
+      const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+
+      before(async () => {
+        await syntheticsApp.waitForLoadingToFinish();
+      });
+
+      after(async () => {
+        await syntheticsApp.navigateToMonitorManagement();
+      });
+
+      step('Go to add monitor', async () => {
+        await syntheticsApp.navigateToAddMonitor();
+      });
+
+      step('login to Kibana', async () => {
+        await syntheticsApp.loginToKibana();
+        const invalid = await page.locator(
+          `text=Username or password is incorrect. Please try again.`
+        );
+        expect(await invalid.isVisible()).toBeFalsy();
+      });
+
+      step(`create ${monitorType} monitor`, async () => {
+        await syntheticsApp.createMonitor({ monitorConfig, monitorType });
+        const isSuccessful = await syntheticsApp.confirmAndSave();
+        expect(isSuccessful).toBeTruthy();
+      });
+
+      step(`view ${monitorType} details in Monitor Management UI`, async () => {
+        await syntheticsApp.navigateToMonitorManagement();
+        const hasFailure = await syntheticsApp.findMonitorConfiguration(monitorListDetails);
+        expect(hasFailure).toBeFalsy();
+      });
+
+      step('edit ${monitorType}', async () => {
+        await syntheticsApp.navigateToEditMonitor();
+        await syntheticsApp.findByText(monitorListDetails.location);
+        const hasFailure = await syntheticsApp.findEditMonitorConfiguration(monitorEditDetails);
+        expect(hasFailure).toBeFalsy();
+      });
+
+      // if (isRemote) {
+      //   step('view results in overview page', async () => {
+      //     await syntheticsApp.navigateToOverviewPage();
+      //     await page.waitForSelector(`text=${monitorName}`, { timeout: 160 * 1000 });
+      //   });
+      // }
+
+      step('delete monitor', async () => {
+        await syntheticsApp.navigateToMonitorManagement();
+        const isSuccessful = await syntheticsApp.deleteMonitors();
+        expect(isSuccessful).toBeTruthy();
+      });
+
+      // const createBasicMonitor = async () => {
+      //   await syntheticsApp.fillFirstMonitorDetails({
+      //     url: 'https://www.elastic.co',
+      //     locations: ['us_central'],
+      //     apmServiceName: 'synthetics',
+      //   });
+      // };
+
+      // before(async () => {
+      //   await syntheticsApp.waitForLoadingToFinish();
+      // });
+
+      // step('Go to add monitor', async () => {
+      //   await syntheticsApp.navigateToAddMonitor();
+      // });
+
+      // step('login to Kibana', async () => {
+      //   await syntheticsApp.loginToKibana();
+      //   const invalid = await page.locator(
+      //     `text=Username or password is incorrect. Please try again.`
+      //   );
+      //   expect(await invalid.isVisible()).toBeFalsy();
+      // });
+
+      // step('shows validation error on touch', async () => {
+      //   await page.click(byTestId('urls-input'));
+      //   await page.click(byTestId('comboBoxInput'));
+      //   expect(await page.isVisible('text=URL is required')).toBeTruthy();
+      // });
+
+      // step('create basic monitor', async () => {
+      //   await createBasicMonitor();
+      //   await syntheticsApp.confirmAndSave();
+      // });
+
+      // step('it navigates to details page after saving', async () => {
+      //   await page.click('text=Dismiss');
+      //   expect(await page.isVisible('text=My first monitor')).toBeTruthy();
+      // });
+    }
+  );
+};
+
+Object.values(configuration).forEach((config) => {
+  createMonitorJourney({
+    monitorType: config.monitorType,
+    monitorName: `${config.monitorType} monitor`,
+    monitorConfig: config.monitorConfig,
+    monitorListDetails: config.monitorListDetails,
+    monitorEditDetails: config.monitorEditDetails as Array<[string, string]>,
+  });
+});

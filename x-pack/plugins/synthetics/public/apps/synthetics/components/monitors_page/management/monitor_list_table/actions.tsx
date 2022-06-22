@@ -95,6 +95,7 @@ export const Actions = ({ euiTheme, id, name, reloadPage, canEditSynthetics }: P
       iconType="boxesHorizontal"
       color="primary"
       iconSide="right"
+      data-test-subj="syntheticsMonitorListActions"
       onClick={openPopover}
     />
   );

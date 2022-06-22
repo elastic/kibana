@@ -333,7 +333,8 @@ const LIGHTWEIGHT_SCHEDULES = [
 
 export const MONITOR_TYPE_CONFIG = {
   [FormMonitorType.MULTISTEP]: {
-    id: 'syntheticsMonitorTypeMultiStep',
+    id: 'syntheticsMonitorTypeMultistep',
+    'data-test-subj': 'syntheticsMonitorTypeMultistep',
     label: 'Multistep',
     value: FormMonitorType.MULTISTEP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.multiStep.title', {
@@ -352,6 +353,7 @@ export const MONITOR_TYPE_CONFIG = {
   },
   [FormMonitorType.SINGLE]: {
     id: 'syntheticsMonitorTypeSingle',
+    'data-test-subj': 'syntheticsMonitorTypeSingle',
     label: 'Single Page',
     value: FormMonitorType.SINGLE,
     descriptionTitle: i18n.translate(
@@ -373,6 +375,7 @@ export const MONITOR_TYPE_CONFIG = {
   },
   [FormMonitorType.HTTP]: {
     id: 'syntheticsMonitorTypeHTTP',
+    'data-test-subj': 'syntheticsMonitorTypeHTTP',
     label: 'HTTP Ping',
     value: FormMonitorType.HTTP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.http.title', {
@@ -388,6 +391,7 @@ export const MONITOR_TYPE_CONFIG = {
   },
   [FormMonitorType.TCP]: {
     id: 'syntheticsMonitorTypeTCP',
+    'data-test-subj': 'syntheticsMonitorTypeTCP',
     label: 'TCP Ping',
     value: FormMonitorType.TCP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.tcp.title', {
@@ -403,6 +407,7 @@ export const MONITOR_TYPE_CONFIG = {
   },
   [FormMonitorType.ICMP]: {
     id: 'syntheticsMonitorTypeICMP',
+    'data-test-subj': 'syntheticsMonitorTypeICMP',
     label: 'ICMP Ping',
     value: FormMonitorType.ICMP,
     descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.icmp.title', {
@@ -453,6 +458,7 @@ export const FIELD: Record<string, FieldMeta> = {
     dependencies: [ConfigKey.NAME],
     props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
       return {
+        'data-test-subj': 'syntheticsMonitorConfigURL',
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
           setValue(ConfigKey.URLS, event.target.value);
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
@@ -482,6 +488,7 @@ export const FIELD: Record<string, FieldMeta> = {
             setValue(ConfigKey.NAME, event.target.value);
           }
         },
+        'data-test-subj': 'syntheticsMonitorConfigURL',
       };
     },
   },
@@ -502,6 +509,7 @@ export const FIELD: Record<string, FieldMeta> = {
             setValue(ConfigKey.NAME, event.target.value);
           }
         },
+        'data-test-subj': 'syntheticsMonitorConfigHost',
       };
     },
   },
@@ -522,6 +530,7 @@ export const FIELD: Record<string, FieldMeta> = {
             setValue(ConfigKey.NAME, event.target.value);
           }
         },
+        'data-test-subj': 'syntheticsMonitorConfigHost',
       };
     },
   },
@@ -553,6 +562,9 @@ export const FIELD: Record<string, FieldMeta> = {
     error: i18n.translate('xpack.synthetics.monitorConfig.name.error', {
       defaultMessage: 'Monitor name is required',
     }),
+    props: () => ({
+      'data-test-subj': 'syntheticsMonitorConfigName',
+    }),
   },
   [ConfigKey.SCHEDULE]: {
     fieldKey: `${ConfigKey.SCHEDULE}.number`,
@@ -569,6 +581,7 @@ export const FIELD: Record<string, FieldMeta> = {
     props: ({ dependencies }) => {
       const [monitorType] = dependencies;
       return {
+        'data-test-subj': 'syntheticsMonitorConfigSchedule',
         options: monitorType === DataStream.BROWSER ? BROWSER_SCHEDULES : LIGHTWEIGHT_SCHEDULES,
       };
     },
@@ -605,6 +618,7 @@ export const FIELD: Record<string, FieldMeta> = {
           id: location.id,
           isServiceManaged: location.isServiceManaged,
         })),
+        'data-test-subj': 'syntheticsMonitorConfigLocations',
         onChange: (updatedValues: ServiceLocations) => {
           setValue(
             ConfigKey.LOCATIONS,
@@ -682,6 +696,7 @@ export const FIELD: Record<string, FieldMeta> = {
     controlled: true,
     props: ({ field }) => ({
       selectedOptions: field?.value,
+      'data-test-subj': 'syntheticsMonitorConfigAPMServiceName',
     }),
   },
   [ConfigKey.NAMESPACE]: {

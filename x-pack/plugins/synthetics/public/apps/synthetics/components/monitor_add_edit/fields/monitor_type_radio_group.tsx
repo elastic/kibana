@@ -26,6 +26,7 @@ export type MonitorTypeRadioOption = EuiKeyPadMenuItemProps & {
   label: React.ReactNode;
   onChange: (id: string, value: string) => void;
   name: string;
+  'data-test-subj': string;
 };
 
 export const MonitorType = ({
@@ -36,6 +37,7 @@ export const MonitorType = ({
   onChange,
   name,
   isSelected,
+  'data-test-subj': dataTestSubj,
 }: MonitorTypeRadioOption) => {
   return (
     <EuiKeyPadMenuItem
@@ -46,6 +48,7 @@ export const MonitorType = ({
       onChange={onChange}
       name={name}
       isSelected={isSelected}
+      data-test-subj={dataTestSubj}
     >
       <EuiIcon type={icon} />
     </EuiKeyPadMenuItem>
@@ -78,6 +81,7 @@ export const MonitorTypeRadioGroup = ({
               name={name}
               onChange={onChange}
               isSelected={radio.value === value}
+              data-test-subj={radio['data-test-subj']}
             />
           );
         })}
