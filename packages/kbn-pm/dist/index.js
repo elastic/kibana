@@ -1806,6 +1806,29 @@ class CiStatsReporter {
       await flushBuffer();
     }
   }
+
+  async reportPerformanceMetrics(metrics) {
+    var _this$config9;
+
+    if (!this.hasBuildConfig()) {
+      return;
+    }
+
+    const buildId = (_this$config9 = this.config) === null || _this$config9 === void 0 ? void 0 : _this$config9.buildId;
+
+    if (!buildId) {
+      throw new Error(`Performance metrics can't be reported without a buildId`);
+    }
+
+    return !!(await this.req({
+      auth: true,
+      path: `/v1/performance_metrics_report?buildId=${buildId}`,
+      body: {
+        metrics
+      },
+      bodyDesc: `performance metrics: ${metrics}`
+    }));
+  }
   /**
    * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
    * in the upstreamBranch when calling the timings() method. Outside of @kbn/pm
