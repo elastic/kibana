@@ -200,7 +200,7 @@ function ({ title, description }: Options) {
 
 ## Use `any` as little as possible
 
-Using any is sometimes valid, but should rarely be used, even if to make quicker progress. Even `Unknown` is better than using `any` if you aren't sure of an input parameter.
+Using any is sometimes valid, but should rarely be used, even if to make quicker progress. Even `unknown` is better than using `any` if you aren't sure of an input parameter.
 
 If you use a variable that isn't initially defined, you should give it a type, or it will be `any` by default (and strangely this isn't a warning, even though I think it should be)
 
