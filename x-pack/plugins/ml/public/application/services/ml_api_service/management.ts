@@ -12,6 +12,7 @@ import { HttpService } from '../http_service';
 import { basePath } from '.';
 import { useMlKibana } from '../../contexts/kibana';
 import type { TrainedModelStat } from '../../../../common/types/trained_models';
+import type { ManagementListResponse } from '../../../../common/types/management';
 
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 
@@ -63,7 +64,7 @@ export function managementApiProvider(httpService: HttpService) {
      * @param params - Optional query params
      */
     getList(mlSavedObjectType: MlSavedObjectType) {
-      return httpService.http<any>({
+      return httpService.http<ManagementListResponse>({
         path: `${apiBasePath}/management/list/${mlSavedObjectType}`,
         method: 'GET',
       });

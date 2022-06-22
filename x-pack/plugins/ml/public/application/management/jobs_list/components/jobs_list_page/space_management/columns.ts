@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import type { MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
 
 export function getColumns(mlSavedObjectType: MlSavedObjectType) {
@@ -21,7 +22,7 @@ export function getColumns(mlSavedObjectType: MlSavedObjectType) {
   }
 }
 
-const adColumns = [
+const adColumns: Array<EuiBasicTableColumn<any>> = [
   {
     field: 'id',
     name: i18n.translate('xpack.ml.analyticsSelector.id', {
@@ -61,7 +62,7 @@ const adColumns = [
   },
 ];
 
-const dfaColumns = [
+const dfaColumns: Array<EuiBasicTableColumn<any>> = [
   {
     field: 'id',
     name: i18n.translate('xpack.ml.analyticsSelector.id', {
@@ -119,7 +120,7 @@ const dfaColumns = [
   },
 ];
 
-const trainedModelColumns = [
+const trainedModelColumns: Array<EuiBasicTableColumn<any>> = [
   {
     field: 'id',
     name: i18n.translate('xpack.ml.analyticsSelector.id', {

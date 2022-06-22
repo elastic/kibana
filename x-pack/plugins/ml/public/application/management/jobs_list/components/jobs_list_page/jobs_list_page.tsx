@@ -62,7 +62,6 @@ export const JobsListPage: FC<{
   const [accessDenied, setAccessDenied] = useState(false);
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
-  const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
   const httpService = new HttpService(coreStart.http);
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
   const I18nContext = coreStart.i18n.Context;
@@ -70,8 +69,7 @@ export const JobsListPage: FC<{
 
   const check = async () => {
     try {
-      const { mlFeatureEnabledInSpace } = await checkGetManagementMlJobsResolver();
-      setIsMlEnabledInSpace(mlFeatureEnabledInSpace);
+      await checkGetManagementMlJobsResolver();
     } catch (e) {
       if (e.mlFeatureEnabledInSpace && e.isPlatinumOrTrialLicense === false) {
         setIsPlatinumOrTrialLicense(false);
@@ -177,7 +175,6 @@ export const JobsListPage: FC<{
                     </EuiFlexItem>
                   </EuiFlexGroup>
                   <SpaceManagement
-                    isMlEnabledInSpace={isMlEnabledInSpace}
                     spacesApi={spacesApi}
                     httpService={httpService}
                     setCurrentTab={setCurrentTabId}

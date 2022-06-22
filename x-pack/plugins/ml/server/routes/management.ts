@@ -13,6 +13,11 @@ import { listTypeSchema } from './schemas/management_schema';
 import { jobServiceProvider } from '../models/job_service';
 import { checksFactory } from '../saved_objects';
 import { BUILT_IN_MODEL_TAG } from '../../common/constants/data_frame_analytics';
+import type {
+  AnomalyDetectionManagementItems,
+  AnalyticsManagementItems,
+  TrainedModelsManagementItems,
+} from '../../common/types/management';
 
 // TODO translate??
 const BUILT_IN_MODEL_TYPE = 'built-in';
@@ -55,7 +60,7 @@ export function managementRoutes({ router, routeGuard }: RouteInitialization) {
               const { jobsSummary } = jobServiceProvider(client, mlClient);
               const [jobs, adJobStatus] = await Promise.all([jobsSummary(), jobsSpaces()]);
 
-              const adJobsWithSpaces = jobs.map((job) => {
+              const adJobsWithSpaces: AnomalyDetectionManagementItems[] = jobs.map((job) => {
                 return {
                   id: job.id,
                   description: job.description,
@@ -83,22 +88,22 @@ export function managementRoutes({ router, routeGuard }: RouteInitialization) {
                 jobsSpaces(),
               ]);
 
-              const statsMapped = dfaJobsStats.reduce((acc, cur) => {
+              const dfaStatsMapped = dfaJobsStats.reduce((acc, cur) => {
                 acc[cur.id] = cur;
                 return acc;
               }, {} as Record<string, estypes.MlDataframeAnalytics>);
 
-              const dfaJobsWithSpaces = dfaJobs.map((j) => {
+              const dfaJobsWithSpaces: AnalyticsManagementItems[] = dfaJobs.map((j) => {
                 const id = j.id;
                 return {
                   id,
-                  description: j.description,
-                  source_index: j.source.index,
+                  description: j.description ?? '',
+                  source_index: j.source.index as string[], // esclient types are wrong
                   dest_index: j.dest.index,
                   job_type: Object.keys(j.analysis)[0] ?? '',
-                  state: statsMapped[id]?.state ?? '',
-                  memory_status: statsMapped[id]?.memory_usage.status ?? '',
-                  progress: statsMapped[id]?.progress ?? {},
+                  state: dfaStatsMapped[id]?.state ?? '',
+                  // memory_status: statsMapped[id]?.memory_usage.status ?? '',
+                  // progress: statsMapped[id]?.progress ?? {},
                   spaces: dfaJobStatus['data-frame-analytics'][id] ?? [],
                 };
               });
@@ -107,23 +112,34 @@ export function managementRoutes({ router, routeGuard }: RouteInitialization) {
               });
 
             case 'trained-model':
-              const [{ trained_model_configs: models }, modelSpaces] = await Promise.all([
+              const [
+                { trained_model_configs: models },
+                { trained_model_stats: modelsStats },
+                modelSpaces,
+              ] = await Promise.all([
                 mlClient.getTrainedModels(),
+                mlClient.getTrainedModelsStats(),
                 trainedModelsSpaces(),
               ]);
 
-              const modelsWithSpaces = models.map((m) => {
+              const modelStatsMapped = modelsStats.reduce((acc, cur) => {
+                acc[cur.model_id] = cur;
+                return acc;
+              }, {} as Record<string, estypes.MlTrainedModelStats>);
+
+              const modelsWithSpaces: TrainedModelsManagementItems[] = models.map((m) => {
+                const id = m.model_id;
                 return {
-                  id: m.model_id,
-                  description: m.description,
-                  create_time: m.create_time,
-                  state: '',
+                  id,
+                  description: m.description ?? '',
+                  // create_time: m.create_time,
+                  state: modelStatsMapped[id].deployment_stats?.state ?? '',
                   type: [
                     m.model_type,
                     ...Object.keys(m.inference_config),
                     ...(m.tags.includes(BUILT_IN_MODEL_TAG) ? [BUILT_IN_MODEL_TYPE] : []),
                   ],
-                  spaces: modelSpaces.trainedModels[m.model_id] ?? [],
+                  spaces: modelSpaces.trainedModels[id] ?? [],
                 };
               });
               return response.ok({

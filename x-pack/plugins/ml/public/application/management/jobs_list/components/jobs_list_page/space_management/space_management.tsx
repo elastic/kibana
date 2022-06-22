@@ -14,35 +14,34 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  SearchFilterConfig,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { HttpService } from '../../../../../services/http_service';
 import type { JobType, MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
-import type { AnomalyDetectionManagementItems } from '../../../../../../../common/types/management';
+import type {
+  ManagementListResponse,
+  ManagementItems,
+} from '../../../../../../../common/types/management';
 import { managementApiProvider } from '../../../../../services/ml_api_service/management';
 import { getColumns } from './columns';
 import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
 import { getFilters } from './filters';
 
 interface Props {
-  isMlEnabledInSpace: boolean;
   spacesApi: SpacesPluginStart | undefined;
   httpService: HttpService;
   setCurrentTab: (tabId: MlSavedObjectType) => void;
 }
 
-export const SpaceManagement: FC<Props> = ({
-  isMlEnabledInSpace,
-  spacesApi,
-  httpService,
-  setCurrentTab,
-}) => {
+export const SpaceManagement: FC<Props> = ({ spacesApi, httpService, setCurrentTab }) => {
   const { getList } = managementApiProvider(httpService);
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
-  const [jobs, setJobs] = useState<AnomalyDetectionManagementItems[]>();
-  const [columns, setColumns] = useState<any[]>([]); // TODO change any !!!!!!!!!!!!!!!!!!!!!!!!!!
-  const [filters, setFilters] = useState<any[] | undefined>([]); // TODO change any !!!!!!!!!!!!!!!!!!!!!!!!!!
+  const [jobs, setJobs] = useState<ManagementListResponse>();
+  const [columns, setColumns] = useState<Array<EuiBasicTableColumn<ManagementListResponse>>>([]);
+  const [filters, setFilters] = useState<SearchFilterConfig[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
   const refresh = useCallback(() => {
@@ -55,7 +54,7 @@ export const SpaceManagement: FC<Props> = ({
       })
       .catch(() => {
         setJobs([]);
-        setFilters([]);
+        setFilters(undefined);
         setIsLoading(false);
       });
   }, [getList, currentTabId]);
@@ -78,7 +77,7 @@ export const SpaceManagement: FC<Props> = ({
               }),
               sortable: true,
               truncateText: true,
-              render: (item: any) => {
+              render: (item: ManagementItems) => {
                 return (
                   <MLSavedObjectsSpacesList
                     spacesApi={spacesApi}
@@ -92,7 +91,7 @@ export const SpaceManagement: FC<Props> = ({
             },
           ]
         : []),
-    ];
+    ] as Array<EuiBasicTableColumn<any>>;
   }, [currentTabId, spacesApi, refresh]);
 
   const getTable = useCallback(() => {
@@ -108,7 +107,7 @@ export const SpaceManagement: FC<Props> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiInMemoryTable
-              items={jobs}
+              items={jobs as any}
               columns={columns}
               search={{
                 box: {
