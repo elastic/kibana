@@ -36,6 +36,17 @@ import { createStore, State } from '../../../../common/store';
 
 jest.mock('../../../../common/lib/kibana/hooks');
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/components/user_privileges', () => {
+  return {
+    useUserPrivileges: () => ({
+      listPrivileges: { loading: false, error: undefined, result: undefined },
+      detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+      endpointPrivileges: {},
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    }),
+  };
+});
+
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
   const mockCasesContract = jest.requireActual('@kbn/cases-plugin/public/mocks');
@@ -225,7 +236,7 @@ describe('Body', () => {
       mockDispatch.mockClear();
     });
 
-    test('Add a Note to an event', () => {
+    test('Add a note to an event', () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulBody {...props} />
@@ -257,7 +268,7 @@ describe('Body', () => {
       );
     });
 
-    test('Add two Note to an event', () => {
+    test('Add two notes to an event', () => {
       const { storage } = createSecuritySolutionStorageMock();
       const state: State = {
         ...mockGlobalState,

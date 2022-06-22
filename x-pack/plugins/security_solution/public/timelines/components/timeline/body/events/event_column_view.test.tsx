@@ -28,6 +28,17 @@ jest.mock('../../../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn(),
   useDeepEqualSelector: jest.fn(),
 }));
+jest.mock('../../../../../common/components/user_privileges', () => {
+  return {
+    useUserPrivileges: () => ({
+      listPrivileges: { loading: false, error: undefined, result: undefined },
+      detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+      endpointPrivileges: {},
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    }),
+  };
+});
+
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {

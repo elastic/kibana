@@ -21,6 +21,7 @@ interface Props {
   ariaLabel?: string;
   allowUnpinning: boolean;
   isAlert: boolean;
+  isDisabled?: boolean;
   timelineType?: TimelineTypeLiteral;
   onClick?: () => void;
   pinned: boolean;
@@ -45,7 +46,7 @@ export const getDefaultAriaLabel = ({
 };
 
 export const Pin = React.memo<Props>(
-  ({ ariaLabel, allowUnpinning, isAlert, onClick = noop, pinned, timelineType }) => {
+  ({ ariaLabel, allowUnpinning, isAlert, isDisabled, onClick = noop, pinned, timelineType }) => {
     const isTemplate = timelineType === TimelineType.template;
     const defaultAriaLabel = getDefaultAriaLabel({
       isAlert,
@@ -60,7 +61,7 @@ export const Pin = React.memo<Props>(
         data-test-subj="pin"
         iconType={getPinIcon(pinned)}
         onClick={onClick}
-        isDisabled={isTemplate || !allowUnpinning}
+        isDisabled={isDisabled || isTemplate || !allowUnpinning}
         size="s"
       />
     );
