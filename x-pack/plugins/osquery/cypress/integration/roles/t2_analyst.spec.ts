@@ -79,7 +79,9 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
       props: { id: 'osquery.hours.number', index: 2 },
     }).should('exist');
 
-    cy.react('EuiAccordion', { props: { buttonContent: 'Advanced' } }).click();
+    cy.react('EuiAccordionClass', { props: { buttonContent: 'Advanced' } })
+      .last()
+      .click();
     typeInECSFieldInput('message{downArrow}{enter}');
     typeInOsqueryFieldInput('days{downArrow}{enter}');
     submitQuery();

@@ -257,9 +257,9 @@
 #CC# /packages/kbn-expect/ @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 
-# Scalability testing
-/packages/kbn-performance-testing-dataset-extractor/  @elastic/kibana-scalability-testing
-/packages/kbn-scalability-simulation-generator/  @elastic/kibana-scalability-testing
+# Performance testing
+/packages/kbn-performance-testing-dataset-extractor/  @elastic/kibana-performance-testing
+/packages/kbn-scalability-simulation-generator/  @elastic/kibana-performance-testing
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
@@ -291,7 +291,6 @@
 /packages/kbn-logging-mocks/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
-/src/dev/run_check_published_api_changes.ts @elastic/kibana-core
 /src/plugins/advanced_settings/ @elastic/kibana-core
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
