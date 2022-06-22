@@ -7,7 +7,7 @@
     "composite": false,
     "emitDeclarationOnly": true,
     "outDir": "./target/types",
-    "types": ["node"],
+    "types": ["node", "jest"],
     "paths": {
       "#pipeline-utils": [".buildkite/pipeline-utils/index.ts"],
       "#pipeline-utils/*": [".buildkite/pipeline-utils/*"],
