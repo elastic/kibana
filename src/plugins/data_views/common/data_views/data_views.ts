@@ -859,8 +859,10 @@ export class DataViewsService {
     });
 
     return this.savedObjectsClient
-      .update(DATA_VIEW_SAVED_OBJECT_TYPE, indexPattern.id, body, {
+      .create(DATA_VIEW_SAVED_OBJECT_TYPE, body, {
+        id: indexPattern.id,
         version: indexPattern.version,
+        overwrite: true,
       })
       .then((resp) => {
         indexPattern.id = resp.id;
