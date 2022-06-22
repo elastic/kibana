@@ -91,7 +91,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, httpService, setCurrentT
             },
           ]
         : []),
-    ] as Array<EuiBasicTableColumn<any>>;
+    ] as Array<EuiBasicTableColumn<ManagementListResponse>>;
   }, [currentTabId, spacesApi, refresh]);
 
   const getTable = useCallback(() => {
