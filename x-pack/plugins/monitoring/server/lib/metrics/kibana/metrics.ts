@@ -337,12 +337,12 @@ export const metrics = {
   kibana_cluster_rule_overdue_count: new KibanaClusterRuleMetric({
     field: 'kibana.cluster_rules.overdue.count',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueCountLabel', {
-      defaultMessage: 'Rule Overdue Count',
+      defaultMessage: 'Rule Queue Length',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueCountDescription',
       {
-        defaultMessage: 'Number of overdue rules across the entire cluster.',
+        defaultMessage: 'Number of queued alerting rules.',
       }
     ),
     format: SMALL_FLOAT,
@@ -353,12 +353,12 @@ export const metrics = {
   kibana_cluster_rule_overdue_p50: new KibanaClusterRuleMetric({
     field: 'kibana.cluster_rules.overdue.delay.p50',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP50Label', {
-      defaultMessage: 'Average Rule Overdue Delay',
+      defaultMessage: 'Average Rule Queue Duration',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP50Description',
       {
-        defaultMessage: 'Average delay of all overdue rules across the entire cluster.',
+        defaultMessage: 'Average duration alerting rules are queued.',
       }
     ),
     format: SMALL_FLOAT,
@@ -369,12 +369,12 @@ export const metrics = {
   kibana_cluster_rule_overdue_p99: new KibanaClusterRuleMetric({
     field: 'kibana.cluster_rules.overdue.delay.p99',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP99Label', {
-      defaultMessage: 'Worst Rule Overdue Delay',
+      defaultMessage: 'Longest Rule Queue Duration',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP99Description',
       {
-        defaultMessage: 'Worst delay of all overdue rules across the entire cluster.',
+        defaultMessage: 'Longest duration an alerting rule was queued.',
       }
     ),
     format: SMALL_FLOAT,
@@ -387,13 +387,13 @@ export const metrics = {
     label: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueCountLabel',
       {
-        defaultMessage: 'Action Overdue Count',
+        defaultMessage: 'Action Queue Length',
       }
     ),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueCountDescription',
       {
-        defaultMessage: 'Number of overdue actions across the entire cluster.',
+        defaultMessage: 'Number of actions queued.',
       }
     ),
     format: SMALL_FLOAT,
@@ -404,12 +404,12 @@ export const metrics = {
   kibana_cluster_action_overdue_p50: new KibanaClusterActionMetric({
     field: 'kibana.cluster_actions.overdue.delay.p50',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP50Label', {
-      defaultMessage: 'Average Action Overdue Delay',
+      defaultMessage: 'Average Action Queue Duration',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP50Description',
       {
-        defaultMessage: 'Average delay of all overdue actions across the entire cluster.',
+        defaultMessage: 'Average duration actions are queued.',
       }
     ),
     format: SMALL_FLOAT,
@@ -420,12 +420,12 @@ export const metrics = {
   kibana_cluster_action_overdue_p99: new KibanaClusterActionMetric({
     field: 'kibana.cluster_actions.overdue.delay.p99',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP99Label', {
-      defaultMessage: 'Worst Action Overdue Delay',
+      defaultMessage: 'Longest Action Queue Duration',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP99Description',
       {
-        defaultMessage: 'Worst delay of all overdue actions across the entire cluster.',
+        defaultMessage: 'Longest duration an action was queued.',
       }
     ),
     format: SMALL_FLOAT,
