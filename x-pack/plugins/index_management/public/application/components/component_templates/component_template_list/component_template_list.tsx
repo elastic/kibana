@@ -56,7 +56,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
     return redirectTo({
       pathname: 'component_templates',
     });
-  }, [history]);
+  }, [redirectTo]);
 
   const goToEditComponentTemplate = useCallback(
     (name: string) => {
