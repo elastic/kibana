@@ -80,6 +80,7 @@ export class ShareMenuManager {
     urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
     theme: ThemeServiceStart;
+    onClose: () => void;
   }) {
     if (this.isOpen) {
       onClose();

@@ -92,9 +92,10 @@ export interface UrlParamExtension {
 }
 
 /** @public */
-export interface ShowShareMenuOptions extends ShareContext {
+export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   anchorElement: HTMLElement;
   allowEmbed: boolean;
   allowShortUrl: boolean;
   embedUrlParamExtensions?: UrlParamExtension[];
+  onClose?: () => void;
 }
