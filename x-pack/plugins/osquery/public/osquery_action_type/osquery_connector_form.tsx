@@ -14,6 +14,7 @@ import { isEmpty, map, pickBy } from 'lodash';
 import { EuiAccordionProps, EuiSpacer } from '@elastic/eui';
 import { isDeepEqual } from 'react-use/lib/util';
 import uuid from 'uuid';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { ECSMapping } from '../../common/schemas/common';
 import { StyledEuiAccordion } from '../components/accordion';
 import { ECSMappingEditorField } from '../packs/queries/lazy_ecs_mapping_editor_field';
@@ -142,13 +143,11 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
     }
   }, [formData, formData.query, handleUpdate]);
 
-  useEffect(() => {
+  useEffectOnce(() => {
     if (actionParams.message?.ecs_mapping) {
       setAdvancedContentState('open');
     }
-    // Should happen only on the initial load
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   const componentProps = useMemo(() => ({ onChange: handleUpdate }), [handleUpdate]);
 

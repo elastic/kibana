@@ -157,4 +157,41 @@ describe('EventDetails', () => {
       expect(alertsWrapper.find('[data-test-subj="threatIntelTab"]').exists()).toBeFalsy();
     });
   });
+
+  describe('osquery tab', () => {
+    it('should not be rendered if not provided with specific raw data', () => {
+      expect(alertsWrapper.find('[data-test-subj="osqueryViewTab"]').exists()).toEqual(false);
+    });
+
+    it('render osquery tab', async () => {
+      const newProps = {
+        ...defaultProps,
+        rawEventData: {
+          ...rawEventData,
+          _source: {
+            ...rawEventData._source,
+            'kibana.alert.rule.name': 'test-rule',
+            'kibana.alert.rule.actions': [{ action_type_id: '.osquery' }],
+          },
+          fields: {
+            ...rawEventData.fields,
+            'agent.id': ['testAgent'],
+          },
+        },
+      };
+      wrapper = mount(
+        <TestProviders>
+          <EventDetails {...newProps} />
+        </TestProviders>
+      ) as ReactWrapper;
+      alertsWrapper = mount(
+        <TestProviders>
+          <EventDetails {...{ ...alertsProps, ...newProps }} />
+        </TestProviders>
+      ) as ReactWrapper;
+      await waitFor(() => wrapper.update());
+
+      expect(alertsWrapper.find('[data-test-subj="osqueryViewTab"]').exists());
+    });
+  });
 });

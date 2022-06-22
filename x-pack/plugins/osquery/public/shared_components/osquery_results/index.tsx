@@ -67,7 +67,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
   }, [fetchNextPage, inView]);
 
   return (
-    <>
+    <div data-test-subj={'osquery-results'}>
       {actionsData?.pages.map((page) =>
         (page.actions as Array<{ _source: OsqueryActionType; _id: string }>)?.map((ruleAction) => {
           const actionId = ruleAction._source.action_id;
@@ -79,6 +79,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
               username={ruleName}
               timestamp={<FormattedRelative value={startDate} />}
               event={'attached query'}
+              data-test-subj={'osquery-results-comment'}
               key={ruleAction._id}
             >
               <EuiSpacer size="m" />
@@ -118,7 +119,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
       )}
 
       <div ref={ref}>{isFetchingNextPage && <EuiLoadingContent lines={5} />}</div>
-    </>
+    </div>
   );
 };
 
