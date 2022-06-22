@@ -7,13 +7,10 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Status } from '../../../../../../../../common/types/api';
 import { CustomSource } from '../../../../../types';
 
-import {
-  AddCustomSourceApiActions,
-  AddCustomSourceApiLogic,
-  AddCustomSourceApiValues,
-} from './add_custom_source_api_logic';
+import { AddCustomSourceApiLogic } from './add_custom_source_api_logic';
 
 export interface AddCustomSourceProps {
   baseServiceType?: string;
@@ -26,8 +23,8 @@ export enum AddCustomSourceSteps {
 }
 
 export interface AddCustomSourceActions {
-  addSource: AddCustomSourceApiActions['addSource'];
-  addSourceSuccess: AddCustomSourceApiActions['addSourceSuccess'];
+  initiateCall: typeof AddCustomSourceApiLogic.actions.initiateCall;
+  apiSuccess({ source }: { source: CustomSource }): { source: CustomSource };
   createContentSource(): void;
   setCustomSourceNameValue(customSourceNameValue: string): string;
   setNewCustomSource(data: CustomSource): CustomSource;
@@ -38,7 +35,7 @@ interface AddCustomSourceValues {
   currentStep: AddCustomSourceSteps;
   customSourceNameValue: string;
   newCustomSource: CustomSource;
-  sourceApi: AddCustomSourceApiValues['sourceApi'];
+  status: Status;
 }
 
 /**
@@ -50,8 +47,8 @@ export const AddCustomSourceLogic = kea<
   MakeLogicType<AddCustomSourceValues, AddCustomSourceActions, AddCustomSourceProps>
 >({
   connect: {
-    actions: [AddCustomSourceApiLogic, ['addSource', 'addSourceSuccess', 'addSourceError']],
-    values: [AddCustomSourceApiLogic, ['sourceApi']],
+    actions: [AddCustomSourceApiLogic, ['initiateCall', 'apiSuccess']],
+    values: [AddCustomSourceApiLogic, ['status']],
   },
   path: ['enterprise_search', 'workplace_search', 'add_custom_source_logic'],
   actions: {
@@ -91,16 +88,13 @@ export const AddCustomSourceLogic = kea<
     createContentSource: () => {
       const { customSourceNameValue } = values;
       const { baseServiceType } = props;
-      actions.addSource(customSourceNameValue, baseServiceType);
+      actions.initiateCall({ name: customSourceNameValue, baseServiceType });
     },
-    addSourceSuccess: ({ source }) => {
+    apiSuccess: ({ source }) => {
       actions.setNewCustomSource(source);
     },
   }),
   selectors: {
-    buttonLoading: [
-      (selectors) => [selectors.sourceApi],
-      (apiStatus) => apiStatus?.status === 'PENDING',
-    ],
+    buttonLoading: [(selectors) => [selectors.status], (status) => status === 'PENDING'],
   },
 });

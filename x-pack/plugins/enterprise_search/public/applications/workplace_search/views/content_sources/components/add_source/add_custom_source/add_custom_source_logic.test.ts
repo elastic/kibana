@@ -42,20 +42,20 @@ describe('AddCustomSourceLogic', () => {
   describe('actions', () => {
     describe('addSourceSuccess', () => {
       it('sets a new source', () => {
-        const customSource: CustomSource = {
+        const source: CustomSource = {
           accessToken: 'a',
           name: 'b',
           id: '1',
         };
-        AddCustomSourceLogic.actions.addSourceSuccess(customSource);
+        AddCustomSourceLogic.actions.apiSuccess({ source });
 
         expect(AddCustomSourceLogic.values).toEqual({
           ...DEFAULT_VALUES,
           customSourceNameValue: '',
-          newCustomSource: customSource,
+          newCustomSource: source,
           sourceApi: {
             status: 'SUCCESS',
-            data: customSource,
+            data: source,
           },
           currentStep: AddCustomSourceSteps.SaveCustomStep,
         });
@@ -102,7 +102,7 @@ describe('AddCustomSourceLogic', () => {
     describe('organization context', () => {
       describe('createContentSource', () => {
         it('calls addSource on AddCustomSourceApi logic', async () => {
-          const addSourceSpy = jest.spyOn(AddCustomSourceLogic.actions, 'addSource');
+          const addSourceSpy = jest.spyOn(AddCustomSourceLogic.actions, 'initiateCall');
 
           AddCustomSourceLogic.actions.createContentSource();
           expect(addSourceSpy).toHaveBeenCalledWith(MOCK_NAME, undefined);
@@ -118,7 +118,7 @@ describe('AddCustomSourceLogic', () => {
             }
           );
 
-          const addSourceSpy = jest.spyOn(AddCustomSourceLogic.actions, 'addSource');
+          const addSourceSpy = jest.spyOn(AddCustomSourceLogic.actions, 'initiateCall');
 
           AddCustomSourceLogic.actions.createContentSource();
 

@@ -10,7 +10,7 @@
  * Each Status string corresponds to a possible status in a request's lifecycle
  */
 
-export type Status = 'IDLE' | 'PENDING' | 'SUCCESS' | 'ERROR';
+export type Status = 'IDLE' | 'LOADING' | 'SUCCESS' | 'ERROR';
 
 export interface HttpError {
   code: number;
@@ -23,7 +23,7 @@ export interface ApiSuccess<T> {
 }
 
 export interface ApiPending<T> {
-  status: 'PENDING';
+  status: 'LOADING';
   data?: T;
 }
 
@@ -33,7 +33,7 @@ export interface ApiIdle<T> {
 }
 
 export interface ApiError {
-  status: Status;
+  status: 'ERROR';
   error: HttpError;
 }
 
