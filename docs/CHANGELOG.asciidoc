@@ -326,7 +326,7 @@ Machine Learning::
 * Anomaly Detection: Adds View in Maps item to Actions menu in the anomalies table {kibana-pull}131284[#131284]
 * Adding v3 modules for Security_Linux and Security_Windows and Deprecating v1 + v2 {kibana-pull}131166[#131166]
 * Data Frame Analytics creation wizard: add support for filters in saved searches {kibana-pull}130744[#130744]
-* Allow to edit job selection on data frame analytics results and map pages {kibana-pull}130419[#130419]
+* Edit job selection on data frame analytics results and map pages {kibana-pull}130419[#130419]
 * Resizable/Collapsible Top Influencers section {kibana-pull}130018[#130018]
 
 Management::
