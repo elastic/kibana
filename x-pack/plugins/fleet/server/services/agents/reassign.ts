@@ -18,6 +18,7 @@ import {
   updateAgent,
   bulkUpdateAgents,
   processAgentsInBatches,
+  errorsToResults,
 } from './crud';
 import type { GetAgentsOptions } from '.';
 import { createAgentAction } from './actions';
@@ -189,29 +190,6 @@ async function reassignBatch(
     }))
   );
 
-  let results;
-
-  if (!skipSuccess) {
-    const givenOrder = agentIds ? agentIds : givenAgents.map((agent) => agent.id);
-    results = givenOrder.map((agentId) => {
-      const hasError = agentId in errors;
-      const result: BulkActionResult = {
-        id: agentId,
-        success: !hasError,
-      };
-      if (hasError) {
-        result.error = errors[agentId];
-      }
-      return result;
-    });
-  } else {
-    results = Object.entries(errors).map(([agentId, error]) => ({
-      id: agentId,
-      success: false,
-      error,
-    }));
-  }
-
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
     agents: agentsToUpdate.map((agent) => agent.id),
@@ -219,5 +197,5 @@ async function reassignBatch(
     type: 'POLICY_REASSIGN',
   });
 
-  return { items: results };
+  return { items: errorsToResults(givenAgents, errors, agentIds, skipSuccess) };
 }
