@@ -38,7 +38,7 @@ async function haveBazelFoldersBeenCreatedBefore(kbnRootPath: string) {
     return (
       (await isDirectory(resolve(kbnRootPath, 'bazel-bin', 'packages'))) ||
       (await isDirectory(resolve(kbnRootPath, 'bazel-kibana', 'packages'))) ||
-      (await isDirectory(resolve(kbnRootPath, 'bazel-out')))
+      (await isDirectory(resolve(kbnRootPath, 'bazel-out', 'host')))
     );
   } catch {
     return false;
