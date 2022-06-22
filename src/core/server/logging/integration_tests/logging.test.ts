@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { LoggerContextConfigInput } from '@kbn/core-logging-server';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { InternalCoreSetup } from '../../internal_types';
-import { LoggerContextConfigInput } from '../logging_config';
 import { Subject } from 'rxjs';
 
 function createRoot() {
