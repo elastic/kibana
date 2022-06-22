@@ -75,7 +75,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
     const svgHeight = options.maxSize * 2 + HALF_FONT_SIZE + circleStyle.strokeWidth * 2;
     const circleCenterX = options.maxSize + circleStyle.strokeWidth;
     const circleBottomY = svgHeight - circleStyle.strokeWidth;
-    const maxLabelWidth = this._formatValue(fieldMeta.max).toString().replace(/[,.]/g, '').length;
+    const maxLabelWidth = this._formatValue(fieldMeta.max).toString().length;
 
     function makeMarker(radius: number, formattedValue: string | number) {
       const circleCenterY = circleBottomY - radius;
