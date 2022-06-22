@@ -277,9 +277,8 @@ A query can have the following status:
 |===
 
 NOTE: If an agent is offline, the request status remains **pending** as {kib} retries the request.
-By default, a query request times out after five minutes. The time out applies to the time it takes
-to deliver the action request to an agent to run a query. If the action completes after the timeout period,
-the results are still returned.
+By default, a query request times out after one minute. An action timeout error is returned when
+the query does not complete within that interval.
 
 
 [float]
