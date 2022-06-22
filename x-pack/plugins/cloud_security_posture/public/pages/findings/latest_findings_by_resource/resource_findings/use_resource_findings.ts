@@ -43,7 +43,7 @@ const getResourceFindingsQuery = ({
       ...query,
       bool: {
         ...query?.bool,
-        filter: [...(query?.bool?.filter || []), { term: { 'resource_id.keyword': resourceId } }],
+        filter: [...(query?.bool?.filter || []), { term: { 'resource.id': resourceId } }],
       },
     },
     pit: { id: pitId },

@@ -89,6 +89,7 @@ export interface RuleFields {
   machineLearningJobId: unknown;
   queryBar: unknown;
   index: unknown;
+  dataViewId?: unknown;
   ruleType: unknown;
   threshold?: unknown;
   threatIndex?: unknown;
@@ -350,6 +351,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
   return {
     ...baseFields,
     ...typeFields,
+    data_view_id: ruleFields.dataViewId,
   };
 };
 
@@ -476,6 +478,7 @@ export const formatRule = <T>(
 
 export const formatPreviewRule = ({
   index,
+  dataViewId,
   query,
   threatIndex,
   threatQuery,
@@ -488,6 +491,7 @@ export const formatPreviewRule = ({
   eqlOptions,
 }: {
   index: string[];
+  dataViewId?: string;
   threatIndex: string[];
   query: FieldValueQueryBar;
   threatQuery: FieldValueQueryBar;
@@ -502,6 +506,7 @@ export const formatPreviewRule = ({
   const defineStepData = {
     ...stepDefineDefaultValue,
     index,
+    dataViewId,
     queryBar: query,
     ruleType,
     threatIndex,
