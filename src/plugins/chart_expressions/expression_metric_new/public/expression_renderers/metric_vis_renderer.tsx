@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import './metric_vis.scss';
+
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -37,7 +39,7 @@ export const getMetricVisRenderer = (
             showNoResult={!visData.rows.length}
             handlers={handlers}
           >
-            <MetricVis data={visData} config={visConfig} />
+            <MetricVis data={visData} config={visConfig} renderComplete={handlers.done} />
           </VisualizationContainer>
         </KibanaThemeProvider>,
         domNode

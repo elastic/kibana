@@ -6,21 +6,32 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
-import { Chart, Metric, MetricSpec, Settings } from '@elastic/charts';
+import { Chart, Metric, MetricSpec, RenderChangeListener, Settings } from '@elastic/charts';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { VisParams } from '../../common';
 import { getThemeService } from '../services/theme_service';
 
 const MetricVis = ({
   data,
   config,
+  renderComplete,
 }: {
   data: Datatable;
   config: Pick<VisParams, 'metric' | 'dimensions'>;
+  renderComplete: IInterpreterRenderHandlers['done'];
 }) => {
+  const onRenderChange = useCallback<RenderChangeListener>(
+    (isRendered) => {
+      if (isRendered) {
+        renderComplete();
+      }
+    },
+    [renderComplete]
+  );
+
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
 
   const secondaryMetricColumn = config.dimensions.secondaryMetric
@@ -78,7 +89,10 @@ const MetricVis = ({
   const chartTheme = getThemeService().useChartsTheme();
   return (
     <Chart>
-      <Settings theme={[{ background: { color: 'transparent' } }, chartTheme]} />
+      <Settings
+        theme={[{ background: { color: 'transparent' } }, chartTheme]}
+        onRenderChange={onRenderChange}
+      />
       <Metric id="metric" data={grid} />
     </Chart>
   );
