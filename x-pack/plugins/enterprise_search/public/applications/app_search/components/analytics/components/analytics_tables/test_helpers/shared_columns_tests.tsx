@@ -44,7 +44,7 @@ export const runActionColumnTests = (wrapper: ReactWrapper) => {
 
   describe('edit action', () => {
     it('calls the find_or_create curation API, then navigates the user to the curation', async () => {
-      http.get.mockReturnValue(Promise.resolve({ id: 'cur-123456789' }));
+      http.post.mockReturnValue(Promise.resolve({ id: 'cur-123456789' }));
       wrapper.find('[data-test-subj="AnalyticsTableEditQueryButton"]').first().simulate('click');
       await nextTick();
 
@@ -58,7 +58,7 @@ export const runActionColumnTests = (wrapper: ReactWrapper) => {
     });
 
     it('falls back to "" for the empty query', async () => {
-      http.get.mockReturnValue(Promise.resolve({ id: 'cur-987654321' }));
+      http.post.mockReturnValue(Promise.resolve({ id: 'cur-987654321' }));
       wrapper.find('[data-test-subj="AnalyticsTableEditQueryButton"]').last().simulate('click');
       await nextTick();
 
@@ -72,7 +72,7 @@ export const runActionColumnTests = (wrapper: ReactWrapper) => {
     });
 
     it('handles API errors', async () => {
-      http.get.mockReturnValue(Promise.reject());
+      http.post.mockReturnValue(Promise.reject());
       wrapper.find('[data-test-subj="AnalyticsTableEditQueryButton"]').first().simulate('click');
       await nextTick();
 
