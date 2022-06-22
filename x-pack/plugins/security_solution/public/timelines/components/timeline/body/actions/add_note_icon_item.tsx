@@ -27,6 +27,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   toggleShowNotes,
 }) => {
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+
   return (
     <ActionIconItem>
       <NotesButton

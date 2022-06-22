@@ -21,7 +21,7 @@ interface Props {
   ariaLabel?: string;
   allowUnpinning: boolean;
   isAlert: boolean;
-  isDisabled: boolean;
+  isDisabled?: boolean;
   timelineType?: TimelineTypeLiteral;
   onClick?: () => void;
   pinned: boolean;
