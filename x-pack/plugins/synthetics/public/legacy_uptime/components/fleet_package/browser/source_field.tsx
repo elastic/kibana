@@ -24,7 +24,7 @@ import { OptionalLabel } from '../optional_label';
 import { CodeEditor } from '../code_editor';
 import { ScriptRecorderFields } from './script_recorder_fields';
 import { ZipUrlTLSFields } from './zip_url_tls_fields';
-import { ConfigKey, MonacoEditorLangId } from '../types';
+import { ConfigKey, MonacoEditorLangId, Validation } from '../types';
 
 enum SourceType {
   INLINE = 'syntheticsBrowserInlineConfig',
@@ -48,6 +48,7 @@ interface Props {
   onChange: (sourceConfig: SourceConfig) => void;
   onFieldBlur: (field: ConfigKey) => void;
   defaultConfig?: SourceConfig;
+  validate?: Validation;
 }
 
 export const defaultValues = {
@@ -72,7 +73,12 @@ const getDefaultTab = (defaultConfig: SourceConfig, isZipUrlSourceEnabled = true
   return isZipUrlSourceEnabled ? SourceType.ZIP : SourceType.INLINE;
 };
 
-export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValues }: Props) => {
+export const SourceField = ({
+  onChange,
+  onFieldBlur,
+  defaultConfig = defaultValues,
+  validate,
+}: Props) => {
   const { isZipUrlSourceEnabled } = usePolicyConfigContext();
   const [sourceType, setSourceType] = useState<SourceType>(
     getDefaultTab(defaultConfig, isZipUrlSourceEnabled)
@@ -82,6 +88,16 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
   useEffect(() => {
     onChange(config);
   }, [config, onChange]);
+
+  const isSourceInlineInvalid =
+    validate?.[ConfigKey.SOURCE_INLINE]?.({
+      [ConfigKey.SOURCE_INLINE]: config.inlineScript,
+    }) ?? false;
+
+  const isZipUrlInvalid =
+    validate?.[ConfigKey.SOURCE_ZIP_URL]?.({
+      [ConfigKey.SOURCE_ZIP_URL]: config.zipUrl,
+    }) ?? false;
 
   const zipUrlLabel = (
     <FormattedMessage
@@ -101,7 +117,7 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
           <EuiSpacer size="m" />
           <EuiFormRow
             label={zipUrlLabel}
-            isInvalid={!config.zipUrl}
+            isInvalid={isZipUrlInvalid}
             error={
               <FormattedMessage
                 id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.error"
@@ -267,7 +283,7 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
       'data-test-subj': `syntheticsSourceTab__inline`,
       content: (
         <EuiFormRow
-          isInvalid={!config.inlineScript}
+          isInvalid={isSourceInlineInvalid}
           error={
             <FormattedMessage
               id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.error"

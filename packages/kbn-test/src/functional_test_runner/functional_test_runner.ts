@@ -43,7 +43,7 @@ export class FunctionalTestRunner {
         : new EsVersion(esVersion);
   }
 
-  async run() {
+  async run(abortSignal?: AbortSignal) {
     const testStats = await this.getTestStats();
 
     return await this.runHarness(async (config, lifecycle, coreProviders) => {
@@ -106,10 +106,19 @@ export class FunctionalTestRunner {
         return this.simulateMochaDryRun(mocha);
       }
 
-      await lifecycle.beforeTests.trigger(mocha.suite);
-      this.log.info('Starting tests');
+      if (abortSignal?.aborted) {
+        this.log.warning('run aborted');
+        return;
+      }
 
-      return await runTests(lifecycle, mocha);
+      await lifecycle.beforeTests.trigger(mocha.suite);
+      if (abortSignal?.aborted) {
+        this.log.warning('run aborted');
+        return;
+      }
+
+      this.log.info('Starting tests');
+      return await runTests(lifecycle, mocha, abortSignal);
     });
   }
 
@@ -210,12 +219,7 @@ export class FunctionalTestRunner {
     const lifecycle = new Lifecycle(this.log);
 
     try {
-      const config = await readConfigFile(
-        this.log,
-        this.esVersion,
-        this.configFile,
-        this.configOverrides
-      );
+      const config = await this.readConfigFile();
       this.log.debug('Config loaded');
 
       if (
@@ -257,6 +261,10 @@ export class FunctionalTestRunner {
         }
       }
     }
+  }
+
+  public async readConfigFile() {
+    return await readConfigFile(this.log, this.esVersion, this.configFile, this.configOverrides);
   }
 
   simulateMochaDryRun(mocha: any) {

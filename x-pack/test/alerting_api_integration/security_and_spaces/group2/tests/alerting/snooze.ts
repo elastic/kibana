@@ -18,7 +18,15 @@ import {
   getProducerUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 
-const FUTURE_SNOOZE_TIME = '9999-12-31T06:00:00.000Z';
+const NOW = new Date().toISOString();
+const SNOOZE_SCHEDULE = {
+  duration: 864000000,
+  rRule: {
+    dtstart: NOW,
+    tzid: 'UTC',
+    count: 1,
+  },
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function createSnoozeRuleTests({ getService }: FtrProviderContext) {
@@ -67,7 +75,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
           const response = await alertUtils
             .getSnoozeRequest(createdAlert.id)
-            .send({ snooze_end_time: FUTURE_SNOOZE_TIME });
+            .send({ snooze_schedule: SNOOZE_SCHEDULE });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -102,7 +110,10 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.snooze_end_time).to.eql(FUTURE_SNOOZE_TIME);
+              expect(updatedAlert.snooze_schedule.length).to.eql(1);
+              const { rRule, duration } = updatedAlert.snooze_schedule[0];
+              expect(rRule.dtstart).to.eql(NOW);
+              expect(duration).to.eql(SNOOZE_SCHEDULE.duration);
               expect(updatedAlert.mute_all).to.eql(false);
               // Ensure AAD isn't broken
               await checkAAD({
@@ -133,7 +144,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
           const response = await alertUtils
             .getSnoozeRequest(createdAlert.id)
-            .send({ snooze_end_time: FUTURE_SNOOZE_TIME });
+            .send({ snooze_schedule: SNOOZE_SCHEDULE });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -161,7 +172,10 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.snooze_end_time).to.eql(FUTURE_SNOOZE_TIME);
+              expect(updatedAlert.snooze_schedule.length).to.eql(1);
+              const { rRule, duration } = updatedAlert.snooze_schedule[0];
+              expect(rRule.dtstart).to.eql(NOW);
+              expect(duration).to.eql(SNOOZE_SCHEDULE.duration);
               expect(updatedAlert.mute_all).to.eql(false);
               // Ensure AAD isn't broken
               await checkAAD({
@@ -192,7 +206,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
           const response = await alertUtils
             .getSnoozeRequest(createdAlert.id)
-            .send({ snooze_end_time: FUTURE_SNOOZE_TIME });
+            .send({ snooze_schedule: SNOOZE_SCHEDULE });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -231,7 +245,10 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.snooze_end_time).to.eql(FUTURE_SNOOZE_TIME);
+              expect(updatedAlert.snooze_schedule.length).to.eql(1);
+              const { rRule, duration } = updatedAlert.snooze_schedule[0];
+              expect(rRule.dtstart).to.eql(NOW);
+              expect(duration).to.eql(SNOOZE_SCHEDULE.duration);
               expect(updatedAlert.mute_all).to.eql(false);
               // Ensure AAD isn't broken
               await checkAAD({
@@ -262,7 +279,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
           const response = await alertUtils
             .getSnoozeRequest(createdAlert.id)
-            .send({ snooze_end_time: FUTURE_SNOOZE_TIME });
+            .send({ snooze_schedule: SNOOZE_SCHEDULE });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -301,7 +318,10 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.snooze_end_time).to.eql(FUTURE_SNOOZE_TIME);
+              expect(updatedAlert.snooze_schedule.length).to.eql(1);
+              const { rRule, duration } = updatedAlert.snooze_schedule[0];
+              expect(rRule.dtstart).to.eql(NOW);
+              expect(duration).to.eql(SNOOZE_SCHEDULE.duration);
               expect(updatedAlert.mute_all).to.eql(false);
               // Ensure AAD isn't broken
               await checkAAD({
@@ -316,7 +336,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           }
         });
 
-        it('should handle snooze rule request appropriately when snoozeEndTime is -1', async () => {
+        it('should handle snooze rule request appropriately when duration is -1', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -346,9 +366,12 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
-          const response = await alertUtils
-            .getSnoozeRequest(createdAlert.id)
-            .send({ snooze_end_time: -1 });
+          const response = await alertUtils.getSnoozeRequest(createdAlert.id).send({
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              duration: -1,
+            },
+          });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -383,7 +406,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.snooze_end_time).to.eql(null);
+              expect(updatedAlert.snooze_schedule).to.eql([]);
               expect(updatedAlert.mute_all).to.eql(true);
               // Ensure AAD isn't broken
               await checkAAD({

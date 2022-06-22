@@ -24,6 +24,7 @@ export const MethodJson: React.FC = () => {
 
   return (
     <NewSearchIndexTemplate
+      title="json"
       description={i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.methodJson.description',
         {
@@ -31,7 +32,7 @@ export const MethodJson: React.FC = () => {
         }
       )}
       docsUrl="#"
-      type="JSON"
+      type="json"
       onNameChange={(value: string) => onNameChange(value)}
     >
       <EuiPanel

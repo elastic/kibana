@@ -32,7 +32,7 @@ export const moduleToSecurityJob = (
     datafeedState: '',
     hasDatafeed: false,
     isSingleMetricViewerJob: false,
-    jobState: '',
+    jobState: 'closed',
     memory_status: '',
     processed_record_count: 0,
     id: moduleJob.id,

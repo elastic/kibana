@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
 import type { Metric, MetricType } from '../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
 
@@ -17,6 +17,22 @@ export const getPercentilesSeries = (percentiles: Metric['percentiles'], fieldNa
       color: percentile.color,
       fieldName: fieldName ?? 'document',
       params: { percentile: percentile.value },
+    };
+  });
+};
+
+export const getPercentileRankSeries = (
+  values: Metric['values'],
+  colors: Metric['colors'],
+  fieldName?: string
+) => {
+  return values?.map((value, index) => {
+    return {
+      agg: 'percentile_rank',
+      isFullReference: false,
+      color: colors?.[index],
+      fieldName: fieldName ?? 'document',
+      params: { value },
     };
   });
 };
@@ -77,6 +93,7 @@ export const computeParentSeries = (
         ...(currentMetric.window && { window: currentMetric.window }),
         ...(timeScale && { timeScale }),
         ...(pipelineAgg === 'percentile' && meta && { percentile: meta }),
+        ...(pipelineAgg === 'percentile_rank' && meta && { value: meta }),
       },
     },
   ];
@@ -151,6 +168,9 @@ export const getParentPipelineSeriesFormula = (
     if (additionalPipelineAggMap.name === 'percentile' && nestedMetaValue) {
       additionalFunctionArgs = `, percentile=${nestedMetaValue}`;
     }
+    if (additionalPipelineAggMap.name === 'percentile_rank' && nestedMetaValue) {
+      additionalFunctionArgs = `, value=${nestedMetaValue}`;
+    }
     formula = `${aggMap.name}(${pipelineAgg}(${additionalPipelineAggMap.name}(${
       additionalSubFunction.field ?? ''
     }${additionalFunctionArgs ?? ''})))`;
@@ -158,6 +178,9 @@ export const getParentPipelineSeriesFormula = (
     let additionalFunctionArgs;
     if (pipelineAgg === 'percentile' && percentileValue) {
       additionalFunctionArgs = `, percentile=${percentileValue}`;
+    }
+    if (pipelineAgg === 'percentile_rank' && percentileValue) {
+      additionalFunctionArgs = `, value=${percentileValue}`;
     }
     if (pipelineAgg === 'filter_ratio') {
       const script = getFilterRatioFormula(subFunctionMetric);
@@ -183,7 +206,8 @@ export const getSiblingPipelineSeriesFormula = (
   currentMetric: Metric,
   metrics: Metric[]
 ) => {
-  const subFunctionMetric = metrics.find((metric) => metric.id === currentMetric.field);
+  const [nestedFieldId, nestedMeta] = currentMetric.field?.split('[') ?? [];
+  const subFunctionMetric = metrics.find((metric) => metric.id === nestedFieldId);
   if (!subFunctionMetric || subFunctionMetric.type === 'static') {
     return null;
   }
@@ -196,7 +220,10 @@ export const getSiblingPipelineSeriesFormula = (
   // support nested aggs with formula
   const additionalSubFunction = metrics.find((metric) => metric.id === subMetricField);
   let formula = `${aggregationMap.name}(`;
-  let minMax = '';
+  let minimumValue = '';
+  if (currentMetric.type === 'positive_only') {
+    minimumValue = `, 0`;
+  }
   if (additionalSubFunction) {
     const additionalPipelineAggMap = SUPPORTED_METRICS[additionalSubFunction.type];
     if (!additionalPipelineAggMap) {
@@ -204,19 +231,22 @@ export const getSiblingPipelineSeriesFormula = (
     }
     const additionalSubFunctionField =
       additionalSubFunction.type !== 'count' ? additionalSubFunction.field : '';
-    if (currentMetric.type === 'positive_only') {
-      minMax = `, 0, ${pipelineAggMap.name}(${additionalPipelineAggMap.name}(${
-        additionalSubFunctionField ?? ''
-      }))`;
-    }
     formula += `${pipelineAggMap.name}(${additionalPipelineAggMap.name}(${
       additionalSubFunctionField ?? ''
-    }))${minMax})`;
+    }))${minimumValue})`;
   } else {
-    if (currentMetric.type === 'positive_only') {
-      minMax = `, 0, ${pipelineAggMap.name}(${subMetricField ?? ''})`;
+    let additionalFunctionArgs;
+    // handle percentile and percentile_rank
+    const nestedMetaValue = Number(nestedMeta?.replace(']', ''));
+    if (pipelineAggMap.name === 'percentile' && nestedMetaValue) {
+      additionalFunctionArgs = `, percentile=${nestedMetaValue}`;
     }
-    formula += `${pipelineAggMap.name}(${subMetricField ?? ''})${minMax})`;
+    if (pipelineAggMap.name === 'percentile_rank' && nestedMetaValue) {
+      additionalFunctionArgs = `, value=${nestedMetaValue}`;
+    }
+    formula += `${pipelineAggMap.name}(${subMetricField ?? ''}${
+      additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
+    })${minimumValue})`;
   }
   return formula;
 };
@@ -284,6 +314,9 @@ export const getFormulaEquivalent = (
       return `${aggregation}(${currentMetric.field}${
         metaValue ? `, percentile=${metaValue}` : ''
       })`;
+    }
+    case 'percentile_rank': {
+      return `${aggregation}(${currentMetric.field}${metaValue ? `, value=${metaValue}` : ''})`;
     }
     case 'cumulative_sum':
     case 'derivative':

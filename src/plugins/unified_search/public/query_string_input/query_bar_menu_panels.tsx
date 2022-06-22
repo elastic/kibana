@@ -19,6 +19,7 @@ import {
 import {
   Filter,
   Query,
+  TimeRange,
   enableFilter,
   disableFilter,
   toggleFilterNegated,
@@ -28,16 +29,21 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '@kbn/data-plugin/common';
-import type {
-  IDataPluginServices,
-  TimeRange,
-  SavedQueryService,
-  SavedQuery,
-} from '@kbn/data-plugin/public';
+import type { IDataPluginServices, SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import { fromUser } from './from_user';
 import { QueryLanguageSwitcher } from './language_switcher';
+import { FilterPanelOption } from '../types';
 
-interface QueryBarMenuPanelProps {
+const MAP_ITEMS_TO_FILTER_OPTION: Record<string, FilterPanelOption> = {
+  'filter-sets-pinAllFilters': 'pinFilter',
+  'filter-sets-unpinAllFilters': 'pinFilter',
+  'filter-sets-enableAllFilters': 'disableFilter',
+  'filter-sets-disableAllFilters': 'disableFilter',
+  'filter-sets-invertAllFilters': 'negateFilter',
+  'filter-sets-removeAllFilters': 'deleteFilter',
+};
+
+export interface QueryBarMenuPanelsProps {
   filters?: Filter[];
   savedQuery?: SavedQuery;
   language: string;
@@ -50,6 +56,7 @@ interface QueryBarMenuPanelProps {
   savedQueryService: SavedQueryService;
   saveAsNewQueryFormComponent?: JSX.Element;
   manageFilterSetComponent?: JSX.Element;
+  hiddenPanelOptions?: FilterPanelOption[];
   nonKqlMode?: 'lucene' | 'text';
   closePopover: () => void;
   onQueryBarSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -72,6 +79,7 @@ export function QueryBarMenuPanels({
   savedQueryService,
   saveAsNewQueryFormComponent,
   manageFilterSetComponent,
+  hiddenPanelOptions,
   nonKqlMode,
   closePopover,
   onQueryBarSubmit,
@@ -79,7 +87,7 @@ export function QueryBarMenuPanels({
   onClearSavedQuery,
   onQueryChange,
   setRenderedComponent,
-}: QueryBarMenuPanelProps) {
+}: QueryBarMenuPanelsProps) {
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings, http, storage } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
@@ -249,10 +257,10 @@ export function QueryBarMenuPanels({
     {
       name: savedQuery
         ? i18n.translate('unifiedSearch.filter.options.loadOtherFilterSetLabel', {
-            defaultMessage: 'Load other filter set',
+            defaultMessage: 'Load other saved query',
           })
         : i18n.translate('unifiedSearch.filter.options.loadCurrentFilterSetLabel', {
-            defaultMessage: 'Load filter set',
+            defaultMessage: 'Load saved query',
           }),
       panel: 4,
       width: 350,
@@ -266,7 +274,7 @@ export function QueryBarMenuPanels({
             defaultMessage: 'Save as new',
           })
         : i18n.translate('unifiedSearch.filter.options.saveFilterSetLabel', {
-            defaultMessage: 'Save filter set',
+            defaultMessage: 'Save saved query',
           }),
       icon: 'save',
       disabled:
@@ -319,7 +327,7 @@ export function QueryBarMenuPanels({
     });
   }
 
-  const panels = [
+  let panels = [
     {
       id: 0,
       title: (
@@ -331,7 +339,13 @@ export function QueryBarMenuPanels({
                 size="s"
                 data-test-subj="savedQueryTitle"
               >
-                <strong>{savedQuery ? savedQuery.attributes.title : 'Filter set'}</strong>
+                <strong>
+                  {savedQuery
+                    ? savedQuery.attributes.title
+                    : i18n.translate('unifiedSearch.search.searchBar.savedQuery', {
+                        defaultMessage: 'Saved query',
+                      })}
+                </strong>
               </EuiText>
             </EuiFlexItem>
             {savedQuery && savedQueryHasChanged && Boolean(showSaveQuery) && hasFiltersOrQuery && (
@@ -397,7 +411,7 @@ export function QueryBarMenuPanels({
     {
       id: 1,
       title: i18n.translate('unifiedSearch.filter.options.saveCurrentFilterSetLabel', {
-        defaultMessage: 'Save current filter set',
+        defaultMessage: 'Save current saved query',
       }),
       disabled: !Boolean(showSaveQuery),
       content: <div style={{ padding: 16 }}>{saveAsNewQueryFormComponent}</div>,
@@ -483,12 +497,28 @@ export function QueryBarMenuPanels({
     {
       id: 4,
       title: i18n.translate('unifiedSearch.filter.options.loadCurrentFilterSetLabel', {
-        defaultMessage: 'Load filter set',
+        defaultMessage: 'Load saved query',
       }),
       width: 400,
       content: <div>{manageFilterSetComponent}</div>,
     },
   ] as EuiContextMenuPanelDescriptor[];
+
+  if (hiddenPanelOptions && hiddenPanelOptions.length > 0) {
+    panels = panels.map((panel) => ({
+      ...panel,
+      items: panel.items?.filter((panelItem) => {
+        if (!panelItem['data-test-subj']) {
+          return true;
+        }
+        const panelFilterOption = MAP_ITEMS_TO_FILTER_OPTION[panelItem['data-test-subj']];
+        if (!panelFilterOption) {
+          return true;
+        }
+        return !hiddenPanelOptions.includes(panelFilterOption);
+      }),
+    }));
+  }
 
   return panels;
 }

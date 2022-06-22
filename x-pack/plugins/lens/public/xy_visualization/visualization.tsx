@@ -11,6 +11,7 @@ import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -31,7 +32,7 @@ import { State, visualizationTypes, XYSuggestion, XYLayerConfig, XYDataLayerConf
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
-import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
+import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
 import {
   getGroupsAvailableInData,
@@ -72,12 +73,14 @@ import { DimensionTrigger } from '../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 
 export const getXyVisualization = ({
+  datatableUtilities,
   paletteService,
   fieldFormats,
   useLegacyTimeAxis,
   kibanaTheme,
   eventAnnotationService,
 }: {
+  datatableUtilities: DatatableUtilitiesService;
   paletteService: PaletteRegistry;
   eventAnnotationService: EventAnnotationServiceType;
   fieldFormats: FieldFormatsStart;
@@ -276,10 +279,12 @@ export const getXyVisualization = ({
             ? [
                 {
                   columnId: dataLayer.splitAccessor,
-                  triggerIcon: 'colorBy' as const,
-                  palette: paletteService
-                    .get(dataLayer.palette?.name || 'default')
-                    .getCategoricalColors(10, dataLayer.palette?.params),
+                  triggerIcon: dataLayer.collapseFn ? ('aggregate' as const) : ('colorBy' as const),
+                  palette: dataLayer.collapseFn
+                    ? undefined
+                    : paletteService
+                        .get(dataLayer.palette?.name || 'default')
+                        .getCategoricalColors(10, dataLayer.palette?.params),
                 },
               ]
             : [],
@@ -332,7 +337,7 @@ export const getXyVisualization = ({
   },
 
   updateLayersConfigurationFromContext({ prevState, layerId, context }) {
-    const { chartType, axisPosition, palette, metrics } = context;
+    const { chartType, axisPosition, palette, metrics, collapseFn } = context;
     const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
     if (!foundLayer || !isDataLayer(foundLayer)) {
       return prevState;
@@ -351,6 +356,7 @@ export const getXyVisualization = ({
       ...foundLayer,
       ...(chartType && { seriesType: chartType as SeriesType }),
       ...(palette && { palette }),
+      collapseFn,
       yConfig,
       layerType: isReferenceLine ? layerTypes.REFERENCELINE : layerTypes.DATA,
     } as XYLayerConfig;
@@ -494,6 +500,7 @@ export const getXyVisualization = ({
   renderDimensionEditor(domElement, props) {
     const allProps = {
       ...props,
+      datatableUtilities,
       formatFactory: fieldFormats.deserialize,
       paletteService,
     };
@@ -513,8 +520,6 @@ export const getXyVisualization = ({
       domElement
     );
   },
-
-  shouldBuildDatasourceExpressionManually: () => true,
 
   toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
     toExpression(
@@ -699,7 +704,7 @@ const getMappedAccessors = ({
       { tables: frame.activeData },
       fieldFormats.deserialize
     );
-    mappedAccessors = getAccessorColorConfig(
+    mappedAccessors = getAccessorColorConfigs(
       colorAssignments,
       frame,
       {

@@ -66,7 +66,10 @@ const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
 });
 
 const StyledLinkButton = styled(EuiButton)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.l};
+  margin-left: 0;
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    margin-left: ${({ theme }) => theme.eui.euiSizeL};
+  }
 `;
 
 const EventsByDatasetComponent: React.FC<Props> = ({

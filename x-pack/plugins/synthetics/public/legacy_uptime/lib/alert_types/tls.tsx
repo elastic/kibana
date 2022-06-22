@@ -14,7 +14,7 @@ import { AlertTypeInitializer } from '.';
 
 import { CERTIFICATES_ROUTE } from '../../../../common/constants/ui';
 
-const { defaultActionMessage, description } = TlsTranslations;
+const { defaultActionMessage, defaultRecoveryMessage, description } = TlsTranslations;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
 export const initTlsAlertType: AlertTypeInitializer = ({
   core,
@@ -29,6 +29,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   description,
   validate: () => ({ errors: {} }),
   defaultActionMessage,
+  defaultRecoveryMessage,
   requiresAppContext: false,
   format: ({ fields }) => ({
     reason: fields[ALERT_REASON] || '',

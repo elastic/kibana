@@ -7,7 +7,7 @@
  */
 
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
-import { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { mount } from 'enzyme';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import moment from 'moment';
@@ -262,7 +262,7 @@ describe('Search Sessions Management table column factory', () => {
 
       const statusLine = mount(status.render!(mockSession.status, mockSession) as ReactElement);
       expect(
-        statusLine.find('.euiText[data-test-subj="sessionManagementStatusTooltip"]').text()
+        statusLine.find('.euiText[data-test-subj="sessionManagementStatusTooltip"]').last().text()
       ).toMatchInlineSnapshot(`"In progress"`);
     });
 

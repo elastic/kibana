@@ -13,10 +13,12 @@ import { usePreviewRule } from '../../../containers/detection_engine/rules/use_p
 import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/helpers';
 import { FieldValueThreshold } from '../threshold_input';
 import { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
+import { EqlOptionsSelected } from '../../../../../common/search_strategy';
 
 interface PreviewRouteParams {
   isDisabled: boolean;
   index: string[];
+  dataViewId?: string;
   threatIndex: string[];
   query: FieldValueQueryBar;
   threatQuery: FieldValueQueryBar;
@@ -26,10 +28,12 @@ interface PreviewRouteParams {
   threshold: FieldValueThreshold;
   machineLearningJobId: string[];
   anomalyThreshold: number;
+  eqlOptions: EqlOptionsSelected;
 }
 
 export const usePreviewRoute = ({
   index,
+  dataViewId,
   isDisabled,
   query,
   threatIndex,
@@ -40,6 +44,7 @@ export const usePreviewRoute = ({
   threshold,
   machineLearningJobId,
   anomalyThreshold,
+  eqlOptions,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
@@ -80,6 +85,7 @@ export const usePreviewRoute = ({
     threshold,
     machineLearningJobId,
     anomalyThreshold,
+    eqlOptions,
   ]);
 
   useEffect(() => {
@@ -87,6 +93,7 @@ export const usePreviewRoute = ({
       setRule(
         formatPreviewRule({
           index,
+          dataViewId,
           query,
           ruleType,
           threatIndex,
@@ -96,11 +103,13 @@ export const usePreviewRoute = ({
           threshold,
           machineLearningJobId,
           anomalyThreshold,
+          eqlOptions,
         })
       );
     }
   }, [
     index,
+    dataViewId,
     isRequestTriggered,
     query,
     rule,
@@ -113,6 +122,7 @@ export const usePreviewRoute = ({
     threshold,
     machineLearningJobId,
     anomalyThreshold,
+    eqlOptions,
   ]);
 
   return {

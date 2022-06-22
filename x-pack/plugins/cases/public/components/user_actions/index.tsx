@@ -58,8 +58,8 @@ const MyEuiCommentList = styled(EuiCommentList)`
     & .comment-alert .euiCommentEvent {
       background-color: ${theme.eui.euiColorLightestShade};
       border: ${theme.eui.euiFlyoutBorder};
-      padding: ${theme.eui.paddingSizes.s};
-      border-radius: ${theme.eui.paddingSizes.xs};
+      padding: ${theme.eui.euiSizeS};
+      border-radius: ${theme.eui.euiSizeXS};
     }
 
     & .comment-alert .euiCommentEvent__headerData {
@@ -69,7 +69,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
     & .comment-action.empty-comment .euiCommentEvent--regular {
       box-shadow: none;
       .euiCommentEvent__header {
-        padding: ${theme.eui.euiSizeM} ${theme.eui.paddingSizes.s};
+        padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS};
         border-bottom: 0;
       }
     }
@@ -81,7 +81,6 @@ export const UserActions = React.memo(
     caseServices,
     caseUserActions,
     data: caseData,
-    fetchUserActions,
     getRuleDetailsHref,
     actionsNavigation,
     isLoadingDescription,
@@ -90,7 +89,6 @@ export const UserActions = React.memo(
     onShowAlertDetails,
     onUpdateField,
     statusActionButton,
-    updateCase,
     useFetchAlertData,
     userCanCrud,
   }: UserActionTreeProps) => {
@@ -116,7 +114,7 @@ export const UserActions = React.memo(
       handleManageQuote,
       handleDeleteComment,
       handleUpdate,
-    } = useUserActionsHandler({ fetchUserActions, updateCase });
+    } = useUserActionsHandler();
 
     const MarkdownNewComment = useMemo(
       () => (

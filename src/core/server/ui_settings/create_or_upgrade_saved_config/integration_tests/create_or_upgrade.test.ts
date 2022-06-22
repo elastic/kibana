@@ -15,7 +15,7 @@ import {
   TestUtils,
 } from '../../../../test_helpers/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
-import { loggingSystemMock } from '../../../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '../../../http/http_server.mocks';
 
 const logger = loggingSystemMock.create().get();
@@ -90,6 +90,9 @@ describe('createOrUpgradeSavedConfig()', () => {
       // 5.4.0-SNAPSHOT and @@version were ignored so we only have the
       // attributes from 5.4.0-rc1, even though the other build nums are greater
       '5.4.0-rc1': true,
+
+      // Should have the transform(s) applied
+      isDefaultIndexMigrated: true,
     });
 
     // add the 5.4.0 flag to the 5.4.0 savedConfig
@@ -115,6 +118,9 @@ describe('createOrUpgradeSavedConfig()', () => {
       // should also include properties from 5.4.0 and 5.4.0-rc1
       '5.4.0': true,
       '5.4.0-rc1': true,
+
+      // Should have the transform(s) applied
+      isDefaultIndexMigrated: true,
     });
 
     // add the 5.4.1 flag to the 5.4.1 savedConfig
@@ -141,6 +147,9 @@ describe('createOrUpgradeSavedConfig()', () => {
       '5.4.1': true,
       '5.4.0': true,
       '5.4.0-rc1': true,
+
+      // Should have the transform(s) applied
+      isDefaultIndexMigrated: true,
     });
 
     // tag the 7.0.0-rc1 doc
@@ -168,6 +177,9 @@ describe('createOrUpgradeSavedConfig()', () => {
       '5.4.1': true,
       '5.4.0': true,
       '5.4.0-rc1': true,
+
+      // Should have the transform(s) applied
+      isDefaultIndexMigrated: true,
     });
 
     // tag the 7.0.0 doc
@@ -194,6 +206,9 @@ describe('createOrUpgradeSavedConfig()', () => {
       '5.4.1': true,
       '5.4.0': true,
       '5.4.0-rc1': true,
+
+      // Should have the transform(s) applied
+      isDefaultIndexMigrated: true,
     });
   }, 30000);
 });

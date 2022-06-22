@@ -33,7 +33,7 @@ import {
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { XJsonLang } from '@kbn/monaco';
-import { DataView, IFieldType } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
@@ -61,7 +61,7 @@ export interface Props {
 
 interface State {
   selectedIndexPattern?: DataView;
-  selectedField?: IFieldType;
+  selectedField?: DataViewField;
   selectedOperator?: Operator;
   params: any;
   useCustomLabel: boolean;
@@ -219,19 +219,19 @@ class FilterEditorUI extends Component<Props, State> {
         <EuiFormRow
           fullWidth
           label={this.props.intl.formatMessage({
-            id: 'unifiedSearch.filter.filterEditor.indexPatternSelectLabel',
-            defaultMessage: 'Index Pattern',
+            id: 'unifiedSearch.filter.filterEditor.dateViewSelectLabel',
+            defaultMessage: 'Data view',
           })}
         >
           <IndexPatternComboBox
             fullWidth
             placeholder={this.props.intl.formatMessage({
               id: 'unifiedSearch.filter.filterBar.indexPatternSelectPlaceholder',
-              defaultMessage: 'Select an index pattern',
+              defaultMessage: 'Select a data view',
             })}
             options={this.props.indexPatterns}
             selectedOptions={selectedIndexPattern ? [selectedIndexPattern] : []}
-            getLabel={(indexPattern) => indexPattern.title}
+            getLabel={(indexPattern) => indexPattern.getName()}
             onChange={this.onIndexPatternChange}
             singleSelection={{ asPlainText: true }}
             isClearable={false}
@@ -447,7 +447,7 @@ class FilterEditorUI extends Component<Props, State> {
     this.setState({ selectedIndexPattern, selectedField, selectedOperator, params });
   };
 
-  private onFieldChange = ([selectedField]: IFieldType[]) => {
+  private onFieldChange = ([selectedField]: DataViewField[]) => {
     const selectedOperator = undefined;
     const params = undefined;
     this.setState({ selectedField, selectedOperator, params });
@@ -529,7 +529,7 @@ function IndexPatternComboBox(props: GenericComboBoxProps<DataView>) {
   return GenericComboBox(props);
 }
 
-function FieldComboBox(props: GenericComboBoxProps<IFieldType>) {
+function FieldComboBox(props: GenericComboBoxProps<DataViewField>) {
   return GenericComboBox(props);
 }
 

@@ -22,7 +22,6 @@ const buildRuleMessage = buildRuleMessageFactory({
 const queryFilter = getQueryFilter('', 'kuery', [], ['*'], []);
 const mockSingleSearchAfter = jest.fn();
 
-// Failing with rule registry enabled
 describe('findThresholdSignals', () => {
   let mockService: RuleExecutorServicesMock;
 
@@ -46,6 +45,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -90,6 +90,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -133,6 +134,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -190,6 +192,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -261,6 +264,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({

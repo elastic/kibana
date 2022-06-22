@@ -262,26 +262,35 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         name: 'cloud_user_id',
         context$: from(security.authc.getCurrentUser()).pipe(
           map((user) => {
-            if (
-              getIsCloudEnabled(cloudId) &&
-              user.authentication_realm?.type === 'saml' &&
-              user.authentication_realm?.name === 'cloud-saml-kibana'
-            ) {
-              // If authenticated via Cloud SAML, use the SAML username as the user ID
-              return user.username;
+            if (user.elastic_cloud_user) {
+              // If the user is managed by ESS, use the plain username as the user ID:
+              // The username is expected to be unique for these users,
+              // and it matches how users are identified in the Cloud UI, so it allows us to correlate them.
+              return { userId: user.username, isElasticCloudUser: true };
             }
 
-            return cloudId ? `${cloudId}:${user.username}` : user.username;
+            return {
+              // For the rest of the authentication providers, we want to add the cloud deployment ID to make it unique.
+              // Especially in the case of Elasticsearch-backed authentication, where users are commonly repeated
+              // across multiple deployments (i.e.: `elastic` superuser).
+              userId: cloudId ? `${cloudId}:${user.username}` : user.username,
+              isElasticCloudUser: false,
+            };
           }),
-          // Join the cloud org id and the user to create a truly unique user id.
           // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
-          map((userId) => ({ userId: sha256(userId) })),
-          catchError(() => of({ userId: undefined }))
+          map(({ userId, isElasticCloudUser }) => ({ userId: sha256(userId), isElasticCloudUser })),
+          catchError(() => of({ userId: undefined, isElasticCloudUser: false }))
         ),
         schema: {
           userId: {
             type: 'keyword',
             _meta: { description: 'The user id scoped as seen by Cloud (hashed)' },
+          },
+          isElasticCloudUser: {
+            type: 'boolean',
+            _meta: {
+              description: '`true` if the user is managed by ESS.',
+            },
           },
         },
       });

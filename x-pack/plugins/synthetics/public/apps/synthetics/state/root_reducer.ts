@@ -7,12 +7,20 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
+import { monitorStatusReducer } from './monitor_summary';
 import { uiReducer } from './ui';
 import { indexStatusReducer } from './index_status';
+import { syntheticsEnablementReducer } from './synthetics_enablement';
+import { monitorListReducer } from './monitor_list';
+import { serviceLocationsReducer } from './service_locations';
 
 export const rootReducer = combineReducers({
   ui: uiReducer,
   indexStatus: indexStatusReducer,
+  syntheticsEnablement: syntheticsEnablementReducer,
+  monitorList: monitorListReducer,
+  serviceLocations: serviceLocationsReducer,
+  monitorStatus: monitorStatusReducer,
 });
 
-export type RooState = ReturnType<typeof rootReducer>;
+export type SyntheticsAppState = ReturnType<typeof rootReducer>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { capitalize, sortBy } from 'lodash';
 import {
   EuiButton,
@@ -71,7 +71,6 @@ import {
   RULES_PLURAL_TITLE,
   SEARCH_PLACEHOLDER,
 } from './translations';
-import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 const ENTER_KEY = 13;
 
 function RulesPage() {
@@ -93,6 +92,7 @@ function RulesPage() {
   });
   const [inputText, setInputText] = useState<string | undefined>();
   const [searchText, setSearchText] = useState<string | undefined>();
+  const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const { lastResponse, setLastResponse } = useRulesPageStateContainer();
   const { status, setStatus } = useRulesPageStateContainer();
@@ -108,16 +108,19 @@ function RulesPage() {
     setCurrentRuleToEdit(ruleItem);
   };
 
-  const { rulesState, setRulesState, reload, noData, initialLoad } = useFetchRules({
+  const { rulesState, setRulesState, reload, noData, initialLoad, tagsState } = useFetchRules({
     searchText,
     ruleLastResponseFilter: lastResponse,
     ruleStatusesFilter: status,
     typesFilter,
+    tagsFilter,
     page,
     setPage,
     sort,
   });
   const { data: rules, totalItemCount, error } = rulesState;
+  const { data: tags, error: tagsError } = tagsState;
+
   const { ruleTypeIndex, ruleTypes } = useLoadRuleTypes({
     filteredSolutions: OBSERVABILITY_SOLUTIONS,
   });
@@ -165,6 +168,18 @@ function RulesPage() {
     },
   ]);
 
+  useEffect(() => {
+    if (tagsError) {
+      toasts.addDanger({
+        title: tagsError,
+      });
+    }
+    if (error)
+      toasts.addDanger({
+        title: error,
+      });
+  }, [tagsError, error, toasts]);
+
   const getRulesTableColumns = () => {
     return [
       {
@@ -182,11 +197,11 @@ function RulesPage() {
         sortable: false,
         width: '50px',
         'data-test-subj': 'rulesTableCell-tagsPopover',
-        render: (tags: string[], item: RuleTableItem) => {
-          return tags.length > 0
+        render: (ruleTags: string[], item: RuleTableItem) => {
+          return ruleTags.length > 0
             ? triggersActionsUi.getRuleTagBadge({
                 isOpen: tagPopoverOpenIndex === item.index,
-                tags,
+                tags: ruleTags,
                 onClick: () => setTagPopoverOpenIndex(item.index),
                 onClose: () => setTagPopoverOpenIndex(-1),
               })
@@ -218,6 +233,7 @@ function RulesPage() {
         field: 'enabled',
         name: STATUS_COLUMN_TITLE,
         sortable: true,
+        'data-test-subj': 'rulesTableCell-ContextStatus',
         render: (_enabled: boolean, item: RuleTableItem) => {
           return triggersActionsUi.getRuleStatusDropdown({
             rule: item,
@@ -225,10 +241,11 @@ function RulesPage() {
             disableRule: async () => await disableRule({ http, id: item.id }),
             onRuleChanged: () => reload(),
             isEditable: item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId),
-            snoozeRule: async (snoozeEndTime: string | -1) => {
-              await snoozeRule({ http, id: item.id, snoozeEndTime });
+            snoozeRule: async (snoozeSchedule) => {
+              await snoozeRule({ http, id: item.id, snoozeSchedule });
             },
-            unsnoozeRule: async () => await unsnoozeRule({ http, id: item.id }),
+            unsnoozeRule: async (scheduleIds) =>
+              await unsnoozeRule({ http, id: item.id, scheduleIds }),
           });
         },
       },
@@ -353,6 +370,13 @@ function RulesPage() {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+            {triggersActionsUi.getRuleTagFilter({
+              tags,
+              selectedTags: tagsFilter,
+              onChange: (myTags: string[]) => setTagsFilter(myTags),
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <LastResponseFilter
               key="rule-lastResponse-filter"
               selectedStatuses={lastResponse}
@@ -378,7 +402,6 @@ function RulesPage() {
                 defaultMessage="Refresh"
               />
             </EuiButton>
-            ,
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup>
@@ -415,15 +438,10 @@ function RulesPage() {
       </>
     );
   };
-
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: (
-          <>
-            {RULES_PAGE_TITLE} <ExperimentalBadge />
-          </>
-        ),
+        pageTitle: <>{RULES_PAGE_TITLE}</>,
         rightSideItems: [
           authorizedToCreateAnyRules && (
             <EuiButton
@@ -478,10 +496,6 @@ function RulesPage() {
       />
 
       {getRulesTable()}
-      {error &&
-        toasts.addDanger({
-          title: error,
-        })}
       {currentRuleToEdit && <EditRuleFlyout onSave={reload} currentRule={currentRuleToEdit} />}
       {createRuleFlyoutVisibility && CreateRuleFlyout}
     </ObservabilityPageTemplate>

@@ -78,6 +78,7 @@ import {
   ALERT_RULE_TIMELINE_ID,
   ALERT_RULE_TIMELINE_TITLE,
   ALERT_RULE_TIMESTAMP_OVERRIDE,
+  ALERT_RULE_INDICES,
 } from '../../../../../common/field_maps/field_names';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
@@ -157,6 +158,9 @@ export const expectedRule = (): RulesSchema => {
     timeline_id: 'some-timeline-id',
     timeline_title: 'some-timeline-title',
     exceptions_list: getListArrayMock(),
+    related_integrations: [],
+    required_fields: [],
+    setup: '',
   };
 };
 
@@ -296,6 +300,7 @@ export const sampleAlertDocAADNoSortId = (
     [ALERT_RULE_FROM]: 'now-6m',
     [ALERT_RULE_IMMUTABLE]: false,
     [ALERT_RULE_INTERVAL]: '5m',
+    [ALERT_RULE_INDICES]: ['auditbeat-*'],
     [ALERT_RULE_LICENSE]: 'Elastic License',
     [ALERT_RULE_MAX_SIGNALS]: 10000,
     [ALERT_RULE_NAME]: 'rule-name',
@@ -624,6 +629,9 @@ export const sampleSignalHit = (): SignalHit => ({
       rule_id: 'query-rule-id',
       interval: '5m',
       exceptions_list: getListArrayMock(),
+      related_integrations: [],
+      required_fields: [],
+      setup: '',
     },
     depth: 1,
   },
@@ -685,6 +693,9 @@ export const sampleThresholdSignalHit = (): SignalHit => ({
       rule_id: 'query-rule-id',
       interval: '5m',
       exceptions_list: getListArrayMock(),
+      related_integrations: [],
+      required_fields: [],
+      setup: '',
     },
     depth: 1,
   },

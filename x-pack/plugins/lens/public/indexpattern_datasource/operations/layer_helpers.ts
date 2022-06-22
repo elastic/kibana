@@ -7,7 +7,7 @@
 
 import { partition, mapValues, pickBy, isArray } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
-import { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type {
@@ -455,6 +455,7 @@ export function replaceColumn({
       if (
         !shouldResetLabel &&
         previousColumn.customLabel &&
+        hypotheticalLayer.columns[columnId] &&
         previousColumn.label !==
           previousDefinition.getDefaultLabel(previousColumn, indexPattern, tempLayer.columns)
       ) {
@@ -1775,6 +1776,8 @@ export function getSplitByTermsLayer(
         paramName: param,
         value: paramValue,
       });
+      // label must be updated after the param is updated (Top {size} values of {field})
+      termsLayer = updateDefaultLabels(termsLayer, indexPattern);
     }
   }
   return termsLayer;

@@ -11,16 +11,10 @@ import moment from 'moment-timezone';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import { search } from '@kbn/data-plugin/public';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import type { Document } from './persistence/saved_object_store';
-import type {
-  Datasource,
-  DatasourceMap,
-  LensBrushEvent,
-  LensFilterEvent,
-  Visualization,
-  StateSetter,
-} from './types';
+import type { Datasource, DatasourceMap, Visualization, StateSetter } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
@@ -153,7 +147,10 @@ export function getRemoveOperation(
   return layerCount === 1 ? 'clear' : 'remove';
 }
 
-export function inferTimeField(context: LensBrushEvent['data'] | LensFilterEvent['data']) {
+export function inferTimeField(
+  datatableUtilities: DatatableUtilitiesService,
+  context: BrushTriggerEvent['data'] | ClickTriggerEvent['data']
+) {
   const tablesAndColumns =
     'table' in context
       ? [{ table: context.table, column: context.column }]
@@ -165,7 +162,7 @@ export function inferTimeField(context: LensBrushEvent['data'] | LensFilterEvent
     .map(({ table, column }) => {
       const tableColumn = table.columns[column];
       const hasTimeRange = Boolean(
-        tableColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(tableColumn)?.timeRange
+        tableColumn && datatableUtilities.getDateHistogramMeta(tableColumn)?.timeRange
       );
       if (hasTimeRange) {
         return tableColumn.meta.field;

@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import {
   EuiHealth,
   EuiBadge,
-  EuiTextColor,
   EuiSpacer,
+  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
@@ -29,35 +29,25 @@ interface Props {
 
 const formatNumber = (value: number) => (value < 1000 ? value : numeral(value).format('0.0a'));
 
-export const FindingsDistributionBar = ({ failed, passed, total, pageEnd, pageStart }: Props) => {
-  const count = useMemo(
-    () =>
-      total
-        ? { total, passed: passed / total, failed: failed / total }
-        : { total: 0, passed: 0, failed: 0 },
-    [total, failed, passed]
-  );
+export const FindingsDistributionBar = (props: Props) => (
+  <div>
+    <Counters {...props} />
+    <EuiSpacer size="s" />
+    {<DistributionBar {...props} />}
+  </div>
+);
 
-  return (
-    <div>
-      <Counters {...{ failed, passed, total, pageEnd, pageStart }} />
-      <EuiSpacer size="s" />
-      <DistributionBar {...count} />
-    </div>
-  );
-};
-
-const Counters = ({ pageStart, pageEnd, total, failed, passed }: Props) => (
+const Counters = (props: Props) => (
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexItem>
-      {!!total && <CurrentPageOfTotal pageStart={pageStart} pageEnd={pageEnd} total={total} />}
+      <CurrentPageOfTotal {...props} />
     </EuiFlexItem>
     <EuiFlexItem
       css={css`
         align-items: flex-end;
       `}
     >
-      {!!total && <PassedFailedCounters passed={passed} failed={failed} />}
+      <PassedFailedCounters {...props} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -110,12 +100,13 @@ const CurrentPageOfTotal = ({
 
 const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({ passed, failed }) => {
   const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexGroup
       gutterSize="none"
       css={css`
         height: 8px;
-        background: ${euiTheme.colors.subdued};
+        background: ${euiTheme.colors.subduedText};
       `}
     >
       <DistributionBarPart value={passed} color={euiTheme.colors.success} />

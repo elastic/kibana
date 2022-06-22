@@ -11,8 +11,22 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-
   - wait
+
+  - label: 'Triggering changes-based pipelines'
+    branches: main
+    agents:
+      queue: kibana-default
+    plugins:
+      - chronotc/monorepo-diff#v2.0.4:
+          watch:
+            - path:
+                - 'versions.json'
+              config:
+                command: 'node .buildkite/scripts/steps/trigger_pipeline.js kibana-buildkite-pipelines-deploy main'
+                label: 'Trigger pipeline deploy'
+                agents:
+                  queue: 'kibana-default'
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution and Plugins
@@ -102,6 +116,16 @@ steps:
       queue: n2-4-spot
     key: storybooks
     timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/bazel_cache/bootstrap_linux.sh
+    label: 'Populate local dev bazel cache (Linux)'
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 15
     retry:
       automatic:
         - exit_status: '-1'

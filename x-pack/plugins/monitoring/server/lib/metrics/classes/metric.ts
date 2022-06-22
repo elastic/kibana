@@ -23,6 +23,7 @@ interface OptionalMetricOptions {
   metricAgg?: string;
   mbField?: string;
   type?: string;
+  isNotSupportedInInternalCollection?: boolean;
 }
 
 interface DefaultMetricOptions {
@@ -56,6 +57,7 @@ export class Metric {
   public usageField?: string;
   public periodsField?: string;
   public quotaField?: string;
+  public isNotSupportedInInternalCollection?: boolean;
 
   constructor(opts: MetricOptions) {
     const props: Required<DefaultMetricOptions> = {

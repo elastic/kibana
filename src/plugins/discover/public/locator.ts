@@ -7,8 +7,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { Filter } from '@kbn/es-query';
-import type { TimeRange, Query, QueryState, RefreshInterval } from '@kbn/data-plugin/public';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { VIEW_MODE } from './components/view_mode_toggle';
@@ -126,7 +126,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       viewMode?: string;
       hideAggregatedPreview?: boolean;
     } = {};
-    const queryState: QueryState = {};
+    const queryState: GlobalQueryStateFromUrl = {};
     const { isFilterPinned } = await import('@kbn/es-query');
 
     if (query) appState.query = query;
@@ -144,7 +144,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
 
     let path = `#/${savedSearchPath}`;
-    path = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, path);
+    path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
     path = setStateToKbnUrl('_a', appState, { useHash }, path);
 
     if (searchSessionId) {

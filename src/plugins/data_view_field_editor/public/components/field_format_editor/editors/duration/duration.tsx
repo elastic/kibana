@@ -86,7 +86,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
     const { error, samples, hasDecimalError } = this.state;
 
     const formatParams: DurationFormatEditorFormatParams = {
-      includeSpaceWithSuffix: format.getParamDefaults().includeSpaceWithSuffix,
+      includeSpaceWithSuffix: format.getParamDefaults().includeSpaceWithSuffix as boolean,
       ...this.props.formatParams,
     };
 

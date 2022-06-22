@@ -34,7 +34,7 @@ export class DateNanosFormatEditor extends DefaultFormatEditor<DateNanosFormatEd
   render() {
     const { format, formatParams } = this.props;
     const { error, samples } = this.state;
-    const defaultPattern = format.getParamDefaults().pattern;
+    const defaultPattern = `${format.getParamDefaults().pattern}`;
 
     return (
       <Fragment>

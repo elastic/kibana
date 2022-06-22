@@ -10,6 +10,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { useUiTracker } from '@kbn/observability-plugin/public';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -21,14 +22,12 @@ import { ServiceLink } from '../../../shared/service_link';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
-  isSingleColumn?: boolean;
   link?: ReactNode;
   showPerPageOptions?: boolean;
 }
 
 export function ServiceOverviewDependenciesTable({
   fixedHeight,
-  isSingleColumn = true,
   link,
   showPerPageOptions = true,
 }: ServiceOverviewDependenciesTableProps) {
@@ -67,7 +66,10 @@ export function ServiceOverviewDependenciesTable({
               end,
               environment,
               numBuckets: 20,
-              offset: comparisonEnabled ? offset : undefined,
+              offset:
+                comparisonEnabled && isTimeComparison(offset)
+                  ? offset
+                  : undefined,
             },
           },
         }
@@ -132,7 +134,6 @@ export function ServiceOverviewDependenciesTable({
     <DependenciesTable
       dependencies={dependencies}
       fixedHeight={fixedHeight}
-      isSingleColumn={isSingleColumn}
       title={
         <EuiToolTip
           content={i18n.translate(

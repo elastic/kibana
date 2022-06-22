@@ -39,10 +39,7 @@ import {
   DatasourceLayers,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import {
-  getDatasourceExpressionsByLayers,
-  prependDatasourceExpression,
-} from './expression_helpers';
+import { getDatasourceExpressionsByLayers } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import {
   getMissingIndexPattern,
@@ -61,10 +58,10 @@ import {
   selectIsFullscreenDatasource,
   selectSearchSessionId,
   selectActiveDatasourceId,
-  selectActiveData,
   selectDatasourceStates,
   selectChangesApplied,
   applyChanges,
+  selectStagedActiveData,
 } from '../../state_management';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from './config_panel/dimension_container';
 
@@ -194,7 +191,7 @@ export function SuggestionPanel({
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
-  const activeData = useLensSelector(selectActiveData);
+  const activeData = useLensSelector(selectStagedActiveData);
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const existsStagedPreview = useLensSelector((state) => Boolean(state.lens.stagedPreview));
   const currentVisualization = useLensSelector(selectCurrentVisualization);
@@ -303,7 +300,7 @@ export function SuggestionPanel({
     activeDatasourceId,
     datasourceMap,
     visualizationMap,
-    frame.activeData,
+    activeData,
   ]);
 
   const context: ExecutionContextSearch = useLensSelector(selectExecutionContextSearch);
@@ -522,22 +519,15 @@ function getPreviewExpression(
     });
   }
 
-  if (visualization.shouldBuildDatasourceExpressionManually?.()) {
-    const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
-      datasources,
-      datasourceStates
-    );
-
-    return visualization.toPreviewExpression(
-      visualizableState.visualizationState,
-      suggestionFrameApi.datasourceLayers,
-      datasourceExpressionsByLayers ?? undefined
-    );
-  }
+  const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
+    datasources,
+    datasourceStates
+  );
 
   return visualization.toPreviewExpression(
     visualizableState.visualizationState,
-    suggestionFrameApi.datasourceLayers
+    suggestionFrameApi.datasourceLayers,
+    datasourceExpressionsByLayers ?? undefined
   );
 }
 
@@ -561,15 +551,11 @@ function preparePreviewExpression(
       }
     : datasourceStates;
 
-  const previewExprDatasourcesStates = visualization.shouldBuildDatasourceExpressionManually?.()
-    ? datasourceStatesWithSuggestions
-    : datasourceStates;
-
   const expression = getPreviewExpression(
     visualizableState,
     visualization,
     datasourceMap,
-    previewExprDatasourcesStates,
+    datasourceStatesWithSuggestions,
     framePublicAPI
   );
 
@@ -577,9 +563,5 @@ function preparePreviewExpression(
     return;
   }
 
-  if (visualization.shouldBuildDatasourceExpressionManually?.()) {
-    return typeof expression === 'string' ? fromExpression(expression) : expression;
-  }
-
-  return prependDatasourceExpression(expression, datasourceMap, datasourceStatesWithSuggestions);
+  return typeof expression === 'string' ? fromExpression(expression) : expression;
 }

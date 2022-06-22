@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Filter, Query } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 
-export type ControlWidth = 'auto' | 'small' | 'medium' | 'large';
+export type ControlWidth = 'small' | 'medium' | 'large';
 export type ControlStyle = 'twoLine' | 'oneLine';
 
 export interface ParentIgnoreSettings {
@@ -30,5 +29,7 @@ export type ControlInput = EmbeddableInput & {
 
 export type DataControlInput = ControlInput & {
   fieldName: string;
+  parentFieldName?: string;
+  childFieldName?: string;
   dataViewId: string;
 };

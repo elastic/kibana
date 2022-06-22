@@ -6,15 +6,16 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
 
 import { UsersKpiProps } from './types';
 
-import { HostsKpiAuthentications } from '../../../hosts/components/kpi_hosts/authentications';
+import { UsersKpiAuthentications } from './authentications';
 import { TotalUsersKpi } from './total_users';
 import { useUserRiskScore } from '../../../risk_score/containers';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import * as i18n from './translations';
+import { RISKY_USERS_DOC_LINK } from '../constants';
 
 export const UsersKpiComponent = React.memo<UsersKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {
@@ -34,11 +35,10 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
 
                 description: (
                   <>
-                    {/*
-                    TODO PENDING ON USER RISK DOCUMENTATION}
-                    <EuiLink href={RISKY_USERS_DOC_LINK} target="_blank"> */}
-                    {i18n.LEARN_MORE} {i18n.USER_RISK_DATA}
-                    {/* </EuiLink> */}
+                    {i18n.LEARN_MORE}{' '}
+                    <EuiLink href={RISKY_USERS_DOC_LINK} target="_blank">
+                      {i18n.USER_RISK_DATA}
+                    </EuiLink>
                     <EuiSpacer />
                   </>
                 ),
@@ -61,7 +61,7 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
           </EuiFlexItem>
 
           <EuiFlexItem grow={2}>
-            <HostsKpiAuthentications
+            <UsersKpiAuthentications
               filterQuery={filterQuery}
               from={from}
               indexNames={indexNames}

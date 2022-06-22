@@ -20,8 +20,9 @@ import {
   bulkUpdateAgents,
 } from './crud';
 import type { GetAgentsOptions } from '.';
-import { createAgentAction, bulkCreateAgentActions } from './actions';
+import { createAgentAction } from './actions';
 import { searchHitToAgent } from './helpers';
+import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
@@ -42,7 +43,7 @@ export async function reassignAgent(
   });
 
   await createAgentAction(esClient, {
-    agent_id: agentId,
+    agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'POLICY_REASSIGN',
   });
@@ -80,9 +81,14 @@ export async function reassignAgents(
   options: ({ agents: Agent[] } | GetAgentsOptions) & { force?: boolean },
   newAgentPolicyId: string
 ): Promise<{ items: BulkActionResult[] }> {
-  const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
-  if (!agentPolicy) {
+  const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+  if (!newAgentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
+  }
+  if (newAgentPolicy.is_managed) {
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      `Cannot reassign an agent to hosted agent policy ${newAgentPolicy.id}`
+    );
   }
 
   const outgoingErrors: Record<Agent['id'], Error> = {};
@@ -106,6 +112,8 @@ export async function reassignAgents(
   const givenOrder =
     'agentIds' in options ? options.agentIds : givenAgents.map((agent) => agent.id);
 
+  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
+
   // which are allowed to unenroll
   const agentResults = await Promise.allSettled(
     givenAgents.map(async (agent, index) => {
@@ -113,16 +121,13 @@ export async function reassignAgents(
         throw new AgentReassignmentError(`${agent.id} is already assigned to ${newAgentPolicyId}`);
       }
 
-      const isAllowed = await reassignAgentIsAllowed(
-        soClient,
-        esClient,
-        agent.id,
-        newAgentPolicyId
-      );
-      if (isAllowed) {
-        return agent;
+      if (isHostedAgent(hostedPolicies, agent)) {
+        throw new HostedAgentPolicyRestrictionRelatedError(
+          `Cannot reassign an agent from hosted agent policy ${agent.policy_id}`
+        );
       }
-      throw new AgentReassignmentError(`${agent.id} may not be reassigned to ${newAgentPolicyId}`);
+
+      return agent;
     })
   );
 
@@ -161,14 +166,11 @@ export async function reassignAgents(
   });
 
   const now = new Date().toISOString();
-  await bulkCreateAgentActions(
-    esClient,
-    agentsToUpdate.map((agent) => ({
-      agent_id: agent.id,
-      created_at: now,
-      type: 'POLICY_REASSIGN',
-    }))
-  );
+  await createAgentAction(esClient, {
+    agents: agentsToUpdate.map((agent) => agent.id),
+    created_at: now,
+    type: 'POLICY_REASSIGN',
+  });
 
   return { items: orderedOut };
 }

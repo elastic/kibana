@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   let visNames: string[] = [];
 
   const expectAllDataRenders = async () => {
-    await pieChart.expectPieSliceCount(16);
+    await pieChart.expectSliceCountForAllPies(16);
     await dashboardExpect.metricValuesExist(['7,544']);
     await dashboardExpect.seriesElementCount(14);
     const tsvbGuageExists = await find.existsByCssSelector('.tvbVisHalfGauge');
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const expectNoDataRenders = async () => {
-    await pieChart.expectPieSliceCount(0);
+    await pieChart.expectEmptyPieChart();
     await dashboardExpect.seriesElementCount(0);
     await dashboardExpect.dataTableNoResult();
     await dashboardExpect.savedSearchNoResult();
@@ -99,7 +99,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  describe('dashboard embeddable rendering', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/132865
+  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await kibanaServer.savedObjects.cleanStandardList();
@@ -112,6 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
+      await elasticChart.setNewChartUiDebugFlag(true);
 
       const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
       const toTime = 'Apr 13, 2018 @ 00:00:00.000';
@@ -160,6 +162,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('initial render test', async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
+      await elasticChart.setNewChartUiDebugFlag();
       await expectAllDataRenders();
     });
 
@@ -178,9 +181,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const alert = await browser.getAlert();
       await alert?.accept();
 
-      await elasticChart.setNewChartUiDebugFlag(true);
-
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await elasticChart.setNewChartUiDebugFlag();
       await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });

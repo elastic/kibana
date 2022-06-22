@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -19,18 +19,27 @@ import { UserRiskScoreQueryId, useUserRiskScore } from '../../../risk_score/cont
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { UsersComponentsQueryProps } from './types';
 import { UserRiskInformationButtonEmpty } from '../../components/user_risk_information';
+import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 
 const QUERY_ID = UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.l};
+  margin-top: ${({ theme }) => theme.eui.euiSizeL};
 `;
+
+const RISKY_USERS_DASHBOARD_TITLE = 'Current Risk Score For Users';
 
 const UserRiskTabBodyComponent: React.FC<
   Pick<UsersComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
     userName: string;
   }
 > = ({ userName, startDate, endDate, setQuery, deleteQuery }) => {
+  const { buttonHref } = useDashboardButtonHref({
+    to: endDate,
+    from: startDate,
+    title: RISKY_USERS_DASHBOARD_TITLE,
+  });
+
   const timerange = useMemo(
     () => ({
       from: startDate,
@@ -104,7 +113,6 @@ const UserRiskTabBodyComponent: React.FC<
       </EuiFlexGroup>
 
       <StyledEuiFlexGroup gutterSize="s">
-        {/* // TODO PENDING ON USER RISK DOCUMENTATION
         <EuiFlexItem grow={false}>
           <EuiButton
             href={buttonHref}
@@ -114,7 +122,7 @@ const UserRiskTabBodyComponent: React.FC<
           >
             {i18n.VIEW_DASHBOARD_BUTTON}
           </EuiButton>
-        </EuiFlexItem> */}
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <UserRiskInformationButtonEmpty />
         </EuiFlexItem>

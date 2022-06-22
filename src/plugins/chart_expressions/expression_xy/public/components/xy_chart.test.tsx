@@ -13,8 +13,10 @@ import {
   AreaSeries,
   Axis,
   BarSeries,
+  ColorVariant,
   Fit,
   GeometryValue,
+  GroupBy,
   HorizontalAlignment,
   LayoutDirection,
   LineAnnotation,
@@ -24,11 +26,13 @@ import {
   ScaleType,
   SeriesNameFn,
   Settings,
+  SmallMultiples,
   VerticalAlignment,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { DataLayerConfig } from '../../common';
@@ -57,6 +61,8 @@ import {
 } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { Annotations } from './annotations';
+import { SplitChart } from './split_chart';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -64,7 +70,7 @@ const onSelectRange = jest.fn();
 describe('XYChart component', () => {
   let getFormatSpy: jest.Mock;
   let convertSpy: jest.Mock;
-  let defaultProps: Omit<XYChartRenderProps, 'data' | 'args'>;
+  let defaultProps: Omit<XYChartRenderProps, 'args'>;
 
   const dataWithoutFormats: Datatable = {
     type: 'datatable',
@@ -104,6 +110,7 @@ describe('XYChart component', () => {
     getFormatSpy.mockReturnValue({ convert: convertSpy });
 
     defaultProps = {
+      data: dataPluginMock.createStartContract(),
       formatFactory: getFormatSpy,
       timeZone: 'UTC',
       renderMode: 'view',
@@ -150,10 +157,10 @@ describe('XYChart component', () => {
       seriesType: 'line',
       xAccessor: 'c',
       accessors: ['a', 'b'],
+      showLines: true,
       splitAccessor: 'd',
       columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
       xScaleType: 'time',
-      yScaleType: 'linear',
       isHistogram: false,
       palette: mockPaletteOutput,
       table: {
@@ -213,7 +220,9 @@ describe('XYChart component', () => {
     });
 
     test('it uses passed in minInterval', () => {
-      const table1 = createSampleDatatableWithRows([{ a: 1, b: 2, c: 'I', d: 'Foo' }]);
+      const table1 = createSampleDatatableWithRows([
+        { a: 1, b: 2, c: '2019-01-02T05:00:00.000Z', d: 'Foo' },
+      ]);
       const table2 = createSampleDatatableWithRows([]);
 
       const component = shallow(
@@ -244,13 +253,13 @@ describe('XYChart component', () => {
         layerId: 'defaultTimeLayer',
         type: 'dataLayer',
         layerType: LayerTypes.DATA,
+        showLines: true,
         seriesType: 'line',
         xAccessor: 'c',
         accessors: ['a', 'b'],
         splitAccessor: 'd',
         columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
         xScaleType: 'time',
-        yScaleType: 'linear',
         isHistogram: true,
         palette: mockPaletteOutput,
         table: data,
@@ -436,7 +445,7 @@ describe('XYChart component', () => {
 
       test('should pass enabled histogram mode and min interval to endzones component', () => {
         const component = shallow(
-          <XYChart {...defaultProps} minInterval={24 * 60 * 60 * 1000} args={defaultTimeArgs} />
+          <XYChart {...defaultProps} minInterval={24 * 60 * 60 * 1000} args={timeArgs} />
         );
 
         expect(component.find(XyEndzones).dive().find('Endzones').props()).toEqual(
@@ -460,7 +469,8 @@ describe('XYChart component', () => {
                   seriesType: 'bar',
                   xScaleType: 'time',
                   isHistogram: true,
-                },
+                  table: newData,
+                } as DataLayerConfig,
               ],
             }}
           />
@@ -485,6 +495,40 @@ describe('XYChart component', () => {
 
         expect(component.find(XyEndzones).length).toEqual(0);
       });
+    });
+  });
+
+  describe('x axis extents', () => {
+    const { args } = sampleArgs();
+
+    test('it passes custom x axis extents to elastic-charts settings spec', () => {
+      {
+        const component = shallow(
+          <XYChart
+            {...defaultProps}
+            args={{
+              ...args,
+              layers: [
+                {
+                  ...(args.layers[0] as DataLayerConfig),
+                  isHistogram: true,
+                },
+              ],
+              xExtent: {
+                type: 'axisExtentConfig',
+                mode: 'custom',
+                lowerBound: 123,
+                upperBound: 456,
+              },
+            }}
+          />
+        );
+        expect(component.find(Settings).prop('xDomain')).toEqual({
+          min: 123,
+          max: 456,
+          minInterval: 50,
+        });
+      }
     });
   });
 
@@ -682,6 +726,136 @@ describe('XYChart component', () => {
     expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(true);
   });
 
+  test('applies the mark size ratio', () => {
+    const { args } = sampleArgs();
+    const markSizeRatioArg = { markSizeRatio: 50 };
+    const component = shallow(
+      <XYChart {...defaultProps} args={{ ...args, ...markSizeRatioArg }} />
+    );
+    expect(component.find(Settings).at(0).prop('theme')).toEqual(
+      expect.objectContaining(markSizeRatioArg)
+    );
+  });
+
+  test('applies the mark size accessor', () => {
+    const { args } = sampleArgs();
+    const markSizeAccessorArg = { markSizeAccessor: 'b' };
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{ ...args, layers: [{ ...args.layers[0], ...markSizeAccessorArg }] }}
+      />
+    );
+    const dataLayers = component.find(DataLayers).dive();
+    const lineArea = dataLayers.find(LineSeries).at(0);
+    expect(lineArea.prop('markSizeAccessor')).toEqual(markSizeAccessorArg.markSizeAccessor);
+    const expectedSeriesStyle = expect.objectContaining({
+      point: expect.objectContaining({
+        visible: true,
+        fill: ColorVariant.Series,
+      }),
+    });
+
+    expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
+    expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
+  });
+
+  test('applies the line width to the chart', () => {
+    const { args } = sampleArgs();
+    const lineWidthArg = { lineWidth: 10 };
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{ ...args, layers: [{ ...args.layers[0], ...lineWidthArg }] }}
+      />
+    );
+    const dataLayers = component.find(DataLayers).dive();
+    const lineArea = dataLayers.find(LineSeries).at(0);
+    const expectedSeriesStyle = expect.objectContaining({
+      line: expect.objectContaining({ strokeWidth: lineWidthArg.lineWidth }),
+    });
+
+    expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
+    expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
+  });
+
+  test('applies showPoints to the chart', () => {
+    const checkIfPointsVisibilityIsApplied = (showPoints: boolean) => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), showPoints }],
+          }}
+        />
+      );
+      const dataLayers = component.find(DataLayers).dive();
+      const lineArea = dataLayers.find(LineSeries).at(0);
+      const expectedSeriesStyle = expect.objectContaining({
+        point: expect.objectContaining({
+          visible: showPoints,
+        }),
+      });
+      expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
+      expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
+    };
+
+    checkIfPointsVisibilityIsApplied(true);
+    checkIfPointsVisibilityIsApplied(false);
+  });
+
+  test('applies point radius to the chart', () => {
+    const pointsRadius = 10;
+    const { args } = sampleArgs();
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: [{ ...(args.layers[0] as DataLayerConfig), pointsRadius }],
+        }}
+      />
+    );
+    const dataLayers = component.find(DataLayers).dive();
+    const lineArea = dataLayers.find(LineSeries).at(0);
+    const expectedSeriesStyle = expect.objectContaining({
+      point: expect.objectContaining({
+        radius: pointsRadius,
+      }),
+    });
+    expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
+    expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
+  });
+
+  test('changes lines visibility at the chart', () => {
+    const checkIfLinesVisibilityIsApplied = (showLines: boolean) => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), showLines }],
+          }}
+        />
+      );
+      const dataLayers = component.find(DataLayers).dive();
+      const lineArea = dataLayers.find(LineSeries).at(0);
+      const expectedSeriesStyle = expect.objectContaining({
+        line: expect.objectContaining({
+          visible: showLines,
+        }),
+      });
+      expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
+      expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
+    };
+
+    checkIfLinesVisibilityIsApplied(true);
+    checkIfLinesVisibilityIsApplied(false);
+  });
+
   test('it renders bar', () => {
     const { args } = sampleArgs();
     const component = shallow(
@@ -756,6 +930,29 @@ describe('XYChart component', () => {
     expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
   });
 
+  test('it renders empty placeholder for no results with references layer', () => {
+    const { data, args } = sampleArgsWithReferenceLine();
+    const emptyDataLayers = args.layers.map((layer) => {
+      if (layer.type === 'dataLayer') {
+        return { ...layer, table: { ...data, rows: [] } };
+      } else {
+        return layer;
+      }
+    });
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: emptyDataLayers,
+        }}
+      />
+    );
+
+    expect(component.find(BarSeries)).toHaveLength(0);
+    expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
+  });
+
   test('onBrushEnd returns correct context data for date histogram data', () => {
     const { args } = sampleArgs();
 
@@ -772,7 +969,7 @@ describe('XYChart component', () => {
 
     expect(onSelectRange).toHaveBeenCalledWith({
       column: 0,
-      table: dateHistogramData.tables.timeLayer,
+      table: dateHistogramData,
       range: [1585757732783, 1585758880838],
     });
   });
@@ -819,8 +1016,8 @@ describe('XYChart component', () => {
       type: 'dataLayer',
       layerType: LayerTypes.DATA,
       hide: false,
+      showLines: true,
       xAccessor: 'xAccessorId',
-      yScaleType: 'linear',
       xScaleType: 'linear',
       isHistogram: true,
       seriesType: 'bar_stacked',
@@ -894,9 +1091,9 @@ describe('XYChart component', () => {
               type: 'dataLayer',
               layerType: LayerTypes.DATA,
               isHistogram: true,
+              showLines: true,
               seriesType: 'bar_stacked',
               xAccessor: 'b',
-              yScaleType: 'linear',
               xScaleType: 'time',
               splitAccessor: 'b',
               accessors: ['d'],
@@ -968,7 +1165,7 @@ describe('XYChart component', () => {
         {
           column: 0,
           row: 0,
-          table: dateHistogramData.tables.timeLayer,
+          table: dateHistogramData,
           value: 1585758120000,
         },
       ],
@@ -1016,9 +1213,9 @@ describe('XYChart component', () => {
       layerId: 'numberLayer',
       type: 'dataLayer',
       layerType: LayerTypes.DATA,
+      showLines: true,
       hide: false,
       xAccessor: 'xAccessorId',
-      yScaleType: 'linear',
       xScaleType: 'linear',
       isHistogram: true,
       seriesType: 'bar_stacked',
@@ -1094,11 +1291,11 @@ describe('XYChart component', () => {
               type: 'dataLayer',
               layerType: LayerTypes.DATA,
               seriesType: 'line',
+              showLines: true,
               xAccessor: 'd',
               accessors: ['a', 'b'],
               columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
               xScaleType: 'ordinal',
-              yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
               table: data,
@@ -1152,12 +1349,12 @@ describe('XYChart component', () => {
               layerId: 'first',
               type: 'dataLayer',
               layerType: LayerTypes.DATA,
+              showLines: true,
               seriesType: 'line',
               xAccessor: 'd',
               accessors: ['a', 'b'],
               columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
               xScaleType: 'ordinal',
-              yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
               table: newData,
@@ -1183,12 +1380,12 @@ describe('XYChart component', () => {
               layerId: 'first',
               type: 'dataLayer',
               layerType: LayerTypes.DATA,
+              showLines: true,
               seriesType: 'line',
               xAccessor: 'd',
               accessors: ['a', 'b'],
               columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
               xScaleType: 'ordinal',
-              yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
               table: data,
@@ -1648,8 +1845,7 @@ describe('XYChart component', () => {
         .find(LineSeries)
         .prop('name') as SeriesNameFn;
 
-      // In this case, the ID is used as the name. This shouldn't happen in practice
-      expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual(null);
+      expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('a');
       expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
     });
 
@@ -1729,7 +1925,7 @@ describe('XYChart component', () => {
       // This accessor has a human-readable name
       expect(nameFn1({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Label A');
       // This accessor does not
-      expect(nameFn2({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual(null);
+      expect(nameFn2({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual('b');
       expect(nameFn1({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
     });
 
@@ -1871,7 +2067,7 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
-          layers: [{ ...(args.layers[0] as DataLayerConfig), yScaleType: 'sqrt' }],
+          yLeftScale: 'sqrt',
         }}
       />
     );
@@ -1910,17 +2106,10 @@ describe('XYChart component', () => {
   test('it should pass the formatter function to the axis', () => {
     const { args } = sampleArgs();
 
-    const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
+    shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
-    const tickFormatter = instance.find(Axis).first().prop('tickFormat');
-
-    if (!tickFormatter) {
-      throw new Error('tickFormatter prop not found');
-    }
-
-    tickFormatter('I');
-
-    expect(convertSpy).toHaveBeenCalledWith('I');
+    expect(convertSpy).toHaveBeenCalledWith(1652034840000);
+    expect(convertSpy).toHaveBeenCalledWith(1652122440000);
   });
 
   test('it should set the tickLabel visibility on the x axis if the tick labels is hidden', () => {
@@ -2080,6 +2269,9 @@ describe('XYChart component', () => {
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
+      yLeftScale: 'linear',
+      yRightScale: 'linear',
+      showTooltip: true,
       legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
       tickLabelsVisibilitySettings: {
@@ -2100,6 +2292,10 @@ describe('XYChart component', () => {
         yLeft: 0,
         yRight: 0,
       },
+      xExtent: {
+        mode: 'dataBounds',
+        type: 'axisExtentConfig',
+      },
       yLeftExtent: {
         mode: 'full',
         type: 'axisExtentConfig',
@@ -2108,18 +2304,19 @@ describe('XYChart component', () => {
         mode: 'full',
         type: 'axisExtentConfig',
       },
+      markSizeRatio: 1,
       layers: [
         {
           layerId: 'first',
           type: 'dataLayer',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
+          showLines: true,
           xAccessor: 'a',
           accessors: ['c'],
           splitAccessor: 'b',
           columnToLabel: '',
           xScaleType: 'ordinal',
-          yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
           table: data1,
@@ -2129,12 +2326,12 @@ describe('XYChart component', () => {
           type: 'dataLayer',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
+          showLines: true,
           xAccessor: 'a',
           accessors: ['c'],
           splitAccessor: 'b',
           columnToLabel: '',
           xScaleType: 'ordinal',
-          yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
           table: data2,
@@ -2171,6 +2368,7 @@ describe('XYChart component', () => {
       yRightTitle: '',
       legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
+      showTooltip: true,
       tickLabelsVisibilitySettings: {
         type: 'tickLabelsConfig',
         x: true,
@@ -2189,6 +2387,10 @@ describe('XYChart component', () => {
         yLeft: 0,
         yRight: 0,
       },
+      xExtent: {
+        mode: 'dataBounds',
+        type: 'axisExtentConfig',
+      },
       yLeftExtent: {
         mode: 'full',
         type: 'axisExtentConfig',
@@ -2197,18 +2399,21 @@ describe('XYChart component', () => {
         mode: 'full',
         type: 'axisExtentConfig',
       },
+      markSizeRatio: 1,
+      yLeftScale: 'linear',
+      yRightScale: 'linear',
       layers: [
         {
           layerId: 'first',
           type: 'dataLayer',
           layerType: LayerTypes.DATA,
+          showLines: true,
           seriesType: 'line',
           xAccessor: 'a',
           accessors: ['c'],
           splitAccessor: 'b',
           columnToLabel: '',
           xScaleType: 'ordinal',
-          yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
           table: data,
@@ -2241,6 +2446,7 @@ describe('XYChart component', () => {
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
+      showTooltip: true,
       legend: { type: 'legendConfig', isVisible: true, position: Position.Top },
       valueLabels: 'hide',
       tickLabelsVisibilitySettings: {
@@ -2261,6 +2467,10 @@ describe('XYChart component', () => {
         yLeft: 0,
         yRight: 0,
       },
+      xExtent: {
+        mode: 'dataBounds',
+        type: 'axisExtentConfig',
+      },
       yLeftExtent: {
         mode: 'full',
         type: 'axisExtentConfig',
@@ -2269,18 +2479,21 @@ describe('XYChart component', () => {
         mode: 'full',
         type: 'axisExtentConfig',
       },
+      markSizeRatio: 1,
+      yLeftScale: 'linear',
+      yRightScale: 'linear',
       layers: [
         {
           layerId: 'first',
           type: 'dataLayer',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
+          showLines: true,
           xAccessor: 'a',
           accessors: ['c'],
           splitAccessor: 'b',
           columnToLabel: '',
           xScaleType: 'ordinal',
-          yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
           table: data,
@@ -2375,6 +2588,37 @@ describe('XYChart component', () => {
     );
 
     expect(component.find(Settings).prop('legendPosition')).toEqual('top');
+  });
+
+  it('computes correct legend sizes', () => {
+    const { args } = sampleArgs();
+
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          legend: { ...args.legend, legendSize: LegendSize.SMALL },
+        }}
+      />
+    );
+    expect(component.find(Settings).prop('legendSize')).toEqual(80);
+
+    component.setProps({
+      args: {
+        ...args,
+        legend: { ...args.legend, legendSize: LegendSize.AUTO },
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toBeUndefined();
+
+    component.setProps({
+      args: {
+        ...args,
+        legend: { ...args.legend, legendSize: undefined },
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toEqual(130);
   });
 
   test('it should apply the fitting function to all non-bar series', () => {
@@ -2495,11 +2739,11 @@ describe('XYChart component', () => {
       layerId: 'timeLayer',
       type: 'dataLayer',
       layerType: LayerTypes.DATA,
+      showLines: true,
       seriesType: 'line',
       xAccessor: 'c',
       accessors: ['a', 'b'],
       xScaleType: 'ordinal',
-      yScaleType: 'linear',
       isHistogram: false,
       palette: mockPaletteOutput,
       table: data,
@@ -2664,6 +2908,142 @@ describe('XYChart component', () => {
 
       expect(lineAnnotations.length).toEqual(2);
       expect(rectAnnotations.length).toEqual(1);
+    });
+  });
+
+  describe('split chart', () => {
+    const SPLIT_COLUMN = '__split_column__';
+    const SPLIT_ROW = '__split_row__';
+
+    it('should render split chart if splitRowAccessor is specified', () => {
+      const { args } = sampleArgs();
+      const splitRowAccessor = 'b';
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            splitRowAccessor,
+          }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+
+      const splitChart = component.find(SplitChart);
+
+      expect(splitChart.prop('splitRowAccessor')).toEqual(splitRowAccessor);
+
+      const groupBy = splitChart.dive().find(GroupBy);
+      const smallMultiples = splitChart.dive().find(SmallMultiples);
+
+      expect(groupBy.at(0).prop('id')).toEqual(SPLIT_ROW);
+      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_ROW);
+    });
+
+    it('should render split chart if splitColumnAccessor is specified', () => {
+      const { args } = sampleArgs();
+      const splitColumnAccessor = 'b';
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            splitColumnAccessor,
+          }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+
+      const splitChart = component.find(SplitChart);
+
+      expect(splitChart.prop('splitColumnAccessor')).toEqual(splitColumnAccessor);
+
+      const groupBy = splitChart.dive().find(GroupBy);
+      const smallMultiples = splitChart.dive().find(SmallMultiples);
+
+      expect(groupBy.at(0).prop('id')).toEqual(SPLIT_COLUMN);
+      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_COLUMN);
+    });
+
+    it('should render split chart if both, splitRowAccessor and splitColumnAccessor are specified', () => {
+      const { args } = sampleArgs();
+      const splitColumnAccessor = 'b';
+      const splitRowAccessor = 'c';
+
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            splitColumnAccessor,
+            splitRowAccessor,
+          }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+
+      const splitChart = component.find(SplitChart);
+
+      expect(splitChart.prop('splitRowAccessor')).toEqual(splitRowAccessor);
+      expect(splitChart.prop('splitColumnAccessor')).toEqual(splitColumnAccessor);
+
+      const groupBy = splitChart.dive().find(GroupBy);
+      const smallMultiples = splitChart.dive().find(SmallMultiples);
+
+      expect(groupBy.at(0).prop('id')).toEqual(SPLIT_COLUMN);
+      expect(groupBy.at(1).prop('id')).toEqual(SPLIT_ROW);
+
+      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_COLUMN);
+      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_ROW);
+    });
+  });
+
+  describe('detailed tooltip', () => {
+    it('should render custom detailed tooltip', () => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            detailedTooltip: true,
+          }}
+        />
+      );
+      const settings = component.find(Settings);
+      const tooltip = settings.prop('tooltip');
+      expect(tooltip).toEqual(
+        expect.objectContaining({
+          headerFormatter: undefined,
+          customTooltip: expect.any(Function),
+        })
+      );
+    });
+
+    it('should render default tooltip, if detailed tooltip is hidden', () => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            detailedTooltip: false,
+          }}
+        />
+      );
+      const settings = component.find(Settings);
+      const tooltip = settings.prop('tooltip');
+      expect(tooltip).toEqual(
+        expect.objectContaining({
+          headerFormatter: expect.any(Function),
+          customTooltip: undefined,
+        })
+      );
     });
   });
 });

@@ -6,91 +6,131 @@
  */
 import React from 'react';
 import {
-  EuiTableFieldDataColumnType,
   EuiEmptyPrompt,
   EuiBasicTable,
   EuiTextColor,
-  EuiFlexGroup,
-  EuiFlexItem,
+  type EuiTableFieldDataColumnType,
+  type CriteriaWithPagination,
+  type Pagination,
+  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { Link, generatePath } from 'react-router-dom';
-import { extractErrorMessage } from '../../../../common/utils/helpers';
+import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
-import type { CspFindingsByResourceResult } from './use_findings_by_resource';
+import type { FindingsByResourcePage } from './use_findings_by_resource';
 import { findingsNavigation } from '../../../common/navigation/constants';
 
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
 
-type FindingsGroupByResourceProps = CspFindingsByResourceResult;
-type CspFindingsByResource = NonNullable<CspFindingsByResourceResult['data']>['page'][number];
+interface Props {
+  items: FindingsByResourcePage[];
+  loading: boolean;
+  pagination: Pagination;
+  setTableOptions(options: CriteriaWithPagination<FindingsByResourcePage>): void;
+}
 
-export const getResourceId = (resource: CspFindingsByResource) =>
-  [resource.resource_id, resource.cluster_id, resource.cis_section].join('/');
+export const getResourceId = (resource: FindingsByResourcePage) =>
+  [resource.resource_id, ...resource.cis_sections].join('/');
 
 const FindingsByResourceTableComponent = ({
-  error,
-  data,
+  items,
   loading,
-}: FindingsGroupByResourceProps) => {
-  const getRowProps = (row: CspFindingsByResource) => ({
+  pagination,
+  setTableOptions,
+}: Props) => {
+  const getRowProps = (row: FindingsByResourcePage) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
   });
 
-  if (!loading && !data?.page.length)
+  if (!loading && !items.length)
     return <EuiEmptyPrompt iconType="logoKibana" title={<h2>{TEXT.NO_FINDINGS}</h2>} />;
 
   return (
     <EuiBasicTable
       loading={loading}
-      error={error ? extractErrorMessage(error) : undefined}
-      items={data?.page || []}
+      items={items}
       columns={columns}
       rowProps={getRowProps}
+      pagination={pagination}
+      onChange={setTableOptions}
     />
   );
 };
 
-const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
+const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
   {
     field: 'resource_id',
     name: (
-      <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.resourceIdColumnLabel"
-        defaultMessage="Resource ID"
+      <ColumnNameWithTooltip
+        columnName={TEXT.RESOURCE_ID}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.resourceTable.resourceTableColumn.resourceIdColumnTooltipLabel',
+          {
+            defaultMessage: 'Custom Elastic Resource ID',
+          }
+        )}
       />
     ),
-    render: (resourceId: CspFindingsByResource['resource_id']) => (
+    render: (resourceId: FindingsByResourcePage['resource_id']) => (
       <Link to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}>
         {resourceId}
       </Link>
     ),
   },
   {
-    field: 'cis_section',
+    field: 'resource_subtype',
     truncateText: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.cisSectionColumnLabel"
-        defaultMessage="CIS Section"
+        id="xpack.csp.findings.groupByResourceTable.resourceTypeColumnLabel"
+        defaultMessage="Resource Type"
       />
     ),
+  },
+  {
+    field: 'resource_name',
+    truncateText: true,
+    name: (
+      <FormattedMessage
+        id="xpack.csp.findings.groupByResourceTable.resourceNameColumnLabel"
+        defaultMessage="Resource Name"
+      />
+    ),
+  },
+  {
+    field: 'cis_sections',
+    truncateText: true,
+    name: (
+      <FormattedMessage
+        id="xpack.csp.findings.groupByResourceTable.cisSectionsColumnLabel"
+        defaultMessage="CIS Sections"
+      />
+    ),
+    render: (sections: string[]) => sections.join(', '),
   },
   {
     field: 'cluster_id',
-    truncateText: true,
     name: (
-      <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.clusterIdColumnLabel"
-        defaultMessage="Cluster ID"
+      <ColumnNameWithTooltip
+        columnName={TEXT.CLUSTER_ID}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.resourceTable.resourceTableColumn.clusterIdColumnTooltipLabel',
+          {
+            defaultMessage: 'Kube-System Namespace ID',
+          }
+        )}
       />
     ),
+    truncateText: true,
   },
   {
     field: 'failed_findings',
+    width: '150px',
     truncateText: true,
     name: (
       <FormattedMessage
@@ -98,16 +138,25 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
         defaultMessage="Failed Findings"
       />
     ),
-    render: (failedFindings: CspFindingsByResource['failed_findings']) => (
-      <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiTextColor color="danger">{formatNumber(failedFindings.total)}</EuiTextColor>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <span>({numeral(failedFindings.normalized).format('0%')})</span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    render: (failedFindings: FindingsByResourcePage['failed_findings']) => (
+      <EuiToolTip
+        content={i18n.translate('xpack.csp.findings.groupByResourceTable.failedFindingsToolTip', {
+          defaultMessage: '{failed} out of {total}',
+          values: {
+            failed: failedFindings.count,
+            total: failedFindings.total_findings,
+          },
+        })}
+      >
+        <>
+          <EuiTextColor color={failedFindings.count === 0 ? '' : 'danger'}>
+            {formatNumber(failedFindings.count)}
+          </EuiTextColor>
+          <span> ({numeral(failedFindings.normalized).format('0%')})</span>
+        </>
+      </EuiToolTip>
     ),
+    dataType: 'number',
   },
 ];
 

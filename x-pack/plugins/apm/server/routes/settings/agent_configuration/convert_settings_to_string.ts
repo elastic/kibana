@@ -13,17 +13,27 @@ import { AgentConfiguration } from '../../../../common/agent_configuration/confi
 export function convertConfigSettingsToString(
   hit: SearchHit<AgentConfiguration>
 ) {
-  const config = hit._source;
+  const { settings } = hit._source;
 
-  if (config.settings?.transaction_sample_rate) {
-    config.settings.transaction_sample_rate =
-      config.settings.transaction_sample_rate.toString();
-  }
+  const convertedConfigSettings = {
+    ...settings,
+    ...(settings?.transaction_sample_rate
+      ? {
+          transaction_sample_rate: settings.transaction_sample_rate.toString(),
+        }
+      : {}),
+    ...(settings?.transaction_max_spans
+      ? {
+          transaction_max_spans: settings.transaction_max_spans.toString(),
+        }
+      : {}),
+  };
 
-  if (config.settings?.transaction_max_spans) {
-    config.settings.transaction_max_spans =
-      config.settings.transaction_max_spans.toString();
-  }
-
-  return hit;
+  return {
+    ...hit,
+    _source: {
+      ...hit._source,
+      settings: convertedConfigSettings,
+    },
+  };
 }

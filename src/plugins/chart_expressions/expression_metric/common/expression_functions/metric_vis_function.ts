@@ -146,6 +146,9 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     validateAccessor(args.bucket, input.columns);
 
     if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
       const argsTable: Dimension[] = [
         [
           args.metric,

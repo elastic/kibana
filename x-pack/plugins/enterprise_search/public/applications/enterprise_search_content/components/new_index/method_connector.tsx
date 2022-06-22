@@ -21,6 +21,7 @@ import { NewSearchIndexTemplate } from './new_search_index_template';
 export const MethodConnector: React.FC = () => {
   return (
     <NewSearchIndexTemplate
+      title="Connector"
       description={i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.methodConnector.description',
         {
@@ -29,7 +30,7 @@ export const MethodConnector: React.FC = () => {
         }
       )}
       docsUrl="#"
-      type="Connector"
+      type="connector"
     >
       <EuiPanel
         color="subdued"

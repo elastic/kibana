@@ -301,7 +301,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
-            timeFieldName: inferTimeField(event.data),
+            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event.data),
           },
         });
       }
@@ -309,7 +309,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
-            timeFieldName: inferTimeField(event.data),
+            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event.data),
           },
         });
       }
@@ -322,7 +322,28 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         );
       }
     },
-    [plugins.uiActions, activeVisualization, dispatchLens]
+    [plugins.data.datatableUtilities, plugins.uiActions, activeVisualization, dispatchLens]
+  );
+
+  const hasCompatibleActions = useCallback(
+    async (event: ExpressionRendererEvent) => {
+      if (!plugins.uiActions) {
+        // ui actions not available, not handling event...
+        return false;
+      }
+      if (!isLensFilterEvent(event)) {
+        return false;
+      }
+      return (
+        (
+          await plugins.uiActions.getTriggerCompatibleActions(
+            VIS_EVENT_TO_TRIGGER[event.name],
+            event
+          )
+        ).length > 0
+      );
+    },
+    [plugins.uiActions]
   );
 
   useEffect(() => {
@@ -444,6 +465,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         framePublicAPI={framePublicAPI}
         lensInspector={lensInspector}
         onEvent={onEvent}
+        hasCompatibleActions={hasCompatibleActions}
         setLocalState={setLocalState}
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
@@ -518,6 +540,7 @@ export const VisualizationWrapper = ({
   framePublicAPI,
   lensInspector,
   onEvent,
+  hasCompatibleActions,
   setLocalState,
   localState,
   ExpressionRendererComponent,
@@ -529,6 +552,7 @@ export const VisualizationWrapper = ({
   framePublicAPI: FramePublicAPI;
   lensInspector: LensInspector;
   onEvent: (event: ExpressionRendererEvent) => void;
+  hasCompatibleActions: (event: ExpressionRendererEvent) => Promise<boolean>;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
     configurationValidationError?: Array<{
@@ -762,6 +786,7 @@ export const VisualizationWrapper = ({
         searchContext={searchContext}
         searchSessionId={searchSessionId}
         onEvent={onEvent}
+        hasCompatibleActions={hasCompatibleActions}
         onData$={onData$}
         inspectorAdapters={lensInspector.adapters}
         renderMode="edit"

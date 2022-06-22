@@ -43,6 +43,8 @@ const enabledActionTypes = [
   '.slack',
   '.webhook',
   '.xmatters',
+  '.test-sub-action-connector',
+  '.test-sub-action-connector-without-sub-actions',
   'test.authorization',
   'test.failing',
   'test.index-record',
@@ -202,6 +204,17 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               config: {
                 apiUrl: 'https://ven04334.service-now.com',
                 usesTableApi: true,
+              },
+              secrets: {
+                username: 'elastic_integration',
+                password: 'somepassword',
+              },
+            },
+            'my-deprecated-servicenow-default': {
+              actionTypeId: '.servicenow',
+              name: 'ServiceNow#xyz',
+              config: {
+                apiUrl: 'https://ven04334.service-now.com',
               },
               secrets: {
                 username: 'elastic_integration',

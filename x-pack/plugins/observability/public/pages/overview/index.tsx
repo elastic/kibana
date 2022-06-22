@@ -66,6 +66,7 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 }
 
 const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.overview.alert.tableState';
+const ALERTS_PER_PAGE = 10;
 
 export function OverviewPage({ routeParams }: Props) {
   const trackMetric = useUiTracker({ app: 'observability-overview' });
@@ -88,7 +89,7 @@ export function OverviewPage({ routeParams }: Props) {
     application: { capabilities },
   } = useKibana<ObservabilityAppServices>().services;
 
-  const { ObservabilityPageTemplate, config } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
@@ -154,9 +155,7 @@ export function OverviewPage({ routeParams }: Props) {
     docsLink: docLinks.links.observability.guide,
   });
 
-  const alertsLink = config.unsafe.alertingExperience.enabled
-    ? paths.observability.alerts
-    : paths.management.rules;
+  const alertsLink = paths.observability.alerts;
 
   return (
     <ObservabilityPageTemplate
@@ -196,7 +195,6 @@ export function OverviewPage({ routeParams }: Props) {
                     defaultMessage: 'Show alerts',
                   }),
                 }}
-                showExperimentalBadge={true}
               >
                 <CasesContext
                   owner={[observabilityFeatureId]}
@@ -208,6 +206,7 @@ export function OverviewPage({ routeParams }: Props) {
                     rangeFrom={relativeStart}
                     rangeTo={relativeEnd}
                     indexNames={indexNames}
+                    itemsPerPage={ALERTS_PER_PAGE}
                     stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
                     storage={new Storage(window.localStorage)}
                   />
@@ -225,7 +224,7 @@ export function OverviewPage({ routeParams }: Props) {
           <EuiFlexGroup>
             <EuiFlexItem>
               {/* Resources / What's New sections */}
-              <EuiFlexGroup direction="row">
+              <EuiFlexGroup>
                 <EuiFlexItem grow={4}>
                   {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
                 </EuiFlexItem>

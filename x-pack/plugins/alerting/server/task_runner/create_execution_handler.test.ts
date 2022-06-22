@@ -13,7 +13,6 @@ import {
   actionsMock,
   renderActionParameterTemplatesDefault,
 } from '@kbn/actions-plugin/server/mocks';
-import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { KibanaRequest } from '@kbn/core/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { InjectActionParamsOpts } from './inject_action_params';
@@ -26,10 +25,13 @@ import {
   RuleTypeState,
 } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
 }));
+
+const alertingEventLogger = alertingEventLoggerMock.create();
 
 const ruleType: NormalizedRuleType<
   RuleTypeParams,
@@ -60,7 +62,6 @@ const ruleType: NormalizedRuleType<
 const actionsClient = actionsClientMock.create();
 
 const mockActionsPlugin = actionsMock.createStart();
-const mockEventLogger = eventLoggerMock.create();
 const createExecutionHandlerParams: jest.Mocked<
   CreateExecutionHandlerOptions<
     RuleTypeParams,
@@ -83,7 +84,7 @@ const createExecutionHandlerParams: jest.Mocked<
   kibanaBaseUrl: 'http://localhost:5601',
   ruleType,
   logger: loggingSystemMock.create().get(),
-  eventLogger: mockEventLogger,
+  alertingEventLogger,
   actions: [
     {
       id: '1',
@@ -178,63 +179,13 @@ describe('Create Execution Handler', () => {
     ]
   `);
 
-    expect(mockEventLogger.logEvent).toHaveBeenCalledTimes(1);
-    expect(mockEventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        Object {
-          "event": Object {
-            "action": "execute-action",
-            "category": Array [
-              "alerts",
-            ],
-            "kind": "alert",
-          },
-          "kibana": Object {
-            "alert": Object {
-              "rule": Object {
-                "consumer": "rule-consumer",
-                "execution": Object {
-                  "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-                },
-                "rule_type_id": "test",
-              },
-            },
-            "alerting": Object {
-              "action_group_id": "default",
-              "instance_id": "2",
-            },
-            "saved_objects": Array [
-              Object {
-                "id": "1",
-                "namespace": "test1",
-                "rel": "primary",
-                "type": "alert",
-                "type_id": "test",
-              },
-              Object {
-                "id": "1",
-                "namespace": "test1",
-                "type": "action",
-                "type_id": "test",
-              },
-            ],
-            "space_ids": Array [
-              "test1",
-            ],
-          },
-          "message": "alert: test:1: 'name-of-alert' instanceId: '2' scheduled actionGroup: 'default' action: test:1",
-          "rule": Object {
-            "category": "test",
-            "id": "1",
-            "license": "basic",
-            "name": "name-of-alert",
-            "ruleset": "alerts",
-          },
-        },
-      ],
-    ]
-  `);
+    expect(alertingEventLogger.logAction).toHaveBeenCalledTimes(1);
+    expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, {
+      id: '1',
+      typeId: 'test',
+      alertId: '2',
+      alertGroup: 'default',
+    });
 
     expect(jest.requireMock('./inject_action_params').injectActionParams).toHaveBeenCalledWith({
       ruleId: '1',

@@ -11,7 +11,6 @@ import styled from 'styled-components';
 
 import { HostsComponentsQueryProps } from './types';
 import * as i18n from '../translations';
-import { useRiskyHostsDashboardButtonHref } from '../../../overview/containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
 import { HostRiskInformationButtonEmpty } from '../../components/host_risk_information';
 import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
@@ -19,9 +18,11 @@ import { useQueryInspector } from '../../../common/components/page/manage_query'
 import { RiskScoreOverTime } from '../../../common/components/risk_score_over_time';
 import { TopRiskScoreContributors } from '../../../common/components/top_risk_score_contributors';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
+import { RISKY_HOSTS_DASHBOARD_TITLE } from './constants';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.l};
+  margin-top: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
 const QUERY_ID = HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE;
@@ -31,7 +32,11 @@ const HostRiskTabBodyComponent: React.FC<
     hostName: string;
   }
 > = ({ hostName, startDate, endDate, setQuery, deleteQuery }) => {
-  const { buttonHref } = useRiskyHostsDashboardButtonHref(startDate, endDate);
+  const { buttonHref } = useDashboardButtonHref({
+    from: startDate,
+    to: endDate,
+    title: RISKY_HOSTS_DASHBOARD_TITLE,
+  });
 
   const timerange = useMemo(
     () => ({

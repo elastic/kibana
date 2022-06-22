@@ -11,7 +11,7 @@ import type { Agent, BulkActionResult } from '../../types';
 import * as APIKeyService from '../api_keys';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
-import { createAgentAction, bulkCreateAgentActions } from './actions';
+import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import {
   getAgentById,
@@ -20,6 +20,7 @@ import {
   getAgentPolicyForAgent,
   bulkUpdateAgents,
 } from './crud';
+import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
 async function unenrollAgentIsAllowed(
   soClient: SavedObjectsClientContract,
@@ -53,7 +54,7 @@ export async function unenrollAgent(
   }
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
-    agent_id: agentId,
+    agents: [agentId],
     created_at: now,
     type: 'UNENROLL',
   });
@@ -80,21 +81,22 @@ export async function unenrollAgents(
     }
     return !agent.unenrollment_started_at && !agent.unenrolled_at;
   });
-  // And which are allowed to unenroll
-  const agentResults = await Promise.allSettled(
-    agentsEnrolled.map((agent) =>
-      unenrollAgentIsAllowed(soClient, esClient, agent.id).then((_) => agent)
-    )
-  );
+
+  const hostedPolicies = await getHostedPolicies(soClient, agentsEnrolled);
+
   const outgoingErrors: Record<Agent['id'], Error> = {};
+
+  // And which are allowed to unenroll
   const agentsToUpdate = options.force
     ? agentsEnrolled
-    : agentResults.reduce<Agent[]>((agents, result, index) => {
-        if (result.status === 'fulfilled') {
-          agents.push(result.value);
-        } else {
+    : agentsEnrolled.reduce<Agent[]>((agents, agent, index) => {
+        if (isHostedAgent(hostedPolicies, agent)) {
           const id = givenAgents[index].id;
-          outgoingErrors[id] = result.reason;
+          outgoingErrors[id] = new HostedAgentPolicyRestrictionRelatedError(
+            `Cannot unenroll ${agent.id} from a hosted agent policy ${agent.policy_id}`
+          );
+        } else {
+          agents.push(agent);
         }
         return agents;
       }, []);
@@ -105,14 +107,11 @@ export async function unenrollAgents(
     await invalidateAPIKeysForAgents(agentsToUpdate);
   } else {
     // Create unenroll action for each agent
-    await bulkCreateAgentActions(
-      esClient,
-      agentsToUpdate.map((agent) => ({
-        agent_id: agent.id,
-        created_at: now,
-        type: 'UNENROLL',
-      }))
-    );
+    await createAgentAction(esClient, {
+      agents: agentsToUpdate.map((agent) => agent.id),
+      created_at: now,
+      type: 'UNENROLL',
+    });
   }
 
   // Update the necessary agents

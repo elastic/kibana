@@ -208,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('file based', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
 

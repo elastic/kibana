@@ -12,38 +12,47 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
-import { Filter, onlyDisabledFiltersChanged } from '@kbn/es-query';
-import type { SavedObjectAttributes, KibanaExecutionContext } from '@kbn/core/public';
+import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
+import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { TimeRange, Query, TimefilterContract } from '@kbn/data-plugin/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
+  Adapters,
+  AttributeService,
+  Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
-  Embeddable,
   IContainer,
-  Adapters,
-  SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
-  AttributeService,
+  SavedObjectEmbeddableInput,
+  ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import {
-  IExpressionLoaderParams,
+  ExpressionAstExpression,
   ExpressionLoader,
   ExpressionRenderError,
-  ExpressionAstExpression,
+  IExpressionLoaderParams,
 } from '@kbn/expressions-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import { isFallbackDataView } from '../visualize_app/utils';
+import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
+import VisualizationError from '../components/visualization_error';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { Vis, SerializedVis } from '../vis';
-import { getExecutionContext, getExpressions, getTheme, getUiActions } from '../services';
+import { SerializedVis, Vis } from '../vis';
+import {
+  getApplication,
+  getExecutionContext,
+  getExpressions,
+  getTheme,
+  getUiActions,
+} from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
-
-const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
@@ -210,15 +219,13 @@ export class VisualizeEmbeddable
         // Turn this off or the uiStateChangeHandler will fire for every modification.
         this.vis.uiState.off('change', this.uiStateChangeHandler);
         this.vis.uiState.clearAllKeys();
-        if (visCustomizations.vis) {
-          this.vis.uiState.set('vis', visCustomizations.vis);
-          getKeys(visCustomizations).forEach((key) => {
-            this.vis.uiState.set(key, visCustomizations[key]);
-          });
-        }
-        if (visCustomizations.table) {
-          this.vis.uiState.set('table', visCustomizations.table);
-        }
+
+        Object.entries(visCustomizations).forEach(([key, value]) => {
+          if (value) {
+            this.vis.uiState.set(key, value);
+          }
+        });
+
         this.vis.uiState.on('change', this.uiStateChangeHandler);
       }
     } else if (this.parent) {
@@ -381,6 +388,33 @@ export class VisualizeEmbeddable
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
+    this.subscriptions.push(
+      this.getUpdated$().subscribe(() => {
+        const { error } = this.getOutput();
+
+        if (error) {
+          if (isFallbackDataView(this.vis.data.indexPattern)) {
+            render(
+              <VisualizationMissedSavedObjectError
+                viewMode={this.input.viewMode ?? ViewMode.VIEW}
+                renderMode={this.input.renderMode ?? 'view'}
+                savedObjectMeta={{
+                  savedObjectId: this.vis.data.indexPattern.id,
+                  savedObjectType: this.vis.data.savedSearchId
+                    ? 'search'
+                    : DATA_VIEW_SAVED_OBJECT_TYPE,
+                }}
+                application={getApplication()}
+              />,
+              this.domNode
+            );
+          } else {
+            render(<VisualizationError error={error} />, this.domNode);
+          }
+        }
+      })
+    );
+
     await this.updateHandler();
   }
 
@@ -436,11 +470,16 @@ export class VisualizeEmbeddable
     }
     this.abortController = new AbortController();
     const abortController = this.abortController;
-    this.expression = await toExpressionAst(this.vis, {
-      timefilter: this.timefilter,
-      timeRange: this.timeRange,
-      abortSignal: this.abortController!.signal,
-    });
+
+    try {
+      this.expression = await toExpressionAst(this.vis, {
+        timefilter: this.timefilter,
+        timeRange: this.timeRange,
+        abortSignal: this.abortController!.signal,
+      });
+    } catch (e) {
+      this.onContainerError(e);
+    }
 
     if (this.handler && !abortController.signal.aborted) {
       await this.handler.update(this.expression, expressionParams);

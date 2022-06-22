@@ -10,7 +10,8 @@ import type { IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { Adapters } from '@kbn/inspector-plugin';
-import type { AggGroupNames, AggParam, AggGroupName, Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import type { AggGroupNames, AggParam, AggGroupName } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import { VisGroups } from './vis_groups_enum';
@@ -56,6 +57,7 @@ interface DefaultEditorConfig<TVisParams> {
     [key: string]: Array<{ text: string; value: string }> | Array<{ id: string; label: string }>;
   };
   enableAutoApply?: boolean;
+  enableDataViewChange?: boolean;
   defaultSize?: string;
   optionsTemplate?: DefaultEditorOptionsComponent<TVisParams>;
   optionTabs?: Array<{
@@ -96,6 +98,7 @@ export interface VisualizeEditorLayersContext {
   termsParams?: Record<string, unknown>;
   splitFields?: string[];
   splitMode?: string;
+  collapseFn?: string;
   splitFilters?: SplitByFilters[];
   palette?: PaletteOutput;
   metrics: VisualizeEditorMetricContext[];
@@ -194,6 +197,10 @@ export interface VisTypeDefinition<TVisParams> {
    */
   readonly stage?: 'experimental' | 'beta' | 'production';
   /**
+   * It sets the vis type on a deprecated mode when is true
+   */
+  readonly isDeprecated?: boolean;
+  /**
    * Describes the experience group that the visualization belongs.
    * It can be on tools, aggregation based or promoted group.
    * @default 'aggbased'
@@ -211,6 +218,10 @@ export interface VisTypeDefinition<TVisParams> {
    * with the selection of a search source - an index pattern or a saved search.
    */
   readonly requiresSearch?: boolean;
+  /**
+   * In case when the visualization performs an aggregation, this option will be used to display or hide the rows with partial data.
+   */
+  readonly hasPartialRows?: boolean | ((vis: { params: TVisParams }) => boolean);
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);
   readonly inspectorAdapters?: Adapters | (() => Adapters);
   /**
@@ -220,6 +231,12 @@ export interface VisTypeDefinition<TVisParams> {
    * of this type.
    */
   readonly getInfoMessage?: (vis: Vis) => React.ReactNode;
+
+  /**
+   * When truthy, it will perform a search and pass the results to the visualization as a `datatable`.
+   * @default false
+   */
+  readonly fetchDatatable?: boolean;
   /**
    * Should be provided to expand base visualization expression with
    * custom exprsesion chain, including render expression.

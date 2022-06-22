@@ -19,11 +19,12 @@ import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { SyncBadge } from './badge/sync_badge';
+import { SpanLinksBadge } from './badge/span_links_badge';
 import { ColdStartBadge } from './badge/cold_start_badge';
 import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 import { FailureBadge } from './failure_badge';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
-import { useApmParams } from '../../../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -43,7 +44,7 @@ const Container = euiStyled.div<IContainerStyleProps>`
   position: relative;
   display: block;
   user-select: none;
-  padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding-top: ${({ theme }) => theme.eui.euiSizeS};
   padding-bottom: ${({ theme }) => theme.eui.euiSizeM};
   margin-right: ${(props) => props.timelineMargins.right}px;
   margin-left: ${(props) =>
@@ -237,6 +238,11 @@ export function WaterfallItem({
             agentName={item.doc.agent.name}
           />
         )}
+        <SpanLinksBadge
+          linkedParents={item.spanLinksCount.linkedParents}
+          linkedChildren={item.spanLinksCount.linkedChildren}
+          id={item.id}
+        />
         {isServerlessColdstart && <ColdStartBadge />}
       </ItemText>
     </Container>
@@ -252,12 +258,16 @@ function RelatedErrors({
 }) {
   const apmRouter = useApmRouter();
   const theme = useTheme();
-  const { query } = useApmParams('/services/{serviceName}/transactions/view');
+  const { query } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/traces/explorer'
+  );
 
   const href = apmRouter.link(`/services/{serviceName}/errors`, {
     path: { serviceName: item.doc.service.name },
     query: {
       ...query,
+      serviceGroup: '',
       kuery: `${TRACE_ID} : "${item.doc.trace.id}" and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`,
     },
   });

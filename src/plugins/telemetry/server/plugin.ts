@@ -17,7 +17,6 @@ import {
   distinctUntilChanged,
   filter,
 } from 'rxjs';
-
 import { ElasticV3ServerShipper } from '@kbn/analytics-shippers-elastic-v3-server';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -85,10 +84,12 @@ type SavedObjectsRegisterType = CoreSetup['savedObjects']['registerType'];
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
   private readonly logger: Logger;
   private readonly currentKibanaVersion: string;
+  private readonly initialConfig: TelemetryConfigType;
   private readonly config$: Observable<TelemetryConfigType>;
   private readonly isOptedIn$ = new BehaviorSubject<boolean | undefined>(undefined);
   private readonly isDev: boolean;
   private readonly fetcherTask: FetcherTask;
+  private optInPromise?: Promise<boolean | undefined>;
   /**
    * @private Used to mark the completion of the old UI Settings migration
    */
@@ -110,7 +111,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
    */
   private readonly optInPollerSubscription = timer(0, OPT_IN_POLL_INTERVAL_MS)
     .pipe(
-      exhaustMap(() => this.getOptInStatus()),
+      exhaustMap(() => {
+        this.optInPromise = this.getOptInStatus();
+        return this.optInPromise;
+      }),
       distinctUntilChanged()
     )
     .subscribe((isOptedIn) => this.isOptedIn$.next(isOptedIn));
@@ -122,13 +126,14 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.isDev = initializerContext.env.mode.dev;
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
     this.config$ = initializerContext.config.create();
+    this.initialConfig = initializerContext.config.get();
     this.fetcherTask = new FetcherTask({
       ...initializerContext,
       logger: this.logger,
     });
 
     // If the opt-in selection cannot be changed, set it as early as possible.
-    const { optIn, allowChangingOptInStatus } = initializerContext.config.get();
+    const { optIn, allowChangingOptInStatus } = this.initialConfig;
     if (allowChangingOptInStatus === false) {
       this.isOptedIn$.next(optIn);
     }
@@ -147,6 +152,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     analytics.registerShipper(ElasticV3ServerShipper, {
       channelName: 'kibana-server',
       version: currentKibanaVersion,
+      sendTo: this.initialConfig.sendUsageTo === 'prod' ? 'production' : 'staging',
     });
 
     const config$ = this.config$;
@@ -204,9 +210,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public stop() {
+  public async stop() {
     this.optInPollerSubscription.unsubscribe();
     this.isOptedIn$.complete();
+    this.fetcherTask.stop();
+    if (this.optInPromise) await this.optInPromise;
   }
 
   private async getOptInStatus(): Promise<boolean | undefined> {

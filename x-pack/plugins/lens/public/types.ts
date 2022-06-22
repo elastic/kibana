@@ -14,7 +14,7 @@ import type {
 import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
-import { Filter } from '@kbn/es-query';
+import { Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   ExpressionRendererEvent,
@@ -22,13 +22,13 @@ import type {
   Datatable,
 } from '@kbn/expressions-plugin/public';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
-import type { Query } from '@kbn/data-plugin/public';
-import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
+import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
   RowClickContext,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
+import { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -369,15 +369,20 @@ export interface DatasourcePublicAPI {
    */
   getSourceId: () => string | undefined;
   /**
-   * Collect all defined filters from all the operations in the layer
+   * Collect all defined filters from all the operations in the layer. If it returns undefined, this means that filters can't be constructed for the current layer
    */
-  getFilters: (activeData?: FramePublicAPI['activeData']) => Record<
-    'enabled' | 'disabled',
-    {
-      kuery: Query[][];
-      lucene: Query[][];
-    }
-  >;
+  getFilters: (
+    activeData?: FramePublicAPI['activeData'],
+    timeRange?: TimeRange
+  ) =>
+    | { error: string }
+    | Record<
+        'enabled' | 'disabled',
+        {
+          kuery: Query[][];
+          lucene: Query[][];
+        }
+      >;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -557,7 +562,7 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
 
 export interface AccessorConfig {
   columnId: string;
-  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible';
+  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible' | 'aggregate';
   color?: string;
   palette?: string[] | Array<{ color: string; stop: number }>;
 }
@@ -931,22 +936,6 @@ export interface Visualization<T = unknown> {
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
-
-  /**
-   * `datasourceExpressionsByLayers` will be passed to the params of `toExpression` and `toPreviewExpression`
-   * functions and datasource expressions will not be appended to the expression automatically.
-   */
-  shouldBuildDatasourceExpressionManually?: () => boolean;
-}
-
-export interface LensFilterEvent {
-  name: 'filter';
-  data: ValueClickContext['data'];
-}
-
-export interface LensBrushEvent {
-  name: 'brush';
-  data: RangeSelectContext['data'];
 }
 
 // Use same technique as TriggerContext
@@ -975,11 +964,11 @@ export interface LensTableRowContextMenuEvent {
   data: RowClickContext['data'];
 }
 
-export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
+export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';
 }
 
-export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensBrushEvent {
+export function isLensBrushEvent(event: ExpressionRendererEvent): event is BrushTriggerEvent {
   return event.name === 'brush';
 }
 
@@ -991,7 +980,7 @@ export function isLensEditEvent<T extends LensEditSupportedActions>(
 
 export function isLensTableRowContextMenuClickEvent(
   event: ExpressionRendererEvent
-): event is LensBrushEvent {
+): event is BrushTriggerEvent {
   return event.name === 'tableRowContextMenuClick';
 }
 
@@ -1003,8 +992,8 @@ export function isLensTableRowContextMenuClickEvent(
 export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
   event: (
     event:
-      | LensFilterEvent
-      | LensBrushEvent
+      | ClickTriggerEvent
+      | BrushTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
   ) => void;

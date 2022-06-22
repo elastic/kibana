@@ -13,18 +13,30 @@ import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
 import numeral from '@elastic/numeral';
 import { TestProvider } from '../../../test/test_provider';
+import type { FindingsByResourcePage } from './use_findings_by_resource';
 
 const chance = new Chance();
 
-const getFakeFindingsByResource = () => ({
-  resource_id: chance.guid(),
-  cluster_id: chance.guid(),
-  cis_section: chance.word(),
-  failed_findings: {
-    total: chance.integer(),
-    normalized: chance.integer({ min: 0, max: 1 }),
-  },
-});
+const getFakeFindingsByResource = (): FindingsByResourcePage => {
+  const count = chance.integer();
+  const total = chance.integer() + count + 1;
+  const normalized = count / total;
+
+  const [resourceName, resourceSubtype, ...cisSections] = chance.unique(chance.word, 4);
+
+  return {
+    cluster_id: chance.guid(),
+    resource_id: chance.guid(),
+    resource_name: resourceName,
+    resource_subtype: resourceSubtype,
+    cis_sections: cisSections,
+    failed_findings: {
+      count,
+      normalized,
+      total_findings: total,
+    },
+  };
+};
 
 type TableProps = PropsOf<typeof FindingsByResourceTable>;
 
@@ -32,8 +44,9 @@ describe('<FindingsByResourceTable />', () => {
   it('renders the zero state when status success and data has a length of zero ', async () => {
     const props: TableProps = {
       loading: false,
-      data: { page: [] },
-      error: null,
+      items: [],
+      pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0 },
+      setTableOptions: jest.fn(),
     };
 
     render(
@@ -50,8 +63,9 @@ describe('<FindingsByResourceTable />', () => {
 
     const props: TableProps = {
       loading: false,
-      data: { page: data },
-      error: null,
+      items: data,
+      pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0 },
+      setTableOptions: jest.fn(),
     };
 
     render(
@@ -66,9 +80,11 @@ describe('<FindingsByResourceTable />', () => {
       );
       expect(row).toBeInTheDocument();
       expect(within(row).getByText(item.resource_id)).toBeInTheDocument();
-      expect(within(row).getByText(item.cluster_id)).toBeInTheDocument();
-      expect(within(row).getByText(item.cis_section)).toBeInTheDocument();
-      expect(within(row).getByText(formatNumber(item.failed_findings.total))).toBeInTheDocument();
+      if (item.resource_name) expect(within(row).getByText(item.resource_name)).toBeInTheDocument();
+      if (item.resource_subtype)
+        expect(within(row).getByText(item.resource_subtype)).toBeInTheDocument();
+      expect(within(row).getByText(item.cis_sections.join(', '))).toBeInTheDocument();
+      expect(within(row).getByText(formatNumber(item.failed_findings.count))).toBeInTheDocument();
       expect(
         within(row).getByText(new RegExp(numeral(item.failed_findings.normalized).format('0%')))
       ).toBeInTheDocument();

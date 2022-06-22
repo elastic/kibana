@@ -9,7 +9,8 @@
 import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { defaultsDeep } from 'lodash';
-import { createFlagError } from '@kbn/dev-utils';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { Config } from './config';
 import { EsVersion } from '../es_version';
@@ -26,21 +27,33 @@ async function getSettingsFromFile(
     primary: boolean;
   }
 ) {
+  let resolvedPath;
+  try {
+    resolvedPath = require.resolve(options.path);
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+      throw createFlagError(`Unable to find config file [${options.path}]`);
+    }
+
+    throw error;
+  }
+
   if (
     options.primary &&
-    !FTR_CONFIGS_MANIFEST_PATHS.includes(options.path) &&
-    !options.path.includes(`${Path.sep}__fixtures__${Path.sep}`)
+    !FTR_CONFIGS_MANIFEST_PATHS.includes(resolvedPath) &&
+    !resolvedPath.includes(`${Path.sep}__fixtures__${Path.sep}`)
   ) {
+    const rel = Path.relative(REPO_ROOT, resolvedPath);
     throw createFlagError(
-      `Refusing to load FTR Config which is not listed in [${FTR_CONFIGS_MANIFEST_REL}]. All FTR Config files must be listed there, use the "enabled" key if the FTR Config should be run on automatically on PR CI, or the "disabled" key if it is run manually or by a special job.`
+      `Refusing to load FTR Config at [${rel}] which is not listed in [${FTR_CONFIGS_MANIFEST_REL}]. All FTR Config files must be listed there, use the "enabled" key if the FTR Config should be run on automatically on PR CI, or the "disabled" key if it is run manually or by a special job.`
     );
   }
 
-  const configModule = require(options.path); // eslint-disable-line @typescript-eslint/no-var-requires
+  const configModule = require(resolvedPath); // eslint-disable-line @typescript-eslint/no-var-requires
   const configProvider = configModule.__esModule ? configModule.default : configModule;
 
   if (!cache.has(configProvider)) {
-    log.debug('Loading config file from %j', options.path);
+    log.debug('Loading config file from %j', resolvedPath);
     cache.set(
       configProvider,
       configProvider({

@@ -21,12 +21,14 @@ import {
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiButtonTo } from '../../../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../../../app_logic';
 import { SOURCES_PATH, getSourcesPath } from '../../../../../routes';
+import { SourceDataItem } from '../../../../../types';
 
 import { CustomSourceDeployment } from '../../custom_source_deployment';
 
@@ -35,14 +37,22 @@ import { SAVE_CUSTOM_BODY1 as READY_TO_ACCEPT_REQUESTS_LABEL } from '../constant
 
 import { AddCustomSourceLogic } from './add_custom_source_logic';
 
-export const SaveCustom: React.FC = () => {
-  const { newCustomSource, sourceData } = useValues(AddCustomSourceLogic);
+interface SaveCustomProps {
+  sourceData: SourceDataItem;
+}
+
+export const SaveCustom: React.FC<SaveCustomProps> = ({ sourceData }) => {
+  const { newCustomSource } = useValues(AddCustomSourceLogic);
   const { isOrganization } = useValues(AppLogic);
-  const { serviceType, name, categories = [] } = sourceData;
+  const { serviceType, baseServiceType, name, categories = [] } = sourceData;
 
   return (
     <>
-      <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
+      <AddSourceHeader
+        name={name}
+        serviceType={baseServiceType ?? serviceType}
+        categories={categories}
+      />
       <EuiSpacer size="xxl" />
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -92,10 +102,10 @@ export const SaveCustom: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
-          <CustomSourceDeployment source={newCustomSource} sourceData={sourceData} />
+          <CustomSourceDeployment source={newCustomSource} baseServiceType={baseServiceType} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {serviceType !== 'custom' && (
+      {baseServiceType && (
         <>
           <EuiSpacer />
           <EuiFlexGroup justifyContent="center">

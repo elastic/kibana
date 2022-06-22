@@ -7,10 +7,10 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { Feature } from 'geojson';
 import {
+  EMSVectorTileStyleDescriptor,
   HeatmapStyleDescriptor,
   StyleDescriptor,
   VectorStyleDescriptor,
@@ -61,6 +61,7 @@ export type LayerDescriptor = {
   attribution?: Attribution;
   id: string;
   label?: string | null;
+  locale?: string | null;
   areLabelsOnTop?: boolean;
   minZoom?: number;
   maxZoom?: number;
@@ -81,4 +82,9 @@ export type VectorLayerDescriptor = LayerDescriptor & {
 export type HeatmapLayerDescriptor = LayerDescriptor & {
   type: LAYER_TYPE.HEATMAP;
   style: HeatmapStyleDescriptor;
+};
+
+export type EMSVectorTileLayerDescriptor = LayerDescriptor & {
+  type: LAYER_TYPE.EMS_VECTOR_TILE;
+  style: EMSVectorTileStyleDescriptor;
 };

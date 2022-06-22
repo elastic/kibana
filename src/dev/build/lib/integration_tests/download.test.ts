@@ -196,7 +196,7 @@ describe('downloadToDisk', () => {
         retryDelaySecMultiplier: 0.1,
       });
       await expect(promise).rejects.toMatchInlineSnapshot(
-        `[Error: Request failed with status code 500]`
+        `[AxiosError: Request failed with status code 500]`
       );
       expect(logWritter.messages).toMatchInlineSnapshot(`
         Array [
@@ -269,7 +269,7 @@ describe('downloadToString', () => {
       maxAttempts: 1,
     });
     await expect(promise).rejects.toMatchInlineSnapshot(
-      `[Error: Request failed with status code 200]`
+      `[AxiosError: Request failed with status code 200]`
     );
     expect(logWritter.messages).toMatchInlineSnapshot(`
       Array [

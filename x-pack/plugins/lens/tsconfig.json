@@ -23,6 +23,7 @@
     { "path": "../../../src/plugins/visualizations/tsconfig.json" },
     { "path": "../../../src/plugins/dashboard/tsconfig.json" },
     { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
+    { "path": "../../../src/plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "../../../src/plugins/share/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/saved_objects/tsconfig.json" },
