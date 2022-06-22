@@ -15,10 +15,13 @@ Retrieve a paginated set of rules based on condition.
 
 === {api-prereq-title}
 
-You must have `read` privileges for the *Management* > *Stack Rules* feature or
-for the *{ml-app}*, *{observability}*, or *Security* features or the
-`monitoring_user` built-in role, depending on the `consumer` and `rule_type_id`
-of the rule you're creating.
+You must have `read` privileges for the appropriate {kib} features, depending on
+the `consumer` and `rule_type_id` of the rules you're seeking. For example, the
+*Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
+features, *{observability}*, and *Security* features. To find rules associated
+with the *{stack-monitor-app}*, use the `monitoring_user` built-in role.
+
+For more details, refer to <<kibana-feature-privileges>>.
 
 === {api-description-title}
 

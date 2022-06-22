@@ -15,7 +15,9 @@ Retrieve the health status of the alerting framework.
 
 === {api-prereq-title}
 
-You must have `read` privileges for the *Management* > *Stack Rules* feature.
+You must have `read` privileges for the *Management* > *Stack Rules* feature or
+for at least one of the *Analytics* > *Discover*, *Analytics* > *{ml-app}*,
+*{observability}*, or *Security* features.
 
 [[get-alerting-framework-health-api-params]]
 === {api-path-parms-title}

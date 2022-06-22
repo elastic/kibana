@@ -15,12 +15,13 @@ Retrieve a rule by ID.
 
 === {api-prereq-title}
 
-You must have `read` privileges for the *Management* > *Stack Rules* feature or
-for the *{ml-app}*, *{observability}*, or *Security* features or the
-`monitoring_user` built-in role, depending on the `consumer` and `rule_type_id`
-of the rule you're creating. If the rule has `actions`, you must also have `read`
-privileges for the *Management* > *Actions and Connectors* feature. For more
-details, refer to <<kibana-feature-privileges>>.
+You must have `read` privileges for the appropriate {kib} features, depending on
+the `consumer` and `rule_type_id` of the rules you're seeking. For example, the
+*Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
+features, *{observability}*, and *Security* features. To get rules associated
+with the *{stack-monitor-app}*, use the `monitoring_user` built-in role.
+
+For more details, refer to <<kibana-feature-privileges>>.
 
 [[get-rule-api-params]]
 === {api-path-parms-title}
