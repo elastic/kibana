@@ -7,7 +7,13 @@
  */
 
 import { lastValueFrom, Subscription } from 'rxjs';
-import { onlyDisabledFiltersChanged, Filter } from '@kbn/es-query';
+import {
+  onlyDisabledFiltersChanged,
+  Filter,
+  Query,
+  TimeRange,
+  FilterStateStore,
+} from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
@@ -17,7 +23,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Container, Embeddable } from '@kbn/embeddable-plugin/public';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import { APPLY_FILTER_TRIGGER, FilterManager, generateFilters } from '@kbn/data-plugin/public';
-import { ISearchSource, Query, TimeRange, FilterStateStore } from '@kbn/data-plugin/public';
+import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -282,7 +288,7 @@ export class SavedSearchEmbeddable
           field,
           value,
           operator,
-          indexPattern.id!
+          indexPattern
         );
         filters = filters.map((filter) => ({
           ...filter,

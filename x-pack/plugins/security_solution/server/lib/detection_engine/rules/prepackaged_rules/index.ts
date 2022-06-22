@@ -86,14 +86,14 @@ import rule73 from './linux_iodine_activity.json';
 import rule74 from './linux_netcat_network_connection.json';
 import rule75 from './linux_nping_activity.json';
 import rule76 from './linux_process_started_in_temp_directory.json';
-import rule77 from './linux_strace_activity.json';
-import rule78 from './persistence_adobe_hijack_persistence.json';
-import rule79 from './persistence_local_scheduled_task_creation.json';
-import rule80 from './persistence_priv_escalation_via_accessibility_features.json';
-import rule81 from './persistence_shell_activity_by_web_server.json';
-import rule82 from './persistence_system_shells_via_services.json';
-import rule83 from './persistence_user_account_creation.json';
-import rule84 from './persistence_via_application_shimming.json';
+import rule77 from './persistence_adobe_hijack_persistence.json';
+import rule78 from './persistence_local_scheduled_task_creation.json';
+import rule79 from './persistence_priv_escalation_via_accessibility_features.json';
+import rule80 from './persistence_shell_activity_by_web_server.json';
+import rule81 from './persistence_system_shells_via_services.json';
+import rule82 from './persistence_user_account_creation.json';
+import rule83 from './persistence_via_application_shimming.json';
+import rule84 from './privilege_escalation_linux_strace_activity.json';
 import rule85 from './privilege_escalation_unusual_parentchild_relationship.json';
 import rule86 from './impact_modification_of_boot_config.json';
 import rule87 from './privilege_escalation_uac_bypass_event_viewer.json';
@@ -680,8 +680,9 @@ import rule667 from './execution_abnormal_process_id_file_created.json';
 import rule668 from './execution_process_started_from_process_id_file.json';
 import rule669 from './privilege_escalation_suspicious_dnshostname_update.json';
 import rule670 from './command_and_control_connection_attempt_by_non_ssh_root_session.json';
-import rule671 from './defense_evasion_elastic_agent_service_terminated.json';
-import rule672 from './defense_evasion_proxy_execution_via_msdt.json';
+import rule671 from './execution_user_exec_to_pod.json';
+import rule672 from './defense_evasion_elastic_agent_service_terminated.json';
+import rule673 from './defense_evasion_proxy_execution_via_msdt.json';
 
 export const rawRules = [
   rule1,
@@ -1356,4 +1357,5 @@ export const rawRules = [
   rule670,
   rule671,
   rule672,
+  rule673,
 ];

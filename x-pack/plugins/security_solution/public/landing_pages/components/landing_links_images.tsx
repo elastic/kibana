@@ -19,7 +19,7 @@ const PrimaryEuiTitle = styled(EuiTitle)`
 `;
 
 const LandingLinksDescripton = styled(EuiText)`
-  padding-top: ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding-top: ${({ theme }) => theme.eui.euiSizeXS};
   max-width: 550px;
 `;
 
@@ -34,7 +34,7 @@ const StyledFlexItem = styled(EuiFlexItem)`
 const SecuritySolutionLink = withSecuritySolutionLink(Link);
 
 const Content = styled(EuiFlexItem)`
-  padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 export const LandingLinksImages: React.FC<LandingLinksImagesProps> = ({ items }) => (
