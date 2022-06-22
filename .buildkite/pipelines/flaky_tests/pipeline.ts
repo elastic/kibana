@@ -10,7 +10,7 @@ const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
   console.error('+++ Triggering directly is not supported anymore');
   console.error(
-    `Please use the "Trigger Flaky Test Runner" UI to run the Flaky Test Runner. You can find the UI at the URL below:`,
+    `Please use the "Trigger Flaky Test Runner" UI to run the Flaky Test Runner. You can find the UI at the URL below:`
   );
   console.error('\n    https://ci-stats.kibana.dev/trigger_flaky_test_runner\n');
   process.exit(1);
@@ -24,7 +24,9 @@ const concurrency = process.env.KIBANA_FLAKY_TEST_CONCURRENCY
   : 25;
 
 if (Number.isNaN(concurrency)) {
-  throw new Error(`invalid KIBANA_FLAKY_TEST_CONCURRENCY: ${process.env.KIBANA_FLAKY_TEST_CONCURRENCY}`);
+  throw new Error(
+    `invalid KIBANA_FLAKY_TEST_CONCURRENCY: ${process.env.KIBANA_FLAKY_TEST_CONCURRENCY}`
+  );
 }
 
 const BASE_JOBS = 1;
@@ -100,7 +102,7 @@ if (totalJobs > MAX_JOBS) {
   console.error(
     `Buildkite builds can only contain ${MAX_JOBS} jobs in total. Found ${totalJobs} based on this config. Make sure your test runs are less than ${
       MAX_JOBS - BASE_JOBS
-    }`,
+    }`
   );
   process.exit(1);
 }
@@ -159,7 +161,7 @@ for (const testSuite of testSuites) {
       const group = groups.find((g) => g.key.includes(CYPRESS_SUITE));
       if (!group) {
         throw new Error(
-          `Group configuration was not found in groups.json for the following cypress suite: {${CYPRESS_SUITE}}.`,
+          `Group configuration was not found in groups.json for the following cypress suite: {${CYPRESS_SUITE}}.`
         );
       }
       steps.push({

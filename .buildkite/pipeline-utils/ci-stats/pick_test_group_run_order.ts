@@ -49,7 +49,7 @@ function getRunGroup(bk: BuildkiteClient, types: RunGroup[], typeName: string): 
         'Empty test configs should be removed',
         '',
         ...type.namesWithoutDurations.map((n) => ` - ${n}`),
-      ].join('\n'),
+      ].join('\n')
     );
   }
 
@@ -63,8 +63,10 @@ function getRunGroup(bk: BuildkiteClient, types: RunGroup[], typeName: string): 
           ? `The following "${typeName}" config has a duration that exceeds the maximum amount of time desired for a single CI job. Please split it up.`
           : `The following "${typeName}" configs have durations that exceed the maximum amount of time desired for a single CI job. Please split them up.`,
         '',
-        ...(type.tooLong ?? []).map(({ config, durationMin }) => ` - ${config}: ${durationMin} minutes`),
-      ].join('\n'),
+        ...(type.tooLong ?? []).map(
+          ({ config, durationMin }) => ` - ${config}: ${durationMin} minutes`
+        ),
+      ].join('\n')
     );
   }
 
@@ -128,7 +130,9 @@ export async function pickTestGroupRunOrder() {
   const INTEGRATION_TYPE = getRequiredEnv('TEST_GROUP_TYPE_INTEGRATION');
   const FUNCTIONAL_TYPE = getRequiredEnv('TEST_GROUP_TYPE_FUNCTIONAL');
 
-  const JEST_MAX_MINUTES = process.env.JEST_MAX_MINUTES ? parseFloat(process.env.JEST_MAX_MINUTES) : 50;
+  const JEST_MAX_MINUTES = process.env.JEST_MAX_MINUTES
+    ? parseFloat(process.env.JEST_MAX_MINUTES)
+    : 50;
   if (Number.isNaN(JEST_MAX_MINUTES)) {
     throw new Error(`invalid JEST_MAX_MINUTES: ${process.env.JEST_MAX_MINUTES}`);
   }
@@ -155,9 +159,12 @@ export async function pickTestGroupRunOrder() {
   const FUNCTIONAL_MINIMUM_ISOLATION_MIN = process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN
     ? parseFloat(process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN)
     : undefined;
-  if (FUNCTIONAL_MINIMUM_ISOLATION_MIN !== undefined && Number.isNaN(FUNCTIONAL_MINIMUM_ISOLATION_MIN)) {
+  if (
+    FUNCTIONAL_MINIMUM_ISOLATION_MIN !== undefined &&
+    Number.isNaN(FUNCTIONAL_MINIMUM_ISOLATION_MIN)
+  ) {
     throw new Error(
-      `invalid FUNCTIONAL_MINIMUM_ISOLATION_MIN: ${process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN}`,
+      `invalid FUNCTIONAL_MINIMUM_ISOLATION_MIN: ${process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN}`
     );
   }
 
@@ -380,11 +387,11 @@ export async function pickTestGroupRunOrder() {
                           : []),
                       ],
                     },
-                  }),
+                  })
                 )
                 .sort((a, b) => a.label.localeCompare(b.label)),
             }
         : [],
-    ].flat(),
+    ].flat()
   );
 }

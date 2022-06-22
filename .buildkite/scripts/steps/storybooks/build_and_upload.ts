@@ -61,7 +61,7 @@ const ghStatus = (state: string, description: string) =>
     `-f target_url="${process.env.BUILDKITE_BUILD_URL}"`,
     `-f context="${GITHUB_CONTEXT}"`,
     `-f description="${description}"`,
-    `--silent`,
+    `--silent`
   );
 
 const build = () => {
@@ -114,7 +114,7 @@ const upload = () => {
 
     if (process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false') {
       exec(
-        `buildkite-agent meta-data set pr_comment:storybooks:head '* [Storybooks Preview](${STORYBOOK_BASE_URL})'`,
+        `buildkite-agent meta-data set pr_comment:storybooks:head '* [Storybooks Preview](${STORYBOOK_BASE_URL})'`
       );
     }
   } finally {

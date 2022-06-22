@@ -27,7 +27,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
 };
 
 const uploadPipeline = (pipelineContent: string | object) => {
-  const str = typeof pipelineContent === 'string' ? pipelineContent : JSON.stringify(pipelineContent);
+  const str =
+    typeof pipelineContent === 'string' ? pipelineContent : JSON.stringify(pipelineContent);
 
   execSync('buildkite-agent pipeline upload', {
     input: str,

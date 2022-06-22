@@ -89,7 +89,7 @@ export class BuildkiteClient {
   getBuild = async (
     pipelineSlug: string,
     buildNumber: string | number,
-    includeRetriedJobs = false,
+    includeRetriedJobs = false
   ): Promise<Build> => {
     // TODO properly assemble URL
     const link = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds/${buildNumber}?include_retried_jobs=${includeRetriedJobs.toString()}`;
@@ -99,13 +99,15 @@ export class BuildkiteClient {
 
   getCurrentBuild = (includeRetriedJobs = false) => {
     if (!process.env.BUILDKITE_PIPELINE_SLUG || !process.env.BUILDKITE_BUILD_NUMBER) {
-      throw new Error('BUILDKITE_PIPELINE_SLUG and BUILDKITE_BUILD_NUMBER must be set to get current build');
+      throw new Error(
+        'BUILDKITE_PIPELINE_SLUG and BUILDKITE_BUILD_NUMBER must be set to get current build'
+      );
     }
 
     return this.getBuild(
       process.env.BUILDKITE_PIPELINE_SLUG,
       process.env.BUILDKITE_BUILD_NUMBER,
-      includeRetriedJobs,
+      includeRetriedJobs
     );
   };
 
@@ -127,9 +129,14 @@ export class BuildkiteClient {
     // https://buildkite.com/docs/pipelines/defining-steps#job-states - See "Differentiating between broken, skipped and canceled states:"
     success =
       job.type === 'manual' ||
-      !['failed', 'timed_out', 'timing_out', 'waiting_failed', 'unblocked_failed', 'blocked_failed'].includes(
-        job.state,
-      );
+      ![
+        'failed',
+        'timed_out',
+        'timing_out',
+        'waiting_failed',
+        'unblocked_failed',
+        'blocked_failed',
+      ].includes(job.state);
 
     if (job.soft_failed) {
       success = true;
@@ -150,7 +157,9 @@ export class BuildkiteClient {
       if (job.retried) {
         hasRetries = true;
         const isPreemptionFailure =
-          job.state === 'failed' && job.agent?.meta_data?.includes('spot=true') && job.exit_status === -1;
+          job.state === 'failed' &&
+          job.agent?.meta_data?.includes('spot=true') &&
+          job.exit_status === -1;
 
         if (!isPreemptionFailure) {
           hasNonPreemptionRetries = true;
@@ -173,7 +182,10 @@ export class BuildkiteClient {
     return this.getBuildStatus(await this.getCurrentBuild(includeRetriedJobs));
   };
 
-  getArtifacts = async (pipelineSlug: string, buildNumber: string | number): Promise<Artifact[]> => {
+  getArtifacts = async (
+    pipelineSlug: string,
+    buildNumber: string | number
+  ): Promise<Artifact[]> => {
     let link = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds/${buildNumber}/artifacts?per_page=100`;
     const artifacts = [];
 
@@ -201,14 +213,22 @@ export class BuildkiteClient {
 
   getArtifactsForCurrentBuild = (): Promise<Artifact[]> => {
     if (!process.env.BUILDKITE_PIPELINE_SLUG || !process.env.BUILDKITE_BUILD_NUMBER) {
-      throw new Error('BUILDKITE_PIPELINE_SLUG and BUILDKITE_BUILD_NUMBER must be set to get current build');
+      throw new Error(
+        'BUILDKITE_PIPELINE_SLUG and BUILDKITE_BUILD_NUMBER must be set to get current build'
+      );
     }
 
-    return this.getArtifacts(process.env.BUILDKITE_PIPELINE_SLUG, process.env.BUILDKITE_BUILD_NUMBER);
+    return this.getArtifacts(
+      process.env.BUILDKITE_PIPELINE_SLUG,
+      process.env.BUILDKITE_BUILD_NUMBER
+    );
   };
 
   // https://buildkite.com/docs/apis/rest-api/builds#create-a-build
-  triggerBuild = async (pipelineSlug: string, options: BuildkiteTriggerBuildParams): Promise<Build> => {
+  triggerBuild = async (
+    pipelineSlug: string,
+    options: BuildkiteTriggerBuildParams
+  ): Promise<Build> => {
     const url = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds`;
 
     return (await this.http.post(url, options)).data;
@@ -221,7 +241,11 @@ export class BuildkiteClient {
     });
   };
 
-  setAnnotation = (context: string, style: 'info' | 'success' | 'warning' | 'error', value: string) => {
+  setAnnotation = (
+    context: string,
+    style: 'info' | 'success' | 'warning' | 'error',
+    value: string
+  ) => {
     execSync(`buildkite-agent annotate --context '${context}' --style '${style}'`, {
       input: value,
       stdio: ['pipe', 'inherit', 'inherit'],

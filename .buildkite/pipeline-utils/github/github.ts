@@ -17,11 +17,11 @@ let prChangesCache: null | RestEndpointMethodTypes['pulls']['listFiles']['respon
 export const getPrChanges = async (
   owner = process.env.GITHUB_PR_BASE_OWNER,
   repo = process.env.GITHUB_PR_BASE_REPO,
-  prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER,
+  prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER
 ) => {
   if (!owner || !repo || !prNumber) {
     throw Error(
-      "Couldn't retrieve Github PR info from environment variables in order to retrieve PR changes",
+      "Couldn't retrieve Github PR info from environment variables in order to retrieve PR changes"
     );
   }
 
@@ -43,7 +43,7 @@ export const getPrChangesCached = async () => {
 export const areChangesSkippable = async (
   skippablePaths: RegExp[],
   requiredPaths: RegExp[] = [],
-  changes: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data'] = null,
+  changes: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data'] = null
 ) => {
   const prChanges = changes || (await getPrChangesCached());
 
@@ -53,7 +53,9 @@ export const areChangesSkippable = async (
 
   if (requiredPaths?.length) {
     const someFilesMatchRequired = requiredPaths.some((path) =>
-      prChanges.some((change) => change.filename.match(path) || change.previous_filename?.match(path)),
+      prChanges.some(
+        (change) => change.filename.match(path) || change.previous_filename?.match(path)
+      )
     );
 
     if (someFilesMatchRequired) {
@@ -65,8 +67,9 @@ export const areChangesSkippable = async (
     (change) =>
       !skippablePaths.some(
         (path) =>
-          change.filename.match(path) && (!change.previous_filename || change.previous_filename.match(path)),
-      ),
+          change.filename.match(path) &&
+          (!change.previous_filename || change.previous_filename.match(path))
+      )
   );
 
   return !someFilesNotSkippable;
@@ -74,7 +77,7 @@ export const areChangesSkippable = async (
 
 export const doAnyChangesMatch = async (
   requiredPaths: RegExp[],
-  changes: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data'] = null,
+  changes: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data'] = null
 ) => {
   const prChanges = changes || (await getPrChangesCached());
 
@@ -83,7 +86,7 @@ export const doAnyChangesMatch = async (
   }
 
   const anyFilesMatchRequired = requiredPaths.some((path) =>
-    prChanges.some((change) => change.filename.match(path) || change.previous_filename?.match(path)),
+    prChanges.some((change) => change.filename.match(path) || change.previous_filename?.match(path))
   );
 
   return anyFilesMatchRequired;

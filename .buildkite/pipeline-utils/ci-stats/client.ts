@@ -100,7 +100,9 @@ export class CiStatsClient {
         branch: (process.env.BUILDKITE_BRANCH || '').replace(/^(refs\/heads\/|origin\/)/, ''),
         commit: process.env.BUILDKITE_COMMIT,
         targetBranch:
-          process.env.GITHUB_PR_TARGET_BRANCH || process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH || null,
+          process.env.GITHUB_PR_TARGET_BRANCH ||
+          process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH ||
+          null,
         mergeBase: process.env.GITHUB_PR_MERGE_BASE || null,
       },
     });

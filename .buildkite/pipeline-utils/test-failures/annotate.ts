@@ -47,7 +47,7 @@ const recursiveReadDir = (dirPath: string, allFiles: string[] = []) => {
 
 export const getAnnotation = (
   failures: TestFailure[],
-  failureHtmlArtifacts: Record<string, Artifact>,
+  failureHtmlArtifacts: Record<string, Artifact>
 ): string => {
   return (
     `**Test Failures**<br />\n` +
@@ -59,7 +59,7 @@ export const getAnnotation = (
           lookup in failureHtmlArtifacts
             ? `${failure.url.replace(
                 'https://buildkite.com/elastic',
-                'https://buildkite.com/organizations/elastic/pipelines',
+                'https://buildkite.com/organizations/elastic/pipelines'
               )}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[lookup].id}`
             : '';
 
@@ -73,7 +73,7 @@ export const getAnnotation = (
 
 export const getPrComment = (
   failures: TestFailure[],
-  failureHtmlArtifacts: Record<string, Artifact>,
+  failureHtmlArtifacts: Record<string, Artifact>
 ): string => {
   return (
     `### Test Failures\n` +
@@ -85,16 +85,17 @@ export const getPrComment = (
           lookup in failureHtmlArtifacts
             ? `${failure.url.replace(
                 'https://buildkite.com/elastic',
-                'https://buildkite.com/organizations/elastic/pipelines',
+                'https://buildkite.com/organizations/elastic/pipelines'
               )}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[lookup].id}`
             : '';
 
         const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
 
         // job name could have #<number> in it, which Github will link to an issue, so we need to "escape" it with spans
-        return `* [[job]](${jobUrl})${logsLink} ${failure.jobName.replace('#', '#<span></span>')} / ${
-          failure.name
-        }`;
+        return `* [[job]](${jobUrl})${logsLink} ${failure.jobName.replace(
+          '#',
+          '#<span></span>'
+        )} / ${failure.name}`;
       })
       .join('\n')
   );
@@ -102,7 +103,7 @@ export const getPrComment = (
 
 export const getSlackMessage = (
   failures: TestFailure[],
-  failureHtmlArtifacts: Record<string, Artifact>,
+  failureHtmlArtifacts: Record<string, Artifact>
 ): string => {
   return (
     `*Test Failures*\n` +
@@ -114,7 +115,7 @@ export const getSlackMessage = (
           lookup in failureHtmlArtifacts
             ? `${failure.url.replace(
                 'https://buildkite.com/elastic',
-                'https://buildkite.com/organizations/elastic/pipelines',
+                'https://buildkite.com/organizations/elastic/pipelines'
               )}/jobs/${failure.jobId}/artifacts/${failureHtmlArtifacts[lookup].id}`
             : '';
 
@@ -149,7 +150,7 @@ export const annotateTestFailures = async () => {
   }
 
   exec(
-    `buildkite-agent artifact download --include-retried-jobs "target/test_failures/*.json" "${failureDir}"`,
+    `buildkite-agent artifact download --include-retried-jobs "target/test_failures/*.json" "${failureDir}"`
   );
 
   const failures: TestFailure[] = recursiveReadDir(failureDir)
@@ -169,10 +170,16 @@ export const annotateTestFailures = async () => {
   buildkite.setAnnotation('test_failures', 'error', getAnnotation(failures, failureHtmlArtifacts));
 
   if (process.env.PR_COMMENTS_ENABLED === 'true') {
-    buildkite.setMetadata('pr_comment:test_failures:body', getPrComment(failures, failureHtmlArtifacts));
+    buildkite.setMetadata(
+      'pr_comment:test_failures:body',
+      getPrComment(failures, failureHtmlArtifacts)
+    );
   }
 
   if (process.env.SLACK_NOTIFICATIONS_ENABLED === 'true') {
-    buildkite.setMetadata('slack:test_failures:body', getSlackMessage(failures, failureHtmlArtifacts));
+    buildkite.setMetadata(
+      'slack:test_failures:body',
+      getSlackMessage(failures, failureHtmlArtifacts)
+    );
   }
 };

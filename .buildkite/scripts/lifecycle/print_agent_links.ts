@@ -14,7 +14,9 @@ import { BuildkiteClient } from '#pipeline-utils';
     const build = await client.getCurrentBuild();
 
     const job = build.jobs.find((j) => j.id === process.env.BUILDKITE_JOB_ID);
-    const startTime = job ? new Date(job.started_at) : new Date(new Date().getTime() - 60 * 60 * 1000);
+    const startTime = job
+      ? new Date(job.started_at)
+      : new Date(new Date().getTime() - 60 * 60 * 1000);
     const twoHours = new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
 
     const METRICS_URL = [

@@ -74,7 +74,9 @@ describe('github', () => {
       });
 
       it('when all files are non-skippable, non-required', async () => {
-        const execute = await areChangesSkippable(skippable, required, [getMockChangedFile('package.json')]);
+        const execute = await areChangesSkippable(skippable, required, [
+          getMockChangedFile('package.json'),
+        ]);
 
         expect(execute).to.eql(false);
       });
@@ -111,7 +113,7 @@ describe('github', () => {
         const execute = await areChangesSkippable(
           skippable,
           [],
-          [getMockChangedFile('docs/index.js'), getMockChangedFile('README.md')],
+          [getMockChangedFile('docs/index.js'), getMockChangedFile('README.md')]
         );
 
         expect(execute).to.eql(true);
