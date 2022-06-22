@@ -372,7 +372,7 @@ Querying & Filtering::
 Security::
 * Disallow creating a role with the existing name in the role management page. Introduce a new optional boolean `createOnly` parameter in the create role API to prevent overwriting existing roles {kibana-pull}132218[#132218]
 * Improves Sessions tab {kibana-pull}131583[#131583]
-* Adds experimental `csp.disableUnsafeEval` config option to remove the unsafe-eval CSP {kibana-pull}124484[#124484]
+* Adds experimental `csp.disableUnsafeEval` config option. Set this to `true` to remove the link:https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions[`unsafe-eval`] source expression from the `script-src` Content Security Policy (CSP) directive. The default value is `false`, which is identical to the original Kibana behavior {kibana-pull}124484[#124484]
 
 [float]
 [[fixes-v8.3.0]]
