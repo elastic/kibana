@@ -256,13 +256,15 @@ export class ScreenshotObservableHandler {
           let screenshots: Screenshot[] = [];
           try {
             screenshots = this.shouldCapturePdf()
-              ? await getPdf(
-                  this.driver,
-                  this.eventLogger,
-                  this.getTitle(data.timeRange),
-                  (this.options as PdfScreenshotOptions).logo
-                )
-              : await getScreenshots(this.driver, this.eventLogger, elements, this.layout);
+              ? await getPdf(this.driver, this.eventLogger, this.getTitle(data.timeRange), {
+                  logo: (this.options as PdfScreenshotOptions).logo,
+                  error: data.error,
+                })
+              : await getScreenshots(this.driver, this.eventLogger, {
+                  elements,
+                  layout: this.layout,
+                  error: data.error,
+                });
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);
           }

@@ -20,6 +20,7 @@ import { ConfigType } from '../../config';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
 import { getFooterTemplate, getHeaderTemplate } from './templates';
+import { Layout } from '../../layouts';
 
 export type Context = Record<string, unknown>;
 
@@ -181,7 +182,15 @@ export class HeadlessChromiumDriver {
     }
   }
 
-  public async printA4Pdf({ title, logo }: { title: string; logo?: string }): Promise<Buffer> {
+  public async printA4Pdf({
+    title,
+    logo,
+    error: _error, // TODO
+  }: {
+    title: string;
+    logo?: string;
+    error?: Error;
+  }): Promise<Buffer> {
     await this.workaroundWebGLDrivenCanvases();
     return this.page.pdf({
       format: 'a4',
@@ -220,7 +229,11 @@ export class HeadlessChromiumDriver {
     return undefined;
   }
 
-  evaluate({ fn, args = [] }: EvaluateOpts, meta: EvaluateMetaOpts, logger: Logger): Promise<any> {
+  evaluate<T = any>(
+    { fn, args = [] }: EvaluateOpts,
+    meta: EvaluateMetaOpts,
+    logger: Logger
+  ): Promise<T> {
     logger.debug(`evaluate ${meta.context}`);
 
     return this.page.evaluate(fn, ...args);

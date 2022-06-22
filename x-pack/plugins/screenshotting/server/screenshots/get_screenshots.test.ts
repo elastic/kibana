@@ -48,8 +48,9 @@ describe('getScreenshots', () => {
   });
 
   it('should return screenshots', async () => {
-    await expect(getScreenshots(browser, eventLogger, elementsPositionAndAttributes, layout))
-      .resolves.toMatchInlineSnapshot(`
+    await expect(
+      getScreenshots(browser, eventLogger, { elements: elementsPositionAndAttributes, layout })
+    ).resolves.toMatchInlineSnapshot(`
             Array [
               Object {
                 "data": Object {
@@ -94,7 +95,7 @@ describe('getScreenshots', () => {
   });
 
   it('should forward elements positions', async () => {
-    await getScreenshots(browser, eventLogger, elementsPositionAndAttributes, layout);
+    await getScreenshots(browser, eventLogger, { elements: elementsPositionAndAttributes, layout });
 
     expect(browser.screenshot).toHaveBeenCalledTimes(2);
     expect(browser.screenshot).toHaveBeenNthCalledWith(
@@ -111,7 +112,7 @@ describe('getScreenshots', () => {
     browser.screenshot.mockResolvedValue(Buffer.from(''));
 
     await expect(
-      getScreenshots(browser, eventLogger, elementsPositionAndAttributes, layout)
+      getScreenshots(browser, eventLogger, { elements: elementsPositionAndAttributes, layout })
     ).rejects.toBeInstanceOf(Error);
   });
 });

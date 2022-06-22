@@ -43,6 +43,12 @@ const resizeViewport = async (
   );
 };
 
+export interface GetScreenshotsOptions {
+  elements: ElementsPositionAndAttribute[];
+  layout: Layout;
+  error?: Error;
+}
+
 /**
  * Get screenshots of multiple areas of the page
  *
@@ -56,15 +62,19 @@ const resizeViewport = async (
 export const getScreenshots = async (
   browser: HeadlessChromiumDriver,
   eventLogger: EventLogger,
-  elements: ElementsPositionAndAttribute[],
-  layout: Layout
+  options: GetScreenshotsOptions
 ): Promise<Screenshot[]> => {
   const { kbnLogger } = eventLogger;
+  const { elements, layout } = options;
   kbnLogger.info(`taking screenshots`);
 
   const screenshots: Screenshot[] = [];
 
   try {
+    if (options.error) {
+      await browser.injectScreenshottingErrorHeader(options.error, layout);
+    }
+
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
       const { position, attributes } = element;
