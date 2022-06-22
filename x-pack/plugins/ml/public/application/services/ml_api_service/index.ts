@@ -384,13 +384,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    checkManageMLCapabilities() {
-      return httpService.http<MlCapabilitiesResponse>({
-        path: `${basePath()}/ml_capabilities`,
-        method: 'GET',
-      });
-    },
-
     checkIndicesExists({ indices }: { indices: string[] }) {
       const body = JSON.stringify({ indices });
 

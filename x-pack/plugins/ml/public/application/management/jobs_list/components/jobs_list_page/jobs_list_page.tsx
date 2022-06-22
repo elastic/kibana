@@ -57,19 +57,19 @@ export const JobsListPage: FC<{
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsStart;
 }> = ({ coreStart, share, history, spacesApi, data, usageCollection, fieldFormats }) => {
+  const httpService = new HttpService(coreStart.http);
   const spacesEnabled = spacesApi !== undefined;
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
-  const httpService = new HttpService(coreStart.http);
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
   const I18nContext = coreStart.i18n.Context;
   const theme$ = coreStart.theme.theme$;
 
   const check = async () => {
     try {
-      await checkGetManagementMlJobsResolver(); // FIX, needs dependency cache!!!!!!!!!!!!!!!!!!!!!!!!!!
+      await checkGetManagementMlJobsResolver(httpService);
     } catch (e) {
       if (e.mlFeatureEnabledInSpace && e.isPlatinumOrTrialLicense === false) {
         setIsPlatinumOrTrialLicense(false);
