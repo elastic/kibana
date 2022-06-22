@@ -409,6 +409,7 @@ export function getIndexPatternDatasource({
                 replaceIfPossible: true,
                 storage,
                 indexPatternsService,
+                uiActions,
               });
             }}
             {...props}

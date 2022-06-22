@@ -14,7 +14,7 @@ export const UPDATE_FILTER_REFERENCES_ACTION = 'UPDATE_FILTER_REFERENCES_ACTION'
 export interface UpdateFilterReferencesActionContext extends ActionExecutionMeta {
   /** The initial data view of the editable layer **/
   fromDataView: string;
-  /** New data view of of the editable layer
+  /** New data view of the editable layer
    *  @description null - in case of removing the layer
    */
   toDataView: string | null;

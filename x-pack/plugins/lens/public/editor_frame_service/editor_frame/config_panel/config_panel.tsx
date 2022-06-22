@@ -95,16 +95,6 @@ export function LayerPanels(
     [updateDatasource]
   );
 
-  const getActionContext = async () => {
-    const trigger = await props.uiActions.getTrigger('UPDATE_USED_DATA_VIEWS_TRIGGER');
-    if (!trigger) {
-      throw new Error('Unable to get context, could not locate trigger');
-    }
-    return {
-      trigger,
-    } as ActionExecutionContext;
-  };
-
   const updateAll = useMemo(
     () => (datasourceId: string, newDatasourceState: unknown, newVisualizationState: unknown) => {
       // React will synchronously update if this is triggered from a third party component,
@@ -123,23 +113,6 @@ export function LayerPanels(
                 typeof newVisualizationState === 'function'
                   ? newVisualizationState(prevState.visualization.state)
                   : newVisualizationState;
-
-              const fromDataView =
-                prevState.datasourceStates[datasourceId].state.currentIndexPatternId;
-              const toDataView = newDatasourceState.currentIndexPatternId;
-
-              const action = props.uiActions.getAction('UPDATE_FILTER_REFERENCES_ACTION');
-              action.execute({
-                ...getActionContext(),
-                fromDataView,
-                toDataView,
-                defaultDataView: toDataView,
-                usedDataViews: Object.values(
-                  Object.values(prevState.datasourceStates[datasourceId].state.layers).map(
-                    ({ indexPatternId }) => indexPatternId
-                  )
-                ),
-              });
 
               return {
                 ...prevState,
@@ -160,7 +133,7 @@ export function LayerPanels(
         );
       }, 0);
     },
-    [dispatchLens, props]
+    [dispatchLens]
   );
 
   const toggleFullscreen = useMemo(
@@ -208,24 +181,36 @@ export function LayerPanels(
               );
             }
           }}
-          onRemoveLayer={() => {
+          onRemoveLayer={async () => {
             const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
             const datasourceId = datasourcePublicAPI?.datasourceId;
             const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
 
+            const getActionContext = async () => {
+              const trigger = await props.uiActions.getTrigger('UPDATE_USED_DATA_VIEWS_TRIGGER');
+              if (!trigger) {
+                throw new Error('Unable to get context, could not locate trigger');
+              }
+              return {
+                trigger,
+              } as ActionExecutionContext;
+            };
+
             const action = props.uiActions.getAction('UPDATE_FILTER_REFERENCES_ACTION');
 
-            action.execute({
-              ...getActionContext(),
-              fromDataView: layerDatasourceState.layers[layerId].indexPatternId,
-              toDataView: null,
-              usedDataViews: Object.values(
-                Object.values(layerDatasourceState.layers).map(
-                  ({ indexPatternId }) => indexPatternId
-                )
-              ),
-              defaultDataView: layerDatasourceState.currentIndexPatternId,
-            });
+            action.execute(
+              await {
+                ...getActionContext(),
+                fromDataView: layerDatasourceState.layers[layerId].indexPatternId,
+                toDataView: null,
+                usedDataViews: Object.values(
+                  Object.values(layerDatasourceState.layers).map(
+                    ({ indexPatternId }) => indexPatternId
+                  )
+                ),
+                defaultDataView: layerDatasourceState.currentIndexPatternId,
+              }
+            );
 
             dispatchLens(
               removeOrClearLayer({
