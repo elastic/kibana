@@ -191,7 +191,7 @@ describe('RuleDataClient', () => {
       );
 
       await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Rule registry writing is disabled. Make sure that \\"xpack.ruleRegistry.write.enabled\\" configuration is not set to false within \\"kibana.yml\\" and that Rule Data Client was initialized successfully."`
+        `"Rule registry writing is disabled. Make sure that \\"xpack.ruleRegistry.write.enabled\\" configuration is not set to false within \\"kibana.yml\\"."`
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
         `Writing is disabled, bulk() will not write any data.`
@@ -226,7 +226,7 @@ describe('RuleDataClient', () => {
 
       // getting the writer again at this point should throw another error
       await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Rule registry writing is disabled. Make sure that \\"xpack.ruleRegistry.write.enabled\\" configuration is not set to false within \\"kibana.yml\\" and that Rule Data Client was initialized successfully."`
+        `"Rule registry writing is disabled due to an error during Rule Data Client initialization."`
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
         `Writing is disabled, bulk() will not write any data.`
@@ -258,7 +258,7 @@ describe('RuleDataClient', () => {
 
       // getting the writer again at this point should throw another error
       await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Rule registry writing is disabled. Make sure that \\"xpack.ruleRegistry.write.enabled\\" configuration is not set to false within \\"kibana.yml\\" and that Rule Data Client was initialized successfully."`
+        `"Rule registry writing is disabled due to an error during Rule Data Client initialization."`
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
         `Writing is disabled, bulk() will not write any data.`
@@ -302,7 +302,7 @@ describe('RuleDataClient', () => {
       );
     });
 
-    test('logs error and returns undefined if bulk function throws error', async () => {
+    test('throws and logs error if bulk function throws error', async () => {
       const error = new Error('something went wrong!');
       scopedClusterClient.bulk.mockRejectedValueOnce(error);
       const ruleDataClient = new RuleDataClient(getRuleDataClientOptions({}));
@@ -314,7 +314,9 @@ describe('RuleDataClient', () => {
       // Adding this delay in the tests to ensure this does not pop up again.
       await delay();
 
-      expect(await writer.bulk({})).toEqual(undefined);
+      await expect(() => writer.bulk({})).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"something went wrong!"`
+      );
       expect(mockLogger.error).toHaveBeenNthCalledWith(1, error);
       expect(ruleDataClient.isWriteEnabled()).toBe(true);
     });

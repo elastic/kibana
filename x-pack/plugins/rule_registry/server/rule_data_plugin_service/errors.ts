@@ -7,11 +7,17 @@
 
 /* eslint-disable max-classes-per-file */
 export class RuleDataWriteDisabledError extends Error {
-  constructor(message?: string) {
-    super(
-      message ??
-        `Rule registry writing is disabled. Make sure that "xpack.ruleRegistry.write.enabled" configuration is not set to false within "kibana.yml" and that Rule Data Client was initialized successfully.`
-    );
+  constructor(reason: 'config' | 'error', message?: string) {
+    let errMessage = message;
+    if (!errMessage) {
+      errMessage =
+        reason === 'config'
+          ? `Rule registry writing is disabled. Make sure that "xpack.ruleRegistry.write.enabled" configuration is not set to false within "kibana.yml".`
+          : reason === 'error'
+          ? `Rule registry writing is disabled due to an error during Rule Data Client initialization.`
+          : `Rule registry writing is disabled. Make sure that "xpack.ruleRegistry.write.enabled" configuration is not set to false within "kibana.yml" and that Rule Data Client was initialized successfully.`;
+    }
+    super(errMessage);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'RuleDataWriteDisabledError';
   }
