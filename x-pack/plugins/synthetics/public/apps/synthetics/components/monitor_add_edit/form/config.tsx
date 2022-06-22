@@ -864,7 +864,7 @@ export const FIELD: Record<string, FieldMeta> = {
     helpText: (
       <>
         <FormattedMessage
-          id="xpack.synthetics.monitorConfig.indexResponseHeaders.helpText"
+          id="xpack.synthetics.monitorConfig.indexResponseBody.helpText"
           defaultMessage="Controls the indexing of the HTTP response body contents to"
         />
         <EuiCode>http.response.body.contents</EuiCode>
@@ -968,7 +968,7 @@ export const FIELD: Record<string, FieldMeta> = {
     label: i18n.translate('xpack.synthetics.monitorConfig.proxyURLTCP.label', {
       defaultMessage: 'Proxy URL',
     }),
-    helpText: i18n.translate('xpack.synthetics.monitorConfig.proxyURLTCP.label', {
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.proxyURLTCP.helpText', {
       defaultMessage:
         'The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of socks5://.',
     }),
@@ -1102,10 +1102,10 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.TLS_KEY_PASSPHRASE]: {
     fieldKey: ConfigKey.TLS_KEY_PASSPHRASE,
     component: EuiFieldPassword,
-    label: i18n.translate('xpack.synthetics.monitorConfig.clientKey.label', {
+    label: i18n.translate('xpack.synthetics.monitorConfig.clientKeyPassphrase.label', {
       defaultMessage: 'Client key passphrase',
     }),
-    helpText: i18n.translate('xpack.synthetics.monitorConfig.clientKey.helpText', {
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.clientKeyPassphrase.helpText', {
       defaultMessage: 'Certificate key passphrase for TLS client authentication.',
     }),
     showWhen: ['isTLSEnabled', true],
@@ -1296,9 +1296,12 @@ export const TCP_ADVANCED = {
     title: i18n.translate('xpack.synthetics.monitorConfig.section.responseChecksTCP.title', {
       defaultMessage: 'Response checks',
     }),
-    description: i18n.translate('xpack.synthetics.monitorConfig.section.responseChecksTCP.title', {
-      defaultMessage: 'Configure the expected response from the remote host.',
-    }),
+    description: i18n.translate(
+      'xpack.synthetics.monitorConfig.section.responseChecksTCP.description',
+      {
+        defaultMessage: 'Configure the expected response from the remote host.',
+      }
+    ),
     components: [FIELD[ConfigKey.RESPONSE_RECEIVE_CHECK]],
   },
 };
