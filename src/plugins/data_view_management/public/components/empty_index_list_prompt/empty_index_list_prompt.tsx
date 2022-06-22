@@ -30,14 +30,12 @@ import { ApplicationStart } from '@kbn/core/public';
 
 export const EmptyIndexListPrompt = ({
   onRefresh,
-  closeFlyout,
   createAnyway,
   canSaveIndexPattern,
   addDataUrl,
   navigateToApp,
 }: {
   onRefresh: () => void;
-  closeFlyout: () => void;
   createAnyway: () => void;
   canSaveIndexPattern: boolean;
   addDataUrl: string;
@@ -92,7 +90,6 @@ export const EmptyIndexListPrompt = ({
                 className="inpEmptyState__card"
                 onClick={() => {
                   navigateToApp('integrations', { path: '/browse' });
-                  closeFlyout();
                 }}
                 icon={<EuiIcon size="xl" type="database" color="subdued" />}
                 title={
@@ -133,7 +130,6 @@ export const EmptyIndexListPrompt = ({
                 className="inpEmptyState__card"
                 onClick={() => {
                   navigateToApp('home', { path: '#/tutorial_directory/sampleData' });
-                  closeFlyout();
                 }}
                 icon={<EuiIcon size="xl" type="heatmap" color="subdued" />}
                 title={

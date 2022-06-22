@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
-import { EmptyDataPrompt } from '../empty_data_prompt';
+import { EmptyIndexListPrompt } from '../empty_index_list_prompt';
 import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
@@ -364,10 +364,12 @@ export const IndexPatternTable = ({
     displayIndexPatternSection = (
       <>
         <EuiSpacer size="xxl" />
-        <EmptyDataPrompt
-          goToCreate={() => setShowCreateDialog(true)}
-          addDataUrl={docLinks.links.addData}
-          canAddData={dataViews.getCanSaveSync()}
+        <EmptyIndexListPrompt
+          onRefresh={loadDataViews}
+          createAnyway={() => setShowCreateDialog(true)}
+          canSaveIndexPattern={!!application.capabilities.indexPatterns.save}
+          navigateToApp={application.navigateToApp}
+          addDataUrl={docLinks.links.indexPatterns.introduction}
         />
       </>
     );
