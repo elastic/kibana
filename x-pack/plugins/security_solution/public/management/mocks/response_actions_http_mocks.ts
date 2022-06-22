@@ -71,11 +71,8 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     id: 'actionList',
     path: ENDPOINTS_ACTION_LIST_ROUTE,
     method: 'get',
-    handler: ({ path }): ActionListApiResponse => {
+    handler: (): ActionListApiResponse => {
       const response = new EndpointActionGenerator('seed').generateActionDetails();
-
-      // use the ID of the action in the response
-      response.id = path.substring(path.lastIndexOf('/') + 1) || response.id;
 
       return {
         elasticAgentIds: ['agent-a'],

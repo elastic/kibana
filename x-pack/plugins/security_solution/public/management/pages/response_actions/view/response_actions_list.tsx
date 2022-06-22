@@ -32,6 +32,7 @@ import type { HorizontalAlignment } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
+import { getEmptyValue } from '../../../../common/components/empty_value';
 import { ACTION_LIST_DATE_RANGE_FILTER_STORAGE_KEY } from '../../../../../common/constants';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import {
@@ -50,6 +51,7 @@ import { ActionListDateRangePicker } from './components/action_list_date_range_p
 import type { DateRangePickerValues } from './components/action_list_date_range_picker';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
+const emptyValue = getEmptyValue();
 const defaultDateRangeOptions = Object.freeze({
   autoRefreshOptions: {
     enabled: false,
@@ -69,7 +71,10 @@ const StyledFacetButton = styled(EuiFacetButton)`
 `;
 
 export const ResponseActionsList = memo<
-  EndpointActionListRequestQuery & { hideHeader?: boolean; hideHostNameColumn?: boolean }
+  Pick<EndpointActionListRequestQuery, 'agentIds' | 'commands' | 'userIds'> & {
+    hideHeader?: boolean;
+    hideHostNameColumn?: boolean;
+  }
 >(({ agentIds, commands, userIds, hideHeader = false, hideHostNameColumn = false }) => {
   const { storage } = useKibana().services;
   const getTestId = useTestIdGenerator('response-actions-list');
@@ -159,19 +164,14 @@ export const ResponseActionsList = memo<
     isFetching,
     isFetched,
     refetch: reFetchEndpointActionList,
-  } = useGetEndpointActionList(
-    {
-      ...queryParams,
-      startDate: dateRangePickerStorage.startDate,
-      endDate: dateRangePickerStorage.endDate,
-    },
-    {
-      keepPreviousData: true,
-    }
-  );
+  } = useGetEndpointActionList({
+    ...queryParams,
+    startDate: dateRangePickerStorage.startDate,
+    endDate: dateRangePickerStorage.endDate,
+  });
 
   // total actions
-  const totalItemCount = useMemo(() => actionList?.total, [actionList]);
+  const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
 
   // expanded tray contents
   const toggleDetails = useCallback(
@@ -229,14 +229,16 @@ export const ResponseActionsList = memo<
           },
           {
             title: OUTPUT_MESSAGES.expandSection.parameters,
-            description: responseData.length ? responseData[0].parameters ?? '-' : '-',
+            description: responseData.length
+              ? responseData[0].parameters ?? emptyValue
+              : emptyValue,
           },
         ];
 
         const descriptionListRight = [
           {
             title: OUTPUT_MESSAGES.expandSection.completedAt,
-            description: `${completedAt ?? '-'}`,
+            description: `${completedAt ?? emptyValue}`,
           },
         ];
 
@@ -298,7 +300,7 @@ export const ResponseActionsList = memo<
         render: (logEntries: ActionDetails['logEntries']) => {
           const userId =
             (logEntries.filter((e) => e.type === 'action')[0] as EndpointActivityLogAction).item
-              .data.user.id || '-';
+              .data.user.id || emptyValue;
           return (
             <StyledFacetButton
               icon={
@@ -315,7 +317,7 @@ export const ResponseActionsList = memo<
                   className="eui-textTruncate eui-fullWidth"
                   data-test-subj={getTestId('column-user-name')}
                 >
-                  <p className="eui-displayInline eui-TextTruncate">{userId}</p>
+                  {userId}
                 </EuiText>
               </EuiToolTip>
             </StyledFacetButton>
@@ -337,7 +339,7 @@ export const ResponseActionsList = memo<
                 className="eui-textTruncate eui-fullWidth"
                 data-test-subj={getTestId('column-hostname')}
               >
-                <p className="eui-displayInline eui-TextTruncate">{hostname}</p>
+                {hostname}
               </EuiText>
             </EuiToolTip>
           );
@@ -352,7 +354,7 @@ export const ResponseActionsList = memo<
         render: (logEntries: ActionDetails['logEntries']) => {
           const comment =
             (logEntries.filter((e) => e.type === 'action')[0] as EndpointActivityLogAction).item
-              .data.EndpointActions.data.comment || '-';
+              .data.EndpointActions.data.comment || emptyValue;
           return (
             <EuiToolTip content={comment} anchorClassName="eui-textTruncate">
               <EuiText
@@ -360,7 +362,7 @@ export const ResponseActionsList = memo<
                 className="eui-textTruncate eui-fullWidth"
                 data-test-subj={getTestId('column-comments')}
               >
-                <p className="eui-displayInline eui-TextTruncate">{comment}</p>
+                {comment}
               </EuiText>
             </EuiToolTip>
           );
@@ -424,6 +426,8 @@ export const ResponseActionsList = memo<
         },
       },
     ];
+    // TODO: filter out the column instead
+    // do this when the API returns comment, parameters and user
     if (hideHostNameColumn) {
       columns.splice(3, 1);
     }
@@ -435,7 +439,7 @@ export const ResponseActionsList = memo<
     return {
       pageIndex: queryParams.page || 0,
       pageSize: queryParams.pageSize || 10,
-      totalItemCount: totalItemCount || 0,
+      totalItemCount,
       pageSizeOptions: MANAGEMENT_PAGE_SIZE_OPTIONS as number[],
     };
   }, [queryParams, totalItemCount]);

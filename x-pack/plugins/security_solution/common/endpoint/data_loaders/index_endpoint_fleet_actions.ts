@@ -79,7 +79,12 @@ export const indexEndpointAndFleetActionsForHost = async (
       )
       .catch(wrapErrorAndRejectPromise);
 
-    const endpointActionsBody = {
+    const endpointActionsBody: LogsEndpointAction & {
+      EndpointActions: LogsEndpointAction['EndpointActions'] & {
+        '@timestamp': undefined;
+        user_id: undefined;
+      };
+    } = {
       EndpointActions: {
         ...action,
         '@timestamp': undefined,

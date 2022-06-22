@@ -68,13 +68,13 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it('should not work without allowed page params', () => {
+    it('should not work with invalid value for `page` query param', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({ page: -1 });
       }).toThrow();
     });
 
-    it('should not work without allowed pageSize params', () => {
+    it('should not work with invalid value for `pageSize` query param', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({ pageSize: 100001 });
       }).toThrow();
