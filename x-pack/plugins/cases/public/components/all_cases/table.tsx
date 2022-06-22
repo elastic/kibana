@@ -46,7 +46,7 @@ interface CasesTableProps {
 }
 
 const Div = styled.div`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 export const CasesTable: FunctionComponent<CasesTableProps> = ({
