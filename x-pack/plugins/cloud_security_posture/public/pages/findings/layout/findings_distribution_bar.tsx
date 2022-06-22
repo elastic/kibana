@@ -106,7 +106,7 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({ passe
       gutterSize="none"
       css={css`
         height: 8px;
-        background: ${euiTheme.colors.subdued};
+        background: ${euiTheme.colors.subduedText};
       `}
     >
       <DistributionBarPart value={passed} color={euiTheme.colors.success} />

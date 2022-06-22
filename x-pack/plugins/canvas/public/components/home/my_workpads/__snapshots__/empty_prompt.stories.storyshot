@@ -13,10 +13,10 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
     className="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <div
-      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder"
+      className="euiPanel euiPanel--subdued euiPanel--paddingMedium css-1wu810y-euiPanel-grow-none-m-subdued"
     >
       <div
-        className="euiPanel euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+        className="euiPanel euiPanel--subdued euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge css-1wqem1z-euiPanel-m-subdued"
       >
         <div
           className="euiEmptyPrompt__main"
@@ -43,33 +43,29 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
               >
                 Add your first workpad
               </h2>
-              <span
-                className="euiTextColor euiTextColor--subdued"
+              <div
+                className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+              />
+              <div
+                className="euiText css-nexvet-euiText-m-euiTextColor-subdued"
                 style={Object {}}
               >
-                <div
-                  className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
-                />
-                <div
-                  className="euiText euiText--medium"
-                >
-                  <p>
-                    Create a new workpad, start from a template, or import a workpad JSON file by dropping it here.
-                  </p>
-                  <p>
-                    New to Canvas?
-                     
-                    <a
-                      className="euiLink css-102pf9n-euiLink-primary"
-                      href="home#/tutorial_directory/sampleData"
-                      rel="noreferrer"
-                    >
-                      Add your first workpad
-                    </a>
-                    .
-                  </p>
-                </div>
-              </span>
+                <p>
+                  Create a new workpad, start from a template, or import a workpad JSON file by dropping it here.
+                </p>
+                <p>
+                  New to Canvas?
+                   
+                  <a
+                    className="euiLink css-102pf9n-euiLink-primary"
+                    href="home#/tutorial_directory/sampleData"
+                    rel="noreferrer"
+                  >
+                    Add your first workpad
+                  </a>
+                  .
+                </p>
+              </div>
             </div>
           </div>
         </div>
