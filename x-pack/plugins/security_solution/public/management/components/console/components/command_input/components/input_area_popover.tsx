@@ -7,9 +7,11 @@
 
 import React, { CSSProperties, memo, ReactElement, useCallback, useEffect, useMemo } from 'react';
 import { EuiFocusTrap, EuiPopover } from '@elastic/eui';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { CommandInputHistory } from './command_input_history';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
+import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 
 export interface InputAreaPopoverProps {
   /** Should be the Console's input area */
@@ -19,6 +21,7 @@ export interface InputAreaPopoverProps {
 }
 
 export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width = '92vw' }) => {
+  const getTestId = useTestIdGenerator(useDataTestSubj());
   const show = useWithInputShowPopover();
   const isPopoverOpen = show !== undefined;
   const dispatch = useConsoleStateDispatch();
@@ -59,6 +62,7 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
       attachToAnchor={true}
       focusTrapProps={focusTrapProps}
       ownFocus={false}
+      data-test-subj={getTestId('inputPopover')}
     >
       {show && (
         <EuiFocusTrap clickOutsideDisables={true}>

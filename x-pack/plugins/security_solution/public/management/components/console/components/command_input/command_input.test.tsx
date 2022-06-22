@@ -40,4 +40,24 @@ describe('When entering data into the Console input', () => {
     enterCommand('{backspace}', { inputOnly: true, useKeyboard: true });
     expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual('c');
   });
+
+  it.todo('should display placeholder text when input area is blank');
+
+  it.todo('should NOT display placeholder text if input area has text entered');
+
+  it.todo('should display hint when a known command is typed');
+
+  it.todo('should display hint when an unknown command is typed');
+
+  describe('and the UP arrow is pressed', () => {
+    it.todo('should display the input history popover');
+
+    it.todo('should clear the input area and show placeholder with first item that is focused');
+
+    it.todo(
+      'should return original value to input and clear placeholder if popup is closed with no selection'
+    );
+
+    it.todo('should add history item to the input area when selected and clear placeholder');
+  });
 });

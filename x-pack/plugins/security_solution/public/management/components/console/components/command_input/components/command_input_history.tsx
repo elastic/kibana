@@ -8,11 +8,13 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiSelectable, EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useIsMounted } from '../../../../../hooks/use_is_mounted';
 import { UserCommandInput } from '../../user_command_input';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputHistory } from '../../../hooks/state_selectors/use_with_input_history';
+import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 
 const NO_HISTORY_EMPTY_MESSAGE = i18n.translate(
   'xpack.securitySolution.commandInputHistory.noHistoryEmptyMessage',
@@ -25,6 +27,7 @@ export const CommandInputHistory = memo(() => {
   const inputHistory = useWithInputHistory();
   const [priorInputText] = useState(useWithInputTextEntered());
   const optionWasSelected = useRef(false);
+  const getTestId = useTestIdGenerator(useDataTestSubj());
 
   const optionListRef = useRef(); // TODO:PT remove when https://github.com/elastic/eui/pull/5978 becomes available in kibana (task #4179)
 
@@ -147,6 +150,7 @@ export const CommandInputHistory = memo(() => {
         listProps={selectableListProps}
         singleSelection={true}
         emptyMessage={NO_HISTORY_EMPTY_MESSAGE}
+        data-test-subj={getTestId('inputHistorySelector')}
       >
         {renderSelectionContent}
       </EuiSelectable>

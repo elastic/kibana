@@ -8,8 +8,10 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { EuiText, EuiTextColor } from '@elastic/eui';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useWithInputPlaceholder } from '../../../hooks/state_selectors/use_with_input_placeholder';
+import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 
 const InputPlaceholderContainer = styled(EuiText)`
   position: absolute;
@@ -21,9 +23,14 @@ const InputPlaceholderContainer = styled(EuiText)`
 export const InputPlaceholder = memo(() => {
   const textEntered = useWithInputTextEntered();
   const placeholder = useWithInputPlaceholder();
+  const getTestId = useTestIdGenerator(useDataTestSubj());
 
   return (
-    <InputPlaceholderContainer size="s" className="eui-textTruncate">
+    <InputPlaceholderContainer
+      size="s"
+      className="eui-textTruncate"
+      data-test-subj={getTestId('inputPlaceholder')}
+    >
       <EuiTextColor color="subdued" className="eui-textTruncate">
         {textEntered ? '' : placeholder}
       </EuiTextColor>
