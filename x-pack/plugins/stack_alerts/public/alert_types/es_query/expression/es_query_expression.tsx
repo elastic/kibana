@@ -144,8 +144,8 @@ export const EsQueryExpression: React.FC<
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.selectIndex"
-            defaultMessage="Select an index and size"
+            id="xpack.stackAlerts.searchThreshold.ui.conditionPrompt"
+            defaultMessage="When the number of documents match"
           />
         </h5>
       </EuiTitle>
@@ -183,15 +183,6 @@ export const EsQueryExpression: React.FC<
 
       <EuiSpacer size="s" />
 
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.queryPrompt"
-            defaultMessage="Define the Elasticsearch query"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <EuiFormRow
         id="queryEditor"
         fullWidth

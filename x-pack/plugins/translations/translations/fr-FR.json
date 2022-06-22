@@ -27805,7 +27805,6 @@
     "xpack.stackAlerts.esQuery.ui.queryPrompt": "Définir la recherche Elasticsearch",
     "xpack.stackAlerts.esQuery.ui.queryPrompt.help": "Documentation DSL sur la recherche Elasticsearch",
     "xpack.stackAlerts.esQuery.ui.queryPrompt.label": "Recherche Elasticsearch",
-    "xpack.stackAlerts.esQuery.ui.selectIndex": "Sélectionner un index et une taille",
     "xpack.stackAlerts.esQuery.ui.sizeExpression": "Taille",
     "xpack.stackAlerts.esQuery.ui.testQuery": "Tester la recherche",
     "xpack.stackAlerts.esQuery.ui.validation.error.greaterThenThreshold0Text": "Seuil 1 doit être supérieur à Seuil 0.",

@@ -74,9 +74,9 @@ export const EsQueryFormTypeChooser: React.FC<EsQueryFormTypeProps> = ({
       <>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
-            <EuiTitle size="s" data-test-subj="selectedRuleFormTypeTitle">
-              <h5>{activeFormTypeItem?.label}</h5>
-            </EuiTitle>
+            <EuiText color="subdued" size="s" data-test-subj="selectedRuleFormTypeDescription">
+              {activeFormTypeItem?.description}
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
@@ -92,9 +92,6 @@ export const EsQueryFormTypeChooser: React.FC<EsQueryFormTypeProps> = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiText color="subdued" size="s" data-test-subj="selectedRuleFormTypeDescription">
-          {activeFormTypeItem?.description}
-        </EuiText>
         <EuiSpacer />
       </>
     );
