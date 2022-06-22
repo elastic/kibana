@@ -15,6 +15,10 @@ export const searchIndices = [
     elasticsearch_index_name: 'ent-search-api-one',
     search_engines: 'Search Engine One, Search Engine Two',
     document_count: 100,
+    health: 'green',
+    data_ingestion: 'connected',
+    last_updated: new Date(),
+    storage: '9.3mb',
   },
   {
     name: 'Customer Feedback',
@@ -23,6 +27,10 @@ export const searchIndices = [
     elasticsearch_index_name: 'es-index-two',
     search_engines: 'Search Engine One',
     document_count: 100,
+    health: 'green',
+    data_ingestion: 'connected',
+    last_updated: new Date(),
+    storage: '9.3mb',
   },
   {
     name: 'Dharma Crawler',
@@ -31,6 +39,10 @@ export const searchIndices = [
     elasticsearch_index_name: 'ent-search-crawler-one',
     search_engines: 'Search Engine One, Search Engine Two',
     document_count: 100,
+    health: 'yellow',
+    data_ingestion: 'incomplete',
+    last_updated: new Date(),
+    storage: '9.3mb',
   },
   {
     name: 'My Custom Source',
@@ -39,5 +51,9 @@ export const searchIndices = [
     elasticsearch_index_name: 'ent-search-custom-source-one',
     search_engines: '--',
     document_count: 1,
+    health: 'red',
+    data_ingestion: 'incomplete',
+    last_updated: new Date(),
+    storage: '0mb',
   },
 ] as SearchIndex[];

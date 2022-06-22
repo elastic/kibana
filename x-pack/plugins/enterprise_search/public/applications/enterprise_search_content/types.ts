@@ -16,4 +16,8 @@ export interface SearchIndex {
   elasticsearch_index_name: string;
   search_engines: string;
   document_count: number;
+  health: 'red' | 'green' | 'yellow' | 'unavailable';
+  data_ingestion: 'connected' | 'incomplete';
+  last_updated: Date;
+  storage: number;
 }

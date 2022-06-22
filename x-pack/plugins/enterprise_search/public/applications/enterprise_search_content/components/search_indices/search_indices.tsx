@@ -14,8 +14,10 @@ import { useValues, useActions } from 'kea';
 import {
   EuiBasicTable,
   EuiButton,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   EuiTitle,
   HorizontalAlignment,
@@ -33,6 +35,13 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { SearchIndicesLogic } from './search_indices_logic';
 
+const healthColorsMap = {
+  red: 'danger',
+  green: 'success',
+  yellow: 'warning',
+  unavailable: '',
+};
+
 export const baseBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.searchIndices.content.breadcrumb', {
     defaultMessage: 'Content',
@@ -43,73 +52,72 @@ export const baseBreadcrumbs = [
 ];
 
 export const SearchIndices: React.FC = () => {
-  const { initPage, searchEnginesLoadSuccess, searchIndicesLoadSuccess } =
-    useActions(SearchIndicesLogic);
-  const { searchIndices, searchEngines } = useValues(SearchIndicesLogic);
+  const { initPage } = useActions(SearchIndicesLogic);
+  const { indices: searchIndices, meta } = useValues(SearchIndicesLogic);
 
   useEffect(() => {
     initPage();
   }, []);
 
-  // TODO This is for easy testing until we have the backend, please remove this before the release
-  // @ts-ignore
-  window.contentActions = {
-    initPage,
-    searchIndicesLoadSuccess,
-    searchEnginesLoadSuccess,
-  };
-
-  // TODO: Replace with a real list of indices
   const columns = [
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.name.columnTitle', {
-        defaultMessage: 'Search index name',
+        defaultMessage: 'Index name',
       }),
       sortable: true,
       truncateText: true,
-      render: (name: string, { indexSlug }: SearchIndex) => (
+      render: (indexName: string, { indexSlug }: SearchIndex) => (
         <EuiLinkTo
           data-test-subj="search-index-link"
-          to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug })}
+          to={'' /*generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug }) */}
         >
-          {name}
+          {indexName}
         </EuiLinkTo>
       ),
     },
     {
-      field: 'source_type',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.sourceType.columnTitle', {
-        defaultMessage: 'Source type',
+      field: 'total.docs.count',
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
+        defaultMessage: 'Docs count',
       }),
       sortable: true,
       truncateText: true,
     },
     {
-      field: 'elasticsearch_index_name',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndices.elasticsearchIndexName.columnTitle',
-        {
-          defaultMessage: 'Elasticsearch index name',
-        }
-      ),
+      field: 'health',
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.health.columnTitle', {
+        defaultMessage: 'Health',
+      }),
       sortable: true,
       truncateText: true,
+      render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
+        <span>
+          <EuiIcon type="dot" color={healthColorsMap[health] ?? ''} />
+          &nbsp;{health ?? '-'}
+        </span>
+      ),
     },
     {
-      field: 'search_engines',
+      field: 'data_ingestion',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndices.searchEngines.columnTitle',
+        'xpack.enterpriseSearch.content.searchIndices.dataIngestion.columnTitle',
         {
-          defaultMessage: 'Attached search engines',
+          defaultMessage: 'Data ingestion',
         }
       ),
       truncateText: true,
+      render: (dataIngestionStatus: string) =>
+        dataIngestionStatus ? (
+          <EuiBadge color={dataIngestionStatus === 'connected' ? 'success' : 'warning'}>
+            {dataIngestionStatus}
+          </EuiBadge>
+        ) : null,
     },
     {
-      field: 'document_count',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
-        defaultMessage: 'Documents',
+      field: 'total.store.size_in_bytes',
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.storage.columnTitle', {
+        defaultMessage: 'Storage',
       }),
       sortable: true,
       truncateText: true,
@@ -125,7 +133,7 @@ export const SearchIndices: React.FC = () => {
             <EuiButtonIconTo
               iconType="eye"
               data-test-subj="view-search-index-button"
-              to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug })}
+              to={'' /*generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug })*/}
             />
           ),
         },
@@ -200,13 +208,24 @@ export const SearchIndices: React.FC = () => {
               </h2>
             </EuiTitle>
             <EuiSpacer size="l" />
-            <EuiBasicTable items={searchIndices} columns={columns} />
+            <EuiBasicTable
+              items={searchIndices}
+              columns={columns}
+              onChange={() => {
+                /* call backend */
+              }}
+              pagination={{
+                pageIndex: meta.page.current,
+                pageSize: meta.page.size,
+                totalItemCount: meta.page.totalResults,
+              }}
+            />
           </>
         ) : (
           <AddContentEmptyPrompt />
         )}
         <EuiSpacer size="xxl" />
-        {(searchEngines.length === 0 || searchIndices.length === 0) && engineSteps}
+        {searchIndices.length === 0 && engineSteps}
       </EnterpriseSearchContentPageTemplate>
       )
     </>

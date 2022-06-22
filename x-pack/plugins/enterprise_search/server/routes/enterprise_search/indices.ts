@@ -34,7 +34,7 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
       path: '/internal/enterprise_search/indices',
       validate: {
         query: schema.object({
-          page: schema.number({ defaultValue: 1, min: 0 }),
+          page: schema.number({ defaultValue: 0, min: 0 }),
           size: schema.number({ defaultValue: 10, min: 0 }),
         }),
       },
@@ -46,8 +46,8 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
         const indices = await fetchIndices(client, '*', /.*/);
         const totalResults = indices.length;
         const totalPages = Math.ceil(totalResults / size);
-        const startIndex = (page - 1) * size;
-        const endIndex = page * size;
+        const startIndex = page * size;
+        const endIndex = (page + 1) * size;
         return response.ok({
           body: {
             meta: {
