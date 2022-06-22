@@ -8,5 +8,5 @@
 
 export type { ApplyGlobalFilterActionContext } from './apply_filter_action';
 export { ACTION_GLOBAL_APPLY_FILTER } from './apply_filter_action';
-export type { UpdateUsedDataViewActionContext } from './update_used_data_view_action';
-export { ACTION_UPDATE_USED_DATA_VIEWS } from './update_used_data_view_action';
+export type { UpdateFilterReferencesActionContext } from './update_filter_references_action';
+export { UPDATE_FILTER_REFERENCES_ACTION } from './update_filter_references_action';

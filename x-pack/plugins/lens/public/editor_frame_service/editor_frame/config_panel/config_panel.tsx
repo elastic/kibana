@@ -124,15 +124,16 @@ export function LayerPanels(
                   ? newVisualizationState(prevState.visualization.state)
                   : newVisualizationState;
 
-              const initialDataView =
+              const fromDataView =
                 prevState.datasourceStates[datasourceId].state.currentIndexPatternId;
-              const newDataView = newDatasourceState.currentIndexPatternId;
+              const toDataView = newDatasourceState.currentIndexPatternId;
 
-              const action = props.uiActions.getAction('ACTION_UPDATE_USED_DATA_VIEWS');
+              const action = props.uiActions.getAction('UPDATE_FILTER_REFERENCES_ACTION');
               action.execute({
                 ...getActionContext(),
-                initialDataView,
-                newDataView,
+                fromDataView,
+                toDataView,
+                defaultDataView: toDataView,
                 usedDataViews: Object.values(
                   Object.values(prevState.datasourceStates[datasourceId].state.layers).map(
                     ({ indexPatternId }) => indexPatternId
@@ -212,20 +213,18 @@ export function LayerPanels(
             const datasourceId = datasourcePublicAPI?.datasourceId;
             const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
 
-            const action = props.uiActions.getAction('ACTION_UPDATE_USED_DATA_VIEWS');
-
-            const newDataView = null;
+            const action = props.uiActions.getAction('UPDATE_FILTER_REFERENCES_ACTION');
 
             action.execute({
               ...getActionContext(),
-              initialDataView: layerDatasourceState.layers[layerId].indexPatternId,
-              newDataView,
+              fromDataView: layerDatasourceState.layers[layerId].indexPatternId,
+              toDataView: null,
               usedDataViews: Object.values(
                 Object.values(layerDatasourceState.layers).map(
                   ({ indexPatternId }) => indexPatternId
                 )
               ),
-              globalDataView: layerDatasourceState.currentIndexPatternId,
+              defaultDataView: layerDatasourceState.currentIndexPatternId,
             });
 
             dispatchLens(

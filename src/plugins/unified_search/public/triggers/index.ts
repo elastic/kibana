@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './update_used_data_view_trigger';
+export * from './update_filter_references_trigger';

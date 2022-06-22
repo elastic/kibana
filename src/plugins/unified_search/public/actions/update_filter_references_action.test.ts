@@ -11,27 +11,27 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
-import { createUpdateUsedDataViewAction } from './update_used_data_view_action';
-import { updateUsedDataViewsTrigger } from '../triggers';
+import { createUpdateFilterReferencesAction } from './update_filter_references_action';
+import { updateFilterReferencesTrigger } from '../triggers';
 import { getFilter } from './get_stub_filter';
 
-beforeEach(() => jest.resetAllMocks());
-const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
-
-describe('update used data view action', () => {
+describe('createUpdateFilterReferencesAction', () => {
   let context: ActionExecutionContext;
   let filterManager: FilterManager;
   let action: Action<object>;
   let filter1: Filter;
   let filter2: Filter;
-  const trigger = updateUsedDataViewsTrigger;
+
+  const trigger = updateFilterReferencesTrigger;
+
   const INDEX_PATTERN_1 = 'INDEX_PATTERN_1';
   const INDEX_PATTERN_2 = 'INDEX_PATTERN_2';
   const INDEX_PATTERN_3 = 'INDEX_PATTERN_3';
 
   beforeEach(async () => {
+    const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
     filterManager = new FilterManager(mockUiSettingsForFilterManager);
-    action = await createUpdateUsedDataViewAction(filterManager);
+    action = await createUpdateFilterReferencesAction(filterManager);
 
     filter1 = getFilter(INDEX_PATTERN_1, FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
     filter2 = getFilter(
