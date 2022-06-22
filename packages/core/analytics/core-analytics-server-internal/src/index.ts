@@ -7,23 +7,3 @@
  */
 
 export { AnalyticsService } from './analytics_service';
-export type {
-  AnalyticsServicePreboot,
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
-} from './analytics_service';
-
-export type {
-  AnalyticsClient,
-  Event,
-  EventContext,
-  EventType,
-  EventTypeOpts,
-  IShipper,
-  ShipperClassConstructor,
-  OptInConfig,
-  ContextProviderOpts,
-  TelemetryCounter,
-} from '@kbn/analytics-client';
-
-export { TelemetryCounterType } from '@kbn/analytics-client';

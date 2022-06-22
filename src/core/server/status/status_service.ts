@@ -22,7 +22,7 @@ import type { RootSchema } from '@kbn/analytics-client';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginName } from '@kbn/core-base-common';
-import { AnalyticsServiceSetup } from '../analytics';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { InternalHttpServiceSetup } from '../http';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';

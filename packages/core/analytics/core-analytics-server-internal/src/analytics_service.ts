@@ -10,28 +10,11 @@ import { of } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-
-/**
- * Exposes the public APIs of the AnalyticsClient during the preboot phase
- * {@link AnalyticsClient}
- * @public
- */
-export type AnalyticsServicePreboot = Omit<AnalyticsClient, 'shutdown'>;
-/**
- * Exposes the public APIs of the AnalyticsClient during the setup phase.
- * {@link AnalyticsClient}
- * @public
- */
-export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
-/**
- * Exposes the public APIs of the AnalyticsClient during the start phase
- * {@link AnalyticsClient}
- * @public
- */
-export type AnalyticsServiceStart = Pick<
-  AnalyticsClient,
-  'optIn' | 'reportEvent' | 'telemetryCounter$'
->;
+import type {
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+  AnalyticsServicePreboot,
+} from '@kbn/core-analytics-server';
 
 export class AnalyticsService {
   private readonly analyticsClient: AnalyticsClient;
@@ -59,6 +42,7 @@ export class AnalyticsService {
       telemetryCounter$: this.analyticsClient.telemetryCounter$,
     };
   }
+
   public setup(): AnalyticsServiceSetup {
     return {
       optIn: this.analyticsClient.optIn,
@@ -70,6 +54,7 @@ export class AnalyticsService {
       telemetryCounter$: this.analyticsClient.telemetryCounter$,
     };
   }
+
   public start(): AnalyticsServiceStart {
     return {
       optIn: this.analyticsClient.optIn,

@@ -17,6 +17,8 @@ import {
   ILoggingSystem,
   config as loggingConfig,
 } from '@kbn/core-logging-server-internal';
+import { AnalyticsService } from '@kbn/core-analytics-server-internal';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { coreDeprecationProvider, ensureValidConfiguration } from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
@@ -51,7 +53,6 @@ import { config as executionContextConfig } from './execution_context';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
-import { AnalyticsService, AnalyticsServiceSetup } from './analytics';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
