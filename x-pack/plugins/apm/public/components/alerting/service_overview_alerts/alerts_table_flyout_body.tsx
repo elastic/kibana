@@ -6,38 +6,30 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  AlertsTableConfigurationRegistryContract,
-  GetRenderCellValue,
-  AlertTableFlyoutComponent,
-  AlertsTableFlyoutBaseProps,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   EuiSpacer,
   EuiTitle,
   EuiText,
-  EuiLink,
   EuiHorizontalRule,
   EuiDescriptionList,
 } from '@elastic/eui';
 import {
-  AlertConsumers,
   TIMESTAMP,
-  EVENT_ACTION,
   ALERT_DURATION,
   ALERT_REASON,
   ALERT_STATUS,
-  ALERT_RULE_TYPE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_ACTIVE,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_RULE_CATEGORY,
-  ALERT_RULE_UUID,
 } from '@kbn/rule-data-utils';
-import moment from 'moment-timezone';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
+import {
+  asDuration,
+  asAbsoluteDateTime,
+} from '../../../../common/utils/formatters';
+import { getValue } from './get_render_cell_value';
 export const AlertTableFlyoutBody = (data: AlertsTableFlyoutBaseProps) => {
   const { alert } = data;
 
@@ -46,7 +38,7 @@ export const AlertTableFlyoutBody = (data: AlertsTableFlyoutBaseProps) => {
       title: i18n.translate('xpack.apm.alerts.flyoutBody.status', {
         defaultMessage: 'Status',
       }),
-      description: alert[ALERT_STATUS]
+      description: getValue(alert[ALERT_STATUS])
         ? ALERT_STATUS_ACTIVE
         : ALERT_STATUS_RECOVERED,
     },
@@ -54,33 +46,31 @@ export const AlertTableFlyoutBody = (data: AlertsTableFlyoutBaseProps) => {
       title: i18n.translate('xpack.apm.alerts.flyoutBody.status', {
         defaultMessage: 'Last Updated',
       }),
-      description: (
-        <span>{moment(alert[TIMESTAMP]).format('YYYY-MM-DD HH:mm:ss')}</span>
-      ),
+      description: asAbsoluteDateTime(getValue(alert[TIMESTAMP])),
     },
     {
       title: i18n.translate('xpack.apm.alerts.flyoutBody.duration', {
         defaultMessage: 'Duration',
       }),
-      description: alert[ALERT_DURATION] ?? '-',
+      description: asDuration(getValue(alert[ALERT_DURATION])) ?? '-',
     },
     {
       title: i18n.translate('xpack.apm.alerts.flyoutBody.expectedValue', {
         defaultMessage: 'Expected value',
       }),
-      description: alert[ALERT_EVALUATION_THRESHOLD] ?? '-',
+      description: getValue(alert[ALERT_EVALUATION_THRESHOLD]) ?? '-',
     },
     {
       title: i18n.translate('xpack.apm.alerts.flyoutBody.actualValue', {
         defaultMessage: 'Actual value',
       }),
-      description: alert[ALERT_EVALUATION_VALUE] ?? '-',
+      description: getValue(alert[ALERT_EVALUATION_VALUE]) ?? '-',
     },
     {
       title: i18n.translate('xpack.apm.alerts.flyoutBody.ruleType', {
         defaultMessage: 'Rule type',
       }),
-      description: alert[ALERT_RULE_CATEGORY] ?? '-',
+      description: getValue(alert[ALERT_RULE_CATEGORY]) ?? '-',
     },
   ];
 
