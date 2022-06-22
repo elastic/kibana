@@ -43,12 +43,7 @@ export async function reporter(options: ReporterOptions) {
     const appHomeStats = tg.find((e) => e.name === '/app/home');
     const appDashboardsStats = tg.find((e) => e.name === '/app/dashboards');
 
-    const ciStatsReporter = CiStatsReporter.fromEnv(
-      new ToolingLog({
-        level: 'info',
-        writeTo: process.stdout,
-      })
-    );
+    const ciStatsReporter = CiStatsReporter.fromEnv(log);
 
     const body = {
       ...(loginStats && { page_load_login: loginStats.latency }),
