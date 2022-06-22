@@ -4221,6 +4221,20 @@
                 "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
                 "deprecated": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ErrorEmbeddable.Unnamed.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "compact",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
             "returnComment": []

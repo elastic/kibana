@@ -5,26 +5,15 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HelpPopover, HelpPopoverButton } from '../components/help_popover/help_popover';
+import { HelpPopover } from '../components/help_popover/help_popover';
 
 export const TimeSeriesExplorerHelpPopover = () => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   return (
     <HelpPopover
       anchorPosition="upCenter"
-      button={
-        <HelpPopoverButton
-          onClick={() => {
-            setIsPopoverOpen(!isPopoverOpen);
-          }}
-        />
-      }
-      closePopover={() => setIsPopoverOpen(false)}
-      isOpen={isPopoverOpen}
       title={i18n.translate('xpack.ml.timeSeriesExplorer.popoverTitle', {
         defaultMessage: 'Single time series analysis',
       })}
