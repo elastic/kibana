@@ -6,34 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { Action, createAction } from '@kbn/ui-actions-plugin/public';
+import { Action, ActionExecutionMeta, createAction } from '@kbn/ui-actions-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
 
 export const UPDATE_FILTER_REFERENCES_ACTION = 'UPDATE_FILTER_REFERENCES_ACTION';
 
-export interface UpdateFilterReferencesActionContext {
+export interface UpdateFilterReferencesActionContext extends ActionExecutionMeta {
   /** The initial data view of the editable layer **/
   fromDataView: string;
   /** New data view of of the editable layer
    *  @description null - in case of removing the layer
    */
-  toDataView: string; // null in case of removing
+  toDataView: string | null;
   /** List of all Data Views used in all layers **/
   usedDataViews: string[] | [];
   /** Index to use by default if all layers are cleared **/
-  defaultDataView: string;
+  defaultDataView?: string;
 }
 
 export function createUpdateFilterReferencesAction(filterManager: FilterManager): Action {
-  return createAction({
+  return createAction<UpdateFilterReferencesActionContext>({
     type: UPDATE_FILTER_REFERENCES_ACTION,
     id: UPDATE_FILTER_REFERENCES_ACTION,
-    execute: async ({
-      fromDataView,
-      toDataView,
-      usedDataViews,
-      defaultDataView,
-    }: UpdateFilterReferencesActionContext) => {
+    execute: async ({ fromDataView, toDataView, usedDataViews, defaultDataView }) => {
       const countOfInitialDataView = usedDataViews.filter((i) => i === fromDataView).length;
       const filters = filterManager.getFilters();
 
@@ -45,13 +40,16 @@ export function createUpdateFilterReferencesAction(filterManager: FilterManager)
       /** removing layer **/
       if (fromDataView && !toDataView) {
         if (usedDataViews.length > 1) {
-          toDataView = usedDataViews[0];
-        } else {
+          toDataView = usedDataViews.filter((item) => item !== fromDataView)[0];
+        }
+        if (!toDataView && defaultDataView) {
           toDataView = defaultDataView;
         }
       }
 
-      filterManager.updateDataViewReferences(filters, fromDataView, toDataView);
+      if (toDataView) {
+        filterManager.updateDataViewReferences(filters, fromDataView, toDataView);
+      }
     },
   });
 }

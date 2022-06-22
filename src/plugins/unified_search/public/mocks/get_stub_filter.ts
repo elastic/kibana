@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { FilterStateStore } from '@kbn/data-plugin/public';
-import type { Filter } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
-export function getFilter(
+export function mockFilter(
+  index: string,
   store: FilterStateStore,
   disabled: boolean,
   negated: boolean,
@@ -21,7 +21,7 @@ export function getFilter(
       store,
     },
     meta: {
-      index: 'logstash-*',
+      index,
       disabled,
       negate: negated,
       alias: null,

@@ -7,157 +7,158 @@
  */
 
 import { FilterManager } from '@kbn/data-plugin/public';
+import { FilterStateStore } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
-import { createUpdateFilterReferencesAction } from './update_filter_references_action';
-import { updateFilterReferencesTrigger } from '../triggers';
-import { getFilter } from './get_stub_filter';
+import {
+  createUpdateFilterReferencesAction,
+  UpdateFilterReferencesActionContext,
+} from './update_filter_references_action';
+import { updateFilterReferencesTrigger } from '../triggers/update_filter_references_trigger';
+import { mockFilter } from '../mocks/get_stub_filter';
 
 describe('createUpdateFilterReferencesAction', () => {
-  let context: ActionExecutionContext;
   let filterManager: FilterManager;
-  let action: Action<object>;
-  let filter1: Filter;
-  let filter2: Filter;
-
+  let executeActionFn: (context: UpdateFilterReferencesActionContext) => Promise<void>;
   const trigger = updateFilterReferencesTrigger;
 
-  const INDEX_PATTERN_1 = 'INDEX_PATTERN_1';
-  const INDEX_PATTERN_2 = 'INDEX_PATTERN_2';
-  const INDEX_PATTERN_3 = 'INDEX_PATTERN_3';
-
   beforeEach(async () => {
-    const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
-    filterManager = new FilterManager(mockUiSettingsForFilterManager);
-    action = await createUpdateFilterReferencesAction(filterManager);
-
-    filter1 = getFilter(INDEX_PATTERN_1, FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
-    filter2 = getFilter(
-      INDEX_PATTERN_2,
-      FilterStateStore.APP_STATE,
-      false,
-      false,
-      'key4',
-      'value4'
-    );
+    filterManager = new FilterManager(coreMock.createStart().uiSettings);
+    executeActionFn = createUpdateFilterReferencesAction(filterManager).execute;
   });
 
-  it('Scenario: Change filter reference when adjusting 1 layer', async () => {
-    context = {
+  /**
+   Scenario: Change filter reference when adjusting 1 layer
+     Given I am configuring one layer: L1 by D1 data view
+     Given I am adding a filter F1 by D1
+     When I change D1 to D2 on L1
+     Then Data view reference for F1 should be updated to D2
+   **/
+  test('Scenario: Change filter reference when adjusting 1 layer', async () => {
+    const f1 = mockFilter('D1', FilterStateStore.GLOBAL_STATE, true, true, 'f1', '');
+    filterManager.setFilters([f1]);
+
+    await executeActionFn({
       trigger,
-      initialDataView: INDEX_PATTERN_1,
-      newDataView: INDEX_PATTERN_2,
-      usedDataViews: [INDEX_PATTERN_1, INDEX_PATTERN_2],
-    } as ActionExecutionContext;
+      fromDataView: 'D1',
+      toDataView: 'D2',
+      usedDataViews: ['D1'],
+    });
 
-    filterManager.setFilters([filter1]);
-
-    await action.execute(context);
-
-    const filtersAfterActionExecuted = filterManager.getFilters();
-    const filteredFilter = filtersAfterActionExecuted.filter(
-      (f) => f.meta.index === INDEX_PATTERN_2
-    );
-    expect(filteredFilter.length).toEqual(1);
+    expect(filterManager.getFilters().map(({ meta }) => meta.index)).toMatchInlineSnapshot(`
+      Array [
+        "D2",
+      ]
+    `);
   });
 
-  it('Scenario: Change filter reference when adjusting 2 or more layers', async () => {
-    context = {
+  /**
+   Scenario: Change filter reference when adjusting 2 or more layers
+     Given I am configuring 2 layers: L1 by D1 + L2 by D2
+     Given I am adding 2 filters: F1 by D1 + F2 by D2
+     When I change D1 to D3 on L1
+     Then Data view reference for F1 should be updated to D3
+   **/
+  test('Scenario: Change filter reference when adjusting 2 or more layers', async () => {
+    const f1 = mockFilter('D1', FilterStateStore.GLOBAL_STATE, true, true, 'f1', '');
+    const f2 = mockFilter('D2', FilterStateStore.GLOBAL_STATE, true, true, 'f2', '');
+    filterManager.setFilters([f1, f2]);
+
+    await executeActionFn({
       trigger,
-      initialDataView: INDEX_PATTERN_1,
-      newDataView: INDEX_PATTERN_3,
-      usedDataViews: [INDEX_PATTERN_1, INDEX_PATTERN_2, INDEX_PATTERN_3],
-    } as ActionExecutionContext;
+      fromDataView: 'D1',
+      toDataView: 'D3',
+      usedDataViews: ['D1', 'D2'],
+    });
 
-    filterManager.setFilters([filter1, filter2]);
-
-    await action.execute(context);
-
-    const filtersAfterActionExecuted = filterManager.getFilters();
-    const filteredFilter = filtersAfterActionExecuted.filter(
-      (f) => f.meta.index === INDEX_PATTERN_3
-    );
-    expect(filteredFilter.length).toEqual(1);
+    expect(filterManager.getFilters().map(({ meta }) => meta.index)).toMatchInlineSnapshot(`
+      Array [
+        "D3",
+        "D2",
+      ]
+    `);
   });
 
-  it('Scenario: change references only for incompatible cases', async () => {
-    context = {
+  /**
+    Scenario: change references only for incompatible cases.
+      Given I am configuring 3 layers: L1 by D1 + L2 by D1 + L3 by D2
+      Given I am adding 2 filters: F1 by D1 + F2 by D2
+      When I change D1 to D2 on L1
+      Then Data view reference should not be updated
+      Note: Important case!
+   **/
+  test('Scenario: change references only for incompatible cases', async () => {
+    const f1 = mockFilter('D1', FilterStateStore.GLOBAL_STATE, true, true, 'f1', '');
+    const f2 = mockFilter('D2', FilterStateStore.GLOBAL_STATE, true, true, 'f2', '');
+    filterManager.setFilters([f1, f2]);
+
+    await executeActionFn({
       trigger,
-      initialDataView: INDEX_PATTERN_1,
-      newDataView: INDEX_PATTERN_2,
-      usedDataViews: [INDEX_PATTERN_1, INDEX_PATTERN_2],
-    } as ActionExecutionContext;
+      fromDataView: 'D1',
+      toDataView: 'D3',
+      usedDataViews: ['D1', 'D1', 'D2'],
+    });
 
-    filterManager.setFilters([filter1, filter2]);
-
-    await action.execute(context);
-
-    const filtersAfterActionExecuted = filterManager.getFilters();
-    const filteredFilter = filtersAfterActionExecuted.filter(
-      (f) => f.meta.index === INDEX_PATTERN_2
-    );
-    expect(filteredFilter.length).toEqual(1);
+    expect(filterManager.getFilters().map(({ meta }) => meta.index)).toMatchInlineSnapshot(`
+      Array [
+        "D1",
+        "D2",
+      ]
+    `);
   });
 
-  it('Scenario: Change filter reference when removing one of configured layers', async () => {
-    context = {
+  /**
+  Scenario: Change filter reference when removing one of configured layers
+    Given I am configuring 2 layers: L1 by D1 + L2 by D2
+    Given I am adding 2 filters: F1 by D1 + F2 by D2
+    When I remove L1
+    Then Data view reference for F1 should be updated to D2
+    Note: should take the first of the available configured Data Views
+   **/
+  test('Scenario: Change filter reference when removing one of configured layers', async () => {
+    const f1 = mockFilter('D1', FilterStateStore.GLOBAL_STATE, true, true, 'f1', '');
+    const f2 = mockFilter('D2', FilterStateStore.GLOBAL_STATE, true, true, 'f2', '');
+    filterManager.setFilters([f1, f2]);
+
+    await executeActionFn({
       trigger,
-      initialDataView: INDEX_PATTERN_1,
-      newDataView: INDEX_PATTERN_2,
-      usedDataViews: [INDEX_PATTERN_1, INDEX_PATTERN_2],
-      globalDataView: INDEX_PATTERN_2,
-    } as ActionExecutionContext;
+      fromDataView: 'D1',
+      toDataView: null,
+      usedDataViews: ['D1', 'D2'],
+    });
 
-    filterManager.setFilters([filter1]);
-
-    await action.execute(context);
-
-    const filtersAfterActionExecuted = filterManager.getFilters();
-    const filteredFilter = filtersAfterActionExecuted.filter(
-      (f) => f.meta.index === INDEX_PATTERN_2
-    );
-    expect(filteredFilter.length).toEqual(1);
+    expect(filterManager.getFilters().map(({ meta }) => meta.index)).toMatchInlineSnapshot(`
+      Array [
+        "D2",
+        "D2",
+      ]
+    `);
   });
 
-  it('Scenario: Change filter reference when removing all layers (one layer was configured)', async () => {
-    context = {
+  /**
+   Scenario: Change filter reference when removing all layers (one layer was configured)
+     Given I am configuring one layer: L1 by D1
+     Given I am adding a filter F1 by D1
+     Given I am changing the Unified Search Data View to D2
+     When I remove all layers
+     Then Data view reference for F1 should be updated to D2
+     Note: Unified Search Data View should be used by default
+   **/
+  test('Scenario: Change filter reference when removing all layers (one layer was configured)', async () => {
+    const f1 = mockFilter('D1', FilterStateStore.GLOBAL_STATE, true, true, 'f1', '');
+    filterManager.setFilters([f1]);
+
+    await executeActionFn({
       trigger,
-      initialDataView: INDEX_PATTERN_1,
-      newDataView: INDEX_PATTERN_2,
-      usedDataViews: [INDEX_PATTERN_1, INDEX_PATTERN_2],
-      globalDataView: INDEX_PATTERN_2,
-    } as ActionExecutionContext;
+      fromDataView: 'D1',
+      toDataView: null,
+      usedDataViews: ['D1'],
+      defaultDataView: 'D2',
+    });
 
-    filterManager.setFilters([filter1]);
-
-    await action.execute(context);
-
-    const filtersAfterActionExecuted = filterManager.getFilters();
-    const filteredFilter = filtersAfterActionExecuted.filter(
-      (f) => f.meta.index === INDEX_PATTERN_2
-    );
-    expect(filteredFilter.length).toEqual(1);
-  });
-
-  it('Scenario: Add new filter from the Unified Search Panel', async () => {
-    context = {
-      trigger,
-      initialDataView: INDEX_PATTERN_1,
-      newDataView: INDEX_PATTERN_2,
-      usedDataViews: [INDEX_PATTERN_1, INDEX_PATTERN_2],
-      globalDataView: INDEX_PATTERN_2,
-    } as ActionExecutionContext;
-
-    filterManager.setFilters([filter1]);
-
-    await action.execute(context);
-
-    const filtersAfterActionExecuted = filterManager.getFilters();
-    const filteredFilter = filtersAfterActionExecuted.filter(
-      (f) => f.meta.index === INDEX_PATTERN_2
-    );
-    expect(filteredFilter.length).toEqual(1);
+    expect(filterManager.getFilters().map(({ meta }) => meta.index)).toMatchInlineSnapshot(`
+      Array [
+        "D2",
+      ]
+    `);
   });
 });
