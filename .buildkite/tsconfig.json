@@ -7,17 +7,17 @@
     "composite": false,
     "emitDeclarationOnly": true,
     "outDir": "./target/types",
-    "types": ["node"],
+    "types": ["node", "mocha"],
     "paths": {
       "#pipeline-utils": [".buildkite/pipeline-utils/index.ts"],
-      "#pipeline-utils/*": [".buildkite/pipeline-utils/*"],
-    },
+      "#pipeline-utils/*": [".buildkite/pipeline-utils/*"]
+    }
   },
   "include": [
     "pipeline-utils/**/*",
     "pipelines/**/*",
     "scripts/**/*",
     "pipelines/flaky_tests/groups.json",
-    "pull_requests.json",
+    "pull_requests.json"
   ]
 }
