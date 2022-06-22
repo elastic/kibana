@@ -199,7 +199,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
           <EuiFlexGroup direction="row" gutterSize="xs" responsive={false} alignItems="baseline">
             <EuiFlexItem grow={false}>
-              <EuiTitle className="panel-title">
+              <EuiTitle size={'xs'}>
                 <h2>
                   <FormattedMessage
                     id="xpack.ml.explorer.anomalyTimelineTitle"
@@ -239,7 +239,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             )}
           </EuiFlexGroup>
 
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
 
           <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="baseline">
             {viewBySwimlaneOptions.length > 0 && (
@@ -275,7 +275,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
           <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <div className="panel-sub-title">
+              <EuiText size={'xs'} color={'subdued'}>
                 {viewByLoadedForTimeFormatted && (
                   <FormattedMessage
                     id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
@@ -295,7 +295,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     defaultMessage="(Job score across all influencers)"
                   />
                 )}
-              </div>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ visibility: selectedCells ? 'visible' : 'hidden' }}>
               <EuiButtonEmpty
