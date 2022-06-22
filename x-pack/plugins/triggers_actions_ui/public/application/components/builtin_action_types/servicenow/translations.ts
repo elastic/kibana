@@ -146,6 +146,14 @@ export const API_INFO_ERROR = (status: number) =>
     defaultMessage: 'Received status: {status} when attempting to get application information',
   });
 
+export const FETCH_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.fetchErrorMsg',
+  {
+    defaultMessage:
+      'Failed to fetch. Check the URL or the CORS configuration of your ServiceNow instance.',
+  }
+);
+
 export const INSTALLATION_CALLOUT_TITLE = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutTitle',
   {
