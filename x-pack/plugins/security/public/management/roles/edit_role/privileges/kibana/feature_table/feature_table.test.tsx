@@ -951,7 +951,7 @@ describe('FeatureTable', () => {
   });
 
   describe('Info Icon Tooltip for Customized Subfeature privileges', () => {
-    it('should render if there are custom privileges and the accordian is toggled open then toggled closed', () => {
+    it('should render if there are custom privileges and the accordion is toggled open then toggled closed', () => {
       const role = createRole([
         {
           spaces: ['foo'],
@@ -1019,7 +1019,7 @@ describe('FeatureTable', () => {
       expect(type).toBe('iInCircle');
     });
 
-    it('should render if there are custom privileges and the accordian has not been toggled (i.e. on load)', () => {
+    it('should render if there are custom privileges and the accordion has not been toggled (i.e. on load)', () => {
       const role = createRole([
         {
           spaces: ['foo'],
@@ -1081,7 +1081,7 @@ describe('FeatureTable', () => {
       expect(type).toBe('iInCircle');
     });
 
-    it('should not render if there are custom privileges and the accordian is open', () => {
+    it('should not render if there are custom privileges and the accordion is open', () => {
       const role = createRole([
         {
           spaces: ['foo'],
@@ -1149,7 +1149,7 @@ describe('FeatureTable', () => {
       expect(type).toBe('empty');
     });
 
-    it('should not render if there are NOT custom privileges and the accordian has not been toggled (i.e on load)', () => {
+    it('should not render if there are NOT custom privileges and the accordion has not been toggled (i.e on load)', () => {
       const role = createRole([
         {
           spaces: ['foo'],
@@ -1211,7 +1211,7 @@ describe('FeatureTable', () => {
       expect(type).toBe('empty');
     });
 
-    it('should not render if there are NOT custom privileges and the accordian has been toggled open then toggled closed', () => {
+    it('should not render if there are NOT custom privileges and the accordion has been toggled open then toggled closed', () => {
       const role = createRole([
         {
           spaces: ['foo'],

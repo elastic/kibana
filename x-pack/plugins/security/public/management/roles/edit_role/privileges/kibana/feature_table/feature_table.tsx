@@ -49,7 +49,7 @@ interface Props {
 }
 
 interface State {
-  showInformationIconMap: Record<string, boolean>;
+  expandedPrivilegeControls: Set<string>;
 }
 
 export class FeatureTable extends Component<Props, State> {
@@ -75,7 +75,7 @@ export class FeatureTable extends Component<Props, State> {
         this.featureCategories.get(feature.category.id)!.push(feature);
       });
 
-    this.state = { showInformationIconMap: {} };
+    this.state = { expandedPrivilegeControls: new Set() };
   }
 
   public render() {
@@ -235,11 +235,14 @@ export class FeatureTable extends Component<Props, State> {
                 canCustomizeSubFeaturePrivileges && hasSubFeaturePrivileges ? 'left' : 'none'
               }
               onToggle={(isOpen: boolean) => {
+                if (isOpen) {
+                  this.state.expandedPrivilegeControls.add(feature.id);
+                } else {
+                  this.state.expandedPrivilegeControls.delete(feature.id);
+                }
+
                 this.setState({
-                  showInformationIconMap: {
-                    ...this.state.showInformationIconMap,
-                    [feature.id]: !isOpen,
-                  },
+                  expandedPrivilegeControls: this.state.expandedPrivilegeControls,
                 });
               }}
             >
@@ -309,7 +312,7 @@ export class FeatureTable extends Component<Props, State> {
 
     let infoIcon = <EuiIconTip type="empty" content={null} />;
 
-    const isAccordianClosed = this.state.showInformationIconMap[feature.id] ?? true;
+    const arePrivilegeControlsCollapsed = !this.state.expandedPrivilegeControls.has(feature.id);
 
     if (
       this.props.privilegeCalculator.hasCustomizedSubFeaturePrivileges(
@@ -317,7 +320,7 @@ export class FeatureTable extends Component<Props, State> {
         this.props.privilegeIndex,
         this.props.allSpacesSelected
       ) &&
-      isAccordianClosed
+      arePrivilegeControlsCollapsed
     ) {
       infoIcon = (
         <EuiIconTip
