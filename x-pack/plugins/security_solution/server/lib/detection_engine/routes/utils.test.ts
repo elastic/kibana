@@ -100,14 +100,15 @@ describe('utils', () => {
       const responseFactory = new SiemResponseFactory(response);
 
       responseFactory.error({statusCode: 400 });
-      const [[{ error_code, attributes,message }]] = response.custom.mock.calls;
+      const [[{ statusCode, body }]] = response.custom.mock.calls;
 
-      expect(error_code).toEqual(400);
-      expect(message).toEqual('Bad Request');
-      expect(attributes).toBeInstanceOf(Buffer);
-      expect(JSON.parse(attributes!.toString())).toEqual(
+      expect(statusCode).toEqual(400);
+      
+      expect(body).toBeInstanceOf(Buffer);
+      expect(JSON.parse(body!.toString())).toEqual(
         expect.objectContaining({
           status_code: 400,
+          message:'Bad Request'
         })
       );
     });
