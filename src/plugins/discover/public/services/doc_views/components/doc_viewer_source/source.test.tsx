@@ -52,7 +52,6 @@ describe('Source Viewer component', () => {
         />
       </KibanaContextProvider>
     );
-    expect(comp.children().render()).toMatchSnapshot();
     const loadingIndicator = comp.find(EuiLoadingSpinner);
     expect(loadingIndicator).not.toBe(null);
   });
@@ -71,7 +70,6 @@ describe('Source Viewer component', () => {
         />
       </KibanaContextProvider>
     );
-    expect(comp.children().render()).toMatchSnapshot();
     const errorPrompt = comp.find(EuiEmptyPrompt);
     expect(errorPrompt.length).toBe(1);
     const refreshButton = comp.find(EuiButton);
