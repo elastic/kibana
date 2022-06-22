@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 
 expect.addSnapshotSerializer({
   test: (val) => val instanceof Observable,
-  print: () => `Observable`,
+  print: () => `Rx.Observable`,
 });
 
 import { mockRender } from './fatal_errors_service.test.mocks';
