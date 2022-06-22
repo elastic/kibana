@@ -68,6 +68,12 @@ jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
+jest.mock('../state_container', () => ({
+  useRulesPageStateContainer: jest
+    .fn()
+    .mockReturnValue({ lastResponse: [], setLastResponse: jest.fn() }),
+}));
+
 const ruleTags = ['a', 'b', 'c', 'd'];
 
 const { loadRules, loadRuleTypes, loadRuleAggregations, updateAPIKey, loadRuleTags } =
@@ -340,7 +346,7 @@ describe('Update Api Key', () => {
     updateAPIKey.mockResolvedValueOnce(204);
     render(
       <IntlProvider locale="en">
-        <RulesList />
+        <RulesList filteredRulesTypes={[]} filteredSolutions={[]} />
       </IntlProvider>
     );
     expect(await screen.findByText('test rule ok')).toBeInTheDocument();
@@ -374,7 +380,7 @@ describe('Update Api Key', () => {
     updateAPIKey.mockRejectedValueOnce(500);
     render(
       <IntlProvider locale="en">
-        <RulesList />
+        <RulesList filteredRulesTypes={[]} filteredSolutions={[]} />
       </IntlProvider>
     );
 
@@ -426,7 +432,7 @@ describe('rules_list component empty', () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
 
-    wrapper = mountWithIntl(<RulesList />);
+    wrapper = mountWithIntl(<RulesList filteredRulesTypes={[]} filteredSolutions={[]} />);
 
     await act(async () => {
       await nextTick();
@@ -513,7 +519,7 @@ describe('rules_list component with items', () => {
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-    wrapper = mountWithIntl(<RulesList />);
+    wrapper = mountWithIntl(<RulesList filteredRulesTypes={[]} filteredSolutions={[]} />);
     await act(async () => {
       await nextTick();
       wrapper.update();
@@ -1032,7 +1038,7 @@ describe('rules_list component empty with show only capability', () => {
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-    wrapper = mountWithIntl(<RulesList />);
+    wrapper = mountWithIntl(<RulesList filteredRulesTypes={[]} filteredSolutions={[]} />);
 
     await act(async () => {
       await nextTick();
@@ -1134,7 +1140,7 @@ describe('rules_list with show only capability', () => {
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-    wrapper = mountWithIntl(<RulesList />);
+    wrapper = mountWithIntl(<RulesList filteredRulesTypes={[]} filteredSolutions={[]} />);
 
     await act(async () => {
       await nextTick();
@@ -1258,7 +1264,7 @@ describe('rules_list with disabled items', () => {
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-    wrapper = mountWithIntl(<RulesList />);
+    wrapper = mountWithIntl(<RulesList filteredRulesTypes={[]} filteredSolutions={[]} />);
 
     await act(async () => {
       await nextTick();

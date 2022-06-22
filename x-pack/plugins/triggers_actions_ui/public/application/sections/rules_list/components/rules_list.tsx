@@ -93,7 +93,7 @@ import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from '.
 const ENTER_KEY = 13;
 
 export interface RulesListProps {
-  filteredRulesTypes: string[] | undefined; // try to add optional
+  filteredRulesTypes: string[] | undefined;
   filteredSolutions: string[] | undefined;
   showActionFilter?: boolean;
   ruleDetailsLink?: string | undefined;
@@ -118,7 +118,7 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
   key: percentile,
 }));
 
-const RulesList = ({
+export const RulesList = ({
   filteredRulesTypes,
   filteredSolutions,
   showActionFilter = true,

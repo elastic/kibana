@@ -18,6 +18,11 @@ export const RulesListSandbox = () => {
   } = useConnectorContext();
 
   return (
-    <div style={style}>{getRulesListLazy({ connectorServices: { validateEmailAddresses } })}</div>
+    <div style={style}>
+      {getRulesListLazy({
+        connectorServices: { validateEmailAddresses },
+        rulesListProps: { filteredRulesTypes: [], filteredSolutions: [] },
+      })}
+    </div>
   );
 };

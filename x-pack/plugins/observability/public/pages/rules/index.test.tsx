@@ -12,7 +12,6 @@ import { ReactWrapper } from 'enzyme';
 import { CoreStart } from '@kbn/core/public';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { RulesPage } from '.';
-import { RulesTable } from './components/rules_table';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import * as pluginContext from '../../hooks/use_plugin_context';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
@@ -22,8 +21,16 @@ import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { RuleState } from './types';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 
-const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+function RulesList() {
+  return <div data-test-subj="rulesList" />;
+}
 
+const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+mockUseKibanaReturnValue.services.triggersActionsUi.getRulesList.mockImplementation(() => {
+  {
+    return <RulesList />;
+  }
+});
 jest.mock('../../utils/kibana_react', () => ({
   __esModule: true,
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
@@ -96,7 +103,6 @@ describe('empty RulesPage', () => {
       await nextTick();
       wrapper.update();
     });
-    expect(wrapper.find(RulesTable).exists()).toBe(false);
     expect(wrapper.find('[data-test-subj="createFirstRuleEmptyPrompt"]').exists()).toBeTruthy();
   });
   it('renders Create rule button', async () => {
@@ -366,7 +372,7 @@ describe('RulesPage with items', () => {
 
   it('renders table of rules', async () => {
     await setup();
-    expect(wrapper.find(RulesTable).exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="rulesList"]').exists()).toBeTruthy();
   });
 });
 
