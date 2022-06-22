@@ -11,8 +11,21 @@ import React, { useCallback } from 'react';
 import { Chart, Metric, MetricSpec, RenderChangeListener, Settings } from '@elastic/charts';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { VisParams } from '../../common';
 import { getThemeService } from '../services/theme_service';
+import { getPaletteService } from '../services';
+
+// TODO - find a reasonable default (from EUI perhaps?)
+const defaultColor = '5e5e5e';
+
+const getColor = (value: number, paletteParams: CustomPaletteState | undefined) =>
+  paletteParams
+    ? getPaletteService().get('custom')?.getColorForValue?.(value, paletteParams, {
+        min: paletteParams.rangeMin,
+        max: paletteParams.rangeMax,
+      }) || defaultColor
+    : defaultColor;
 
 const MetricVis = ({
   data,
@@ -51,7 +64,6 @@ const MetricVis = ({
   const metricConfigs: MetricSpec['data'][number] = [];
 
   const commonProps = {
-    color: '#5e5e5e',
     valueFormatter: formatValue,
     domain: { min: config.metric.progressMin, max: config.metric.progressMax },
     progressBarDirection: config.metric.progressDirection,
@@ -59,21 +71,27 @@ const MetricVis = ({
   };
 
   if (!breakdownByColumn) {
+    const value = data.rows[0][primaryMetricColumn.id];
+
     metricConfigs.push({
       ...commonProps,
-      value: data.rows[0][primaryMetricColumn.id],
+      value,
       title: primaryMetricColumn.name,
       subtitle: secondaryMetricColumn?.name ?? config.metric.subtitle,
+      color: getColor(value, config.metric.palette),
     });
   }
 
   if (breakdownByColumn) {
     for (const row of data.rows) {
+      const value = row[primaryMetricColumn.id];
+
       metricConfigs.push({
         ...commonProps,
-        value: row[primaryMetricColumn.id],
+        value,
         title: row[breakdownByColumn.id],
         subtitle: primaryMetricColumn.name,
+        color: getColor(value, config.metric.palette),
       });
     }
   }

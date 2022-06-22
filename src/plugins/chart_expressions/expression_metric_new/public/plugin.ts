@@ -28,14 +28,13 @@ export interface ExpressionMetricPluginStart {
 
 /** @internal */
 export class ExpressionMetricPlugin implements Plugin<void, void> {
-  public setup(core: CoreSetup, { expressions, charts }: ExpressionMetricPluginSetup) {
-    setThemeService(charts.theme);
-
+  public async setup(core: CoreSetup, { expressions, charts }: ExpressionMetricPluginSetup) {
     expressions.registerFunction(metricVisFunction);
     expressions.registerRenderer(getMetricVisRenderer(core.theme));
-    charts.palettes.getPalettes().then((palettes) => {
-      setPaletteService(palettes);
-    });
+
+    setThemeService(charts.theme);
+    const palettes = await charts.palettes.getPalettes();
+    setPaletteService(palettes);
   }
 
   public start(core: CoreStart, { fieldFormats }: ExpressionMetricPluginStart) {
