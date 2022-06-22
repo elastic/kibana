@@ -6,7 +6,6 @@
  */
 
 import type {
-  AlertsTableConfigurationRegistryContract,
   AlertTableFlyoutComponent,
   GetRenderCellValue,
 } from '@kbn/triggers-actions-ui-plugin/public';
