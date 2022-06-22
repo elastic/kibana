@@ -7,9 +7,11 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-// Wraps the supplied aggregations in a sampler aggregation.
-// A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
-// of less than 1 indicates no sampling, and the aggs are returned as-is.
+/**
+ * Wraps the supplied aggregations in a sampler aggregation.
+ * A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
+ * of less than 1 indicates no sampling, and the aggs are returned as-is.
+ */
 export function buildSamplerAggregation(
   aggs: any,
   samplerShardSize: number

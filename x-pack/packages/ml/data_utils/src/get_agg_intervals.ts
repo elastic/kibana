@@ -26,14 +26,14 @@ import { stringHash } from './string_hash';
  * @deprecated At some point use the one from src/core/server/elasticsearch/client/types.ts when it is made into a package. If it never is, then keep using this one.
  * @public
  */
-export type ElasticsearchClient = Omit<
+type ElasticsearchClient = Omit<
   Client,
   'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
 >;
 
 const MAX_CHART_COLUMNS = 20;
 
-export interface HistogramField {
+interface HistogramField {
   fieldName: string;
   type: string;
 }
@@ -45,6 +45,9 @@ interface NumericColumnStats {
 }
 type NumericColumnStatsMap = Record<string, NumericColumnStats>;
 
+/**
+ * Returns aggregation intervals for the supplied document fields.
+ */
 export const getAggIntervals = async (
   client: ElasticsearchClient,
   indexPattern: string,

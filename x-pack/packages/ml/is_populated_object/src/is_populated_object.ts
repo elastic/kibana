@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/*
+/**
  * A type guard to check record like object structures.
  *
  * Examples:
