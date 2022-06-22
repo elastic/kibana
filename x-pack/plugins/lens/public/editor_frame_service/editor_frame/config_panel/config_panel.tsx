@@ -214,10 +214,12 @@ export function LayerPanels(
 
             const action = props.uiActions.getAction('ACTION_UPDATE_USED_DATA_VIEWS');
 
+            const newDataView = null;
+
             action.execute({
               ...getActionContext(),
               initialDataView: layerDatasourceState.layers[layerId].indexPatternId,
-              newDataView: '',
+              newDataView,
               usedDataViews: Object.values(
                 Object.values(layerDatasourceState.layers).map(
                   ({ indexPatternId }) => indexPatternId
