@@ -502,7 +502,7 @@ Operations::
 Fixes error handling on precommit hook {kibana-pull}132998[#132998]
 
 Platform::
-Retry INIT step when hitting incompatible_cluster_routing_allocation {kibana-pull}131809[#131809]
+Prevents Kibana from bootlooping during migrations when Elasticsearch routing allocation settings are incompatible {kibana-pull}131809[#131809]
 
 Querying & Filtering::
 Allows the negative character on the number type fields {kibana-pull}130653[#130653]
