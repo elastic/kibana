@@ -12,10 +12,10 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { stringHash } from '@kbn/ml-string-hash';
 
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
-import { stringHash } from './string_hash';
 
 // TODO Temporary type definition until we can import from `@kbn/core`.
 // Copied from src/core/server/elasticsearch/client/types.ts

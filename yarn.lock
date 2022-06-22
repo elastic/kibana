@@ -3235,11 +3235,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-data-utils@link:bazel-bin/x-pack/packages/ml/data_utils":
+"@kbn/ml-agg-utils@link:bazel-bin/x-pack/packages/ml/agg_utils":
   version "0.0.0"
   uid ""
 
 "@kbn/ml-is-populated-object@link:bazel-bin/x-pack/packages/ml/is_populated_object":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-string-hash@link:bazel-bin/x-pack/packages/ml/string_hash":
   version "0.0.0"
   uid ""
 
@@ -6622,11 +6626,15 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__ml-data-utils@link:bazel-bin/x-pack/packages/ml/data_utils/npm_module_types":
+"@types/kbn__ml-agg-utils@link:bazel-bin/x-pack/packages/ml/agg_utils/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__ml-is-populated-object@link:bazel-bin/x-pack/packages/ml/is_populated_object/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ml-string-hash@link:bazel-bin/x-pack/packages/ml/string_hash/npm_module_types":
   version "0.0.0"
   uid ""
 

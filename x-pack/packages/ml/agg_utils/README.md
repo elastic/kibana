@@ -1,4 +1,4 @@
-# @kbn/ml-data-utils
+# @kbn/ml-agg-utils
 
 This package includes utility functions provided by the ML team to be used in Kibana plugins related to data manipulation and verification.
 

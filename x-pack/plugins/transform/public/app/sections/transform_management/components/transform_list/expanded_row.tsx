@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
 import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
-import { stringHash } from '@kbn/ml-data-utils';
+import { stringHash } from '@kbn/ml-string-hash';
 
 import moment from 'moment-timezone';
 import { TransformListRow } from '../../../../common';

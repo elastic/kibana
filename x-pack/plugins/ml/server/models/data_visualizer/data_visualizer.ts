@@ -13,8 +13,8 @@ import {
   buildSamplerAggregation,
   getAggIntervals,
   getSamplerAggregationsResponsePath,
-  stringHash,
-} from '@kbn/ml-data-utils';
+} from '@kbn/ml-agg-utils';
+import { stringHash } from '@kbn/ml-string-hash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
