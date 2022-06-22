@@ -62,9 +62,10 @@ description, and other <<osquery-manage-query,details>>.
 [[osquery-view-history]]
 == View or rerun previous live queries
 
-From the *Live queries history* section on the *Live queries* tab:
+The *Live queries history* section on the *Live queries* tab shows a log of queries run over the last 30 days.
+Each query has the following options:
 
-* Click image:images/play-icon.png[Right-pointing triangle] to replay a query.
+* Click image:images/play-icon.png[Right-pointing triangle] to rerun a query.
 
 * Click image:images/table-icon.png[Table icon] to view the query <<osquery-results,results>> and <<osquery-status,status>>.
 +
