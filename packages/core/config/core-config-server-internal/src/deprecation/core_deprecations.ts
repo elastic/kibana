@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
+import type { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (settings.server?.basePath && !settings.server?.rewriteBasePath) {
