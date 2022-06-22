@@ -16,9 +16,9 @@ export function registerMappingRoute({ router }: RouteDependencies) {
       path: '/internal/enterprise_search/{index_name}/mapping',
       validate: {
         params: schema.object({
-          index_name: schema.string()
-        })
-      }
+          index_name: schema.string(),
+        }),
+      },
     },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;

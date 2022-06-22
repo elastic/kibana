@@ -45,8 +45,8 @@ import {
 } from './lib/enterprise_search_request_handler';
 
 import { registerAppSearchRoutes } from './routes/app_search';
-import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
+import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
