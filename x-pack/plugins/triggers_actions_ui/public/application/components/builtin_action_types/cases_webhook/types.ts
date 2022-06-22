@@ -12,7 +12,6 @@ import {
   CasesWebhookSecretConfigurationType,
   ExecutorSubActionPushParams,
 } from '@kbn/actions-plugin/server/builtin_action_types/cases_webhook/types';
-import { UserConfiguredActionConnector } from '../../../../types';
 
 export interface CasesWebhookActionParams {
   subAction: string;
@@ -22,8 +21,3 @@ export interface CasesWebhookActionParams {
 export type CasesWebhookConfig = CasesWebhookPublicConfigurationType;
 
 export type CasesWebhookSecrets = CasesWebhookSecretConfigurationType;
-
-export type CasesWebhookActionConnector = UserConfiguredActionConnector<
-  CasesWebhookConfig,
-  CasesWebhookSecrets
->;

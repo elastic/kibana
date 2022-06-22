@@ -9,12 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { CasesWebhookMethods } from './types';
 import { nullableType } from '../lib/nullable';
 
-const HeadersSchema = schema.arrayOf(
-  schema.object({
-    key: schema.string(),
-    value: schema.string(),
-  })
-);
+const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 
 export const ExternalIncidentServiceConfiguration = {
   createIncidentUrl: schema.string(),

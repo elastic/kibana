@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { CasesWebhookActionConnector } from './types';
 import CasesWebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../test_utils';
 import { act, render } from '@testing-library/react';
@@ -46,7 +45,7 @@ const actionConnector = {
   isPreconfigured: false,
   name: 'cases webhook',
   config,
-} as CasesWebhookActionConnector;
+};
 describe('CasesWebhookActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {
     const wrapper = mountWithIntl(
