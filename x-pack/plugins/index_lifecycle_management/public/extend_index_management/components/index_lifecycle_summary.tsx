@@ -140,7 +140,9 @@ export class IndexLifecycleSummary extends Component<Props, State> {
                 id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.phaseDefinitionTitle"
               />
             </EuiPopoverTitle>
-            <EuiCodeBlock lang="json">{JSON.stringify(ilm.phase_execution, null, 2)}</EuiCodeBlock>
+            <EuiCodeBlock language="json">
+              {JSON.stringify(ilm.phase_execution, null, 2)}
+            </EuiCodeBlock>
           </EuiPopover>
         </EuiDescriptionListDescription>
       </Fragment>
