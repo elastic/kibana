@@ -357,8 +357,8 @@ export async function changeLayerIndexPattern({
   const fromDataView = state.currentIndexPatternId;
   const toDataView = indexPatternId;
 
-  const getActionContext = async () => {
-    const trigger = await uiActions.getTrigger('UPDATE_USED_DATA_VIEWS_TRIGGER');
+  const getActionContext = () => {
+    const trigger = uiActions.getTrigger('UPDATE_FILTER_REFERENCES_TRIGGER');
     if (!trigger) {
       throw new Error('Unable to get context, could not locate trigger');
     }
@@ -368,17 +368,13 @@ export async function changeLayerIndexPattern({
   };
 
   const action = uiActions.getAction('UPDATE_FILTER_REFERENCES_ACTION');
-  action.execute(
-    await {
-      ...getActionContext(),
-      fromDataView,
-      toDataView,
-      defaultDataView: toDataView,
-      usedDataViews: Object.values(
-        Object.values(state.layers).map((layer) => layer.indexPatternId)
-      ),
-    }
-  );
+  action.execute({
+    ...getActionContext(),
+    fromDataView,
+    toDataView,
+    defaultDataView: toDataView,
+    usedDataViews: Object.values(Object.values(state.layers).map((layer) => layer.indexPatternId)),
+  });
 
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
