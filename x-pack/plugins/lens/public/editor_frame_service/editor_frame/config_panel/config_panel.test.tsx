@@ -18,6 +18,8 @@ import { Visualization } from '../../../types';
 import { LayerPanels } from './config_panel';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from '@kbn/core/public/mocks';
+import { ActionRegistry } from '@kbn/ui-actions-plugin/public/types';
+import { UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { generateId } from '../../../id_generator';
 import { mountWithProvider } from '../../../mocks';
 import { LayerType, layerTypes } from '../../../../common';
@@ -46,6 +48,10 @@ afterEach(() => {
 
 describe('ConfigPanel', () => {
   const frame = createMockFramePublicAPI();
+  const actions: ActionRegistry = new Map();
+  const uiActions = new UiActionsService({
+    actions,
+  });
   function prepareAndMountComponent(
     props: ReturnType<typeof getDefaultProps>,
     customStoreProps?: Partial<MountStoreProps>
@@ -107,6 +113,7 @@ describe('ConfigPanel', () => {
       core: coreMock.createStart(),
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
+      uiActions,
     };
   }
 

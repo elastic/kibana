@@ -143,6 +143,16 @@ export function LayerPanels(
     [dispatchLens]
   );
 
+  const getActionContext = async () => {
+    const trigger = await props.uiActions.getTrigger('UPDATE_USED_DATA_VIEWS_TRIGGER');
+    if (!trigger) {
+      throw new Error('Unable to get context, could not locate trigger');
+    }
+    return {
+      trigger,
+    } as ActionExecutionContext;
+  };
+
   return (
     <EuiForm className="lnsConfigPanel">
       {layerIds.map((layerId, layerIndex) => (
@@ -185,16 +195,6 @@ export function LayerPanels(
             const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
             const datasourceId = datasourcePublicAPI?.datasourceId;
             const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
-
-            const getActionContext = async () => {
-              const trigger = await props.uiActions.getTrigger('UPDATE_USED_DATA_VIEWS_TRIGGER');
-              if (!trigger) {
-                throw new Error('Unable to get context, could not locate trigger');
-              }
-              return {
-                trigger,
-              } as ActionExecutionContext;
-            };
 
             const action = props.uiActions.getAction('UPDATE_FILTER_REFERENCES_ACTION');
 
