@@ -21,6 +21,8 @@ import {
   coreDeprecationProvider,
   ensureValidConfiguration,
 } from '@kbn/core-config-server-internal';
+import { AnalyticsService } from '@kbn/core-analytics-server-internal';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
@@ -54,7 +56,6 @@ import { config as executionContextConfig } from './execution_context';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
-import { AnalyticsService, AnalyticsServiceSetup } from './analytics';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';

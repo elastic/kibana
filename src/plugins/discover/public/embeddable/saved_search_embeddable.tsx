@@ -7,7 +7,13 @@
  */
 
 import { lastValueFrom, Subscription } from 'rxjs';
-import { onlyDisabledFiltersChanged, Filter } from '@kbn/es-query';
+import {
+  onlyDisabledFiltersChanged,
+  Filter,
+  Query,
+  TimeRange,
+  FilterStateStore,
+} from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
@@ -17,7 +23,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Container, Embeddable } from '@kbn/embeddable-plugin/public';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import { APPLY_FILTER_TRIGGER, FilterManager, generateFilters } from '@kbn/data-plugin/public';
-import { ISearchSource, Query, TimeRange, FilterStateStore } from '@kbn/data-plugin/public';
+import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -125,12 +131,15 @@ export class SavedSearchEmbeddable
     this.inspectorAdapters = {
       requests: new RequestAdapter(),
     };
+    this.panelTitle = savedSearch.title ?? '';
     this.initializeSearchEmbeddableProps();
 
     this.subscription = this.getUpdated$().subscribe(() => {
-      this.panelTitle = this.output.title || '';
-
-      if (this.searchProps) {
+      const titleChanged = this.output.title && this.panelTitle !== this.output.title;
+      if (titleChanged) {
+        this.panelTitle = this.output.title || '';
+      }
+      if (this.searchProps && (titleChanged || this.isFetchRequired(this.searchProps))) {
         this.pushContainerStateParamsToProps(this.searchProps);
       }
     });
@@ -323,16 +332,24 @@ export class SavedSearchEmbeddable
     }
   }
 
-  private async pushContainerStateParamsToProps(
-    searchProps: SearchProps,
-    { forceFetch = false }: { forceFetch: boolean } = { forceFetch: false }
-  ) {
-    const isFetchRequired =
+  private isFetchRequired(searchProps?: SearchProps) {
+    if (!searchProps) {
+      return false;
+    }
+    return (
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
       !isEqual(this.prevTimeRange, this.input.timeRange) ||
       !isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort) ||
-      this.prevSearchSessionId !== this.input.searchSessionId;
+      this.prevSearchSessionId !== this.input.searchSessionId
+    );
+  }
+
+  private async pushContainerStateParamsToProps(
+    searchProps: SearchProps,
+    { forceFetch = false }: { forceFetch: boolean } = { forceFetch: false }
+  ) {
+    const isFetchRequired = this.isFetchRequired(searchProps);
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
@@ -387,7 +404,7 @@ export class SavedSearchEmbeddable
   }
 
   private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
-    if (!this.searchProps) {
+    if (!searchProps) {
       return;
     }
 
