@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  transformError,
-  getBootstrapIndexExists,
-  getIndexExists,
-} from '@kbn/securitysolution-es-utils';
+import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
 import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNAL_INDEX_URL } from '../../../../../common/constants';
