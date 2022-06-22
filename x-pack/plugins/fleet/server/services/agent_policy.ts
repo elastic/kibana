@@ -857,8 +857,8 @@ class AgentPolicyService {
     const agentPolicies = (
       await soClient.find<AgentPolicySOAttributes>({
         type: SAVED_OBJECT_TYPE,
-        fields: ['revision', 'default_download_source_id'],
-        searchFields: ['default_download_source_id'],
+        fields: ['revision', 'download_source_id'],
+        searchFields: ['download_source_id'],
         search: escapeSearchQueryPhrase(downloadSourceId),
         perPage: SO_SEARCH_LIMIT,
       })
@@ -872,16 +872,48 @@ class AgentPolicyService {
         agentPolicies,
         (agentPolicy) =>
           this.update(soClient, esClient, agentPolicy.id, {
-            default_download_source_id:
-              agentPolicy.default_download_source_id === downloadSourceId
+            download_source_id:
+              agentPolicy.download_source_id === downloadSourceId
                 ? null
-                : agentPolicy.default_download_source_id,
+                : agentPolicy.download_source_id,
           }),
         {
           concurrency: 50,
         }
       );
     }
+  }
+
+  public async bumpAllAgentPoliciesForDownloadSource(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    downloadSourceId: string,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
+    const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      fields: ['revision', 'download_source_id'],
+      searchFields: ['download_source_id'],
+      search: escapeSearchQueryPhrase(downloadSourceId),
+      perPage: SO_SEARCH_LIMIT,
+    });
+    const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
+      policy.attributes = {
+        ...policy.attributes,
+        revision: policy.attributes.revision + 1,
+        updated_at: new Date().toISOString(),
+        updated_by: options?.user ? options.user.username : 'system',
+      };
+      return policy;
+    });
+    const res = await soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+    await pMap(
+      currentPolicies.saved_objects,
+      (policy) => this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', policy.id),
+      { concurrency: 50 }
+    );
+
+    return res;
   }
 }
 
