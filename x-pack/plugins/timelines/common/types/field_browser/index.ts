@@ -38,14 +38,16 @@ export interface FieldBrowserOptions {
 }
 
 export interface FieldBrowserProps {
-  /** The timeline associated with this field browser */
-  timelineId: string;
   /** The timeline's current column headers */
   columnHeaders: ColumnHeaderOptions[];
   /** A map of categoryId -> metadata about the fields in that category */
   browserFields: BrowserFields;
   /** When true, this Fields Browser is being used as an "events viewer" */
   isEventViewer?: boolean;
+  /** Callback to reset the default columns */
+  onResetColumns: () => void;
+  /** Callback to toggle a field column */
+  onToggleColumn: (fieldId: string) => void;
   /** The options to customize the field browser, supporting columns rendering and button to create fields */
   options?: FieldBrowserOptions;
   /** The width of the field browser */
