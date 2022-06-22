@@ -44,7 +44,7 @@ export const hasUserIndexPattern = async (
   }
 
   const resolveResponse = await esClient.indices.resolveIndex({
-    name: `${DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN},${DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN}`,
+    name: `${DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN}`,
   });
 
   const hasAnyNonDefaultFleetDataStreams = resolveResponse.data_streams.some(
