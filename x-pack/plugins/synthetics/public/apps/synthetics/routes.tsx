@@ -44,7 +44,6 @@ type RouteProps = {
   component: React.FC;
   dataTestSubj: string;
   title: string;
-  hideWhenNoData?: boolean;
   pageHeader?: {
     pageTitle: string | JSX.Element;
     children?: JSX.Element;
@@ -107,7 +106,6 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
       path: OVERVIEW_ROUTE,
       component: () => <OverviewPage />,
       dataTestSubj: 'syntheticsOverviewPage',
-      hideWhenNoData: true,
       pageHeader: {
         pageTitle: (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -232,7 +230,6 @@ export const PageRouter: FC = () => {
           component: RouteComponent,
           dataTestSubj,
           pageHeader,
-          hideWhenNoData,
           ...pageTemplateProps
         }: RouteProps) => (
           <Route path={path} key={dataTestSubj} exact={true}>
@@ -241,7 +238,6 @@ export const PageRouter: FC = () => {
               <SyntheticsPageTemplateComponent
                 path={path}
                 pageHeader={pageHeader}
-                hideWhenNoData={hideWhenNoData}
                 {...pageTemplateProps}
               >
                 <RouteComponent />

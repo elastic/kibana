@@ -19,7 +19,6 @@ import { useBreakpoints } from '../../../hooks';
 interface Props {
   path: string;
   pageHeader?: EuiPageHeaderProps;
-  hideWhenNoData?: boolean;
 }
 
 const mobileCenteredHeader = `
@@ -32,7 +31,6 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
   path,
   pageHeader,
   children,
-  hideWhenNoData,
   ...pageTemplateProps
 }) => {
   const {
