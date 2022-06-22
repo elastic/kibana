@@ -213,15 +213,26 @@ export class SessionIndex {
       await this.ensureSessionIndexExists();
     }
 
+    // **************************************************
+    // !! There is potential for a race condition here !!
+    // **************************************************
+    // Prior to https://github.com/elastic/kibana/pull/134900, we maintained an index template with
+    // our desired settings and mappings for this session index. This allowed our index to almost
+    // always have the correct settings/mappings, even if the index was auto-created by this step.
+    // Now that the template is removed, we run the risk of the index being created without our desired
+    // settings/mappings, because they can't be specified as part of this `create` operation.
+    //
+    // The call to `this.ensureSessionIndexExists()` above attempts to mitigate this by creating the session index
+    // explicitly with our desired settings/mappings. A race condition exists because it's possible to delete the session index
+    // _after_ we've ensured it exists, but _before_ we make the call below to store the session document.
+    //
+    // The chances of this happening are very small.
+
     const { sid, ...sessionValueToStore } = sessionValue;
     try {
       const { _primary_term: primaryTerm, _seq_no: sequenceNumber } =
         await this.options.elasticsearchClient.create({
           id: sid,
-          // We cannot control whether index is created automatically during this operation or not.
-          // But we can reduce probability of getting into a weird state when session is being created
-          // while session index is missing for some reason. This way we'll recreate index with a
-          // proper name and alias. But this will only work if we still have a proper index template.
           index: this.indexName,
           body: sessionValueToStore,
           refresh: 'wait_for',
@@ -478,9 +489,11 @@ export class SessionIndex {
     }
   }
 
+  /**
+   * Creates the session index if it doesn't already exist.
+   */
   private async ensureSessionIndexExists() {
-    // Check if required index exists. We cannot be sure that automatic creation of indices is
-    // always enabled, so we create session index explicitly.
+    // Check if required index exists.
     let indexExists = false;
     try {
       indexExists = await this.options.elasticsearchClient.indices.exists({
