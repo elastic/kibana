@@ -1,23 +1,26 @@
 {
+  "extends": "../tsconfig.bazel.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "rootDir": ".",
-    "target": "es2021",
-    "strict": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "removeComments": false,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "sourceMap": true,
-    "lib": ["es2021"],
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./target/types",
+    "types": ["node"],
     "paths": {
-      "#pipeline-utils": ["./pipeline-utils/index.ts"],
-      "#pipeline-utils/*": ["./pipeline-utils/*"]
+      "#pipeline-utils": [".buildkite/pipeline-utils/index.ts"],
+      "#pipeline-utils/*": [".buildkite/pipeline-utils/*"],
     },
-    "useUnknownInCatchVariables": false
   },
-  "include": ["pipeline-utils/**/*", "pipelines/**/*", "scripts/**/*"],
-  "exclude": ["**/*.test.ts", "**/vm-filesystem/**", "**/dist"]
+  "include": [
+    "pipeline-utils/**/*",
+    "pipelines/**/*",
+    "scripts/**/*",
+    "pipelines/flaky_tests/groups.json",
+    "pull_requests.json",
+  ],
+  "exclude": [
+    "**/*.test.ts",
+    "**/vm-filesystem/**",
+    "**/dist",
+  ],
 }
