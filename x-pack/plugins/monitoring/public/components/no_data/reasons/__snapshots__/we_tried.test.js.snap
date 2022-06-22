@@ -13,7 +13,7 @@ exports[`WeTried should render "we tried" message 1`] = `
     class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />
   <div
-    class="euiText euiText--medium eui-textLeft"
+    class="euiText eui-textLeft css-1lo1kz-euiText-m"
   >
     <p>
       No monitoring data found. Try setting the time filter to "Last 1 hour" or check if data is available for a different time period.

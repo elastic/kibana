@@ -35,8 +35,7 @@
         "^\\.buildkite/pull_requests\\.json$"
       ],
       "always_require_ci_on_changed": [
-        "^docs/developer/plugin-list.asciidoc$",
-        "/plugins/[^/]+/readme\\.(md|asciidoc)$"
+        "^docs/developer/plugin-list.asciidoc$"
       ],
       "kibana_versions_check": true
     }

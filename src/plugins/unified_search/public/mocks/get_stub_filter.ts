@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { type Filter, FilterStateStore } from '@kbn/es-query';
 
 export function mockFilter(
   index: string,
