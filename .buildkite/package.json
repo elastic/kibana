@@ -2,14 +2,9 @@
   "name": "kibana-buildkite",
   "version": "1.0.0",
   "description": "Kibana Buildkite",
-  "main": "./pipeline-utils",
   "scripts": {
-    "node": "node",
     "test": "mocha",
-    "test:watch": "mocha --watch",
-    "build": "rm -rf dist && tsc",
-    "lint": "eslint -c .eslintrc --fix --ext .ts .",
-    "watch": "tsc --watch"
+    "test:watch": "mocha --watch"
   },
   "dependencies": {
     "@octokit/rest": "^18.10.0",
