@@ -12,7 +12,7 @@ const mavenJavaAgentUrl =
 
 const versionRegex = /<version>(\d+\.\d+\.\d+.*?)<\/version>/gm;
 
-export async function getApmJavaAgentVersionsFromRegistry() {
+export async function getJavaAgentVersionsFromRegistry() {
   const response = await (await fetch(mavenJavaAgentUrl)).text();
   const versions = [...response.matchAll(versionRegex)]
     .map((aMatch) => aMatch[1])
