@@ -7,9 +7,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { intersectionBy } from 'lodash';
-import { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { ActionConnector, loadAllActions } from '../..';
+import { useKibana } from '../../common/lib/kibana';
 
 const ACTIONS_LOAD_ERROR = (errorMessage: string) =>
   i18n.translate('xpack.observability.ruleDetails.connectorsLoadError', {
@@ -22,14 +22,14 @@ interface FetchActionConnectors {
   errorActionConnectors?: string;
 }
 interface FetchRuleActionConnectorsProps {
-  http: HttpSetup;
   ruleActions: any[];
 }
 
-export function useFetchRuleActionConnectors({
-  http,
-  ruleActions,
-}: FetchRuleActionConnectorsProps) {
+export function useFetchRuleActionConnectors({ ruleActions }: FetchRuleActionConnectorsProps) {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const [actionConnectors, setActionConnector] = useState<FetchActionConnectors>({
     isLoadingActionConnectors: true,
     actionConnectors: [] as Array<ActionConnector<Record<string, unknown>>>,
@@ -56,15 +56,17 @@ export function useFetchRuleActionConnectors({
         actionConnectors: actions,
       }));
     } catch (error) {
+      const errorMsg = ACTIONS_LOAD_ERROR(
+        error instanceof Error ? error.message : typeof error === 'string' ? error : ''
+      );
       setActionConnector((oldState: FetchActionConnectors) => ({
         ...oldState,
         isLoadingActionConnectors: false,
-        errorActionConnectors: ACTIONS_LOAD_ERROR(
-          error instanceof Error ? error.message : typeof error === 'string' ? error : ''
-        ),
+        errorActionConnectors: errorMsg,
       }));
+      toasts.addDanger({ title: errorMsg });
     }
-  }, [http, ruleActions]);
+  }, [http, ruleActions, toasts]);
   useEffect(() => {
     fetchRuleActionConnectors();
   }, [fetchRuleActionConnectors]);
