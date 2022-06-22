@@ -18,7 +18,7 @@ import { useGetUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
 import { selectDynamicSettings } from '../../../state/selectors';
 import { getHistogramInterval } from '../../../../../common/lib/get_histogram_interval';
-import { Ping } from '../../../../../common/runtime_types';
+import { Ping } from '../../../../common/runtime_types';
 
 export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
