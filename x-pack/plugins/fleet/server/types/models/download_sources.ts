@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 const DownloadSourceBaseSchema = {
   id: schema.maybe(schema.string()),
   name: schema.string(),
-  host: schema.string(),
+  host: schema.uri({ scheme: ['http', 'https'] }),
   is_default: schema.boolean({ defaultValue: false }),
 };
 

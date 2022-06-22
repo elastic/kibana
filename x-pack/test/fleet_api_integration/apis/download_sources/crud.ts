@@ -81,7 +81,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'new host1',
-            host: 'https://test.co',
+            host: 'https://test.co:403',
             is_default: false,
           })
           .expect(200);
@@ -92,7 +92,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/agent_download_sources/${defaultDownloadSourceId}`)
           .expect(200);
 
-        expect(downloadSource.host).to.eql('https://test.co');
+        expect(downloadSource.host).to.eql('https://test.co:403');
       });
 
       it('should allow to update an existing download source', async function () {
@@ -120,6 +120,18 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(404);
       });
+
+      it('should return a 400 when passing a host that is not a valid uri', async function () {
+        await supertest
+          .put(`/api/fleet/agent_download_sources/${defaultDownloadSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'new host1',
+            host: 'not a valid uri',
+            is_default: true,
+          })
+          .expect(400);
+      });
     });
 
     describe('POST /agent_download_sources', () => {
@@ -129,7 +141,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'My download source',
-            host: 'https://test.fr:443',
+            host: 'http://test.fr:443',
             is_default: false,
           })
           .expect(200);
@@ -137,7 +149,7 @@ export default function (providerContext: FtrProviderContext) {
         const { id: _, ...itemWithoutId } = postResponse.item;
         expect(itemWithoutId).to.eql({
           name: 'My download source',
-          host: 'https://test.fr:443',
+          host: 'http://test.fr:443',
           is_default: false,
         });
       });
@@ -172,6 +184,18 @@ export default function (providerContext: FtrProviderContext) {
         const defaultDownloadSource = downloadSources.filter((item: any) => item.is_default);
         expect(defaultDownloadSource).to.have.length(1);
         expect(defaultDownloadSource[0].id).eql(downloadSource2.id);
+      });
+
+      it('should return a 400 when passing a host that is not a valid uri', async function () {
+        await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'new host1',
+            host: 'not a valid uri',
+            is_default: true,
+          })
+          .expect(400);
       });
     });
 
