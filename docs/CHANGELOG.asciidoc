@@ -104,7 +104,7 @@ To review the breaking changes in previous versions, refer to the following:
 [[fixes-v7.17.5]]
 === Bug fixes
 Discover::
-* Fixes context page with special char in data view {kibana-pull}133222[#133222]
+* Fixes context page when there's a special character in data view id {kibana-pull}133222[#133222]
 * Fixes CSV export with relative time filter from Discover main view {kibana-pull}123206[#123206]
 
 Elastic Security::
