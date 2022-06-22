@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpStart, SavedObjectsImportResponse } from 'src/core/public';
+import { HttpStart, SavedObjectsImportResponse } from '@kbn/core/public';
 import { CREATE_DASHBOARD_ROUTE } from '../../../../common/constants';
 
 export async function importFile(http: HttpStart) {
