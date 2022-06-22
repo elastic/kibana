@@ -3104,6 +3104,7 @@
   uid ""
 
 "@kbn/core-i18n-browser@link:bazel-bin/packages/core/i18n/core-i18n-browser":
+"@kbn/core-fatal-errors-browser@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser":
   version "0.0.0"
   uid ""
 
@@ -6518,6 +6519,7 @@
   version "0.0.0"
   uid ""
 
+<<<<<<< HEAD
 "@types/kbn__core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6527,6 +6529,9 @@
   uid ""
 
 "@types/kbn__core-i18n-browser@link:bazel-bin/packages/core/i18n/core-i18n-browser/npm_module_types":
+=======
+"@types/kbn__core-fatal-errors-browser@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser/npm_module_types":
+>>>>>>> 22096430554 (Moves core context provider to theme package, create fatal-errors-public types package)
   version "0.0.0"
   uid ""
 

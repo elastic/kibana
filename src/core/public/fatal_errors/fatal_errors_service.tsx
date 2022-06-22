@@ -24,36 +24,6 @@ export interface Deps {
   injectedMetadata: InternalInjectedMetadataSetup;
 }
 
-/**
- * FatalErrors stop the Kibana Public Core and displays a fatal error screen
- * with details about the Kibana build and the error.
- *
- * @public
- */
-export interface FatalErrorsSetup {
-  /**
-   * Add a new fatal error. This will stop the Kibana Public Core and display
-   * a fatal error screen with details about the Kibana build and the error.
-   *
-   * @param error - The error to display
-   * @param source - Adds a prefix of the form `${source}: ` to the error message
-   */
-  add: (error: string | Error, source?: string) => never;
-
-  /**
-   * An Observable that will emit whenever a fatal error is added with `add()`
-   */
-  get$: () => Rx.Observable<FatalErrorInfo>;
-}
-
-/**
- * FatalErrors stop the Kibana Public Core and displays a fatal error screen
- * with details about the Kibana build and the error.
- *
- * @public
- */
-export type FatalErrorsStart = FatalErrorsSetup;
-
 /** @internal */
 export class FatalErrorsService {
   private readonly errorInfo$ = new Rx.ReplaySubject<FatalErrorInfo>();

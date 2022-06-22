@@ -63,13 +63,3 @@ export function getErrorInfo(error: any, source?: string): FatalErrorInfo {
     stack: formatStack(error),
   };
 }
-
-/**
- * Represents the `message` and `stack` of a fatal Error
- *
- * @public
- * */
-export interface FatalErrorInfo {
-  message: string;
-  stack: string | undefined;
-}
