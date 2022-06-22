@@ -9,6 +9,7 @@ import React, { useMemo, memo } from 'react';
 import { EuiForm } from '@elastic/eui';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { Visualization } from '../../../types';
+import { IndexPatternPrivateState } from '../../../indexpattern_datasource/types';
 import { LayerPanel } from './layer_panel';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
@@ -194,7 +195,8 @@ export function LayerPanels(
           onRemoveLayer={async () => {
             const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
             const datasourceId = datasourcePublicAPI?.datasourceId;
-            const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
+            const layerDatasourceState = datasourceStates?.[datasourceId]
+              ?.state as IndexPatternPrivateState;
 
             const action = props.uiActions.getAction('UPDATE_FILTER_REFERENCES_ACTION');
 
@@ -204,9 +206,7 @@ export function LayerPanels(
                 fromDataView: layerDatasourceState.layers[layerId].indexPatternId,
                 toDataView: null,
                 usedDataViews: Object.values(
-                  Object.values(layerDatasourceState.layers).map(
-                    ({ indexPatternId }) => indexPatternId
-                  )
+                  Object.values(layerDatasourceState.layers).map((layer) => layer.indexPatternId)
                 ),
                 defaultDataView: layerDatasourceState.currentIndexPatternId,
               }

@@ -13,6 +13,7 @@ import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public'
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Document } from '../persistence/saved_object_store';
 import {
   Datasource,
@@ -31,6 +32,7 @@ export interface EditorFrameSetupPlugins {
 }
 
 export interface EditorFrameStartPlugins {
+  uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   embeddable?: EmbeddableStart;
   dashboard?: DashboardStart;
