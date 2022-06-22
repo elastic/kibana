@@ -7,8 +7,8 @@
  */
 
 import { execSync } from 'child_process';
-import fs = require('fs');
-import prConfigs = require('../../../pull_requests.json');
+import fs from 'fs';
+import prConfigs from '../../../pull_requests.json';
 import { areChangesSkippable, doAnyChangesMatch } from '#pipeline-utils';
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 

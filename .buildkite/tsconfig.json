@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
-    "rootDir": "./",
+    "baseUrl": ".",
+    "rootDir": ".",
     "target": "es2021",
     "strict": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "removeComments": false,
     "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "sourceMap": true,
-    "lib": ["es2020"],
+    "lib": ["es2021"],
     "paths": {
       "#pipeline-utils": ["./pipeline-utils/index.ts"],
       "#pipeline-utils/*": ["./pipeline-utils/*"]

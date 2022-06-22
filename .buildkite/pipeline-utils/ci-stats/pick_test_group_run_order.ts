@@ -9,7 +9,7 @@
 import * as Fs from 'fs';
 
 import * as globby from 'globby';
-import * as minimatch from 'minimatch';
+import minimatch from 'minimatch';
 import { load as loadYaml } from 'js-yaml';
 
 import { BuildkiteClient, BuildkiteStep } from '../buildkite';

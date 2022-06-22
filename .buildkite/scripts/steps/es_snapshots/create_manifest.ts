@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import fs = require('fs');
+import fs from 'fs';
 import { execSync } from 'child_process';
 import { BASE_BUCKET_DAILY } from './bucket_config';
 

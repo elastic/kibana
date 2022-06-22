@@ -7,8 +7,8 @@
  */
 
 import { execSync } from 'child_process';
-import fs = require('fs');
-import path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // TODO - how to generate this dynamically?
 const STORYBOOKS = [

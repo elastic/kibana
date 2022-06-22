@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { groups } from './groups.json';
+
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
   console.error('+++ Triggering directly is not supported anymore');
@@ -15,9 +17,6 @@ if (!configJson) {
   console.error('\n    https://ci-stats.kibana.dev/trigger_flaky_test_runner\n');
   process.exit(1);
 }
-
-import groupsJson = require('./groups.json');
-const groups = groupsJson.groups as Array<{ key: string; name: string; ciGroups: number }>;
 
 const concurrency = process.env.KIBANA_FLAKY_TEST_CONCURRENCY
   ? parseInt(process.env.KIBANA_FLAKY_TEST_CONCURRENCY, 10)
