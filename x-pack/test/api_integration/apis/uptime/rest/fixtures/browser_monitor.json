@@ -44,5 +44,6 @@
   "name": "Test HTTP Monitor 03",
   "namespace": "testnamespace",
   "origin": "ui",
-  "urls": null
+  "urls": null,
+  "url.port": null
 }
