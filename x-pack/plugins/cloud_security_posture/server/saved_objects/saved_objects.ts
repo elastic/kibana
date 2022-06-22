@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { SavedObjectsServiceSetup } from '@kbn/core/server';
 import { cspRule, cspRuleTemplate } from './mappings';
 import { cspRuleMigrations, cspRuleTemplateMigrations } from './migrations';
@@ -13,6 +14,8 @@ import {
   cspRuleSchemaV840,
   cspRuleTemplateSchemaV830,
   cspRuleTemplateSchemaV840,
+  CspRuleTemplateType,
+  CspRuleType,
 } from '../../common/schemas';
 
 import {
@@ -21,13 +24,19 @@ import {
 } from '../../common/constants';
 
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
-  savedObjects.registerType({
+  savedObjects.registerType<CspRuleType>({
     name: CSP_RULE_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
       importableAndExportable: true,
       visibleInManagement: true,
+      getTitle: (savedObject) =>
+        `${i18n.translate('xpack.csp.cspSettings.rules', {
+          defaultMessage: `CSP Security Rules - `,
+        })} ${savedObject.attributes.metadata.benchmark.name} ${
+          savedObject.attributes.metadata.benchmark.version
+        } ${savedObject.attributes.metadata.name}`,
     },
     schemas: {
       '8.3.0': cspRuleSchemaV830,
@@ -36,7 +45,7 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
     migrations: cspRuleMigrations,
     mappings: cspRule,
   });
-  savedObjects.registerType({
+  savedObjects.registerType<CspRuleTemplateType>({
     name: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
