@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 
 import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from '@kbn/core/server/mocks';
 
 import { DEFAULT_SPACE_ID } from '../../common/constants';
@@ -180,79 +179,77 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       test(`replaces object namespaces '*' with available spaces`, async () => {
         const { client, baseClient, spacesClient, typeRegistry } = createSpacesSavedObjectsClient();
         spacesClient.getAll.mockResolvedValue([
-          { id: 'available-space-a', name: 'a', disabledFeatures: [] },
-          { id: 'available-space-b', name: 'b', disabledFeatures: [] },
+          { id: 'space-a', name: 'Available Space A', disabledFeatures: [] },
+          { id: 'space-b', name: 'Available Space B', disabledFeatures: [] },
         ]);
-        typeRegistry.isNamespaceAgnostic.mockImplementation((type) => type === 'foo');
-        typeRegistry.isShareable.mockImplementation((type) => type === 'bar');
-        // 'baz' is neither agnostic nor shareable, so it is isolated (namespaceType: 'single' or namespaceType: 'multiple-isolated')
+        typeRegistry.isNamespaceAgnostic.mockImplementation((type) => type === 'global-type');
+        typeRegistry.isShareable.mockImplementation((type) => type === 'shareable-type');
+        // 'isolated-type' is neither agnostic nor shareable, so it is isolated (namespaceType: 'single' or namespaceType: 'multiple-isolated')
         baseClient.bulkGet.mockResolvedValue({
           saved_objects: [
-            { type: 'foo', id: '1', key: 'val' },
-            { type: 'bar', id: '2', key: 'val' },
-            { type: 'baz', id: '3', key: 'val' }, // this should be replaced with a 400 error
-            { type: 'foo', id: '4', key: 'val' },
-            { type: 'bar', id: '5', key: 'val' },
-            { type: 'baz', id: '6', key: 'val' }, // this should not be replaced with a 400 error because the user did not search for it in '*' all spaces
+            { type: 'global-type', id: '1', key: 'val' },
+            { type: 'shareable-type', id: '2', key: 'val' },
+            { type: 'isolated-type', id: '3', key: 'val' }, // this should be replaced with a 400 error
+            { type: 'global-type', id: '4', key: 'val' },
+            { type: 'shareable-type', id: '5', key: 'val' },
+            { type: 'isolated-type', id: '6', key: 'val' }, // this should not be replaced with a 400 error because the user did not search for it in '*' all spaces
           ] as unknown as SavedObject[],
         });
 
         const objects = [
-          { type: 'foo', id: '1', namespaces: ['*', 'this-is-ignored'] },
-          { type: 'bar', id: '2', namespaces: ['*', 'this-is-ignored'] },
-          { type: 'baz', id: '3', namespaces: ['*', 'this-is-ignored'] },
-          { type: 'foo', id: '4', namespaces: ['another-space'] },
-          { type: 'bar', id: '5', namespaces: ['another-space'] },
-          { type: 'baz', id: '6', namespaces: ['another-space'] },
+          { type: 'global-type', id: '1', namespaces: ['*', 'this-is-ignored'] },
+          { type: 'shareable-type', id: '2', namespaces: ['*', 'this-is-ignored'] },
+          { type: 'isolated-type', id: '3', namespaces: ['*', 'this-is-ignored'] },
+          { type: 'global-type', id: '4', namespaces: ['another-space'] },
+          { type: 'shareable-type', id: '5', namespaces: ['another-space'] },
+          { type: 'isolated-type', id: '6', namespaces: ['another-space'] },
         ];
         const result = await client.bulkGet(objects);
 
         expect(result.saved_objects).toEqual([
-          { type: 'foo', id: '1', key: 'val' },
-          { type: 'bar', id: '2', key: 'val' },
-          {
-            type: 'baz',
-            id: '3',
-            error: SavedObjectsErrorHelpers.createBadRequestError(
-              '"namespaces" can only specify a single space when used with space-isolated types'
-            ).output.payload,
-          },
-          { type: 'foo', id: '4', key: 'val' },
-          { type: 'bar', id: '5', key: 'val' },
-          { type: 'baz', id: '6', key: 'val' },
+          { type: 'global-type', id: '1', key: 'val' },
+          { type: 'shareable-type', id: '2', key: 'val' },
+          { type: 'isolated-type', id: '3', key: 'val' },
+          { type: 'global-type', id: '4', key: 'val' },
+          { type: 'shareable-type', id: '5', key: 'val' },
+          { type: 'isolated-type', id: '6', key: 'val' },
         ]);
         expect(baseClient.bulkGet).toHaveBeenCalledWith(
           [
-            { type: 'foo', id: '1', namespaces: ['available-space-a', 'available-space-b'] },
-            { type: 'bar', id: '2', namespaces: ['available-space-a', 'available-space-b'] },
-            { type: 'baz', id: '3', namespaces: ['available-space-a', 'available-space-b'] },
+            { type: 'global-type', id: '1', namespaces: ['space-a', 'space-b'] },
+            { type: 'shareable-type', id: '2', namespaces: ['space-a', 'space-b'] },
+            { type: 'isolated-type', id: '3', namespaces: ['*'] },
             // even if another space doesn't exist, it can be specified explicitly
-            { type: 'foo', id: '4', namespaces: ['another-space'] },
-            { type: 'bar', id: '5', namespaces: ['another-space'] },
-            { type: 'baz', id: '6', namespaces: ['another-space'] },
+            { type: 'global-type', id: '4', namespaces: ['another-space'] },
+            { type: 'shareable-type', id: '5', namespaces: ['another-space'] },
+            { type: 'isolated-type', id: '6', namespaces: ['another-space'] },
           ],
           { namespace: currentSpace.expectedNamespace }
         );
         expect(spacesClient.getAll).toHaveBeenCalledTimes(1);
       });
 
-      test(`replaces object namespaces '*' with an empty array when the user doesn't have access to any spaces`, async () => {
-        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
+      test(`replaces object namespaces '*' when the user doesn't have access to any spaces`, async () => {
+        const { client, baseClient, spacesClient, typeRegistry } = createSpacesSavedObjectsClient();
         spacesClient.getAll.mockRejectedValue(Boom.forbidden());
+        typeRegistry.isNamespaceAgnostic.mockImplementation((type) => type === 'global-type');
+        typeRegistry.isShareable.mockImplementation((type) => type === 'shareable-type');
         baseClient.bulkGet.mockResolvedValue({ saved_objects: [] }); // doesn't matter for this test
 
         const objects = [
-          { type: 'foo', id: '1', namespaces: ['*'] },
-          { type: 'bar', id: '2', namespaces: ['*', 'this-is-ignored'] },
-          { type: 'baz', id: '3', namespaces: ['another-space'] },
+          { type: 'isolated-type', id: '1', namespaces: ['*', 'this-is-ignored'] },
+          { type: 'global-type', id: '2', namespaces: ['*', 'this-is-ignored'] },
+          { type: 'shareable-type', id: '3', namespaces: ['*', 'this-is-ignored'] },
+          { type: 'shareable-type', id: '4', namespaces: ['another-space'] },
         ];
         await client.bulkGet(objects);
 
         expect(baseClient.bulkGet).toHaveBeenCalledWith(
           [
-            { type: 'foo', id: '1', namespaces: [] },
-            { type: 'bar', id: '2', namespaces: [] },
-            { type: 'baz', id: '3', namespaces: ['another-space'] }, // even if another space doesn't exist, it can be specified explicitly
+            { type: 'isolated-type', id: '1', namespaces: ['*'] }, // for isolated types: allow this through to the base client where it will fail validation
+            { type: 'global-type', id: '2', namespaces: [currentSpace.id] }, // for global types: specify the current space so the base client will correctly fail authZ
+            { type: 'shareable-type', id: '3', namespaces: [currentSpace.id] }, // for shareable types: specify the current space so the base client will correctly fail authZ
+            { type: 'shareable-type', id: '4', namespaces: ['another-space'] }, // even if another space doesn't exist, it can be specified explicitly
           ],
           { namespace: currentSpace.expectedNamespace }
         );

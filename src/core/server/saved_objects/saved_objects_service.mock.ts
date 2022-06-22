@@ -60,6 +60,7 @@ const createSetupContractMock = () => {
     setClientFactoryProvider: jest.fn(),
     addClientWrapper: jest.fn(),
     addEncryptionExtension: jest.fn(),
+    addSecurityExtension: jest.fn(),
     registerType: jest.fn(),
     getKibanaIndex: jest.fn(),
   };

@@ -9,7 +9,19 @@
 export type { ISavedObjectsRepository, SavedObjectsRepository } from './repository';
 export { SavedObjectsClientProvider } from './scoped_client_provider';
 
-export type { ISavedObjectsEncryptionExtension, SavedObjectsExtensions } from './extensions';
+export type {
+  ISavedObjectsEncryptionExtension,
+  CheckAuthorizationParams,
+  AuthorizationTypeEntry,
+  AuthorizationTypeMap,
+  CheckAuthorizationResult,
+  EnforceAuthorizationParams,
+  AddAuditEventParams,
+  RedactNamespacesParams,
+  ISavedObjectsSecurityExtension,
+  SavedObjectsExtensions,
+} from './extensions';
+export { AuditAction } from './extensions';
 
 export type {
   ISavedObjectsPointInTimeFinder,
@@ -25,6 +37,7 @@ export type {
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
   SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
 } from './scoped_client_provider';
 
 export { SavedObjectsErrorHelpers } from './errors';

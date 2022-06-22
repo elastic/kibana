@@ -69,9 +69,11 @@ describe('createPointInTimeFinder()', () => {
         namespaces: ['ns1', 'ns2'],
       };
 
+      const internalOptions = {};
       const finder = new PointInTimeFinder(findOptions, {
         logger,
         client: repository,
+        internalOptions,
       });
 
       expect(repository.openPointInTimeForType).not.toHaveBeenCalled();
@@ -79,9 +81,11 @@ describe('createPointInTimeFinder()', () => {
       await finder.find().next();
 
       expect(repository.openPointInTimeForType).toHaveBeenCalledTimes(1);
-      expect(repository.openPointInTimeForType).toHaveBeenCalledWith(findOptions.type, {
-        namespaces: findOptions.namespaces,
-      });
+      expect(repository.openPointInTimeForType).toHaveBeenCalledWith(
+        findOptions.type,
+        { namespaces: findOptions.namespaces },
+        internalOptions
+      );
     });
 
     test('throws if a PIT is already open', async () => {
@@ -143,9 +147,11 @@ describe('createPointInTimeFinder()', () => {
         search: 'foo*',
       };
 
+      const internalOptions = {};
       const finder = new PointInTimeFinder(findOptions, {
         logger,
         client: repository,
+        internalOptions,
       });
       const hits: SavedObjectsFindResult[] = [];
       for await (const result of finder.find()) {
@@ -162,7 +168,8 @@ describe('createPointInTimeFinder()', () => {
           sortField: 'updated_at',
           sortOrder: 'desc',
           type: ['visualization'],
-        })
+        }),
+        internalOptions
       );
     });
 
@@ -199,9 +206,11 @@ describe('createPointInTimeFinder()', () => {
         perPage: 1,
       };
 
+      const internalOptions = {};
       const finder = new PointInTimeFinder(findOptions, {
         logger,
         client: repository,
+        internalOptions,
       });
       const hits: SavedObjectsFindResult[] = [];
       for await (const result of finder.find()) {
@@ -220,7 +229,8 @@ describe('createPointInTimeFinder()', () => {
           sortField: 'updated_at',
           sortOrder: 'desc',
           type: ['visualization'],
-        })
+        }),
+        internalOptions
       );
     });
   });
@@ -244,9 +254,11 @@ describe('createPointInTimeFinder()', () => {
         perPage: 2,
       };
 
+      const internalOptions = {};
       const finder = new PointInTimeFinder(findOptions, {
         logger,
         client: repository,
+        internalOptions,
       });
       const hits: SavedObjectsFindResult[] = [];
       for await (const result of finder.find()) {
@@ -254,7 +266,7 @@ describe('createPointInTimeFinder()', () => {
         await finder.close();
       }
 
-      expect(repository.closePointInTime).toHaveBeenCalledWith('test');
+      expect(repository.closePointInTime).toHaveBeenCalledWith('test', undefined, internalOptions);
     });
 
     test('causes generator to stop', async () => {
@@ -315,9 +327,11 @@ describe('createPointInTimeFinder()', () => {
         perPage: 2,
       };
 
+      const internalOptions = {};
       const finder = new PointInTimeFinder(findOptions, {
         logger,
         client: repository,
+        internalOptions,
       });
       const hits: SavedObjectsFindResult[] = [];
       try {
@@ -328,7 +342,7 @@ describe('createPointInTimeFinder()', () => {
         // intentionally empty
       }
 
-      expect(repository.closePointInTime).toHaveBeenCalledWith('test');
+      expect(repository.closePointInTime).toHaveBeenCalledWith('test', undefined, internalOptions);
     });
 
     test('finder can be reused after closing', async () => {

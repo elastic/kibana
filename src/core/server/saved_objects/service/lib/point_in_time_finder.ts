@@ -9,9 +9,10 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsFindOptions, SavedObjectsClientContract } from '../../types';
 import type { SavedObjectsFindResponse } from '..';
+import type { ISavedObjectsRepository, SavedObjectsFindInternalOptions } from './repository';
 
 type PointInTimeFinderClient = Pick<
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
   'find' | 'openPointInTimeForType' | 'closePointInTime'
 >;
 
@@ -36,13 +37,16 @@ export interface SavedObjectsCreatePointInTimeFinderDependencies {
 export interface PointInTimeFinderDependencies
   extends SavedObjectsCreatePointInTimeFinderDependencies {
   logger: Logger;
+  internalOptions?: SavedObjectsFindInternalOptions;
 }
 
 /**
  * @internal
  */
 export type CreatePointInTimeFinderFn = <T = unknown, A = unknown>(
-  findOptions: SavedObjectsCreatePointInTimeFinderOptions
+  findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+  dependencies?: SavedObjectsCreatePointInTimeFinderDependencies,
+  internalOptions?: SavedObjectsFindInternalOptions
 ) => ISavedObjectsPointInTimeFinder<T, A>;
 
 /** @public */
@@ -76,15 +80,17 @@ export class PointInTimeFinder<T = unknown, A = unknown>
   readonly #log: Logger;
   readonly #client: PointInTimeFinderClient;
   readonly #findOptions: SavedObjectsFindOptions;
+  readonly #internalOptions: SavedObjectsFindInternalOptions | undefined;
   #open: boolean = false;
   #pitId?: string;
 
   constructor(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
-    { logger, client }: PointInTimeFinderDependencies
+    { logger, client, internalOptions }: PointInTimeFinderDependencies
   ) {
     this.#log = logger.get('point-in-time-finder');
     this.#client = client;
+    this.#internalOptions = internalOptions;
     this.#findOptions = {
       // Default to 1000 items per page as a tradeoff between
       // speed and memory consumption.
@@ -135,7 +141,7 @@ export class PointInTimeFinder<T = unknown, A = unknown>
     try {
       if (this.#pitId) {
         this.#log.debug(`Closing PIT for types [${this.#findOptions.type}]`);
-        await this.#client.closePointInTime(this.#pitId);
+        await this.#client.closePointInTime(this.#pitId, undefined, this.#internalOptions);
         this.#pitId = undefined;
       }
       this.#open = false;
@@ -147,9 +153,11 @@ export class PointInTimeFinder<T = unknown, A = unknown>
 
   private async open() {
     try {
-      const { id } = await this.#client.openPointInTimeForType(this.#findOptions.type, {
-        namespaces: this.#findOptions.namespaces,
-      });
+      const { id } = await this.#client.openPointInTimeForType(
+        this.#findOptions.type,
+        { namespaces: this.#findOptions.namespaces },
+        this.#internalOptions
+      );
       this.#pitId = id;
       this.#open = true;
     } catch (e) {
@@ -173,16 +181,19 @@ export class PointInTimeFinder<T = unknown, A = unknown>
     searchAfter?: estypes.Id[];
   }) {
     try {
-      return await this.#client.find<T, A>({
-        // Sort fields are required to use searchAfter, so we set some defaults here
-        sortField: 'updated_at',
-        sortOrder: 'desc',
-        // Bump keep_alive by 2m on every new request to allow for the ES client
-        // to make multiple retries in the event of a network failure.
-        pit: id ? { id, keepAlive: '2m' } : undefined,
-        searchAfter,
-        ...findOptions,
-      });
+      return await this.#client.find<T, A>(
+        {
+          // Sort fields are required to use searchAfter, so we set some defaults here
+          sortField: 'updated_at',
+          sortOrder: 'desc',
+          // Bump keep_alive by 2m on every new request to allow for the ES client
+          // to make multiple retries in the event of a network failure.
+          pit: id ? { id, keepAlive: '2m' } : undefined,
+          searchAfter,
+          ...findOptions,
+        },
+        this.#internalOptions
+      );
     } catch (e) {
       if (id) {
         // Clean up PIT on any errors.

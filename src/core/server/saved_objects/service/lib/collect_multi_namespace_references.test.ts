@@ -76,6 +76,7 @@ describe('collectMultiNamespaceReferences', () => {
       serializer,
       getIndexForType: (type: string) => `index-for-${type}`,
       createPointInTimeFinder: jest.fn() as CreatePointInTimeFinderFn,
+      securityExtension: undefined,
       objects,
       options,
     };
@@ -445,4 +446,6 @@ describe('collectMultiNamespaceReferences', () => {
       );
     });
   });
+
+  test.todo('with security enabled');
 });

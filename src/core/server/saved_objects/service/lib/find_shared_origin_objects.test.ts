@@ -79,7 +79,9 @@ describe('findSharedOriginObjects', () => {
     const result = await findSharedOriginObjects(createPointInTimeFinder, objects);
     expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
     expect(createPointInTimeFinder).toHaveBeenCalledWith(
-      expect.objectContaining({ type: ['type-1', 'type-2', 'type-3', 'type-4'] }) // filter assertions are below
+      expect.objectContaining({ type: ['type-1', 'type-2', 'type-3', 'type-4'] }), // filter assertions are below
+      undefined,
+      { disableExtensions: true }
     );
     const kueryFilterArgs = createPointInTimeFinder.mock.calls[0][0].filter.arguments;
     expect(kueryFilterArgs).toHaveLength(8); // 2 for each object
@@ -119,7 +121,11 @@ describe('findSharedOriginObjects', () => {
     const objects = [obj1, obj2, obj3];
     await findSharedOriginObjects(createPointInTimeFinder, objects, 999);
     expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
-    expect(createPointInTimeFinder).toHaveBeenCalledWith(expect.objectContaining({ perPage: 999 }));
+    expect(createPointInTimeFinder).toHaveBeenCalledWith(
+      expect.objectContaining({ perPage: 999 }),
+      undefined,
+      { disableExtensions: true }
+    );
   });
 
   it('does not create a PointInTimeFinder if no objects are passed in', async () => {

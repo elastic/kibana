@@ -7,6 +7,7 @@
  */
 
 import type { ISavedObjectsEncryptionExtension } from './encryption';
+import type { ISavedObjectsSecurityExtension } from './security';
 import type { SavedObjectsExtensions } from './extensions';
 
 const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtension> => ({
@@ -15,8 +16,16 @@ const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtensi
   encryptAttributes: jest.fn(),
 });
 
+const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> => ({
+  checkAuthorization: jest.fn(),
+  enforceAuthorization: jest.fn(),
+  addAuditEvent: jest.fn(),
+  redactNamespaces: jest.fn(),
+});
+
 const create = (): jest.Mocked<SavedObjectsExtensions> => ({
   encryptionExtension: createEncryptionExtension(),
+  securityExtension: createSecurityExtension(),
 });
 
 export const extensionsMock = { create };

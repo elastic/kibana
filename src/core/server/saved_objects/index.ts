@@ -67,6 +67,7 @@ export type {
 
 export type {
   ISavedObjectsRepository,
+  SavedObjectsFindInternalOptions,
   SavedObjectsIncrementCounterOptions,
   SavedObjectsIncrementCounterField,
   SavedObjectsDeleteByNamespaceOptions,

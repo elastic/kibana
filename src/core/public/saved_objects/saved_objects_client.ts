@@ -26,7 +26,7 @@ type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : neve
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
-  'pit' | 'rootSearchFields' | 'searchAfter' | 'sortOrder' | 'typeToNamespacesMap'
+  'pit' | 'rootSearchFields' | 'searchAfter' | 'sortOrder'
 >;
 
 type SavedObjectsFindResponse = Omit<PromiseType<ReturnType<SavedObjectsApi['find']>>, 'pit_id'>;

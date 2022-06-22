@@ -1222,6 +1222,8 @@ describe('SavedObjectsRepository', () => {
     });
 
     test.todo('with encryption extension');
+
+    test.todo('with security extension');
   });
 
   describe('#bulkGet', () => {
@@ -1526,6 +1528,8 @@ describe('SavedObjectsRepository', () => {
     });
 
     test.todo('with encryption extension');
+
+    test.todo('with security extension');
   });
 
   describe('#bulkResolve', () => {
@@ -2055,6 +2059,8 @@ describe('SavedObjectsRepository', () => {
     });
 
     test.todo('with encryption extension');
+
+    test.todo('with security extension');
   });
 
   describe('#checkConflicts', () => {
@@ -2190,6 +2196,8 @@ describe('SavedObjectsRepository', () => {
         });
       });
     });
+
+    test.todo('with security extension');
   });
 
   describe('#create', () => {
@@ -2802,6 +2810,8 @@ describe('SavedObjectsRepository', () => {
     });
 
     test.todo('with encryption extension');
+
+    test.todo('with security extension');
   });
 
   describe('#delete', () => {
@@ -3093,6 +3103,8 @@ describe('SavedObjectsRepository', () => {
         expect(result).toEqual({});
       });
     });
+
+    test.todo('with security extension');
   });
 
   describe('#deleteByNamespace', () => {
@@ -3329,6 +3341,8 @@ describe('SavedObjectsRepository', () => {
         ).rejects.toThrowError(createConflictError(type, id));
       });
     });
+
+    test.todo('with security extension');
   });
 
   describe('#find', () => {
@@ -3518,26 +3532,6 @@ describe('SavedObjectsRepository', () => {
         expect(client.search).not.toHaveBeenCalled();
       });
 
-      it(`throws when type is not falsy and typeToNamespacesMap is defined`, async () => {
-        await expect(
-          savedObjectsRepository.find({ type: 'foo', typeToNamespacesMap: new Map() })
-        ).rejects.toThrowError(
-          'options.type must be an empty string when options.typeToNamespacesMap is used'
-        );
-        expect(client.search).not.toHaveBeenCalled();
-      });
-
-      it(`throws when type is not an empty array and typeToNamespacesMap is defined`, async () => {
-        const test = async (args: SavedObjectsFindOptions) => {
-          await expect(savedObjectsRepository.find(args)).rejects.toThrowError(
-            'options.namespaces must be an empty array when options.typeToNamespacesMap is used'
-          );
-          expect(client.search).not.toHaveBeenCalled();
-        };
-        await test({ type: '', typeToNamespacesMap: new Map() });
-        await test({ type: '', namespaces: ['some-ns'], typeToNamespacesMap: new Map() });
-      });
-
       it(`throws when searchFields is defined but not an array`, async () => {
         await expect(
           // @ts-expect-error searchFields is an array
@@ -3653,28 +3647,12 @@ describe('SavedObjectsRepository', () => {
         await test(HIDDEN_TYPE);
         await test(['unknownType', HIDDEN_TYPE]);
       });
-
-      it(`should return empty results when attempting to find only invalid or hidden types using typeToNamespacesMap`, async () => {
-        const test = async (types: string[]) => {
-          const result = await savedObjectsRepository.find({
-            typeToNamespacesMap: new Map(types.map((x) => [x, undefined])),
-            type: '',
-            namespaces: [],
-          });
-          expect(result).toEqual(expect.objectContaining({ saved_objects: [] }));
-          expect(client.search).not.toHaveBeenCalled();
-        };
-
-        await test(['unknownType']);
-        await test([HIDDEN_TYPE]);
-        await test(['unknownType', HIDDEN_TYPE]);
-      });
     });
 
     describe('search dsl', () => {
       const commonOptions: SavedObjectsFindOptions = {
-        type: [type], // cannot be used when `typeToNamespacesMap` is present
-        namespaces: [namespace], // cannot be used when `typeToNamespacesMap` is present
+        type: [type],
+        namespaces: [namespace],
         search: 'foo*',
         searchFields: ['foo'],
         sortField: 'name',
@@ -3689,35 +3667,6 @@ describe('SavedObjectsRepository', () => {
       it(`passes mappings, registry, and search options to getSearchDsl`, async () => {
         await findSuccess(commonOptions, namespace);
         expect(mockGetSearchDsl).toHaveBeenCalledWith(mappings, registry, commonOptions);
-      });
-
-      it(`accepts typeToNamespacesMap`, async () => {
-        const relevantOpts = {
-          ...commonOptions,
-          type: '',
-          namespaces: [],
-          typeToNamespacesMap: new Map([[type, [namespace]]]), // can only be used when `type` is falsy and `namespaces` is an empty array
-        };
-
-        await findSuccess(relevantOpts, namespace);
-        expect(mockGetSearchDsl).toHaveBeenCalledWith(mappings, registry, {
-          ...relevantOpts,
-          type: [type],
-        });
-      });
-
-      it('search for the right fields when typeToNamespacesMap is set', async () => {
-        const relevantOpts = {
-          ...commonOptions,
-          fields: ['title'],
-          type: '',
-          namespaces: [],
-          typeToNamespacesMap: new Map([[type, [namespace]]]),
-        };
-
-        await findSuccess(relevantOpts, namespace);
-        const esOptions = client.search.mock.calls[0][0];
-        expect(esOptions?._source ?? []).toContain('index-pattern.title');
       });
 
       it(`accepts hasReferenceOperator`, async () => {
@@ -3880,6 +3829,8 @@ describe('SavedObjectsRepository', () => {
     });
 
     test.todo('with encryption extension');
+
+    test.todo('with security extension');
   });
 
   describe('#get', () => {
@@ -4062,6 +4013,8 @@ describe('SavedObjectsRepository', () => {
     });
 
     test.todo('with encryption extension');
+
+    test.todo('with security extension');
   });
 
   describe('#resolve', () => {
@@ -5002,6 +4955,8 @@ describe('SavedObjectsRepository', () => {
     });
 
     test.todo('with encryption extension');
+
+    test.todo('with security extension');
   });
 
   describe('#openPointInTimeForType', () => {
@@ -5093,6 +5048,8 @@ describe('SavedObjectsRepository', () => {
         expect(response).toEqual({ id });
       });
     });
+
+    test.todo('with security extension');
   });
 
   describe('#closePointInTime', () => {
@@ -5131,6 +5088,8 @@ describe('SavedObjectsRepository', () => {
         expect(response).toEqual(results);
       });
     });
+
+    test.todo('with security extension');
   });
 
   describe('#createPointInTimeFinder', () => {

@@ -7,13 +7,13 @@
 
 import { URL } from 'url';
 
+import { AuditAction as SavedObjectAction } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from '../authentication';
 import {
   httpRequestEvent,
-  SavedObjectAction,
   savedObjectEvent,
   sessionCleanupEvent,
   SpaceAuditAction,

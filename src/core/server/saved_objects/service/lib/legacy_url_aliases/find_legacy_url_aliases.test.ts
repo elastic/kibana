@@ -70,10 +70,14 @@ describe('findLegacyUrlAliases', () => {
     const objects = [obj1, obj2, obj3];
     const result = await findLegacyUrlAliases(createPointInTimeFinder, objects);
     expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
-    expect(createPointInTimeFinder).toHaveBeenCalledWith({
-      type: LEGACY_URL_ALIAS_TYPE,
-      filter: expect.any(Object), // assertions are below
-    });
+    expect(createPointInTimeFinder).toHaveBeenCalledWith(
+      {
+        type: LEGACY_URL_ALIAS_TYPE,
+        filter: expect.any(Object), // assertions are below
+      },
+      undefined,
+      { disableExtensions: true }
+    );
     const kueryFilterArgs = createPointInTimeFinder.mock.calls[0][0].filter.arguments;
     expect(kueryFilterArgs).toHaveLength(2);
     const typeAndIdFilters = kueryFilterArgs[1].arguments;
@@ -103,11 +107,15 @@ describe('findLegacyUrlAliases', () => {
     const objects = [obj1, obj2, obj3];
     await findLegacyUrlAliases(createPointInTimeFinder, objects, 999);
     expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
-    expect(createPointInTimeFinder).toHaveBeenCalledWith({
-      type: LEGACY_URL_ALIAS_TYPE,
-      perPage: 999,
-      filter: expect.any(Object),
-    });
+    expect(createPointInTimeFinder).toHaveBeenCalledWith(
+      {
+        type: LEGACY_URL_ALIAS_TYPE,
+        perPage: 999,
+        filter: expect.any(Object),
+      },
+      undefined,
+      { disableExtensions: true }
+    );
   });
 
   it('does not create a PointInTimeFinder if no objects are passed in', async () => {

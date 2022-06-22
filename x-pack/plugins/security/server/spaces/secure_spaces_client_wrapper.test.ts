@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { mockEnsureAuthorized } from './secure_spaces_client_wrapper.test.mocks';
-
 import type {
   EcsEventOutcome,
+  ISavedObjectsSecurityExtension,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { AuditAction as SavedObjectAction, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { extensionsMock } from '@kbn/core/server/saved_objects/service/lib/extensions/extensions.mock';
 import type { GetAllSpacesPurpose, LegacyUrlAliasTarget, Space } from '@kbn/spaces-plugin/server';
 import { spacesClientMock } from '@kbn/spaces-plugin/server/mocks';
 import { deepFreeze } from '@kbn/std';
 
 import type { AuditEvent, AuditLogger } from '../audit';
-import { SavedObjectAction, SpaceAuditAction } from '../audit';
+import { SpaceAuditAction } from '../audit';
 import { auditLoggerMock } from '../audit/mocks';
 import type {
   AuthorizationServiceSetup,
@@ -108,12 +109,16 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
     // other errors exist but are not needed for these test cases
   } as unknown as jest.Mocked<SavedObjectsClientContract['errors']>;
 
+  const securityExtension = securityEnabled
+    ? (extensionsMock.create().securityExtension as jest.Mocked<ISavedObjectsSecurityExtension>)
+    : undefined;
   const wrapper = new SecureSpacesClientWrapper(
     baseClient,
     request,
     authorization,
     auditLogger,
-    errors
+    errors,
+    securityExtension
   );
   return {
     authorization,
@@ -122,6 +127,7 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
     baseClient,
     auditLogger,
     forbiddenError,
+    securityExtension,
   };
 };
 
@@ -153,10 +159,6 @@ const expectAuditEvent = (
     })
   );
 };
-
-beforeEach(() => {
-  mockEnsureAuthorized.mockReset();
-});
 
 describe('SecureSpacesClientWrapper', () => {
   describe('#getAll', () => {
@@ -669,9 +671,9 @@ describe('SecureSpacesClientWrapper', () => {
     it('deletes the space with all saved objects when authorized', async () => {
       const username = 'some_user';
 
-      const { wrapper, baseClient, authorization, auditLogger, request } = setup({
-        securityEnabled: true,
-      });
+      const { wrapper, baseClient, authorization, auditLogger, request, securityExtension } = setup(
+        { securityEnabled: true }
+      );
 
       const checkPrivileges = jest.fn().mockResolvedValue({
         username,
@@ -698,13 +700,17 @@ describe('SecureSpacesClientWrapper', () => {
         type: 'space',
         id: space.id,
       });
-      expectAuditEvent(auditLogger, SavedObjectAction.DELETE, 'unknown', {
-        type: 'dashboard',
-        id: '2',
+      expect(securityExtension!.addAuditEvent).toHaveBeenCalledTimes(2);
+      expect(securityExtension!.addAuditEvent).toHaveBeenCalledWith({
+        action: SavedObjectAction.DELETE,
+        outcome: 'unknown',
+        savedObject: { type: 'dashboard', id: '2' },
       });
-      expectAuditEvent(auditLogger, SavedObjectAction.UPDATE_OBJECTS_SPACES, 'unknown', {
-        type: 'dashboard',
-        id: '3',
+      expect(securityExtension!.addAuditEvent).toHaveBeenCalledWith({
+        action: SavedObjectAction.UPDATE_OBJECTS_SPACES,
+        outcome: 'unknown',
+        savedObject: { type: 'dashboard', id: '3' },
+        deleteFromSpaces: [space.id],
       });
     });
   });
@@ -714,39 +720,41 @@ describe('SecureSpacesClientWrapper', () => {
     const alias2 = { targetSpace: 'space-2', targetType: 'type-2', sourceId: 'id' };
 
     function expectAuditEvents(
-      auditLogger: AuditLogger,
+      securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>,
       aliases: LegacyUrlAliasTarget[],
-      action: EcsEventOutcome
+      { error }: { error: boolean }
     ) {
       aliases.forEach((alias) => {
-        expectAuditEvent(auditLogger, SavedObjectAction.UPDATE, action, {
-          type: LEGACY_URL_ALIAS_TYPE,
-          id: getAliasId(alias),
+        expect(securityExtension!.addAuditEvent).toHaveBeenCalledWith({
+          action: SavedObjectAction.UPDATE,
+          savedObject: { type: LEGACY_URL_ALIAS_TYPE, id: getAliasId(alias) },
+          ...(error ? { error: expect.anything() } : { outcome: 'unknown' }),
         });
       });
     }
 
-    function expectAuthorizationCheck(targetTypes: string[], targetSpaces: string[]) {
-      expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
-      expect(mockEnsureAuthorized).toHaveBeenCalledWith(
-        expect.any(Object), // dependencies
-        targetTypes, // unique types of the alias targets
-        ['bulk_update'], // actions
-        targetSpaces, // unique spaces of the alias targets
-        { requireFullAuthorization: false }
-      );
+    function expectAuthorizationCheck(
+      securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>,
+      targetTypes: string[],
+      targetSpaces: string[]
+    ) {
+      expect(securityExtension!.checkAuthorization).toHaveBeenCalledTimes(1);
+      expect(securityExtension!.checkAuthorization).toHaveBeenCalledWith({
+        types: new Set(targetTypes), // unique types of the alias targets
+        spaces: new Set(targetSpaces), // unique spaces of the alias targets
+        actions: ['bulk_update'],
+      });
     }
 
     describe('when security is not enabled', () => {
       const securityEnabled = false;
 
       it('delegates to base client without checking authorization', async () => {
-        const { wrapper, baseClient, auditLogger } = setup({ securityEnabled });
+        const { wrapper, baseClient, securityExtension } = setup({ securityEnabled });
         const aliases = [alias1];
         await wrapper.disableLegacyUrlAliases(aliases);
 
-        expect(mockEnsureAuthorized).not.toHaveBeenCalled();
-        expectAuditEvents(auditLogger, aliases, 'unknown');
+        expect(securityExtension).toBeUndefined();
         expect(baseClient.disableLegacyUrlAliases).toHaveBeenCalledTimes(1);
         expect(baseClient.disableLegacyUrlAliases).toHaveBeenCalledWith(aliases);
       });
@@ -755,49 +763,41 @@ describe('SecureSpacesClientWrapper', () => {
     describe('when security is enabled', () => {
       const securityEnabled = true;
 
-      it('re-throws the error if the authorization check fails', async () => {
-        const error = new Error('Oh no!');
-        mockEnsureAuthorized.mockRejectedValue(error);
-        const { wrapper, baseClient, auditLogger } = setup({ securityEnabled });
-        const aliases = [alias1, alias2];
-        await expect(() => wrapper.disableLegacyUrlAliases(aliases)).rejects.toThrow(error);
-
-        expectAuthorizationCheck(['type-1', 'type-2'], ['space-1', 'space-2']);
-        expectAuditEvents(auditLogger, aliases, 'failure');
-        expect(baseClient.disableLegacyUrlAliases).not.toHaveBeenCalled();
-      });
-
       it('throws a forbidden error when unauthorized', async () => {
-        mockEnsureAuthorized.mockResolvedValue({
-          status: 'partially_authorized',
-          typeActionMap: new Map()
-            .set('type-1', { bulk_update: { authorizedSpaces: ['space-1'] } })
-            .set('type-2', { bulk_update: { authorizedSpaces: ['space-1'] } }), // the user is not authorized to bulkUpdate type-2 in space-2, so this will throw a forbidden error
+        const { wrapper, baseClient, forbiddenError, securityExtension } = setup({
+          securityEnabled,
         });
-        const { wrapper, baseClient, auditLogger, forbiddenError } = setup({ securityEnabled });
+        securityExtension!.checkAuthorization.mockResolvedValue({
+          // These values don't actually matter, the call to enforceAuthorization matters
+          status: 'unauthorized',
+          typeMap: new Map(),
+        });
+        securityExtension!.enforceAuthorization.mockImplementation(() => {
+          throw new Error('Oh no!');
+        });
         const aliases = [alias1, alias2];
         await expect(() => wrapper.disableLegacyUrlAliases(aliases)).rejects.toThrow(
           forbiddenError
         );
 
-        expectAuthorizationCheck(['type-1', 'type-2'], ['space-1', 'space-2']);
-        expectAuditEvents(auditLogger, aliases, 'failure');
+        expectAuthorizationCheck(securityExtension!, ['type-1', 'type-2'], ['space-1', 'space-2']);
+        expectAuditEvents(securityExtension!, aliases, { error: true });
         expect(baseClient.disableLegacyUrlAliases).not.toHaveBeenCalled();
       });
 
       it('updates the legacy URL aliases when authorized', async () => {
-        mockEnsureAuthorized.mockResolvedValue({
-          status: 'partially_authorized',
-          typeActionMap: new Map()
-            .set('type-1', { bulk_update: { authorizedSpaces: ['space-1'] } })
-            .set('type-2', { bulk_update: { authorizedSpaces: ['space-2'] } }),
+        const { wrapper, baseClient, securityExtension } = setup({ securityEnabled });
+        securityExtension!.checkAuthorization.mockResolvedValue({
+          // These values don't actually matter, the call to enforceAuthorization matters
+          status: 'fully_authorized',
+          typeMap: new Map(),
         });
-        const { wrapper, baseClient, auditLogger } = setup({ securityEnabled });
+        // enforceAuthorization does *not* throw an error by default
         const aliases = [alias1, alias2];
         await wrapper.disableLegacyUrlAliases(aliases);
 
-        expectAuthorizationCheck(['type-1', 'type-2'], ['space-1', 'space-2']);
-        expectAuditEvents(auditLogger, aliases, 'unknown');
+        expectAuthorizationCheck(securityExtension!, ['type-1', 'type-2'], ['space-1', 'space-2']);
+        expectAuditEvents(securityExtension!, aliases, { error: false });
         expect(baseClient.disableLegacyUrlAliases).toHaveBeenCalledTimes(1);
         expect(baseClient.disableLegacyUrlAliases).toHaveBeenCalledWith(aliases);
       });

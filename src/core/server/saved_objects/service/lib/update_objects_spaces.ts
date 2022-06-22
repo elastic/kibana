@@ -17,6 +17,7 @@ import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
 import type {
   MutatingOperationRefreshSetting,
+  SavedObject,
   SavedObjectError,
   SavedObjectsBaseOptions,
 } from '../../types';
@@ -32,9 +33,10 @@ import {
 } from './internal_utils';
 import { DEFAULT_REFRESH_SETTING } from './repository';
 import type { RepositoryEsClient } from './repository_es_client';
-import { ALL_NAMESPACES_STRING } from './utils';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from './utils';
 import type { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
 import { deleteLegacyUrlAliases } from './legacy_url_aliases';
+import { AuditAction, ISavedObjectsSecurityExtension } from './extensions';
 
 /**
  * An object that should have its spaces updated.
@@ -47,15 +49,7 @@ export interface SavedObjectsUpdateObjectsSpacesObject {
   /** The ID of the object to update */
   type: string;
   /**
-   * The space(s) that the object to update currently exists in. This is only intended to be used by SOC wrappers.
-   *
-   * @internal
-   */
-  spaces?: string[];
-  /**
-   * The version of the object to update; this is used for optimistic concurrency control. This is only intended to be used by SOC wrappers.
-   *
-   * @internal
+   * The version of the object to update; this is used for optimistic concurrency control.
    */
   version?: string;
 }
@@ -108,6 +102,7 @@ export interface UpdateObjectsSpacesParams {
   serializer: SavedObjectsSerializer;
   logger: Logger;
   getIndexForType: (type: string) => string;
+  securityExtension: ISavedObjectsSecurityExtension | undefined;
   objects: SavedObjectsUpdateObjectsSpacesObject[];
   spacesToAdd: string[];
   spacesToRemove: string[];
@@ -137,6 +132,7 @@ export async function updateObjectsSpaces({
   serializer,
   logger,
   getIndexForType,
+  securityExtension,
   objects,
   spacesToAdd,
   spacesToRemove,
@@ -157,9 +153,12 @@ export async function updateObjectsSpaces({
 
   let bulkGetRequestIndexCounter = 0;
   const expectedBulkGetResults: Array<
-    Either<SavedObjectsUpdateObjectsSpacesResponseObject, Record<string, any>>
+    Either<
+      SavedObjectsUpdateObjectsSpacesResponseObject,
+      { type: string; id: string; version: string | undefined; esRequestIndex: number }
+    >
   > = objects.map((object) => {
-    const { type, id, spaces, version } = object;
+    const { type, id, version } = object;
 
     if (!allowedTypes.includes(type)) {
       const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
@@ -185,23 +184,26 @@ export async function updateObjectsSpaces({
       value: {
         type,
         id,
-        spaces,
         version,
-        ...(!spaces && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+        esRequestIndex: bulkGetRequestIndexCounter++,
       },
     };
   });
 
-  const bulkGetDocs = expectedBulkGetResults.reduce<estypes.MgetOperation[]>((acc, x) => {
-    if (isRight(x) && x.value.esRequestIndex !== undefined) {
-      acc.push({
-        _id: serializer.generateRawId(undefined, x.value.type, x.value.id),
-        _index: getIndexForType(x.value.type),
-        _source: ['type', 'namespaces'],
-      });
-    }
-    return acc;
-  }, []);
+  const validObjects = expectedBulkGetResults.filter(isRight);
+  if (validObjects.length === 0) {
+    // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
+    return {
+      // Filter with the `isLeft` comparator simply because it's a convenient type guard, we know the only expected results are errors.
+      objects: expectedBulkGetResults.filter(isLeft).map(({ value }) => value),
+    };
+  }
+
+  const bulkGetDocs = validObjects.map<estypes.MgetOperation>((x) => ({
+    _id: serializer.generateRawId(undefined, x.value.type, x.value.id),
+    _index: getIndexForType(x.value.type),
+    _source: ['type', 'namespaces'],
+  }));
   const bulkGetResponse = bulkGetDocs.length
     ? await client.mget<SavedObjectsRawDocSource>(
         { body: { docs: bulkGetDocs } },
@@ -218,6 +220,59 @@ export async function updateObjectsSpaces({
   ) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
   }
+
+  const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+  const addToSpaces = spacesToAdd.length ? spacesToAdd : undefined;
+  const deleteFromSpaces = spacesToRemove.length ? spacesToRemove : undefined;
+  const typesAndSpaces = new Map<string, Set<string>>();
+  const spacesToAuthorize = new Set<string>();
+  for (const { value } of validObjects) {
+    const { type, esRequestIndex: index } = value;
+    const preflightResult = index ? bulkGetResponse?.body.docs[index] : undefined;
+
+    const spacesToEnforce =
+      typesAndSpaces.get(type) ?? new Set([...spacesToAdd, ...spacesToRemove, namespaceString]); // Always enforce authZ for the active space
+    typesAndSpaces.set(type, spacesToEnforce);
+    for (const space of spacesToEnforce) {
+      spacesToAuthorize.add(space);
+    }
+    // @ts-expect-error MultiGetHit._source is optional
+    for (const space of preflightResult?._source?.namespaces ?? []) {
+      // Existing namespaces are included so we can later redact if necessary
+      // If this is a specific space, add it to the spaces we'll check privileges for (don't accidentally check for global privileges)
+      if (space === ALL_NAMESPACES_STRING) continue;
+      spacesToAuthorize.add(space);
+    }
+  }
+
+  const authorizationResult = await securityExtension?.checkAuthorization({
+    types: new Set(typesAndSpaces.keys()),
+    spaces: spacesToAuthorize,
+    actions: ['share_to_space'],
+    // If a user tries to share/unshare an object to/from '*', they need to have 'share_to_space' privileges for the Global Resource (e.g.,
+    // All privileges for All Spaces).
+    options: { allowGlobalResource: true },
+  });
+  if (authorizationResult) {
+    securityExtension!.enforceAuthorization({
+      typesAndSpaces,
+      action: 'share_to_space',
+      typeMap: authorizationResult.typeMap,
+      auditCallback: (error) => {
+        for (const { value } of validObjects) {
+          securityExtension!.addAuditEvent({
+            action: AuditAction.UPDATE_OBJECTS_SPACES,
+            savedObject: { type: value.type, id: value.id },
+            addToSpaces,
+            deleteFromSpaces,
+            error,
+            ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the update operation has not occurred yet
+          });
+        }
+      },
+    });
+  }
+
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;
   const bulkOperationParams: estypes.BulkOperationContainer[] = [];
@@ -232,39 +287,24 @@ export async function updateObjectsSpaces({
       return expectedBulkGetResult;
     }
 
-    const { id, type, spaces, version, esRequestIndex } = expectedBulkGetResult.value;
-
-    let currentSpaces: string[] = spaces;
-    let versionProperties;
-    if (esRequestIndex !== undefined) {
-      const doc = bulkGetResponse?.body.docs[esRequestIndex];
-      const isErrorDoc = isMgetError(doc);
-
-      if (
-        isErrorDoc ||
-        !doc?.found ||
-        // @ts-expect-error MultiGetHit._source is optional
-        !rawDocExistsInNamespace(registry, doc, namespace)
-      ) {
-        const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
-        return {
-          tag: 'Left',
-          value: { id, type, spaces: [], error },
-        };
-      }
-      currentSpaces = doc._source?.namespaces ?? [];
+    const { id, type, version, esRequestIndex } = expectedBulkGetResult.value;
+    const doc = bulkGetResponse!.body.docs[esRequestIndex];
+    if (
+      isMgetError(doc) ||
+      !doc?.found ||
       // @ts-expect-error MultiGetHit._source is optional
-      versionProperties = getExpectedVersionProperties(version, doc);
-    } else if (spaces?.length === 0) {
-      // A SOC wrapper attempted to retrieve this object in a pre-flight request and it was not found.
+      !rawDocExistsInNamespace(registry, doc, namespace)
+    ) {
       const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
       return {
         tag: 'Left',
         value: { id, type, spaces: [], error },
       };
-    } else {
-      versionProperties = getExpectedVersionProperties(version);
     }
+
+    const currentSpaces = doc._source?.namespaces ?? [];
+    // @ts-expect-error MultiGetHit._source is optional
+    const versionProperties = getExpectedVersionProperties(version, doc);
 
     const { updatedSpaces, removedSpaces, isUpdateRequired } = analyzeSpaceChanges(
       currentSpaces,
@@ -347,6 +387,13 @@ export async function updateObjectsSpaces({
           }
         }
 
+        if (authorizationResult) {
+          const { namespaces: redactedSpaces } = securityExtension!.redactNamespaces({
+            savedObject: { type, namespaces: updatedSpaces } as SavedObject, // Other SavedObject attributes aren't required
+            typeMap: authorizationResult.typeMap,
+          });
+          return { id, type, spaces: redactedSpaces! };
+        }
         return { id, type, spaces: updatedSpaces };
       }
     ),

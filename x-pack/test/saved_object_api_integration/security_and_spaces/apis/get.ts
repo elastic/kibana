@@ -58,19 +58,18 @@ export default function ({ getService }: FtrProviderContext) {
     const { normalTypes, hiddenType, allTypes } = createTestCases(spaceId);
     // use singleRequest to reduce execution time and/or test combined cases
     return {
-      unauthorized: createTestDefinitions(allTypes, true),
-      authorized: [
-        createTestDefinitions(normalTypes, false),
-        createTestDefinitions(hiddenType, true),
+      unauthorized: [
+        createTestDefinitions(normalTypes, true),
+        createTestDefinitions(hiddenType, false), // validation for hidden type returns 404 Not Found before authZ check
       ].flat(),
-      superuser: createTestDefinitions(allTypes, false),
+      authorized: createTestDefinitions(allTypes, false),
     };
   };
 
   describe('_get', () => {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` within the ${spaceId} space`;
-      const { unauthorized, authorized, superuser } = createTests(spaceId);
+      const { unauthorized, authorized } = createTests(spaceId);
       const _addTests = (user: TestUser, tests: GetTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
@@ -85,10 +84,10 @@ export default function ({ getService }: FtrProviderContext) {
         users.readGlobally,
         users.allAtSpace,
         users.readAtSpace,
+        users.superuser,
       ].forEach((user) => {
         _addTests(user, authorized);
       });
-      _addTests(users.superuser, superuser);
     });
   });
 }

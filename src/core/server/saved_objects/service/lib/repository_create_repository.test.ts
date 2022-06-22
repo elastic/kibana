@@ -94,7 +94,7 @@ describe('SavedObjectsRepository#createRepository', () => {
       callAdminCluster,
       logger,
       [],
-      { encryptionExtension: undefined },
+      { encryptionExtension: undefined, securityExtension: undefined },
       SavedObjectsRepository
     );
     expect(repository).toBeDefined();
@@ -114,7 +114,7 @@ describe('SavedObjectsRepository#createRepository', () => {
       callAdminCluster,
       logger,
       ['hiddenType', 'hiddenType', 'hiddenType'],
-      { encryptionExtension: undefined },
+      { encryptionExtension: undefined, securityExtension: undefined },
       SavedObjectsRepository
     );
     expect(repository).toBeDefined();

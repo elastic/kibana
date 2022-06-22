@@ -5,10 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { SavedObjectsErrorHelpers, SavedObjectsClientProvider, SavedObjectsUtils } from './lib';
+export {
+  SavedObjectsErrorHelpers,
+  SavedObjectsClientProvider,
+  SavedObjectsUtils,
+  AuditAction,
+} from './lib';
 export type {
   SavedObjectsRepository,
   ISavedObjectsEncryptionExtension,
+  CheckAuthorizationParams,
+  AuthorizationTypeEntry,
+  AuthorizationTypeMap,
+  CheckAuthorizationResult,
+  EnforceAuthorizationParams,
+  AddAuditEventParams,
+  RedactNamespacesParams,
+  ISavedObjectsSecurityExtension,
   SavedObjectsExtensions,
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderOptions,
@@ -20,6 +33,7 @@ export type {
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
   SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectReferenceWithContext,

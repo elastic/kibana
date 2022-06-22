@@ -7,7 +7,9 @@
  */
 
 import type { ISavedObjectsEncryptionExtension } from './encryption';
+import type { ISavedObjectsSecurityExtension } from './security';
 
 export interface SavedObjectsExtensions {
   encryptionExtension: ISavedObjectsEncryptionExtension | undefined;
+  securityExtension: ISavedObjectsSecurityExtension | undefined;
 }

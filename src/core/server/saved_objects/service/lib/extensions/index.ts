@@ -7,4 +7,15 @@
  */
 
 export type { ISavedObjectsEncryptionExtension } from './encryption';
+export type {
+  CheckAuthorizationParams,
+  AuthorizationTypeEntry,
+  AuthorizationTypeMap,
+  CheckAuthorizationResult,
+  EnforceAuthorizationParams,
+  AddAuditEventParams,
+  RedactNamespacesParams,
+  ISavedObjectsSecurityExtension,
+} from './security';
+export { AuditAction } from './security';
 export type { SavedObjectsExtensions } from './extensions';

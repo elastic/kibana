@@ -127,6 +127,7 @@ describe('getSortedObjectsForExport()', () => {
                   "search",
                 ],
               },
+              undefined,
             ],
           ],
           "results": Array [
@@ -240,7 +241,8 @@ describe('getSortedObjectsForExport()', () => {
               sortField: 'updated_at',
               sortOrder: 'desc',
               type: ['index-pattern'],
-            })
+            }),
+            undefined // PointInTimeFinder adds `internalOptions`, which is undefined in this case
           );
         });
       });
@@ -478,6 +480,7 @@ describe('getSortedObjectsForExport()', () => {
                   "search",
                 ],
               },
+              undefined,
             ],
           ],
           "results": Array [
@@ -637,6 +640,7 @@ describe('getSortedObjectsForExport()', () => {
                   "search",
                 ],
               },
+              undefined,
             ],
           ],
           "results": Array [
@@ -733,6 +737,7 @@ describe('getSortedObjectsForExport()', () => {
                   "search",
                 ],
               },
+              undefined,
             ],
           ],
           "results": Array [
@@ -834,6 +839,7 @@ describe('getSortedObjectsForExport()', () => {
                   "search",
                 ],
               },
+              undefined,
             ],
           ],
           "results": Array [

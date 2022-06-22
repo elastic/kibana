@@ -60,6 +60,7 @@ describe('internalBulkResolve', () => {
       getIndexForType: (type: string) => `index-for-${type}`,
       incrementCounterInternal,
       encryptionExtension: undefined,
+      securityExtension: undefined,
       objects,
       options,
     };
@@ -342,4 +343,6 @@ describe('internalBulkResolve', () => {
   }
 
   test.todo('with encryption extension');
+
+  test.todo('with security extension');
 });

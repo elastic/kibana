@@ -23,7 +23,11 @@ import type {
   SavedObjectsResolveResponse,
 } from '../saved_objects_client';
 import { DecoratedError, SavedObjectsErrorHelpers } from './errors';
-import type { ISavedObjectsEncryptionExtension } from './extensions';
+import type {
+  ISavedObjectsEncryptionExtension,
+  ISavedObjectsSecurityExtension,
+} from './extensions';
+import { AuditAction } from './extensions';
 import {
   getCurrentTime,
   getSavedObjectFromSource,
@@ -39,6 +43,7 @@ import {
   SavedObjectsIncrementCounterOptions,
 } from './repository';
 import type { RepositoryEsClient } from './repository_es_client';
+import { SavedObjectsUtils } from './utils';
 
 /**
  * Parameters for the internal bulkResolve function.
@@ -58,6 +63,7 @@ export interface InternalBulkResolveParams {
     options?: SavedObjectsIncrementCounterOptions<T>
   ) => Promise<SavedObject<T>>;
   encryptionExtension: ISavedObjectsEncryptionExtension | undefined;
+  securityExtension: ISavedObjectsSecurityExtension | undefined;
   objects: SavedObjectsBulkResolveObject[];
   options?: SavedObjectsBaseOptions;
 }
@@ -102,6 +108,7 @@ export async function internalBulkResolve<T>(
     getIndexForType,
     incrementCounterInternal,
     encryptionExtension,
+    securityExtension,
     objects,
     options = {},
   } = params;
@@ -248,7 +255,91 @@ export async function internalBulkResolve<T>(
     { refresh: false }
   ).catch(() => {}); // if the call fails for some reason, intentionally swallow the error
 
-  return { resolved_objects: resolvedObjects };
+  const redacted = await authorizeAuditAndRedact(resolvedObjects, securityExtension, namespace);
+  return { resolved_objects: redacted };
+}
+
+/**
+ * Checks authorization, writes audit events, and redacts namespaces from the bulkResolve response. In other SavedObjectsRepository
+ * functions we do this before decrypting attributes. However, because of the bulkResolve logic involved in deciding between the exact match
+ * or alias match, it's cleaner to do authorization, auditing, and redaction all afterwards.
+ */
+async function authorizeAuditAndRedact<T>(
+  resolvedObjects: Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>,
+  securityExtension: ISavedObjectsSecurityExtension | undefined,
+  namespace: string | undefined
+) {
+  if (!securityExtension) {
+    return resolvedObjects;
+  }
+
+  const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+  const typesAndSpaces = new Map<string, Set<string>>();
+  const spacesToAuthorize = new Set<string>();
+  const auditableObjects: Array<{ type: string; id: string }> = [];
+
+  for (const result of resolvedObjects) {
+    let auditableObject: { type: string; id: string } | undefined;
+    if (isBulkResolveError(result)) {
+      const { type, id, error } = result;
+      if (!SavedObjectsErrorHelpers.isBadRequestError(error)) {
+        // Only "not found" errors should show up as audit events (not "unsupported type" errors)
+        auditableObject = { type, id };
+      }
+    } else {
+      const { type, id, namespaces = [] } = result.saved_object;
+      auditableObject = { type, id };
+      for (const space of namespaces) {
+        spacesToAuthorize.add(space);
+      }
+    }
+    if (auditableObject) {
+      auditableObjects.push(auditableObject);
+      const spacesToEnforce =
+        typesAndSpaces.get(auditableObject.type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
+      spacesToEnforce.add(namespaceString);
+      typesAndSpaces.set(auditableObject.type, spacesToEnforce);
+      spacesToAuthorize.add(namespaceString);
+    }
+  }
+
+  if (typesAndSpaces.size === 0) {
+    // We only had "unsupported type" errors, there are no types to check privileges for, just return early
+    return resolvedObjects;
+  }
+
+  const authorizationResult = await securityExtension.checkAuthorization({
+    types: new Set(typesAndSpaces.keys()),
+    spaces: spacesToAuthorize,
+    actions: ['bulk_get'],
+  });
+  securityExtension.enforceAuthorization({
+    typesAndSpaces,
+    action: 'bulk_get',
+    typeMap: authorizationResult.typeMap,
+    auditCallback: (error) => {
+      for (const { type, id } of auditableObjects) {
+        securityExtension.addAuditEvent({
+          action: AuditAction.RESOLVE,
+          savedObject: { type, id },
+          error,
+        });
+      }
+    },
+  });
+
+  return resolvedObjects.map((result) => {
+    if (isBulkResolveError(result)) {
+      return result;
+    }
+    return {
+      ...result,
+      saved_object: securityExtension.redactNamespaces({
+        typeMap: authorizationResult.typeMap,
+        savedObject: result.saved_object,
+      }),
+    };
+  });
 }
 
 /** Separates valid and invalid object types */
