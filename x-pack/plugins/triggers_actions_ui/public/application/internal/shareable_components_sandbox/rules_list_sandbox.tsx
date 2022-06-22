@@ -21,7 +21,7 @@ export const RulesListSandbox = () => {
     <div style={style}>
       {getRulesListLazy({
         connectorServices: { validateEmailAddresses },
-        rulesListProps: { filteredRulesTypes: [], filteredSolutions: [] },
+        rulesListProps: {},
       })}
     </div>
   );

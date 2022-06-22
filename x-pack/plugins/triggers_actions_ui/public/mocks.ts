@@ -102,7 +102,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     getRulesList: () => {
       return getRulesListLazy({
         connectorServices,
-        rulesListProps: { filteredRulesTypes: [], filteredSolutions: [] },
+        rulesListProps: {},
       });
     },
   };

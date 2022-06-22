@@ -93,8 +93,8 @@ import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from '.
 const ENTER_KEY = 13;
 
 export interface RulesListProps {
-  filteredRulesTypes: string[] | undefined;
-  filteredSolutions: string[] | undefined;
+  filteredRulesTypes?: string[] | undefined;
+  filteredSolutions?: string[] | undefined;
   showActionFilter?: boolean;
   ruleDetailsLink?: string | undefined;
   showCreateRuleButton?: boolean;
