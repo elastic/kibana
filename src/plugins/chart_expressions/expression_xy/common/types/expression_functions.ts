@@ -196,6 +196,7 @@ export interface XYArgs extends DataLayerArgs {
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
+  xExtent?: AxisExtentConfigResult;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
   yLeftScale: YScaleType;
@@ -230,6 +231,7 @@ export interface LayeredXYArgs {
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
+  xExtent?: AxisExtentConfigResult;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
   yLeftScale: YScaleType;
@@ -261,6 +263,7 @@ export interface XYProps {
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
+  xExtent?: AxisExtentConfigResult;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
   yLeftScale: YScaleType;

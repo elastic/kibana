@@ -72,9 +72,16 @@ export const mockState: SyntheticsAppState = {
       perPage: 0,
       page: 0,
       syncErrors: [],
+      absoluteTotal: 0,
     },
     error: null,
     loading: false,
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
+  monitorStatus: {
+    data: null,
+    loading: false,
+    error: null,
+    selectedLocationId: null,
+  },
 };

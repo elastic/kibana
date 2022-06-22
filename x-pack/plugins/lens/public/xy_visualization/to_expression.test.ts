@@ -8,6 +8,7 @@
 import { Ast, fromExpression } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { getXyVisualization } from './xy_visualization';
 import { OperationDescriptor } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
@@ -20,6 +21,7 @@ import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
+    datatableUtilities: createDatatableUtilitiesMock(),
     paletteService: chartPluginMock.createPaletteRegistry(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     kibanaTheme: themeServiceMock.createStartContract(),
@@ -72,7 +74,7 @@ describe('#toExpression', () => {
     expect(
       xyVisualization.toExpression(
         {
-          legend: { position: Position.Bottom, isVisible: true },
+          legend: { position: Position.Left, isVisible: true },
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
@@ -371,7 +373,7 @@ describe('#toExpression', () => {
   it('should set legend size for outside legend', () => {
     const expression = xyVisualization.toExpression(
       {
-        legend: { position: Position.Bottom, isVisible: true, legendSize: LegendSize.SMALL },
+        legend: { position: Position.Left, isVisible: true, legendSize: LegendSize.SMALL },
         valueLabels: 'show',
         preferredSeriesType: 'bar',
         layers: [
@@ -394,11 +396,42 @@ describe('#toExpression', () => {
     ).toEqual('small');
   });
 
-  it('should ignore legend size for insidee legend', () => {
+  it('should use auto legend size for bottom/top legend', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: {
           position: Position.Bottom,
+          isVisible: true,
+          isInside: false,
+          legendSize: LegendSize.SMALL,
+        },
+        valueLabels: 'show',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+    expect((expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.legendSize[0]).toBe(
+      LegendSize.AUTO
+    );
+  });
+
+  it('should ignore legend size for inside legend', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: {
+          position: Position.Left,
           isVisible: true,
           isInside: true,
           legendSize: LegendSize.SMALL,

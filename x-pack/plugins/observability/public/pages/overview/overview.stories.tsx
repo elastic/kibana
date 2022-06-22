@@ -11,10 +11,10 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { createKibanaReactContext, KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
-import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
 import { OverviewPage } from '.';
 import { alertsFetchData } from './mock/alerts.mock';
@@ -82,15 +82,6 @@ const withCore = makeDecorator({
               appMountParameters: {
                 setHeaderActionMenu: () => {},
               } as unknown as AppMountParameters,
-              config: {
-                unsafe: {
-                  alertingExperience: { enabled: true },
-                  cases: { enabled: true },
-                  rules: { enabled: true },
-                },
-              },
-              core: {} as CoreStart,
-              plugins: {} as ObservabilityPublicPluginsStart,
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
               kibanaFeatures: [],

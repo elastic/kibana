@@ -25,7 +25,7 @@ export const singleAstriskValidator = (
 export const schema = {
   title: {
     label: i18n.translate('indexPatternEditor.editor.form.titleLabel', {
-      defaultMessage: 'Name',
+      defaultMessage: 'Index pattern',
     }),
     defaultValue: '',
     helpText: i18n.translate('indexPatternEditor.validations.titleHelpText', {
@@ -36,7 +36,7 @@ export const schema = {
       {
         validator: fieldValidators.emptyField(
           i18n.translate('indexPatternEditor.validations.titleIsRequiredErrorMessage', {
-            defaultMessage: 'A name is required.',
+            defaultMessage: 'An Index pattern is required.',
           })
         ),
       },
@@ -44,6 +44,12 @@ export const schema = {
         validator: singleAstriskValidator,
       },
     ],
+  },
+  name: {
+    label: i18n.translate('indexPatternEditor.editor.form.nameLabel', {
+      defaultMessage: 'Name',
+    }),
+    defaultValue: '',
   },
   timestampField: {
     label: i18n.translate('indexPatternEditor.editor.form.timeFieldLabel', {

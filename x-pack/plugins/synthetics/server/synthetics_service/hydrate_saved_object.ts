@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type { SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
 import { UptimeESClient } from '../legacy_uptime/lib/lib';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { DecryptedSyntheticsMonitorSavedObject } from '../../common/types';
@@ -20,6 +21,27 @@ export const hydrateSavedObjects = async ({
   server: UptimeServerSetup;
 }) => {
   try {
+    const { uptimeEsClient } = server;
+    if (!uptimeEsClient) {
+      return;
+    }
+
+    const { has_all_requested: hasAllPrivileges } =
+      await uptimeEsClient.baseESClient.security.hasPrivileges({
+        body: {
+          index: [
+            {
+              names: ['synthetics-*'],
+              privileges: ['read'] as SecurityIndexPrivilege[],
+            },
+          ],
+        },
+      });
+
+    if (!hasAllPrivileges) {
+      return;
+    }
+
     const missingInfoIds: string[] = monitors
       .filter((monitor) => {
         const isBrowserMonitor = monitor.attributes.type === 'browser';
@@ -48,7 +70,7 @@ export const hydrateSavedObjects = async ({
       monitors
         .filter((monitor) => missingInfoIds.includes(monitor.id))
         .forEach((monitor) => {
-          let resultAttributes: Partial<SyntheticsMonitor> = monitor.attributes;
+          let resultAttributes: SyntheticsMonitor = monitor.attributes;
 
           let isUpdated = false;
 
@@ -128,7 +150,6 @@ const fetchSampleMonitorDocuments = async (esClient: UptimeESClient, configIds: 
     'getHydrateQuery',
     SYNTHETICS_INDEX_PATTERN
   );
-
   return data.body.hits.hits.map(
     ({ _source: doc }) => ({ ...(doc as any), timestamp: (doc as any)['@timestamp'] } as Ping)
   );

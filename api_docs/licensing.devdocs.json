@@ -553,11 +553,15 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -2302,11 +2306,15 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
               },
               {
                 "plugin": "securitySolution",

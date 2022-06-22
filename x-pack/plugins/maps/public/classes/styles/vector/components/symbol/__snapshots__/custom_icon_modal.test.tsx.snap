@@ -66,15 +66,9 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
           />
         </EuiFormRow>
         <EuiSpacer />
-        <EuiAccordion
-          arrowDisplay="left"
+        <WithEuiTheme(EuiAccordionClass)
           buttonContent="Advanced options"
-          buttonElement="button"
-          element="div"
           id="advancedOptionsAccordion"
-          initialIsOpen={false}
-          isLoading={false}
-          isLoadingMessage={false}
           paddingSize="xs"
         >
           <EuiPanel
@@ -173,7 +167,7 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
               />
             </EuiFormRow>
           </EuiPanel>
-        </EuiAccordion>
+        </WithEuiTheme(EuiAccordionClass)>
       </EuiFlexItem>
       <EuiFlexItem
         className="mapsIconPreview__wrapper mapsCustomIconForm__preview"

@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import {
+  InternalLoggingServicePreboot,
+  InternalLoggingServiceSetup,
+} from '@kbn/core-logging-server-internal';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { InternalContextPreboot, ContextSetup } from './context';
 import {
@@ -32,7 +37,6 @@ import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metr
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
-import { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart, InternalCoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart } from './deprecations';
@@ -41,7 +45,6 @@ import type {
   InternalExecutionContextStart,
 } from './execution_context';
 import { InternalPrebootServicePreboot } from './preboot';
-import { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
 import type {
   AnalyticsServicePreboot,
   AnalyticsServiceSetup,

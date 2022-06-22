@@ -65,7 +65,7 @@ const statusFilters = [
 ];
 
 const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
-  padding: ${(props) => props.theme.eui.paddingSizes.s};
+  padding: ${(props) => props.theme.eui.euiSizeS};
 `;
 
 export const SearchAndFilterBar: React.FunctionComponent<{
@@ -87,7 +87,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
-  refreshAgents: () => void;
+  refreshAgents: (args?: { refreshTags?: boolean }) => void;
   onClickAddAgent: () => void;
 }> = ({
   agentPolicies,

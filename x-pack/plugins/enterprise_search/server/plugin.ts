@@ -24,6 +24,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
@@ -45,7 +46,7 @@ import {
 
 import { registerAppSearchRoutes } from './routes/app_search';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
-import { registerListRoute } from './routes/enterprise_search/indices';
+import { registerIndexRoutes } from './routes/enterprise_search/indices';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -92,6 +93,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     const log = this.logger;
     const PLUGIN_IDS = [
       ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+      ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
       ELASTICSEARCH_PLUGIN.ID,
       APP_SEARCH_PLUGIN.ID,
       WORKPLACE_SEARCH_PLUGIN.ID,
@@ -158,7 +160,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerConfigDataRoute(dependencies);
     registerAppSearchRoutes(dependencies);
     registerWorkplaceSearchRoutes(dependencies);
-    registerListRoute(dependencies);
+    registerIndexRoutes(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry
