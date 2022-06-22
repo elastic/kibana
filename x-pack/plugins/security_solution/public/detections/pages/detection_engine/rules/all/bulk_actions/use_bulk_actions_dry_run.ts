@@ -8,6 +8,7 @@
 import { useQuery, QueryClient } from 'react-query';
 
 import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
+import { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../../../common/constants';
 
 import {
   BulkAction,
@@ -29,6 +30,7 @@ export interface DryRunResult {
   failedRulesCount?: number;
   ruleErrors: Array<{
     message: string;
+    errorCode?: BULK_ACTIONS_DRY_RUN_ERR_CODE;
     ruleIds: string[];
   }>;
 }
@@ -43,8 +45,9 @@ const processDryRunResult = (result: BulkActionResponse | undefined): DryRunResu
     succeededRulesCount: result?.attributes.summary.succeeded,
     failedRulesCount: result?.attributes.summary.failed,
     ruleErrors:
-      result?.attributes.errors?.map(({ message, rules }) => ({
+      result?.attributes.errors?.map(({ message, err_code: errorCode, rules }) => ({
         message,
+        errorCode,
         ruleIds: rules.map(({ id }) => id),
       })) ?? [],
   };

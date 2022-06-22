@@ -9,10 +9,7 @@ import type { DryRunResult } from '../use_bulk_actions_dry_run';
 import type { FilterOptions } from '../../../../../../containers/detection_engine/rules/types';
 
 import { convertRulesFilterToKQL } from '../../../../../../containers/detection_engine/rules/utils';
-import {
-  BULK_ACTIONS_DRY_RUN_EDIT_MACHINE_LEARNING_INDEX_ERROR_MSG,
-  BULK_ACTIONS_DRY_RUN_IMMUTABLE_ERROR_MSG,
-} from '../../../../../../../../common/constants';
+import { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../../../../common/constants';
 
 interface PrepareSearchFilterProps {
   dryRunResult?: DryRunResult;
@@ -45,12 +42,13 @@ export const prepareSearchParams = ({
 
   // otherwise create filter that excludes failed results based on dry run errors
   let modifiedFilterOptions = filterOptions;
-  dryRunResult?.ruleErrors.forEach(({ message }) => {
-    switch (message) {
-      case BULK_ACTIONS_DRY_RUN_IMMUTABLE_ERROR_MSG:
+  dryRunResult?.ruleErrors.forEach(({ errorCode }) => {
+    switch (errorCode) {
+      case BULK_ACTIONS_DRY_RUN_ERR_CODE.IMMUTABLE:
         modifiedFilterOptions = { ...modifiedFilterOptions, showCustomRules: true };
         break;
-      case BULK_ACTIONS_DRY_RUN_EDIT_MACHINE_LEARNING_INDEX_ERROR_MSG:
+      case BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_INDEX_PATTERN:
+      case BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_AUTH:
         modifiedFilterOptions = {
           ...modifiedFilterOptions,
           excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'machine_learning'],

@@ -19,8 +19,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
-  BULK_ACTIONS_DRY_RUN_IMMUTABLE_ERROR_MSG,
-  BULK_ACTIONS_DRY_RUN_EDIT_MACHINE_LEARNING_INDEX_ERROR_MSG,
+  BULK_ACTIONS_DRY_RUN_ERR_CODE,
 } from '../../../../../common/constants';
 import {
   BulkAction,
@@ -34,6 +33,7 @@ import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../utils/route_limited_concurrency_tag';
+import { invariant } from '../../../../../common/utils/invariant';
 import {
   initPromisePool,
   PromisePoolError,
@@ -63,6 +63,7 @@ interface RuleDetailsInError {
 interface NormalizedRuleError {
   message: string;
   status_code: number;
+  err_code?: BULK_ACTIONS_DRY_RUN_ERR_CODE;
   rules: RuleDetailsInError[];
 }
 
@@ -74,8 +75,8 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
   errors.forEach((errorObj) => {
     let message: string;
     let statusCode: number = 500;
+    let errorCode: BULK_ACTIONS_DRY_RUN_ERR_CODE | undefined;
     let rule: RuleDetailsInError;
-
     // transform different error types (PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkEditError)
     // to one common used in NormalizedRuleError
     if ('rule' in errorObj) {
@@ -88,6 +89,7 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
           ? transformError(error)
           : { message: String(error), statusCode: 500 };
 
+      errorCode = (error as DryRunError)?.errorCode;
       message = transformedError.message;
       statusCode = transformedError.statusCode;
       // The promise pool item is either a rule ID string or a rule object. We have
@@ -102,6 +104,7 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
       errorsMap.set(message, {
         message: truncate(message, { length: MAX_ERROR_MESSAGE_LENGTH }),
         status_code: statusCode,
+        err_code: errorCode,
         rules: [rule],
       });
     }
@@ -246,6 +249,26 @@ export const migrateRuleActions = async ({
   return migratedRule;
 };
 
+class DryRunError extends Error {
+  public readonly errorCode: BULK_ACTIONS_DRY_RUN_ERR_CODE;
+  public readonly statusCode: number;
+
+  constructor(message: string, errorCode: BULK_ACTIONS_DRY_RUN_ERR_CODE, statusCode?: number) {
+    super(message);
+    this.name = 'BulkActionDryRunError';
+    this.errorCode = errorCode;
+    this.statusCode = statusCode ?? 500;
+  }
+}
+
+const throwDryRunError = async (executor: () => void, errorCode: BULK_ACTIONS_DRY_RUN_ERR_CODE) => {
+  try {
+    await executor();
+  } catch (e) {
+    throw new DryRunError(e.message, errorCode, e.statusCode);
+  }
+};
+
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
@@ -365,6 +388,12 @@ export const performBulkActionRoute = (
         let created: RuleAlertType[] = [];
         let deleted: RuleAlertType[] = [];
 
+        const throwDryRunMlAuth = (ruleType: RuleAlertType['params']['type']) =>
+          throwDryRunError(
+            async () => throwAuthzError(await mlAuthz.validateRuleType(ruleType)),
+            BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_AUTH
+          );
+
         switch (body.action) {
           case BulkAction.enable:
             bulkActionOutcome = await initPromisePool({
@@ -373,7 +402,7 @@ export const performBulkActionRoute = (
               executor: async (rule) => {
                 if (isDryRun) {
                   if (!rule.enabled) {
-                    throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
+                    await throwDryRunMlAuth(rule.params.type);
                   }
                   return {
                     ...rule,
@@ -410,7 +439,7 @@ export const performBulkActionRoute = (
               executor: async (rule) => {
                 if (isDryRun) {
                   if (rule.enabled) {
-                    throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
+                    await throwDryRunMlAuth(rule.params.type);
                   }
                   return {
                     ...rule,
@@ -474,7 +503,7 @@ export const performBulkActionRoute = (
               items: rules,
               executor: async (rule) => {
                 if (isDryRun) {
-                  throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
+                  await throwDryRunMlAuth(rule.params.type);
                   return rule;
                 }
 
@@ -522,23 +551,30 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                if (rule.params.immutable) {
-                  throw Error(BULK_ACTIONS_DRY_RUN_IMMUTABLE_ERROR_MSG);
-                }
+                await throwDryRunMlAuth(rule.params.type);
+
+                await throwDryRunError(
+                  () => invariant(rule.params.immutable === false, "Elastic rule can't be edited"),
+                  BULK_ACTIONS_DRY_RUN_ERR_CODE.IMMUTABLE
+                );
 
                 // if rule is machine_learning, index pattern action can't be applied to it
-                if (
-                  rule.params.type === 'machine_learning' &&
-                  body.edit.find((action) =>
-                    [
-                      BulkActionEditType.add_index_patterns,
-                      BulkActionEditType.delete_index_patterns,
-                      BulkActionEditType.set_index_patterns,
-                    ].includes(action.type)
-                  )
-                ) {
-                  throw Error(BULK_ACTIONS_DRY_RUN_EDIT_MACHINE_LEARNING_INDEX_ERROR_MSG);
-                }
+                await throwDryRunError(
+                  () =>
+                    invariant(
+                      rule.params.type !== 'machine_learning' ||
+                        !body.edit.find((action) =>
+                          [
+                            BulkActionEditType.add_index_patterns,
+                            BulkActionEditType.delete_index_patterns,
+                            BulkActionEditType.set_index_patterns,
+                          ].includes(action.type)
+                        ),
+                      "Machine learning rule doesn't have index patterns"
+                    ),
+                  BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_INDEX_PATTERN
+                );
+
                 return rule;
               },
               abortSignal: abortController.signal,

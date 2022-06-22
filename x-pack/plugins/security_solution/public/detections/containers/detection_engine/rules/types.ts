@@ -49,6 +49,8 @@ import {
   UpdateRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';
 
+import { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../common/constants';
+
 /**
  * Params is an "record", since it is a type of RuleActionParams which is action templates.
  * @see x-pack/plugins/alerting/common/rule.ts
@@ -257,6 +259,7 @@ export interface BulkActionResult {
 export interface BulkActionAggregatedError {
   message: string;
   status_code: number;
+  err_code?: BULK_ACTIONS_DRY_RUN_ERR_CODE;
   rules: Array<{ id: string; name?: string }>;
 }
 
