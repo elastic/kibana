@@ -5,18 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { cloneDeep, each } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Action } from '@kbn/ui-actions-plugin/public';
-// @ts-expect-error
-import realHits from '../../../../__fixtures__/real_hits';
-
+import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
-import { flattenHit } from '@kbn/data-plugin/public';
 import { DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { SavedObject } from '@kbn/core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
@@ -24,7 +19,6 @@ import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar'
 import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks__/services';
 import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { ElasticSearchHit } from '../../../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
@@ -42,9 +36,7 @@ jest.mock('../../../../kibana_services', () => ({
 
 function getCompProps(): DiscoverSidebarProps {
   const indexPattern = stubLogstashIndexPattern;
-  const hits = each(cloneDeep(realHits), (hit) =>
-    flattenHit(hit, indexPattern)
-  ) as unknown as ElasticSearchHit[];
+  const hits = getDataTableRecords(indexPattern);
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
@@ -55,7 +47,7 @@ function getCompProps(): DiscoverSidebarProps {
   const fieldCounts: Record<string, number> = {};
 
   for (const hit of hits) {
-    for (const key of Object.keys(flattenHit(hit, indexPattern))) {
+    for (const key of Object.keys(hit.flattened)) {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
