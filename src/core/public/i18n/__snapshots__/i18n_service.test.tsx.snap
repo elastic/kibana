@@ -66,6 +66,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiColumnSortingDraggable.activeSortLabel": [Function],
           "euiColumnSortingDraggable.defaultSortAsc": "A-Z",
           "euiColumnSortingDraggable.defaultSortDesc": "Z-A",
+          "euiColumnSortingDraggable.dragHandleAriaLabel": "Drag handle",
           "euiColumnSortingDraggable.removeSortLabel": [Function],
           "euiColumnSortingDraggable.toggleLegend": [Function],
           "euiComboBox.listboxAriaLabel": "Choose from the following options",
