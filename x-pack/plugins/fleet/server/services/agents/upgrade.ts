@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import moment from 'moment';
 import pMap from 'p-map';
 
-import type { Agent, BulkActionResult, FleetServerAgentAction, CurrentUpgrade } from '../../types';
+import type { Agent, FleetServerAgentAction, CurrentUpgrade } from '../../types';
 import {
   AgentReassignmentError,
   HostedAgentPolicyRestrictionRelatedError,
@@ -21,6 +21,7 @@ import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../commo
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
+import { errorsToResults } from './crud';
 import {
   getAgentDocuments,
   getAgents,
@@ -183,22 +184,13 @@ export async function sendUpgradeAgentsActions(
     }))
   );
 
-  const givenOrder =
-    'agentIds' in options ? options.agentIds : agentsToCheckUpgradeable.map((agent) => agent.id);
-
-  const orderedOut = givenOrder.map((agentId) => {
-    const hasError = agentId in outgoingErrors;
-    const result: BulkActionResult = {
-      id: agentId,
-      success: !hasError,
-    };
-    if (hasError) {
-      result.error = outgoingErrors[agentId];
-    }
-    return result;
-  });
-
-  return { items: orderedOut };
+  return {
+    items: errorsToResults(
+      givenAgents,
+      outgoingErrors,
+      'agentIds' in options ? options.agentIds : undefined
+    ),
+  };
 }
 
 /**
