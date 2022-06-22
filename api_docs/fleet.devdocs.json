@@ -2729,6 +2729,21 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.debug",
+            "type": "Function",
+            "tags": [],
+            "label": "debug",
+            "description": [],
+            "signature": [
+              "() => [string, string]"
+            ],
+            "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11138,7 +11153,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "{ packagePolicyIds: string[]; }"
+              "{ packagePolicyIds: string[]; force?: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/package_policy.ts",
             "deprecated": false
@@ -20806,6 +20821,20 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.LICENSE_FOR_SCHEDULE_UPGRADE",
+        "type": "string",
+        "tags": [],
+        "label": "LICENSE_FOR_SCHEDULE_UPGRADE",
+        "description": [],
+        "signature": [
+          "\"platinum\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/agent_policy.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.LIMITED_CONCURRENCY_ROUTE_TAG",
         "type": "string",
         "tags": [],
@@ -22392,6 +22421,51 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentPolicyRouteService.getResetOnePreconfiguredAgentPolicyPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getResetOnePreconfiguredAgentPolicyPath",
+            "description": [],
+            "signature": [
+              "(agentPolicyId: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.agentPolicyRouteService.getResetOnePreconfiguredAgentPolicyPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentPolicyId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentPolicyRouteService.getResetAllPreconfiguredAgentPolicyPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getResetAllPreconfiguredAgentPolicyPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -22797,6 +22871,16 @@
         "path": "x-pack/plugins/fleet/common/constants/routes.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.APP_API_ROUTES.HEALTH_CHECK_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "HEALTH_CHECK_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "fleet",
             "id": "def-common.APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN",
@@ -24084,6 +24168,16 @@
             "description": [],
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PACKAGE_POLICY_API_ROUTES.ORPHANED_INTEGRATION_POLICIES",
+            "type": "string",
+            "tags": [],
+            "label": "ORPHANED_INTEGRATION_POLICIES",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -24224,6 +24318,21 @@
             "type": "Function",
             "tags": [],
             "label": "getDryRunPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.packagePolicyRouteService.getOrphanedIntegrationPoliciesPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getOrphanedIntegrationPoliciesPath",
             "description": [],
             "signature": [
               "() => string"
