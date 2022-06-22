@@ -14,7 +14,6 @@ import { useAppRootNavLink } from '../../common/components/navigation/nav_links'
 import { NavLinkItem } from '../../common/components/navigation/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useCanSeeHostIsolationExceptionsMenu } from '../../management/pages/host_isolation_exceptions/view/hooks';
 import { LandingLinksIcons } from '../components/landing_links_icons';
 import { MANAGE_PAGE_TITLE } from './translations';
 
@@ -27,23 +26,19 @@ export const ManageLandingPage = () => (
 );
 
 const StyledEuiHorizontalRule = styled(EuiHorizontalRule)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.l};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
 type ManagementCategories = Array<{ label: string; links: NavLinkItem[] }>;
 const useManagementCategories = (): ManagementCategories => {
-  const hideHostIsolationExceptions = !useCanSeeHostIsolationExceptionsMenu();
   const { links = [], categories = [] } = useAppRootNavLink(SecurityPageName.administration) ?? {};
 
   const manageLinksById = Object.fromEntries(links.map((link) => [link.id, link]));
 
   return categories.reduce<ManagementCategories>((acc, { label, linkIds }) => {
     const linksItem = linkIds.reduce<NavLinkItem[]>((linksAcc, linkId) => {
-      if (
-        manageLinksById[linkId] &&
-        !(linkId === SecurityPageName.hostIsolationExceptions && hideHostIsolationExceptions)
-      ) {
+      if (manageLinksById[linkId]) {
         linksAcc.push(manageLinksById[linkId]);
       }
       return linksAcc;

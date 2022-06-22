@@ -54,7 +54,7 @@ import {
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 
-import { getColumnHeaders } from './column_headers/helpers';
+import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
 import {
   addBuildingBlockStyle,
   getEventIdToDataMapping,
@@ -69,7 +69,7 @@ import type { FieldBrowserOptions } from '../../../../common/types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
 import { StatefulEventContext } from '../../stateful_event_context';
-import { StatefulFieldsBrowser } from '../toolbar/fields_browser';
+import { FieldBrowser } from '../toolbar/field_browser';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -341,7 +341,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-    const { queryFields, selectAll } = useDeepEqualSelector((state) =>
+    const { queryFields, selectAll, defaultColumns } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
     );
 
@@ -449,6 +449,32 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       return (bulkActions?.customBulkActions?.length || bulkActions?.alertStatusActions) ?? true;
     }, [hasAlertsCrud, selectedCount, showCheckboxes, bulkActions]);
 
+    const onResetColumns = useCallback(() => {
+      dispatch(tGridActions.updateColumns({ id, columns: defaultColumns }));
+    }, [defaultColumns, dispatch, id]);
+
+    const onToggleColumn = useCallback(
+      (fieldId: string) => {
+        if (columnHeaders.some(({ id: columnId }) => columnId === fieldId)) {
+          dispatch(
+            tGridActions.removeColumn({
+              columnId: fieldId,
+              id,
+            })
+          );
+        } else {
+          dispatch(
+            tGridActions.upsertColumn({
+              column: getColumnHeader(fieldId, defaultColumns),
+              id,
+              index: 1,
+            })
+          );
+        }
+      },
+      [columnHeaders, dispatch, id, defaultColumns]
+    );
+
     const alertToolbar = useMemo(
       () => (
         <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -519,12 +545,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             ) : (
               <>
                 {additionalControls ?? null}
-                <StatefulFieldsBrowser
+                <FieldBrowser
                   data-test-subj="field-browser"
                   browserFields={browserFields}
                   options={fieldBrowserOptions}
-                  timelineId={id}
                   columnHeaders={columnHeaders}
+                  onResetColumns={onResetColumns}
+                  onToggleColumn={onToggleColumn}
                 />
               </>
             )}
@@ -556,6 +583,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         indexNames,
         onAlertStatusActionSuccess,
         onAlertStatusActionFailure,
+        onResetColumns,
+        onToggleColumn,
         additionalBulkActions,
         refetch,
         additionalControls,

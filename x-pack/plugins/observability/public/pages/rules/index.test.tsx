@@ -43,14 +43,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
 
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {} as AppMountParameters,
-  config: {
-    unsafe: {
-      alertingExperience: { enabled: true },
-      cases: { enabled: true },
-      overviewNext: { enabled: false },
-      rules: { enabled: true },
-    },
-  },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
   kibanaFeatures: [],

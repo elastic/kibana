@@ -206,6 +206,7 @@ export const getIsRulePreviewDisabled = ({
   isQueryBarValid,
   isThreatQueryBarValid,
   index,
+  dataViewId,
   threatIndex,
   threatMapping,
   machineLearningJobId,
@@ -215,12 +216,14 @@ export const getIsRulePreviewDisabled = ({
   isQueryBarValid: boolean;
   isThreatQueryBarValid: boolean;
   index: string[];
+  dataViewId: string | undefined;
   threatIndex: string[];
   threatMapping: ThreatMapping;
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
 }) => {
-  if (!isQueryBarValid || index.length === 0) return true;
+  if (!isQueryBarValid || ((index == null || index.length === 0) && dataViewId == null))
+    return true;
   if (ruleType === 'threat_match') {
     if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) return true;
     if (

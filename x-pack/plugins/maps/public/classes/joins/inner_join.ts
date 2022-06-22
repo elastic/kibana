@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { Feature, GeoJsonProperties } from 'geojson';
 import { ESTermSource } from '../sources/es_term_source';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
