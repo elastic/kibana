@@ -22,9 +22,8 @@ export const mockLocation = {
   isServiceManaged: true,
 };
 describe('<Disclaimer />', () => {
-  let spy;
   beforeEach(() => {
-    spy = jest.spyOn(formContext, 'useFormContext').mockReturnValue({
+    jest.spyOn(formContext, 'useFormContext').mockReturnValue({
       watch: () => [[mockLocation] as ServiceLocations],
     } as unknown as formContext.UseFormReturn);
   });
@@ -36,7 +35,7 @@ describe('<Disclaimer />', () => {
   });
 
   it('does not show disclaimer when locations are not service managed', () => {
-    spy = jest.spyOn(formContext, 'useFormContext').mockReturnValue({
+    jest.spyOn(formContext, 'useFormContext').mockReturnValue({
       watch: () => [[{ ...mockLocation, isServiceManaged: false }] as ServiceLocations],
     } as unknown as formContext.UseFormReturn);
     const { queryByText } = render(<Disclaimer />);

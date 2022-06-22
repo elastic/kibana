@@ -36,7 +36,6 @@ const onChange = jest.fn();
 const onBlur = jest.fn();
 
 describe('<ScriptRecorderFields />', () => {
-  let file: File;
   const testScript = 'step(() => {})';
   const WrappedComponent = ({
     script = '',
