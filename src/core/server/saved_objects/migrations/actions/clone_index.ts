@@ -23,8 +23,8 @@ import {
   INDEX_NUMBER_OF_SHARDS,
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
-import { isClusterShardLimitExceeded } from './es_errors';
-import { ClusterShardLimitExceeded } from './create_index';
+import { isClusterShardLimitExceeded, isUnavailableShardsException } from './es_errors';
+import { ClusterShardLimitExceeded, UnavailableShardsException } from './create_index';
 export type CloneIndexResponse = AcknowledgeResponse;
 
 /** @internal */
@@ -51,11 +51,15 @@ export const cloneIndex = ({
   target,
   timeout = DEFAULT_TIMEOUT,
 }: CloneIndexParams): TaskEither.TaskEither<
-  RetryableEsClientError | IndexNotFound | IndexNotYellowTimeout | ClusterShardLimitExceeded,
+  | RetryableEsClientError
+  | IndexNotFound
+  | IndexNotYellowTimeout
+  | ClusterShardLimitExceeded
+  | UnavailableShardsException,
   CloneIndexResponse
 > => {
   const cloneTask: TaskEither.TaskEither<
-    RetryableEsClientError | IndexNotFound | ClusterShardLimitExceeded,
+    RetryableEsClientError | IndexNotFound | ClusterShardLimitExceeded | UnavailableShardsException,
     AcknowledgeResponse
   > = () => {
     return client.indices
@@ -118,6 +122,10 @@ export const cloneIndex = ({
         } else if (isClusterShardLimitExceeded(error?.body?.error)) {
           return Either.left({
             type: 'cluster_shard_limit_exceeded' as const,
+          });
+        } else if (isUnavailableShardsException(error?.body?.error)) {
+          return Either.left({
+            type: 'unavailable_shards_exception' as const,
           });
         } else {
           throw error;

@@ -30,3 +30,7 @@ export const isClusterShardLimitExceeded = ({ type, reason }: estypes.ErrorCause
     ) !== null
   );
 };
+
+export const isUnavailableShardsException = ({ type }: estypes.ErrorCause): boolean => {
+  return type === 'unavailable_shards_exception';
+};

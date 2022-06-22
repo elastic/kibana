@@ -23,7 +23,7 @@ import {
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
 import { IndexNotYellowTimeout, waitForIndexStatusYellow } from './wait_for_index_status_yellow';
-import { isClusterShardLimitExceeded } from './es_errors';
+import { isClusterShardLimitExceeded, isUnavailableShardsException } from './es_errors';
 
 function aliasArrayToRecord(aliases: string[]): Record<string, estypes.IndicesAlias> {
   const result: Record<string, estypes.IndicesAlias> = {};
@@ -36,6 +36,11 @@ function aliasArrayToRecord(aliases: string[]): Record<string, estypes.IndicesAl
 /** @internal */
 export interface ClusterShardLimitExceeded {
   type: 'cluster_shard_limit_exceeded';
+}
+
+/** @internal */
+export interface UnavailableShardsException {
+  type: 'unavailable_shards_exception';
 }
 
 /** @internal */
@@ -61,11 +66,14 @@ export const createIndex = ({
   mappings,
   aliases = [],
 }: CreateIndexParams): TaskEither.TaskEither<
-  RetryableEsClientError | IndexNotYellowTimeout | ClusterShardLimitExceeded,
+  | RetryableEsClientError
+  | IndexNotYellowTimeout
+  | ClusterShardLimitExceeded
+  | UnavailableShardsException,
   'create_index_succeeded'
 > => {
   const createIndexTask: TaskEither.TaskEither<
-    RetryableEsClientError | ClusterShardLimitExceeded,
+    RetryableEsClientError | ClusterShardLimitExceeded | UnavailableShardsException,
     AcknowledgeResponse
   > = () => {
     const aliasesObject = aliasArrayToRecord(aliases);
@@ -130,6 +138,10 @@ export const createIndex = ({
           return Either.left({
             type: 'cluster_shard_limit_exceeded' as const,
           });
+        } else if (isUnavailableShardsException(error?.body?.error)) {
+          return Either.left({
+            type: 'unavailable_shards_exception' as const,
+          });
         } else {
           throw error;
         }
@@ -140,7 +152,10 @@ export const createIndex = ({
   return pipe(
     createIndexTask,
     TaskEither.chain<
-      RetryableEsClientError | IndexNotYellowTimeout | ClusterShardLimitExceeded,
+      | RetryableEsClientError
+      | IndexNotYellowTimeout
+      | ClusterShardLimitExceeded
+      | UnavailableShardsException,
       AcknowledgeResponse,
       'create_index_succeeded'
     >((res) => {
