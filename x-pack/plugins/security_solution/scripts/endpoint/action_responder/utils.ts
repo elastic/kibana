@@ -19,6 +19,7 @@ import {
   EndpointActionData,
   EndpointActionResponse,
   LogsEndpointActionResponse,
+  OutputActionRunningProcess,
 } from '../../../common/endpoint/types';
 import { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -94,6 +95,7 @@ export const sendEndpointActionResponse = async (
       data: {
         command: action.command as EndpointActionData['command'],
         comment: '',
+        ...getOutputDataIfNeeded(action.command as EndpointActionData['command']),
       },
       started_at: action.startedAt,
     },
@@ -113,4 +115,26 @@ export const sendEndpointActionResponse = async (
   });
 
   return endpointResponse;
+};
+
+const getOutputDataIfNeeded = (command: EndpointActionData['command']) => {
+  return command === 'running-processes'
+    ? ({
+        output: {
+          type: 'json',
+          content: {
+            entries: [
+              { command: '/opt/cmd1', pid: '123', entity_id: '345', user: 'root' },
+              { command: '/opt/cmd2', pid: '234', entity_id: '456', user: 'test' },
+              {
+                command: '/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3',
+                pid: '345',
+                entity_id: '467',
+                user: 'test',
+              },
+            ],
+          },
+        },
+      } as EndpointActionData<undefined, OutputActionRunningProcess>)
+    : {};
 };

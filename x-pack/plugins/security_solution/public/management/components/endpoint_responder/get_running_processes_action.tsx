@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionDetails } from '../../../../common/endpoint/types';
+import {
+  ActionDetails,
+  OutputActionRunningProcess,
+  RunningProcessesEntry,
+} from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import { EndpointCommandDefinitionMeta } from './types';
 import { CommandExecutionComponentProps } from '../console/types';
@@ -21,7 +25,7 @@ export const GetRunningProcessesActionResult = memo<
     {
       actionId?: string;
       actionRequestSent?: boolean;
-      completedActionDetails?: ActionDetails;
+      completedActionDetails?: ActionDetails<OutputActionRunningProcess>;
     },
     EndpointCommandDefinitionMeta
   >
@@ -34,7 +38,7 @@ export const GetRunningProcessesActionResult = memo<
 
   const getRunningProcessesApi = useSendGetEndpointRunningProcessesRequest();
 
-  const { data: actionDetails } = useGetActionDetails(actionId ?? '-', {
+  const { data: actionDetails } = useGetActionDetails<OutputActionRunningProcess>(actionId ?? '-', {
     enabled: Boolean(actionId) && isPending,
     refetchInterval: isPending ? 3000 : false,
   });
@@ -55,12 +59,12 @@ export const GetRunningProcessesActionResult = memo<
 
   // If get running processes request was created, store the action id if necessary
   useEffect(() => {
-    if (getRunningProcessesApi.isSuccess && actionId !== getRunningProcessesApi.data.action) {
+    if (getRunningProcessesApi.isSuccess && actionId !== getRunningProcessesApi.data.data.id) {
       setStore((prevState) => {
-        return { ...prevState, actionId: getRunningProcessesApi.data.action };
+        return { ...prevState, actionId: getRunningProcessesApi.data.data.id };
       });
     }
-  }, [actionId, getRunningProcessesApi?.data?.action, getRunningProcessesApi.isSuccess, setStore]);
+  }, [actionId, getRunningProcessesApi?.data?.data.id, getRunningProcessesApi.isSuccess, setStore]);
 
   useEffect(() => {
     if (actionDetails?.data.isCompleted) {
@@ -73,6 +77,13 @@ export const GetRunningProcessesActionResult = memo<
       });
     }
   }, [actionDetails?.data, setStatus, setStore]);
+
+  const tableEntries = useMemo(() => {
+    if (endpointId) {
+      return completedActionDetails?.outputs?.[endpointId]?.content.entries ?? [];
+    }
+    return [];
+  }, [completedActionDetails?.outputs, endpointId]);
 
   // Show nothing if still pending
   if (isPending) {
@@ -106,6 +117,7 @@ export const GetRunningProcessesActionResult = memo<
         'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.enityId',
         { defaultMessage: 'Entity id' }
       ),
+      width: '15%',
     },
     {
       field: 'pid',
@@ -113,6 +125,7 @@ export const GetRunningProcessesActionResult = memo<
         'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.pid',
         { defaultMessage: 'PID' }
       ),
+      width: '15%',
     },
     {
       field: 'command',
@@ -120,6 +133,7 @@ export const GetRunningProcessesActionResult = memo<
         'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.command',
         { defaultMessage: 'Command' }
       ),
+      width: '55%',
     },
     {
       field: 'user',
@@ -127,16 +141,14 @@ export const GetRunningProcessesActionResult = memo<
         'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.user',
         { defaultMessage: 'User' }
       ),
+      width: '15%',
     },
   ];
 
   // Show results
   return (
     <ResultComponent data-test-subj="getRunningProcessesSuccessCallout" showTitle={false}>
-      <EuiBasicTable
-        items={[...(completedActionDetails?.output?.content.entries ?? [])]}
-        columns={columns}
-      />
+      <EuiBasicTable<RunningProcessesEntry> items={[...tableEntries]} columns={columns} />
     </ResultComponent>
   );
 });

@@ -19,18 +19,24 @@ export type ResponseActions =
   | 'kill-process'
   | 'suspend-process'
   | 'running-processes';
+export interface OutputActions {
+  type: string;
+}
 
-export type OutputActionContentEntry = OutputActionRunningProcess;
-export interface OutputActionRunningProcess {
+export type OutputsType<TOutputType extends OutputActions = OutputActions> =
+  | Record<string, TOutputType | undefined>
+  | undefined;
+
+export interface RunningProcessesEntry {
   command: string;
   pid: string;
   entity_id: string;
   user: string;
 }
-export interface OutputActions {
+export interface OutputActionRunningProcess extends OutputActions {
   type: 'json' | 'text';
   content: {
-    entries: OutputActionContentEntry[];
+    entries: RunningProcessesEntry[];
   };
 }
 
@@ -112,11 +118,14 @@ export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId;
 
-export interface EndpointActionData<T extends EndpointActionDataParameterTypes = undefined> {
+export interface EndpointActionData<
+  T extends EndpointActionDataParameterTypes = undefined,
+  TOutputActions extends OutputActions = OutputActions
+> {
   command: ResponseActions;
   comment?: string;
   parameters?: T;
-  output?: OutputActions;
+  output?: TOutputActions;
 }
 
 export interface FleetActionResponseData {
@@ -216,6 +225,7 @@ export interface HostIsolationResponse {
   action: string;
 }
 
+export type RunningProcessesRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
 export interface RunningProcessesResponse {
   action: string;
 }
@@ -239,7 +249,7 @@ export interface PendingActionsResponse {
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
 
-export interface ActionDetails {
+export interface ActionDetails<TOutputType extends OutputActions = OutputActions> {
   /** The action id */
   id: string;
   /**
@@ -274,11 +284,11 @@ export interface ActionDetails {
   /**
    * The output data from an action
    */
-  output: OutputActions | undefined;
+  outputs?: OutputsType<TOutputType>;
 }
 
-export interface ActionDetailsApiResponse {
-  data: ActionDetails;
+export interface ActionDetailsApiResponse<TOutputType extends OutputActions = OutputActions> {
+  data: ActionDetails<TOutputType>;
 }
 export interface ActionListApiResponse {
   page: number | undefined;

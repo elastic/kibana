@@ -8,13 +8,11 @@
 import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query';
 import { HttpFetchError } from '@kbn/core/public';
 import {
-  HostIsolationRequestBody,
-  RunningProcessesResponse,
+  RunningProcessesRequestBody,
+  ActionDetails,
+  OutputActionRunningProcess,
 } from '../../../../common/endpoint/types/actions';
-import {
-  // GET_RUNNING_PROCESSES_ROUTE,
-  ISOLATE_HOST_ROUTE,
-} from '../../../../common/endpoint/constants';
+import { GET_RUNNING_PROCESSES_ROUTE } from '../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 /**
@@ -23,20 +21,25 @@ import { KibanaServices } from '../../../common/lib/kibana';
  */
 export const useSendGetEndpointRunningProcessesRequest = (
   customOptions?: UseMutationOptions<
-    RunningProcessesResponse,
+    { data: ActionDetails<OutputActionRunningProcess> },
     HttpFetchError,
-    HostIsolationRequestBody // TODO: Change this and the ones below for the Running processes ones when API pr merged
+    RunningProcessesRequestBody // TODO: Change this and the ones below for the Running processes ones when API pr merged
   >
-): UseMutationResult<RunningProcessesResponse, HttpFetchError, HostIsolationRequestBody> => {
-  return useMutation<RunningProcessesResponse, HttpFetchError, HostIsolationRequestBody>(
-    (getRunningProcessesData: HostIsolationRequestBody) => {
-      return KibanaServices.get().http.post<RunningProcessesResponse>(
-        /* GET_RUNNING_PROCESSES_ROUTE */ ISOLATE_HOST_ROUTE,
-        {
-          body: JSON.stringify(getRunningProcessesData),
-        }
-      );
-    },
-    customOptions
-  );
+): UseMutationResult<
+  { data: ActionDetails<OutputActionRunningProcess> },
+  HttpFetchError,
+  RunningProcessesRequestBody
+> => {
+  return useMutation<
+    { data: ActionDetails<OutputActionRunningProcess> },
+    HttpFetchError,
+    RunningProcessesRequestBody
+  >((getRunningProcessesData: RunningProcessesRequestBody) => {
+    return KibanaServices.get().http.post<{ data: ActionDetails<OutputActionRunningProcess> }>(
+      GET_RUNNING_PROCESSES_ROUTE,
+      {
+        body: JSON.stringify(getRunningProcessesData),
+      }
+    );
+  }, customOptions);
 };
