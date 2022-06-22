@@ -24,6 +24,11 @@ import {
 } from '../../../../common/lib/utils';
 import {
   secOnly,
+  secOnlyRead,
+  globalRead,
+  obsOnlyRead,
+  obsSecRead,
+  noKibanaPrivileges,
   obsOnly,
   superUser,
   secOnlyDelete,
