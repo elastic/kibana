@@ -246,13 +246,13 @@ export interface DiscoverFieldProps {
   multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
 
   /**
-   * Callback to edit a runtime field from index pattern
+   * Callback to edit a field from data view
    * @param fieldName name of the field to edit
    */
   onEditField?: (fieldName: string) => void;
 
   /**
-   * Callback to delete a runtime field from index pattern
+   * Callback to delete a runtime field from data view
    * @param fieldName name of the field to delete
    */
   onDeleteField?: (fieldName: string) => void;

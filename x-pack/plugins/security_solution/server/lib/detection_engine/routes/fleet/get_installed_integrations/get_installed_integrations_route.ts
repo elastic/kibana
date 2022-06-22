@@ -5,18 +5,25 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import { initPromisePool } from '../../../../../utils/promise_pool';
+import { buildSiemResponse } from '../../utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
+
 import { DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL } from '../../../../../../common/constants';
 import { GetInstalledIntegrationsResponse } from '../../../../../../common/detection_engine/schemas/response/get_installed_integrations_response_schema';
-import { buildSiemResponse } from '../../utils';
 import { createInstalledIntegrationSet } from './installed_integration_set';
+
+const MAX_CONCURRENT_REQUESTS_TO_PACKAGE_REGISTRY = 5;
 
 /**
  * Returns an array of installed Fleet integrations and their packages.
  */
-export const getInstalledIntegrationsRoute = (router: SecuritySolutionPluginRouter) => {
+export const getInstalledIntegrationsRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.get(
     {
       path: DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
@@ -39,17 +46,40 @@ export const getInstalledIntegrationsRoute = (router: SecuritySolutionPluginRout
           set.addPackagePolicy(policy);
         });
 
-        const registryPackages = await Promise.all(
-          set.getPackages().map((packageInfo) => {
-            return fleet.packages.getRegistryPackage(
+        const registryPackages = await initPromisePool({
+          concurrency: MAX_CONCURRENT_REQUESTS_TO_PACKAGE_REGISTRY,
+          items: set.getPackages(),
+          executor: async (packageInfo) => {
+            const registryPackage = await fleet.packages.getRegistryPackage(
               packageInfo.package_name,
               packageInfo.package_version
             );
-          })
-        );
+            return registryPackage;
+          },
+        });
 
-        registryPackages.forEach((registryPackage) => {
-          set.addRegistryPackage(registryPackage.packageInfo);
+        if (registryPackages.errors.length > 0) {
+          const errors = registryPackages.errors.map(({ error, item }) => {
+            return {
+              error,
+              packageId: `${item.package_name}@${item.package_version}`,
+            };
+          });
+
+          const packages = errors.map((e) => e.packageId).join(', ');
+          logger.error(
+            `Unable to retrieve installed integrations. Error fetching packages from registry: ${packages}.`
+          );
+
+          errors.forEach(({ error, packageId }) => {
+            const logMessage = `Error fetching package info from registry for ${packageId}`;
+            const logReason = error instanceof Error ? error.message : String(error);
+            logger.debug(`${logMessage}. ${logReason}`);
+          });
+        }
+
+        registryPackages.results.forEach(({ result }) => {
+          set.addRegistryPackage(result.packageInfo);
         });
 
         const installedIntegrations = set.getIntegrations();
