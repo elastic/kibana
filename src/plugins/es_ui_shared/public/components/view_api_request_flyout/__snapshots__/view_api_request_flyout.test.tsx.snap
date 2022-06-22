@@ -32,7 +32,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
         class="euiFlyoutBody__overflowContent"
       >
         <div
-          class="euiText euiText--medium"
+          class="euiText css-1lo1kz-euiText-m"
         >
           <p
             data-test-subj="apiRequestFlyoutDescription"
