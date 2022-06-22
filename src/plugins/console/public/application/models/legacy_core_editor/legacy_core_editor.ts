@@ -466,7 +466,7 @@ export class LegacyCoreEditor implements CoreEditor {
     return session.getAllFolds().map((fold) => fold.range);
   }
 
-  addFoldsAt(foldRanges: Range[]) {
+  addFoldsAtRanges(foldRanges: Range[]) {
     const session = this.editor.getSession();
     foldRanges.forEach((range) => {
       session.addFold('...', _AceRange.fromPoints(range.start, range.end));

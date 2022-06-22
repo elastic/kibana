@@ -287,5 +287,5 @@ export interface CoreEditor {
   /**
    * Add folds at given ranges
    */
-  addFoldsAt(foldRanges: Range[]): void;
+  addFoldsAtRanges(foldRanges: Range[]): void;
 }
