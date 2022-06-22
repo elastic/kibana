@@ -445,4 +445,36 @@ export class HeadlessChromiumDriver {
       targetPathname.startsWith(`${this.basePath}/`)
     );
   }
+
+  public async injectScreenshottingErrorHeader(error: Error, layout: Layout) {
+    await this.page.evaluate(
+      (selector: string, text: string) => {
+        let container = document.querySelector(selector);
+        if (!container) {
+          container = document.querySelector('body');
+        }
+
+        const errorBoundary = document.createElement('div');
+        errorBoundary.className = 'euiErrorBoundary';
+
+        const divNode = document.createElement('div');
+        divNode.className = 'euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge';
+
+        const preNode = document.createElement('pre');
+        preNode.className = 'euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap';
+
+        const codeNode = document.createElement('code');
+        codeNode.className = 'euiCodeBlock__code';
+
+        errorBoundary.appendChild(divNode);
+        divNode.appendChild(preNode);
+        preNode.appendChild(codeNode);
+        codeNode.appendChild(document.createTextNode(text));
+
+        container?.insertBefore(errorBoundary, container.firstChild);
+      },
+      layout.selectors.screenshot,
+      error.toString()
+    );
+  }
 }
