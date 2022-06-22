@@ -44,6 +44,7 @@ import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
 import { useBulkActions } from './bulk_actions/use_bulk_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
+import { convertRulesFilterToKQL } from '../../../../containers/detection_engine/rules/utils';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -161,7 +162,9 @@ export const RulesTables = React.memo<RulesTableProps>(
     });
 
     const { bulkActionsDryRunResult, isBulkActionsDryRunLoading } = useBulkActionsDryRun({
-      searchParams: isAllSelected ? { filterOptions } : { ids: selectedRuleIds },
+      searchParams: isAllSelected
+        ? { query: convertRulesFilterToKQL(filterOptions) }
+        : { ids: selectedRuleIds },
       editAction: bulkActionEdit,
       enabled: isBulkEditConfirmationVisible,
       action: bulkAction,

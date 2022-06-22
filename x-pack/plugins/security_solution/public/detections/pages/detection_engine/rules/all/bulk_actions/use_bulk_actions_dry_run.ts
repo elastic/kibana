@@ -7,7 +7,6 @@
 
 import { useQuery, QueryClient } from 'react-query';
 
-import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
 import { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../../../common/constants';
 
 import {
@@ -57,7 +56,7 @@ const processDryRunResult = (result: BulkActionResponse | undefined): DryRunResu
 
 interface UseBulkActionsDryRunProps {
   action?: BulkAction;
-  searchParams: { filterOptions?: FilterOptions } | { ids?: string[] };
+  searchParams: { query?: string } | { ids?: string[] };
   enabled: boolean;
   editAction?: BulkActionEditType;
 }
