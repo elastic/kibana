@@ -371,7 +371,7 @@ Querying & Filtering::
 * Allows comma delimiter on the filters multiple selections dropdowns {kibana-pull}130266[#130266]
 
 Security::
-* Warn & disallow creating role with existing name {kibana-pull}132218[#132218]
+* Disallow creating a role with the existing name in the role management page. Introduce a new optional boolean `createOnly` parameter in the create role API to prevent overwriting existing roles {kibana-pull}132218[#132218]
 * Improves Sessions tab {kibana-pull}131583[#131583]
 * Adds experimental `csp.disableUnsafeEval` config option to remove the unsafe-eval CSP {kibana-pull}124484[#124484]
 
