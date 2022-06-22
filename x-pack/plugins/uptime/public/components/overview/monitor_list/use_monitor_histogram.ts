@@ -13,7 +13,7 @@ import {
   Histogram,
   HistogramPoint,
   MonitorSummary,
-} from '../../../../../common/runtime_types/monitor';
+} from '../../../../common/runtime_types/monitor';
 import { useGetUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
 import { selectDynamicSettings } from '../../../state/selectors';
