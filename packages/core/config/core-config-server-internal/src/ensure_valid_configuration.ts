@@ -7,7 +7,7 @@
  */
 
 import { ConfigService, ConfigValidateParameters } from '@kbn/config';
-import { CriticalError } from '../errors';
+import { CriticalError } from '@kbn/core-base-server-internal';
 
 const ignoredPaths = ['dev.', 'elastic.apm.'];
 
