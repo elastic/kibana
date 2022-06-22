@@ -19,6 +19,7 @@ import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { MonitorTags } from './monitor_tags';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { LocationsStatus } from './locations_status';
 import {
@@ -26,6 +27,7 @@ import {
   selectMonitorStatus,
   syntheticsMonitorSelector,
 } from '../../../state/monitor_summary';
+import { ConfigKey } from '../../../../../../common/runtime_types';
 
 export const MonitorDetailsPanel = () => {
   const { data } = useSelector(selectMonitorStatus);
@@ -75,7 +77,7 @@ export const MonitorDetailsPanel = () => {
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <EuiBadge color="hollow">DEV</EuiBadge>
+          {monitor && <MonitorTags tags={monitor[ConfigKey.TAGS]} />}
         </EuiDescriptionListDescription>
       </EuiDescriptionList>
     </>
