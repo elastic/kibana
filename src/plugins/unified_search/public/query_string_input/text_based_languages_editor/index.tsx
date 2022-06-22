@@ -34,15 +34,18 @@ import {
 import { MemoizedDocumentation } from './documentation';
 import { useDebounceWithOptions } from './helpers';
 
+const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+
 interface TextBasedLanguagesEditorProps {
   query: any;
   onTextLangQueryChange: (query: any) => void;
   expandCodeEditor: (status: boolean) => void;
   isCodeEditorExpanded: boolean;
+  errors?: string[];
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
-const OS_COMMAND_KEY = '⌘';
+const COMMAND_KEY = isMac ? '⌘' : '^';
 const FONT_WIDTH = 8;
 const EDITOR_ONE_LINER_UNUSED_SPACE = 180;
 
@@ -68,6 +71,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   onTextLangQueryChange,
   expandCodeEditor,
   isCodeEditorExpanded,
+  errors,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getTextBasedLanguage(query);
@@ -75,6 +79,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const [lines, setLines] = useState(1);
   const [code, setCode] = useState(query.sql);
+  const [codeOneLiner, setCodeOneLiner] = useState('');
   const [editorHeight, setEditorHeight] = useState(
     isCodeEditorExpanded ? EDITOR_INITIAL_HEIGHT_EXPANDED : EDITOR_INITIAL_HEIGHT
   );
@@ -88,7 +93,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     euiTheme,
     isCompactFocused,
     editorHeight,
-    isCodeEditorExpanded
+    isCodeEditorExpanded,
+    Boolean(errors?.length)
   );
 
   const containerRef = useRef<HTMLElement>(null);
@@ -143,6 +149,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       if (editorElement) {
         editorElement.style.height = `${EDITOR_INITIAL_HEIGHT}px`;
         const contentWidth = Number(editorElement?.style.width.replace('px', ''));
+        calculateVisibleCode(contentWidth, true);
         editor1.current.layout({ width: contentWidth, height: EDITOR_INITIAL_HEIGHT });
       }
     }
@@ -159,6 +166,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       editor1.current?.onDidFocusEditorText(() => {
         setIsCompactFocused(true);
         setShowLineNumbers(true);
+        setCodeOneLiner('');
         clickedOutside = false;
         initialRender = false;
         updateLinesFromModel = true;
@@ -183,28 +191,26 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, []);
 
   const calculateVisibleCode = useCallback(
-    (width: number) => {
+    (width: number, force?: boolean) => {
       const containerWidth = containerRef.current?.offsetWidth;
-      if (containerWidth && !isCompactFocused) {
-        const hasLines = /\r|\n/.exec(query.sql);
+      if (containerWidth && (!isCompactFocused || force)) {
+        const hasLines = /\r|\n/.exec(code);
         if (hasLines && !updateLinesFromModel) {
-          setLines(query.sql.split(/\r|\n/).length);
+          setLines(code.split(/\r|\n/).length);
         }
-        const text = hasLines ? query.sql.split(/\r|\n/)[0] : query.sql;
+        const text = hasLines ? code.split(/\r|\n/)[0] : code;
         const queryLength = text.length;
         const charactersAlowed = Math.floor((width - EDITOR_ONE_LINER_UNUSED_SPACE) / FONT_WIDTH);
         if (queryLength > charactersAlowed) {
           const shortedCode = text.substring(0, charactersAlowed) + '...';
-          setCode(shortedCode);
+          setCodeOneLiner(shortedCode);
         } else {
           const shortedCode = hasLines ? `${text}...` : text;
-          setCode(shortedCode);
+          setCodeOneLiner(shortedCode);
         }
-      } else {
-        setCode(query.sql);
       }
     },
-    [isCompactFocused, query.sql]
+    [code, isCompactFocused]
   );
 
   const onResize = ({ width }: { width: number }) => {
@@ -346,7 +352,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     )}
                     <CodeEditor
                       languageId={languageId(language)}
-                      value={code}
+                      value={codeOneLiner || code}
                       options={codeEditorOptions}
                       width="100%"
                       onChange={onQueryUpdate}
@@ -388,7 +394,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                               </EuiText>
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
-                              <EuiBadge color="default">{`${OS_COMMAND_KEY} + Enter`} </EuiBadge>
+                              <EuiBadge color="default">{`${COMMAND_KEY} + Enter`} </EuiBadge>
                             </EuiFlexItem>
                           </EuiFlexGroup>
                         </EuiFlexItem>
@@ -462,7 +468,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="default">{`${OS_COMMAND_KEY} + Enter`} </EuiBadge>
+                <EuiBadge color="default">{`${COMMAND_KEY} + Enter`} </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

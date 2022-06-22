@@ -7,7 +7,7 @@
  */
 import type { EuiThemeComputed } from '@elastic/eui';
 
-export const EDITOR_INITIAL_HEIGHT = 40;
+export const EDITOR_INITIAL_HEIGHT = 38;
 export const EDITOR_INITIAL_HEIGHT_EXPANDED = 140;
 export const EDITOR_MIN_HEIGHT = 40;
 export const EDITOR_MAX_HEIGHT = 400;
@@ -16,25 +16,27 @@ export const textBasedLanguagedEditorStyles = (
   euiTheme: EuiThemeComputed,
   isCompactFocused: boolean,
   editorHeight: number,
-  isCodeEditorExpanded: boolean
+  isCodeEditorExpanded: boolean,
+  hasErrors: boolean
 ) => {
   let position = isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'); // cast string to type 'relative' | 'absolute'
   if (isCodeEditorExpanded) {
     position = 'relative' as 'relative';
   }
+  const bottomContainerBorderColor = hasErrors ? euiTheme.colors.danger : euiTheme.colors.primary;
   return {
     editorContainer: {
       position,
       zIndex: isCompactFocused ? 1 : 0,
       height: `${editorHeight}px`,
       border: isCompactFocused ? euiTheme.border.thin : 'none',
-      borderRight: euiTheme.border.thin,
     },
     resizableContainer: {
       display: 'flex',
       width: isCodeEditorExpanded ? '100%' : 'calc(100% - 80px)',
       alignItems: isCompactFocused ? 'flex-start' : 'center',
       border: !isCompactFocused ? euiTheme.border.thin : 'none',
+      borderBottomColor: hasErrors ? euiTheme.colors.danger : euiTheme.colors.lightShade,
     },
     linesBadge: {
       position: 'absolute' as 'absolute', // cast string to type 'absolute',
@@ -45,7 +47,7 @@ export const textBasedLanguagedEditorStyles = (
     },
     bottomContainer: {
       border: euiTheme.border.thin,
-      borderTop: isCodeEditorExpanded ? 'none' : `1px solid ${euiTheme.colors.primary}`,
+      borderTop: isCodeEditorExpanded ? 'none' : `1px solid ${bottomContainerBorderColor}`,
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.s,
       paddingRight: euiTheme.size.s,
