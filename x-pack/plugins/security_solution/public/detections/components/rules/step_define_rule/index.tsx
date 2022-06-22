@@ -85,7 +85,7 @@ const StyledButtonGroup = styled(EuiButtonGroup)`
   display: flex;
   justify-content: right;
   .euiButtonGroupButton {
-    padding-right: ${(props) => props.theme.eui.paddingSizes.l};
+    padding-right: ${(props) => props.theme.eui.euiSizeL};
   }
 `;
 
