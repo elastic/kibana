@@ -12,7 +12,6 @@ import { QUERY_KEY_CONTAINER_NAME_WIDGET, AGGREGATE_ROUTE } from '../../../commo
 import { AggregateResult } from '../../../common/types/aggregate';
 
 export const useFetchContainerNameData = (
-  onReduce: (result: AggregateResult[]) => Record<string, number>,
   filterQuery: string,
   widgetKey: string,
   groupBy: string,
@@ -42,7 +41,7 @@ export const useFetchContainerNameData = (
           sortByCount,
         },
       });
-      return onReduce(res);
+      return res;
     },
     {
       refetchOnWindowFocus: false,

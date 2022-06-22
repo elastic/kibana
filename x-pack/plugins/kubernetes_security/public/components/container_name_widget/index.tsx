@@ -13,13 +13,18 @@ import type { IndexPattern, GlobalFilter } from '../../types';
 import { useSetFilter } from '../../hooks';
 import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
 import { useFetchContainerNameData } from './hooks';
-import { AggregateResult } from '../../../common/types/aggregate';
 import { CONTAINER_IMAGE_NAME } from '../../../common/constants';
 
 export interface ContainerNameWidgetDataValueMap {
+  key: string;
+  count_by_aggs: {
+    value: number;
+  };
+}
+
+export interface ContainerNameArrayDataValue {
   name: string;
   count: number;
-  shouldHideFilter?: boolean;
 }
 
 export interface ContainerNameWidgetDeps {
@@ -28,7 +33,6 @@ export interface ContainerNameWidgetDeps {
   globalFilter: GlobalFilter;
   groupedBy: string;
   countBy?: string;
-  onReduce: (result: AggregateResult[]) => Record<string, number>;
 }
 
 interface FilterButtons {
@@ -42,7 +46,6 @@ export const ContainerNameWidget = ({
   globalFilter,
   groupedBy,
   countBy,
-  onReduce,
 }: ContainerNameWidgetDeps) => {
   const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
   const styles = useStyles();
@@ -56,7 +59,6 @@ export const ContainerNameWidget = ({
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
 
   const { data } = useFetchContainerNameData(
-    onReduce,
     filterQueryWithTimeRange,
     widgetKey,
     groupedBy,
@@ -67,40 +69,37 @@ export const ContainerNameWidget = ({
   const { getFilterForValueButton, getFilterOutValueButton, filterManager } = useSetFilter();
   const filterButtons = useMemo(() => {
     const result: FilterButtons = {
-      filterForButtons: [],
-      filterOutButtons: [],
+      filterForButtons:
+        data &&
+        data.map((aggResult: ContainerNameWidgetDataValueMap) => {
+          return getFilterForValueButton({
+            field: CONTAINER_IMAGE_NAME,
+            filterManager,
+            size: 'xs',
+            onClick: () => {},
+            onFilterAdded: () => {},
+            ownFocus: false,
+            showTooltip: true,
+            value: aggResult.key,
+          });
+        }),
+
+      filterOutButtons:
+        data &&
+        data.map((aggResult: ContainerNameWidgetDataValueMap) => {
+          return getFilterOutValueButton({
+            field: CONTAINER_IMAGE_NAME,
+            filterManager,
+            size: 'xs',
+            onClick: () => {},
+            onFilterAdded: () => {},
+            ownFocus: false,
+            showTooltip: true,
+            value: aggResult.key,
+          });
+        }),
     };
 
-    const mapping = () =>
-      data
-        ? Object.keys(data).forEach((groupedByValue) => {
-            result.filterForButtons.push(
-              getFilterForValueButton({
-                field: CONTAINER_IMAGE_NAME,
-                filterManager,
-                size: 'xs',
-                onClick: () => {},
-                onFilterAdded: () => {},
-                ownFocus: false,
-                showTooltip: true,
-                value: [groupedByValue],
-              })
-            );
-            result.filterOutButtons.push(
-              getFilterOutValueButton({
-                field: CONTAINER_IMAGE_NAME,
-                filterManager,
-                size: 'xs',
-                onClick: () => {},
-                onFilterAdded: () => {},
-                ownFocus: false,
-                showTooltip: true,
-                value: [groupedByValue],
-              })
-            );
-          })
-        : 0;
-    mapping();
     return result;
   }, [data, getFilterForValueButton, getFilterOutValueButton, filterManager]);
 
@@ -111,19 +110,14 @@ export const ContainerNameWidget = ({
     }
   );
 
-  const containerNameArray: ContainerNameWidgetDataValueMap[] = [];
-
-  const recordToArray = () =>
-    data
-      ? Object.keys(data).forEach((key) => {
-          containerNameArray.push({
-            name: key,
-            count: data[key],
-          });
-        })
-      : 0;
-
-  recordToArray();
+  const containerNameArray: ContainerNameArrayDataValue[] = data
+    ? data.map((aggResult: ContainerNameWidgetDataValueMap) => {
+        return {
+          name: aggResult.key,
+          count: aggResult.count_by_aggs.value,
+        };
+      })
+    : [];
 
   const columns = [
     {
@@ -180,7 +174,7 @@ export const ContainerNameWidget = ({
       <EuiInMemoryTable
         items={containerNameArray}
         columns={columns}
-        pagination={false}
+        pagination={true}
         sorting={sorting}
       />
     </div>

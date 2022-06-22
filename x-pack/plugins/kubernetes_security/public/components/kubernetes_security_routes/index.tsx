@@ -65,16 +65,6 @@ const KubernetesSecurityRoutesComponent = ({
     []
   );
 
-  const onReduceContainerAggs = useCallback(
-    (result: AggregateResult[]): Record<string, number> =>
-      result.reduce((groupedByKeyValue, aggregate) => {
-        groupedByKeyValue[aggregate.key_as_string || (aggregate.key.toString() as string)] =
-          aggregate.count_by_aggs.value;
-        return groupedByKeyValue;
-      }, {} as Record<string, number>),
-    []
-  );
-
   return (
     <Switch>
       <Route strict exact path={KUBERNETES_PATH}>
@@ -221,7 +211,6 @@ const KubernetesSecurityRoutesComponent = ({
               globalFilter={globalFilter}
               groupedBy={CONTAINER_IMAGE_NAME}
               countBy={ENTRY_LEADER_ENTITY_ID}
-              onReduce={onReduceContainerAggs}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
