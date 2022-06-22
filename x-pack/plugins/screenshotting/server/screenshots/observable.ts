@@ -7,7 +7,7 @@
 
 import type { Headers } from '@kbn/core/server';
 import { defer, forkJoin, Observable, throwError } from 'rxjs';
-import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
+import { mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import { errors } from '../../common';
 import {
   Context,
@@ -15,7 +15,7 @@ import {
   getChromiumDisconnectedError,
   HeadlessChromiumDriver,
 } from '../browsers';
-import { ConfigType, durationToNumber as toNumber } from '../config';
+import { ConfigType, durationToNumber } from '../config';
 import type { PdfScreenshotOptions } from '../formats';
 import { Layout } from '../layouts';
 import { Actions, EventLogger } from './event_logger';
@@ -28,14 +28,9 @@ import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
-import type { Screenshot } from './types';
+import type { PhaseInstance, PhaseTimeouts, Screenshot } from './types';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
-
-type CaptureTimeouts = ConfigType['capture']['timeouts'];
-export interface PhaseTimeouts extends CaptureTimeouts {
-  loadDelay: ConfigType['capture']['loadDelay'];
-}
 
 type Url = string;
 type UrlWithContext = [url: Url, context: Context];
@@ -113,28 +108,53 @@ const getDefaultElementPosition = (
   ];
 };
 
+const getTimeouts = (captureConfig: ConfigType['capture']) => ({
+  openUrl: {
+    timeoutValue: durationToNumber(captureConfig.timeouts.openUrl),
+    configValue: `xpack.screenshotting.capture.timeouts.openUrl`,
+    label: 'open URL',
+  },
+  waitForElements: {
+    timeoutValue: durationToNumber(captureConfig.timeouts.waitForElements),
+    configValue: `xpack.screenshotting.capture.timeouts.waitForElements`,
+    label: 'wait for elements',
+  },
+  renderComplete: {
+    timeoutValue: durationToNumber(captureConfig.timeouts.renderComplete),
+    configValue: `xpack.screenshotting.capture.timeouts.renderComplete`,
+    label: 'render complete',
+  },
+  loadDelay: durationToNumber(captureConfig.loadDelay),
+});
+
 export class ScreenshotObservableHandler {
+  private timeouts: PhaseTimeouts;
+
   constructor(
     private readonly driver: HeadlessChromiumDriver,
     private readonly config: ConfigType,
     private readonly eventLogger: EventLogger,
     private readonly layout: Layout,
     private options: ScreenshotObservableOptions
-  ) {}
+  ) {
+    this.timeouts = getTimeouts(config.capture);
+  }
 
   /*
    * Decorates a TimeoutError with context of the phase that has timed out.
    */
-  public waitUntil<O>(timeoutValue: number, label: string) {
+  public waitUntil<O>(phase: PhaseInstance) {
+    const { timeoutValue, label, configValue } = phase;
     return (source: Observable<O>) =>
       source.pipe(
-        catchError((error) => {
-          throw new Error(`The "${label}" phase encountered an error: ${error}`);
-        }),
         timeoutWith(
           timeoutValue,
           throwError(
-            new Error(`The "${label}" phase took longer than ${timeoutValue / 1000} seconds.`)
+            new Error(
+              `Screenshotting encountered a timeout error: "${label}" took longer than` +
+                ` ${timeoutValue / 1000} seconds. You may need to increase "${configValue}"` +
+                ` in kibana.yml.`
+            )
           )
         )
       );
@@ -154,24 +174,25 @@ export class ScreenshotObservableHandler {
       return openUrl(
         this.driver,
         this.eventLogger,
-        toNumber(this.config.capture.timeouts.openUrl),
+        this.timeouts.openUrl.timeoutValue,
         index,
         url,
         { ...(context ?? {}), layout: this.layout.id },
         this.options.headers ?? {}
       );
-    }).pipe(this.waitUntil(toNumber(this.config.capture.timeouts.openUrl), 'open URL'));
+    }).pipe(this.waitUntil(this.timeouts.openUrl));
   }
 
   private waitForElements() {
     const driver = this.driver;
-    const waitTimeout = toNumber(this.config.capture.timeouts.waitForElements);
+    const waitTimeout = this.timeouts.waitForElements.timeoutValue;
 
     return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
+      this.waitUntil(this.timeouts.waitForElements),
       mergeMap((itemsCount) =>
         waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout)
       ),
-      this.waitUntil(waitTimeout, 'wait for elements')
+      this.waitUntil(this.timeouts.waitForElements)
     );
   }
 
@@ -202,7 +223,7 @@ export class ScreenshotObservableHandler {
       await waitForRenderComplete(
         driver,
         eventLogger,
-        toNumber(this.config.capture.loadDelay),
+        durationToNumber(this.config.capture.loadDelay),
         layout
       );
     }).pipe(
@@ -217,7 +238,7 @@ export class ScreenshotObservableHandler {
           renderErrors: getRenderErrors(driver, eventLogger, layout),
         })
       ),
-      this.waitUntil(toNumber(this.config.capture.timeouts.renderComplete), 'render complete')
+      this.waitUntil(this.timeouts.renderComplete)
     );
   }
 
