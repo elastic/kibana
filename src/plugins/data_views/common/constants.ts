@@ -29,6 +29,7 @@ export const RUNTIME_FIELD_TYPES = [
  */
 export const DEFAULT_ASSETS_TO_IGNORE = {
   LOGS_INDEX_PATTERN: 'logs-*',
+  LOGS_DATA_STREAM_TO_IGNORE: 'logs-elastic_agent', // ignore ds created by Fleet server itself
   ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE: 'logs-enterprise_search.api-default', // ignore ds created by enterprise search
 };
 

@@ -48,7 +48,9 @@ export const hasUserIndexPattern = async (
 
   if (resolveResponse) {
     const hasAnyNonDefaultFleetDataStreams = resolveResponse.data_streams.some(
-      (ds) => ds.name === DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE
+      (ds) =>
+        ds.name !== DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE &&
+        ds.name !== DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE
     );
 
     if (hasAnyNonDefaultFleetDataStreams) return false;

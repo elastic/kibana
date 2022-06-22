@@ -19,6 +19,7 @@ export class HasData {
     if (source.name.startsWith('.')) return false;
 
     // filter out sources from DEFAULT_ASSETS_TO_IGNORE
+    if (source.name === DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE) return false;
     if (source.name === DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE)
       return false;
 

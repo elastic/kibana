@@ -64,6 +64,26 @@ describe('isUserDataIndex', () => {
     expect(isUserDataIndex(dataIndex)).toBe(true);
   });
 
+  test('fleet asset is not data index', () => {
+    const fleetAssetIndex: MatchedItem = {
+      name: 'logs-elastic_agent',
+      tags: [
+        {
+          key: 'data_stream',
+          name: 'Data stream',
+          color: 'primary',
+        },
+      ],
+      item: {
+        name: 'logs-elastic_agent',
+        backing_indices: ['.ds-logs-elastic_agent-2021.08.18-000001'],
+        timestamp_field: '@timestamp',
+      },
+    };
+
+    expect(isUserDataIndex(fleetAssetIndex)).toBe(false);
+  });
+
   test('ent search logs not data index', () => {
     const fleetAssetIndex: MatchedItem = {
       name: 'logs-enterprise_search.api-default',
