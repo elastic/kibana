@@ -131,12 +131,15 @@ export class SavedSearchEmbeddable
     this.inspectorAdapters = {
       requests: new RequestAdapter(),
     };
+    this.panelTitle = savedSearch.title ?? '';
     this.initializeSearchEmbeddableProps();
 
     this.subscription = this.getUpdated$().subscribe(() => {
-      this.panelTitle = this.output.title || '';
-
-      if (this.searchProps) {
+      const titleChanged = this.output.title && this.panelTitle !== this.output.title;
+      if (titleChanged) {
+        this.panelTitle = this.output.title || '';
+      }
+      if (this.searchProps && (titleChanged || this.isFetchRequired(this.searchProps))) {
         this.pushContainerStateParamsToProps(this.searchProps);
       }
     });
@@ -329,16 +332,24 @@ export class SavedSearchEmbeddable
     }
   }
 
-  private async pushContainerStateParamsToProps(
-    searchProps: SearchProps,
-    { forceFetch = false }: { forceFetch: boolean } = { forceFetch: false }
-  ) {
-    const isFetchRequired =
+  private isFetchRequired(searchProps?: SearchProps) {
+    if (!searchProps) {
+      return false;
+    }
+    return (
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
       !isEqual(this.prevTimeRange, this.input.timeRange) ||
       !isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort) ||
-      this.prevSearchSessionId !== this.input.searchSessionId;
+      this.prevSearchSessionId !== this.input.searchSessionId
+    );
+  }
+
+  private async pushContainerStateParamsToProps(
+    searchProps: SearchProps,
+    { forceFetch = false }: { forceFetch: boolean } = { forceFetch: false }
+  ) {
+    const isFetchRequired = this.isFetchRequired(searchProps);
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
@@ -393,7 +404,7 @@ export class SavedSearchEmbeddable
   }
 
   private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
-    if (!this.searchProps) {
+    if (!searchProps) {
       return;
     }
 
