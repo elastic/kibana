@@ -15,6 +15,7 @@ import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import { buildDataTableRecord } from '../utils/build_data_record';
 
 const mockSearchResult = new Subject();
 const services = {
@@ -195,7 +196,7 @@ describe('Test of <Doc /> helper / hook', () => {
       getComputedFields: () => [],
     };
 
-    const record = { test: 1 };
+    const record = { _id: '1', _index: 't', test: 1 };
 
     const props = {
       id: '1',
@@ -233,6 +234,9 @@ describe('Test of <Doc /> helper / hook', () => {
       await hook.waitForNextUpdate();
     });
 
-    expect(hook.result.current.slice(0, 2)).toEqual([ElasticRequestState.Found, record]);
+    expect(hook.result.current.slice(0, 2)).toEqual([
+      ElasticRequestState.Found,
+      buildDataTableRecord(record),
+    ]);
   });
 });
