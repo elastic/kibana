@@ -8,6 +8,7 @@
 import { EuiFlyoutBody } from '@elastic/eui';
 import styled from 'styled-components';
 import React from 'react';
+import { AlertRawEventData } from '../../../../../common/components/event_details/event_details';
 import { EndpointIsolateSuccess } from '../../../../../common/components/endpoint/host_isolation';
 import { HostIsolationPanel } from '../../../../../detections/components/host_isolation';
 import { BrowserFields, TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
@@ -44,7 +45,7 @@ interface FlyoutBodyComponentProps {
   isIsolateActionSuccessBannerVisible: boolean;
   isHostIsolationPanelOpen: boolean;
   loading: boolean;
-  rawEventData: object | undefined;
+  rawEventData: AlertRawEventData | undefined;
   showAlertDetails: () => void;
   timelineId: string;
 }
