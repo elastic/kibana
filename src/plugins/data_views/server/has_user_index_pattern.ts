@@ -20,7 +20,6 @@ interface Deps {
 }
 
 export const getIndexPattern = async ({
-  esClient,
   soClient,
 }: Deps): Promise<SavedObjectsFindResponse<DataViewSavedObjectAttrs, unknown>> =>
   soClient.find<DataViewSavedObjectAttrs>({

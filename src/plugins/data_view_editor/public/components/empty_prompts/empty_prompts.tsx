@@ -37,9 +37,6 @@ export function isUserDataIndex(source: MatchedItem) {
   // filter out sources from DEFAULT_ASSETS_TO_IGNORE
   if (source.name === DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE) return false;
 
-  // filter out empty sources created by apm server
-  if (source.name.startsWith('apm-')) return false;
-
   return true;
 }
 
