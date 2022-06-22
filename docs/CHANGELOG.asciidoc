@@ -489,7 +489,7 @@ Observability::
 * Fixes normalizers to not parse list values if they are already parsed {kibana-pull}133563[#133563]
 * Change bucket_scripts to use params for thresholds {kibana-pull}133214[#133214]
 * Use Observability rule type registry for list of rule types {kibana-pull}132484[#132484]
-* APM anomaly rule type should appear in o11y rules page {kibana-pull}132476[#132476]
+* APM anomaly rule type should appear in observability rules page {kibana-pull}132476[#132476]
 * Fixes monitors details page errors {kibana-pull}132196[#132196]
 * Set a valid service_name for python APM onboarding {kibana-pull}131959[#131959]
 * Rename service groups template titles and links {kibana-pull}131381[#131381]
