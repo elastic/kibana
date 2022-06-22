@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import moment from 'moment';
 import pMap from 'p-map';
 
-import type { Agent, FleetServerAgentAction, CurrentUpgrade } from '../../types';
+import type { Agent, BulkActionResult, FleetServerAgentAction, CurrentUpgrade } from '../../types';
 import {
   AgentReassignmentError,
   HostedAgentPolicyRestrictionRelatedError,
@@ -21,14 +21,8 @@ import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../commo
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
-import { errorsToResults } from './crud';
-import {
-  getAgentDocuments,
-  getAgents,
-  updateAgent,
-  bulkUpdateAgents,
-  getAgentPolicyForAgent,
-} from './crud';
+import { errorsToResults, processAgentsInBatches } from './crud';
+import { getAgentDocuments, updateAgent, bulkUpdateAgents, getAgentPolicyForAgent } from './crud';
 import { searchHitToAgent } from './helpers';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
@@ -105,8 +99,36 @@ export async function sendUpgradeAgentsActions(
       }
     }
   } else if ('kuery' in options) {
-    givenAgents = await getAgents(esClient, options);
+    return await processAgentsInBatches(
+      esClient,
+      {
+        kuery: options.kuery,
+        showInactive: options.showInactive ?? false,
+        perPage: options.perPage,
+      },
+      async (agents: Agent[], skipSuccess: boolean) =>
+        await upgradeBatch(soClient, esClient, agents, outgoingErrors, options, skipSuccess)
+    );
   }
+
+  return await upgradeBatch(soClient, esClient, givenAgents, outgoingErrors, options);
+}
+
+async function upgradeBatch(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  givenAgents: Agent[],
+  outgoingErrors: Record<Agent['id'], Error>,
+  options: ({ agents: Agent[] } | GetAgentsOptions) & {
+    version: string;
+    sourceUri?: string | undefined;
+    force?: boolean;
+    upgradeDurationSeconds?: number;
+    startTime?: string;
+  },
+  skipSuccess?: boolean
+): Promise<{ items: BulkActionResult[] }> {
+  const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
 
@@ -187,8 +209,9 @@ export async function sendUpgradeAgentsActions(
   return {
     items: errorsToResults(
       givenAgents,
-      outgoingErrors,
-      'agentIds' in options ? options.agentIds : undefined
+      errors,
+      'agentIds' in options ? options.agentIds : undefined,
+      skipSuccess
     ),
   };
 }
