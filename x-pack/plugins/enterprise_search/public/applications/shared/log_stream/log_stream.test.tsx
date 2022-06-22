@@ -50,7 +50,7 @@ describe('EntSearchLogStream', () => {
         ).prop('children')
       );
 
-      expect(wrapper.prop('sourceId')).toEqual('test');
+      expect(wrapper.prop('logView')).toEqual({ type: 'log-view-reference', logViewId: 'test' });
       expect(wrapper.prop('startTimestamp')).toEqual(1);
       expect(wrapper.prop('endTimestamp')).toEqual(2);
     });
