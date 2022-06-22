@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { History, LocationDescriptor } from 'history';
+import { History } from 'history';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import {
@@ -21,7 +21,7 @@ import {
 } from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
 import type { WizardSection } from '../component_template_form';
-import { useKibana } from '../../../..';
+import { useRedirectPath } from '../../../../hooks/redirect_path';
 
 interface MatchParams {
   name: string;
@@ -34,27 +34,6 @@ export function useTabFromQueryString(history: History): WizardSection | undefin
       return params.get('tab') as WizardSection;
     }
   }, [history.location.search]);
-}
-
-export function useRedirectPath(history: History) {
-  const { services } = useKibana();
-
-  const redirectPath = useMemo(() => {
-    const locationSearchParams = new URLSearchParams(history.location.search);
-
-    return locationSearchParams.get('redirect_path');
-  }, [history.location.search]);
-
-  return useCallback(
-    (location: LocationDescriptor) => {
-      if (redirectPath && services.application) {
-        services.application.navigateToUrl(redirectPath);
-      } else {
-        history.push(location);
-      }
-    },
-    [redirectPath, services.application, history]
-  );
 }
 
 export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
