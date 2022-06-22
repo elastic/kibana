@@ -144,16 +144,6 @@ export function LayerPanels(
     [dispatchLens]
   );
 
-  const getActionContext = () => {
-    const trigger = props.uiActions.getTrigger('UPDATE_FILTER_REFERENCES_TRIGGER');
-    if (!trigger) {
-      throw new Error('Unable to get context, could not locate trigger');
-    }
-    return {
-      trigger,
-    } as ActionExecutionContext;
-  };
-
   return (
     <EuiForm className="lnsConfigPanel">
       {layerIds.map((layerId, layerIndex) => (
@@ -198,17 +188,18 @@ export function LayerPanels(
             const layerDatasourceState = datasourceStates?.[datasourceId]
               ?.state as IndexPatternPrivateState;
 
+            const trigger = props.uiActions.getTrigger('UPDATE_FILTER_REFERENCES_TRIGGER');
             const action = props.uiActions.getAction('UPDATE_FILTER_REFERENCES_ACTION');
 
             action.execute({
-              ...getActionContext(),
+              trigger,
               toDataView: null,
               fromDataView: layerDatasourceState.layers[layerId].indexPatternId,
               usedDataViews: Object.values(
                 Object.values(layerDatasourceState.layers).map((layer) => layer.indexPatternId)
               ),
               defaultDataView: layerDatasourceState.currentIndexPatternId,
-            });
+            } as ActionExecutionContext);
 
             dispatchLens(
               removeOrClearLayer({
