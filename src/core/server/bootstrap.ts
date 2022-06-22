@@ -8,8 +8,8 @@
 
 import chalk from 'chalk';
 import { CliArgs, Env, RawConfigService } from '@kbn/config';
+import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
-import { CriticalError } from './errors';
 
 interface BootstrapArgs {
   configs: string[];

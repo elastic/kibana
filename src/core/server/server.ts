@@ -17,9 +17,12 @@ import {
   ILoggingSystem,
   config as loggingConfig,
 } from '@kbn/core-logging-server-internal';
+import {
+  coreDeprecationProvider,
+  ensureValidConfiguration,
+} from '@kbn/core-config-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { coreDeprecationProvider, ensureValidConfiguration } from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
