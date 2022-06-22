@@ -46,10 +46,12 @@ export const hasUserIndexPattern = async (
     name: `${DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN}`,
   });
 
-  const hasAnyNonDefaultFleetDataStreams = resolveResponse.data_streams.some(
-    (ds) => ds.name !== DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE
-  );
+  if (resolveResponse) {
+    const hasAnyNonDefaultFleetDataStreams = resolveResponse.data_streams.some(
+      (ds) => ds.name === DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE
+    );
 
-  if (hasAnyNonDefaultFleetDataStreams) return true;
-  return false;
+    if (hasAnyNonDefaultFleetDataStreams) return false;
+  }
+  return true;
 };
