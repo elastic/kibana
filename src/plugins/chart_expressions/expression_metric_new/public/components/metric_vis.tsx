@@ -17,7 +17,7 @@ import { getThemeService } from '../services/theme_service';
 import { getPaletteService } from '../services';
 
 // TODO - find a reasonable default (from EUI perhaps?)
-const defaultColor = '5e5e5e';
+const defaultColor = '#5e5e5e';
 
 const getColor = (value: number, paletteParams: CustomPaletteState | undefined) =>
   paletteParams
@@ -55,10 +55,6 @@ const MetricVis = ({
     ? getColumnByAccessor(config.dimensions.breakdownBy, data.columns)
     : undefined;
 
-  const extraText = secondaryMetricColumn
-    ? data.rows[0][secondaryMetricColumn.id]
-    : config.metric.extraText;
-
   const formatValue = (val: unknown) => String(val);
 
   const metricConfigs: MetricSpec['data'][number] = [];
@@ -67,7 +63,6 @@ const MetricVis = ({
     valueFormatter: formatValue,
     domain: { min: config.metric.progressMin, max: config.metric.progressMax },
     progressBarDirection: config.metric.progressDirection,
-    extra: <span>{extraText}</span>,
   };
 
   if (!breakdownByColumn) {
@@ -78,6 +73,11 @@ const MetricVis = ({
       value,
       title: primaryMetricColumn.name,
       subtitle: secondaryMetricColumn?.name ?? config.metric.subtitle,
+      extra: (
+        <span>
+          {secondaryMetricColumn ? data.rows[0][secondaryMetricColumn.id] : config.metric.extraText}
+        </span>
+      ),
       color: getColor(value, config.metric.palette),
     });
   }
@@ -91,6 +91,11 @@ const MetricVis = ({
         value,
         title: row[breakdownByColumn.id],
         subtitle: primaryMetricColumn.name,
+        extra: (
+          <span>
+            {secondaryMetricColumn ? row[secondaryMetricColumn.id] : config.metric.extraText}
+          </span>
+        ),
         color: getColor(value, config.metric.palette),
       });
     }
