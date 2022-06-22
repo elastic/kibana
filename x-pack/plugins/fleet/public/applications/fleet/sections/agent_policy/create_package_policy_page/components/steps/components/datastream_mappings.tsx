@@ -6,16 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiBasicTable,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-  EuiSpacer,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { RegistryStream, PackageInfo } from '../../../../../../types';
@@ -76,9 +67,9 @@ export const DatastreamMappings: React.FunctionComponent<Props> = ({
         <EuiBasicTable
           items={[{ label: defaultPipelineName + '@mappings' }]}
           columns={[
-            // @ts-ignore
             {
               field: 'label',
+              name: '',
             },
             {
               width: '60px',
@@ -95,15 +86,6 @@ export const DatastreamMappings: React.FunctionComponent<Props> = ({
             },
           ]}
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="xs" />
-        <EuiButtonEmpty size="xs" flush="left" iconType="plusInCircle">
-          <FormattedMessage
-            id="xpack.fleet.packagePolicyEditor.datastreamMappings.addCustomButn"
-            defaultMessage="Add custom mappings"
-          />
-        </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
