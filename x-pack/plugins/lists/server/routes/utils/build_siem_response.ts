@@ -60,15 +60,19 @@ export class SiemResponseFactory {
     };
 
     return this.response.custom({
-      body: Buffer.from(
-        JSON.stringify({
-          message: body ?? statusToErrorMessage(statusCode),
-          status_code: statusCode,
-        })
-      ),
-      headers: defaultedHeaders,
-      statusCode,
-    });
+      message:statusToErrorMessage(statusCode),
+      error_code:statusCode,
+      attributes:Buffer.from(
+          JSON.stringify({
+           status_code:statusCode,
+            message:body,
+            
+            
+          })
+        ),
+        headers:defaultedHeaders,
+        statusCode:0
+      });
   }
 }
 
