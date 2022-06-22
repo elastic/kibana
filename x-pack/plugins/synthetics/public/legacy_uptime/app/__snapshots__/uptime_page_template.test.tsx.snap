@@ -22,7 +22,7 @@ exports[`UptimePageTemplateComponent styling applies the header centering on mob
     class="euiPageBody euiPageBody--borderRadiusNone"
   >
     <div
-      class="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--borderRadiusNone"
+      class="euiPanel euiPanel--plain euiPageContent euiPageContent--borderRadiusNone css-10ffim0-euiPanel-grow-none-plain"
       role="main"
     >
       <div
@@ -52,7 +52,7 @@ exports[`UptimePageTemplateComponent styling does not apply header centering on 
     class="euiPageBody euiPageBody--borderRadiusNone"
   >
     <div
-      class="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--borderRadiusNone"
+      class="euiPanel euiPanel--plain euiPageContent euiPageContent--borderRadiusNone css-10ffim0-euiPanel-grow-none-plain"
       role="main"
     >
       <div

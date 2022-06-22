@@ -11,6 +11,7 @@ export type {
   DataViewBase,
   DataViewFieldBase,
   EsQueryConfig,
+  EsQueryFiltersConfig,
   IFieldSubType,
   IFieldSubTypeMulti,
   IFieldSubTypeNested,
@@ -43,7 +44,6 @@ export type {
   KueryNode,
   KueryParseOptions,
   KueryQueryOptions,
-  NodeTypes,
 } from './kuery';
 
 export {

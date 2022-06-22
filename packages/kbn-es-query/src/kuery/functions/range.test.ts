@@ -229,6 +229,36 @@ describe('kuery functions', () => {
 
         expect(result).toEqual(expected);
       });
+
+      test('should allow to configure ignore_unmapped for a nested query', () => {
+        const expected = {
+          bool: {
+            should: [
+              {
+                nested: {
+                  path: 'nestedField.nestedChild',
+                  query: {
+                    range: {
+                      'nestedField.nestedChild.doublyNestedChild': {
+                        lt: 8000,
+                      },
+                    },
+                  },
+                  score_mode: 'none',
+                  ignore_unmapped: true,
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode('range', '*doublyNested*', 'lt', 8000);
+        const result = range.toElasticsearchQuery(node, indexPattern, {
+          nestedIgnoreUnmapped: true,
+        });
+
+        expect(result).toEqual(expected);
+      });
     });
   });
 });
