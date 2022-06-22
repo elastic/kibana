@@ -18,6 +18,7 @@ import {
 } from './loader';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { HttpFetchError } from '@kbn/core/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
@@ -932,6 +933,7 @@ describe('loader', () => {
         indexPatternsService: mockIndexPatternsService(),
         onError: jest.fn(),
         storage,
+        uiActions: uiActionsPluginMock.createStartContract(),
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
@@ -1006,6 +1008,7 @@ describe('loader', () => {
         },
         onError,
         storage,
+        uiActions: uiActionsPluginMock.createStartContract(),
       });
 
       expect(setState).not.toHaveBeenCalled();
