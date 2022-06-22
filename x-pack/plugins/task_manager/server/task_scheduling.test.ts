@@ -288,10 +288,21 @@ describe('TaskScheduling', () => {
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
       mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Idle }));
-      mockTaskStore.update.mockRejectedValueOnce(409);
+      mockTaskStore.update.mockRejectedValueOnce(500);
 
       const result = taskScheduling.runSoon(id);
-      await expect(result).rejects.toEqual(409);
+      await expect(result).rejects.toEqual(500);
+    });
+
+    test('ignores 409 conflict errors', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Idle }));
+      mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
+
+      const result = await taskScheduling.runSoon(id);
+      expect(result).toEqual({ id });
     });
 
     test('rejects when the task is being claimed', async () => {

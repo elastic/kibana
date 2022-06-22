@@ -209,11 +209,17 @@ export class TaskScheduling {
    */
   public async runSoon(taskId: string): Promise<RunSoonResult> {
     const task = await this.getTask(taskId);
-    await this.store.update({
-      ...task,
-      scheduledAt: new Date(),
-      runAt: new Date(),
-    });
+    try {
+      await this.store.update({
+        ...task,
+        scheduledAt: new Date(),
+        runAt: new Date(),
+      });
+    } catch (e) {
+      if (e.statusCode !== 409) {
+        throw e;
+      }
+    }
     return { id: task.id };
   }
 
