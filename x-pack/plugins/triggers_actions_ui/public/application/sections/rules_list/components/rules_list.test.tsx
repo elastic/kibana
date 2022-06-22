@@ -398,7 +398,8 @@ describe('Update Api Key', () => {
   });
 });
 
-describe('rules_list component empty', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/134924
+describe.skip('rules_list component empty', () => {
   let wrapper: ReactWrapper<any>;
   async function setup() {
     loadRules.mockResolvedValue({
