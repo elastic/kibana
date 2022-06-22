@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             caseId: secCase.id,
             params: postCommentUserReq,
-            auth: { user, space: 'space1' },
+            auth: { user: superUser, space: 'space1' },
           });
 
           await deleteComment({
