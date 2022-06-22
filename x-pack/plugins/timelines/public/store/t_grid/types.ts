@@ -54,6 +54,7 @@ export enum TimelineId {
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
+  kubernetesPageSessions = 'kubernetes-page-sessions',
 }
 
 export interface InitialyzeTGridSettings extends Partial<TGridModelSettings> {
