@@ -47,10 +47,10 @@ export class ApmClient {
   private readonly logger: ToolingLog;
 
   constructor(config: AxiosRequestConfig, logger: ToolingLog) {
-    const { baseURL = DEFAULT_BASE_URL, timeout = DEFAULT_CLIENT_TIMEOUT } = config;
+    const { baseURL = DEFAULT_BASE_URL, timeout = DEFAULT_CLIENT_TIMEOUT, auth } = config;
 
     this.client = axios.create({
-      auth: config.auth,
+      auth,
       baseURL,
       timeout,
     });

@@ -7,8 +7,9 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import ApmClient from './apm_client';
-import CiStatsClient from './ci_stats_client';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+
+import { ApmClient } from './apm_client';
 
 interface ReporterOptions {
   param: {
@@ -16,13 +17,10 @@ interface ReporterOptions {
   };
   apmClient: {
     baseURL: string;
-    username: string;
-    password: string;
-  };
-  ciStatsClient: {
-    baseURL: string;
-    username: string;
-    password: string;
+    auth: {
+      username: string;
+      password: string;
+    };
   };
   log: ToolingLog;
 }
@@ -31,12 +29,10 @@ export async function reporter(options: ReporterOptions) {
   const {
     param: { ciBuildId },
     apmClient: apmClientOptions,
-    ciStatsClient: ciStatsClientOptions,
     log,
   } = options;
 
   const apm = new ApmClient(apmClientOptions, log);
-  const ciStats = new CiStatsClient(ciStatsClientOptions, log);
 
   const performanceMainStats = await apm.mainStatistics({ ciBuildId });
 
@@ -47,10 +43,19 @@ export async function reporter(options: ReporterOptions) {
     const appHomeStats = tg.find((e) => e.name === '/app/home');
     const appDashboardsStats = tg.find((e) => e.name === '/app/dashboards');
 
-    await ciStats.postPerformanceMetricsReports(ciBuildId, 'url', {
+    const ciStatsReporter = CiStatsReporter.fromEnv(
+      new ToolingLog({
+        level: 'info',
+        writeTo: process.stdout,
+      })
+    );
+
+    const body = {
       ...(loginStats && { page_load_login: loginStats.latency }),
       ...(appHomeStats && { page_load_app_home: appHomeStats.latency }),
       ...(appDashboardsStats && { page_load_app_dashboards: appDashboardsStats.latency }),
-    });
+    };
+
+    await ciStatsReporter.reportPerformanceMetrics(body);
   }
 }

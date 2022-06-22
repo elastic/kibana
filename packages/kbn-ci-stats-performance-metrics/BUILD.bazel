@@ -40,9 +40,8 @@ RUNTIME_DEPS = [
   "//packages/kbn-dev-cli-runner",
   "//packages/kbn-test",
   "//packages/kbn-tooling-log",
-  "@npm//@elastic/elasticsearch",
-  "@npm//axios-curlirize",
-  "@npm//qs",
+  "//packages/kbn-ci-stats-reporter",
+  "@npm//lodash",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -59,9 +58,10 @@ TYPES_DEPS = [
   "//packages/kbn-dev-cli-runner:npm_module_types",
   "//packages/kbn-test:npm_module_types",
   "//packages/kbn-tooling-log:npm_module_types",
-  "@npm//@elastic/elasticsearch",
+  "//packages/kbn-ci-stats-reporter:npm_module_types",
   "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//@types/lodash",
 ]
 
 jsts_transpiler(

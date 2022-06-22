@@ -52,16 +52,15 @@ export async function runCli() {
       }
 
       return reporter({
-        param: { ciBuildId: buildId },
         apmClient: {
-          username: apmUsername,
-          password: apmPassword,
+          auth: {
+            username: apmUsername,
+            password: apmPassword,
+          },
           baseURL: apmBaseUrl,
         },
-        ciStatsClient: {
-          username: '',
-          password: '',
-          baseURL: '',
+        param: {
+          ciBuildId: buildId,
         },
         log,
       });

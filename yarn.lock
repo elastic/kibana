@@ -9164,11 +9164,6 @@ axe-core@^4.2.0:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.3.5.tgz#78d6911ba317a8262bfee292aeafcc1e04b49cc5"
   integrity sha512-WKTW1+xAzhMS5dJsxWkliixlO/PqC4VhmO9T4juNYcaTg9jzWiJsou6m5pxWYGfigWbwzJWeFY6z47a+4neRXA==
 
-axios-curlirize@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/axios-curlirize/-/axios-curlirize-2.0.0.tgz#c63eedac2c18ef5591371d7658b733cacd2e731a"
-  integrity sha512-TrQBa8MfIwaYsrCoYhfCr7NDRXLuGm+Rqh/PtAuO64b8PCCOJWn37BWQvpN4/mzzig3uHb4qXzvpxJmALHaiwA==
-
 axios@^0.21.1:
   version "0.21.4"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.4.tgz#c67b90dc0568e5c1cf2b0b858c43ba28e2eda575"
