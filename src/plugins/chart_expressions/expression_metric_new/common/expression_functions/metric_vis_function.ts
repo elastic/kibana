@@ -148,7 +148,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           metric: {
             subtitle: args.subtitle,
             extraText: args.extraText,
-            palette: args.palette?.name ?? args.palette?.params,
+            palette: args.palette?.params,
             progressMin: args.progressMin,
             progressMax: args.progressMax,
             progressDirection: args.progressDirection,
