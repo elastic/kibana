@@ -8,7 +8,6 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { ApiStatus, Status, HttpError } from '../../../../common/types/api';
-import { flashAPIErrors, clearFlashMessages } from '../flash_messages';
 
 export interface Values<T> {
   apiStatus: ApiStatus<T>;
@@ -18,8 +17,8 @@ export interface Values<T> {
 }
 
 export interface Actions<Args extends Record<string, unknown> | undefined, Result> {
-  initiateCall(args: Args): Args;
-  apiError(code: number, error: string): HttpError;
+  makeRequest(args: Args): Args;
+  apiError(error: HttpError): HttpError;
   apiSuccess(result: Result): Result;
   apiReset(): void;
 }
@@ -31,57 +30,47 @@ export const createApiLogic = <Result, Args extends Record<string, unknown> | un
   kea<MakeLogicType<Values<Result>, Actions<Args, Result>>>({
     path: ['enterprise_search', 'workplace_search', ...path],
     actions: {
-      initiateCall: (args) => args,
-      apiError: (code, error) => ({ code, error }),
+      makeRequest: (args) => args,
+      apiError: (error) => error,
       apiSuccess: (result) => result,
       apiReset: true,
     },
     reducers: () => ({
       apiStatus: [
         {
-          status: 'IDLE',
+          status: Status.IDLE,
         },
         {
-          initiateCall: () => ({
-            status: 'LOADING',
+          makeRequest: () => ({
+            status: Status.LOADING,
           }),
           apiError: (_, error) => ({
-            status: 'ERROR',
+            status: Status.ERROR,
             error,
           }),
           apiSuccess: (_, data) => ({
-            status: 'SUCCESS',
+            status: Status.SUCCESS,
             data,
           }),
           apiReset: () => ({
-            status: 'IDLE',
+            status: Status.IDLE,
           }),
         },
       ],
     }),
     listeners: ({ actions }) => ({
-      initiateCall: async (args) => {
-        clearFlashMessages();
+      makeRequest: async (args) => {
         try {
           const result = await apiFunction(args);
           actions.apiSuccess(result);
         } catch (e) {
-          flashAPIErrors(e);
-          actions.apiError(e?.body?.statusCode, e?.body?.message);
+          actions.apiError(e);
         }
       },
     }),
     selectors: ({ selectors }) => ({
       status: [() => [selectors.apiStatus], (apiStatus: ApiStatus<Result>) => apiStatus.status],
-      data: [
-        () => [selectors.apiStatus],
-        (apiStatus: ApiStatus<Result>) =>
-          apiStatus.status === 'SUCCESS' ? apiStatus.data : undefined,
-      ],
-      error: [
-        () => [selectors.apiStatus],
-        (apiStatus: ApiStatus<Result>) =>
-          apiStatus.status === 'ERROR' ? apiStatus.error : undefined,
-      ],
+      data: [() => [selectors.apiStatus], (apiStatus: ApiStatus<Result>) => apiStatus.data],
+      error: [() => [selectors.apiStatus], (apiStatus: ApiStatus<Result>) => apiStatus.error],
     }),
   });

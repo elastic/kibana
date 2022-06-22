@@ -8,6 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../../../common/types/api';
+import { clearFlashMessages, flashAPIErrors } from '../../../../../../shared/flash_messages';
 import { CustomSource } from '../../../../../types';
 
 import { AddCustomSourceApiLogic } from './add_custom_source_api_logic';
@@ -23,7 +24,7 @@ export enum AddCustomSourceSteps {
 }
 
 export interface AddCustomSourceActions {
-  initiateCall: typeof AddCustomSourceApiLogic.actions.initiateCall;
+  makeRequest: typeof AddCustomSourceApiLogic.actions.makeRequest;
   apiSuccess({ source }: { source: CustomSource }): { source: CustomSource };
   createContentSource(): void;
   setCustomSourceNameValue(customSourceNameValue: string): string;
@@ -47,7 +48,7 @@ export const AddCustomSourceLogic = kea<
   MakeLogicType<AddCustomSourceValues, AddCustomSourceActions, AddCustomSourceProps>
 >({
   connect: {
-    actions: [AddCustomSourceApiLogic, ['initiateCall', 'apiSuccess']],
+    actions: [AddCustomSourceApiLogic, ['makeRequest', 'apiError', 'apiSuccess']],
     values: [AddCustomSourceApiLogic, ['status']],
   },
   path: ['enterprise_search', 'workplace_search', 'add_custom_source_logic'],
@@ -88,13 +89,15 @@ export const AddCustomSourceLogic = kea<
     createContentSource: () => {
       const { customSourceNameValue } = values;
       const { baseServiceType } = props;
-      actions.initiateCall({ name: customSourceNameValue, baseServiceType });
+      actions.makeRequest({ name: customSourceNameValue, baseServiceType });
     },
+    makeRequest: () => clearFlashMessages(),
+    apiError: (error) => flashAPIErrors(error),
     apiSuccess: ({ source }) => {
       actions.setNewCustomSource(source);
     },
   }),
   selectors: {
-    buttonLoading: [(selectors) => [selectors.status], (status) => status === 'PENDING'],
+    buttonLoading: [(selectors) => [selectors.status], (status) => status === Status.LOADING],
   },
 });

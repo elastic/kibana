@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers } from '../../__mocks__/kea_logic';
+import { LogicMounter } from '../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
+
+import { HttpError, Status } from '../../../../common/types/api';
 
 import { createApiLogic } from './create_api_logic';
 
 const DEFAULT_VALUES = {
   apiStatus: {
-    status: 'IDLE',
+    status: Status.IDLE,
   },
   data: undefined,
   error: undefined,
-  status: 'IDLE',
+  status: Status.IDLE,
 };
 
 describe('CreateApiLogic', () => {
   const apiCallMock = jest.fn();
   const logic = createApiLogic(['path'], apiCallMock);
   const { mount } = new LogicMounter(logic);
-  const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -36,14 +37,14 @@ describe('CreateApiLogic', () => {
   });
 
   describe('actions', () => {
-    describe('initiateCall', () => {
+    describe('makeRequest', () => {
       it('should set status to LOADING', () => {
-        logic.actions.initiateCall({});
+        logic.actions.makeRequest({});
         expect(logic.values).toEqual({
           ...DEFAULT_VALUES,
-          status: 'LOADING',
+          status: Status.LOADING,
           apiStatus: {
-            status: 'LOADING',
+            status: Status.LOADING,
           },
         });
       });
@@ -53,10 +54,10 @@ describe('CreateApiLogic', () => {
         logic.actions.apiSuccess({ success: 'data' });
         expect(logic.values).toEqual({
           ...DEFAULT_VALUES,
-          status: 'SUCCESS',
+          status: Status.SUCCESS,
           data: { success: 'data' },
           apiStatus: {
-            status: 'SUCCESS',
+            status: Status.SUCCESS,
             data: { success: 'data' },
           },
         });
@@ -64,44 +65,32 @@ describe('CreateApiLogic', () => {
     });
     describe('apiError', () => {
       it('should set status to ERROR and set error data', () => {
-        logic.actions.apiError(404, 'message');
+        logic.actions.apiError('error' as any as HttpError);
         expect(logic.values).toEqual({
           ...DEFAULT_VALUES,
-          status: 'ERROR',
+          status: Status.ERROR,
           data: undefined,
-          error: {
-            code: 404,
-            error: 'message',
-          },
+          error: 'error',
           apiStatus: {
-            status: 'ERROR',
+            status: Status.ERROR,
             data: undefined,
-            error: {
-              code: 404,
-              error: 'message',
-            },
+            error: 'error',
           },
         });
       });
     });
     describe('apiReset', () => {
       it('should reset api', () => {
-        logic.actions.apiError(404, 'message');
+        logic.actions.apiError('error' as any as HttpError);
         expect(logic.values).toEqual({
           ...DEFAULT_VALUES,
-          status: 'ERROR',
+          status: Status.ERROR,
           data: undefined,
-          error: {
-            code: 404,
-            error: 'message',
-          },
+          error: 'error',
           apiStatus: {
-            status: 'ERROR',
+            status: Status.ERROR,
             data: undefined,
-            error: {
-              code: 404,
-              error: 'message',
-            },
+            error: 'error',
           },
         });
         logic.actions.apiReset();
@@ -111,17 +100,16 @@ describe('CreateApiLogic', () => {
   });
 
   describe('listeners', () => {
-    describe('initiateCall', () => {
+    describe('makeRequest', () => {
       it('calls apiCall on success', async () => {
         const apiSuccessMock = jest.spyOn(logic.actions, 'apiSuccess');
         const apiErrorMock = jest.spyOn(logic.actions, 'apiError');
         apiCallMock.mockReturnValue(Promise.resolve('result'));
-        logic.actions.initiateCall({ arg: 'argument1' });
+        logic.actions.makeRequest({ arg: 'argument1' });
         expect(apiCallMock).toHaveBeenCalledWith({ arg: 'argument1' });
         await nextTick();
         expect(apiErrorMock).not.toHaveBeenCalled();
         expect(apiSuccessMock).toHaveBeenCalledWith('result');
-        expect(clearFlashMessages).toHaveBeenCalled();
       });
       it('calls apiError on error', async () => {
         const apiSuccessMock = jest.spyOn(logic.actions, 'apiSuccess');
@@ -129,14 +117,11 @@ describe('CreateApiLogic', () => {
         apiCallMock.mockReturnValue(
           Promise.reject({ body: { statusCode: 404, message: 'message' } })
         );
-        logic.actions.initiateCall({ arg: 'argument1' });
+        logic.actions.makeRequest({ arg: 'argument1' });
         expect(apiCallMock).toHaveBeenCalledWith({ arg: 'argument1' });
         await nextTick();
         expect(apiSuccessMock).not.toHaveBeenCalled();
         expect(apiErrorMock).toHaveBeenCalledWith(404, 'message');
-        expect(flashAPIErrors).toHaveBeenCalledWith({
-          body: { statusCode: 404, message: 'message' },
-        });
       });
     });
   });
