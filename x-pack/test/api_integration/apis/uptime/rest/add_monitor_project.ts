@@ -587,7 +587,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+            query: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
