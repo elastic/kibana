@@ -1,171 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`should render entity by expression with aggregatable field options for entity 1`] = `
-<EntityByExpression
-  entity="FlightNum"
-  errors={
-    Object {
-      "actionConnectors": Array [],
-      "alertTypeId": Array [],
-      "boundaryGeoField": Array [],
-      "boundaryIndexId": Array [],
-      "boundaryIndexTitle": Array [],
-      "boundaryType": Array [],
-      "dateField": Array [],
-      "entity": Array [],
-      "geoField": Array [],
-      "index": Array [],
-      "indexId": Array [],
-      "interval": Array [],
-      "name": Array [
-        "Name is required.",
-      ],
-    }
-  }
-  indexFields={
-    Array [
-      Object {
-        "aggregatable": true,
-        "count": 0,
-        "esTypes": Array [
-          "geo_point",
-        ],
-        "name": "DestLocation",
-        "readFromDocValues": true,
-        "scripted": false,
-        "searchable": true,
-        "type": "geo_point",
-      },
-      Object {
-        "aggregatable": true,
-        "count": 0,
-        "esTypes": Array [
-          "keyword",
-        ],
-        "name": "FlightNum",
-        "readFromDocValues": true,
-        "scripted": false,
-        "searchable": true,
-        "type": "string",
-      },
-      Object {
-        "aggregatable": true,
-        "count": 0,
-        "esTypes": Array [
-          "geo_point",
-        ],
-        "name": "OriginLocation",
-        "readFromDocValues": true,
-        "scripted": false,
-        "searchable": true,
-        "type": "geo_point",
-      },
-      Object {
-        "aggregatable": true,
-        "count": 0,
-        "esTypes": Array [
-          "date",
-        ],
-        "name": "timestamp",
-        "readFromDocValues": true,
-        "scripted": false,
-        "searchable": true,
-        "type": "date",
-      },
-    ]
-  }
-  isInvalid={false}
-  setAlertParamsEntity={[Function]}
+<div
+  class="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock"
+  id="popoverForExpression"
 >
-  <ExpressionWithPopover
-    defaultValue="Select entity field"
-    expressionDescription="by"
-    isInvalid={false}
-    popoverContent={
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        error={Array []}
-        fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        id="entitySelect"
-        labelType="label"
-      >
-        <SingleFieldSelect
-          fields={Array []}
-          onChange={[Function]}
-          placeholder="Select entity field"
-          value="FlightNum"
-        />
-      </EuiFormRow>
-    }
-    value="FlightNum"
+  <div
+    class="euiPopover__anchor"
   >
-    <EuiPopover
-      anchorPosition="downLeft"
-      button={
-        <EuiExpression
-          data-test-subj="selectIndexExpression"
-          description="by"
-          display="columns"
-          isActive={false}
-          isInvalid={false}
-          onClick={[Function]}
-          value="FlightNum"
-        />
-      }
-      closePopover={[Function]}
-      display="block"
-      hasArrow={true}
-      id="popoverForExpression"
-      isOpen={false}
-      ownFocus={true}
-      panelPaddingSize="m"
-      zIndex={8000}
+    <button
+      class="euiExpression css-c0byu8-euiExpression-isClickable-success-columns"
+      data-test-subj="selectIndexExpression"
     >
-      <div
-        className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock"
-        id="popoverForExpression"
+      <span
+        class="euiExpression__description css-s06x37-euiExpression__description-success-isUppercase-columns"
+        style="flex-basis: 20%;"
       >
-        <div
-          className="euiPopover__anchor"
-        >
-          <EuiExpression
-            data-test-subj="selectIndexExpression"
-            description="by"
-            display="columns"
-            isActive={false}
-            isInvalid={false}
-            onClick={[Function]}
-            value="FlightNum"
-          >
-            <button
-              className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--columns euiExpression--success"
-              data-test-subj="selectIndexExpression"
-              onClick={[Function]}
-            >
-              <span
-                className="euiExpression__description"
-                style={
-                  Object {
-                    "flexBasis": "20%",
-                  }
-                }
-              >
-                by
-              </span>
-               
-              <span
-                className="euiExpression__value"
-              >
-                FlightNum
-              </span>
-            </button>
-          </EuiExpression>
-        </div>
-      </div>
-    </EuiPopover>
-  </ExpressionWithPopover>
-</EntityByExpression>
+        by
+      </span>
+       
+      <span
+        class="euiExpression__value css-18wds23-euiExpression__value-columns"
+      >
+        FlightNum
+      </span>
+    </button>
+  </div>
+</div>
 `;

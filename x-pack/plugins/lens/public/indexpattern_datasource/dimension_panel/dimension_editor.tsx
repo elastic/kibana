@@ -809,6 +809,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   selectedOperationDefinition.shiftable &&
                   selectedColumn.timeShift !== undefined ? (
                     <TimeShift
+                      datatableUtilities={services.data.datatableUtilities}
                       indexPattern={currentIndexPattern}
                       selectedColumn={selectedColumn}
                       columnId={columnId}
