@@ -56,13 +56,12 @@ export const AddConnectorFlyout = ({ focusInput, isDisabled }: Props) => {
   const ConnectorAddFlyout = useMemo(
     () =>
       getAddConnectorFlyout({
-        consumer: 'uptime',
         onClose: () => {
           dispatch(getConnectorsAction.get());
           setAddFlyoutVisibility(false);
           focusInput();
         },
-        actionTypes: (actionTypes ?? []).filter((actionType) =>
+        supportedActionTypes: (actionTypes ?? []).filter((actionType) =>
           ALLOWED_ACTION_TYPES.includes(actionType.id as ActionTypeId)
         ),
       }),

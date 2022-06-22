@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
 
 export const CALLOUT_STATE_KEY = 'discover:docExplorerCalloutClosed';

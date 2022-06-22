@@ -17,6 +17,10 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
+import { RunTestManually } from './components/monitor_summary/run_test_manually';
+import { MonitorSummaryHeaderContent } from './components/monitor_summary/monitor_summary_header_content';
+import { MonitorSummaryTitle } from './components/monitor_summary/monitor_summary_title';
+import { MonitorSummaryPage } from './components/monitor_summary/monitor_summary';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
 import { MonitorsPageHeader } from './components/monitors_page/management/page_header/monitors_page_header';
 import { OverviewPage } from './components/monitors_page/overview/overview_page';
@@ -30,6 +34,7 @@ import {
   MONITORS_ROUTE,
   OVERVIEW_ROUTE,
   GETTING_STARTED_ROUTE,
+  MONITOR_ROUTE,
 } from '../../../common/constants';
 import { MonitorPage } from './components/monitors_page/monitor_page';
 import { apiService } from '../../utils/api_service';
@@ -72,6 +77,26 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
       pageContentProps: {
         paddingSize: 'none',
         hasShadow: false,
+      },
+    },
+    {
+      title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
+        defaultMessage: 'Synthetics Getting Started | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: MONITOR_ROUTE,
+      component: () => <MonitorSummaryPage />,
+      template: 'centeredBody',
+      dataTestSubj: 'syntheticsGettingStartedPage',
+      pageContentProps: {
+        paddingSize: 'none',
+        hasShadow: false,
+      },
+      pageHeader: {
+        paddingSize: 'none',
+        children: <MonitorSummaryHeaderContent />,
+        pageTitle: <MonitorSummaryTitle />,
+        rightSideItems: [<RunTestManually />],
       },
     },
     {

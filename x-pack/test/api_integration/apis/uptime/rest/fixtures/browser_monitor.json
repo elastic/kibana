@@ -44,5 +44,7 @@
   "name": "Test HTTP Monitor 03",
   "namespace": "testnamespace",
   "origin": "ui",
-  "form_monitor_type": "multistep"
+  "form_monitor_type": "multistep",
+  "urls": null,
+  "url.port": null
 }

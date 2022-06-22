@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React, { createContext } from 'react';
-import { TimeRange, RefreshInterval } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { RefreshInterval } from '@kbn/data-plugin/public';
 import { GlobalState } from '../../url_state';
 import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
 import { Legacy } from '../../legacy_shims';

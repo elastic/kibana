@@ -9,7 +9,7 @@
 import { compact, isEqual, isUndefined, omitBy } from 'lodash';
 import { BehaviorSubject, Observable, Subscription, map } from 'rxjs';
 import type { CoreService } from '@kbn/core-base-browser-internal';
-import { AnalyticsServiceSetup } from '../analytics';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { KibanaExecutionContext } from '../../types';
 
 // Should be exported from elastic/apm-rum
