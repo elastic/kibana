@@ -343,6 +343,7 @@ export interface RuleDefinitionProps {
   rule: Rule;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
+  onEditRule: () => Promise<void>;
 }
 
 export enum Percentiles {

@@ -15,20 +15,21 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { RuleDefinitionProps } from '../../../../types';
 import { RuleType, useLoadRuleTypes } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { NOTIFY_WHEN_OPTIONS } from '../../rule_form/rule_notify_when';
 import { Actions } from './rule_actions';
+import { RuleEdit } from '../../rule_form';
 
-export const OBSERVABILITY_SOLUTIONS = ['logs', 'uptime', 'infrastructure', 'apm'];
+const OBSERVABILITY_SOLUTIONS = ['logs', 'uptime', 'infrastructure', 'apm'];
 
 export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   rule,
   actionTypeRegistry,
   ruleTypeRegistry,
+  onEditRule,
 }) => {
   const {
     application: { capabilities },
@@ -178,6 +179,18 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
+      {editFlyoutVisible && (
+        <RuleEdit
+          onSave={() => {
+            setEditFlyoutVisible(false);
+            return onEditRule();
+          }}
+          initialRule={rule}
+          onClose={() => setEditFlyoutVisible(false)}
+          ruleTypeRegistry={ruleTypeRegistry}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      )}
     </EuiFlexItem>
   );
 };

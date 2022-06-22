@@ -400,7 +400,7 @@ export function RuleDetailsPage() {
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
-        {getRuleDefinition({ rule } as RuleDefinitionProps)}
+        {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />
