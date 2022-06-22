@@ -30,10 +30,14 @@ node scripts/es snapshot \
 while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
 
 function echoKibanaLogs {
-  echo '--- Kibana logs'
   if [[ "$TEST_PACKAGE" == "deb" ]] || [[ "$TEST_PACKAGE" == "rpm" ]]; then
+    echo "--- /var/log/kibana/kibana.log "
     vagrant ssh $TEST_PACKAGE -t -c 'sudo cat /var/log/kibana/kibana.log'
+
+    echo "--- Journal "
+    vagrant ssh $TEST_PACKAGE -t -c 'sudo journalctl -u kibana.service --no-pager'
   elif [[ "$TEST_PACKAGE" == "docker" ]]; then
+    echo '--- Docker logs'
     vagrant ssh $TEST_PACKAGE -t -c 'sudo docker logs kibana'
   fi
 }
