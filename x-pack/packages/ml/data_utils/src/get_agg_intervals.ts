@@ -51,7 +51,7 @@ type NumericColumnStatsMap = Record<string, NumericColumnStats>;
 export const getAggIntervals = async (
   client: ElasticsearchClient,
   indexPattern: string,
-  query: any,
+  query: estypes.QueryDslQueryContainer,
   fields: HistogramField[],
   samplerShardSize: number,
   runtimeMappings?: estypes.MappingRuntimeFields
