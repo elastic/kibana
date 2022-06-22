@@ -22,11 +22,11 @@ export interface MetricVisParam {
   subtitle?: string;
   extraText?: string;
   palette?: CustomPaletteState;
-  progressMin: number;
+  progressMin?: number;
   progressMax?: number;
   progressDirection: LayoutDirection;
   maxCols: number;
-  numTiles?: number;
+  minTiles?: number;
 }
 
 export interface VisParams {

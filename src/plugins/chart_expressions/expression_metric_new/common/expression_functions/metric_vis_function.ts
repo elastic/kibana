@@ -58,7 +58,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
     progressMin: {
       types: ['number'],
-      default: 0,
       help: i18n.translate('expressionNewMetricVis.function.progressMin.help', {
         defaultMessage: 'The number at which the progress bar should be empty.',
       }),
@@ -91,6 +90,13 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'Specifies the max number of columns in the metric grid.',
       }),
       default: 5,
+    },
+    minTiles: {
+      types: ['number'],
+      help: i18n.translate('expressionNewMetricVis.function.minTiles.help', {
+        defaultMessage:
+          'Specifies the minimum number of tiles in the metric grid regardless of the input data.',
+      }),
     },
   },
   fn(input, args, handlers) {
@@ -147,6 +153,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             progressMax: args.progressMax,
             progressDirection: args.progressDirection,
             maxCols: args.maxCols,
+            minTiles: args.minTiles,
           },
           dimensions: {
             metric: args.metric,

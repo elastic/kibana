@@ -24,11 +24,12 @@ export interface MetricArguments {
   breakdownBy?: ExpressionValueVisDimension | string;
   subtitle?: string;
   extraText?: string;
-  progressMin: number;
+  progressMin?: number;
   progressMax?: number;
   progressDirection: LayoutDirection;
   palette?: PaletteOutput<CustomPaletteState>;
   maxCols: number;
+  minTiles?: number;
 }
 
 export type MetricInput = Datatable;

@@ -59,10 +59,17 @@ const MetricVis = ({
 
   const metricConfigs: MetricSpec['data'][number] = [];
 
+  const useProgressBar =
+    typeof config.metric.progressMin === 'number' && typeof config.metric.progressMax === 'number';
+
   const commonProps = {
     valueFormatter: formatValue,
-    domain: { min: config.metric.progressMin, max: config.metric.progressMax },
-    progressBarDirection: config.metric.progressDirection,
+    ...(useProgressBar
+      ? {
+          domain: { min: config.metric.progressMin, max: config.metric.progressMax },
+          progressBarDirection: config.metric.progressDirection,
+        }
+      : {}),
   };
 
   if (!breakdownByColumn) {
@@ -99,6 +106,10 @@ const MetricVis = ({
         color: getColor(value, config.metric.palette),
       });
     }
+  }
+
+  if (config.metric.minTiles) {
+    while (metricConfigs.length < config.metric.minTiles) metricConfigs.push(undefined);
   }
 
   const grid: MetricSpec['data'] = [];
