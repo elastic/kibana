@@ -9,7 +9,6 @@
 import React, { useState, useCallback, ChangeEvent, FormEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import uuid from 'uuid';
 
 import {
   EuiButton,
@@ -27,6 +26,8 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 
+import * as utils from './utils';
+
 export interface DevToolsVariablesModalProps {
   onClose: () => void;
   onSaveVariables: (newVariables: DevToolsVariable[]) => void;
@@ -39,51 +40,35 @@ export interface DevToolsVariable {
   value: string;
 }
 
-const generateEmptyVariableField = (): DevToolsVariable => ({
-  id: uuid.v4(),
-  name: '',
-  value: '',
-});
-
 export const DevToolsVariablesModal = (props: DevToolsVariablesModalProps) => {
   const [variables, setVariables] = useState<DevToolsVariable[]>(props.variables);
   const formId = useGeneratedHtmlId({ prefix: '__console' });
 
   const addNewVariable = useCallback(() => {
-    setVariables((v) => [...v, generateEmptyVariableField()]);
+    setVariables((v) => [...v, utils.generateEmptyVariableField()]);
   }, []);
 
   const deleteVariable = useCallback(
     (id: string) => {
-      const updatedVariables = variables.filter((v) => v.id !== id);
+      const updatedVariables = utils.deleteVariable(variables, id);
       setVariables(updatedVariables);
     },
     [variables]
   );
 
-  const { onSaveVariables } = props;
   const onSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      onSaveVariables(variables);
+      props.onSaveVariables(variables);
     },
-    [onSaveVariables, variables]
+    [props, variables]
   );
 
   const onChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>, id: string) => {
-      const { name, value } = e.target;
-      const index = variables.findIndex((v) => v.id === id);
-
-      if (index === -1) {
-        return;
-      } else {
-        setVariables((v) => [
-          ...v.slice(0, index),
-          { ...v[index], [name]: value },
-          ...v.slice(index + 1),
-        ]);
-      }
+    (event: ChangeEvent<HTMLInputElement>, id: string) => {
+      const { name, value } = event.target;
+      const editedVariables = utils.editVariable(name, value, id, variables);
+      setVariables(editedVariables);
     },
     [variables]
   );

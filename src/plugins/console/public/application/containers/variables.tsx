@@ -10,11 +10,11 @@ import React from 'react';
 import { DevToolsVariablesModal, DevToolsVariable } from '../components';
 import { useServicesContext } from '../contexts';
 
-interface Props {
+interface VariablesProps {
   onClose: () => void;
 }
 
-export function Variables({ onClose }: Props) {
+export function Variables({ onClose }: VariablesProps) {
   const {
     services: { storage },
   } = useServicesContext();

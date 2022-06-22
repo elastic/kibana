@@ -18,7 +18,7 @@ export { WelcomePanel } from './welcome_panel';
 export type { AutocompleteOptions } from './settings_modal';
 export { HelpPanel } from './help_panel';
 export { EditorContentSpinner } from './editor_content_spinner';
-export type { DevToolsVariable } from './variables_modal';
+export type { DevToolsVariable } from './variables';
 
 /**
  * The Lazily-loaded `DevToolsSettingsModal` component.  Consumers should use `React.Suspense` or
@@ -42,7 +42,7 @@ export const DevToolsSettingsModal = withSuspense(DevToolsSettingsModalLazy);
  * the withSuspense` HOC to load this component.
  */
 export const DevToolsVariablesModalLazy = React.lazy(() =>
-  import('./variables_modal').then(({ DevToolsVariablesModal }) => ({
+  import('./variables').then(({ DevToolsVariablesModal }) => ({
     default: DevToolsVariablesModal,
   }))
 );
