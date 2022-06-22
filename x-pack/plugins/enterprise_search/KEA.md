@@ -100,13 +100,7 @@ export const AddCustomSourceLogic = kea<
 });
 ```
 
-You'll have to add the imported the actions and values types you're already using for your function, preferably by importing the types off the imported logic. Like so:
-```typescript
-export interface AddCustomSourceActions {
-  addSource: AddCustomSourceApiActions['addSource'];
-  addSourceSuccess: AddCustomSourceApiActions['addSourceSuccess'];
-}
-```
+You'll have to add the imported the actions and values types you're already using for your function, preferably by importing the types off the imported logic, so TypeScript can warn you if you're misusing the function.
 ## Keep your logic files small
 
 Using the above methods, you can keep your logic files small and isolated. Keep API calls separate from view and component logic. Keep the amount of logic you're processing limited per file. If your logic file starts exceeding about 150 lines of code, you should start thinking about splitting it up into separate chunks, if possible.

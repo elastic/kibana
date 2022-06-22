@@ -20,9 +20,7 @@ const DEFAULT_VALUES = {
   buttonLoading: false,
   customSourceNameValue: '',
   newCustomSource: {} as CustomSource,
-  sourceApi: {
-    status: 'IDLE',
-  },
+  status: 'IDLE',
 };
 
 const MOCK_NAME = 'name';
@@ -53,10 +51,7 @@ describe('AddCustomSourceLogic', () => {
           ...DEFAULT_VALUES,
           customSourceNameValue: '',
           newCustomSource: source,
-          sourceApi: {
-            status: 'SUCCESS',
-            data: source,
-          },
+          status: 'SUCCESS',
           currentStep: AddCustomSourceSteps.SaveCustomStep,
         });
       });
@@ -105,7 +100,10 @@ describe('AddCustomSourceLogic', () => {
           const addSourceSpy = jest.spyOn(AddCustomSourceLogic.actions, 'initiateCall');
 
           AddCustomSourceLogic.actions.createContentSource();
-          expect(addSourceSpy).toHaveBeenCalledWith(MOCK_NAME, undefined);
+          expect(addSourceSpy).toHaveBeenCalledWith({
+            name: MOCK_NAME,
+            baseServiceType: undefined,
+          });
         });
 
         it('submits a base service type for pre-configured sources', () => {
@@ -122,7 +120,10 @@ describe('AddCustomSourceLogic', () => {
 
           AddCustomSourceLogic.actions.createContentSource();
 
-          expect(addSourceSpy).toHaveBeenCalledWith(MOCK_NAME, 'share_point_server');
+          expect(addSourceSpy).toHaveBeenCalledWith({
+            name: MOCK_NAME,
+            baseServiceType: 'share_point_server',
+          });
         });
       });
     });
