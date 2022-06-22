@@ -15,5 +15,6 @@
     },
     "useUnknownInCatchVariables": false
   },
+  "include": ["pipeline-utils/**/*", "pipelines/**/*", "scripts/**/*"],
   "exclude": ["**/*.test.ts", "**/vm-filesystem/**", "**/dist"]
 }
