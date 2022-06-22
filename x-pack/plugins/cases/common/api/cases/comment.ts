@@ -72,6 +72,7 @@ export const ActionsCommentRequestRt = rt.type({
 
 export enum ExternalReferenceStorageType {
   so = 'so',
+  doc = 'doc',
   other = 'other',
 }
 
@@ -89,14 +90,28 @@ export const ExternalReferenceRt = rt.type({
   owner: rt.string,
 });
 
+export const ExternalReferenceWithoutSORefsRt = rt.type({
+  externalReferenceStorage: ExternalReferenceStorageRt,
+  externalReferenceAttachmentTypeId: rt.string,
+  externalReferenceMetadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
+  type: rt.literal(CommentType.externalReference),
+  owner: rt.string,
+});
+
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);
 const AttributesTypeAlertsRt = rt.intersection([AlertCommentRequestRt, CommentAttributesBasicRt]);
 const AttributesTypeActionsRt = rt.intersection([
   ActionsCommentRequestRt,
   CommentAttributesBasicRt,
 ]);
+
 const AttributesTypeExternalReferenceRt = rt.intersection([
   ExternalReferenceRt,
+  CommentAttributesBasicRt,
+]);
+
+const AttributesTypeExternalReferenceWithoutSORefsRt = rt.intersection([
+  ExternalReferenceWithoutSORefsRt,
   CommentAttributesBasicRt,
 ]);
 
@@ -105,6 +120,13 @@ const CommentAttributesRt = rt.union([
   AttributesTypeAlertsRt,
   AttributesTypeActionsRt,
   AttributesTypeExternalReferenceRt,
+]);
+
+const CommentAttributesWithoutSORefsRt = rt.union([
+  AttributesTypeUserRt,
+  AttributesTypeAlertsRt,
+  AttributesTypeActionsRt,
+  AttributesTypeExternalReferenceWithoutSORefsRt,
 ]);
 
 export const CommentRequestRt = rt.union([
@@ -172,7 +194,12 @@ export const CommentPatchRequestRt = rt.intersection([
  * We ensure that partial updates of CommentContext is not going to happen inside the patch comment route.
  */
 export const CommentPatchAttributesRt = rt.intersection([
-  rt.union([rt.partial(CommentAttributesBasicRt.props), rt.partial(AlertCommentRequestRt.props)]),
+  rt.union([
+    rt.partial(ContextTypeUserRt.props),
+    rt.partial(AlertCommentRequestRt.props),
+    rt.partial(ActionsCommentRequestRt.props),
+    rt.partial(ExternalReferenceRt.props),
+  ]),
   rt.partial(CommentAttributesBasicRt.props),
 ]);
 
@@ -196,6 +223,7 @@ export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
+export type CommentAttributesWithoutSORefs = rt.TypeOf<typeof CommentAttributesWithoutSORefsRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
 export type BulkCreateCommentRequest = rt.TypeOf<typeof BulkCreateCommentRequestRt>;
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;

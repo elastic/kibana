@@ -25,7 +25,6 @@ import {
   ActionTypes,
   Actions,
   CommentRequestAlertType,
-  ExternalReferenceStorageType,
 } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
@@ -103,25 +102,6 @@ export class CaseCommentModel {
           currentComment
         );
         options.references = updatedReferences;
-      }
-
-      /**
-       * Update the SavedObject's references if the type of the attachment
-       * is externalReference. Partial updates of attachment are not supported.
-       * The soType and the externalReferenceId will be defined.
-       * */
-
-      if (
-        queryRestAttributes.type === CommentType.externalReference &&
-        queryRestAttributes.externalReferenceStorage.type === ExternalReferenceStorageType.so
-      ) {
-        options.references = [
-          ...(options.references ?? []),
-          this.getExternalReferenceSoReferences({
-            id: queryRestAttributes.externalReferenceId,
-            type: queryRestAttributes.externalReferenceStorage.soType,
-          }),
-        ];
       }
 
       const [comment, commentableCase] = await Promise.all([
@@ -313,29 +293,7 @@ export class CaseCommentModel {
       references = [...references, ...commentStringReferences];
     }
 
-    if (
-      commentReq.type === CommentType.externalReference &&
-      commentReq.externalReferenceStorage.type === ExternalReferenceStorageType.so
-    ) {
-      references = [
-        ...references,
-
-        this.getExternalReferenceSoReferences({
-          id: commentReq.externalReferenceId,
-          type: commentReq.externalReferenceStorage.soType,
-        }),
-      ];
-    }
-
     return references;
-  }
-
-  private getExternalReferenceSoReferences({ id, type }: { id: string; type: string }) {
-    return {
-      id,
-      name: 'externalReferenceId',
-      type,
-    };
   }
 
   private async handleAlertComments(attachments: CommentRequest[]) {
@@ -428,6 +386,7 @@ export class CaseCommentModel {
       });
     }
   }
+
   public async bulkCreate({
     attachments,
   }: {
