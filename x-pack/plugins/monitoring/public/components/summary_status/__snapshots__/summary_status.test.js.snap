@@ -13,7 +13,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
         data-test-subj="status"
       >
         <div
@@ -27,7 +27,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           Status: 
           <span
@@ -46,7 +46,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
       >
         <div
           class="euiText euiStat__description emotion-euiText-s"
@@ -57,7 +57,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           127.0.0.1:9300
         </p>
@@ -74,7 +74,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
       >
         <div
           class="euiText euiStat__description emotion-euiText-s"
@@ -87,7 +87,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           24.8k
         </p>
@@ -120,7 +120,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
       >
         <div
           class="euiText euiStat__description emotion-euiText-s"
@@ -133,7 +133,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           173.9 GB
         </p>
@@ -150,7 +150,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
       >
         <div
           class="euiText euiStat__description emotion-euiText-s"
@@ -163,7 +163,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           24.8k
         </p>
@@ -191,7 +191,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
         data-test-subj="status"
       >
         <div
@@ -205,7 +205,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           Status: 
           <span
@@ -224,7 +224,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
       >
         <div
           class="euiText euiStat__description emotion-euiText-s"
@@ -237,7 +237,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           173.9 GB
         </p>
@@ -254,7 +254,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
       >
         <div
           class="euiText euiStat__description emotion-euiText-s"
@@ -267,7 +267,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiStat__title emotion-euiTitle-xxxs"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           24.8k
         </p>
