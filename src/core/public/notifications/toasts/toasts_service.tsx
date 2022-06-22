@@ -10,7 +10,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { I18nStart } from '../../i18n';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import { IUiSettingsClient } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi, IToasts } from './toasts_api';

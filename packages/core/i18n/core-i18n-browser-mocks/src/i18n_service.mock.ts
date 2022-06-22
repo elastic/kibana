@@ -8,8 +8,8 @@
 
 import React from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-
-import { I18nService, I18nStart } from './i18n_service';
+import { I18nService } from '@kbn/core-i18n-browser-internal';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 
 const PassThroughComponent = ({ children }: { children: React.ReactNode }) => children;
 

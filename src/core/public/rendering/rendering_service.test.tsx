@@ -14,7 +14,7 @@ import { applicationServiceMock } from '../application/application_service.mock'
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { i18nServiceMock } from '../i18n/i18n_service.mock';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { BehaviorSubject } from 'rxjs';
 
 describe('RenderingService#start', () => {

@@ -7,7 +7,7 @@
     "bfetch": "src/plugins/bfetch",
     "charts": "src/plugins/charts",
     "console": "src/plugins/console",
-    "core": "src/core",
+    "core": ["src/core", "packages/core/i18n/core-i18n-browser-internal"],
     "customIntegrations": "src/plugins/custom_integrations",
     "dashboard": "src/plugins/dashboard",
     "controls": "src/plugins/controls",
