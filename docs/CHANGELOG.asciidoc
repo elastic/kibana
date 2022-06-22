@@ -217,7 +217,6 @@ Lens & Visualizations::
 * Adds `xyVis` split chart {kibana-pull}130229[#130229]
 
 Machine Learning::
-* Adds ML expected model bounds as an option to Comparison controls {kibana-pull}132456[#132456]
 * Adds the ability to create anomaly detection jobs from Lens visualizations {kibana-pull}129762[#129762]
 * Additional testing of trained model in UI {kibana-pull}129209[#129209]
 
@@ -232,6 +231,7 @@ Observability::
 * Adds the ability to bulk attach multiple alerts to a Case {kibana-pull}130958[#130958]
 * Adds rule details page {kibana-pull}130330[#130330]
 * Adds span link {kibana-pull}126630[#126630]
+* Adds ML expected model bounds as an option to Comparison controls {kibana-pull}132456[#132456]
 
 Platform::
 Adds `xyVis` and `layeredXyVis` {kibana-pull}128255[#128255]
@@ -461,7 +461,6 @@ Machine Learning::
 * Hide job messages clear notifications tooltip on click {kibana-pull}132982[#132982]
 * Filtering category runtime fields in advanced wizard {kibana-pull}132916[#132916]
 * Fixes trained model testing so it is available for users with ML read permissions {kibana-pull}132698[#132698]
-* Wizard validation improvements {kibana-pull}132615[#132615]
 * Adding type for job summary state {kibana-pull}131643[#131643]
 
 Management::
