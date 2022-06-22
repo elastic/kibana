@@ -20,7 +20,7 @@ import { EuiCodeEditor, XJson } from '@kbn/es-ui-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
-import { validateExpression } from '../validation';
+import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
@@ -50,7 +50,7 @@ export const EsQueryExpression: React.FC<
     timeWindowUnit,
   } = ruleParams;
 
-  const [currentAlertParams, setCurrentAlertParams] = useState<
+  const [currentRuleParams, setCurrentRuleParams] = useState<
     EsQueryAlertParams<SearchType.esQuery>
   >({
     ...ruleParams,
@@ -60,12 +60,12 @@ export const EsQueryExpression: React.FC<
     thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
     size: size ?? DEFAULT_VALUES.SIZE,
     esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
-    searchType: 'esQuery',
+    searchType: SearchType.esQuery,
   });
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
-      setCurrentAlertParams((currentParams) => ({
+      setCurrentRuleParams((currentParams) => ({
         ...currentParams,
         [paramField]: paramValue,
       }));
@@ -88,7 +88,7 @@ export const EsQueryExpression: React.FC<
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
 
   const setDefaultExpressionValues = async () => {
-    setRuleProperty('params', currentAlertParams);
+    setRuleProperty('params', currentRuleParams);
     setXJson(esQuery ?? DEFAULT_VALUES.QUERY);
 
     if (index && index.length > 0) {
@@ -109,11 +109,8 @@ export const EsQueryExpression: React.FC<
   };
 
   const hasValidationErrors = useCallback(() => {
-    const { errors: validationErrors } = validateExpression(currentAlertParams);
-    return Object.keys(validationErrors).some(
-      (key) => validationErrors[key] && validationErrors[key].length
-    );
-  }, [currentAlertParams]);
+    return hasExpressionValidationErrors(currentRuleParams);
+  }, [currentRuleParams]);
 
   const onTestQuery = useCallback(async () => {
     const window = `${timeWindowSize}${timeWindowUnit}`;

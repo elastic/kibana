@@ -11,23 +11,33 @@ import { EuiSpacer, EuiLoadingSpinner, EuiEmptyPrompt, EuiCallOut } from '@elast
 import { ISearchSource } from '@kbn/data-plugin/common';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/public';
-import { CommonAlertParams, OnlySearchSourceAlertParams, SearchType } from '../types';
+import { EsQueryAlertParams, SearchType } from '../types';
 import { useTriggersAndActionsUiDeps } from '../util';
 import { SearchSourceExpressionForm } from './search_source_expression_form';
 import { DEFAULT_VALUES } from '../constants';
 
-export type SearchSourceExpressionProps = RuleTypeParamsExpressionProps<CommonAlertParams> &
-  OnlySearchSourceAlertParams;
+export type SearchSourceExpressionProps = RuleTypeParamsExpressionProps<
+  EsQueryAlertParams<SearchType.searchSource>
+> & {
+  shouldResetSearchConfiguration?: boolean;
+};
 
 export const SearchSourceExpression = ({
-  searchConfiguration,
-  savedQueryId,
   ruleParams,
   errors,
   setRuleParams,
   setRuleProperty,
+  shouldResetSearchConfiguration,
 }: SearchSourceExpressionProps) => {
-  const { thresholdComparator, threshold, timeWindowSize, timeWindowUnit, size } = ruleParams;
+  const {
+    thresholdComparator,
+    threshold,
+    timeWindowSize,
+    timeWindowUnit,
+    size,
+    savedQueryId,
+    searchConfiguration,
+  } = ruleParams;
   const { data } = useTriggersAndActionsUiDeps();
 
   const [searchSource, setSearchSource] = useState<ISearchSource>();
@@ -40,8 +50,12 @@ export const SearchSourceExpression = ({
   );
 
   useEffect(() => {
+    const initialSearchConfiguration = shouldResetSearchConfiguration
+      ? data.search.searchSource.createEmpty().getSerializedFields()
+      : searchConfiguration;
+
     setRuleProperty('params', {
-      searchConfiguration,
+      searchConfiguration: initialSearchConfiguration,
       searchType: SearchType.searchSource,
       timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
       timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
@@ -52,13 +66,13 @@ export const SearchSourceExpression = ({
 
     const initSearchSource = () =>
       data.search.searchSource
-        .create(searchConfiguration)
+        .create(initialSearchConfiguration)
         .then((fetchedSearchSource) => setSearchSource(fetchedSearchSource))
         .catch(setParamsError);
 
     initSearchSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.search.searchSource, data.dataViews]);
+  }, [data.search.searchSource, data.dataViews, shouldResetSearchConfiguration]);
 
   useEffect(() => {
     if (savedQueryId) {

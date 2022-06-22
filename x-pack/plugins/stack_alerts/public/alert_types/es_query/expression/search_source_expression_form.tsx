@@ -17,12 +17,13 @@ import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { mapAndFlattenFilters, SavedQuery, TimeHistory } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { CommonAlertParams } from '../types';
+import { CommonAlertParams, EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { useTriggersAndActionsUiDeps } from '../util';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { totalHitsToNumber } from '../test_query_row';
+import { hasExpressionValidationErrors } from '../validation';
 
 const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
   'pinFilter',
@@ -54,7 +55,7 @@ interface SearchSourceParamsAction {
 
 interface SearchSourceExpressionFormProps {
   searchSource: ISearchSource;
-  ruleParams: CommonAlertParams;
+  ruleParams: EsQueryAlertParams<SearchType.searchSource>;
   errors: IErrorObject;
   initialSavedQuery?: SavedQuery;
   setParam: (paramField: string, paramValue: unknown) => void;
@@ -247,7 +248,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onChangeWindowUnit={onChangeWindowUnit}
         onChangeSizeValue={onChangeSizeValue}
         errors={errors}
-        hasValidationErrors={false}
+        hasValidationErrors={hasExpressionValidationErrors(ruleParams) || !ruleConfiguration.index}
         onTestFetch={onTestFetch}
       />
 

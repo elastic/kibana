@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, useMemo, useState } from 'react';
+import React, { memo, PropsWithChildren, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
 import 'brace/theme/github';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { ErrorKey, EsQueryAlertParams } from '../types';
+import { ErrorKey, EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
 import { EsQueryFormType, EsQueryFormTypeChooser } from './es_query_form_type_chooser';
-import { isSearchSourceAlert, useTriggersAndActionsUiDeps } from '../util';
+import { isSearchSourceAlert } from '../util';
 import { EXPRESSION_ERROR_KEYS } from '../constants';
 
 function areSearchSourceExpressionPropsEqual(
@@ -35,13 +35,27 @@ const SearchSourceExpressionMemoized = memo<SearchSourceExpressionProps>(
 export const EsQueryAlertTypeExpression: React.FunctionComponent<
   RuleTypeParamsExpressionProps<EsQueryAlertParams>
 > = (props) => {
-  const { ruleParams, errors } = props;
+  const { ruleParams, errors, setRuleProperty } = props;
   const isSearchSource = isSearchSourceAlert(ruleParams);
   const [activeEsQueryFormType, setActiveEsQueryFormType] = useState<EsQueryFormType | null>(null);
-  const { data } = useTriggersAndActionsUiDeps();
-  const emptySearchConfiguration = useMemo(() => {
-    return data.search.searchSource.createEmpty().getSerializedFields();
-  }, [data.search.searchSource]);
+
+  const resetFormType = useCallback(() => {
+    // @ts-ignore Reset rule params regardless of their type
+    setRuleProperty('params', {});
+    setActiveEsQueryFormType(null);
+  }, [setActiveEsQueryFormType, setRuleProperty]);
+
+  const formTypeSelected = useCallback(
+    (formType: EsQueryFormType | null) => {
+      if (!formType) {
+        resetFormType();
+        return;
+      }
+
+      setActiveEsQueryFormType(formType);
+    },
+    [setActiveEsQueryFormType, resetFormType]
+  );
 
   const hasExpressionErrors = Object.keys(errors).some((errorKey) => {
     return (
@@ -74,22 +88,16 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           {activeEsQueryFormType === EsQueryFormType.KQL_OR_LUCENE && (
             <EsQueryFormTypeChooser
               activeFormType={activeEsQueryFormType}
-              onFormTypeSelect={setActiveEsQueryFormType}
+              onFormTypeSelect={formTypeSelected}
             />
           )}
-          <SearchSourceExpressionMemoized
-            {...props}
-            ruleParams={ruleParams}
-            searchType={ruleParams.searchType}
-            searchConfiguration={ruleParams.searchConfiguration}
-            savedQueryId={ruleParams.savedQueryId}
-          />
+          <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
         </>
       ) : (
         <>
           <EsQueryFormTypeChooser
             activeFormType={activeEsQueryFormType}
-            onFormTypeSelect={setActiveEsQueryFormType}
+            onFormTypeSelect={formTypeSelected}
           />
           {activeEsQueryFormType === EsQueryFormType.QUERY_DSL && (
             <EsQueryExpression {...props} ruleParams={ruleParams} />
@@ -97,10 +105,12 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           {activeEsQueryFormType === EsQueryFormType.KQL_OR_LUCENE && (
             <SearchSourceExpressionMemoized
               {...props}
-              ruleParams={ruleParams}
-              searchType="searchSource"
-              searchConfiguration={emptySearchConfiguration}
-              savedQueryId={undefined}
+              ruleParams={{
+                ...ruleParams,
+                searchType: SearchType.searchSource,
+                searchConfiguration: {},
+              }}
+              shouldResetSearchConfiguration
             />
           )}
         </>

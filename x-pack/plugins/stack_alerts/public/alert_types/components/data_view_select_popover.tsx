@@ -62,7 +62,12 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           description={i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewLabel', {
             defaultMessage: 'data view',
           })}
-          value={selectedTitle}
+          value={
+            selectedTitle ??
+            i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewPlaceholder', {
+              defaultMessage: 'Select a data view',
+            })
+          }
           isActive={dataViewPopoverOpen}
           onClick={() => {
             setDataViewPopoverOpen(true);
