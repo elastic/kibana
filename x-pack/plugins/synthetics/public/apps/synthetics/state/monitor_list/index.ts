@@ -22,7 +22,7 @@ export interface MonitorListState {
 }
 
 const initialState: MonitorListState = {
-  data: { page: 1, perPage: 10, total: null, monitors: [], syncErrors: [] },
+  data: { page: 1, perPage: 10, total: null, monitors: [], syncErrors: [], absoluteTotal: 0 },
   pageState: {
     pageIndex: 0,
     pageSize: 10,
