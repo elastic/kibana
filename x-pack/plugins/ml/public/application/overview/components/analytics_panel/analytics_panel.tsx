@@ -51,7 +51,6 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
     setErrorMessage,
     setIsInitialized,
     setLazyJobCount,
-    false,
     false
   );
 

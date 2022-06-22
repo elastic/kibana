@@ -1,0 +1,86 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import { useMemo } from 'react';
+import { HttpService } from '../http_service';
+import { basePath } from '.';
+import { useMlKibana } from '../../contexts/kibana';
+import type { TrainedModelStat } from '../../../../common/types/trained_models';
+
+import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
+
+export interface InferenceQueryParams {
+  decompress_definition?: boolean;
+  from?: number;
+  include_model_definition?: boolean;
+  size?: number;
+  tags?: string;
+  // Custom kibana endpoint query params
+  with_pipelines?: boolean;
+  include?: 'total_feature_importance' | 'feature_importance_baseline' | string;
+}
+
+export interface InferenceStatsQueryParams {
+  from?: number;
+  size?: number;
+}
+
+export interface IngestStats {
+  count: number;
+  time_in_millis: number;
+  current: number;
+  failed: number;
+}
+
+export interface InferenceStatsResponse {
+  count: number;
+  trained_model_stats: TrainedModelStat[];
+}
+
+export interface MlInferTrainedModelDeploymentResponse {
+  inference_results: estypes.MlInferTrainedModelDeploymentResponse[];
+}
+
+/**
+ * Service with APIs calls to perform inference operations.
+ * @param httpService
+ */
+export function managementApiProvider(httpService: HttpService) {
+  const apiBasePath = basePath();
+
+  return {
+    /**
+     * Fetches configuration information for a trained inference model.
+     *
+     * @param modelId - Model ID, collection of Model IDs or Model ID pattern.
+     *                  Fetches all In case nothing is provided.
+     * @param params - Optional query params
+     */
+    getList(mlSavedObjectType: MlSavedObjectType) {
+      return httpService.http<any>({
+        path: `${apiBasePath}/management/list/${mlSavedObjectType}`,
+        method: 'GET',
+      });
+    },
+  };
+}
+
+type ManagementApiService = ReturnType<typeof managementApiProvider>;
+
+/**
+ * Hooks for accessing {@link TrainedModelsApiService} in React components.
+ */
+export function useManagementApiService(): ManagementApiService {
+  const {
+    services: {
+      mlServices: { httpService },
+    },
+  } = useMlKibana();
+  return useMemo(() => managementApiProvider(httpService), [httpService]);
+}

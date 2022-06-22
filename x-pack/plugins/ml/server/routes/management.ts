@@ -1,0 +1,141 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { wrapError } from '../client/error_wrapper';
+import type { RouteInitialization } from '../types';
+import { listTypeSchema } from './schemas/management_schema';
+
+import { jobServiceProvider } from '../models/job_service';
+import { checksFactory } from '../saved_objects';
+import { BUILT_IN_MODEL_TAG } from '../../common/constants/data_frame_analytics';
+
+// TODO translate??
+const BUILT_IN_MODEL_TYPE = 'built-in';
+/**
+ * Routes for job service
+ */
+export function managementRoutes({ router, routeGuard }: RouteInitialization) {
+  /**
+   * @apiGroup JobService
+   *
+   * @api {post} /api/ml/jobs/jobs_summary Jobs summary
+   * @apiName JobsSummary
+   * @apiDescription Returns a list of anomaly detection jobs, with summary level information for every job.
+   *  For any supplied job IDs, full job information will be returned, which include the analysis configuration,
+   *  job stats, datafeed stats, and calendars.
+   *
+   * @apiSchema (body) optionalJobIdsSchema
+   *
+   * @apiSuccess {Array} jobsList list of jobs. For any supplied job IDs, the job object will contain a fullJob property
+   *    which includes the full configuration and stats for the job.
+   */
+  router.get(
+    {
+      path: '/api/ml/management/list/{listType}',
+      validate: {
+        params: listTypeSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(
+      async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+        try {
+          const { listType } = request.params;
+          const { jobsSpaces, trainedModelsSpaces } = checksFactory(client, mlSavedObjectService);
+
+          switch (listType) {
+            case 'anomaly-detector':
+              const { jobsSummary } = jobServiceProvider(client, mlClient);
+              const [jobs, adJobStatus] = await Promise.all([jobsSummary(), jobsSpaces()]);
+
+              const adJobsWithSpaces = jobs.map((job) => {
+                return {
+                  id: job.id,
+                  description: job.description,
+                  jobState: job.jobState,
+                  datafeedState: job.datafeedState,
+                  spaces: adJobStatus['anomaly-detector'][job.id] ?? [],
+                };
+              });
+
+              return response.ok({
+                body: adJobsWithSpaces,
+              });
+            case 'data-frame-analytics':
+              const [
+                { data_frame_analytics: dfaJobs },
+                { data_frame_analytics: dfaJobsStats },
+                dfaJobStatus,
+              ] = await Promise.all([
+                mlClient.getDataFrameAnalytics({
+                  size: 10000,
+                }),
+                mlClient.getDataFrameAnalyticsStats({
+                  size: 10000,
+                }),
+                jobsSpaces(),
+              ]);
+
+              const statsMapped = dfaJobsStats.reduce((acc, cur) => {
+                acc[cur.id] = cur;
+                return acc;
+              }, {} as Record<string, estypes.MlDataframeAnalytics>);
+
+              const dfaJobsWithSpaces = dfaJobs.map((j) => {
+                const id = j.id;
+                return {
+                  id,
+                  description: j.description,
+                  source_index: j.source.index,
+                  dest_index: j.dest.index,
+                  type: Object.keys(j.analysis)[0] ?? '',
+                  status: statsMapped[id]?.state ?? '',
+                  memory_status: statsMapped[id]?.memory_usage.status ?? '',
+                  progress: statsMapped[id]?.progress ?? {},
+                  spaces: dfaJobStatus['data-frame-analytics'][id] ?? [],
+                };
+              });
+              return response.ok({
+                body: dfaJobsWithSpaces,
+              });
+
+            case 'trained-model':
+              const [{ trained_model_configs: models }, modelSpaces] = await Promise.all([
+                mlClient.getTrainedModels(),
+                trainedModelsSpaces(),
+              ]);
+
+              const modelsWithSpaces = models.map((m) => {
+                return {
+                  id: m.model_id,
+                  description: m.description,
+                  create_time: m.create_time,
+                  state: '',
+                  type: [
+                    m.model_type,
+                    ...Object.keys(m.inference_config),
+                    ...(m.tags.includes(BUILT_IN_MODEL_TAG) ? [BUILT_IN_MODEL_TYPE] : []),
+                  ],
+                  spaces: modelSpaces.trainedModels[m.model_id] ?? [],
+                };
+              });
+              return response.ok({
+                body: modelsWithSpaces,
+              });
+            default:
+              throw Error('aagghhh');
+          }
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    )
+  );
+}

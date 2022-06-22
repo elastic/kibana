@@ -37,7 +37,6 @@ import { CreateAnalyticsButton } from '../create_analytics_button';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
-import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 import { useRefresh } from '../../../../../routing/use_refresh';
@@ -85,7 +84,6 @@ function getItemIdToExpandedRowMap(
 }
 
 interface Props {
-  isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
   spacesApi?: SpacesPluginStart;
   blockRefresh?: boolean;
@@ -93,7 +91,6 @@ interface Props {
   updatePageState: (update: Partial<ListingPageUrlState>) => void;
 }
 export const DataFrameAnalyticsList: FC<Props> = ({
-  isManagementTable = false,
   isMlEnabledInSpace = true,
   spacesApi,
   blockRefresh = false,
@@ -134,8 +131,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setErrorMessage,
     setIsInitialized,
     setJobsAwaitingNodeCount,
-    blockRefresh,
-    isManagementTable
+    blockRefresh
   );
 
   const updateFilteredItems = useCallback(
@@ -171,13 +167,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const getAnalyticsCallback = useCallback(() => getAnalytics(true), []);
 
   // Subscribe to the refresh observable to trigger reloading the analytics list.
-  const { refresh } = useRefreshAnalyticsList(
-    {
-      isLoading: setIsLoading,
-      onRefresh: getAnalyticsCallback,
-    },
-    isManagementTable
-  );
+  const { refresh } = useRefreshAnalyticsList({
+    isLoading: setIsLoading,
+    onRefresh: getAnalyticsCallback,
+  });
 
   useEffect(
     function updateOnTimerRefresh() {
@@ -189,9 +182,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const { columns, modals } = useColumns(
     expandedRowItemIds,
     setExpandedRowItemIds,
-    isManagementTable,
     isMlEnabledInSpace,
-    spacesApi,
     refresh
   );
 
@@ -235,7 +226,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     );
   }
 
-  if (analytics.length === 0 && !isManagementTable) {
+  if (analytics.length === 0) {
     return (
       <div data-test-subj="mlAnalyticsJobList">
         <EuiSpacer size="m" />
@@ -249,17 +240,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const stats = analyticsStats && (
     <EuiFlexItem grow={false}>
       <StatsBar stats={analyticsStats} dataTestSub={'mlAnalyticsStatsBar'} />
-    </EuiFlexItem>
-  );
-
-  const managementStats = (
-    <EuiFlexItem>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        {stats}
-        <EuiFlexItem grow={false}>
-          <RefreshAnalyticsListButton />
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </EuiFlexItem>
   );
 
@@ -277,18 +257,15 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       {modals}
       <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
       <EuiFlexGroup justifyContent="spaceBetween">
-        {!isManagementTable && stats}
-        {isManagementTable && managementStats}
+        {stats}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            {!isManagementTable && (
-              <EuiFlexItem grow={false}>
-                <CreateAnalyticsButton
-                  isDisabled={disabled}
-                  navigateToSourceSelection={navigateToSourceSelection}
-                />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <CreateAnalyticsButton
+                isDisabled={disabled}
+                navigateToSourceSelection={navigateToSourceSelection}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
