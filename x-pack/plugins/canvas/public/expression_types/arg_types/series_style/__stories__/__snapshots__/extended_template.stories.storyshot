@@ -81,10 +81,10 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
       </div>
     </div>
     <div
-      className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+      className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
     />
     <div
-      className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+      className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"

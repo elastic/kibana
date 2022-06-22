@@ -13,10 +13,10 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
     className="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <div
-      className="euiPanel euiPanel--subdued euiPanel--paddingMedium css-1wu810y-euiPanel-grow-none-m-subdued"
+      className="euiPanel euiPanel--subdued euiPanel--paddingMedium emotion-euiPanel-grow-none-m-subdued"
     >
       <div
-        className="euiPanel euiPanel--subdued euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge css-1wqem1z-euiPanel-m-subdued"
+        className="euiPanel euiPanel--subdued euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-subdued"
       >
         <div
           className="euiEmptyPrompt__main"
@@ -39,15 +39,15 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
               className="euiEmptyPrompt__contentInner"
             >
               <h2
-                className="euiTitle css-1w464ad-euiTitle-m"
+                className="euiTitle emotion-euiTitle-m"
               >
                 Add your first workpad
               </h2>
               <div
-                className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+                className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
               />
               <div
-                className="euiText css-nexvet-euiText-m-euiTextColor-subdued"
+                className="euiText emotion-euiText-m-euiTextColor-subdued"
                 style={Object {}}
               >
                 <p>
@@ -57,7 +57,7 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
                   New to Canvas?
                    
                   <a
-                    className="euiLink css-102pf9n-euiLink-primary"
+                    className="euiLink emotion-euiLink-primary"
                     href="home#/tutorial_directory/sampleData"
                     rel="noreferrer"
                   >

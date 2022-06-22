@@ -5,18 +5,18 @@ exports[`CheckerErrors should render nothing if errors is empty 1`] = `null`;
 exports[`CheckerErrors should render typical boom errors from api response 1`] = `
 Array [
   <div
-    class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />,
   <div
-    class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger eui-textLeft css-j9niqn-euiPanel-none-m-danger-euiCallOut"
+    class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger eui-textLeft emotion-euiPanel-none-m-danger-euiCallOut"
   >
     <p
-      class="euiTitle euiCallOutHeader__title css-st4zhi-euiTitle-xs-euiCallOutHeader-danger"
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
     >
       Errors found
     </p>
     <div
-      class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
+      class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
     >
       <p>
         There were some errors encountered in trying to check Elasticsearch settings. You need administrator rights to check the settings and, if needed, to enable the monitoring collection setting.

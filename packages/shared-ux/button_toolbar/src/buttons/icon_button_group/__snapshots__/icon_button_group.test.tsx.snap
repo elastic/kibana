@@ -191,7 +191,7 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
                 "key": "css",
                 "nonce": undefined,
                 "registered": Object {
-                  "css-iuv015-EuiButtonGroup": "&.euiButtonGroupButton{background-color:#FFF;border:1px solid #D3DAE6 !important;&:first-of-type{border-top-left-radius:6px !important;border-bottom-left-radius:6px !important;}&:last-of-type{border-top-right-radius:6px !important;border-bottom-right-radius:6px !important;}};;label:EuiButtonGroup;",
+                  "emotion-EuiButtonGroup": "&.euiButtonGroupButton{background-color:#FFF;border:1px solid #D3DAE6 !important;&:first-of-type{border-top-left-radius:6px !important;border-bottom-left-radius:6px !important;}&:last-of-type{border-top-right-radius:6px !important;border-bottom-right-radius:6px !important;}};;label:EuiButtonGroup;",
                 },
                 "sheet": StyleSheet {
                   "_alreadyInsertedOrderInsensitiveRule": true,
@@ -203,28 +203,28 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
                       data-s=""
                     >
                       
-                      .css-iuv015-EuiButtonGroup{}
+                      .emotion-EuiButtonGroup{}
                     </style>
                     <style
                       data-emotion="css"
                       data-s=""
                     >
                       
-                      .css-iuv015-EuiButtonGroup.euiButtonGroupButton{background-color:#FFF;border:1px solid #D3DAE6!important;}
+                      .emotion-EuiButtonGroup.euiButtonGroupButton{background-color:#FFF;border:1px solid #D3DAE6!important;}
                     </style>
                     <style
                       data-emotion="css"
                       data-s=""
                     >
                       
-                      .css-iuv015-EuiButtonGroup.euiButtonGroupButton:first-of-type{border-top-left-radius:6px!important;border-bottom-left-radius:6px!important;}
+                      .emotion-EuiButtonGroup.euiButtonGroupButton:first-of-type{border-top-left-radius:6px!important;border-bottom-left-radius:6px!important;}
                     </style>
                     <style
                       data-emotion="css"
                       data-s=""
                     >
                       
-                      .css-iuv015-EuiButtonGroup.euiButtonGroupButton:last-of-type{border-top-right-radius:6px!important;border-bottom-right-radius:6px!important;}
+                      .emotion-EuiButtonGroup.euiButtonGroupButton:last-of-type{border-top-right-radius:6px!important;border-bottom-right-radius:6px!important;}
                     </style>
                     <style
                       data-styled="active"
@@ -243,28 +243,28 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
                       data-s=""
                     >
                       
-                      .css-iuv015-EuiButtonGroup{}
+                      .emotion-EuiButtonGroup{}
                     </style>,
                     <style
                       data-emotion="css"
                       data-s=""
                     >
                       
-                      .css-iuv015-EuiButtonGroup.euiButtonGroupButton{background-color:#FFF;border:1px solid #D3DAE6!important;}
+                      .emotion-EuiButtonGroup.euiButtonGroupButton{background-color:#FFF;border:1px solid #D3DAE6!important;}
                     </style>,
                     <style
                       data-emotion="css"
                       data-s=""
                     >
                       
-                      .css-iuv015-EuiButtonGroup.euiButtonGroupButton:first-of-type{border-top-left-radius:6px!important;border-bottom-left-radius:6px!important;}
+                      .emotion-EuiButtonGroup.euiButtonGroupButton:first-of-type{border-top-left-radius:6px!important;border-bottom-left-radius:6px!important;}
                     </style>,
                     <style
                       data-emotion="css"
                       data-s=""
                     >
                       
-                      .css-iuv015-EuiButtonGroup.euiButtonGroupButton:last-of-type{border-top-right-radius:6px!important;border-bottom-right-radius:6px!important;}
+                      .emotion-EuiButtonGroup.euiButtonGroupButton:last-of-type{border-top-right-radius:6px!important;border-bottom-right-radius:6px!important;}
                     </style>,
                   ],
                 },
@@ -283,7 +283,7 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
           />
           <EuiButtonGroupButton
             aria-label="Text"
-            className="css-iuv015-EuiButtonGroup"
+            className="emotion-EuiButtonGroup"
             color="text"
             element="button"
             iconType="visText"
@@ -300,7 +300,7 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
             <EuiButtonDisplay
               aria-label="Text"
               baseClassName="euiButtonGroupButton"
-              className="euiButtonGroupButton-isIconOnly css-iuv015-EuiButtonGroup"
+              className="euiButtonGroupButton-isIconOnly emotion-EuiButtonGroup"
               color="text"
               data-test-subj="generated-id0"
               element="button"
@@ -324,7 +324,7 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
               <button
                 aria-label="Text"
                 aria-pressed={false}
-                className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton-isIconOnly css-iuv015-EuiButtonGroup"
+                className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton-isIconOnly emotion-EuiButtonGroup"
                 data-test-subj="generated-id0"
                 disabled={false}
                 id="generated-id"
@@ -337,7 +337,7 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
                 title="Text"
                 type="button"
               >
-                <EuiButtonContent
+                <EuiButtonContentDeprecated
                   className="euiButton__content"
                   iconSide="left"
                   iconType="visText"
@@ -372,7 +372,7 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
                       Text
                     </span>
                   </span>
-                </EuiButtonContent>
+                </EuiButtonContentDeprecated>
               </button>
             </EuiButtonDisplay>
           </EuiButtonGroupButton>

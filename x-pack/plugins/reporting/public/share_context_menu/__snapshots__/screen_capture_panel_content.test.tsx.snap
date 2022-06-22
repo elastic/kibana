@@ -6,7 +6,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
   data-test-subj="shareReportingForm"
 >
   <div
-    class="euiText css-1vkrgyt-euiText-s"
+    class="euiText emotion-euiText-s"
   >
     <p>
       <span>
@@ -15,7 +15,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     </p>
   </div>
   <div
-    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
     class="euiFormRow"
@@ -94,20 +94,20 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     </span>
   </button>
   <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
+    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
     class="euiAccordion"
   >
     <div
-      class="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
+      class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
     >
       <button
         aria-controls="advanced-options"
         aria-expanded="false"
         aria-labelledby="generated-id"
-        class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton css-86d10e-euiAccordion__iconButton"
+        class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiAccordion__iconButton"
         tabindex="-1"
         type="button"
       >
@@ -121,7 +121,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
       <button
         aria-controls="advanced-options"
         aria-expanded="false"
-        class="euiAccordion__button css-ot1kdj-euiAccordion__button"
+        class="euiAccordion__button emotion-euiAccordion__button"
         id="generated-id"
         type="button"
       >
@@ -134,20 +134,20 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     </div>
     <div
       aria-labelledby="generated-id"
-      class="euiAccordion__childWrapper css-bu9wkr-euiAccordion__childWrapper"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper"
       id="advanced-options"
       role="region"
       tabindex="-1"
     >
       <div>
         <div
-          class=" css-ip8p5q-euiAccordion__children"
+          class=" emotion-euiAccordion__children"
         >
           <div
-            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiText css-1vkrgyt-euiText-s"
+            class="euiText emotion-euiText-s"
           >
             <p>
               <span>
@@ -156,27 +156,27 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
             </p>
           </div>
           <div
-            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger css-1a24lnd-euiPanel-none-s-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
           >
             <p
-              class="euiTitle euiCallOutHeader__title css-18vjrtd-euiTitle-xxs-euiCallOutHeader-danger"
+              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
             >
               <span
                 aria-hidden="true"
-                class="css-15maws8-euiCallOut__icon"
+                class="emotion-euiCallOut__icon"
                 color="inherit"
                 data-euiicon-type="alert"
               />
               Unsaved work
             </p>
             <div
-              class="euiText css-15vp7z3-euiText-xs-euiTextColor-default-euiCallOut__description"
+              class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
             >
               <div
-                class="euiText css-1vkrgyt-euiText-s"
+                class="euiText emotion-euiText-s"
               >
                 <p>
                   <span>
@@ -185,7 +185,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
                 </p>
               </div>
               <div
-                class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
             </div>
           </div>
@@ -202,7 +202,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
   data-test-subj="shareReportingForm"
 >
   <div
-    class="euiText css-1vkrgyt-euiText-s"
+    class="euiText emotion-euiText-s"
   >
     <p>
       <span>
@@ -211,7 +211,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     </p>
   </div>
   <div
-    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
     class="euiFormRow"
@@ -290,20 +290,20 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     </span>
   </button>
   <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
+    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
     class="euiAccordion"
   >
     <div
-      class="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
+      class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
     >
       <button
         aria-controls="advanced-options"
         aria-expanded="false"
         aria-labelledby="generated-id"
-        class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton css-86d10e-euiAccordion__iconButton"
+        class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiAccordion__iconButton"
         tabindex="-1"
         type="button"
       >
@@ -317,7 +317,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
       <button
         aria-controls="advanced-options"
         aria-expanded="false"
-        class="euiAccordion__button css-ot1kdj-euiAccordion__button"
+        class="euiAccordion__button emotion-euiAccordion__button"
         id="generated-id"
         type="button"
       >
@@ -330,20 +330,20 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     </div>
     <div
       aria-labelledby="generated-id"
-      class="euiAccordion__childWrapper css-bu9wkr-euiAccordion__childWrapper"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper"
       id="advanced-options"
       role="region"
       tabindex="-1"
     >
       <div>
         <div
-          class=" css-ip8p5q-euiAccordion__children"
+          class=" emotion-euiAccordion__children"
         >
           <div
-            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiText css-1vkrgyt-euiText-s"
+            class="euiText emotion-euiText-s"
           >
             <p>
               <span>
@@ -352,27 +352,27 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
             </p>
           </div>
           <div
-            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger css-1a24lnd-euiPanel-none-s-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
           >
             <p
-              class="euiTitle euiCallOutHeader__title css-18vjrtd-euiTitle-xxs-euiCallOutHeader-danger"
+              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
             >
               <span
                 aria-hidden="true"
-                class="css-15maws8-euiCallOut__icon"
+                class="emotion-euiCallOut__icon"
                 color="inherit"
                 data-euiicon-type="alert"
               />
               Unsaved work
             </p>
             <div
-              class="euiText css-15vp7z3-euiText-xs-euiTextColor-default-euiCallOut__description"
+              class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
             >
               <div
-                class="euiText css-1vkrgyt-euiText-s"
+                class="euiText emotion-euiText-s"
               >
                 <p>
                   <span>
@@ -381,7 +381,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
                 </p>
               </div>
               <div
-                class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
             </div>
           </div>
@@ -398,7 +398,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
   data-test-subj="shareReportingForm"
 >
   <div
-    class="euiText css-1vkrgyt-euiText-s"
+    class="euiText emotion-euiText-s"
   >
     <p>
       <span>
@@ -407,7 +407,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     </p>
   </div>
   <div
-    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <button
     class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton--fullWidth"
@@ -427,20 +427,20 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     </span>
   </button>
   <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
+    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
     class="euiAccordion"
   >
     <div
-      class="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
+      class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
     >
       <button
         aria-controls="advanced-options"
         aria-expanded="false"
         aria-labelledby="generated-id"
-        class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton css-86d10e-euiAccordion__iconButton"
+        class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiAccordion__iconButton"
         tabindex="-1"
         type="button"
       >
@@ -454,7 +454,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
       <button
         aria-controls="advanced-options"
         aria-expanded="false"
-        class="euiAccordion__button css-ot1kdj-euiAccordion__button"
+        class="euiAccordion__button emotion-euiAccordion__button"
         id="generated-id"
         type="button"
       >
@@ -467,20 +467,20 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     </div>
     <div
       aria-labelledby="generated-id"
-      class="euiAccordion__childWrapper css-bu9wkr-euiAccordion__childWrapper"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper"
       id="advanced-options"
       role="region"
       tabindex="-1"
     >
       <div>
         <div
-          class=" css-ip8p5q-euiAccordion__children"
+          class=" emotion-euiAccordion__children"
         >
           <div
-            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiText css-1vkrgyt-euiText-s"
+            class="euiText emotion-euiText-s"
           >
             <p>
               <span>
@@ -489,27 +489,27 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
             </p>
           </div>
           <div
-            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger css-1a24lnd-euiPanel-none-s-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
           >
             <p
-              class="euiTitle euiCallOutHeader__title css-18vjrtd-euiTitle-xxs-euiCallOutHeader-danger"
+              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
             >
               <span
                 aria-hidden="true"
-                class="css-15maws8-euiCallOut__icon"
+                class="emotion-euiCallOut__icon"
                 color="inherit"
                 data-euiicon-type="alert"
               />
               Unsaved work
             </p>
             <div
-              class="euiText css-15vp7z3-euiText-xs-euiTextColor-default-euiCallOut__description"
+              class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
             >
               <div
-                class="euiText css-1vkrgyt-euiText-s"
+                class="euiText emotion-euiText-s"
               >
                 <p>
                   <span>
@@ -518,7 +518,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
                 </p>
               </div>
               <div
-                class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
             </div>
           </div>

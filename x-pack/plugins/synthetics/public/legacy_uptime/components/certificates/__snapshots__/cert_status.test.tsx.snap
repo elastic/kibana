@@ -7,7 +7,7 @@ exports[`CertStatus renders expected elements for valid props 1`] = `
 }
 
 <div
-  class="euiHealth css-qn8ayk-euiHealth-s"
+  class="euiHealth emotion-euiHealth-s"
 >
   <div
     class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -26,7 +26,7 @@ exports[`CertStatus renders expected elements for valid props 1`] = `
       <span>
         OK  
         <div
-          class="euiText c0 css-pwgelg-euiText-xs-euiTextColor-subdued"
+          class="euiText c0 emotion-euiText-xs-euiTextColor-subdued"
         >
            for 4 months
         </div>

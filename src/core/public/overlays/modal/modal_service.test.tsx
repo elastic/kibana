@@ -50,7 +50,7 @@ describe('ModalService', () => {
       });
       expect(mockReactDomRender.mock.calls).toMatchSnapshot();
       const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
-      expect(modalContent.html()).toMatchSnapshot();
+      expect(modalContent.render()).toMatchSnapshot();
     });
 
     describe('with a currently active modal', () => {
@@ -108,7 +108,7 @@ describe('ModalService', () => {
       });
       expect(mockReactDomRender.mock.calls).toMatchSnapshot();
       const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
-      expect(modalContent.html()).toMatchSnapshot();
+      expect(modalContent.render()).toMatchSnapshot();
     });
 
     it('renders a string confirm message', () => {
@@ -116,7 +116,7 @@ describe('ModalService', () => {
       modals.openConfirm('Some message');
       expect(mockReactDomRender.mock.calls).toMatchSnapshot();
       const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
-      expect(modalContent.html()).toMatchSnapshot();
+      expect(modalContent.render()).toMatchSnapshot();
     });
 
     describe('with a currently active modal', () => {

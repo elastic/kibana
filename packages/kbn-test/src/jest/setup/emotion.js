@@ -7,11 +7,14 @@
  */
 
 import { createSerializer } from '@emotion/jest';
+import { replaceEmotionPrefix } from '@elastic/eui/lib/test';
 
 module.exports = createSerializer({
-  classNameReplacer: (className) => className,
+  classNameReplacer: replaceEmotionPrefix,
   includeStyles: false,
 });
+// NOTE: The above `createSerializer` needs to be repeated in canvas'
+// `storyshots.test.tsx` file as well, as they do not use the kbn-test config
 
 const consoleError = console.error;
 console.error = (message, ...rest) => {

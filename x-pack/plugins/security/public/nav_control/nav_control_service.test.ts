@@ -103,7 +103,7 @@ describe('SecurityNavControlService', () => {
                   >
                     <span
                       aria-label="Loading"
-                      class="euiLoadingSpinner css-155ohbx-euiLoadingSpinner-m"
+                      class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
                       role="progressbar"
                     />
                   </span>
