@@ -5,7 +5,7 @@ exports[`Ping Headers shallow renders expected elements for valid props 1`] = `
   <EuiSpacer
     size="s"
   />
-  <WithEuiTheme(EuiAccordionClass)
+  <EuiAccordionClass
     buttonContent={
       <EuiText
         size="s"
@@ -84,6 +84,6 @@ exports[`Ping Headers shallow renders expected elements for valid props 1`] = `
       }
       type="responsiveColumn"
     />
-  </WithEuiTheme(EuiAccordionClass)>
+  </EuiAccordionClass>
 </Fragment>
 `;
