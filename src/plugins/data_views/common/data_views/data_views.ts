@@ -279,14 +279,13 @@ export class DataViewsService {
   private onError: OnError;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
   /**
+   * Can the user save advanced settings?
+   */
+  private getCanSaveAdvancedSettings: () => Promise<boolean>;
+  /**
    * Can the user save data views?
    */
   public getCanSave: () => Promise<boolean>;
-  /**
-   * Can the user save advanced settings?
-   */
-  public getCanSaveAdvancedSettings: () => Promise<boolean>;
-
   /**
    * DataViewsService constructor
    * @param deps Service dependencies
