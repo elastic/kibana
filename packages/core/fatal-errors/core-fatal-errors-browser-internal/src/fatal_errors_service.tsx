@@ -8,8 +8,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import * as Rx from 'rxjs';
-import { first, tap } from 'rxjs/operators';
+import { ReplaySubject, first, tap } from 'rxjs';
 
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
@@ -27,7 +26,7 @@ export interface Deps {
 
 /** @internal */
 export class FatalErrorsService {
-  private readonly errorInfo$ = new Rx.ReplaySubject<FatalErrorInfo>();
+  private readonly errorInfo$ = new ReplaySubject<FatalErrorInfo>();
   private fatalErrors?: FatalErrorsSetup;
 
   /**
