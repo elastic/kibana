@@ -439,8 +439,8 @@ export class SyntheticsService {
   }
 
   formatConfigs(configs: SyntheticsMonitorWithId[]) {
-    return configs.map((config: Partial<MonitorFields>) =>
-      formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
+    return configs.map((config: SyntheticsMonitor) =>
+      formatMonitorConfig(Object.keys(config) as ConfigKey[], config as Partial<MonitorFields>)
     );
   }
 
