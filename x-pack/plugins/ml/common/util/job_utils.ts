@@ -9,7 +9,6 @@ import { each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-// @ts-ignore
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
