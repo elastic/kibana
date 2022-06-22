@@ -241,10 +241,11 @@ function RulesPage() {
             disableRule: async () => await disableRule({ http, id: item.id }),
             onRuleChanged: () => reload(),
             isEditable: item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId),
-            snoozeRule: async (snoozeEndTime: string | -1) => {
-              await snoozeRule({ http, id: item.id, snoozeEndTime });
+            snoozeRule: async (snoozeSchedule) => {
+              await snoozeRule({ http, id: item.id, snoozeSchedule });
             },
-            unsnoozeRule: async () => await unsnoozeRule({ http, id: item.id }),
+            unsnoozeRule: async (scheduleIds) =>
+              await unsnoozeRule({ http, id: item.id, scheduleIds }),
           });
         },
       },

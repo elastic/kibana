@@ -13,8 +13,8 @@ import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import type { FilterManager, TimeRange, SavedQuery } from '@kbn/data-plugin/public';
+import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';

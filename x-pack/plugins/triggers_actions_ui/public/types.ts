@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Moment } from 'moment';
 import type { ComponentType, ReactNode } from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
@@ -440,6 +441,32 @@ export enum AlertsTableFlyoutState {
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
+
+export enum RRuleFrequency {
+  YEARLY = 0,
+  MONTHLY = 1,
+  WEEKLY = 2,
+  DAILY = 3,
+}
+
+export interface RecurrenceSchedule {
+  freq: RRuleFrequency;
+  interval: number;
+  until?: Moment;
+  count?: number;
+  byweekday?: string[];
+  bymonthday?: number[];
+  bymonth?: number[];
+}
+
+export interface SnoozeSchedule {
+  id: string | null;
+  duration: number;
+  rRule: Partial<RecurrenceSchedule> & {
+    dtstart: string;
+    tzid: string;
+  };
+}
 
 export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
