@@ -32,6 +32,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const find = getService('find');
+  const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects([
     'common',
     'header',
@@ -54,6 +56,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
     });
+
+    /**
+     * @param field field name to sort
+     * @param optionIndex index of the option to choose in dropdown
+     */
+    const clickSort = async (field: string, optionIndex: number) => {
+      await testSubjects.click(`dataGridHeaderCell-${field}`);
+      const optionButtons = await find.allByCssSelector('.euiListGroupItem__button');
+      await optionButtons[optionIndex].click();
+    };
 
     it('should not allow saving of invalid scripts', async function () {
       await PageObjects.settings.navigateTo();
@@ -145,29 +157,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
-          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\n18');
+          const rowData = (await dataGrid.getRowsText())[0];
+          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.91618');
         });
       });
 
       // add a test to sort numeric scripted field
       it('should sort scripted field value in Discover', async function () {
-        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
+        await clickSort(scriptedPainlessFieldName, 1);
+        await PageObjects.common.sleep(500);
+
         // after the first click on the scripted field, it becomes secondary sort after time.
         // click on the timestamp twice to make it be the secondary sort key.
-        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
-        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+        await clickSort('@timestamp', 1);
+        await clickSort('@timestamp', 0);
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
-          expect(rowData).to.be('Sep 17, 2015 @ 10:53:14.181\n-1');
+          const rowData = (await dataGrid.getRowsText())[0];
+          expect(rowData).to.be('Sep 17, 2015 @ 10:53:14.181-1');
         });
 
-        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
+        await clickSort(scriptedPainlessFieldName, 2);
+        // after the first click on the scripted field, it becomes primary sort after time.
+        // click on the scripted field twice then, makes it be the secondary sort key.
+        await clickSort(scriptedPainlessFieldName, 2);
+        await clickSort(scriptedPainlessFieldName, 2);
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
-          expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.479\n20');
+          const rowData = (await dataGrid.getRowsText())[0];
+          expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.47920');
         });
       });
 
@@ -232,29 +252,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
-          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ngood');
+          const rowData = (await dataGrid.getRowsText())[0];
+          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916good');
         });
       });
 
       // add a test to sort string scripted field
       it('should sort scripted field value in Discover', async function () {
-        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
+        await clickSort(scriptedPainlessFieldName2, 1);
+        // await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
+        await PageObjects.common.sleep(500);
+
         // after the first click on the scripted field, it becomes secondary sort after time.
         // click on the timestamp twice to make it be the secondary sort key.
-        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
-        await testSubjects.click('docTableHeaderFieldSort_@timestamp');
+        await clickSort('@timestamp', 1);
+        await clickSort('@timestamp', 0);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
-          expect(rowData).to.be('Sep 17, 2015 @ 09:48:40.594\nbad');
+          const rowData = (await dataGrid.getRowsText())[0];
+          expect(rowData).to.be('Sep 17, 2015 @ 09:48:40.594bad');
         });
 
-        await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
+        await clickSort(scriptedPainlessFieldName2, 2);
+        // after the first click on the scripted field, it becomes primary sort after time.
+        // click on the scripted field twice then, makes it be the secondary sort key.
+        await clickSort(scriptedPainlessFieldName2, 2);
+        await clickSort(scriptedPainlessFieldName2, 2);
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
-          expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.479\ngood');
+          const rowData = (await dataGrid.getRowsText())[0];
+          expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.479good');
         });
       });
 
@@ -318,8 +346,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
-          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ntrue');
+          const rowData = (await dataGrid.getRowsText())[0];
+          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916true');
         });
       });
 
@@ -405,8 +433,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
-          const rowData = await PageObjects.discover.getDocTableIndexLegacy(1);
-          expect(rowData).to.be('Sep 18, 2015 @ 06:52:55.953\n2015-09-18 07:00');
+          const rowData = (await dataGrid.getRowsText())[0];
+          expect(rowData).to.be('Sep 18, 2015 @ 06:52:55.9532015-09-18 07:00');
         });
       });
 
