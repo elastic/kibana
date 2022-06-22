@@ -95,54 +95,6 @@ export const securitySolutionOnlyAll: Role = {
   },
 };
 
-export const securitySolutionOnlyCreate: Role = {
-  name: 'sec_only_create',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        feature: {
-          securitySolutionFixture: ['minimal_all', 'cases_create'],
-          actions: ['all'],
-          actionsSimulators: ['all'],
-        },
-        spaces: ['space1'],
-      },
-    ],
-  },
-};
-
-export const securitySolutionOnlyUpdate: Role = {
-  name: 'sec_only_update',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        feature: {
-          securitySolutionFixture: ['minimal_all', 'cases_update'],
-          actions: ['all'],
-          actionsSimulators: ['all'],
-        },
-        spaces: ['space1'],
-      },
-    ],
-  },
-};
-
 export const securitySolutionOnlyDelete: Role = {
   name: 'sec_only_delete',
   privileges: {
@@ -158,30 +110,6 @@ export const securitySolutionOnlyDelete: Role = {
       {
         feature: {
           securitySolutionFixture: ['minimal_all', 'cases_delete'],
-          actions: ['all'],
-          actionsSimulators: ['all'],
-        },
-        spaces: ['space1'],
-      },
-    ],
-  },
-};
-
-export const securitySolutionOnlyPush: Role = {
-  name: 'sec_only_push',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        feature: {
-          securitySolutionFixture: ['minimal_all', 'cases_push'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -267,11 +195,8 @@ export const roles = [
   noKibanaPrivileges,
   globalRead,
   securitySolutionOnlyAll,
-  securitySolutionOnlyCreate,
   securitySolutionOnlyRead,
-  securitySolutionOnlyUpdate,
   securitySolutionOnlyDelete,
-  securitySolutionOnlyPush,
   observabilityOnlyAll,
   observabilityOnlyRead,
   testDisabledPluginAll,

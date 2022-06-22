@@ -27,6 +27,7 @@ import {
   obsOnlyRead,
   obsSecRead,
   secOnly,
+  secOnlyDelete,
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
@@ -98,28 +99,32 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllCaseItems(es);
       });
 
-      it('should delete a comment from the appropriate owner', async () => {
-        const secCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-          200,
-          { user: secOnly, space: 'space1' }
-        );
+      for (const user of [secOnly, secOnlyDelete]) {
+        it(`User ${
+          user.username
+        } with role(s) ${user.roles.join()} - should delete a comment from the appropriate owner`, async () => {
+          const secCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            { user: superUser, space: 'space1' }
+          );
 
-        const commentResp = await createComment({
-          supertest: supertestWithoutAuth,
-          caseId: secCase.id,
-          params: postCommentUserReq,
-          auth: { user: secOnly, space: 'space1' },
-        });
+          const commentResp = await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: secCase.id,
+            params: postCommentUserReq,
+            auth: { user, space: 'space1' },
+          });
 
-        await deleteComment({
-          supertest: supertestWithoutAuth,
-          caseId: secCase.id,
-          commentId: commentResp.comments![0].id,
-          auth: { user: secOnly, space: 'space1' },
+          await deleteComment({
+            supertest: supertestWithoutAuth,
+            caseId: secCase.id,
+            commentId: commentResp.comments![0].id,
+            auth: { user, space: 'space1' },
+          });
         });
-      });
+      }
 
       it('should delete multiple comments from the appropriate owner', async () => {
         const secCase = await createCase(

@@ -36,6 +36,7 @@ import {
   obsSecRead,
   noKibanaPrivileges,
   obsSec,
+  secOnlyDelete,
 } from '../../../../common/lib/authentication/users';
 import { getUserInfo } from '../../../../common/lib/authentication';
 import { assertWarningHeader } from '../../../../common/lib/validation';
@@ -164,7 +165,7 @@ export default ({ getService }: FtrProviderContext): void => {
           }
         );
 
-        for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
+        for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead, secOnlyDelete]) {
           await getCase({
             supertest: supertestWithoutAuth,
             caseId: newCase.id,

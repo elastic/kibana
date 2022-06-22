@@ -129,7 +129,6 @@ export function checkPrivilegesWithRequestFactory(
         })
         .flat();
 
-      console.log(JSON.stringify({ privilegeArray, hasPrivilegesResponse }, null, 2));
       return {
         hasAllRequested: hasPrivilegesResponse.has_all_requested,
         username: hasPrivilegesResponse.username,

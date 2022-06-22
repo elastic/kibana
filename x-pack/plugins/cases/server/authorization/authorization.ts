@@ -141,7 +141,6 @@ export class Authorization {
         securityAuth.actions.cases.get(owner, operation.name)
       );
 
-      console.log(requiredPrivileges);
       const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested } = await checkPrivileges({
         kibana: requiredPrivileges,

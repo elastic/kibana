@@ -39,6 +39,7 @@ import {
   globalRead,
   obsSecRead,
   obsSec,
+  secOnlyDelete,
 } from '../../../../common/lib/authentication/users';
 
 interface CaseAttributes {
@@ -636,6 +637,7 @@ export default ({ getService }: FtrProviderContext): void => {
       for (const scenario of [
         { user: noKibanaPrivileges, space: 'space1' },
         { user: secOnly, space: 'space2' },
+        { user: secOnlyDelete, space: 'space1' },
       ]) {
         it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
           scenario.space

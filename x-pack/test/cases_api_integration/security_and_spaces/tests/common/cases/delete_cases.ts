@@ -31,9 +31,6 @@ import {
   noKibanaPrivileges,
   obsOnly,
   superUser,
-  secOnlyCreate,
-  secOnlyUpdate,
-  secOnlyPush,
   secOnlyDelete,
 } from '../../../../common/lib/authentication/users';
 
@@ -103,7 +100,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCases({ supertest, caseIDs: ['fake-id'], expectedHttpCode: 404 });
     });
 
-    describe.only('rbac', () => {
+    describe('rbac', () => {
       for (const user of [secOnly, secOnlyDelete]) {
         it(`User ${
           user.username
@@ -113,7 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getPostCaseRequest({ owner: 'securitySolutionFixture' }),
             200,
             {
-              user,
+              user: superUser,
               space: 'space1',
             }
           );
@@ -190,17 +187,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      for (const user of [
-        // globalRead,
-        // secOnlyRead,
-        secOnlyCreate,
-        // secOnlyUpdate,
-        // secOnlyPush,
-        // obsOnlyRead,
-        // obsSecRead,
-        // noKibanaPrivileges,
-      ]) {
-        it.only(`User ${
+      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+        it(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should NOT delete a case`, async () => {
           const postedCase = await createCase(
