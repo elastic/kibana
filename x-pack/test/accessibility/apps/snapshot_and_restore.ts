@@ -12,6 +12,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const es = getService('es');
 
+  async function createRepo(repoName: string) {
+    await es.snapshot.createRepository({
+      name: repoName,
+      verify: true,
+      type: 'fs',
+      repository: {
+        type: 'fs',
+        settings: {
+          location: 'temp',
+        },
+      },
+      settings: {
+        location: 'temp',
+      },
+    });
+  }
+
   describe('Stack management- snapshot restore a11y tests', () => {
     before(async () => {
       await PageObjects.settings.navigateTo();
@@ -40,25 +57,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('table views with data', async () => {
+      const testRepoName = 'testrepo';
       const snapshotName = `testsnapshot${Date.now().toString()}`;
       before(async () => {
-        await es.snapshot.createRepository({
-          name: 'testrepo',
-          verify: true,
-          type: 'fs',
-          repository: {
-            type: 'fs',
-            settings: {
-              location: 'temp',
-            },
-          },
-          settings: {
-            location: 'temp',
-          },
-        });
-
+        await createRepo(testRepoName);
         await es.snapshot.create({
-          repository: 'testrepo',
+          repository: testRepoName,
           snapshot: snapshotName,
           wait_for_completion: true,
         });
@@ -74,39 +78,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
 
-      describe('create policy wizard', async () => {
-        before(async () => {
-          await PageObjects.snapshotRestore.navToPolicies();
-        });
-        it('page one', async () => {
-          await PageObjects.snapshotRestore.fillCreateNewPolicyPageOne(
-            'testpolicy',
-            '<daily-snap-{now/d}>'
-          );
-          await a11y.testAppSnapshot();
-        });
-        it('page two', async () => {
-          await PageObjects.snapshotRestore.fillCreateNewPolicyPageTwo();
-          await a11y.testAppSnapshot();
-        });
-        it('page three', async () => {
-          await PageObjects.snapshotRestore.fillCreateNewPolicyPageThree();
-          await a11y.testAppSnapshot();
-        });
-        it('submit page four and flyout', async () => {
-          // Commenting out this snapshot as this is reported. https://github.com/elastic/kibana/issues/134514
-          await PageObjects.snapshotRestore.submitNewPolicy();
-          // await a11y.testAppSnapshot();
-        });
-        it('policy table with data', async () => {
-          await PageObjects.snapshotRestore.closeFlyout();
-          await a11y.testAppSnapshot();
-        });
+      after(async () => {
+        await es.snapshot.delete({ snapshot: snapshotName, repository: testRepoName });
+        await es.snapshot.deleteRepository({ name: [testRepoName] });
+      });
+    });
+
+    describe('create policy wizard', async () => {
+      const testRepoName = 'policyrepo';
+      before(async () => {
+        await createRepo(testRepoName);
+        await PageObjects.snapshotRestore.navToPolicies();
+      });
+      it('page one', async () => {
+        await PageObjects.snapshotRestore.fillCreateNewPolicyPageOne(
+          'testpolicy',
+          '<daily-snap-{now/d}>'
+        );
+        await a11y.testAppSnapshot();
+      });
+      it('page two', async () => {
+        await PageObjects.snapshotRestore.fillCreateNewPolicyPageTwo();
+        await a11y.testAppSnapshot();
+      });
+      it('page three', async () => {
+        await PageObjects.snapshotRestore.fillCreateNewPolicyPageThree();
+        await a11y.testAppSnapshot();
+      });
+      it('submit page four and flyout', async () => {
+        // Commenting out this snapshot as this is reported. https://github.com/elastic/kibana/issues/134514
+        await PageObjects.snapshotRestore.submitNewPolicy();
+        // await a11y.testAppSnapshot();
+      });
+      it('policy table with data', async () => {
+        await PageObjects.snapshotRestore.closeFlyout();
+        await a11y.testAppSnapshot();
       });
 
       after(async () => {
-        await es.snapshot.delete({ snapshot: snapshotName, repository: 'testrepo' });
-        await es.snapshot.deleteRepository({ name: ['testrepo'] });
+        await es.snapshot.deleteRepository({ name: [testRepoName] });
         await es.slm.deleteLifecycle({ policy_id: 'testpolicy' });
       });
     });
