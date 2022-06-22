@@ -106,7 +106,7 @@ To add interactive filters to your dashboards, use the link:https://www.elastic.
 The apiKey, including key and ID/key pair, and `elasticsearch_anonymous_user` credential types for anonymous authentication providers are deprecated. For more information, check {kibana-pull}131636[#131636].
 
 *Impact* +
-If you have anonymous authentication providers configured with apiKey and `elasticsearch_anonymous_user', a deprecation warning appears, even when the provider is not enabled.
+If you have anonymous authentication provider configured with apiKey or `elasticsearch_anonymous_user` credential types, a deprecation warning appears, even when the provider is not enabled.
 ====
       
 [discrete]
