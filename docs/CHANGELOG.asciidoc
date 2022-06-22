@@ -117,7 +117,7 @@ Machine Learning::
 Fixes actual and typical formatting for the `time_of_week` function {kibana-pull}134353[#134353]
 
 Observability::
-Use dynamic heartbeatIndices for use_monitor_histogram hook {kibana-pull}134856[#134856]
+Renders the monitor downtime history histogram for all monitors indexed in `synthetics-*` {kibana-pull}134856[#134856]
 
 Platform::
 Fixes an issue in PDF/PNG reporting where visualization panels could sometimes appear blank {kibana-pull}131877[#131877]
