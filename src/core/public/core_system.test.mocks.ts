@@ -48,7 +48,7 @@ export const MockFatalErrorsService = fatalErrorsServiceMock.create();
 export const FatalErrorsServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockFatalErrorsService);
-jest.doMock('@kbn/core-fatal-errors-browser-mocks', () => ({
+jest.doMock('@kbn/core-fatal-errors-browser-internal', () => ({
   FatalErrorsService: FatalErrorsServiceConstructor,
 }));
 
