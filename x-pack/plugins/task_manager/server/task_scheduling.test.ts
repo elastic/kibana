@@ -302,7 +302,11 @@ describe('TaskScheduling', () => {
       mockTaskStore.update.mockRejectedValueOnce(409);
 
       const result = taskScheduling.runSoon(id);
-      await expect(result).rejects.toEqual(Error('Task is being claimed'));
+      await expect(result).rejects.toEqual(
+        Error(
+          'Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" as it is currently running'
+        )
+      );
     });
 
     test('rejects when the task is already running', async () => {
@@ -313,7 +317,11 @@ describe('TaskScheduling', () => {
       mockTaskStore.update.mockRejectedValueOnce(409);
 
       const result = taskScheduling.runSoon(id);
-      await expect(result).rejects.toEqual(Error('Task is already running'));
+      await expect(result).rejects.toEqual(
+        Error(
+          'Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" as it is currently running'
+        )
+      );
     });
 
     test('rejects when the task status is failed', async () => {
@@ -324,7 +332,9 @@ describe('TaskScheduling', () => {
       mockTaskStore.update.mockRejectedValueOnce(409);
 
       const result = taskScheduling.runSoon(id);
-      await expect(result).rejects.toEqual(Error('Task was already failed'));
+      await expect(result).rejects.toEqual(
+        Error('Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason')
+      );
     });
 
     test('rejects when the task status is Unrecognized', async () => {
@@ -335,7 +345,9 @@ describe('TaskScheduling', () => {
       mockTaskStore.update.mockRejectedValueOnce(409);
 
       const result = taskScheduling.runSoon(id);
-      await expect(result).rejects.toEqual(Error('Task status is unrecognised'));
+      await expect(result).rejects.toEqual(
+        Error('Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason')
+      );
     });
 
     test('rejects when the task does not exist', async () => {

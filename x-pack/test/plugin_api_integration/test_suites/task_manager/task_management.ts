@@ -521,7 +521,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(task.state.count).to.eql(2);
       });
 
-      // drain tasks, othrwise they'll keep Task Manager stalled
+      // drain tasks, otherwise they'll keep Task Manager stalled
       await retry.try(async () => {
         await releaseTasksWaitingForEventToComplete('releaseTheOthers');
         const tasks = (
@@ -635,7 +635,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'i-dont-exist',
       });
       expect(failedRunSoonResult).to.eql({
-        error: `Error: Failed to run task "i-dont-exist" as it does not exist`,
+        error: `Error: Saved object [task/i-dont-exist] not found`,
         id: 'i-dont-exist',
       });
     });
@@ -696,36 +696,6 @@ export default function ({ getService }: FtrProviderContext) {
       await provideParamsToTasksWaitingForParams(longRunningTask.id);
 
       expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id });
-    });
-
-    it('should allow a failed task to be rerun using runSoon', async () => {
-      const taskThatFailsBeforeRunSoon = await scheduleTask({
-        taskType: 'singleAttemptSampleTask',
-        params: {
-          waitForParams: true,
-        },
-      });
-
-      // tell the task to fail on its next run
-      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunSoon.id, {
-        failWith: 'error on first run',
-      });
-
-      // wait for task to fail
-      await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
-        expect(getTaskById(tasks, taskThatFailsBeforeRunSoon.id).status).to.eql('failed');
-      });
-
-      // runSoonHasBeenAttempted should be successfully run the failing task
-      const runSoonResultWithExpectedFailure = runTaskSoon({
-        id: taskThatFailsBeforeRunSoon.id,
-      });
-
-      // release the task without failing this time
-      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunSoon.id);
-
-      expect(await runSoonResultWithExpectedFailure).to.eql({ id: taskThatFailsBeforeRunSoon.id });
     });
 
     function expectReschedule(

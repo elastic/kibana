@@ -397,13 +397,11 @@ export class TaskScheduling {
     const task = await this.store.get(taskId);
     switch (task.status) {
       case TaskStatus.Claiming:
-        throw Error('Task is being claimed');
       case TaskStatus.Running:
-        throw Error('Task is already running');
+        throw Error(`Failed to run task "${taskId}" as it is currently running`);
       case TaskStatus.Failed:
-        throw Error('Task was already failed');
       case TaskStatus.Unrecognized:
-        throw Error('Task status is unrecognised');
+        throw Error(`Failed to run task "${taskId}" for unknown reason`);
       default:
         return task;
     }
