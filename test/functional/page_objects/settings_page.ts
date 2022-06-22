@@ -59,6 +59,11 @@ export class SettingsPageObject extends FtrService {
     });
   }
 
+  async clickIndexManagement() {
+    await this.testSubjects.click('index_management');
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   async getAdvancedSettings(propertyName: string) {
     this.log.debug('in getAdvancedSettings');
     return await this.testSubjects.getAttribute(
