@@ -149,7 +149,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
   border: 0.2rem dashed #7dded8;
 }
 
-.is-dragging .c6 .drop-target-data-providers .euiTextColor--subdued {
+.is-dragging .c6 .drop-target-data-providers .timeline-drop-area-empty__text {
   color: #7dded8;
 }
 
@@ -219,7 +219,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
     data-test-subj="flyoutBottomBar"
   >
     <div
-      class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--flexGrowZero c0"
+      class="euiPanel euiPanel--plain euiPanel--paddingSmall c0 css-1sriiwr-euiPanel-none-s-plain"
       data-test-subj="timeline-flyout-header-panel"
     >
       <div
@@ -315,7 +315,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
       </div>
     </div>
     <div
-      class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow c5"
+      class="euiPanel euiPanel--plain c5 css-n9us4v-euiPanel-grow-m-plain-hasShadow"
     >
       <div
         aria-label="You are in the timeline query area, which contains groups of data providers that query for events"
@@ -339,13 +339,9 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                 class="c10"
               >
                 <div
-                  class="euiText euiText--small c11"
+                  class="euiText c11 timeline-drop-area-empty__text css-czh9ev-euiText-s-euiTextColor-subdued"
                 >
-                  <div
-                    class="euiTextColor euiTextColor--subdued"
-                  >
-                    Drop anything
-                  </div>
+                  Drop anything
                 </div>
                 <span
                   class="c12"
@@ -367,13 +363,9 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                   </span>
                 </span>
                 <div
-                  class="euiText euiText--small c11"
+                  class="euiText c11 timeline-drop-area-empty__text css-czh9ev-euiText-s-euiTextColor-subdued"
                 >
-                  <div
-                    class="euiTextColor euiTextColor--subdued"
-                  >
-                    here to build an
-                  </div>
+                  here to build an
                 </div>
                 <span
                   class="euiBadge euiBadge--hollow euiBadge--iconLeft c14"
@@ -391,13 +383,9 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                   </span>
                 </span>
                 <div
-                  class="euiText euiText--small c11"
+                  class="euiText c11 timeline-drop-area-empty__text css-czh9ev-euiText-s-euiTextColor-subdued"
                 >
-                  <div
-                    class="euiTextColor euiTextColor--subdued"
-                  >
-                    query
-                  </div>
+                  query
                 </div>
               </div>
               <div
@@ -419,7 +407,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                         class="euiButtonEmpty__text"
                       >
                         <div
-                          class="euiText euiText--small"
+                          class="euiText css-1vkrgyt-euiText-s"
                         >
                           + Add field
                         </div>

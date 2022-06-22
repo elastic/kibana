@@ -10,7 +10,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 .c0 {
   font-size: 12px;
   line-height: 1.5;
-  padding-left: 16px;
+  padding-left: 12px;
 }
 
 .c0 .euiAccordion + div {
@@ -468,7 +468,7 @@ tr:hover .c5:focus::before {
                                     data-test-subj="draggable-content-event.duration"
                                   >
                                     <div
-                                      class="euiText euiText--extraSmall"
+                                      class="euiText css-1utxlgq-euiText-xs"
                                     >
                                       <span
                                         class="c8"
@@ -550,7 +550,7 @@ tr:hover .c5:focus::before {
                                     data-test-subj="draggable-content-event.start"
                                   >
                                     <div
-                                      class="euiText euiText--extraSmall"
+                                      class="euiText css-1utxlgq-euiText-xs"
                                     >
                                       <span
                                         class="c8"
@@ -628,7 +628,7 @@ tr:hover .c5:focus::before {
                                     data-test-subj="draggable-content-event.end"
                                   >
                                     <div
-                                      class="euiText euiText--extraSmall"
+                                      class="euiText css-1utxlgq-euiText-xs"
                                     >
                                       <span
                                         class="c8"
@@ -894,7 +894,7 @@ tr:hover .c5:focus::before {
                                           class="euiToolTipAnchor"
                                         >
                                           <div
-                                            class="euiText euiText--extraSmall c10"
+                                            class="euiText c10 css-1utxlgq-euiText-xs"
                                           >
                                             <span>
                                               100B
@@ -970,7 +970,7 @@ tr:hover .c5:focus::before {
                                           class="euiToolTipAnchor"
                                         >
                                           <div
-                                            class="euiText euiText--extraSmall c10"
+                                            class="euiText c10 css-1utxlgq-euiText-xs"
                                           >
                                             <span>
                                               3 pkts
@@ -1881,7 +1881,7 @@ tr:hover .c5:focus::before {
                                                 class="euiToolTipAnchor"
                                               >
                                                 <div
-                                                  class="euiText euiText--extraSmall c20"
+                                                  class="euiText c20 css-1utxlgq-euiText-xs"
                                                 >
                                                   <span
                                                     class="c21"
@@ -1970,7 +1970,7 @@ tr:hover .c5:focus::before {
                                                 class="euiToolTipAnchor"
                                               >
                                                 <div
-                                                  class="euiText euiText--extraSmall c20"
+                                                  class="euiText c20 css-1utxlgq-euiText-xs"
                                                 >
                                                   <span>
                                                     2 pkts
@@ -2088,7 +2088,7 @@ tr:hover .c5:focus::before {
                                                 class="euiToolTipAnchor"
                                               >
                                                 <div
-                                                  class="euiText euiText--extraSmall c20"
+                                                  class="euiText c20 css-1utxlgq-euiText-xs"
                                                 >
                                                   <span
                                                     class="c21"
@@ -2177,7 +2177,7 @@ tr:hover .c5:focus::before {
                                                 class="euiToolTipAnchor"
                                               >
                                                 <div
-                                                  class="euiText euiText--extraSmall c20"
+                                                  class="euiText c20 css-1utxlgq-euiText-xs"
                                                 >
                                                   <span>
                                                     1 pkts
