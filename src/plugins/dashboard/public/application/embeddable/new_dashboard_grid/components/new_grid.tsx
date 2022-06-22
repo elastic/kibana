@@ -7,7 +7,7 @@
  */
 
 import { EuiAccordion, EuiButton, htmlIdGenerator } from '@elastic/eui';
-import { GridStack, GridStackNode, GridStackWidget } from 'gridstack';
+import { GridItemHTMLElement, GridStack, GridStackNode, GridStackWidget } from 'gridstack';
 import React, {
   createRef,
   FC,
@@ -58,38 +58,41 @@ export const TestReactGrid: FC<Props> = ({
   );
 
   if (Object.keys(panelRefs.current).length !== panels.length) {
+    // this happens on each render - so when a panel is added, we loop through all existing
+    // panels and only change the ref for the new panel
     panels.forEach((panel) => {
       panelRefs.current[panel.id!] = panelRefs.current[panel.id!] || createRef();
     });
   }
 
   useEffect(() => {
-    console.log('on mount');
+    // on mount
     gridRef.current =
       gridRef.current ||
       GridStack.init({
         ...sharedGridParams,
         class: GRID_CLASS,
       });
-
-    return () => {
-      console.log('on dismount');
-    };
   }, [sharedGridParams]);
 
   useEffect(() => {
+    // this happens every time a panel is added.... could we make this more efficient?
+
     const grid = gridRef.current;
 
-    if (grid) {
-      grid.batchUpdate();
-      grid.removeAll(false);
-      panels.forEach((panel) => {
-        const widget = grid.makeWidget(panelRefs.current[panel.id!].current);
-        grid.update(widget, panel); // need this so that the size and position are updated **before** the commit
-      });
-      grid.commit();
+    if (!grid) {
+      // TODO: error handling bc grid isn't instantiated
+      return;
     }
-  }, [panels, gridData]);
+
+    grid.batchUpdate();
+    grid.removeAll(false);
+    panels.forEach((panel) => {
+      const widget = grid.makeWidget(panelRefs.current[panel.id!].current);
+      grid.update(widget, panel); // need this so that the size and position are updated **before** the commit
+    });
+    grid.commit();
+  }, [panels]);
 
   const addNewPanel = () => {
     const id = htmlIdGenerator('panel')();
@@ -106,7 +109,8 @@ export const TestReactGrid: FC<Props> = ({
 
   return (
     <div>
-      <EuiButton onClick={addNewPanel}>Add Panel</EuiButton>
+      <EuiButton onClick={addNewPanel}>Add Panel</EuiButton>{' '}
+      <EuiButton onClick={addNewPanel}>Add Group</EuiButton>
       <div>Count:{panels.length}</div>
       <EuiAccordion id={`accordion`} buttonContent="Panel data">
         <div>{JSON.stringify(panels)}</div>
