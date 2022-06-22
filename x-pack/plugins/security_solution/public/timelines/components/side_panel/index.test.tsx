@@ -127,6 +127,12 @@ describe('Details Panel Component', () => {
           cases: {
             ui: { getCasesContext: () => mockCasesContext },
           },
+          osquery: {
+            OsqueryResults: jest.fn().mockReturnValue(null),
+            featureFlags: {
+              DETECTION_ACTION: true,
+            },
+          },
         },
       });
     });
