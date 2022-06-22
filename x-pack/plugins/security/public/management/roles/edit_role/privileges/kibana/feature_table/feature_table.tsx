@@ -315,12 +315,12 @@ export class FeatureTable extends Component<Props, State> {
     const arePrivilegeControlsCollapsed = !this.state.expandedPrivilegeControls.has(feature.id);
 
     if (
+      arePrivilegeControlsCollapsed &&
       this.props.privilegeCalculator.hasCustomizedSubFeaturePrivileges(
         feature.id,
         this.props.privilegeIndex,
         this.props.allSpacesSelected
-      ) &&
-      arePrivilegeControlsCollapsed
+      )
     ) {
       infoIcon = (
         <EuiIconTip
