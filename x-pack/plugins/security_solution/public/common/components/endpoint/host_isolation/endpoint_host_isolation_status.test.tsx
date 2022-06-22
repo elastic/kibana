@@ -53,7 +53,7 @@ describe('when using the EndpointHostIsolationStatus component', () => {
     const { getByTestId } = render(componentProps);
     expect(getByTestId('test').textContent).toBe(expectedLabel);
     // Validate that the text color is set to `subdued`
-    expect(getByTestId('test-pending').classList.contains('euiTextColor--subdued')).toBe(true);
+    expect(getByTestId('test-pending').classList.toString().includes('subdued')).toBe(true);
   });
 
   describe('and the disableIsolationUIPendingStatuses experimental feature flag is true', () => {

@@ -51,7 +51,7 @@ describe('Source Viewer component', () => {
         />
       </KibanaContextProvider>
     );
-    expect(comp.children()).toMatchSnapshot();
+    expect(comp.children().render()).toMatchSnapshot();
     const loadingIndicator = comp.find(EuiLoadingSpinner);
     expect(loadingIndicator).not.toBe(null);
   });
@@ -111,7 +111,7 @@ describe('Source Viewer component', () => {
         />
       </KibanaContextProvider>
     );
-    expect(comp.children()).toMatchSnapshot();
+    expect(comp.children().render()).toMatchSnapshot();
     const jsonCodeEditor = comp.find(JsonCodeEditorCommon);
     expect(jsonCodeEditor).not.toBe(null);
   });
