@@ -14,6 +14,7 @@ import { getListPath } from '../../services/navigation';
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 import { PipelineForm } from '../../components';
+import { useRedirectToPathOrRedirectPath } from '../../hooks';
 
 interface Props {
   /**
@@ -26,14 +27,47 @@ interface LocationState {
   sourcePipeline?: Pipeline;
 }
 
+function useFormDefaultValue(sourcePipeline?: Pipeline) {
+  const history = useHistory<LocationState>();
+
+  const locationSearchParams = useMemo(() => {
+    return new URLSearchParams(history.location.search);
+  }, [history.location.search]);
+
+  const formDefaultValue = useMemo(() => {
+    if (sourcePipeline) {
+      return sourcePipeline;
+    }
+
+    if (history.location.state?.sourcePipeline) {
+      return history.location.state.sourcePipeline;
+    }
+
+    if (locationSearchParams.has('name')) {
+      return {
+        name: locationSearchParams.get('name') as string,
+        description: '',
+        processors: [],
+        on_failure: [],
+      };
+    }
+  }, [sourcePipeline, history, locationSearchParams]);
+
+  return { formDefaultValue, canEditName: !locationSearchParams.has('name') };
+}
+
 export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Props> = ({
   sourcePipeline,
 }) => {
   const history = useHistory<LocationState>();
+
   const { services } = useKibana();
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
+
+  const { formDefaultValue, canEditName } = useFormDefaultValue(sourcePipeline);
+  const redirectToPathOrRedirectPath = useRedirectToPathOrRedirectPath(history);
 
   const onSave = async (pipeline: Pipeline) => {
     setIsSaving(true);
@@ -48,26 +82,14 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
       return;
     }
 
-    history.push(getListPath({ inspectedPipelineName: pipeline.name }));
+    redirectToPathOrRedirectPath(getListPath({ inspectedPipelineName: pipeline.name }));
   };
 
-  const onCancel = () => {
-    history.push(getListPath());
-  };
+  const onCancel = () => redirectToPathOrRedirectPath(getListPath());
 
   useEffect(() => {
     services.breadcrumbs.setBreadcrumbs('create');
   }, [services]);
-
-  const formDefaultValue = useMemo(() => {
-    if (sourcePipeline) {
-      return sourcePipeline;
-    }
-
-    if (history.location.state?.sourcePipeline) {
-      return history.location.state.sourcePipeline;
-    }
-  }, [sourcePipeline, history]);
 
   return (
     <>
@@ -102,6 +124,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
 
       <PipelineForm
         defaultValue={formDefaultValue}
+        canEditName={canEditName}
         onSave={onSave}
         onCancel={onCancel}
         isSaving={isSaving}

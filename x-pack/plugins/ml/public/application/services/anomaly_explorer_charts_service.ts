@@ -7,7 +7,8 @@
 
 import { Observable, of } from 'rxjs';
 import { map as mapObservable } from 'rxjs/operators';
-import type { TimefilterContract, TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { RecordForInfluencer } from './results_service/results_service';
 import type { EntityField } from '../../../common/util/anomaly_utils';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';

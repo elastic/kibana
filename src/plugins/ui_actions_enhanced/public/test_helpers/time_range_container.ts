@@ -12,7 +12,7 @@ import {
   ContainerOutput,
   EmbeddableStart,
 } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 
 /**
  * interfaces are not allowed to specify a sub-set of the required types until

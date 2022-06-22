@@ -109,10 +109,13 @@ export const sendInstallPackage = (pkgName: string, pkgVersion: string) => {
   });
 };
 
-export const sendRemovePackage = (pkgName: string, pkgVersion: string) => {
+export const sendRemovePackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
   return sendRequest<DeletePackageResponse>({
     path: epmRouteService.getRemovePath(pkgName, pkgVersion),
     method: 'delete',
+    body: {
+      force,
+    },
   });
 };
 

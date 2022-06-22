@@ -6,7 +6,8 @@
  */
 
 import { IUiSettingsClient } from '@kbn/core/public';
-import { TimefilterContract, TimeRange, UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { TimefilterContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
   getBoundsRoundedToInterval,
   TimeBuckets,
