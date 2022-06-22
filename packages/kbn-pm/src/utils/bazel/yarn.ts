@@ -33,9 +33,13 @@ async function areNodeModulesPresent(kbnRootPath: string) {
   }
 }
 
-async function haveBazelBinPackagesBeenBuiltBefore(kbnRootPath: string) {
+async function haveBazelFoldersBeenCreatedBefore(kbnRootPath: string) {
   try {
-    return await isDirectory(resolve(kbnRootPath, 'bazel-bin', 'packages'));
+    return (
+      (await isDirectory(resolve(kbnRootPath, 'bazel-bin', 'packages'))) ||
+      (await isDirectory(resolve(kbnRootPath, 'bazel-kibana', 'packages'))) ||
+      (await isDirectory(resolve(kbnRootPath, 'bazel-out')))
+    );
   } catch {
     return false;
   }
@@ -44,6 +48,6 @@ async function haveBazelBinPackagesBeenBuiltBefore(kbnRootPath: string) {
 export async function haveNodeModulesBeenManuallyDeleted(kbnRootPath: string) {
   return (
     !(await areNodeModulesPresent(kbnRootPath)) &&
-    (await haveBazelBinPackagesBeenBuiltBefore(kbnRootPath))
+    (await haveBazelFoldersBeenCreatedBefore(kbnRootPath))
   );
 }

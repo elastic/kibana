@@ -63027,16 +63027,16 @@ async function areNodeModulesPresent(kbnRootPath) {
   }
 }
 
-async function haveBazelBinPackagesBeenBuiltBefore(kbnRootPath) {
+async function haveBazelFoldersBeenCreatedBefore(kbnRootPath) {
   try {
-    return await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* isDirectory */ "c"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'bazel-bin', 'packages'));
+    return (await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* isDirectory */ "c"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'bazel-bin', 'packages'))) || (await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* isDirectory */ "c"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'bazel-kibana', 'packages'))) || (await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* isDirectory */ "c"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'bazel-out')));
   } catch {
     return false;
   }
 }
 
 async function haveNodeModulesBeenManuallyDeleted(kbnRootPath) {
-  return !(await areNodeModulesPresent(kbnRootPath)) && (await haveBazelBinPackagesBeenBuiltBefore(kbnRootPath));
+  return !(await areNodeModulesPresent(kbnRootPath)) && (await haveBazelFoldersBeenCreatedBefore(kbnRootPath));
 }
 
 /***/ }),
