@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { coreDeprecationProvider } from './deprecation';
-export { ensureValidConfiguration } from './ensure_valid_configuration';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/config/core-config-server-internal'],
+};
