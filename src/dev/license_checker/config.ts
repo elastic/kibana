@@ -52,6 +52,7 @@ export const LICENSE_ALLOWED = [
   'FreeBSD',
   'ISC',
   'ISC*',
+  'LGPL-3.0+',
   'MIT OR GPL-2.0',
   '(MIT OR CC0-1.0)',
   'MIT',
