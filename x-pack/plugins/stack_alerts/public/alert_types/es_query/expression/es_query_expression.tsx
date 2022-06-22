@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, useEffect, useCallback } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,10 +13,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { XJsonMode } from '@kbn/ace';
 import 'brace/theme/github';
 
-import { EuiSpacer, EuiFormRow, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { DocLinksStart, HttpSetup } from '@kbn/core/public';
 
-import { XJson, EuiCodeEditor } from '@kbn/es-ui-shared-plugin/public';
+import { EuiCodeEditor, XJson } from '@kbn/es-ui-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
@@ -27,7 +27,6 @@ import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { totalHitsToNumber } from '../test_query_row';
-import { EsQueryFormType } from './es_query_form_type_chooser';
 
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();
@@ -37,20 +36,9 @@ interface KibanaDeps {
   docLinks: DocLinksStart;
 }
 
-type EsQueryExpressionProps = RuleTypeParamsExpressionProps<
-  EsQueryAlertParams<SearchType.esQuery>
-> & {
-  activeEsQueryFormType: EsQueryFormType;
-};
-
-export const EsQueryExpression: React.FC<EsQueryExpressionProps> = ({
-  ruleParams,
-  setRuleParams,
-  setRuleProperty,
-  errors,
-  data,
-  activeEsQueryFormType,
-}) => {
+export const EsQueryExpression: React.FC<
+  RuleTypeParamsExpressionProps<EsQueryAlertParams<SearchType.esQuery>>
+> = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
   const {
     index,
     timeField,
@@ -156,7 +144,6 @@ export const EsQueryExpression: React.FC<EsQueryExpressionProps> = ({
 
   return (
     <Fragment>
-      {activeEsQueryFormType}
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage

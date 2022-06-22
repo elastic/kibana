@@ -53,12 +53,8 @@ interface SearchSourceParamsAction {
 }
 
 interface SearchSourceExpressionFormProps {
-  thresholdComparator?: CommonAlertParams['thresholdComparator'];
-  threshold?: CommonAlertParams['threshold'];
-  timeWindowSize: CommonAlertParams['timeWindowSize'];
-  timeWindowUnit: CommonAlertParams['timeWindowUnit'];
-  size: CommonAlertParams['size'];
   searchSource: ISearchSource;
+  ruleParams: CommonAlertParams;
   errors: IErrorObject;
   initialSavedQuery?: SavedQuery;
   setParam: (paramField: string, paramValue: unknown) => void;
@@ -70,7 +66,7 @@ const isSearchSourceParam = (action: LocalStateAction): action is SearchSourcePa
 
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
   const { data } = useTriggersAndActionsUiDeps();
-  const { searchSource, errors, initialSavedQuery, setParam } = props;
+  const { searchSource, errors, initialSavedQuery, setParam, ruleParams } = props;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
 
   const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
@@ -91,15 +87,15 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       index: searchSource.getField('index')!,
       query: searchSource.getField('query')!,
       filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
-      threshold: props.threshold ?? DEFAULT_VALUES.THRESHOLD,
-      thresholdComparator: props.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      timeWindowSize: props.timeWindowSize,
-      timeWindowUnit: props.timeWindowUnit,
-      size: props.size,
+      threshold: ruleParams.threshold ?? DEFAULT_VALUES.THRESHOLD,
+      thresholdComparator: ruleParams.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+      timeWindowSize: ruleParams.timeWindowSize,
+      timeWindowUnit: ruleParams.timeWindowUnit,
+      size: ruleParams.size,
     }
   );
   const { index: dataView, query, filter: filters } = ruleConfiguration;
-  const dataViews = useMemo(() => [dataView], [dataView]);
+  const dataViews = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
   const onSelectDataView = useCallback(
     (newDataViewId) =>
@@ -201,8 +197,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       <EuiSpacer size="s" />
 
       <DataViewSelectPopover
-        initialDataViewTitle={dataView.title}
-        initialDataViewId={dataView.id}
+        initialDataViewTitle={dataView?.title}
+        initialDataViewId={dataView?.id}
         onSelectDataView={onSelectDataView}
       />
 
@@ -224,10 +220,10 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onClearSavedQuery={onClearSavedQuery}
         onSavedQueryUpdated={onSavedQuery}
         onSaved={onSavedQuery}
-        showSaveQuery={true}
-        showQueryBar={true}
-        showQueryInput={true}
-        showFilterBar={true}
+        showSaveQuery
+        showQueryBar
+        showQueryInput
+        showFilterBar
         showDatePicker={false}
         showAutoRefreshOnly={false}
         showSubmitButton={false}

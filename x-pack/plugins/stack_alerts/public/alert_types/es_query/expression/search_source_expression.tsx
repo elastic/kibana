@@ -11,29 +11,23 @@ import { EuiSpacer, EuiLoadingSpinner, EuiEmptyPrompt, EuiCallOut } from '@elast
 import { ISearchSource } from '@kbn/data-plugin/common';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/public';
-import { EsQueryAlertParams, SearchType } from '../types';
+import { CommonAlertParams, OnlySearchSourceAlertParams, SearchType } from '../types';
 import { useTriggersAndActionsUiDeps } from '../util';
 import { SearchSourceExpressionForm } from './search_source_expression_form';
 import { DEFAULT_VALUES } from '../constants';
 
-export type SearchSourceExpressionProps = RuleTypeParamsExpressionProps<
-  EsQueryAlertParams<SearchType.searchSource>
->;
+export type SearchSourceExpressionProps = RuleTypeParamsExpressionProps<CommonAlertParams> &
+  OnlySearchSourceAlertParams;
 
 export const SearchSourceExpression = ({
+  searchConfiguration,
+  savedQueryId,
   ruleParams,
   errors,
   setRuleParams,
   setRuleProperty,
 }: SearchSourceExpressionProps) => {
-  const {
-    searchConfiguration,
-    thresholdComparator,
-    threshold,
-    timeWindowSize,
-    timeWindowUnit,
-    size,
-  } = ruleParams;
+  const { thresholdComparator, threshold, timeWindowSize, timeWindowUnit, size } = ruleParams;
   const { data } = useTriggersAndActionsUiDeps();
 
   const [searchSource, setSearchSource] = useState<ISearchSource>();
@@ -67,10 +61,10 @@ export const SearchSourceExpression = ({
   }, [data.search.searchSource, data.dataViews]);
 
   useEffect(() => {
-    if (ruleParams.savedQueryId) {
-      data.query.savedQueries.getSavedQuery(ruleParams.savedQueryId).then(setSavedQuery);
+    if (savedQueryId) {
+      data.query.savedQueries.getSavedQuery(savedQueryId).then(setSavedQuery);
     }
-  }, [data.query.savedQueries, ruleParams.savedQueryId]);
+  }, [data.query.savedQueries, savedQueryId]);
 
   if (paramsError) {
     return (
@@ -89,11 +83,7 @@ export const SearchSourceExpression = ({
 
   return (
     <SearchSourceExpressionForm
-      threshold={ruleParams.threshold}
-      thresholdComparator={ruleParams.thresholdComparator}
-      timeWindowSize={ruleParams.timeWindowSize}
-      timeWindowUnit={ruleParams.timeWindowUnit}
-      size={ruleParams.size}
+      ruleParams={ruleParams}
       searchSource={searchSource}
       errors={errors}
       initialSavedQuery={savedQuery}

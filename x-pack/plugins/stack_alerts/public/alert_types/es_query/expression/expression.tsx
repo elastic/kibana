@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, useState } from 'react';
+import React, { memo, PropsWithChildren, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
-
 import 'brace/theme/github';
-
-import { EuiSpacer, EuiCallOut, EuiHorizontalRule } from '@elastic/eui';
+import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ErrorKey, EsQueryAlertParams } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
 import { EsQueryFormType, EsQueryFormTypeChooser } from './es_query_form_type_chooser';
-import { isSearchSourceAlert } from '../util';
+import { isSearchSourceAlert, useTriggersAndActionsUiDeps } from '../util';
 import { EXPRESSION_ERROR_KEYS } from '../constants';
 
 function areSearchSourceExpressionPropsEqual(
@@ -40,6 +38,10 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
   const { ruleParams, errors } = props;
   const isSearchSource = isSearchSourceAlert(ruleParams);
   const [activeEsQueryFormType, setActiveEsQueryFormType] = useState<EsQueryFormType | null>(null);
+  const { data } = useTriggersAndActionsUiDeps();
+  const emptySearchConfiguration = useMemo(() => {
+    return data.search.searchSource.createEmpty().getSerializedFields();
+  }, [data.search.searchSource]);
 
   const hasExpressionErrors = Object.keys(errors).some((errorKey) => {
     return (
@@ -69,21 +71,36 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
 
       {isSearchSource ? (
         <>
-          {/* From Discover page */}
-          <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
+          {activeEsQueryFormType === EsQueryFormType.KQL_OR_LUCENE && (
+            <EsQueryFormTypeChooser
+              activeFormType={activeEsQueryFormType}
+              onFormTypeSelect={setActiveEsQueryFormType}
+            />
+          )}
+          <SearchSourceExpressionMemoized
+            {...props}
+            ruleParams={ruleParams}
+            searchType={ruleParams.searchType}
+            searchConfiguration={ruleParams.searchConfiguration}
+            savedQueryId={ruleParams.savedQueryId}
+          />
         </>
       ) : (
         <>
-          {/* From Stack Management page */}
           <EsQueryFormTypeChooser
             activeFormType={activeEsQueryFormType}
             onFormTypeSelect={setActiveEsQueryFormType}
           />
-          {activeEsQueryFormType && (
-            <EsQueryExpression
+          {activeEsQueryFormType === EsQueryFormType.QUERY_DSL && (
+            <EsQueryExpression {...props} ruleParams={ruleParams} />
+          )}
+          {activeEsQueryFormType === EsQueryFormType.KQL_OR_LUCENE && (
+            <SearchSourceExpressionMemoized
               {...props}
               ruleParams={ruleParams}
-              activeEsQueryFormType={activeEsQueryFormType}
+              searchType="searchSource"
+              searchConfiguration={emptySearchConfiguration}
+              savedQueryId={undefined}
             />
           )}
         </>
