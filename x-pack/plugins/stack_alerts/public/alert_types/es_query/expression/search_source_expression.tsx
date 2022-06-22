@@ -50,9 +50,13 @@ export const SearchSourceExpression = ({
   );
 
   useEffect(() => {
-    const initialSearchConfiguration = shouldResetSearchConfiguration
-      ? data.search.searchSource.createEmpty().getSerializedFields()
-      : searchConfiguration;
+    let initialSearchConfiguration = searchConfiguration;
+
+    if (shouldResetSearchConfiguration) {
+      const newSearchSource = data.search.searchSource.createEmpty();
+      newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
+      initialSearchConfiguration = newSearchSource.getSerializedFields();
+    }
 
     setRuleProperty('params', {
       searchConfiguration: initialSearchConfiguration,
