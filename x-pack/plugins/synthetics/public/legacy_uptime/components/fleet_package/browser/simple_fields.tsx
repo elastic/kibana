@@ -76,7 +76,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
             defaultMessage="Frequency"
           />
         }
-        isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
+        isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields as Partial<MonitorFields>)}
         error={
           <FormattedMessage
             id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"

@@ -309,7 +309,7 @@ describe('validateMonitor', () => {
       const testMonitor = {
         ...testHTTPFields,
         ...({
-          [ConfigKey.URLS]: undefined,
+          [ConfigKey.URLS]: null,
         } as unknown as Partial<HTTPFields>),
       } as MonitorFields;
 
