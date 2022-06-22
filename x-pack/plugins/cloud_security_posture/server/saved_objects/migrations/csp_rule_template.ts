@@ -25,7 +25,12 @@ function migrateCspRuleMetadata(
     attributes: {
       enabled,
       muted,
-      metadata,
+      metadata: {
+        ...metadata,
+        impact: metadata.impact || undefined,
+        default_value: metadata.default_value || undefined,
+        references: metadata.references || undefined,
+      },
     },
   };
 }
