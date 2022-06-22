@@ -18,7 +18,7 @@ const tagTitle = i18n.translate(
 
 export type RuleTagBadgeOptions = 'tagsOutPopover' | 'default';
 
-interface RuleTagBadgeBasicOptions {
+export interface RuleTagBadgeBasicOptions {
   isOpen: boolean;
   onClick: React.MouseEventHandler<HTMLButtonElement>;
   onClose: () => void;
