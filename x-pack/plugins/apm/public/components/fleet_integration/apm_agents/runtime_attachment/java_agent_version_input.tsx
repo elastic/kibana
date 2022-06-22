@@ -53,7 +53,7 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
 
   const comboProps = !hasOptions
     ? {
-        // Leaving the onCreateOption disables custom option
+        // Leaving the onCreateOption out disables custom option
         // so only enables it when no options was returned from the API
         onCreateOption: (nextVersion: string) => {
           if (!hasOptions) {
