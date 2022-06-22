@@ -50,7 +50,7 @@ interface Props {
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
 const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
-  if (data.actionTypeId !== '.webhook') {
+  if (data.actionTypeId !== '.webhook' && data.actionTypeId !== '.cases-webhook') {
     return data;
   }
 

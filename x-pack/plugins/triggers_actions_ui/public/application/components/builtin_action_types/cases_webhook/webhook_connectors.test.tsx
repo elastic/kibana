@@ -8,20 +8,11 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { CasesWebhookActionConnector } from './types';
-import WebhookActionConnectorFields from './webhook_connectors';
-import { MockCodeEditor } from '../../../code_editor.mock';
+import CasesWebhookActionConnectorFields from './webhook_connectors';
+import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../test_utils';
+import { act, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 jest.mock('../../../../common/lib/kibana');
-const kibanaReactPath = '../../../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 const config = {
   createCommentJson: '{"body":"$COMMENT"}',
@@ -36,7 +27,7 @@ const config = {
   getIncidentResponseExternalTitleKey: 'key',
   getIncidentResponseUpdatedDateKey: 'fields.udpated',
   hasAuth: true,
-  headers: { 'content-type': 'text' },
+  headers: [{ key: 'content-type', value: 'text' }],
   incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/$TITLE',
   getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/$ID',
   updateIncidentJson:
@@ -44,50 +35,31 @@ const config = {
   updateIncidentMethod: 'put',
   updateIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/$ID',
 };
-
-const configErrors = {
-  createCommentJson: [],
-  createCommentMethod: [],
-  createCommentUrl: [],
-  createIncidentJson: [],
-  createIncidentMethod: [],
-  createIncidentResponseKey: [],
-  createIncidentUrl: [],
-  getIncidentResponseCreatedDateKey: [],
-  getIncidentResponseExternalTitleKey: [],
-  getIncidentResponseUpdatedDateKey: [],
-  incidentViewUrl: [],
-  getIncidentUrl: [],
-  updateIncidentJson: [],
-  updateIncidentMethod: [],
-  updateIncidentUrl: [],
-};
-
-describe('WebhookActionConnectorFields renders', () => {
-  test('all connector fields is rendered', () => {
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.cases-webhook',
-      isPreconfigured: false,
-      isDeprecated: false,
-      name: 'cases webhook',
-      config,
-    } as CasesWebhookActionConnector;
+const actionConnector = {
+  secrets: {
+    user: 'user',
+    password: 'pass',
+  },
+  id: 'test',
+  actionTypeId: '.cases-webhook',
+  isDeprecated: false,
+  isPreconfigured: false,
+  name: 'cases webhook',
+  config,
+} as CasesWebhookActionConnector;
+describe('CasesWebhookActionConnectorFields renders', () => {
+  test('all connector fields is rendered', async () => {
     const wrapper = mountWithIntl(
-      <WebhookActionConnectorFields
-        action={actionConnector}
-        errors={configErrors}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <CasesWebhookActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
     );
+
+    await waitForComponentToUpdate();
     expect(wrapper.find('[data-test-subj="webhookCreateMethodSelect"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookCreateUrlText"]').length > 0).toBeTruthy();
     expect(
@@ -116,89 +88,188 @@ describe('WebhookActionConnectorFields renders', () => {
 
     expect(wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookHeaderText"]').length > 0).toBeTruthy();
-    wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').last().simulate('click');
     expect(wrapper.find('[data-test-subj="webhookAddHeaderButton"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookHeadersKeyInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookHeadersValueInput"]').length > 0).toBeTruthy();
+    wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').last().simulate('click');
+    expect(wrapper.find('[data-test-subj="webhookAddHeaderButton"]').length > 0).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="webhookHeadersKeyInput"]').length > 0).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="webhookHeadersValueInput"]').length > 0).toBeFalsy();
   });
 
-  test('should display a message on create to remember credentials', () => {
-    const actionConnector = {
-      secrets: {},
-      actionTypeId: '.cases-webhook',
-      isPreconfigured: false,
-      isDeprecated: false,
-      name: 'cases webhook',
-      config,
-    } as unknown as CasesWebhookActionConnector;
-    const wrapper = mountWithIntl(
-      <WebhookActionConnectorFields
-        action={actionConnector}
-        errors={{}}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
-  });
+  describe('Validation', () => {
+    const onSubmit = jest.fn();
 
-  test('should display a message on edit to re-enter credentials', () => {
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.cases-webhook',
-      isPreconfigured: false,
-      isDeprecated: true,
-      name: 'webhook',
-      config,
-    } as CasesWebhookActionConnector;
-    const wrapper = mountWithIntl(
-      <WebhookActionConnectorFields
-        action={actionConnector}
-        errors={{ url: [], method: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
-  });
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
 
-  test('should display a message for missing secrets after import', () => {
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.webhook',
-      isPreconfigured: false,
-      isMissingSecrets: true,
-      isDeprecated: false,
-      name: 'webhook',
-      config,
-    } as CasesWebhookActionConnector;
-    const wrapper = mountWithIntl(
-      <WebhookActionConnectorFields
-        action={actionConnector}
-        errors={{ url: [], method: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
+    const tests: Array<[string, string]> = [
+      ['webhookCreateUrlText', 'not-valid'],
+      ['webhookUserInput', ''],
+      ['webhookPasswordInput', ''],
+    ];
+
+    it('connector validation succeeds when connector config is valid', async () => {
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      const { isPreconfigured, ...rest } = actionConnector;
+
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          ...rest,
+          __internal__: {
+            hasHeaders: true,
+          },
+        },
+        isValid: true,
+      });
+    });
+
+    it('connector validation succeeds when auth=false', async () => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          hasAuth: false,
+        },
+      };
+
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      const { isPreconfigured, secrets, ...rest } = actionConnector;
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          ...rest,
+          config: {
+            ...actionConnector.config,
+            hasAuth: false,
+          },
+          __internal__: {
+            hasHeaders: true,
+          },
+        },
+        isValid: true,
+      });
+    });
+
+    it('connector validation succeeds without headers', async () => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          headers: null,
+        },
+      };
+
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      const { isPreconfigured, ...rest } = actionConnector;
+      const { headers, ...rest2 } = actionConnector.config;
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          ...rest,
+          config: rest2,
+          __internal__: {
+            hasHeaders: false,
+          },
+        },
+        isValid: true,
+      });
+    });
+
+    it('validates correctly if the method is empty', async () => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          createIncidentMethod: '',
+        },
+      };
+
+      const res = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
+
+    it.each(tests)('validates correctly %p', async (field, value) => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          headers: [],
+        },
+      };
+
+      const res = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+          delay: 10,
+        });
+      });
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
   });
 });

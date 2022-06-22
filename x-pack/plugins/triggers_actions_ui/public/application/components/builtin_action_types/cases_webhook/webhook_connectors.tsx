@@ -466,12 +466,12 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
           {({ items, addItem, removeItem }) => {
             return (
               <>
-                <EuiTitle size="xxs">
+                <EuiTitle size="xxs" data-test-subj="webhookHeaderText">
                   <h5>{i18n.HEADERS_TITLE}</h5>
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 {items.map((item) => (
-                  <EuiFlexGroup key={item.id}>
+                  <EuiFlexGroup key={item.id} data-test-subj="gobblegobble">
                     <EuiFlexItem>
                       <UseField
                         path={`${item.path}.key`}
@@ -483,7 +483,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
                         // a row and add a new one, the stale values will appear
                         readDefaultValueOnForm={!item.isNew}
                         componentProps={{
-                          euiFieldProps: { readOnly },
+                          euiFieldProps: { readOnly, ['data-test-subj']: 'webhookHeadersKeyInput' },
                         }}
                       />
                     </EuiFlexItem>
@@ -494,7 +494,10 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
                         component={TextField}
                         readDefaultValueOnForm={!item.isNew}
                         componentProps={{
-                          euiFieldProps: { readOnly },
+                          euiFieldProps: {
+                            readOnly,
+                            ['data-test-subj']: 'webhookHeadersValueInput',
+                          },
                         }}
                       />
                     </EuiFlexItem>
@@ -510,7 +513,11 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
                   </EuiFlexGroup>
                 ))}
                 <EuiSpacer size="m" />
-                <EuiButtonEmpty iconType="plusInCircle" onClick={addItem}>
+                <EuiButtonEmpty
+                  iconType="plusInCircle"
+                  onClick={addItem}
+                  data-test-subj="webhookAddHeaderButton"
+                >
                   {i18n.ADD_BUTTON}
                 </EuiButtonEmpty>
                 <EuiSpacer />
