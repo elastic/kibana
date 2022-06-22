@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { History, LocationDescriptor } from 'history';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import {
@@ -19,9 +20,41 @@ import {
   Error,
 } from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
+import type { WizardSection } from '../component_template_form';
+import { useKibana } from '../../../..';
 
 interface MatchParams {
   name: string;
+}
+
+export function useTabFromQueryString(history: History): WizardSection | undefined {
+  return useMemo(() => {
+    const params = new URLSearchParams(history.location.search);
+    if (params.has('tab')) {
+      return params.get('tab') as WizardSection;
+    }
+  }, [history.location.search]);
+}
+
+export function useRedirectPath(history: History) {
+  const { services } = useKibana();
+
+  const redirectPath = useMemo(() => {
+    const locationSearchParams = new URLSearchParams(history.location.search);
+
+    return locationSearchParams.get('redirect_path');
+  }, [history.location.search]);
+
+  return useCallback(
+    (location: LocationDescriptor) => {
+      if (redirectPath && services.application) {
+        services.application.navigateToUrl(redirectPath);
+      } else {
+        history.push(location);
+      }
+    },
+    [redirectPath, services.application, history]
+  );
 }
 
 export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
@@ -31,6 +64,8 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   history,
 }) => {
   const { api, breadcrumbs } = useComponentTemplatesContext();
+  const defaultActiveStep = useTabFromQueryString(history);
+  const redirectTo = useRedirectPath(history);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
@@ -56,7 +91,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       return;
     }
 
-    history.push({
+    redirectTo({
       pathname: encodeURI(
         `/component_templates/${encodeURIComponent(updatedComponentTemplate.name)}`
       ),
@@ -112,6 +147,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
 
       <ComponentTemplateForm
         defaultValue={componentTemplate!}
+        defaultActiveStep={defaultActiveStep}
         onSave={onSave}
         isSaving={isSaving}
         saveError={saveError}

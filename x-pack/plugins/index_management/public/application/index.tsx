@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import SemVer from 'semver/classes/semver';
 
-import { CoreStart, CoreSetup } from '@kbn/core/public';
+import { CoreStart, CoreSetup, ApplicationStart } from '@kbn/core/public';
 
 import { API_BASE_PATH } from '../../common';
 import {
@@ -42,6 +42,7 @@ export const renderApp = (
   // uiSettings is required by the CodeEditor component used to edit runtime field Painless scripts.
   const { Provider: KibanaReactContextProvider } =
     createKibanaReactContext<KibanaReactContextServices>({
+      application,
       uiSettings,
       kibanaVersion: {
         get: () => kibanaVersion,
@@ -86,6 +87,7 @@ export const renderApp = (
 };
 
 interface KibanaReactContextServices {
+  application: ApplicationStart;
   uiSettings: CoreSetup['uiSettings'];
   kibanaVersion: {
     get: () => SemVer;

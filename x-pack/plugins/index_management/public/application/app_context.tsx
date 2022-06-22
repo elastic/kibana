@@ -41,6 +41,7 @@ export interface AppDependencies {
     extensionsService: ExtensionsService;
     httpService: HttpService;
     notificationService: NotificationService;
+    application: ApplicationStart;
   };
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
