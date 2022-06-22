@@ -23,7 +23,7 @@ export const useSendGetEndpointRunningProcessesRequest = (
   customOptions?: UseMutationOptions<
     { data: ActionDetails<OutputActionRunningProcess> },
     HttpFetchError,
-    RunningProcessesRequestBody // TODO: Change this and the ones below for the Running processes ones when API pr merged
+    RunningProcessesRequestBody
   >
 ): UseMutationResult<
   { data: ActionDetails<OutputActionRunningProcess> },
