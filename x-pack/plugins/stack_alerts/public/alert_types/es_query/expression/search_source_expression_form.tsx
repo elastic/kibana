@@ -42,8 +42,10 @@ interface LocalState {
 }
 
 interface LocalStateAction {
-  type: SearchSourceParamsAction['type'] | ('threshold' | 'timeWindowSize' | 'size');
-  payload: SearchSourceParamsAction['payload'] | (number[] | number);
+  type:
+    | SearchSourceParamsAction['type']
+    | ('threshold' | 'thresholdComparator' | 'timeWindowSize' | 'timeWindowUnit' | 'size');
+  payload: SearchSourceParamsAction['payload'] | (number[] | number | string);
 }
 
 type LocalStateReducer = (prevState: LocalState, action: LocalStateAction) => LocalState;
@@ -90,9 +92,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
       threshold: ruleParams.threshold ?? DEFAULT_VALUES.THRESHOLD,
       thresholdComparator: ruleParams.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      timeWindowSize: ruleParams.timeWindowSize,
-      timeWindowUnit: ruleParams.timeWindowUnit,
-      size: ruleParams.size,
+      timeWindowSize: ruleParams.timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+      timeWindowUnit: ruleParams.timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+      size: ruleParams.size ?? DEFAULT_VALUES.SIZE,
     }
   );
   const { index: dataView, query, filter: filters } = ruleConfiguration;
@@ -142,8 +144,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   // window size
   const onChangeWindowUnit = useCallback(
-    (selectedWindowUnit: string) => setParam('timeWindowUnit', selectedWindowUnit),
-    [setParam]
+    (selectedWindowUnit: string) =>
+      dispatch({ type: 'timeWindowUnit', payload: selectedWindowUnit }),
+    []
   );
 
   const onChangeWindowSize = useCallback(
@@ -155,8 +158,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   // threshold
   const onChangeSelectedThresholdComparator = useCallback(
     (selectedThresholdComparator?: string) =>
-      setParam('thresholdComparator', selectedThresholdComparator),
-    [setParam]
+      selectedThresholdComparator &&
+      dispatch({ type: 'thresholdComparator', payload: selectedThresholdComparator }),
+    []
   );
 
   const onChangeSelectedThreshold = useCallback(
@@ -169,6 +173,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     (updatedValue: number) => dispatch({ type: 'size', payload: updatedValue }),
     []
   );
+
   const onTestFetch = useCallback(async () => {
     const timeWindow = `${ruleConfiguration.timeWindowSize}${ruleConfiguration.timeWindowUnit}`;
     const testSearchSource = searchSource.createCopy();
