@@ -12,6 +12,15 @@ import React from 'react';
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
 import { mockDetailItemData, mockDetailItemDataId, rawEventData, TestProviders } from '../../mock';
+import {
+  useKibana as mockUseKibana,
+  useDateFormat as mockUseDateFormat,
+  useToasts as mockUseToasts,
+} from '../../lib/kibana/__mocks__';
+
+const mockedUseDateFormat = mockUseDateFormat();
+const mockedUseToasts = mockUseToasts();
+const mockedUseKibana = mockUseKibana();
 
 import { EventDetails, EventsViewType } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -21,8 +30,31 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineTabs } from '../../../../common/types/timeline';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
 
-jest.mock('../../lib/kibana');
 jest.mock('../../containers/cti/event_enrichment');
+
+// TODO it's still WIP
+jest.mock('../../lib/kibana', () => {
+  return {
+    useKibana: () => {
+      return {
+        ...mockedUseKibana,
+        services: {
+          ...mockedUseKibana.services,
+          osquery: {
+            OsqueryResults: jest.fn().mockReturnValue(null),
+            featureFlags: {
+              DETECTION_ACTION: true,
+            },
+          },
+        },
+      };
+    },
+    useDateFormat: () => mockedUseDateFormat,
+    useTimeZone: () => jest.fn().mockReturnValue('"America/Los_Angeles"'),
+    useToasts: () => mockedUseToasts,
+    useGetUserCasesPermissions: () => jest.fn(),
+  };
+});
 
 jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
   return {
