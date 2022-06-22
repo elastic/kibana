@@ -59,7 +59,8 @@ exports[`renderLegendDetailRow Should render icon size scale 1`] = `
             "fontSize": 10,
           }
         }
-        x={29.75}
+        textAnchor="end"
+        x={84.75}
         y={31}
       >
         0_format
@@ -98,7 +99,8 @@ exports[`renderLegendDetailRow Should render icon size scale 1`] = `
             "fontSize": 10,
           }
         }
-        x={29.75}
+        textAnchor="end"
+        x={84.75}
         y={21}
       >
         25_format
@@ -137,7 +139,8 @@ exports[`renderLegendDetailRow Should render icon size scale 1`] = `
             "fontSize": 10,
           }
         }
-        x={29.75}
+        textAnchor="end"
+        x={84.75}
         y={11}
       >
         100_format
