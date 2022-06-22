@@ -14,10 +14,10 @@ import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from
 
 import {
   getAgentDocuments,
-  getAgents,
   getAgentPolicyForAgent,
   updateAgent,
   bulkUpdateAgents,
+  processAgentsInBatches,
 } from './crud';
 import type { GetAgentsOptions } from '.';
 import { createAgentAction } from './actions';
@@ -107,10 +107,46 @@ export async function reassignAgents(
       }
     }
   } else if ('kuery' in options) {
-    givenAgents = await getAgents(esClient, options);
+    return await processAgentsInBatches(
+      esClient,
+      {
+        kuery: options.kuery,
+        showInactive: options.showInactive ?? false,
+        perPage: options.perPage,
+      },
+      async (agents: Agent[], skipSuccess: boolean) =>
+        await reassignBatch(
+          soClient,
+          esClient,
+          newAgentPolicyId,
+          agents,
+          outgoingErrors,
+          undefined,
+          skipSuccess
+        )
+    );
   }
-  const givenOrder =
-    'agentIds' in options ? options.agentIds : givenAgents.map((agent) => agent.id);
+
+  return await reassignBatch(
+    soClient,
+    esClient,
+    newAgentPolicyId,
+    givenAgents,
+    outgoingErrors,
+    'agentIds' in options ? options.agentIds : undefined
+  );
+}
+
+async function reassignBatch(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  newAgentPolicyId: string,
+  givenAgents: Agent[],
+  outgoingErrors: Record<Agent['id'], Error>,
+  agentIds?: string[],
+  skipSuccess?: boolean
+): Promise<{ items: BulkActionResult[] }> {
+  const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
 
@@ -137,7 +173,7 @@ export async function reassignAgents(
       agents.push(result.value);
     } else {
       const id = givenAgents[index].id;
-      outgoingErrors[id] = result.reason;
+      errors[id] = result.reason;
     }
     return agents;
   }, []);
@@ -153,17 +189,28 @@ export async function reassignAgents(
     }))
   );
 
-  const orderedOut = givenOrder.map((agentId) => {
-    const hasError = agentId in outgoingErrors;
-    const result: BulkActionResult = {
+  let results;
+
+  if (!skipSuccess) {
+    const givenOrder = agentIds ? agentIds : givenAgents.map((agent) => agent.id);
+    results = givenOrder.map((agentId) => {
+      const hasError = agentId in errors;
+      const result: BulkActionResult = {
+        id: agentId,
+        success: !hasError,
+      };
+      if (hasError) {
+        result.error = errors[agentId];
+      }
+      return result;
+    });
+  } else {
+    results = Object.entries(errors).map(([agentId, error]) => ({
       id: agentId,
-      success: !hasError,
-    };
-    if (hasError) {
-      result.error = outgoingErrors[agentId];
-    }
-    return result;
-  });
+      success: false,
+      error,
+    }));
+  }
 
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
@@ -172,5 +219,5 @@ export async function reassignAgents(
     type: 'POLICY_REASSIGN',
   });
 
-  return { items: orderedOut };
+  return { items: results };
 }
