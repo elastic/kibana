@@ -16,9 +16,8 @@ if (!configJson) {
   process.exit(1);
 }
 
-const groups = /** @type {Array<{key: string, name: string, ciGroups: number }>} */ (
-  require('./groups.json').groups
-);
+import groupsJson = require('./groups.json');
+const groups = groupsJson.groups as Array<{ key: string; name: string; ciGroups: number }>;
 
 const concurrency = process.env.KIBANA_FLAKY_TEST_CONCURRENCY
   ? parseInt(process.env.KIBANA_FLAKY_TEST_CONCURRENCY, 10)
@@ -31,8 +30,8 @@ if (Number.isNaN(concurrency)) {
 const BASE_JOBS = 1;
 const MAX_JOBS = 500;
 
-function getTestSuitesFromJson(json) {
-  const fail = (errorMsg) => {
+function getTestSuitesFromJson(json: string) {
+  const fail = (errorMsg: string) => {
     console.error('+++ Invalid test config provided');
     console.error(`${errorMsg}: ${json}`);
     process.exit(1);
@@ -106,7 +105,7 @@ if (totalJobs > MAX_JOBS) {
   process.exit(1);
 }
 
-const steps = [];
+const steps: any[] = [];
 const pipeline = {
   env: {
     IGNORE_SHIP_CI_STATS_ERROR: 'true',
@@ -135,7 +134,7 @@ for (const testSuite of testSuites) {
       },
       label: `FTR Config: ${testSuite.ftrConfig}`,
       parallelism: testSuite.count,
-      concurrency: concurrency,
+      concurrency,
       concurrency_group: process.env.UUID,
       concurrency_method: 'eager',
       agents: {
@@ -157,7 +156,7 @@ for (const testSuite of testSuites) {
   switch (keyParts[0]) {
     case 'cypress':
       const CYPRESS_SUITE = keyParts[1];
-      const group = groups.find((group) => group.key.includes(CYPRESS_SUITE));
+      const group = groups.find((g) => g.key.includes(CYPRESS_SUITE));
       if (!group) {
         throw new Error(
           `Group configuration was not found in groups.json for the following cypress suite: {${CYPRESS_SUITE}}.`,
@@ -169,7 +168,7 @@ for (const testSuite of testSuites) {
         agents: { queue: 'ci-group-6' },
         depends_on: 'build',
         parallelism: testSuite.count,
-        concurrency: concurrency,
+        concurrency,
         concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
         env: {
