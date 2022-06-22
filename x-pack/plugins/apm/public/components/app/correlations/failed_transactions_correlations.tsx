@@ -515,7 +515,7 @@ export function FailedTransactionsCorrelations({
           style={{
             display: 'flex',
             flexDirection: 'row',
-            paddingLeft: euiTheme.eui.paddingSizes.s,
+            paddingLeft: euiTheme.eui.euiSizeS,
           }}
         >
           <EuiSwitch
@@ -532,7 +532,7 @@ export function FailedTransactionsCorrelations({
           <EuiIconTip
             size="m"
             iconProps={{
-              style: { marginLeft: euiTheme.eui.paddingSizes.xs },
+              style: { marginLeft: euiTheme.eui.euiSizeXS },
             }}
             content={i18n.translate(
               'xpack.apm.correlations.latencyCorrelations.advancedStatisticsTooltipContent',
