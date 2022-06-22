@@ -862,7 +862,9 @@ describe('Session index', () => {
       ).rejects.toBe(failureReason);
     });
 
-    it('properly stores session value in the index', async () => {
+    it('properly stores session value in the index, creating the index first if it does not exist', async () => {
+      mockElasticsearchClient.indices.exists.mockResolvedValue(false);
+
       mockElasticsearchClient.create.mockResponse({
         _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
         _index: 'my-index',
@@ -887,6 +889,49 @@ describe('Session index', () => {
         sid,
         metadata: { primaryTerm: 321, sequenceNumber: 654 },
       });
+
+      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledTimes(1);
+
+      expect(mockElasticsearchClient.create).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.create).toHaveBeenCalledWith({
+        id: sid,
+        index: indexName,
+        body: sessionValue,
+        refresh: 'wait_for',
+      });
+    });
+
+    it('properly stores session value in the index, skipping index creation if it already exists', async () => {
+      mockElasticsearchClient.indices.exists.mockResolvedValue(true);
+
+      mockElasticsearchClient.create.mockResponse({
+        _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
+        _index: 'my-index',
+        _id: 'W0tpsmIBdwcYyG50zbta',
+        _version: 1,
+        _primary_term: 321,
+        _seq_no: 654,
+        result: 'created',
+      });
+
+      const sid = 'some-long-sid';
+      const sessionValue = {
+        usernameHash: 'some-username-hash',
+        provider: { type: 'basic', name: 'basic1' },
+        idleTimeoutExpiration: null,
+        lifespanExpiration: null,
+        content: 'some-encrypted-content',
+      };
+
+      await expect(sessionIndex.create({ sid, ...sessionValue })).resolves.toEqual({
+        ...sessionValue,
+        sid,
+        metadata: { primaryTerm: 321, sequenceNumber: 654 },
+      });
+
+      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
 
       expect(mockElasticsearchClient.create).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.create).toHaveBeenCalledWith({
