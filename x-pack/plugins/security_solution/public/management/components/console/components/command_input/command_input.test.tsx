@@ -8,6 +8,7 @@
 import { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { ConsoleTestSetup, getConsoleTestSetup } from '../../mocks';
 import { ConsoleProps } from '../../types';
+import { INPUT_DEFAULT_PLACEHOLDER_TEXT } from '../console_state/state_update_handlers/handle_input_area_state';
 
 describe('When entering data into the Console input', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
@@ -41,13 +42,44 @@ describe('When entering data into the Console input', () => {
     expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual('c');
   });
 
-  it.todo('should display placeholder text when input area is blank');
+  it('should display placeholder text when input area is blank', () => {
+    render();
 
-  it.todo('should NOT display placeholder text if input area has text entered');
+    expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual(
+      INPUT_DEFAULT_PLACEHOLDER_TEXT
+    );
+  });
 
-  it.todo('should display hint when a known command is typed');
+  it('should NOT display placeholder text if input area has text entered', () => {
+    render();
+    enterCommand('cm', { inputOnly: true });
 
-  it.todo('should display hint when an unknown command is typed');
+    expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual('');
+  });
+
+  it('should NOT display any hint test in footer if nothing is displayed', () => {
+    render();
+
+    expect(renderResult.getByTestId('test-footer').textContent?.trim()).toEqual('');
+  });
+
+  it('should display hint when a known command is typed', () => {
+    render();
+    enterCommand('cmd2 ', { inputOnly: true });
+
+    expect(renderResult.getByTestId('test-footer').textContent).toEqual(
+      'Hint: cmd2 --file [--ext --bad]'
+    );
+  });
+
+  it('should display hint when an unknown command is typed', () => {
+    render();
+    enterCommand('abc ', { inputOnly: true });
+
+    expect(renderResult.getByTestId('test-footer').textContent).toEqual(
+      'Hint: unknown command abc'
+    );
+  });
 
   describe('and the UP arrow is pressed', () => {
     it.todo('should display the input history popover');

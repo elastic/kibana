@@ -22,7 +22,7 @@ const UNKNOWN_COMMAND_HINT = (commandName: string) =>
 
 const COMMAND_USAGE_HINT = (usage: string) =>
   i18n.translate('xpack.securitySolution.useInputHints.commandUsage', {
-    defaultMessage: 'Usage: {usage}',
+    defaultMessage: 'Hint: {usage}',
     values: {
       usage,
     },
