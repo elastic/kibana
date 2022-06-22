@@ -25,16 +25,6 @@ of less than 1 indicates no sampling, and the aggs are returned as-is.
 
 **returns:** string[]
 
-### `stringHash` (function)
-
-Creates a deterministic number based hash out of a string.
-
-**Parameters:**
-
-- str (`string`)
-
-**returns:** number
-
 ### `getAggIntervals` (function)
 
 Returns aggregation intervals for the supplied document fields.
