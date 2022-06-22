@@ -14,9 +14,10 @@ import { first, tap } from 'rxjs/operators';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import { CoreContextProvider } from '../utils';
+import type { FatalErrorInfo, FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
+import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
 import { FatalErrorsScreen } from './fatal_errors_screen';
-import { FatalErrorInfo, getErrorInfo } from './get_error_info';
+import { getErrorInfo } from './get_error_info';
 
 export interface Deps {
   i18n: I18nStart;

@@ -22,7 +22,7 @@ import { tap } from 'rxjs/operators';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { FatalErrorInfo } from './get_error_info';
+import { FatalErrorInfo } from '@kbn/core-fatal-errors-browser';
 
 interface Props {
   kibanaVersion: string;

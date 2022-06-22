@@ -7,5 +7,3 @@
  */
 
 export { FatalErrorsService } from './fatal_errors_service';
-export type { FatalErrorsSetup, FatalErrorsStart } from './fatal_errors_service';
-export type { FatalErrorInfo } from './get_error_info';

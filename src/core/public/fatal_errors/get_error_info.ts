@@ -7,7 +7,7 @@
  */
 
 import { inspect } from 'util';
-
+import type { FatalErrorInfo } from '@kbn/core-fatal-errors-browser';
 /**
  * Produce a string version of an error,
  */
