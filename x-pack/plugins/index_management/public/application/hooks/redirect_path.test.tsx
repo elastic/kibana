@@ -11,7 +11,7 @@ import { useRedirectPath } from './redirect_path';
 import { useKibana } from '..';
 
 const mockedUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-jest.mock('../../../..');
+jest.mock('..');
 
 describe('useRedirectPath', () => {
   const mockedNavigateToUrl = jest.fn();
