@@ -33,7 +33,7 @@ For deprecated APIs, refer to <<alerts-api>>.
 
 include::alerting/create_rule.asciidoc[leveloffset=+1]
 include::alerting/delete_rule.asciidoc[leveloffset=+1]
-include::alerting/update_rule.asciidoc[]
+include::alerting/update_rule.asciidoc[leveloffset=+1]
 include::alerting/get_rules.asciidoc[]
 include::alerting/find_rules.asciidoc[]
 include::alerting/list_rule_types.asciidoc[]

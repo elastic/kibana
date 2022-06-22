@@ -16,25 +16,24 @@ import {
 } from '../../../../../common/runtime_types/monitor';
 import { useGetUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
-import { esKuerySelector } from '../../../state/selectors';
+import { selectDynamicSettings } from '../../../state/selectors';
 import { getHistogramInterval } from '../../../../../common/lib/get_histogram_interval';
 import { Ping } from '../../../../../common/runtime_types';
 
 export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
-  const { dateRangeStart, dateRangeEnd, statusFilter } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
-  const filters = useSelector(esKuerySelector);
+  const { settings } = useSelector(selectDynamicSettings);
 
   const monitorIds = (items ?? []).map(({ monitor_id: monitorId }) => monitorId);
 
   const { queryParams, minInterval } = getQueryParams(
     dateRangeStart,
     dateRangeEnd,
-    filters,
-    statusFilter,
-    monitorIds
+    monitorIds,
+    settings?.heartbeatIndices || ''
   );
 
   const { data, loading } = useEsSearch<Ping, typeof queryParams>(
@@ -77,14 +76,13 @@ export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
 const getQueryParams = (
   dateRangeStart: string,
   dateRangeEnd: string,
-  filters: string,
-  statusFilter: string,
-  monitorIds: string[]
+  monitorIds: string[],
+  index: string
 ) => {
   const minInterval = getHistogramInterval(dateRangeStart, dateRangeEnd, 12);
 
   const queryParams = {
-    index: 'heartbeat-*',
+    index,
     body: {
       size: 0,
       query: {
