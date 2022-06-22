@@ -4,9 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import type { MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
+import type {
+  AnalyticsManagementItems,
+  AnomalyDetectionManagementItems,
+  TrainedModelsManagementItems,
+} from '../../../../../../../common/types/management';
+import { AnomalyDetectionJobIdLink } from '../../../../../jobs/jobs_list/components/jobs_list/job_id_link';
+import { DFAnalyticsJobIdLink } from '../../../../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_columns';
 
 export function getColumns(mlSavedObjectType: MlSavedObjectType) {
   switch (mlSavedObjectType) {
@@ -22,7 +30,7 @@ export function getColumns(mlSavedObjectType: MlSavedObjectType) {
   }
 }
 
-const adColumns: Array<EuiBasicTableColumn<any>> = [
+const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
   {
     field: 'id',
     name: i18n.translate('xpack.ml.analyticsSelector.id', {
@@ -32,6 +40,7 @@ const adColumns: Array<EuiBasicTableColumn<any>> = [
     truncateText: true,
     'data-test-subj': 'mlAnalyticsSelectorTableColumnId',
     scope: 'row',
+    render: (id: string) => <AnomalyDetectionJobIdLink id={id} />,
   },
   {
     field: 'description',
@@ -62,7 +71,7 @@ const adColumns: Array<EuiBasicTableColumn<any>> = [
   },
 ];
 
-const dfaColumns: Array<EuiBasicTableColumn<any>> = [
+const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
   {
     field: 'id',
     name: i18n.translate('xpack.ml.analyticsSelector.id', {
@@ -72,6 +81,7 @@ const dfaColumns: Array<EuiBasicTableColumn<any>> = [
     truncateText: true,
     'data-test-subj': 'mlAnalyticsSelectorTableColumnId',
     scope: 'row',
+    render: (id: string) => <DFAnalyticsJobIdLink jobId={id} />,
   },
   {
     field: 'description',
@@ -120,7 +130,7 @@ const dfaColumns: Array<EuiBasicTableColumn<any>> = [
   },
 ];
 
-const trainedModelColumns: Array<EuiBasicTableColumn<any>> = [
+const trainedModelColumns: Array<EuiBasicTableColumn<TrainedModelsManagementItems>> = [
   {
     field: 'id',
     name: i18n.translate('xpack.ml.analyticsSelector.id', {

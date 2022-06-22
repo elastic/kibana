@@ -40,7 +40,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, httpService, setCurrentT
   const { getList } = managementApiProvider(httpService);
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
   const [jobs, setJobs] = useState<ManagementListResponse>();
-  const [columns, setColumns] = useState<Array<EuiBasicTableColumn<ManagementListResponse>>>([]);
+  const [columns, setColumns] = useState<Array<EuiBasicTableColumn<ManagementItems>>>([]);
   const [filters, setFilters] = useState<SearchFilterConfig[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -91,7 +91,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, httpService, setCurrentT
             },
           ]
         : []),
-    ] as Array<EuiBasicTableColumn<ManagementListResponse>>;
+    ] as Array<EuiBasicTableColumn<ManagementItems>>;
   }, [currentTabId, spacesApi, refresh]);
 
   const getTable = useCallback(() => {

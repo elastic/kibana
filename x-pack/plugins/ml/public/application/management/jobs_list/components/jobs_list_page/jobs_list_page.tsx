@@ -69,7 +69,7 @@ export const JobsListPage: FC<{
 
   const check = async () => {
     try {
-      await checkGetManagementMlJobsResolver();
+      await checkGetManagementMlJobsResolver(); // FIX, needs dependency cache!!!!!!!!!!!!!!!!!!!!!!!!!!
     } catch (e) {
       if (e.mlFeatureEnabledInSpace && e.isPlatinumOrTrialLicense === false) {
         setIsPlatinumOrTrialLicense(false);
