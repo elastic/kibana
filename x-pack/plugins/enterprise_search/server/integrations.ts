@@ -175,7 +175,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
       }
     ),
     categories: ['enterprise_search', 'file_storage'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/network_drive',
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/network_drive/custom',
   },
   {
     id: 'onedrive',
@@ -203,7 +203,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
       }
     ),
     categories: ['enterprise_search', 'microsoft_365', 'communications', 'productivity'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/outlook',
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/outlook/custom',
   },
   {
     id: 'salesforce',
@@ -280,7 +280,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
       }
     ),
     categories: ['enterprise_search', 'file_storage', 'microsoft_365'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/sharepoint_server',
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/share_point_server/custom',
   },
   {
     id: 'slack',
@@ -308,7 +308,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
       }
     ),
     categories: ['enterprise_search', 'microsoft_365', 'communications', 'productivity'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/teams',
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/teams/custom',
   },
   {
     id: 'zendesk',
@@ -336,7 +336,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
       }
     ),
     categories: ['enterprise_search', 'communications', 'productivity'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/zoom',
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/zoom/custom',
   },
 ];
 
