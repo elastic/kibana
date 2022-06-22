@@ -75,7 +75,6 @@ export const readIndexRoute = (
             body: {
               name: indexName,
               index_mapping_outdated: mappingOutdated || aliasesOutdated,
-              indexExists,
             },
           });
         } else {
@@ -83,7 +82,6 @@ export const readIndexRoute = (
             body: {
               name: indexName,
               index_mapping_outdated: false,
-              indexExists,
             },
           });
         }

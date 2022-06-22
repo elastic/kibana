@@ -32,9 +32,12 @@ export const createDashboardsRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const spaceId = context.securitySolution.getSpaceId();
 
       try {
+        const securitySolution = await context.securitySolution;
+
+        const spaceId = securitySolution?.getSpaceId();
+
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
         const res = await createDashboards({

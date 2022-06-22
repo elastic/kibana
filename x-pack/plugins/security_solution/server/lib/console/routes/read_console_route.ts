@@ -10,10 +10,7 @@ import fs from 'fs';
 import { schema } from '@kbn/config-schema';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  CustomHttpResponseOptions,
-  KibanaResponseFactory,
-} from '../../../../../../../src/core/server';
+import { CustomHttpResponseOptions, KibanaResponseFactory } from '@kbn/core/server';
 import { DEV_TOOL_CONSOLE } from '../../../../common/constants';
 
 import { SecuritySolutionPluginRouter } from '../../../types';
@@ -78,25 +75,27 @@ export const readConsoleRoute = (router: SecuritySolutionPluginRouter) => {
     async (context, request, response) => {
       const siemResponse = buildConsoleResponse(response);
       const { console_id: consoleId } = request.params;
-      const spaceId = context.securitySolution.getSpaceId();
 
-      const fileName = mappings[consoleId] ?? null;
-
-      if (!fileName) {
-        return siemResponse.error({ statusCode: 500, body: 'No such file or directory' });
-      }
-
-      const filePath = '../';
-      const dir = resolve(join(__dirname, filePath));
-
-      const dataPath = path.join(dir, fileName);
-      let res = '';
       try {
-        res = await getReadables(dataPath);
+        const securitySolution = await context.securitySolution;
+        const spaceId = securitySolution.getSpaceId();
+
+        const fileName = mappings[consoleId] ?? null;
+
+        if (!fileName) {
+          return siemResponse.error({ statusCode: 500, body: 'No such file or directory' });
+        }
+
+        const filePath = '../';
+        const dir = resolve(join(__dirname, filePath));
+
+        const dataPath = path.join(dir, fileName);
+        const res = await getReadables(dataPath);
         const regex = /{{space_name}}/g;
         return response.ok({ body: res.replace(regex, spaceId) });
       } catch (err) {
         const error = transformError(err);
+
         return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,

@@ -10,11 +10,11 @@ import {
   getBootstrapIndexExists,
   getIndexExists,
 } from '@kbn/securitysolution-es-utils';
+import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNAL_INDEX_URL } from '../../../../../common/constants';
 
 import { buildSiemResponse } from '../utils';
-import { RuleDataPluginService } from '../../../../../../rule_registry/server';
 import { isOutdated } from '../../migrations/helpers';
 import { getIndexVersion } from '../index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
@@ -36,26 +36,21 @@ export const readSignalIndexRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const siemClient = context.securitySolution?.getAppClient();
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const core = await context.core;
+        const securitySolution = await context.securitySolution;
+        const siemClient = securitySolution?.getAppClient();
+        const esClient = core.elasticsearch.client.asCurrentUser;
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        // console.log('spaceId', index);
-        const spaceId = context.securitySolution.getSpaceId();
+        const spaceId = securitySolution.getSpaceId();
         const indexName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
 
         const index = siemClient.getSignalsIndex();
-        // const indexExists = await getBootstrapIndexExists(
-        //   context.core.elasticsearch.client.asInternalUser,
-        //   indexelastic
-        // );
-        const indexExists = await getIndexExists(
-          context.core.elasticsearch.client.asInternalUser,
-          index
-        );
+
+        const indexExists = await getIndexExists(core.elasticsearch.client.asInternalUser, index);
         if (indexExists) {
           let mappingOutdated: boolean | null = null;
           let aliasesOutdated: boolean | null = null;
