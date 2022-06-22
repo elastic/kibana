@@ -271,7 +271,7 @@ Cases::
 * Adds the ability to create a case from within the selection case modal {kibana-pull}128882[#128882]
 
 Content Management::
-Adds "Last updated" metadata to TableListView {kibana-pull}132321[#132321]
+The list view for Dashboard, Visualize Library, Maps, and Graph has a new "Last updated" column to easily access content that has been recently modified {kibana-pull}132321[#132321]
 
 Dashboard::
 * Improves the banner {kibana-pull}132301[#132301]
