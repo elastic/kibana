@@ -32,6 +32,27 @@ const getTestRuleType = (id?: string, iconClass?: string) => {
   };
 };
 
+const getAsyncTestRuleType = (id?: string, iconClass?: string) => {
+  return () =>
+    Promise.resolve({
+      id: id || 'test-async-alert-type',
+      description: 'Test description',
+      iconClass: iconClass || 'icon',
+      documentationUrl: null,
+      validate: (): ValidationResult => {
+        return { errors: {} };
+      },
+      ruleParamsExpression: ExpressionComponent,
+      requiresAppContext: false,
+    });
+};
+
+const getAsyncErrorTestRuleType = (() => {
+  return () => {
+    throw new Error('one kind of error');
+  };
+}) as unknown as () => Promise<RuleTypeModel>;
+
 const getTestActionType = (
   id?: string,
   iconClass?: string,
@@ -65,6 +86,33 @@ describe('register()', () => {
       ruleTypeRegistry.register(getTestRuleType('my-test-alert-type-1'))
     ).toThrowErrorMatchingInlineSnapshot(
       `"Object type \\"my-test-alert-type-1\\" is already registered."`
+    );
+  });
+});
+
+describe('registerAsync()', () => {
+  test('able to register alert types', async () => {
+    const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
+    await ruleTypeRegistry.registerAsync(getAsyncTestRuleType());
+    expect(ruleTypeRegistry.has('test-async-alert-type')).toEqual(true);
+  });
+
+  test('do Not throws error if alert type already registered', async () => {
+    const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
+    await ruleTypeRegistry.registerAsync(getAsyncTestRuleType('my-async-alert-type-1'));
+    expect(
+      async () =>
+        await ruleTypeRegistry.registerAsync(getAsyncTestRuleType('my-async-alert-type-1'))
+    ).not.toThrowError();
+    expect(ruleTypeRegistry.has('my-async-alert-type-1')).toEqual(true);
+  });
+
+  test('throws error if you can not load the alert type', async () => {
+    const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
+    expect(
+      async () => await ruleTypeRegistry.registerAsync(getAsyncErrorTestRuleType())
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Object type is not able to be registered. Error msg: \\"one kind of error\\""`
     );
   });
 });
