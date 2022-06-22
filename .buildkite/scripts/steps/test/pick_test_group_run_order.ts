@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-const { CiStats } = require('#pipeline-utils');
+import { CiStats } from '#pipeline-utils';
 
 (async () => {
   try {
-    await CiStats.onStart();
+    await CiStats.pickTestGroupRunOrder();
   } catch (ex) {
     console.error('CI Stats Error', ex.message);
     if (ex.response) {

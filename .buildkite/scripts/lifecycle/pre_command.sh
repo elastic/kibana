@@ -24,14 +24,14 @@ retry 5 15 npm ci # TODO no dev
 cd ..
 
 echo '--- Agent Debug/SSH Info'
-ts-node .buildkite/scripts/lifecycle/print_agent_links.js || true
+ts-node .buildkite/scripts/lifecycle/print_agent_links.ts || true
 
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   echo ""
   echo "To SSH into this agent, run:"
   echo "gcloud compute ssh --tunnel-through-iap --project elastic-kibana-ci --zone \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone)\" \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/name)\""
   echo ""
-fi  
+fi
 
 echo '--- Job Environment Setup'
 

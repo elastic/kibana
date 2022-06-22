@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "rootDir": "./",
-    "target": "es2019",
+    "target": "es2021",
     "strict": true,
     "module": "commonjs",
     "moduleResolution": "node",
@@ -13,8 +13,7 @@
       "#pipeline-utils": ["./pipeline-utils/index.ts"],
       "#pipeline-utils/*": ["./pipeline-utils/*"]
     },
-    "useUnknownInCatchVariables": false,
-    "allowJs": true
+    "useUnknownInCatchVariables": false
   },
   "exclude": ["**/*.test.ts", "**/vm-filesystem/**", "**/dist"]
 }

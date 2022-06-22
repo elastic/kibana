@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { BuildkiteClient } = require('#pipeline-utils');
+import { BuildkiteClient } from '#pipeline-utils';
 
 (async () => {
   try {

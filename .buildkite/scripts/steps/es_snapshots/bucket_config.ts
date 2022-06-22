@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  BASE_BUCKET_DAILY: 'kibana-ci-es-snapshots-daily',
-  BASE_BUCKET_PERMANENT: 'kibana-ci-es-snapshots-permanent',
-};
+export const BASE_BUCKET_DAILY = 'kibana-ci-es-snapshots-daily';
+export const BASE_BUCKET_PERMANENT = 'kibana-ci-es-snapshots-permanent';

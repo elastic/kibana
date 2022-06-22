@@ -1,5 +1,6 @@
 {
   "rules": {
-    "no-console": "off"
+    "no-console": "off",
+    "@kbn/imports/no_unresolvable_imports": "off"
   }
 }

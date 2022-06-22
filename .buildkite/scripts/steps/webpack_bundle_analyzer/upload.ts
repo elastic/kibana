@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-const execSync = require('child_process').execSync;
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs = require('fs');
+import path = require('path');
 
 const GITHUB_CONTEXT = 'Build and Publish Webpack bundle analyzer reports';
 
 const WEBPACK_REPORTS =
   process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
     ? `pr-${process.env.BUILDKITE_PULL_REQUEST}`
-    : process.env.BUILDKITE_BRANCH.replace('/', '__');
+    : (process.env.BUILDKITE_BRANCH ?? '').replace('/', '__');
 const WEBPACK_REPORTS_BUCKET = 'ci-artifacts.kibana.dev/webpack_bundle_analyzer';
 const WEBPACK_REPORTS_BUCKET_URL = `https://${WEBPACK_REPORTS_BUCKET}/${WEBPACK_REPORTS}`;
 const WEBPACK_REPORTS_BASE_URL = `${WEBPACK_REPORTS_BUCKET_URL}/${process.env.BUILDKITE_COMMIT}`;
 
-const exec = (...args) => execSync(args.join(' '), { stdio: 'inherit' });
+const exec = (...args: string[]) => execSync(args.join(' '), { stdio: 'inherit' });
 
-const ghStatus = (state, description) =>
+const ghStatus = (state: string, description: string) =>
   exec(
     `gh api "repos/elastic/kibana/statuses/${process.env.BUILDKITE_COMMIT}"`,
     `-f state=${state}`,
     `-f target_url="${process.env.BUILDKITE_BUILD_URL}"`,
     `-f context="${GITHUB_CONTEXT}"`,
     `-f description="${description}"`,
-    `--silent`
+    `--silent`,
   );
 
 const upload = () => {
@@ -61,7 +61,7 @@ const upload = () => {
 
     if (process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false') {
       exec(
-        `buildkite-agent meta-data set pr_comment:webpack_bundle_reports:head '* [Webpack Bundle Analyzer](${WEBPACK_REPORTS_BASE_URL})'`
+        `buildkite-agent meta-data set pr_comment:webpack_bundle_reports:head '* [Webpack Bundle Analyzer](${WEBPACK_REPORTS_BASE_URL})'`,
       );
     }
   } finally {

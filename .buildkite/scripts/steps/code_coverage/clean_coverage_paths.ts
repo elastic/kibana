@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { readFileSync, writeFileSync } = require('fs');
+import { readFileSync, writeFileSync } from 'fs';
 
 const file = process.argv[2];
 const search = process.argv[3];
