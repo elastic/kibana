@@ -37,9 +37,7 @@ Array [
 
 exports[`cases feature_privilege_builder within feature grants push privileges under feature with id obs 1`] = `
 Array [
-  "cases:1.0.0-zeta1:obs/createCase",
-  "cases:1.0.0-zeta1:obs/createComment",
-  "cases:1.0.0-zeta1:obs/createConfiguration",
+  "cases:1.0.0-zeta1:obs/pushCase",
 ]
 `;
 
