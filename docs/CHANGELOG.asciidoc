@@ -242,7 +242,6 @@ Improves the current filter/search experience {kibana-pull}128401[#128401]
 Security::
 * Adds a manual refresh button {kibana-pull}132766[#132766]
 * Adds the metadata tab {kibana-pull}131465[#131465]
-* Adds the ability to use {kib} feature privileges with API keys {kibana-pull}130918[#130918]
 
 Sharing::
 Adds method to re-link visualizations with missing index-pattern {kibana-pull}132336[#132336]
