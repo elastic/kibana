@@ -113,14 +113,14 @@ describe('convertToBuildEsQuery', () => {
   };
 
   it('should, by default, build a query where the `nested` fields syntax includes the `"ignore_unmapped":true` option', () => {
-    const converted = convertToBuildEsQuery({
+    const [converted, _] = convertToBuildEsQuery({
       config,
       queries: queryWithNestedFields,
       indexPattern: mockIndexPattern,
       filters,
     });
 
-    expect(JSON.parse(converted)).to.eql({
+    expect(JSON.parse(converted ?? '')).to.eql({
       bool: {
         must: [],
         filter: [
@@ -228,14 +228,14 @@ describe('convertToBuildEsQuery', () => {
       nestedIgnoreUnmapped: false, // <-- override the default
     };
 
-    const converted = convertToBuildEsQuery({
+    const [converted, _] = convertToBuildEsQuery({
       config: configWithOverride,
       queries: queryWithNestedFields,
       indexPattern: mockIndexPattern,
       filters,
     });
 
-    expect(JSON.parse(converted)).to.eql({
+    expect(JSON.parse(converted ?? '')).to.eql({
       bool: {
         must: [],
         filter: [
