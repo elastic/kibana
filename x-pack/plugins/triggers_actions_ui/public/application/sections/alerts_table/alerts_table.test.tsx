@@ -5,43 +5,39 @@
  * 2.0.
  */
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+
 import { AlertsTable } from './alerts_table';
-import { AlertsData } from '../../../types';
-jest.mock('../../../../../../../src/plugins/data/public/');
-jest.mock('../../../common/lib/kibana');
+import { AlertsField, AlertsTableFlyoutState } from '../../../types';
+
+jest.mock('@kbn/data-plugin/public');
+
+const columns = [
+  {
+    id: AlertsField.name,
+    displayAsText: 'Name',
+  },
+  {
+    id: AlertsField.reason,
+    displayAsText: 'Reason',
+  },
+];
 
 describe('AlertsTable', () => {
-  const consumers = [
-    AlertConsumers.APM,
-    AlertConsumers.LOGS,
-    AlertConsumers.UPTIME,
-    AlertConsumers.INFRASTRUCTURE,
-    AlertConsumers.SIEM,
-  ];
-  const columns = [
+  const alerts = [
     {
-      id: 'kibana.alert.rule.name',
-      displayAsText: 'Name',
+      [AlertsField.name]: ['one'],
+      [AlertsField.reason]: ['two'],
     },
     {
-      id: 'kibana.alert.rule.category',
-      displayAsText: 'Category',
+      [AlertsField.name]: ['three'],
+      [AlertsField.reason]: ['four'],
     },
-  ];
+  ] as unknown as EcsFieldsResponse[];
 
-  const alerts: AlertsData[] = [
-    {
-      field1: ['one'],
-      field2: ['two'],
-    },
-    {
-      field1: ['three'],
-      field2: ['four'],
-    },
-  ];
   const fetchAlertsData = {
     activePage: 0,
     alerts,
@@ -53,54 +49,91 @@ describe('AlertsTable', () => {
     onPageChange: jest.fn(),
     onSortChange: jest.fn(),
     refresh: jest.fn(),
+    sort: [],
   };
+
   const useFetchAlertsData = () => {
     return fetchAlertsData;
   };
 
-  const tableProps = {
-    consumers,
-    bulkActions: [],
+  const alertsTableConfiguration = {
+    id: '',
     columns,
+    sort: [],
+    externalFlyout: {
+      header: jest.fn(),
+      body: jest.fn(),
+      footer: jest.fn(),
+    },
+    internalFlyout: {
+      header: jest.fn(),
+      body: jest.fn(),
+      footer: jest.fn(),
+    },
+    getRenderCellValue: () =>
+      jest.fn().mockImplementation((props) => {
+        return `${props.colIndex}:${props.rowIndex}`;
+      }),
+  };
+
+  const tableProps = {
+    alertsTableConfiguration,
+    columns,
+    bulkActions: [],
     deletedEventIds: [],
     disabledCellActions: [],
     pageSize: 1,
-    pageSizeOptions: [1, 2, 5, 10, 20, 50, 100],
+    pageSizeOptions: [1, 10, 20, 50, 100],
     leadingControlColumns: [],
-    renderCellValue: jest.fn().mockImplementation((props) => {
-      return `${props.colIndex}:${props.rowIndex}`;
-    }),
     showCheckboxes: false,
+    showExpandToDetails: true,
     trailingControlColumns: [],
+    alerts,
+    flyoutState: AlertsTableFlyoutState.internal,
     useFetchAlertsData,
+    visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
   };
 
-  it('should support sorting', async () => {
-    const wrapper = mountWithIntl(<AlertsTable {...tableProps} />);
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+  describe('Alerts table UI', () => {
+    it('should support sorting', async () => {
+      const renderResult = render(<AlertsTable {...tableProps} />);
+      userEvent.click(renderResult.container.querySelector('.euiDataGridHeaderCell__button')!);
+      userEvent.click(renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`));
+      userEvent.click(renderResult.getByTitle('Sort A-Z'));
+      expect(fetchAlertsData.onSortChange).toHaveBeenCalledWith([
+        { direction: 'asc', id: 'kibana.alert.rule.name' },
+      ]);
     });
-    wrapper.find('.euiDataGridHeaderCell__button').first().simulate('click');
-    wrapper.update();
-    wrapper
-      .find(`[data-test-subj="dataGridHeaderCellActionGroup-${columns[0].id}"]`)
-      .first()
-      .simulate('click');
-    wrapper.find(`.euiListGroupItem__label[title="Sort A-Z"]`).simulate('click');
-    expect(fetchAlertsData.onSortChange).toHaveBeenCalledWith([
-      { direction: 'asc', id: 'kibana.alert.rule.name' },
-    ]);
-  });
 
-  it('should support pagination', async () => {
-    const wrapper = mountWithIntl(<AlertsTable {...tableProps} />);
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    it('should support pagination', async () => {
+      const renderResult = render(<AlertsTable {...tableProps} />);
+      userEvent.click(renderResult.getByTestId('pagination-button-1'));
+      expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
     });
-    wrapper.find('.euiPagination__item EuiButtonEmpty').at(1).simulate('click');
-    expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
+
+    describe('leading control columns', () => {
+      it('should return at least the flyout action control', async () => {
+        const wrapper = render(<AlertsTable {...tableProps} />);
+        expect(wrapper.getByTestId('expandColumnHeaderLabel').textContent).toBe('Actions');
+      });
+
+      it('should render other leading controls', () => {
+        const customTableProps = {
+          ...tableProps,
+          leadingControlColumns: [
+            {
+              id: 'selection',
+              width: 67,
+              headerCellRender: () => <span data-test-subj="testHeader">Test header</span>,
+              rowCellRender: () => <h2 data-test-subj="testCell">Test cell</h2>,
+            },
+          ],
+        };
+        const wrapper = render(<AlertsTable {...customTableProps} />);
+        expect(wrapper.queryByTestId('testHeader')).not.toBe(null);
+        expect(wrapper.queryByTestId('testCell')).not.toBe(null);
+      });
+    });
   });
 });

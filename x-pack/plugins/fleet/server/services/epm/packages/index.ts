@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject } from 'src/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 import { installationStatuses, KibanaSavedObjectType } from '../../../../common';
 import { KibanaAssetType } from '../../../types';
@@ -20,7 +20,6 @@ export {
   getInstallation,
   getInstallations,
   getPackageInfo,
-  getPackageInfoFromRegistry,
   getPackages,
   getLimitedPackages,
 } from './get';

@@ -10,7 +10,7 @@ import {
   basicValidJobMessages,
   basicInvalidJobMessages,
   nonBasicIssuesMessages,
-} from '../../../../../../x-pack/plugins/ml/common/constants/messages.test.mock';
+} from '@kbn/ml-plugin/common/constants/messages.test.mock';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should recognize a valid job configuration`, async () => {
       const requestBody = {
-        duration: { start: 1586995459000, end: 1589672736000 },
+        duration: { start: 1560297859000, end: 1562975136000 },
         job: {
           job_id: 'test',
           description: '',
@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should recognize a basic invalid job configuration and skip advanced checks', async () => {
       const requestBody = {
-        duration: { start: 1586995459000, end: 1589672736000 },
+        duration: { start: 1560297859000, end: 1562975136000 },
         job: {
           job_id: '-(*&^',
           description: '',
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should recognize non-basic issues in job configuration', async () => {
       const requestBody = {
-        duration: { start: 1586995459000, end: 1589672736000 },
+        duration: { start: 1560297859000, end: 1562975136000 },
         job: {
           job_id: 'test',
           description: '',
@@ -204,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not validate configuration in case request payload is invalid', async () => {
       const requestBody = {
-        duration: { start: 1586995459000, end: 1589672736000 },
+        duration: { start: 1560297859000, end: 1562975136000 },
         job: {
           job_id: 'test',
           description: '',

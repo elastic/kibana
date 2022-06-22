@@ -12,7 +12,7 @@ import { TestScheduler } from 'rxjs/testing';
 import { Execution } from './execution';
 import { parseExpression, ExpressionAstExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
-import { ExpressionFunctionDefinition } from '../../common';
+import { ExpressionFunctionDefinition } from '..';
 import { ExecutionContract } from './execution_contract';
 
 beforeAll(() => {
@@ -714,7 +714,7 @@ describe('Execution', () => {
       expect(result).toMatchObject({
         type: 'error',
         error: {
-          message: '[requiredArg] > requiredArg requires an argument',
+          message: '[requiredArg] > requiredArg requires the "arg" argument',
         },
       });
     });
@@ -725,7 +725,7 @@ describe('Execution', () => {
       expect(result).toMatchObject({
         type: 'error',
         error: {
-          message: '[var_set] > var_set requires an "name" argument',
+          message: '[var_set] > var_set requires the "name" argument',
         },
       });
     });

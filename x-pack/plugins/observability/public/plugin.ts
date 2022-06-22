@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ConfigSchema } from '.';
 import {
   AppDeepLink,
   AppMountParameters,
@@ -18,26 +17,23 @@ import {
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin as PluginClass,
-  PluginInitializerContext,
-} from '../../../../src/core/public';
-import type {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
-import type { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
-import type { DiscoverStart } from '../../../../src/plugins/discover/public';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import type { FeaturesPluginStart } from '../../features/public';
-import type {
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from '../../../../src/plugins/home/public';
-import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '../../cases/public';
-import type { LensPublicStart } from '../../lens/public';
+} from '@kbn/core/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SharedUXPluginStart } from '@kbn/shared-ux-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { KibanaFeature } from '@kbn/features-plugin/common';
+
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
@@ -46,10 +42,9 @@ import { createCallObservabilityApi } from './services/call_observability_api';
 import { createNavigationRegistry, NavigationEntry } from './services/navigation_registry';
 import { updateGlobalNavigation } from './update_global_navigation';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
-import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
+import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
-import { KibanaFeature } from '../../features/common';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -57,9 +52,11 @@ export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
+  usageCollection: UsageCollectionSetup;
   cases: CasesUiStart;
   embeddable: EmbeddableStart;
   home?: HomePublicPluginStart;
@@ -70,6 +67,7 @@ export interface ObservabilityPublicPluginsStart {
   discover: DiscoverStart;
   features: FeaturesPluginStart;
   kibanaFeatures: KibanaFeature[];
+  sharedUX: SharedUXPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -127,17 +125,12 @@ export class Plugin
     }),
   ];
 
-  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
-    this.initializerContext = initializerContext;
-  }
-
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
-    const config = this.initializerContext.config.get();
 
     createCallObservabilityApi(coreSetup.http);
 
@@ -150,6 +143,13 @@ export class Plugin
       const { renderApp } = await import('./application');
       // Get start services
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
+
+      // Register alerts metadata
+      const { registerAlertsTableConfiguration } = await import(
+        './config/register_alerts_table_configuration'
+      );
+      const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+      registerAlertsTableConfiguration(alertsTableConfigurationRegistry);
       // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
       // subset of this privilege are not authorized to access this endpoint and will receive a 404
       // error that causes the Alerting view to fail to load.
@@ -161,13 +161,13 @@ export class Plugin
       }
 
       return renderApp({
-        config,
         core: coreStart,
         plugins: pluginsStart,
         appMountParameters: params,
         observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: navigation.PageTemplate,
         kibanaFeatures,
+        usageCollection: pluginsSetup.usageCollection,
       });
     };
 
@@ -264,22 +264,18 @@ export class Plugin
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry,
-      isAlertingExperienceEnabled: () => config.unsafe.alertingExperience.enabled,
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
-      useRulesLink: createUseRulesLink(config.unsafe.rules.enabled),
+      useRulesLink: createUseRulesLink(),
     };
   }
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
 
-    const config = this.initializerContext.config.get();
-
     updateGlobalNavigation({
       capabilities: application.capabilities,
-      config,
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
     });
@@ -289,6 +285,7 @@ export class Plugin
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
+      getSharedUXContext: pluginsStart.sharedUX.getContextServices,
     });
 
     return {
@@ -297,8 +294,12 @@ export class Plugin
       },
       createExploratoryViewUrl,
       getAppDataView: getAppDataView(pluginsStart.dataViews),
-      ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(coreStart, pluginsStart),
-      useRulesLink: createUseRulesLink(config.unsafe.rules.enabled),
+      ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(
+        coreStart.uiSettings,
+        pluginsStart.dataViews,
+        pluginsStart.lens
+      ),
+      useRulesLink: createUseRulesLink(),
     };
   }
 }

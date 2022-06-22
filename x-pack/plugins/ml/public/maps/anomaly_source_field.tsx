@@ -7,14 +7,19 @@
 
 // eslint-disable-next-line max-classes-per-file
 import React, { ReactNode } from 'react';
+import type {
+  AggregationsExtendedStatsAggregation,
+  AggregationsPercentilesAggregation,
+  AggregationsTermsAggregation,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
-import { IField, IVectorSource } from '../../../maps/public';
-import { FIELD_ORIGIN, DECIMAL_DEGREES_PRECISION } from '../../../maps/common';
-import { TileMetaFeature } from '../../../maps/common/descriptor_types';
+import { IField, IVectorSource } from '@kbn/maps-plugin/public';
+import { FIELD_ORIGIN, DECIMAL_DEGREES_PRECISION } from '@kbn/maps-plugin/common';
+import { TileMetaFeature } from '@kbn/maps-plugin/common/descriptor_types';
+import { ITooltipProperty } from '@kbn/maps-plugin/public';
 import { AnomalySource } from './anomaly_source';
-import { ITooltipProperty } from '../../../maps/public';
 
 export const ACTUAL_LABEL = i18n.translate('xpack.ml.maps.anomalyLayerActualLabel', {
   defaultMessage: 'Actual',
@@ -230,15 +235,22 @@ export class AnomalySourceField implements IField {
     return false;
   }
 
-  async getExtendedStatsFieldMetaRequest(): Promise<unknown> {
+  async getExtendedStatsFieldMetaRequest(): Promise<Record<
+    string,
+    { extended_stats: AggregationsExtendedStatsAggregation }
+  > | null> {
     return null;
   }
 
-  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown> {
+  async getPercentilesFieldMetaRequest(
+    percentiles: number[]
+  ): Promise<Record<string, { percentiles: AggregationsPercentilesAggregation }> | null> {
     return null;
   }
 
-  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
+  async getCategoricalFieldMetaRequest(
+    size: number
+  ): Promise<Record<string, { terms: AggregationsTermsAggregation }> | null> {
     return null;
   }
 

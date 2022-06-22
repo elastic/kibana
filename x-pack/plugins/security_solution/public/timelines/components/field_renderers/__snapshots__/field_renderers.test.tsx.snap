@@ -24,7 +24,9 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
   >
     <DefaultDraggable
       field="source.as.number"
+      fieldType="number"
       id="autonomous-system-renderer-default-draggable-ip-overview-source.as.number"
+      isAggregatable={true}
       isDraggable={false}
       value="12345"
     />
@@ -60,7 +62,9 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
       },
     }
   }
+  fieldType="keyword"
   hideTopN={false}
+  isAggregatable={true}
   isDraggable={false}
   render={[Function]}
 />
@@ -83,7 +87,9 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
       },
     }
   }
+  fieldType="keyword"
   hideTopN={false}
+  isAggregatable={true}
   isDraggable={false}
   render={[Function]}
 />
@@ -99,7 +105,9 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
   >
     <DefaultDraggable
       field="source.geo.city_name"
+      fieldType="keyword"
       id="location-renderer-default-draggable-ip-overview-source.geo.city_name"
+      isAggregatable={true}
       isDraggable={false}
       value={
         Array [
@@ -114,7 +122,9 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
   >
     <DefaultDraggable
       field="source.geo.region_name"
+      fieldType="keyword"
       id="location-renderer-default-draggable-ip-overview-source.geo.region_name"
+      isAggregatable={true}
       isDraggable={false}
       value={
         Array [

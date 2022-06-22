@@ -12,32 +12,31 @@ import {
   SavedObjectAttributes,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-plugin/common';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunction,
+  MigrateFunctionsObject,
+} from '@kbn/kibana-utils-plugin/common';
+import {
+  CONTROL_GROUP_TYPE,
+  rawControlGroupAttributesToSerializable,
+  serializableToRawControlGroupAttributes,
+} from '@kbn/controls-plugin/common';
 import { migrations730 } from './migrations_730';
 import { SavedDashboardPanel } from '../../common/types';
-import { EmbeddableSetup } from '../../../embeddable/server';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
-import {
-  serializableToRawAttributes,
-  DashboardDoc700To720,
-  DashboardDoc730ToLatest,
-  rawAttributesToSerializable,
-} from '../../common';
+import { DashboardDoc700To720, DashboardDoc730ToLatest } from '../../common';
 import { injectReferences, extractReferences } from '../../common/saved_dashboard_references';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from '../../common/embeddable/embeddable_saved_object_converters';
-import { SavedObjectEmbeddableInput } from '../../../embeddable/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../data/common';
-import {
-  mergeMigrationFunctionMaps,
-  MigrateFunction,
-  MigrateFunctionsObject,
-} from '../../../kibana_utils/common';
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
-import { CONTROL_GROUP_TYPE } from '../../../controls/common';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -221,12 +220,15 @@ const migrateByValuePanels =
     const { attributes } = doc;
 
     if (attributes?.controlGroupInput) {
-      const controlGroupInput = rawAttributesToSerializable(attributes.controlGroupInput);
+      const controlGroupInput = rawControlGroupAttributesToSerializable(
+        attributes.controlGroupInput
+      );
       const migratedControlGroupInput = migrate({
         ...controlGroupInput,
         type: CONTROL_GROUP_TYPE,
       });
-      attributes.controlGroupInput = serializableToRawAttributes(migratedControlGroupInput);
+      attributes.controlGroupInput =
+        serializableToRawControlGroupAttributes(migratedControlGroupInput);
     }
 
     // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when

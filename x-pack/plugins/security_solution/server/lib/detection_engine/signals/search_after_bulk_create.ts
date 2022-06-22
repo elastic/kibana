@@ -41,6 +41,7 @@ export const searchAfterAndBulkCreate = async ({
   trackTotalHits,
   tuple,
   wrapHits,
+  runtimeMappings,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     const ruleParams = completeRule.ruleParams;
@@ -61,17 +62,18 @@ export const searchAfterAndBulkCreate = async ({
         errors: ['malformed date tuple'],
       });
     }
+
     signalsCreatedCount = 0;
     while (signalsCreatedCount < tuple.maxSignals) {
       try {
         let mergedSearchResults = createSearchResultReturnType();
         logger.debug(buildRuleMessage(`sortIds: ${sortIds}`));
-
         if (hasSortId) {
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
             searchAfterSortIds: sortIds,
             index: inputIndexPattern,
+            runtimeMappings,
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),
             services,
@@ -127,11 +129,11 @@ export const searchAfterAndBulkCreate = async ({
         // filter out the search results that match with the values found in the list.
         // the resulting set are signals to be indexed, given they are not duplicates
         // of signals already present in the signals index.
-        const filteredEvents = await filterEventsAgainstList({
+        const [includedEvents, _] = await filterEventsAgainstList({
           listClient,
           exceptionsList,
           logger,
-          eventSearchResult: mergedSearchResults,
+          events: mergedSearchResults.hits.hits,
           buildRuleMessage,
         });
 
@@ -139,16 +141,11 @@ export const searchAfterAndBulkCreate = async ({
         // if there isn't anything after going through the value list filter
         // skip the call to bulk create and proceed to the next search_after,
         // if there is a sort id to continue the search_after with.
-        if (filteredEvents.hits.hits.length !== 0) {
+        if (includedEvents.length !== 0) {
           // make sure we are not going to create more signals than maxSignals allows
-          if (signalsCreatedCount + filteredEvents.hits.hits.length > tuple.maxSignals) {
-            filteredEvents.hits.hits = filteredEvents.hits.hits.slice(
-              0,
-              tuple.maxSignals - signalsCreatedCount
-            );
-          }
-          const enrichedEvents = await enrichment(filteredEvents);
-          const wrappedDocs = wrapHits(enrichedEvents.hits.hits, buildReasonMessage);
+          const limitedEvents = includedEvents.slice(0, tuple.maxSignals - signalsCreatedCount);
+          const enrichedEvents = await enrichment(limitedEvents);
+          const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
 
           const {
             bulkCreateDuration: bulkDuration,
@@ -171,9 +168,7 @@ export const searchAfterAndBulkCreate = async ({
           signalsCreatedCount += createdCount;
           logger.debug(buildRuleMessage(`created ${createdCount} signals`));
           logger.debug(buildRuleMessage(`signalsCreatedCount: ${signalsCreatedCount}`));
-          logger.debug(
-            buildRuleMessage(`enrichedEvents.hits.hits: ${enrichedEvents.hits.hits.length}`)
-          );
+          logger.debug(buildRuleMessage(`enrichedEvents.hits.hits: ${enrichedEvents.length}`));
 
           sendAlertTelemetryEvents(
             logger,

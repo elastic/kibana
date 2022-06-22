@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { Filter } from '../../../data/common';
-import { DataView } from '../../../data_views/common';
+import type { Filter } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 type CancelFnType = () => void;
 type SubmitFnType = (filters: Filter[]) => void;

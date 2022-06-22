@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { applyPaletteParams, getContrastColor } from './utils';
 
 describe('applyPaletteParams', () => {

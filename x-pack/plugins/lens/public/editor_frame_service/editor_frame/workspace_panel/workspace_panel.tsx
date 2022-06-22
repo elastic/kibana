@@ -22,14 +22,18 @@ import {
   EuiSpacer,
   EuiTextColor,
 } from '@elastic/eui';
-import type { CoreStart, ApplicationStart } from 'kibana/public';
-import type { DataPublicPluginStart, ExecutionContextSearch } from 'src/plugins/data/public';
-import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
+import type { CoreStart, ApplicationStart } from '@kbn/core/public';
+import type { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import type {
   ExpressionRendererEvent,
   ExpressionRenderError,
   ReactExpressionRendererType,
-} from '../../../../../../../src/plugins/expressions/public';
+} from '@kbn/expressions-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import {
   FramePublicAPI,
   isLensBrushEvent,
@@ -44,8 +48,6 @@ import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
 import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
@@ -55,7 +57,6 @@ import {
   getUnknownVisualizationTypeError,
 } from '../../error_helper';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
-import type { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 import {
   onActiveDataChange,
   useLensDispatch,
@@ -78,7 +79,6 @@ import {
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
-import type { Datatable } from '../../../../../../../src/plugins/expressions/public';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../config_panel/dimension_container';
 
 export interface WorkspacePanelProps {
@@ -301,7 +301,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
-            timeFieldName: inferTimeField(event.data),
+            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event.data),
           },
         });
       }
@@ -309,7 +309,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
-            timeFieldName: inferTimeField(event.data),
+            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event.data),
           },
         });
       }
@@ -322,7 +322,28 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         );
       }
     },
-    [plugins.uiActions, activeVisualization, dispatchLens]
+    [plugins.data.datatableUtilities, plugins.uiActions, activeVisualization, dispatchLens]
+  );
+
+  const hasCompatibleActions = useCallback(
+    async (event: ExpressionRendererEvent) => {
+      if (!plugins.uiActions) {
+        // ui actions not available, not handling event...
+        return false;
+      }
+      if (!isLensFilterEvent(event)) {
+        return false;
+      }
+      return (
+        (
+          await plugins.uiActions.getTriggerCompatibleActions(
+            VIS_EVENT_TO_TRIGGER[event.name],
+            event
+          )
+        ).length > 0
+      );
+    },
+    [plugins.uiActions]
   );
 
   useEffect(() => {
@@ -444,6 +465,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         framePublicAPI={framePublicAPI}
         lensInspector={lensInspector}
         onEvent={onEvent}
+        hasCompatibleActions={hasCompatibleActions}
         setLocalState={setLocalState}
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
@@ -518,6 +540,7 @@ export const VisualizationWrapper = ({
   framePublicAPI,
   lensInspector,
   onEvent,
+  hasCompatibleActions,
   setLocalState,
   localState,
   ExpressionRendererComponent,
@@ -529,6 +552,7 @@ export const VisualizationWrapper = ({
   framePublicAPI: FramePublicAPI;
   lensInspector: LensInspector;
   onEvent: (event: ExpressionRendererEvent) => void;
+  hasCompatibleActions: (event: ExpressionRendererEvent) => Promise<boolean>;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
     configurationValidationError?: Array<{
@@ -762,6 +786,7 @@ export const VisualizationWrapper = ({
         searchContext={searchContext}
         searchSessionId={searchSessionId}
         onEvent={onEvent}
+        hasCompatibleActions={hasCompatibleActions}
         onData$={onData$}
         inspectorAdapters={lensInspector.adapters}
         renderMode="edit"

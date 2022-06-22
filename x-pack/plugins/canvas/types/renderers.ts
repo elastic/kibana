@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 
 type GenericRendererCallback = (callback: () => void) => void;
 

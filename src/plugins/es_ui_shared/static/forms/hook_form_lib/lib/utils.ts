@@ -57,6 +57,24 @@ export const flattenObject = (
   }, {});
 
 /**
+ * Deeply remove all "undefined" value inside an Object
+ *
+ * @param obj The object to process
+ * @returns The object without any "undefined"
+ */
+export const stripOutUndefinedValues = <R>(obj: GenericObject): R => {
+  return Object.entries(obj)
+    .filter(({ 1: value }) => value !== undefined)
+    .reduce((acc, [key, value]) => {
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        return { ...acc, [key]: stripOutUndefinedValues(value) };
+      }
+
+      return { ...acc, [key]: value };
+    }, {} as R);
+};
+
+/**
  * Helper to map the object of fields to any of its value
  *
  * @param formFields key value pair of path and form Fields

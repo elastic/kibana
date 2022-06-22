@@ -16,6 +16,16 @@ import { ACTIONS_COLUMN_ARIA_COL_INDEX } from './helpers';
 import { EVENTS_TABLE_ARIA_LABEL } from './translations';
 
 /**
+ * The EUI theme's z-index property that is used by the timeline overlay
+ */
+export const TIMELINE_EUI_THEME_ZINDEX_LEVEL = 'euiZLevel4';
+
+/**
+ * The css classname added to the `document.body` whenever the timeline is visible on the page
+ */
+export const SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME = 'securitySolutionTimeline-isVisible';
+
+/**
  * TIMELINE BODY
  */
 export const SELECTOR_TIMELINE_GLOBAL_CONTAINER = 'securitySolutionTimeline__container';
@@ -185,7 +195,7 @@ export const EventsThContent = styled.div.attrs(({ className = '' }) => ({
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
-  padding: ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding: ${({ theme }) => theme.eui.euiSizeXS};
   text-align: ${({ textAlign }) => textAlign};
   width: ${({ width }) =>
     width != null
@@ -194,7 +204,7 @@ export const EventsThContent = styled.div.attrs(({ className = '' }) => ({
 
   > button.euiButtonIcon,
   > .euiToolTipAnchor > button.euiButtonIcon {
-    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+    margin-left: ${({ theme }) => `-${theme.eui.euiSizeXS}`};
   }
 `;
 
@@ -286,12 +296,12 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
 }))<{ className: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
-  padding-left: ${({ theme }) => theme.eui.paddingSizes.m};
+  padding-left: ${({ theme }) => theme.eui.euiSizeM};
   .euiAccordion + div {
     background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
-    padding: 0 ${({ theme }) => theme.eui.paddingSizes.s};
+    padding: 0 ${({ theme }) => theme.eui.euiSizeS};
     border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-    border-radius: ${({ theme }) => theme.eui.paddingSizes.xs};
+    border-radius: ${({ theme }) => theme.eui.euiSizeXS};
   }
 `;
 
@@ -352,7 +362,7 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
-  padding: ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding: ${({ theme }) => theme.eui.euiSizeXS};
   text-align: ${({ textAlign }) => textAlign};
   width: ${({ width }) =>
     width != null
@@ -360,7 +370,7 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
       : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 
   button.euiButtonIcon {
-    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+    margin-left: ${({ theme }) => `-${theme.eui.euiSizeXS}`};
   }
 `;
 

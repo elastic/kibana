@@ -11,17 +11,18 @@ import { takeUntil } from 'rxjs/operators';
 import { get } from 'lodash';
 import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
-import { CoreService } from 'src/core/types';
-import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsSingleBucketAggregateBase,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CoreContext } from '../core_context';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
+import type { Logger } from '@kbn/logging';
+import { SavedObjectsServiceStart, SavedObjectTypeRegistry } from '..';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType, InternalHttpServiceSetup } from '../http';
-import { LoggingConfigType } from '../logging';
+
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import type {
   CoreServicesUsageData,

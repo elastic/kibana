@@ -9,7 +9,7 @@ import { EuiCard } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta } from '@storybook/react/types-6-0';
 import React from 'react';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import { PodMetricsTable } from './pod_metrics_table';
 import type { PodMetricsTableProps } from './pod_metrics_table';
@@ -46,30 +46,35 @@ const storyArgs: Omit<PodMetricsTableProps, 'setSortState' | 'setCurrentPageInde
   isLoading: false,
   pods: [
     {
+      id: '358d96e3-026f-4440-a487-f6c2301884c0',
       name: 'gke-edge-oblt-pool-1-9a60016d-lgg1',
       uptime: 23000000,
       averageCpuUsagePercent: 99,
       averageMemoryUsageMegabytes: 34,
     },
     {
+      id: '358d96e3-026f-4440-a487-f6c2301884c1',
       name: 'gke-edge-oblt-pool-1-9a60016d-lgg2',
       uptime: 43000000,
       averageCpuUsagePercent: 72,
       averageMemoryUsageMegabytes: 68,
     },
     {
+      id: '358d96e3-026f-4440-a487-f6c2301884c0',
       name: 'gke-edge-oblt-pool-1-9a60016d-lgg3',
       uptime: 53000000,
       averageCpuUsagePercent: 54,
       averageMemoryUsageMegabytes: 132,
     },
     {
+      id: '358d96e3-026f-4440-a487-f6c2301884c0',
       name: 'gke-edge-oblt-pool-1-9a60016d-lgg4',
       uptime: 63000000,
       averageCpuUsagePercent: 34,
       averageMemoryUsageMegabytes: 264,
     },
     {
+      id: '358d96e3-026f-4440-a487-f6c2301884c0',
       name: 'gke-edge-oblt-pool-1-9a60016d-lgg5',
       uptime: 83000000,
       averageCpuUsagePercent: 13,

@@ -18,7 +18,7 @@ import { castArray, omit } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
-import { ISearchStartSearchSource } from '../../../../../src/plugins/data/common';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -118,7 +118,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           shouldWriteAlerts: () => shouldWriteAlerts,
           shouldStopExecution: () => false,
           search: {} as any,
-          searchSourceClient: Promise.resolve({} as ISearchStartSearchSource),
+          searchSourceClient: {} as ISearchStartSearchSource,
         },
         spaceId: 'spaceId',
         state,

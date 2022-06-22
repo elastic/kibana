@@ -8,11 +8,12 @@
 
 import moment from 'moment';
 import { get, last } from 'lodash';
-import type { DataView } from 'src/plugins/data_views/public';
-import { SortDirection } from 'src/plugins/data/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
+import { Query } from '@kbn/es-query';
 import { createContextSearchSourceStub } from './_stubs';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { DataPublicPluginStart, Query } from '../../../../../data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EsHitRecord, EsHitRecordList } from '../../types';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -89,7 +90,7 @@ describe('context predecessors', function () {
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits: EsHitRecordList) => {
-          expect(mockSearchSource.fetch.calledOnce).toBe(true);
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
         }
       );
@@ -234,7 +235,7 @@ describe('context predecessors', function () {
         (hits: EsHitRecordList) => {
           const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
-          expect(mockSearchSource.fetch.calledOnce).toBe(true);
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(removeFieldsSpy.calledOnce).toBe(true);
           expect(setFieldsSpy.calledOnce).toBe(true);
           expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { handleEsError } from '../shared_imports';

@@ -6,14 +6,14 @@
  */
 
 import { snoozeRuleRoute } from './snooze_rule';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -21,8 +21,14 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-// These tests don't test for future snooze time validation, so this date doesn't need to be in the future
-const SNOOZE_END_TIME = '2021-03-07T00:00:00.000Z';
+const SNOOZE_SCHEDULE = {
+  rRule: {
+    dtstart: '2021-03-07T00:00:00.000Z',
+    tzid: 'UTC',
+    count: 1,
+  },
+  duration: 864000000,
+};
 
 describe('snoozeAlertRoute', () => {
   it('snoozes an alert', async () => {
@@ -44,7 +50,7 @@ describe('snoozeAlertRoute', () => {
           id: '1',
         },
         body: {
-          snooze_end_time: SNOOZE_END_TIME,
+          snooze_schedule: SNOOZE_SCHEDULE,
         },
       },
       ['noContent']
@@ -57,7 +63,14 @@ describe('snoozeAlertRoute', () => {
       Array [
         Object {
           "id": "1",
-          "snoozeEndTime": "${SNOOZE_END_TIME}",
+          "snoozeSchedule": Object {
+            "duration": 864000000,
+            "rRule": Object {
+              "count": 1,
+              "dtstart": "2021-03-07T00:00:00.000Z",
+              "tzid": "UTC",
+            },
+          },
         },
       ]
     `);
@@ -84,7 +97,10 @@ describe('snoozeAlertRoute', () => {
           id: '1',
         },
         body: {
-          snooze_end_time: -1,
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            duration: -1,
+          },
         },
       },
       ['noContent']
@@ -97,7 +113,14 @@ describe('snoozeAlertRoute', () => {
       Array [
         Object {
           "id": "1",
-          "snoozeEndTime": -1,
+          "snoozeSchedule": Object {
+            "duration": -1,
+            "rRule": Object {
+              "count": 1,
+              "dtstart": "2021-03-07T00:00:00.000Z",
+              "tzid": "UTC",
+            },
+          },
         },
       ]
     `);

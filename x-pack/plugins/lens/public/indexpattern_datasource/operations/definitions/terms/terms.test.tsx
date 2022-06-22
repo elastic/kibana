@@ -14,13 +14,15 @@ import type {
   SavedObjectsClientContract,
   HttpSetup,
   CoreStart,
-} from 'kibana/public';
-import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+} from '@kbn/core/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
-import { GenericOperationDefinition, termsOperation, LastValueIndexPatternColumn } from '../index';
+import { GenericOperationDefinition, termsOperation, LastValueIndexPatternColumn } from '..';
 import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
 import { FrameDatasourceAPI } from '../../../../types';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
@@ -58,6 +60,8 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
   // need to provide the terms operation as some helpers use operation specific features
@@ -146,6 +150,61 @@ describe('terms', () => {
       );
     });
 
+    it('should add shard size if accuracy mode enabled', () => {
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const getEsAggsFnArgs = (accuracyMode: boolean, size: number, multiTerms: boolean) =>
+        termsOperation.toEsAggsFn(
+          {
+            ...termsColumn,
+            params: {
+              ...termsColumn.params,
+              accuracyMode,
+              size,
+              secondaryFields: multiTerms ? ['secondary_field'] : [],
+            },
+          },
+          'col1',
+          {} as IndexPattern,
+          layer,
+          uiSettingsMock,
+          []
+        ).arguments;
+
+      const smallSize = 5;
+      const bigSize = 900;
+
+      // terms agg
+      expect(getEsAggsFnArgs(true, smallSize, false).shardSize?.[0]).toEqual(1000);
+      expect(getEsAggsFnArgs(true, bigSize, false).shardSize?.[0]).toEqual(1360);
+      expect(getEsAggsFnArgs(false, smallSize, false).shardSize).not.toBeDefined();
+
+      // multi-terms agg
+      expect(getEsAggsFnArgs(true, smallSize, true).shardSize?.[0]).toEqual(1000);
+      expect(getEsAggsFnArgs(true, bigSize, true).shardSize?.[0]).toEqual(1360);
+      expect(getEsAggsFnArgs(false, smallSize, true).shardSize).not.toBeDefined();
+    });
+
+    it('should never add shard size if using rare terms', () => {
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const args = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: {
+            ...termsColumn.params,
+            accuracyMode: true,
+            orderBy: { type: 'rare', maxDocCount: 1 },
+          },
+        },
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        []
+      ).arguments;
+
+      expect(args.shardSize).not.toBeDefined();
+    });
+
     it('should reflect rare terms params correctly', () => {
       const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
       const esAggsFn = termsOperation.toEsAggsFn(
@@ -165,6 +224,42 @@ describe('terms', () => {
           arguments: expect.objectContaining({
             field: ['source'],
             max_doc_count: [3],
+          }),
+        })
+      );
+    });
+
+    it('should default percentile rank with non integer value to alphabetical sort', () => {
+      const newLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col2: {
+            ...layer.columns.col2,
+            operationType: 'percentile_rank',
+            params: {
+              value: 100.2,
+            },
+          },
+        },
+      };
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const esAggsFn = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: { ...termsColumn.params, orderBy: { type: 'column', columnId: 'col2' } },
+        },
+        'col1',
+        {} as IndexPattern,
+        newLayer,
+        uiSettingsMock,
+        ['col1', 'col2']
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggTerms',
+          arguments: expect.objectContaining({
+            orderBy: ['_key'],
           }),
         })
       );
@@ -1820,6 +1915,55 @@ describe('terms', () => {
         .find(EuiSwitch);
 
       expect(select2.prop('disabled')).toEqual(true);
+    });
+
+    describe('accuracy mode', () => {
+      const renderWithAccuracy = (accuracy: boolean, rareTerms: boolean) =>
+        shallow(
+          <InlineOptions
+            {...defaultProps}
+            layer={layer}
+            updateLayer={() => {}}
+            columnId="col1"
+            currentColumn={
+              {
+                ...layer.columns.col1,
+                params: {
+                  ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+                  accuracyMode: accuracy,
+                  orderBy: rareTerms ? { type: 'rare', maxDocCount: 3 } : { type: 'alphabetical' },
+                },
+              } as TermsIndexPatternColumn
+            }
+          />
+        );
+
+      const getSwitchComponent = (accuracy: boolean, rareTerms: boolean) =>
+        renderWithAccuracy(accuracy, rareTerms)
+          .find('[data-test-subj="indexPattern-accuracy-mode"]')
+          .find(EuiSwitch);
+
+      it('should be checked when enabled and not rare terms', () => {
+        const switchComponent = getSwitchComponent(true, false);
+        expect(switchComponent.prop('checked')).toEqual(true);
+        expect(switchComponent.prop('disabled')).toEqual(false);
+      });
+
+      it('should NOT be checked when NOT enabled and not rare terms', () => {
+        const switchComponent = getSwitchComponent(false, false);
+        expect(switchComponent.prop('checked')).toEqual(false);
+        expect(switchComponent.prop('disabled')).toEqual(false);
+      });
+
+      it('should always be unchecked and disabled when rare terms', () => {
+        const switchWithAccuracyEnabled = getSwitchComponent(true, true);
+        expect(switchWithAccuracyEnabled.prop('disabled')).toEqual(true);
+        expect(switchWithAccuracyEnabled.prop('checked')).toEqual(false);
+
+        const switchWithAccuracyDisabled = getSwitchComponent(false, true);
+        expect(switchWithAccuracyDisabled.prop('disabled')).toEqual(true);
+        expect(switchWithAccuracyDisabled.prop('checked')).toEqual(false);
+      });
     });
 
     it('should disable size input and show max doc count input', () => {

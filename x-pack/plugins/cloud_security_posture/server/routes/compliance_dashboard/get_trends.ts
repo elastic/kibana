@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-import { BENCHMARK_SCORE_INDEX_PATTERN } from '../../../common/constants';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
 import { Stats } from '../../../common/types';
 import { calculatePostureScore } from './get_stats';
 
@@ -25,10 +25,23 @@ export interface ScoreTrendDoc {
   >;
 }
 
-export const getTrendsAggsQuery = () => ({
-  index: BENCHMARK_SCORE_INDEX_PATTERN,
-  size: 5,
+export const getTrendsQuery = () => ({
+  index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  // large number that should be sufficient for 24 hours considering we write to the score index every 5 minutes
+  size: 999,
   sort: '@timestamp:desc',
+  query: {
+    bool: {
+      must: {
+        range: {
+          '@timestamp': {
+            gte: 'now-1d',
+            lte: 'now',
+          },
+        },
+      },
+    },
+  },
 });
 
 export type Trends = Array<{
@@ -60,7 +73,7 @@ export const getTrendsFromQueryResult = (scoreTrendDocs: ScoreTrendDoc[]): Trend
   }));
 
 export const getTrends = async (esClient: ElasticsearchClient): Promise<Trends> => {
-  const trendsQueryResult = await esClient.search<ScoreTrendDoc>(getTrendsAggsQuery());
+  const trendsQueryResult = await esClient.search<ScoreTrendDoc>(getTrendsQuery());
 
   if (!trendsQueryResult.hits.hits) throw new Error('missing trend results from score index');
 

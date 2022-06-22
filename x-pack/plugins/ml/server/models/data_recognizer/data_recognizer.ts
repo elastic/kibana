@@ -12,11 +12,11 @@ import type {
   KibanaRequest,
   IScopedClusterClient,
   SavedObjectsClientContract,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 import moment from 'moment';
 import { merge } from 'lodash';
-import type { DataViewsService } from '../../../../../../src/plugins/data_views/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlClient } from '../../lib/ml_client';
@@ -304,11 +304,14 @@ export class DataRecognizer {
       query: moduleConfig.query,
     };
 
-    const body = await this._client.asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._client.asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
 
     // @ts-expect-error incorrect search response type
     return body.hits.total.value > 0;

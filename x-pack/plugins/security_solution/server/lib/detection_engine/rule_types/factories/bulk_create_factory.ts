@@ -8,16 +8,16 @@
 import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
+import { PersistenceAlertService } from '@kbn/rule-registry-plugin/server';
+import { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import { BuildRuleMessage } from '../../signals/rule_messages';
 import { makeFloatString } from '../../signals/utils';
 import { RefreshTypes } from '../../types';
-import { PersistenceAlertService } from '../../../../../../rule_registry/server';
 import {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/detection_engine/schemas/alerts';
-import { AlertWithCommonFieldsLatest } from '../../../../../../rule_registry/common/schemas';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;

@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getOr } from 'lodash/fp';
+import { SavedObjectsImportSuccess } from '@kbn/core/public';
 import { InnerLinkPanel, LinkPanel, LinkPanelListItem } from '../link_panel';
 import { LinkPanelViewProps } from '../link_panel/types';
 import { Link } from '../link_panel/link';
@@ -25,7 +26,7 @@ import { HostRiskScoreQueryId } from '../../../risk_score/containers';
 import { importFile } from '../link_panel/import_file';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
-import { SavedObjectsImportSuccess } from '../../../../../../../src/core/public';
+import { RISKY_HOSTS_DASHBOARD_TITLE } from '../../../hosts/pages/navigation/constants';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   {
@@ -90,7 +91,11 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
   const [status, setStatus] = useState('idle');
   const [dashboardUrl, setDashboardUrl] = useState<string | null>(null);
   const [error, setError] = useState(undefined);
-  const { buttonHref } = useRiskyHostsDashboardButtonHref(to, from);
+  const { buttonHref } = useRiskyHostsDashboardButtonHref({
+    to,
+    from,
+    title: RISKY_HOSTS_DASHBOARD_TITLE,
+  });
   const {
     services: { http, dashboard },
   } = useKibana();

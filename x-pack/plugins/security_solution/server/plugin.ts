@@ -8,7 +8,6 @@
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
 import {
-  SIGNALS_ID,
   QUERY_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
@@ -17,16 +16,16 @@ import {
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
-import { Logger, SavedObjectsClient } from '../../../../src/core/server';
-import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
+import { Logger, SavedObjectsClient } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { ECS_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
-import { FieldMap } from '../../rule_registry/common/field_map';
-import { technicalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/technical_rule_field_map';
-import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { IRuleDataClient, Dataset } from '../../rule_registry/server';
-import { ListPluginSetup } from '../../lists/server';
-import { ILicense } from '../../licensing/server';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
+import { FieldMap } from '@kbn/rule-registry-plugin/common/field_map';
+import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
+import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
+import { IRuleDataClient, Dataset } from '@kbn/rule-registry-plugin/server';
+import { ListPluginSetup } from '@kbn/lists-plugin/server';
+import { ILicense } from '@kbn/licensing-plugin/server';
 
 import {
   createEqlAlertType,
@@ -148,7 +147,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     const eventLogService = plugins.eventLog;
     registerEventLogProvider(eventLogService);
 
-    const requestContextFactory = new RequestContextFactory({ config, logger, core, plugins });
+    const requestContextFactory = new RequestContextFactory({
+      config,
+      logger,
+      core,
+      plugins,
+      endpointAppContextService: this.endpointAppContextService,
+    });
+
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
@@ -176,9 +182,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
-
-    // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
-    const isRuleRegistryEnabled = experimentalFeatures.ruleRegistryEnabled;
 
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
@@ -235,6 +238,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleDataClient,
       eventLogService,
       ruleExecutionLoggerFactory: ruleExecutionLogForExecutorsFactory,
+      version: pluginContext.env.packageInfo.version,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -271,18 +275,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerPolicyRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
-    const racRuleTypes = [
+    const ruleTypes = [
+      LEGACY_NOTIFICATIONS_ID,
       EQL_RULE_TYPE_ID,
       INDICATOR_RULE_TYPE_ID,
       ML_RULE_TYPE_ID,
       QUERY_RULE_TYPE_ID,
       SAVED_QUERY_RULE_TYPE_ID,
       THRESHOLD_RULE_TYPE_ID,
-    ];
-    const ruleTypes = [
-      SIGNALS_ID,
-      LEGACY_NOTIFICATIONS_ID,
-      ...(isRuleRegistryEnabled ? racRuleTypes : []),
     ];
 
     plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));

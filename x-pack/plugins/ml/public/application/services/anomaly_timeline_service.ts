@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
-import {
-  TimefilterContract,
-  TimeRange,
-  UI_SETTINGS,
-} from '../../../../../../src/plugins/data/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import type { TimeRange } from '@kbn/es-query';
+import { TimefilterContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
   getBoundsRoundedToInterval,
   TimeBuckets,
@@ -262,7 +259,7 @@ export class AnomalyTimelineService {
     swimlaneLimit: number,
     perPage: number,
     fromPage: number,
-    swimlaneContainerWidth: number,
+    bucketInterval: TimeBucketsInterval,
     selectionInfluencers: EntityField[],
     influencersFilterQuery: InfluencersFilterQuery
   ) {
@@ -300,7 +297,7 @@ export class AnomalyTimelineService {
         selectedJobIds,
         earliestMs,
         latestMs,
-        this.getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth).asMilliseconds(),
+        bucketInterval.asMilliseconds(),
         perPage,
         fromPage,
         swimlaneLimit

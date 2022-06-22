@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
   CoreStart,
   HttpSetup,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/public';
-import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
-import type { HomePublicPluginSetup } from 'src/plugins/home/public';
-import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
+} from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import type { FeaturesPluginStart } from '../../features/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
-import type { SpacesPluginStart } from '../../spaces/public';
-import { SecurityLicenseService } from '../common/licensing';
 import type { SecurityLicense } from '../common/licensing';
-import { accountManagementApp } from './account_management';
+import { SecurityLicenseService } from '../common/licensing';
+import { accountManagementApp, UserProfileAPIClient } from './account_management';
+import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { ConfigType } from './config';
-import { ManagementService } from './management';
+import { ManagementService, UserAPIClient } from './management';
 import type { SecurityNavControlServiceStart } from './nav_control';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
@@ -69,6 +69,7 @@ export class SecurityPlugin
   private readonly managementService = new ManagementService();
   private readonly securityCheckupService: SecurityCheckupService;
   private readonly anonymousAccessService = new AnonymousAccessService();
+  private readonly analyticsService = new AnalyticsService();
   private authc!: AuthenticationServiceSetup;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -92,16 +93,24 @@ export class SecurityPlugin
       http: core.http,
     });
 
+    const securityApiClients = {
+      userProfiles: new UserProfileAPIClient(core.http),
+      users: new UserAPIClient(core.http),
+    };
+
     this.navControlService.setup({
       securityLicense: license,
-      authc: this.authc,
       logoutUrl: getLogoutUrl(core.http),
+      securityApiClients,
     });
+
+    this.analyticsService.setup({ securityLicense: license });
 
     accountManagementApp.create({
       authc: this.authc,
       application: core.application,
       getStartServices: core.getStartServices,
+      securityApiClients,
     });
 
     if (management) {
@@ -126,7 +135,7 @@ export class SecurityPlugin
         icon: 'securityApp',
         path: '/app/management/security/roles',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
         order: 600,
       });
     }
@@ -166,9 +175,11 @@ export class SecurityPlugin
       this.anonymousAccessService.start({ http });
     }
 
+    this.analyticsService.start({ http: core.http });
+
     return {
       uiApi: getUiApi({ core }),
-      navControlService: this.navControlService.start({ core }),
+      navControlService: this.navControlService.start({ core, authc: this.authc }),
       authc: this.authc as AuthenticationServiceStart,
     };
   }
@@ -178,6 +189,7 @@ export class SecurityPlugin
     this.navControlService.stop();
     this.securityLicenseService.stop();
     this.managementService.stop();
+    this.analyticsService.stop();
   }
 }
 
@@ -207,6 +219,7 @@ export interface SecurityPluginStart {
   authc: AuthenticationServiceStart;
   /**
    * Exposes UI components that will be loaded asynchronously.
+   * @deprecated
    */
   uiApi: UiApi;
 }

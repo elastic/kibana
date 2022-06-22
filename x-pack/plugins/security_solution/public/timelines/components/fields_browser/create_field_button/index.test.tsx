@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { useCreateFieldButton, UseCreateFieldButton, UseCreateFieldButtonProps } from './index';
+import { useCreateFieldButton, UseCreateFieldButton, UseCreateFieldButtonProps } from '.';
 
 import { TestProviders } from '../../../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
@@ -19,7 +19,7 @@ const renderUseCreateFieldButton = (props: Partial<UseCreateFieldButtonProps> = 
   renderHook<UseCreateFieldButtonProps, ReturnType<UseCreateFieldButton>>(
     () =>
       useCreateFieldButton({
-        hasFieldEditPermission: true,
+        isAllowed: true,
         loading: false,
         openFieldEditor: mockOpenFieldEditor,
         ...props,
@@ -40,7 +40,7 @@ describe('useCreateFieldButton', () => {
   });
 
   it('should return the undefined when user do not has edit permissions', async () => {
-    const { result } = renderUseCreateFieldButton({ hasFieldEditPermission: false });
+    const { result } = renderUseCreateFieldButton({ isAllowed: false });
     expect(result.current).toBeUndefined();
   });
 

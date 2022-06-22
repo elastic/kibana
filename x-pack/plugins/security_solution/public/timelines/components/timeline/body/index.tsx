@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { noop, isEmpty } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -15,7 +15,7 @@ import {
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
   getActionsColumnWidth,
-} from '../../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 import { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import {
@@ -147,19 +147,6 @@ export const StatefulBody = React.memo<Props>(
       }
     }, [isSelectAllChecked, onSelectAll, selectAll]);
 
-    useEffect(() => {
-      if (!isEmpty(browserFields) && !isEmpty(columnHeaders)) {
-        columnHeaders.forEach(({ id: columnId }) => {
-          if (browserFields.base?.fields?.[columnId] == null) {
-            const [category] = columnId.split('.');
-            if (browserFields[category]?.fields?.[columnId] == null) {
-              dispatch(timelineActions.removeColumn({ id, columnId }));
-            }
-          }
-        });
-      }
-    }, [browserFields, columnHeaders, dispatch, id]);
-
     const enabledRowRenderers = useMemo(() => {
       if (
         excludedRowRendererIds &&
@@ -260,7 +247,6 @@ export const StatefulBody = React.memo<Props>(
             <Events
               containerRef={containerRef}
               actionsColumnWidth={actionsColumnWidth}
-              browserFields={browserFields}
               columnHeaders={columnHeaders}
               data={data}
               eventIdToNoteIds={eventIdToNoteIds}

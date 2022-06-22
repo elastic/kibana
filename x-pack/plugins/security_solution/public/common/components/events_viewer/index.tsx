@@ -9,6 +9,9 @@ import React, { useRef, useCallback, useMemo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
+import type { EntityType } from '@kbn/timelines-plugin/common';
+import { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
 import { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
@@ -22,8 +25,6 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { eventsViewerSelector } from './selectors';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererDataView } from '../../containers/sourcerer';
-import type { EntityType } from '../../../../../timelines/common';
-import { TGridCellAction } from '../../../../../timelines/common/types';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import { useKibana } from '../../lib/kibana';
@@ -186,14 +187,21 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
     newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
   };
-  const onAlertStatusActionSuccess = useCallback(() => {
-    if (id === TimelineId.active) {
-      refetchQuery([timelineQuery]);
-    } else {
-      refetchQuery(globalQueries);
-    }
-  }, [id, timelineQuery, globalQueries]);
-  const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
+
+  const addToCaseBulkActions = useBulkAddToCaseActions();
+  const bulkActions = useMemo(
+    () => ({
+      onAlertStatusActionSuccess: () => {
+        if (id === TimelineId.active) {
+          refetchQuery([timelineQuery]);
+        } else {
+          refetchQuery(globalQueries);
+        }
+      },
+      customBulkActions: addToCaseBulkActions,
+    }),
+    [addToCaseBulkActions, globalQueries, id, timelineQuery]
+  );
 
   const fieldBrowserOptions = useFieldBrowserOptions({
     sourcererScope: scopeId,

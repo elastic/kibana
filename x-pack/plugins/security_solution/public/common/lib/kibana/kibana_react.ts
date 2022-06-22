@@ -12,7 +12,8 @@ import {
   useUiSetting,
   useUiSetting$,
   withKibana,
-} from '../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
+import type { ApmBase } from '@elastic/apm-rum';
 import { StartServices } from '../../../types';
 
 export type KibanaContext = KibanaReactContextValue<StartServices>;
@@ -23,6 +24,7 @@ export interface WithKibanaProps {
 const useTypedKibana = () => useKibana<StartServices>();
 
 export {
+  ApmBase,
   KibanaContextProvider,
   useTypedKibana as useKibana,
   useUiSetting,

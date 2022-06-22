@@ -177,6 +177,7 @@ describe('indicator match', () => {
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
+
         it('Has a default set of *:*', () => {
           getCustomQueryInput().should('have.text', '*:*');
         });

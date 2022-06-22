@@ -8,7 +8,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from 'src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,9 +27,9 @@ import {
 } from '@elastic/eui';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import { useNavigationProps } from '../../utils/use_navigation_props';
+import { useNavigationProps } from '../../hooks/use_navigation_props';
 import { ElasticSearchHit } from '../../types';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface DiscoverGridFlyoutProps {
   columns: string[];
@@ -71,7 +71,10 @@ export function DiscoverGridFlyout({
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   // Get actual hit with updated highlighted searches
-  const actualHit = useMemo(() => hits?.find(({ _id }) => _id === hit?._id) || hit, [hit, hits]);
+  const actualHit = useMemo(
+    () => hits?.find(({ _id, _index }) => hit._index === _index && _id === hit?._id) || hit,
+    [hit, hits]
+  );
   const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);
   const activePage = useMemo<number>(() => {
     const id = getDocFingerprintId(hit);
@@ -83,9 +86,9 @@ export function DiscoverGridFlyout({
   }, [hits, hit, pageCount]);
 
   const setPage = useCallback(
-    (pageIdx: number) => {
-      if (hits && hits[pageIdx]) {
-        setExpandedDoc(hits[pageIdx]);
+    (index: number) => {
+      if (hits && hits[index]) {
+        setExpandedDoc(hits[index]);
       }
     },
     [hits, setExpandedDoc]

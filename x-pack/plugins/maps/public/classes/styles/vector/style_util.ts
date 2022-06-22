@@ -6,12 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ICON_SOURCE,
-  MB_LOOKUP_FUNCTION,
-  VECTOR_SHAPE_TYPE,
-  VECTOR_STYLES,
-} from '../../../../common/constants';
+import { ICON_SOURCE, MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../common/constants';
 import { Category } from '../../../../common/descriptor_types';
 import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
@@ -28,23 +23,6 @@ export function getComputedFieldName(styleName: VECTOR_STYLES, fieldName: string
 
 export function getComputedFieldNamePrefix(fieldName: string) {
   return `__kbn__dynamic__${fieldName}`;
-}
-
-export function isOnlySingleFeatureType(
-  featureType: VECTOR_SHAPE_TYPE,
-  supportedFeatures: VECTOR_SHAPE_TYPE[],
-  hasFeatureType: { [key in keyof typeof VECTOR_SHAPE_TYPE]: boolean }
-): boolean {
-  if (supportedFeatures.length === 1) {
-    return supportedFeatures[0] === featureType;
-  }
-
-  const featureTypes = Object.keys(hasFeatureType);
-  // @ts-expect-error
-  return featureTypes.reduce((accumulator: boolean, featureTypeKey: VECTOR_SHAPE_TYPE) => {
-    const hasFeature = hasFeatureType[featureTypeKey];
-    return featureTypeKey === featureType ? accumulator && hasFeature : accumulator && !hasFeature;
-  }, true);
 }
 
 export function dynamicRound(value: number | string) {
@@ -109,16 +87,16 @@ export function makeMbClampedNumberExpression({
     [
       'case',
       ['==', [lookupFunction, fieldName], null],
-      minValue - 1, // == does a JS-y like check where returns true for null and undefined
+      fallback, // == does a JS-y like check where returns true for null and undefined
       clamp,
     ],
     fallback,
   ];
 }
 
-export function getHasLabel(label: StaticTextProperty | DynamicTextProperty) {
+export function getHasLabel(label: StaticTextProperty | DynamicTextProperty): boolean {
   return label.isDynamic()
     ? label.isComplete()
     : (label as StaticTextProperty).getOptions().value != null &&
-        (label as StaticTextProperty).getOptions().value.length;
+        (label as StaticTextProperty).getOptions().value.length > 0;
 }

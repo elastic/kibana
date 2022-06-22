@@ -20,7 +20,7 @@ const serviceInventoryHref = url.format({
   query: timeRange,
 });
 
-const apiRequestsToIntercept = [
+const mainApiRequestsToIntercept = [
   {
     endpoint: '/internal/apm/services?*',
     aliasName: 'servicesRequest',
@@ -31,12 +31,22 @@ const apiRequestsToIntercept = [
   },
 ];
 
-const aliasNames = apiRequestsToIntercept.map(
+const secondaryApiRequestsToIntercept = [
+  {
+    endpoint: 'internal/apm/suggestions?*',
+    aliasName: 'suggestionsRequest',
+  },
+];
+
+const mainAliasNames = mainApiRequestsToIntercept.map(
   ({ aliasName }) => `@${aliasName}`
 );
 
 describe('When navigating to the service inventory', () => {
   before(async () => {
+    cy.loginAsViewerUser();
+    cy.visit(serviceInventoryHref);
+
     const { rangeFrom, rangeTo } = timeRange;
     await synthtrace.index(
       opbeans({
@@ -48,11 +58,6 @@ describe('When navigating to the service inventory', () => {
 
   after(async () => {
     await synthtrace.clean();
-  });
-
-  beforeEach(() => {
-    cy.loginAsReadOnlyUser();
-    cy.visit(serviceInventoryHref);
   });
 
   it('has no detectable a11y violations on load', () => {
@@ -77,42 +82,53 @@ describe('When navigating to the service inventory', () => {
     cy.contains('h1', 'opbeans-node');
   });
 
-  describe('Calls APIs', () => {
+  describe.skip('Calls APIs', () => {
     beforeEach(() => {
-      apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
-        cy.intercept('GET', endpoint).as(aliasName);
-      });
+      [...mainApiRequestsToIntercept, ...secondaryApiRequestsToIntercept].map(
+        ({ endpoint, aliasName }) => {
+          cy.intercept('GET', endpoint).as(aliasName);
+        }
+      );
+
+      cy.loginAsViewerUser();
+      cy.visit(serviceInventoryHref);
     });
 
     it('with the correct environment when changing the environment', () => {
-      cy.wait(aliasNames);
-
-      cy.get('[data-test-subj="environmentFilter"]').select('production');
+      cy.wait(mainAliasNames);
+      cy.get('[data-test-subj="environmentFilter"]').type('pro');
 
       cy.expectAPIsToHaveBeenCalledWith({
-        apisIntercepted: aliasNames,
+        apisIntercepted: ['@suggestionsRequest'],
+        value: 'fieldValue=pro',
+      });
+
+      cy.contains('button', 'production').click();
+
+      cy.expectAPIsToHaveBeenCalledWith({
+        apisIntercepted: mainAliasNames,
         value: 'environment=production',
       });
     });
 
     it('when clicking the refresh button', () => {
-      cy.wait(aliasNames);
+      cy.wait(mainAliasNames);
       cy.contains('Refresh').click();
-      cy.wait(aliasNames);
+      cy.wait(mainAliasNames);
     });
 
     it('when selecting a different time range and clicking the update button', () => {
-      cy.wait(aliasNames);
+      cy.wait(mainAliasNames);
 
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
         moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
       );
       cy.contains('Update').click();
-      cy.wait(aliasNames);
+      cy.wait(mainAliasNames);
 
       cy.contains('Refresh').click();
-      cy.wait(aliasNames);
+      cy.wait(mainAliasNames);
     });
   });
 });

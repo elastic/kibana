@@ -8,17 +8,23 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { PersistedState } from '../../../../visualizations/public';
-import { ThemeServiceStart } from '../../../../../core/public';
-import { KibanaThemeProvider } from '../../../../kibana_react/public';
-import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import {
   EXPRESSION_HEATMAP_NAME,
   HeatmapExpressionProps,
   FilterEvent,
   BrushEvent,
 } from '../../common';
-import { getFormatService, getPaletteService, getUISettings, getThemeService } from '../services';
+import {
+  getDatatableUtilities,
+  getFormatService,
+  getPaletteService,
+  getUISettings,
+  getThemeService,
+} from '../services';
 import { getTimeZone } from '../utils/get_timezone';
 
 interface ExpressioHeatmapRendererDependencies {
@@ -55,6 +61,7 @@ export const heatmapRenderer: (
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
             timeZone={timeZone}
+            datatableUtilities={getDatatableUtilities()}
             formatFactory={getFormatService().deserialize}
             chartsThemeService={getThemeService()}
             paletteService={getPaletteService()}

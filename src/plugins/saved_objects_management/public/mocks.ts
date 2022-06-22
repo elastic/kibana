@@ -22,6 +22,10 @@ const createStartContractMock = (): jest.Mocked<SavedObjectsManagementPluginStar
   const mock = {
     actions: actionServiceMock.createStart(),
     columns: columnServiceMock.createStart(),
+    getAllowedTypes: jest.fn(),
+    getRelationships: jest.fn(),
+    getSavedObjectLabel: jest.fn(),
+    getDefaultTitle: jest.fn(),
   };
   return mock;
 };

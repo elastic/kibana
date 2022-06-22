@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
-import { take, toArray } from 'rxjs/operators';
+import { BehaviorSubject, filter, firstValueFrom, ReplaySubject } from 'rxjs';
+import { takeWhile, tap, toArray } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import type { Plugin, CoreSetup, CoreStart, TelemetryCounter } from 'src/core/server';
+import type { Plugin, CoreSetup, CoreStart, TelemetryCounter, Event } from '@kbn/core/server';
 import type { Action } from './custom_shipper';
 import { CustomShipper } from './custom_shipper';
 
@@ -61,30 +61,47 @@ export class AnalyticsPluginAPlugin implements Plugin {
         validate: {
           query: schema.object({
             takeNumberOfCounters: schema.number({ min: 1 }),
+            eventType: schema.string(),
           }),
         },
       },
       async (context, req, res) => {
-        const { takeNumberOfCounters } = req.query;
+        const { takeNumberOfCounters, eventType } = req.query;
 
-        return res.ok({ body: stats.slice(-takeNumberOfCounters) });
+        return res.ok({
+          body: stats
+            .filter(
+              (counter) =>
+                counter.event_type === eventType &&
+                ['client', 'FTR-shipper'].includes(counter.source)
+            )
+            .slice(-takeNumberOfCounters),
+        });
       }
     );
 
     router.get(
       {
         path: '/internal/analytics_plugin_a/actions',
-        validate: {
-          query: schema.object({
-            takeNumberOfActions: schema.number({ min: 1 }),
-          }),
-        },
+        validate: false,
       },
       async (context, req, res) => {
-        const { takeNumberOfActions } = req.query;
-
-        const actions = await firstValueFrom(actions$.pipe(take(takeNumberOfActions), toArray()));
-
+        let found = false;
+        const actions = await firstValueFrom(
+          actions$.pipe(
+            takeWhile(() => !found),
+            tap((action) => {
+              found = isTestPluginLifecycleReportEventAction(action);
+            }),
+            // Filter only the actions that are relevant to this plugin
+            filter(
+              ({ action, meta }) =>
+                ['optIn', 'extendContext'].includes(action) ||
+                isTestPluginLifecycleReportEventAction({ action, meta })
+            ),
+            toArray()
+          )
+        );
         return res.ok({ body: actions });
       }
     );
@@ -111,4 +128,11 @@ export class AnalyticsPluginAPlugin implements Plugin {
   }
 
   public stop() {}
+}
+
+function isTestPluginLifecycleReportEventAction({ action, meta }: Action): boolean {
+  return (
+    action === 'reportEvents' &&
+    meta.find((event: Event) => event.event_type === 'test-plugin-lifecycle')
+  );
 }

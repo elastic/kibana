@@ -13,11 +13,12 @@ import {
   getVisSchemas,
   DateHistogramParams,
   HistogramParams,
-} from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { BUCKET_TYPES } from '../../../data/public';
-import { Labels } from '../../../charts/public';
+} from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
+import { Labels } from '@kbn/charts-plugin/public';
 
+import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import {
   Dimensions,
   Dimension,
@@ -31,8 +32,6 @@ import {
 } from './types';
 import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_functions/xy_vis_fn';
 import { XyVisType } from '../common';
-import { getEsaggsFn } from './to_ast_esaggs';
-import { TimeRangeBounds } from '../../../data/common';
 import { getSeriesParams } from './utils/get_series_params';
 import { getSafeId } from './utils/accessors';
 
@@ -238,7 +237,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     splitColumnDimension: dimensions.splitColumn?.map(prepareXYDimension),
   });
 
-  const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);
+  const ast = buildExpression([visTypeXy]);
 
   return ast.toAst();
 };

@@ -6,18 +6,16 @@
  */
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { SimpleSavedObject } from 'kibana/public';
-import { secretKeys } from '../../../../../plugins/uptime/common/constants/monitor_management';
-import {
-  ConfigKey,
-  HTTPFields,
-  MonitorFields,
-} from '../../../../../plugins/uptime/common/runtime_types';
+import { SimpleSavedObject } from '@kbn/core/public';
+import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
+import { ConfigKey, HTTPFields, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { getFixtureJson } from './helper/get_fixture_json';
 export default function ({ getService }: FtrProviderContext) {
-  describe('[PUT] /internal/uptime/service/monitors', () => {
+  describe('[PUT] /internal/uptime/service/monitors', function () {
+    this.tags('skipCloud');
+
     const supertest = getService('supertest');
 
     let _httpMonitorJson: HTTPFields;

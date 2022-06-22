@@ -18,8 +18,8 @@ import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { checkIfSeriesHaveSameFormatters } from '../../lib/check_if_series_have_same_formatters';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
-import { MarkdownSimple } from '../../../../../../../../plugins/kibana_react/public';
-import { LEGACY_TIME_AXIS } from '../../../../../../../../plugins/charts/common';
+import { MarkdownSimple } from '@kbn/kibana-react-plugin/public';
+import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import { replaceVars } from '../../lib/replace_vars';
 import { getInterval } from '../../lib/get_interval';
 import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
@@ -162,6 +162,7 @@ class TimeseriesVisualization extends Component {
       onBrush,
       onFilterClick,
       syncColors,
+      syncTooltips,
       palettesService,
       fieldFormatMap,
       getConfig,
@@ -272,6 +273,7 @@ class TimeseriesVisualization extends Component {
             xAxisFormatter={this.xAxisFormatter(interval)}
             annotations={this.prepareAnnotations()}
             syncColors={syncColors}
+            syncTooltips={syncTooltips}
             palettesService={palettesService}
             interval={interval}
             useLegacyTimeAxis={getConfig(LEGACY_TIME_AXIS, false)}

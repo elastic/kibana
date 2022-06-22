@@ -6,8 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme, transparentize } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
+import { useEuiTheme } from '../../hooks';
 
 interface StylesDeps {
   isInvestigated: boolean;
@@ -15,7 +16,7 @@ interface StylesDeps {
 }
 
 export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { size, colors, font } = euiTheme;
@@ -42,11 +43,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
 
     const alert: CSSObject = {
       fontFamily: font.family,
-      display: 'flex',
-      alignItems: 'center',
-      minHeight: '20px',
-      padding: `${size.xs} ${size.base}`,
-      boxSizing: 'content-box',
+      padding: `0 ${size.m}`,
       cursor: 'pointer',
       '&:not(:last-child)': {
         marginBottom: size.s,
@@ -55,37 +52,38 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       '&:hover': {
         background: hoverBgColor,
       },
-    };
-
-    const alertRowItem: CSSObject = {
-      '&:first-of-type': {
-        marginRight: size.m,
+      '&& button': {
+        flexShrink: 0,
+        marginRight: size.xs,
+        '&:hover, &:focus, &:focus-within': {
+          backgroundColor: transparentize(euiVars.buttonsBackgroundNormalDefaultPrimary, 0.2),
+        },
       },
-      '&:not(:first-of-type)': {
-        marginRight: size.s,
+      '&& .euiFlexItem': {
+        marginTop: size.xxs,
+        marginBottom: size.xxs,
       },
-    };
-
-    const alertRuleName: CSSObject = {
-      ...alertRowItem,
-      maxWidth: '70%',
     };
 
     const alertStatus: CSSObject = {
-      ...alertRowItem,
       textTransform: 'capitalize',
-      '&, span': {
-        cursor: 'pointer !important',
-      },
+    };
+
+    const alertName: CSSObject = {
+      color: colors.title,
+    };
+
+    const actionBadge: CSSObject = {
+      textTransform: 'capitalize',
     };
 
     return {
       alert,
-      alertRowItem,
-      alertRuleName,
       alertStatus,
+      alertName,
+      actionBadge,
     };
-  }, [euiTheme, isInvestigated, isSelected]);
+  }, [euiTheme, isInvestigated, isSelected, euiVars]);
 
   return cached;
 };

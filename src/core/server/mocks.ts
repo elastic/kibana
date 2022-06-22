@@ -9,7 +9,10 @@
 import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import { isPromise } from '@kbn/std';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { loggingSystemMock, loggingServiceMock } from '@kbn/core-logging-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -17,8 +20,6 @@ import type {
   StartServicesAccessor,
   CorePreboot,
 } from '.';
-import { loggingSystemMock } from './logging/logging_system.mock';
-import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
 import { httpResourcesMock } from './http_resources/http_resources_service.mock';
@@ -38,16 +39,15 @@ import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 import { prebootServiceMock } from './preboot/preboot_service.mock';
-import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { analyticsServiceMock } from './analytics/analytics_service.mock';
 
-export { configServiceMock, configDeprecationsMock } from './config/mocks';
+export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
+export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 export { httpServerMock } from './http/http_server.mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
-export { loggingSystemMock } from './logging/logging_system.mock';
 export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
@@ -63,10 +63,14 @@ export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_serv
 export { i18nServiceMock } from './i18n/i18n_service.mock';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
-export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
+export { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 export { analyticsServiceMock } from './analytics/analytics_service.mock';
 
-export type { ElasticsearchClientMock } from './elasticsearch/client/mocks';
+export type {
+  ElasticsearchClientMock,
+  ClusterClientMock,
+  ScopedClusterClientMock,
+} from './elasticsearch/client/mocks';
 
 type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
 
@@ -280,6 +284,40 @@ function createCoreRequestHandlerContextMock() {
   };
 }
 
+export type CustomRequestHandlerMock<T> = {
+  core: Promise<ReturnType<typeof createCoreRequestHandlerContextMock>>;
+  resolve: jest.MockedFunction<any>;
+} & {
+  [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+};
+
+const createCustomRequestHandlerContextMock = <T>(contextParts: T): CustomRequestHandlerMock<T> => {
+  const mock = Object.entries(contextParts).reduce(
+    (context, [key, value]) => {
+      // @ts-expect-error type matching from inferred types is hard
+      context[key] = isPromise(value) ? value : Promise.resolve(value);
+      return context;
+    },
+    {
+      core: Promise.resolve(createCoreRequestHandlerContextMock()),
+    } as CustomRequestHandlerMock<T>
+  );
+
+  mock.resolve = jest.fn().mockImplementation(async () => {
+    const resolved = {};
+    for (const propName of Object.keys(mock)) {
+      if (propName === 'resolve') {
+        continue;
+      }
+      // @ts-expect-error type matching from inferred types is hard
+      resolved[propName] = await mock[propName];
+    }
+    return resolved;
+  });
+
+  return mock;
+};
+
 export const coreMock = {
   createPreboot: createCorePrebootMock,
   createSetup: createCoreSetupMock,
@@ -289,4 +327,5 @@ export const coreMock = {
   createInternalStart: createInternalCoreStartMock,
   createPluginInitializerContext: pluginInitializerContextMock,
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
+  createCustomRequestHandlerContext: createCustomRequestHandlerContextMock,
 };

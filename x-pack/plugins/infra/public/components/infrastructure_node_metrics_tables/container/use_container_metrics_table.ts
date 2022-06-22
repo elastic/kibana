@@ -5,39 +5,51 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
-import type { MetricsMap, SortState, UseNodeMetricsTableOptions } from '../shared';
-import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
+import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
+import {
+  averageOfValues,
+  createMetricByFieldLookup,
+  makeUnpackMetric,
+  metricsToApiOptions,
+  scaleUpPercentage,
+  useInfrastructureNodeMetrics,
+} from '../shared';
 
 type ContainerMetricsField =
   | 'kubernetes.container.start_time'
-  | 'kubernetes.container.cpu.usage.node.pct'
+  | 'kubernetes.container.cpu.usage.limit.pct'
   | 'kubernetes.container.memory.usage.bytes';
 
-const containerMetricsMap: MetricsMap<ContainerMetricsField> = {
-  'kubernetes.container.start_time': {
-    aggregation: 'max',
-    field: 'kubernetes.container.start_time',
+const containerMetricsQueryConfig: MetricsQueryOptions<ContainerMetricsField> = {
+  sourceFilter: {
+    term: {
+      'event.dataset': 'kubernetes.container',
+    },
   },
-  'kubernetes.container.cpu.usage.node.pct': {
-    aggregation: 'avg',
-    field: 'kubernetes.container.cpu.usage.node.pct',
-  },
-  'kubernetes.container.memory.usage.bytes': {
-    aggregation: 'avg',
-    field: 'kubernetes.container.memory.usage.bytes',
+  groupByField: 'container.id',
+  metricsMap: {
+    'kubernetes.container.start_time': {
+      aggregation: 'max',
+      field: 'kubernetes.container.start_time',
+    },
+    'kubernetes.container.cpu.usage.limit.pct': {
+      aggregation: 'avg',
+      field: 'kubernetes.container.cpu.usage.limit.pct',
+    },
+    'kubernetes.container.memory.usage.bytes': {
+      aggregation: 'avg',
+      field: 'kubernetes.container.memory.usage.bytes',
+    },
   },
 };
 
-const { options: containerMetricsOptions, metricByField } = metricsToApiOptions(
-  containerMetricsMap,
-  'container.id'
-);
-export { metricByField };
+export const metricByField = createMetricByFieldLookup(containerMetricsQueryConfig.metricsMap);
+const unpackMetric = makeUnpackMetric(metricByField);
 
 export interface ContainerNodeMetricsRow {
   name: string;
@@ -56,6 +68,11 @@ export function useContainerMetricsTable({
     direction: 'desc',
   });
 
+  const { options: containerMetricsOptions } = useMemo(
+    () => metricsToApiOptions(containerMetricsQueryConfig, filterClauseDsl),
+    [filterClauseDsl]
+  );
+
   const {
     isLoading,
     nodes: containers,
@@ -63,7 +80,6 @@ export function useContainerMetricsTable({
   } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({
     metricsExplorerOptions: containerMetricsOptions,
     timerange,
-    filterClauseDsl,
     transform: seriesToContainerNodeMetricsRow,
     sortState,
     currentPageIndex,
@@ -83,44 +99,87 @@ export function useContainerMetricsTable({
 
 function seriesToContainerNodeMetricsRow(series: MetricsExplorerSeries): ContainerNodeMetricsRow {
   if (series.rows.length === 0) {
-    return {
-      name: series.id,
-      uptime: null,
-      averageCpuUsagePercent: null,
-      averageMemoryUsageMegabytes: null,
-    };
+    return rowWithoutMetrics(series.id);
   }
 
-  let uptime: number = 0;
-  let averageCpuUsagePercent: number = 0;
-  let averageMemoryUsageMegabytes: number = 0;
-  series.rows.forEach((row) => {
-    const metricValues = unpackMetrics(row);
-    uptime += metricValues.uptime ?? 0;
-    averageCpuUsagePercent += metricValues.averageCpuUsagePercent ?? 0;
-    averageMemoryUsageMegabytes += metricValues.averageMemoryUsageMegabytes ?? 0;
-  });
-
-  const bucketCount = series.rows.length;
-  const bytesPerMegabyte = 1000000;
   return {
     name: series.id,
-    uptime: uptime / bucketCount,
-    averageCpuUsagePercent: averageCpuUsagePercent / bucketCount,
-    averageMemoryUsageMegabytes: Math.floor(
-      averageMemoryUsageMegabytes / bucketCount / bytesPerMegabyte
-    ),
+    ...calculateMetricAverages(series.rows),
   };
 }
 
-function unpackMetrics(row: MetricsExplorerRow): Omit<ContainerNodeMetricsRow, 'name'> {
+function rowWithoutMetrics(name: string) {
   return {
-    uptime: row[metricByField['kubernetes.container.start_time']] as number | null,
-    averageCpuUsagePercent: row[metricByField['kubernetes.container.cpu.usage.node.pct']] as
-      | number
-      | null,
-    averageMemoryUsageMegabytes: row[metricByField['kubernetes.container.memory.usage.bytes']] as
-      | number
-      | null,
+    name,
+    uptime: null,
+    averageCpuUsagePercent: null,
+    averageMemoryUsageMegabytes: null,
+  };
+}
+
+function calculateMetricAverages(rows: MetricsExplorerRow[]) {
+  const { startTimeValues, averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } =
+    collectMetricValues(rows);
+
+  let uptime = null;
+  if (startTimeValues.length !== 0) {
+    const startTime = startTimeValues.at(-1);
+    uptime = Date.now() - startTime!;
+  }
+
+  let averageCpuUsagePercent = null;
+  if (averageCpuUsagePercentValues.length !== 0) {
+    averageCpuUsagePercent = scaleUpPercentage(averageOfValues(averageCpuUsagePercentValues));
+  }
+
+  let averageMemoryUsageMegabytes = null;
+  if (averageMemoryUsageMegabytesValues.length !== 0) {
+    const averageInBytes = averageOfValues(averageMemoryUsageMegabytesValues);
+    const bytesPerMegabyte = 1000000;
+    averageMemoryUsageMegabytes = Math.floor(averageInBytes / bytesPerMegabyte);
+  }
+
+  return {
+    uptime,
+    averageCpuUsagePercent,
+    averageMemoryUsageMegabytes,
+  };
+}
+
+function collectMetricValues(rows: MetricsExplorerRow[]) {
+  const startTimeValues: number[] = [];
+  const averageCpuUsagePercentValues: number[] = [];
+  const averageMemoryUsageMegabytesValues: number[] = [];
+
+  rows.forEach((row) => {
+    const { startTime, averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
+
+    if (startTime !== null) {
+      startTimeValues.push(startTime);
+    }
+
+    if (averageCpuUsagePercent !== null) {
+      averageCpuUsagePercentValues.push(averageCpuUsagePercent);
+    }
+
+    if (averageMemoryUsageMegabytes !== null) {
+      averageMemoryUsageMegabytesValues.push(averageMemoryUsageMegabytes);
+    }
+  });
+
+  return {
+    startTimeValues,
+    averageCpuUsagePercentValues,
+    averageMemoryUsageMegabytesValues,
+  };
+}
+
+function unpackMetrics(
+  row: MetricsExplorerRow
+): Omit<ContainerNodeMetricsRow, 'name' | 'uptime'> & { startTime: number | null } {
+  return {
+    startTime: unpackMetric(row, 'kubernetes.container.start_time'),
+    averageCpuUsagePercent: unpackMetric(row, 'kubernetes.container.cpu.usage.limit.pct'),
+    averageMemoryUsageMegabytes: unpackMetric(row, 'kubernetes.container.memory.usage.bytes'),
   };
 }

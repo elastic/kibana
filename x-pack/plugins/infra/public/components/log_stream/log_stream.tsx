@@ -9,9 +9,9 @@ import { buildEsQuery, Filter, Query } from '@kbn/es-query';
 import { JsonValue } from '@kbn/utility-types';
 import { noop } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { LogEntryCursor } from '../../../common/log_entry';
 import { defaultLogViewsStaticConfig } from '../../../common/log_views';
 import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
@@ -21,6 +21,7 @@ import { LogColumnRenderConfiguration } from '../../utils/log_column_render_conf
 import { useKibanaQuerySettings } from '../../utils/use_kibana_query_settings';
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 import { LogStreamErrorBoundary } from './log_stream_error_boundary';
+import { useLogEntryFlyout } from '../logging/log_entry_flyout';
 
 interface LogStreamPluginDeps {
   data: DataPublicPluginStart;
@@ -72,6 +73,7 @@ interface LogStreamContentProps {
   center?: LogEntryCursor;
   highlight?: string;
   columns?: LogColumnDefinition[];
+  showFlyoutAction?: boolean;
 }
 
 export const LogStream: React.FC<LogStreamProps> = ({ height = 400, ...contentProps }) => {
@@ -93,6 +95,7 @@ export const LogStreamContent: React.FC<LogStreamContentProps> = ({
   center,
   highlight,
   columns,
+  showFlyoutAction = false,
 }) => {
   const customColumns = useMemo(
     () => (columns ? convertLogColumnDefinitionToLogSourceColumnDefinition(columns) : undefined),
@@ -111,6 +114,8 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
 `
     );
   }
+
+  const { openLogEntryFlyout } = useLogEntryFlyout(sourceId);
 
   const kibanaQuerySettings = useKibanaQuerySettings();
 
@@ -223,6 +228,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
       jumpToTarget={noop}
       reportVisibleInterval={handlePagination}
       reloadItems={fetchEntries}
+      onOpenLogEntryFlyout={showFlyoutAction ? openLogEntryFlyout : undefined}
       highlightedItem={highlight ?? null}
       currentHighlightKey={null}
       startDateExpression={''}

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataView, DataViewField } from 'src/plugins/data_views/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { PanelData } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../types';
 import { convertSeriesToDataTable, addMetaToColumns } from './convert_series_to_datatable';
@@ -162,7 +162,6 @@ describe('convert series to datatables', () => {
         id: 'series1:0',
         label: 0,
         splitByLabel: 'Average of test2',
-        labelFormatted: 'false',
         data: [
           [1616454000000, 0],
           [1616457600000, 5],
@@ -176,7 +175,6 @@ describe('convert series to datatables', () => {
         id: 'series1:1',
         label: 1,
         splitByLabel: 'Average of test2',
-        labelFormatted: 'true',
         data: [
           [1616454000000, 10],
           [1616457600000, 12],

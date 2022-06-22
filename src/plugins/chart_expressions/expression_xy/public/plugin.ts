@@ -7,27 +7,31 @@
  */
 
 import moment from 'moment';
-import { LEGACY_TIME_AXIS } from '../../../charts/common';
-import { DataPublicPluginStart } from '../../../data/public';
-import { FieldFormatsStart } from '../../../field_formats/public';
-import { ChartsPluginStart } from '../../../charts/public';
-import { CoreSetup, CoreStart, IUiSettingsClient } from '../../../../core/public';
+import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { CoreSetup, CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public';
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
 import {
   xyVisFunction,
+  layeredXyVisFunction,
+  extendedDataLayerFunction,
   yAxisConfigFunction,
+  extendedYAxisConfigFunction,
   legendConfigFunction,
   gridlinesConfigFunction,
-  dataLayerConfigFunction,
   axisExtentConfigFunction,
   tickLabelsConfigFunction,
-  annotationLayerConfigFunction,
+  referenceLineFunction,
+  referenceLineLayerFunction,
+  annotationLayerFunction,
   labelsOrientationConfigFunction,
-  referenceLineLayerConfigFunction,
   axisTitlesVisibilityConfigFunction,
-} from '../common';
+  extendedAnnotationLayerFunction,
+} from '../common/expression_functions';
 import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
-import { EventAnnotationPluginSetup } from '../../../event_annotation/public';
 
 export interface XYPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -51,16 +55,20 @@ export class ExpressionXyPlugin {
     { expressions, charts }: SetupDeps
   ): ExpressionXyPluginSetup {
     expressions.registerFunction(yAxisConfigFunction);
+    expressions.registerFunction(extendedYAxisConfigFunction);
     expressions.registerFunction(legendConfigFunction);
     expressions.registerFunction(gridlinesConfigFunction);
-    expressions.registerFunction(dataLayerConfigFunction);
+    expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(tickLabelsConfigFunction);
-    expressions.registerFunction(annotationLayerConfigFunction);
+    expressions.registerFunction(annotationLayerFunction);
+    expressions.registerFunction(extendedAnnotationLayerFunction);
     expressions.registerFunction(labelsOrientationConfigFunction);
-    expressions.registerFunction(referenceLineLayerConfigFunction);
+    expressions.registerFunction(referenceLineFunction);
+    expressions.registerFunction(referenceLineLayerFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyVisFunction);
+    expressions.registerFunction(layeredXyVisFunction);
 
     const getStartDeps: GetStartDepsFn = async () => {
       const [coreStart, deps] = await core.getStartServices();

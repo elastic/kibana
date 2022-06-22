@@ -18,7 +18,7 @@ import {
   mockTimelineDetails,
   mockTimelineResult,
   mockAADEcsDataWithAlert,
-} from '../../../common/mock/';
+} from '../../../common/mock';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../../common/ecs';
 import {
@@ -27,8 +27,8 @@ import {
   TimelineStatus,
   TimelineTabs,
 } from '../../../../common/types/timeline';
-import type { ISearchStart } from '../../../../../../../src/plugins/data/public';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -47,7 +47,7 @@ import {
   NAMESPACE_TYPE,
   TIE_BREAKER,
   USER,
-} from '../../../../../lists/common/constants.mock';
+} from '@kbn/lists-plugin/common/constants.mock';
 import { of } from 'rxjs';
 
 jest.mock('../../../timelines/containers/api', () => ({
@@ -105,6 +105,48 @@ describe('alert actions', () => {
               field: ['destination.ip'],
               value: 1,
             },
+          },
+          name: ['mock threshold rule'],
+          saved_id: [],
+          type: ['threshold'],
+          uuid: ['c5ba41ab-aaf3-4f43-971b-bdf9434ce0ea'],
+          timeline_id: undefined,
+          timeline_title: undefined,
+        },
+        threshold_result: {
+          count: 99,
+          from: '2021-01-10T21:11:45.839Z',
+          cardinality: [
+            {
+              field: 'source.ip',
+              value: 1,
+            },
+          ],
+          terms: [
+            {
+              field: 'destination.ip',
+              value: 1,
+            },
+          ],
+        },
+      },
+    },
+  });
+
+  const ecsDataMockWithNoTemplateTimelineAndNoFilters = getThresholdDetectionAlertAADMock({
+    ...mockAADEcsDataWithAlert,
+    kibana: {
+      alert: {
+        ...mockAADEcsDataWithAlert.kibana?.alert,
+        rule: {
+          ...mockAADEcsDataWithAlert.kibana?.alert?.rule,
+          parameters: {
+            ...mockAADEcsDataWithAlert.kibana?.alert?.rule?.parameters,
+            threshold: {
+              field: ['destination.ip'],
+              value: 1,
+            },
+            filters: undefined,
           },
           name: ['mock threshold rule'],
           saved_id: [],
@@ -207,7 +249,8 @@ describe('alert actions', () => {
               {
                 columnHeaderType: 'not-filtered',
                 id: '@timestamp',
-                type: 'number',
+                type: 'date',
+                esTypes: ['date'],
                 initialWidth: 190,
               },
               {
@@ -532,7 +575,7 @@ describe('alert actions', () => {
     });
 
     describe('Threshold', () => {
-      beforeEach(() => {
+      test('Exceptions and filters are included', async () => {
         fetchMock.mockResolvedValue({
           hits: {
             hits: [
@@ -544,9 +587,6 @@ describe('alert actions', () => {
             ],
           },
         });
-      });
-
-      test('Exceptions and filters are included', async () => {
         mockGetExceptions.mockResolvedValue([getExceptionListItemSchemaMock()]);
         await sendAlertToTimelineAction({
           createTimeline,
@@ -662,6 +702,31 @@ describe('alert actions', () => {
           from: expectedFrom,
           to: expectedTo,
         });
+      });
+
+      test('Does not crash when no filters provided', async () => {
+        fetchMock.mockResolvedValue({
+          hits: {
+            hits: [
+              {
+                _id: ecsDataMockWithNoTemplateTimelineAndNoFilters[0]._id,
+                _index: 'mock',
+                _source: ecsDataMockWithNoTemplateTimelineAndNoFilters[0],
+              },
+            ],
+          },
+        });
+        mockGetExceptions.mockResolvedValue([getExceptionListItemSchemaMock()]);
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: ecsDataMockWithNoTemplateTimelineAndNoFilters,
+          updateTimelineIsLoading,
+          searchStrategyClient,
+          getExceptions: mockGetExceptions,
+        });
+
+        expect(createTimeline).not.toThrow();
+        expect(toastMock).not.toHaveBeenCalled();
       });
     });
 

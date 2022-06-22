@@ -16,7 +16,7 @@ export interface PackageSpecManifest {
   version: string;
   license?: 'basic';
   type?: 'integration';
-  release: 'experimental' | 'beta' | 'ga';
+  release?: 'experimental' | 'beta' | 'ga';
   categories?: Array<PackageSpecCategory | undefined>;
   conditions?: PackageSpecConditions;
   icons?: PackageSpecIcon[];

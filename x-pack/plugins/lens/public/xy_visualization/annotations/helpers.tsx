@@ -7,6 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import {
+  defaultAnnotationColor,
+  defaultAnnotationRangeColor,
+  isRangeAnnotation,
+} from '@kbn/event-annotation-plugin/public';
+import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { layerTypes } from '../../../common';
 import type { FramePublicAPI, Visualization } from '../../types';
 import { isHorizontalChart } from '../state_helpers';
@@ -20,7 +26,6 @@ import {
 } from '../visualization_helpers';
 import { LensIconChartBarAnnotations } from '../../assets/chart_bar_annotations';
 import { generateId } from '../../id_generator';
-import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
 
 const MAX_DATE = 8640000000000000;
 const MIN_DATE = -8640000000000000;
@@ -29,13 +34,21 @@ export const defaultAnnotationLabel = i18n.translate('xpack.lens.xyChart.default
   defaultMessage: 'Event',
 });
 
-export function getStaticDate(
-  dataLayers: XYDataLayerConfig[],
-  activeData: FramePublicAPI['activeData']
-) {
-  const fallbackValue = moment().toISOString();
+export const defaultRangeAnnotationLabel = i18n.translate(
+  'xpack.lens.xyChart.defaultRangeAnnotationLabel',
+  {
+    defaultMessage: 'Event range',
+  }
+);
 
+export function getStaticDate(dataLayers: XYDataLayerConfig[], frame: FramePublicAPI) {
   const dataLayersId = dataLayers.map(({ layerId }) => layerId);
+  const { activeData, dateRange } = frame;
+
+  const dateRangeMinValue = moment(dateRange.fromDate).valueOf();
+  const dateRangeMaxValue = moment(dateRange.toDate).valueOf();
+  const fallbackValue = moment((dateRangeMinValue + dateRangeMaxValue) / 2).toISOString();
+
   if (
     !activeData ||
     Object.entries(activeData)
@@ -57,7 +70,11 @@ export function getStaticDate(
     return lastTimestamp && lastTimestamp > acc ? lastTimestamp : acc;
   }, MIN_DATE);
   const middleDate = (minDate + maxDate) / 2;
-  return moment(middleDate).toISOString();
+
+  if (dateRangeMinValue < middleDate && dateRangeMaxValue > middleDate) {
+    return moment(middleDate).toISOString();
+  }
+  return fallbackValue;
 }
 
 export const getAnnotationsSupportedLayer = (
@@ -119,12 +136,13 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
     : undefined;
 
   let resultAnnotations = [...inputAnnotations] as XYAnnotationLayerConfig['annotations'];
+
   if (!currentConfig) {
     resultAnnotations.push({
       label: defaultAnnotationLabel,
       key: {
         type: 'point_in_time',
-        timestamp: getStaticDate(getDataLayers(prevState.layers), frame?.activeData),
+        timestamp: getStaticDate(getDataLayers(prevState.layers), frame),
       },
       icon: 'triangle',
       ...previousConfig,
@@ -151,15 +169,16 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
   };
 };
 
-export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig) => {
-  return layer.annotations.map((annotation) => {
-    return {
-      columnId: annotation.id,
-      triggerIcon: annotation.isHidden ? ('invisible' as const) : ('color' as const),
-      color: annotation?.color || defaultAnnotationColor,
-    };
-  });
-};
+export const getSingleColorAnnotationConfig = (annotation: EventAnnotationConfig) => ({
+  columnId: annotation.id,
+  triggerIcon: annotation.isHidden ? ('invisible' as const) : ('color' as const),
+  color:
+    annotation?.color ||
+    (isRangeAnnotation(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor),
+});
+
+export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig) =>
+  layer.annotations.map((annotation) => getSingleColorAnnotationConfig(annotation));
 
 export const getAnnotationsConfiguration = ({
   state,
@@ -167,7 +186,7 @@ export const getAnnotationsConfiguration = ({
   layer,
 }: {
   state: XYState;
-  frame: FramePublicAPI;
+  frame: Pick<FramePublicAPI, 'datasourceLayers'>;
   layer: XYAnnotationLayerConfig;
 }) => {
   const dataLayers = getDataLayers(state.layers);

@@ -7,14 +7,14 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AggConfigSerialized, IAggConfigs } from 'src/plugins/data/public';
 import { SerializableRecord } from '@kbn/utility-types';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AggConfigSerialized, IAggConfigs } from '../../../public';
 import { Query } from '../..';
-import { Filter } from '../../es_query';
-import { IndexPattern } from '../..';
 import type { SearchSource } from './search_source';
-import { PersistableStateService } from '../../../../kibana_utils/common';
 
 /**
  * search source interface
@@ -111,7 +111,7 @@ export interface SearchSourceFields {
   /**
    * {@link IndexPatternService}
    */
-  index?: IndexPattern;
+  index?: DataView;
   searchAfter?: EsQuerySearchAfter;
   timeout?: string;
   terminate_after?: number;
@@ -216,4 +216,14 @@ export interface ShardFailure {
     type: string;
   };
   shard: number;
+}
+
+export function isSerializedSearchSource(
+  maybeSerializedSearchSource: unknown
+): maybeSerializedSearchSource is SerializedSearchSourceFields {
+  return (
+    typeof maybeSerializedSearchSource === 'object' &&
+    maybeSerializedSearchSource !== null &&
+    !Array.isArray(maybeSerializedSearchSource)
+  );
 }

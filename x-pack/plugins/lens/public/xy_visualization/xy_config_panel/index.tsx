@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
+import { Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { AxesSettingsConfig, AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../types';
 import { State, XYState } from '../types';
-import {
-  AxesSettingsConfig,
-  AxisExtentConfig,
-} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isHorizontalChart } from '../state_helpers';
-import { LegendSettingsPopover } from '../../shared_components';
+import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { getAxesConfiguration, GroupsConfiguration } from '../axes_configuration';
+import { getAxesConfiguration, getXDomain, GroupsConfiguration } from '../axes_configuration';
 import { VisualOptionsPopover } from './visual_options_popover';
 import { getScaleType } from '../to_expression';
 import { TooltipWrapper } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
+import { LegendSettingsPopoverProps } from '../../shared_components/legend_settings_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -114,6 +113,13 @@ function hasPercentageAxis(axisGroups: GroupsConfiguration, groupId: string, sta
   );
 }
 
+const axisKeyToTitleMapping: Record<keyof AxesSettingsConfig, 'xTitle' | 'yTitle' | 'yRightTitle'> =
+  {
+    x: 'xTitle',
+    yLeft: 'yTitle',
+    yRight: 'yRightTitle',
+  };
+
 export const XyToolbar = memo(function XyToolbar(
   props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
 ) {
@@ -123,6 +129,7 @@ export const XyToolbar = memo(function XyToolbar(
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
   const dataBounds = getDataBounds(frame.activeData, axisGroups);
+  const xDataBounds = getXDomain(dataLayers, frame.activeData);
 
   const tickLabelsVisibilitySettings = {
     x: state?.tickLabelsVisibilitySettings?.x ?? true,
@@ -180,27 +187,28 @@ export const XyToolbar = memo(function XyToolbar(
     });
   };
 
-  const axisTitlesVisibilitySettings = {
-    x: state?.axisTitlesVisibilitySettings?.x ?? true,
-    yLeft: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
-    yRight: state?.axisTitlesVisibilitySettings?.yRight ?? true,
-  };
-  const onAxisTitlesVisibilitySettingsChange = (
-    axis: AxesSettingsConfigKeys,
-    checked: boolean
-  ): void => {
-    const newAxisTitlesVisibilitySettings = {
-      ...axisTitlesVisibilitySettings,
-      ...{
-        [axis]: checked,
-      },
-    };
-    setState({
-      ...state,
-      axisTitlesVisibilitySettings: newAxisTitlesVisibilitySettings,
-    });
-  };
+  const axisTitlesVisibilitySettings = useMemo(
+    () => ({
+      x: state?.axisTitlesVisibilitySettings?.x ?? true,
+      yLeft: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
+      yRight: state?.axisTitlesVisibilitySettings?.yRight ?? true,
+    }),
+    [
+      state?.axisTitlesVisibilitySettings?.x,
+      state?.axisTitlesVisibilitySettings?.yLeft,
+      state?.axisTitlesVisibilitySettings?.yRight,
+    ]
+  );
 
+  const onTitleStateChange = useCallback(
+    ({ title, visible }: { title?: string; visible: boolean }, axis: keyof AxesSettingsConfig) =>
+      setState({
+        ...state,
+        [axisKeyToTitleMapping[axis]]: title,
+        axisTitlesVisibilitySettings: { ...axisTitlesVisibilitySettings, [axis]: visible },
+      }),
+    [axisTitlesVisibilitySettings, setState, state]
+  );
   const nonOrdinalXAxis = dataLayers.every(
     (layer) =>
       !layer.xAccessor ||
@@ -250,6 +258,15 @@ export const XyToolbar = memo(function XyToolbar(
     },
     [setState, state]
   );
+  const setXExtent = useCallback(
+    (extent: AxisExtentConfig | undefined) => {
+      setState({
+        ...state,
+        xExtent: extent,
+      });
+    },
+    [setState, state]
+  );
   const hasBarOrAreaOnRightAxis = Boolean(
     axisGroups
       .find((group) => group.groupId === 'right')
@@ -290,21 +307,30 @@ export const XyToolbar = memo(function XyToolbar(
     }
   );
 
+  const hasNumberHistogram = dataLayers.some(({ layerId, xAccessor }) =>
+    hasNumericHistogramDimension(props.frame.datasourceLayers[layerId], xAccessor)
+  );
+
   // Ask the datasource if it has a say about default truncation value
   const defaultParamsFromDatasources = getDefaultVisualValuesForLayer(
     state,
     props.frame.datasourceLayers
   ).truncateText;
 
+  const legendSize = state.legend.legendSize;
+
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
+
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <VisualOptionsPopover
             state={state}
             setState={setState}
             datasourceLayers={frame.datasourceLayers}
           />
+
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}
@@ -382,8 +408,10 @@ export const XyToolbar = memo(function XyToolbar(
             }}
             onAlignmentChange={(value) => {
               const [vertical, horizontal] = value.split('_');
-              const verticalAlignment = vertical as VerticalAlignment;
-              const horizontalAlignment = horizontal as HorizontalAlignment;
+              const verticalAlignment = vertical as LegendSettingsPopoverProps['verticalAlignment'];
+              const horizontalAlignment =
+                horizontal as LegendSettingsPopoverProps['horizontalAlignment'];
+
               setState({
                 ...state,
                 legend: { ...state.legend, verticalAlignment, horizontalAlignment },
@@ -397,21 +425,23 @@ export const XyToolbar = memo(function XyToolbar(
                 valuesInLegend: !state.valuesInLegend,
               });
             }}
-            legendSize={state.legend.legendSize}
-            onLegendSizeChange={(legendSize) => {
+            legendSize={legendSize}
+            onLegendSizeChange={(newLegendSize) => {
               setState({
                 ...state,
                 legend: {
                   ...state.legend,
-                  legendSize,
+                  legendSize: newLegendSize,
                 },
               });
             }}
+            showAutoLegendSizeOption={hadAutoLegendSize}
           />
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <TooltipWrapper
             tooltipContent={
               shouldRotate
@@ -430,7 +460,7 @@ export const XyToolbar = memo(function XyToolbar(
               axis="yLeft"
               layers={state?.layers}
               axisTitle={state?.yTitle}
-              updateTitleState={(value) => setState({ ...state, yTitle: value })}
+              updateTitleState={onTitleStateChange}
               areTickLabelsVisible={tickLabelsVisibilitySettings.yLeft}
               toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
               areGridlinesVisible={gridlinesVisibilitySettings.yLeft}
@@ -441,19 +471,26 @@ export const XyToolbar = memo(function XyToolbar(
               orientation={labelsOrientation.yLeft}
               setOrientation={onLabelsOrientationChange}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
-              toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
               extent={state?.yLeftExtent || { mode: 'full' }}
               setExtent={setLeftExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
               dataBounds={dataBounds.left}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'left', state)}
+              scale={state?.yLeftScale}
+              setScale={(scale) => {
+                setState({
+                  ...state,
+                  yLeftScale: scale,
+                });
+              }}
             />
           </TooltipWrapper>
+
           <AxisSettingsPopover
             axis="x"
             layers={state?.layers}
             axisTitle={state?.xTitle}
-            updateTitleState={(value) => setState({ ...state, xTitle: value })}
+            updateTitleState={onTitleStateChange}
             areTickLabelsVisible={tickLabelsVisibilitySettings.x}
             toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
             areGridlinesVisible={gridlinesVisibilitySettings.x}
@@ -461,7 +498,6 @@ export const XyToolbar = memo(function XyToolbar(
             orientation={labelsOrientation.x}
             setOrientation={onLabelsOrientationChange}
             isAxisTitleVisible={axisTitlesVisibilitySettings.x}
-            toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
             endzonesVisible={!state?.hideEndzones}
             setEndzoneVisibility={onChangeEndzoneVisiblity}
             hasBarOrAreaOnAxis={false}
@@ -469,7 +505,11 @@ export const XyToolbar = memo(function XyToolbar(
             useMultilayerTimeAxis={
               isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
             }
+            extent={hasNumberHistogram ? state?.xExtent || { mode: 'dataBounds' } : undefined}
+            setExtent={setXExtent}
+            dataBounds={xDataBounds}
           />
+
           <TooltipWrapper
             tooltipContent={
               shouldRotate
@@ -488,7 +528,7 @@ export const XyToolbar = memo(function XyToolbar(
               axis="yRight"
               layers={state?.layers}
               axisTitle={state?.yRightTitle}
-              updateTitleState={(value) => setState({ ...state, yRightTitle: value })}
+              updateTitleState={onTitleStateChange}
               areTickLabelsVisible={tickLabelsVisibilitySettings.yRight}
               toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
               areGridlinesVisible={gridlinesVisibilitySettings.yRight}
@@ -501,11 +541,17 @@ export const XyToolbar = memo(function XyToolbar(
               setOrientation={onLabelsOrientationChange}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'right', state)}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
-              toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
               extent={state?.yRightExtent || { mode: 'full' }}
               setExtent={setRightExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}
               dataBounds={dataBounds.right}
+              scale={state?.yRightScale}
+              setScale={(scale) => {
+                setState({
+                  ...state,
+                  yRightScale: scale,
+                });
+              }}
             />
           </TooltipWrapper>
         </EuiFlexGroup>

@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -25,7 +26,6 @@ import {
   NetworkTopNFlowStrategyResponse,
   PageInfoPaginated,
 } from '../../../../common/search_strategy';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -46,6 +46,7 @@ export interface NetworkTopNFlowArgs {
 
 interface UseNetworkTopNFlow {
   flowTarget: FlowTargetSourceDest;
+  id: string;
   ip?: string;
   indexNames: string[];
   type: networkModel.NetworkType;
@@ -59,6 +60,7 @@ export const useNetworkTopNFlow = ({
   endDate,
   filterQuery,
   flowTarget,
+  id,
   indexNames,
   ip,
   skip,
@@ -96,7 +98,7 @@ export const useNetworkTopNFlow = ({
 
   const [networkTopNFlowResponse, setNetworkTopNFlowResponse] = useState<NetworkTopNFlowArgs>({
     networkTopNFlow: [],
-    id: `${ID}-${flowTarget}`,
+    id,
     inspect: {
       dsl: [],
       response: [],

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REMOVED_TYPES } from '../../migrations/core';
+import { REMOVED_TYPES } from '../core';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 
 // Types should NEVER be removed from this array
@@ -114,7 +114,7 @@ const previouslyRegisteredTypes = [
 ].sort();
 
 describe('SO type registrations', () => {
-  it('does not remove types from registrations without updating unusedTypesQuery', async () => {
+  it('does not remove types from registrations without updating excludeOnUpgradeQuery', async () => {
     const root = kbnTestServer.createRoot({}, { oss: false });
     await root.preboot();
     const setup = await root.setup();

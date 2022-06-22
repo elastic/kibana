@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import {
   AuthenticationsEdges,
   AuthStackByField,
@@ -18,18 +18,18 @@ import {
   UserAuthenticationsStrategyResponse,
   UsersQueries,
 } from '../../../../common/search_strategy/security_solution';
-import { PageInfoPaginated, DocValueFields, SortField } from '../../../../common/search_strategy';
+import { PageInfoPaginated, SortField } from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
-import { inputsModel } from '../../../common/store';
-import { createFilter } from '../../../common/containers/helpers';
-import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
-import { useKibana } from '../../../common/lib/kibana';
+import { inputsModel } from '../../store';
+import { createFilter } from '../helpers';
+import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
+import { useKibana } from '../../lib/kibana';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 
 import * as i18n from './translations';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];
@@ -43,7 +43,6 @@ export interface AuthenticationArgs {
 }
 
 interface UseAuthentications {
-  docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
   indexNames: string[];
@@ -55,7 +54,6 @@ interface UseAuthentications {
 }
 
 export const useAuthentications = ({
-  docValueFields,
   filterQuery,
   endDate,
   indexNames,
@@ -163,7 +161,6 @@ export const useAuthentications = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: UsersQueries.authentications,
         filterQuery: createFilter(filterQuery),
         stackByField,
@@ -180,16 +177,7 @@ export const useAuthentications = ({
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    docValueFields,
-    endDate,
-    filterQuery,
-    indexNames,
-    stackByField,
-    limit,
-    startDate,
-  ]);
+  }, [activePage, endDate, filterQuery, indexNames, stackByField, limit, startDate]);
 
   useEffect(() => {
     authenticationsSearch(authenticationsRequest);

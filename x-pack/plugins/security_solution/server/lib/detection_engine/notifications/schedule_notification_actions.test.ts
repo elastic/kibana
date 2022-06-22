@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleExecutorServicesMock, alertsMock } from '../../../../../alerting/server/mocks';
+import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { sampleThresholdAlert } from '../rule_types/__mocks__/threshold';
 import {
   NotificationRuleTypeParams,
@@ -39,6 +39,7 @@ describe('schedule_notification_actions', () => {
     riskScore: 80,
     riskScoreMapping: [],
     ruleNameOverride: undefined,
+    dataViewId: undefined,
     outputIndex: 'output-1',
     severity: 'high',
     severityMapping: [],
@@ -51,6 +52,9 @@ describe('schedule_notification_actions', () => {
     note: '# sample markdown',
     version: 1,
     exceptionsList: [],
+    relatedIntegrations: [],
+    requiredFields: [],
+    setup: '',
   };
 
   it('Should schedule actions with unflatted and legacy context', () => {

@@ -616,7 +616,7 @@
         "label": "EcsEventCategory",
         "description": [],
         "signature": [
-          "\"database\" | \"package\" | \"network\" | \"web\" | \"host\" | \"session\" | \"file\" | \"registry\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
+          "\"database\" | \"package\" | \"network\" | \"web\" | \"file\" | \"host\" | \"session\" | \"registry\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,
@@ -630,7 +630,7 @@
         "label": "EcsEventKind",
         "description": [],
         "signature": [
-          "\"alert\" | \"metric\" | \"event\" | \"state\" | \"signal\" | \"pipeline_error\""
+          "\"metric\" | \"alert\" | \"state\" | \"event\" | \"signal\" | \"pipeline_error\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,
@@ -644,7 +644,7 @@
         "label": "EcsEventOutcome",
         "description": [],
         "signature": [
-          "\"unknown\" | \"success\" | \"failure\""
+          "\"success\" | \"unknown\" | \"failure\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,
@@ -658,7 +658,7 @@
         "label": "EcsEventType",
         "description": [],
         "signature": [
-          "\"start\" | \"user\" | \"error\" | \"info\" | \"group\" | \"end\" | \"protocol\" | \"connection\" | \"access\" | \"admin\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
+          "\"start\" | \"error\" | \"user\" | \"info\" | \"group\" | \"end\" | \"admin\" | \"protocol\" | \"connection\" | \"access\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,

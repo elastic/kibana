@@ -10,15 +10,16 @@ import {
   SavedObjectsFindResponse,
   SavedObject,
   SavedObjectReference,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { flatMap, uniqWith, xorWith } from 'lodash';
+import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { AlertInfo } from './types';
-import { LensServerPluginSetup } from '../../../lens/server';
 
 import {
   CaseAttributes,
   CasePostRequest,
   CaseResponse,
+  CaseSeverity,
   CasesFindResponse,
   CaseStatuses,
   CommentAttributes,
@@ -55,6 +56,8 @@ export const transformNewCase = ({
   newCase: CasePostRequest;
 }): CaseAttributes => ({
   ...newCase,
+  duration: null,
+  severity: newCase.severity ?? CaseSeverity.LOW,
   closed_at: null,
   closed_by: null,
   created_at: new Date().toISOString(),

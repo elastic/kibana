@@ -12,6 +12,7 @@ interface AdvancedPolicySchemaType {
   first_supported_version: string;
   last_supported_version?: string;
   documentation: string;
+  license?: string;
 }
 
 export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
@@ -883,5 +884,68 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
           'Allows users to control whether kprobes or ebpf are used to gather data. Possible options are kprobes, ebpf, or auto. Default: kprobes',
       }
     ),
+  },
+  {
+    key: 'linux.advanced.event_filter.default',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.event_filter.default',
+      {
+        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.event_filter.default',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.event_filter.default',
+      {
+        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.event_filter.default',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.event_filter.default',
+      {
+        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.utilization_limits.cpu',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.cpu',
+      {
+        defaultMessage:
+          'The percentage of the aggregate system CPU to restrict Endpoint to. The range is 20-100%. Anything under 20 gets ignored and causes a policy warning.  Default: 100',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.utilization_limits.cpu',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.cpu',
+      {
+        defaultMessage:
+          'The percentage of the aggregate system CPU to restrict Endpoint to. The range is 20-100%. Anything under 20 gets ignored and causes a policy warning.  Default: 50',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.rollback',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.rollback',
+      {
+        defaultMessage: 'Experimental',
+      }
+    ),
+    license: 'platinum',
   },
 ];

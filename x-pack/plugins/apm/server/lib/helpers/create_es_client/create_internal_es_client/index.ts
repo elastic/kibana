@@ -6,12 +6,12 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { unwrapEsResponse } from '../../../../../../observability/server';
-import { APMRouteHandlerResources } from '../../../../routes/typings';
+import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import {
   ESSearchResponse,
   ESSearchRequest,
-} from '../../../../../../../../src/core/types/elasticsearch';
+} from '@kbn/core/types/elasticsearch';
+import { APMRouteHandlerResources } from '../../../../routes/typings';
 import {
   callAsyncWithDebug,
   getDebugBody,
@@ -21,14 +21,16 @@ import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
 export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
-export type APMInternalClient = ReturnType<typeof createInternalESClient>;
+export type APMInternalClient = Awaited<
+  ReturnType<typeof createInternalESClient>
+>;
 
-export function createInternalESClient({
+export async function createInternalESClient({
   context,
   debug,
   request,
 }: Pick<APMRouteHandlerResources, 'context' | 'request'> & { debug: boolean }) {
-  const { asInternalUser } = context.core.elasticsearch.client;
+  const { asInternalUser } = (await context.core).elasticsearch.client;
 
   function callEs<T extends { body: any }>(
     operationName: string,
@@ -72,7 +74,11 @@ export function createInternalESClient({
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       return callEs(operationName, {
         requestType: 'search',
-        cb: (signal) => asInternalUser.search(params, { signal, meta: true }),
+        cb: (signal) =>
+          asInternalUser.search(params, {
+            signal,
+            meta: true,
+          }) as Promise<{ body: any }>,
         params,
       });
     },

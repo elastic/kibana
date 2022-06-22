@@ -9,7 +9,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110893
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { ExpressionFunction } from 'src/plugins/expressions';
+import { ExpressionFunction } from '@kbn/expressions-plugin';
 import { PresentationUtilPlugin } from './plugin';
 import { pluginServices } from './services';
 
@@ -54,7 +54,7 @@ export {
   AddFromLibraryButton,
   PrimaryActionButton,
   PrimaryActionPopover,
-  /** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-components */
+  /** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-button-toolbar` */
   QuickButtonGroup,
   SolutionToolbar,
   SolutionToolbarButton,

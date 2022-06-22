@@ -26,7 +26,7 @@ import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
 import { i18n } from '@kbn/i18n';
 
-import { useUiTracker } from '../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 
 import {
   asPercent,
@@ -513,7 +513,7 @@ export function FailedTransactionsCorrelations({
           style={{
             display: 'flex',
             flexDirection: 'row',
-            paddingLeft: euiTheme.eui.paddingSizes.s,
+            paddingLeft: euiTheme.eui.euiSizeS,
           }}
         >
           <EuiSwitch
@@ -530,7 +530,7 @@ export function FailedTransactionsCorrelations({
           <EuiIconTip
             size="m"
             iconProps={{
-              style: { marginLeft: euiTheme.eui.paddingSizes.xs },
+              style: { marginLeft: euiTheme.eui.euiSizeXS },
             }}
             content={i18n.translate(
               'xpack.apm.correlations.latencyCorrelations.advancedStatisticsTooltipContent',

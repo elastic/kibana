@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, PackageInfo } from 'src/core/server';
+import type { Logger, PackageInfo } from '@kbn/core/server';
 import { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
@@ -83,6 +83,8 @@ export class PdfMaker {
     const groupCount = this.content.length;
 
     // inject a page break for every 2 groups on the page
+    // TODO: Remove this code since we are now using Chromium to drive this
+    // layout via native print functionality.
     if (groupCount > 0 && groupCount % this.layout.groupCount === 0) {
       contents = [
         {

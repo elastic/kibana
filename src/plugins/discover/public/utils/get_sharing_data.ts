@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { Capabilities } from 'kibana/public';
-import type { IUiSettingsClient } from 'kibana/public';
+import type { Capabilities } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type {
   DataPublicPluginStart,
   ISearchSource,
   SerializedSearchSourceFields,
-} from 'src/plugins/data/public';
+} from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -96,7 +96,10 @@ export async function getSharingData(
        */
       const useFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
       if (useFieldsApi && columns.length) {
-        searchSource.setField('fields', columns);
+        searchSource.setField(
+          'fields',
+          columns.map((field) => ({ field, include_unmapped: 'true' }))
+        );
       }
       return searchSource.getSerializedFields(true);
     },

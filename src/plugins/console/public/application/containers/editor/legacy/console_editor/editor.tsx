@@ -19,14 +19,12 @@ import { debounce } from 'lodash';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { ace } from '../../../../../../../es_ui_shared/public';
-// @ts-ignore
-import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
+import { ace } from '@kbn/es-ui-shared-plugin/public';
 import { ConsoleMenu } from '../../../../components';
 import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
   useSaveCurrentTextObject,
-  useSendCurrentRequestToES,
+  useSendCurrentRequest,
   useSetInputEditor,
 } from '../../../../hooks';
 import * as senseEditor from '../../../../models/sense_editor';
@@ -66,13 +64,20 @@ const inputId = 'ConAppInputTextarea';
 
 function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService, esHostService, http },
+    services: {
+      history,
+      notifications,
+      settings: settingsService,
+      esHostService,
+      http,
+      autocompleteInfo,
+    },
     docLinkVersion,
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
-  const sendCurrentRequestToES = useSendCurrentRequestToES();
+  const sendCurrentRequest = useSendCurrentRequest();
   const saveCurrentTextObject = useSaveCurrentTextObject();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -196,14 +201,14 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    retrieveAutoCompleteInfo(http, settingsService, settingsService.getAutocomplete());
+    autocompleteInfo.retrieve(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
 
     return () => {
       unsubscribeResizer();
-      clearSubscriptions();
+      autocompleteInfo.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
       if (editorInstanceRef.current) {
         editorInstanceRef.current.getCoreEditor().destroy();
@@ -217,6 +222,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     setInputEditor,
     settingsService,
     http,
+    autocompleteInfo,
   ]);
 
   useEffect(() => {
@@ -231,11 +237,11 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     if (!isKeyboardShortcutsDisabled) {
       registerCommands({
         senseEditor: editorInstanceRef.current!,
-        sendCurrentRequestToES,
+        sendCurrentRequest,
         openDocumentation,
       });
     }
-  }, [sendCurrentRequestToES, openDocumentation, settings]);
+  }, [openDocumentation, settings, sendCurrentRequest]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;
@@ -262,7 +268,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
             >
               <EuiLink
                 color="success"
-                onClick={sendCurrentRequestToES}
+                onClick={sendCurrentRequest}
                 data-test-subj="sendRequestButton"
                 aria-label={i18n.translate('console.sendRequestButtonTooltip', {
                   defaultMessage: 'Click to send request',

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { DataViewField } from '../../../../data_views/public';
-import { useReduxEmbeddableContext } from '../../../../presentation_util/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { useStateObservable } from '../../hooks/use_state_observable';
 import { RangeSliderPopover } from './range_slider_popover';
 import { rangeSliderReducers } from './range_slider_reducers';
@@ -20,6 +20,7 @@ import './range_slider.scss';
 
 interface Props {
   componentStateSubject: BehaviorSubject<RangeSliderComponentState>;
+  ignoreValidation: boolean;
 }
 // Availableoptions and loading state is controled by the embeddable, but is not considered embeddable input.
 export interface RangeSliderComponentState {
@@ -28,9 +29,10 @@ export interface RangeSliderComponentState {
   min: string;
   max: string;
   loading: boolean;
+  isInvalid?: boolean;
 }
 
-export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
+export const RangeSliderComponent: FC<Props> = ({ componentStateSubject, ignoreValidation }) => {
   // Redux embeddable Context to get state from Embeddable input
   const {
     useEmbeddableDispatch,
@@ -40,21 +42,19 @@ export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
   const dispatch = useEmbeddableDispatch();
 
   // useStateObservable to get component state from Embeddable
-  const { loading, min, max, fieldFormatter } = useStateObservable<RangeSliderComponentState>(
-    componentStateSubject,
-    componentStateSubject.getValue()
-  );
+  const { loading, min, max, fieldFormatter, isInvalid } =
+    useStateObservable<RangeSliderComponentState>(
+      componentStateSubject,
+      componentStateSubject.getValue()
+    );
 
-  const { value = ['', ''], id, title } = useEmbeddableSelector((state) => state);
-
-  const [selectedValue, setSelectedValue] = useState<RangeValue>(value || ['', '']);
+  const { value, id, title } = useEmbeddableSelector((state) => state);
 
   const onChangeComplete = useCallback(
     (range: RangeValue) => {
       dispatch(selectRange(range));
-      setSelectedValue(range);
     },
-    [selectRange, setSelectedValue, dispatch]
+    [selectRange, dispatch]
   );
 
   return (
@@ -64,9 +64,10 @@ export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
       min={min}
       max={max}
       title={title}
-      value={selectedValue}
+      value={value ?? ['', '']}
       onChange={onChangeComplete}
       fieldFormatter={fieldFormatter}
+      isInvalid={!ignoreValidation && isInvalid}
     />
   );
 };

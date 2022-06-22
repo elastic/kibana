@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { IEventLogClient } from '../../../../event_log/server';
-import { actionsClientMock } from '../../../../actions/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { IEventLogClient } from '@kbn/event-log-plugin/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 import { ConstructorOptions } from '../rules_client';
-import { eventLogClientMock } from '../../../../event_log/server/mocks';
 import { RuleTypeRegistry } from '../../rule_type_registry';
 import { RecoveredActionGroup } from '../../../common';
 
@@ -57,6 +57,7 @@ export function getBeforeSetup(
     {
       id: '1',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'test',
       name: 'test',
       config: {
@@ -66,6 +67,7 @@ export function getBeforeSetup(
     {
       id: '2',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'test2',
       name: 'test2',
       config: {
@@ -76,6 +78,7 @@ export function getBeforeSetup(
       id: 'testPreconfigured',
       actionTypeId: '.slack',
       isPreconfigured: true,
+      isDeprecated: false,
       name: 'test',
     },
   ]);
@@ -91,11 +94,6 @@ export function getBeforeSetup(
     isExportable: true,
     async executor() {},
     producer: 'alerts',
-    config: {
-      execution: {
-        actions: { max: 1000 },
-      },
-    },
   }));
   rulesClientParams.getEventLogClient.mockResolvedValue(
     eventLogClient ?? eventLogClientMock.create()

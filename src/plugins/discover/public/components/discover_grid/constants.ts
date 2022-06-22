@@ -19,7 +19,7 @@ export const GRID_STYLE = {
 
 export const pageSizeArr = [25, 50, 100, 250];
 export const defaultPageSize = 100;
-export const defaultTimeColumnWidth = 190;
+export const defaultTimeColumnWidth = 210;
 export const toolbarVisibility = {
   showColumnSelector: {
     allowHide: false,

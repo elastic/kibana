@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from '@kbn/core/server';
 import {
   EndpointActionLogRequestParams,
   EndpointActionLogRequestQuery,
@@ -14,7 +14,7 @@ import { getAuditLogResponse } from '../../services';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EndpointAppContext } from '../../types';
 
-export const actionsLogRequestHandler = (
+export const auditLogRequestHandler = (
   endpointContext: EndpointAppContext
 ): RequestHandler<
   EndpointActionLogRequestParams,

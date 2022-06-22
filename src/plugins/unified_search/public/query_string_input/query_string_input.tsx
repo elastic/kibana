@@ -24,30 +24,29 @@ import {
   EuiTextArea,
   htmlIdGenerator,
   PopoverAnchorPosition,
+  toSentenceCase,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { compact, debounce, isEqual, isFunction } from 'lodash';
-import { Toast } from '../../../../core/public';
-import {
-  IDataPluginServices,
-  Query,
-  QuerySuggestion,
-  QuerySuggestionTypes,
-  getQueryLog,
-} from '../../../data/public';
-import { DataView } from '../../../data_views/public';
+import { compact, debounce, isEmpty, isEqual, isFunction } from 'lodash';
+import { Toast } from '@kbn/core/public';
+import type { Query } from '@kbn/es-query';
+import { IDataPluginServices, getQueryLog } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { PersistedLog } from '@kbn/data-plugin/public';
+import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data-plugin/common';
+import { KibanaReactContextValue, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
-import type { PersistedLog } from '../../../data/public';
-import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '../../../data/common';
-import { KibanaReactContextValue, toMountPoint } from '../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
-import { getTheme } from '../services';
+import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
+import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import { getTheme, getAutocomplete } from '../services';
+import './query_string_input.scss';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<DataView | string>;
@@ -77,7 +76,6 @@ export interface QueryStringInputProps {
    * this params add another option text, which is just a  simple keyword search mode, the way a simple search box works
    */
   nonKqlMode?: 'lucene' | 'text';
-  nonKqlModeHelpText?: string;
   /**
    * @param autoSubmit if user selects a value, in that case kuery will be auto submitted
    */
@@ -129,6 +127,8 @@ const KEY_CODES = {
 export default class QueryStringInputUI extends PureComponent<Props, State> {
   static defaultProps = {
     storageKey: KIBANA_USER_QUERY_LANGUAGE_KEY,
+    iconType: 'search',
+    isClearable: true,
   };
 
   public state: State = {
@@ -201,7 +201,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const hasQuerySuggestions = this.services.data.autocomplete.hasQuerySuggestions(language);
+    const hasQuerySuggestions = getAutocomplete().hasQuerySuggestions(language);
 
     if (
       !hasQuerySuggestions ||
@@ -222,7 +222,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
       const suggestions =
-        (await this.services.data.autocomplete.getQuerySuggestions({
+        (await getAutocomplete().getQuerySuggestions({
           language,
           indexPatterns,
           query: queryString,
@@ -683,31 +683,59 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     this.handleAutoHeight();
   };
 
+  getSearchInputPlaceholder = () => {
+    let placeholder = '';
+    if (!this.props.query.language || this.props.query.language === 'text') {
+      placeholder = i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholderForText', {
+        defaultMessage: 'Filter your data',
+      });
+    } else {
+      const language =
+        this.props.query.language === 'kuery' ? 'KQL' : toSentenceCase(this.props.query.language);
+
+      placeholder = i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
+        defaultMessage: 'Filter your data using {language} syntax',
+        values: { language },
+      });
+    }
+
+    return placeholder;
+  };
+
   public render() {
     const isSuggestionsVisible = this.state.isSuggestionsVisible && {
       'aria-controls': 'kbnTypeahead__items',
       'aria-owns': 'kbnTypeahead__items',
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
-    const containerClassName = classNames(
-      'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
-      this.props.className
-    );
-    const inputClassName = classNames(
-      'kbnQueryBar__textarea',
-      this.props.iconType ? 'kbnQueryBar__textarea--withIcon' : null,
-      this.props.prepend ? 'kbnQueryBar__textarea--hasPrepend' : null,
-      !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textarea--hasAppend' : null
-    );
-    const inputWrapClassName = classNames(
-      'euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap',
-      this.props.prepend ? 'kbnQueryBar__textareaWrap--hasPrepend' : null,
-      !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textareaWrap--hasAppend' : null
+
+    const simpleLanguageSwitcher = this.props.disableLanguageSwitcher ? null : (
+      <QueryLanguageSwitcher
+        language={this.props.query.language}
+        anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+        onSelectLanguage={this.onSelectLanguage}
+        nonKqlMode={this.props.nonKqlMode}
+      />
     );
 
+    const prependElement =
+      this.props.prepend || simpleLanguageSwitcher ? (
+        <FilterButtonGroup attached items={[this.props.prepend, simpleLanguageSwitcher]} />
+      ) : undefined;
+
+    const containerClassName = classNames('kbnQueryBar__wrap', this.props.className);
+    const inputClassName = classNames('kbnQueryBar__textarea', {
+      'kbnQueryBar__textarea--withIcon': this.props.iconType,
+      'kbnQueryBar__textarea--isClearable': this.props.isClearable,
+      'kbnQueryBar__textarea--withPrepend': prependElement,
+      'kbnQueryBar__textarea--isSuggestionsVisible':
+        isSuggestionsVisible && !isEmpty(this.state.suggestions),
+    });
+    const inputWrapClassName = classNames('kbnQueryBar__textareaWrap');
     return (
       <div className={containerClassName} onFocus={this.onFocusWithin} onBlur={this.onBlurWithin}>
-        {this.props.prepend}
+        {prependElement}
+
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
@@ -722,12 +750,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
           >
             <div role="search" className={inputWrapClassName} ref={this.assignQueryInputDivRef}>
               <EuiTextArea
-                placeholder={
-                  this.props.placeholder ||
-                  i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
-                    defaultMessage: 'Search',
-                  })
-                }
+                placeholder={this.props.placeholder || this.getSearchInputPlaceholder()}
                 value={this.forwardNewValueIfNeeded(this.getQueryString())}
                 onKeyDown={this.onKeyDown}
                 onKeyUp={this.onKeyUp}
@@ -805,15 +828,6 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
-        {this.props.disableLanguageSwitcher ? null : (
-          <QueryLanguageSwitcher
-            language={this.props.query.language}
-            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-            onSelectLanguage={this.onSelectLanguage}
-            nonKqlMode={this.props.nonKqlMode}
-            nonKqlModeHelpText={this.props.nonKqlModeHelpText}
-          />
-        )}
       </div>
     );
   }

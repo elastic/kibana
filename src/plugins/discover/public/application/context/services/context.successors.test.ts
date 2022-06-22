@@ -8,10 +8,11 @@
 
 import moment from 'moment';
 import { get, last } from 'lodash';
-import { SortDirection } from 'src/plugins/data/public';
-import type { DataView } from 'src/plugins/data_views/public';
+import { SortDirection } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { createContextSearchSourceStub } from './_stubs';
-import { DataPublicPluginStart, Query } from '../../../../../data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Query } from '@kbn/es-query';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { EsHitRecord, EsHitRecordList } from '../../types';
 
@@ -88,7 +89,7 @@ describe('context successors', function () {
 
       return fetchSuccessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits) => {
-          expect(mockSearchSource.fetch.calledOnce).toBe(true);
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
         }
       );
@@ -225,7 +226,7 @@ describe('context successors', function () {
 
       return fetchSuccessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits) => {
-          expect(mockSearchSource.fetch.calledOnce).toBe(true);
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
           const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');

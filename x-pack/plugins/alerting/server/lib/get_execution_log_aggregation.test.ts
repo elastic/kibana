@@ -83,7 +83,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_scheduled_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions,num_active_alerts,num_recovered_alerts,num_new_alerts]"`
     );
   });
 
@@ -95,7 +95,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_scheduled_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions,num_active_alerts,num_recovered_alerts,num_new_alerts]"`
     );
   });
 
@@ -164,15 +164,6 @@ describe('getExecutionLogAggregation', () => {
                   gap_policy: 'insert_zeros',
                 },
               },
-              alertCounts: {
-                filters: {
-                  filters: {
-                    newAlerts: { match: { 'event.action': 'new-instance' } },
-                    activeAlerts: { match: { 'event.action': 'active-instance' } },
-                    recoveredAlerts: { match: { 'event.action': 'recovered-instance' } },
-                  },
-                },
-              },
               actionExecution: {
                 filter: {
                   bool: {
@@ -211,16 +202,33 @@ describe('getExecutionLogAggregation', () => {
                       field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
                     },
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     max: {
-                      field: 'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
+                      field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+                    },
+                  },
+                  numActiveAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
+                    },
+                  },
+                  numRecoveredAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+                    },
+                  },
+                  numNewAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
                     },
                   },
                   executionDuration: { max: { field: 'event.duration' } },
                   outcomeAndMessage: {
                     top_hits: {
                       size: 1,
-                      _source: { includes: ['event.outcome', 'message', 'error.message'] },
+                      _source: {
+                        includes: ['event.outcome', 'message', 'error.message', 'kibana.version'],
+                      },
                     },
                   },
                 },
@@ -278,28 +286,23 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 0,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
+                    value: 0.0,
                   },
                   outcomeAndMessage: {
                     hits: {
@@ -316,6 +319,9 @@ describe('formatExecutionLogResult', () => {
                           _source: {
                             event: {
                               outcome: 'success',
+                            },
+                            kibana: {
+                              version: '8.2.0',
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -363,27 +369,22 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 5,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -401,6 +402,9 @@ describe('formatExecutionLogResult', () => {
                           _source: {
                             event: {
                               outcome: 'success',
+                            },
+                            kibana: {
+                              version: '8.2.0',
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -459,11 +463,12 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 0,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -478,11 +483,12 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -512,28 +518,23 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 0,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
+                    value: 0.0,
                   },
                   outcomeAndMessage: {
                     hits: {
@@ -550,6 +551,9 @@ describe('formatExecutionLogResult', () => {
                           _source: {
                             event: {
                               outcome: 'failure',
+                            },
+                            kibana: {
+                              version: '8.2.0',
                             },
                             message:
                               "rule execution failure: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -600,27 +604,22 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 5,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -638,6 +637,9 @@ describe('formatExecutionLogResult', () => {
                           _source: {
                             event: {
                               outcome: 'success',
+                            },
+                            kibana: {
+                              version: '8.2.0',
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -696,11 +698,12 @@ describe('formatExecutionLogResult', () => {
           status: 'failure',
           message:
             "rule execution failure: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule' - I am erroring in rule execution!!",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 0,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -715,11 +718,12 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -749,27 +753,22 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 1,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 0,
-                    },
-                    newAlerts: {
-                      doc_count: 0,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 0,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
                   numTriggeredActions: {
                     value: 0.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
+                    value: 0.0,
+                  },
+                  numActiveAlerts: {
+                    value: 0.0,
+                  },
+                  numNewAlerts: {
+                    value: 0.0,
+                  },
+                  numRecoveredAlerts: {
                     value: 0.0,
                   },
                   outcomeAndMessage: {
@@ -787,6 +786,9 @@ describe('formatExecutionLogResult', () => {
                           _source: {
                             event: {
                               outcome: 'success',
+                            },
+                            kibana: {
+                              version: '8.2.0',
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -829,27 +831,22 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 5,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -867,6 +864,9 @@ describe('formatExecutionLogResult', () => {
                           _source: {
                             event: {
                               outcome: 'success',
+                            },
+                            kibana: {
+                              version: '8.2.0',
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -925,11 +925,12 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 0,
           num_new_alerts: 0,
           num_recovered_alerts: 0,
           num_triggered_actions: 0,
-          num_scheduled_actions: 0,
+          num_generated_actions: 0,
           num_succeeded_actions: 0,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -944,11 +945,12 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -978,27 +980,22 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 5,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -1016,6 +1013,9 @@ describe('formatExecutionLogResult', () => {
                           _source: {
                             event: {
                               outcome: 'success',
+                            },
+                            kibana: {
+                              version: '8.2.0',
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -1063,27 +1063,22 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 5,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -1101,6 +1096,9 @@ describe('formatExecutionLogResult', () => {
                           _source: {
                             event: {
                               outcome: 'success',
+                            },
+                            kibana: {
+                              version: '8.2.0',
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -1159,11 +1157,12 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 0,
           num_errored_actions: 5,
           total_search_duration_ms: 0,
@@ -1178,11 +1177,12 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,

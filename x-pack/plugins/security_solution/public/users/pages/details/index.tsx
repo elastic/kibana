@@ -11,6 +11,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -24,7 +25,6 @@ import { inputsSelectors } from '../../../common/store';
 import { setUsersDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 
 import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
@@ -52,6 +52,7 @@ import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { LandingPageComponent } from '../../../common/components/landing_page';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 const QUERY_ID = 'UsersDetailsQueryId';
 
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
@@ -59,6 +60,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   usersDetailsPagePath,
 }) => {
   const dispatch = useDispatch();
+  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
@@ -170,7 +172,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             <EuiSpacer />
 
             <SecuritySolutionTabNavigation
-              navTabs={navTabsUsersDetails(detailName, hasMlUserPermissions(capabilities))}
+              navTabs={navTabsUsersDetails(
+                detailName,
+                hasMlUserPermissions(capabilities),
+                riskyUsersFeatureEnabled
+              )}
             />
 
             <EuiSpacer />

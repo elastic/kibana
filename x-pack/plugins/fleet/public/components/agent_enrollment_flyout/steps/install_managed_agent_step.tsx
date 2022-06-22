@@ -13,28 +13,41 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
 
-import { ManualInstructions } from '../../enrollment_instructions';
+import { InstallSection } from '../../enrollment_instructions/install_section';
+import type { CommandsByPlatform } from '../../../applications/fleet/components/fleet_server_instructions/utils/install_command_utils';
+
+import type { K8sMode } from '../types';
 
 export const InstallManagedAgentStep = ({
+  installCommand,
   selectedApiKeyId,
   apiKeyData,
-  fleetServerHosts,
   isK8s,
+  isComplete,
+  fullCopyButton,
+  onCopy,
 }: {
-  fleetServerHosts: string[];
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
-  isK8s?: string;
+  isK8s?: K8sMode;
+  installCommand: CommandsByPlatform;
+  isComplete?: boolean;
+  fullCopyButton?: boolean;
+  onCopy?: () => void;
 }): EuiContainedStepProps => {
+  const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
+  const status = isComplete ? 'complete' : nonCompleteStatus;
   return {
+    status,
     title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
       defaultMessage: 'Install Elastic Agent on your host',
     }),
     children: selectedApiKeyId && apiKeyData && (
-      <ManualInstructions
-        apiKey={apiKeyData.item}
-        fleetServerHosts={fleetServerHosts}
+      <InstallSection
+        installCommand={installCommand}
         isK8s={isK8s}
+        onCopy={onCopy}
+        fullCopyButton={fullCopyButton}
       />
     ),
   };

@@ -6,13 +6,6 @@
  */
 
 import * as runtimeTypes from 'io-ts';
-import { ReactNode } from 'react';
-
-// This type is for typing EuiDescriptionList
-export interface DescriptionList {
-  title: NonNullable<ReactNode>;
-  description: NonNullable<ReactNode>;
-}
 
 export const unionWithNullType = <T extends runtimeTypes.Mixed>(type: T) =>
   runtimeTypes.union([type, runtimeTypes.null]);

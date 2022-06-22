@@ -40,19 +40,17 @@ function generateData({
   return range
     .interval('1m')
     .rate(1)
-    .spans((timestamp, index) => [
-      ...service1
+    .generator((timestamp, index) => [
+      service1
         .transaction('GET /apple 🍎 ')
         .timestamp(timestamp)
         .duration(1000)
-        .success()
-        .serialize(),
-      ...service2
+        .success(),
+      service2
         .transaction('GET /banana 🍌')
         .timestamp(timestamp)
         .duration(500)
-        .success()
-        .serialize(),
+        .success(),
     ]);
 }
 
@@ -74,7 +72,7 @@ describe('Agent configuration', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsPowerUser();
+    cy.loginAsEditorUser();
     cy.visit(agentConfigHref);
   });
 
@@ -102,5 +100,30 @@ describe('Agent configuration', () => {
     cy.contains('Edit').click();
     cy.wait('@serviceEnvironmentApi');
     cy.contains('production');
+  });
+  it('displays All label when selecting all option', () => {
+    cy.intercept(
+      'GET',
+      '/api/apm/settings/agent-configuration/environments'
+    ).as('serviceEnvironmentApi');
+    cy.contains('Create configuration').click();
+    cy.get('[data-test-subj="serviceNameComboBox"]')
+      .click()
+      .type('All')
+      .type('{enter}');
+    cy.contains('All').realClick();
+    cy.wait('@serviceEnvironmentApi');
+
+    cy.get('[data-test-subj="serviceEnviromentComboBox"]')
+      .click({ force: true })
+      .type('All');
+
+    cy.get('mark').contains('All').click();
+    cy.contains('Next step').click();
+    cy.contains('Service name All');
+    cy.contains('Environment All');
+    cy.contains('Edit').click();
+    cy.wait('@serviceEnvironmentApi');
+    cy.contains('All');
   });
 });

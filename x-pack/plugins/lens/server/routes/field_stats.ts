@@ -8,10 +8,10 @@ import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup } from 'src/core/server';
-import type { DataViewField } from 'src/plugins/data_views/common';
-import { SavedObjectNotFound } from '../../../../../src/plugins/kibana_utils/common';
-import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
+import { CoreSetup } from '@kbn/core/server';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
 import { PluginStartContract } from '../plugin';
 
@@ -39,7 +39,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
       },
     },
     async (context, req, res) => {
-      const requestClient = context.core.elasticsearch.client.asCurrentUser;
+      const requestClient = (await context.core).elasticsearch.client.asCurrentUser;
       const { fromDate, toDate, fieldName, dslQuery, size } = req.body;
 
       const [{ savedObjects, elasticsearch }, { dataViews }] = await setup.getStartServices();

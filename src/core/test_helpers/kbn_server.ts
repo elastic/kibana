@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { defaultsDeep } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
+import supertest from 'supertest';
+
+import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 import {
   createTestEsCluster,
@@ -15,12 +19,9 @@ import {
   kibanaServerTestUser,
   systemIndicesSuperuser,
 } from '@kbn/test';
-import { defaultsDeep } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
-import supertest from 'supertest';
+import { CliArgs, Env } from '@kbn/config';
 
 import { InternalCoreSetup, InternalCoreStart } from '../server/internal_types';
-import { CliArgs, Env } from '../server/config';
 import { Root } from '../server/root';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';

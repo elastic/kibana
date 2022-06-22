@@ -15,7 +15,7 @@ import { waitFor } from '@testing-library/react';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { AlertsByCategory } from '.';
-import { mockCasesContext } from '../../../../../cases/public/mocks/mock_cases_context';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 
 jest.mock('../../../common/components/link_to');
@@ -97,7 +97,7 @@ describe('Alerts by category', () => {
 
     test('it renders the expected title', async () => {
       await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="header-section-title"]').text()).toEqual(
+        expect(wrapper.find('[data-test-subj="header-section-title"]').first().text()).toEqual(
           'External alert trend'
         );
       });

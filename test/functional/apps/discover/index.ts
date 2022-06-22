@@ -13,8 +13,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const config = getService('config');
 
   describe('discover app', function () {
-    this.tags('ciGroup6');
-
     before(async function () {
       await browser.setWindowSize(1300, 800);
     });
@@ -27,8 +25,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_data_view_editor'));
       loadTestFile(require.resolve('./_saved_queries'));
     } else {
+      loadTestFile(require.resolve('./_no_data'));
       loadTestFile(require.resolve('./_saved_queries'));
       loadTestFile(require.resolve('./_discover'));
+      loadTestFile(require.resolve('./_discover_accessibility'));
       loadTestFile(require.resolve('./_discover_histogram'));
       loadTestFile(require.resolve('./_doc_table'));
       loadTestFile(require.resolve('./_doc_table_newline'));
@@ -50,16 +50,18 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_data_grid_context'));
       loadTestFile(require.resolve('./_data_grid_field_data'));
       loadTestFile(require.resolve('./_data_grid_doc_navigation'));
+      loadTestFile(require.resolve('./_data_grid_row_navigation'));
       loadTestFile(require.resolve('./_data_grid_doc_table'));
+      loadTestFile(require.resolve('./_data_grid_copy_to_clipboard'));
+      loadTestFile(require.resolve('./_data_grid_pagination'));
       loadTestFile(require.resolve('./_indexpattern_with_unmapped_fields'));
       loadTestFile(require.resolve('./_runtime_fields_editor'));
       loadTestFile(require.resolve('./_huge_fields'));
       loadTestFile(require.resolve('./_date_nested'));
       loadTestFile(require.resolve('./_search_on_page_load'));
       loadTestFile(require.resolve('./_chart_hidden'));
-      loadTestFile(require.resolve('./_context_encoded_url_param'));
+      loadTestFile(require.resolve('./_context_encoded_url_params'));
       loadTestFile(require.resolve('./_data_view_editor'));
-      loadTestFile(require.resolve('./_empty_state'));
     }
   });
 }

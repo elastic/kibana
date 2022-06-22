@@ -7,7 +7,7 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import type { HttpFetchOptions } from '../../../../../../../src/core/public';
+import type { HttpFetchOptions } from '@kbn/core/public';
 import type {
   DataResponseMock,
   NodeMetricsTableFetchMock,
@@ -17,6 +17,7 @@ import { createStartServicesAccessorMock } from '../test_helpers';
 import { createLazyHostMetricsTable } from './create_lazy_host_metrics_table';
 import IntegratedHostMetricsTable from './integrated_host_metrics_table';
 import { metricByField } from './use_host_metrics_table';
+import type { MetricsExplorerSeries } from '../../../../common/http_api';
 
 describe('HostMetricsTable', () => {
   const timerange = {
@@ -114,7 +115,7 @@ function createHost(
   cpuUsagePct: number,
   memoryBytes: number,
   memoryUsagePct: number
-) {
+): Partial<MetricsExplorerSeries> {
   return {
     id: name,
     rows: [
@@ -123,7 +124,7 @@ function createHost(
         [metricByField['system.cpu.total.norm.pct']]: cpuUsagePct,
         [metricByField['system.memory.total']]: memoryBytes,
         [metricByField['system.memory.used.pct']]: memoryUsagePct,
-      },
+      } as MetricsExplorerSeries['rows'][number],
     ],
   };
 }

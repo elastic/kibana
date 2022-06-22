@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
+import { coreMock } from '@kbn/core/public/mocks';
+import { homePluginMock } from '@kbn/home-plugin/public/mocks';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import { TelemetryPlugin } from './plugin';
-import { coreMock } from '../../../core/public/mocks';
-import { homePluginMock } from '../../home/public/mocks';
-import { screenshotModePluginMock } from '../../screenshot_mode/public/mocks';
-import { HomePublicPluginSetup } from '../../home/public';
-import { ScreenshotModePluginSetup } from '../../screenshot_mode/public';
-
-let screenshotMode: ScreenshotModePluginSetup;
-let home: HomePublicPluginSetup;
 
 describe('TelemetryPlugin', () => {
+  let screenshotMode: ScreenshotModePluginSetup;
+  let home: HomePublicPluginSetup;
+
   beforeEach(() => {
     screenshotMode = screenshotModePluginMock.createSetupContract();
     home = homePluginMock.createSetupContract();
@@ -54,6 +55,31 @@ describe('TelemetryPlugin', () => {
           expect(home.welcomeScreen.registerTelemetryNoticeRenderer).not.toBeCalled();
           expect(home.welcomeScreen.registerOnRendered).not.toBeCalled();
         });
+      });
+    });
+    describe('EBT shipper registration', () => {
+      it('registers the UI telemetry shipper', () => {
+        const initializerContext = coreMock.createPluginInitializerContext();
+        const coreSetupMock = coreMock.createSetup();
+
+        new TelemetryPlugin(initializerContext).setup(coreSetupMock, { screenshotMode, home });
+
+        expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
+          ElasticV3BrowserShipper,
+          { channelName: 'kibana-browser', version: 'version', sendTo: 'staging' }
+        );
+      });
+
+      it('registers the UI telemetry shipper (pointing to prod)', () => {
+        const initializerContext = coreMock.createPluginInitializerContext({ sendUsageTo: 'prod' });
+        const coreSetupMock = coreMock.createSetup();
+
+        new TelemetryPlugin(initializerContext).setup(coreSetupMock, { screenshotMode, home });
+
+        expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
+          ElasticV3BrowserShipper,
+          { channelName: 'kibana-browser', version: 'version', sendTo: 'production' }
+        );
       });
     });
   });

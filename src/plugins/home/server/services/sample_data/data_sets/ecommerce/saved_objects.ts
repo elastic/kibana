@@ -9,7 +9,7 @@
 /* eslint max-len: 0 */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 
 export const getSavedObjects = (): SavedObject[] => [
   {
@@ -22,6 +22,7 @@ export const getSavedObjects = (): SavedObject[] => [
       runtimeFieldMap: '{}',
       timeFieldName: 'order_date',
       title: 'kibana_sample_data_ecommerce',
+      name: 'Kibana Sample Data eCommerce',
       typeMeta: '{}',
     },
     coreMigrationVersion: '8.0.0',

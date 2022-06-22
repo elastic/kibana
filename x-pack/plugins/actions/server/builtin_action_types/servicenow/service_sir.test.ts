@@ -10,8 +10,8 @@ import axios from 'axios';
 import { createExternalServiceSIR } from './service_sir';
 import * as utils from '../lib/axios_utils';
 import { ExternalServiceSIR } from './types';
-import { Logger } from '../../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { observables } from './mocks';
 import { snExternalServiceConfig } from './config';
@@ -92,15 +92,16 @@ describe('ServiceNow SIR service', () => {
   let service: ExternalServiceSIR;
 
   beforeEach(() => {
-    service = createExternalServiceSIR(
-      {
-        config: { apiUrl: 'https://example.com/' },
+    service = createExternalServiceSIR({
+      credentials: {
+        config: { apiUrl: 'https://example.com/', isOAuth: false },
         secrets: { username: 'admin', password: 'admin' },
       },
       logger,
       configurationUtilities,
-      snExternalServiceConfig['.servicenow-sir']
-    ) as ExternalServiceSIR;
+      serviceConfig: snExternalServiceConfig['.servicenow-sir'],
+      axiosInstance: axios,
+    }) as ExternalServiceSIR;
   });
 
   beforeEach(() => {

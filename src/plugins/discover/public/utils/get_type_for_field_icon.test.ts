@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from 'src/plugins/data_views/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { getTypeForFieldIcon } from './get_type_for_field_icon';
 
 describe('getTypeForFieldIcon', () => {

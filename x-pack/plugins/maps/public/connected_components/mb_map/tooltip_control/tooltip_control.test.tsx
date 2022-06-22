@@ -15,12 +15,13 @@ import sinon from 'sinon';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { Feature } from 'geojson';
-import type { Map as MbMap, MapMouseEvent, MapboxGeoJSONFeature } from '@kbn/mapbox-gl';
+import type { Map as MbMap, MapMouseEvent, MapGeoJSONFeature } from '@kbn/mapbox-gl';
 import { TooltipControl } from './tooltip_control';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
+import { IVectorSource } from '../../../classes/sources/vector_source';
 
 // mutable map state
-let featuresAtLocation: MapboxGeoJSONFeature[] = [];
+let featuresAtLocation: MapGeoJSONFeature[] = [];
 
 const layerId = 'tfi3f';
 const mbLayerId = 'tfi3f_circle';
@@ -58,6 +59,13 @@ const mockLayer = {
         type: 'Polygon',
       },
     };
+  },
+  getSource: () => {
+    return {
+      getFeatureActions: () => {
+        return [];
+      },
+    } as unknown as IVectorSource;
   },
 } as unknown as IVectorLayer;
 
@@ -254,7 +262,7 @@ describe('TooltipControl', () => {
         properties: {
           __kbn__feature_id__: 1,
         },
-      } as unknown as MapboxGeoJSONFeature;
+      } as unknown as MapGeoJSONFeature;
       featuresAtLocation = [feature, feature];
       mount(
         <TooltipControl

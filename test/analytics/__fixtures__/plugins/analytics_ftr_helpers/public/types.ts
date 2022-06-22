@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { Event, EventType } from 'src/core/public';
+import type { Event, EventType } from '@kbn/core/public';
 
 declare global {
   interface Window {
     __analytics_ftr_helpers__: {
       setOptIn: (optIn: boolean) => void;
-      getLastEvents: (takeNumberOfEvents: number, eventTypes?: EventType[]) => Promise<Event[]>;
+      getEvents: (takeNumberOfEvents: number, eventTypes?: EventType[]) => Promise<Event[]>;
     };
   }
 }

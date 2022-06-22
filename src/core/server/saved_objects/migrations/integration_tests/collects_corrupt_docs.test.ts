@@ -90,13 +90,23 @@ describe('migration v2 with corrupt saved object documents', () => {
     } catch (err) {
       const errorMessage = err.message;
       const errorLines = errorMessage.split('\n');
+      const errorMessageWithoutStack = errorLines
+        .filter((line: string) => !line.includes(' at '))
+        .join('\n');
 
-      expect(errorLines[0]).toEqual(
-        `Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 2 transformation errors were encountered:`
-      );
-      expect(errorLines[errorLines.length - 1]).toEqual(
-        `To allow migrations to proceed, please delete or fix these documents.`
-      );
+      expect(errorMessageWithoutStack).toMatchInlineSnapshot(`
+        "Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 2 transformation errors were encountered:
+        - foo:3: Error: Migration function for version 7.14.0 threw an error
+        Caused by:
+        Error: \\"number\\" attribute should be present
+        - foo:4: Error: Migration function for version 7.14.0 threw an error
+        Caused by:
+        Error: \\"number\\" attribute should be present
+
+        To allow migrations to proceed, please delete or fix these documents.
+        Note that you can configure Kibana to automatically discard corrupt documents and transform errors for this migration.
+        Please refer to https://www.elastic.co/guide/en/kibana/master/resolve-migrations-failures.html for more information."
+      `);
 
       expectMatchOrder(errorLines, [
         {

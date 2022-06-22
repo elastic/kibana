@@ -8,10 +8,9 @@
 
 import deepEqual from 'fast-deep-equal';
 
-import { RangeSliderEditor } from './range_slider_editor';
-import { ControlEmbeddable, IEditableControlFactory } from '../../types';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from './types';
-import { EmbeddableFactoryDefinition, IContainer } from '../../../../embeddable/public';
 import {
   createRangeSliderExtract,
   createRangeSliderInject,
@@ -37,8 +36,8 @@ export class RangeSliderEmbeddableFactory
   ) => {
     if (
       embeddable &&
-      (!deepEqual(newInput.fieldName, embeddable.getInput().fieldName) ||
-        !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId))
+      ((newInput.fieldName && !deepEqual(newInput.fieldName, embeddable.getInput().fieldName)) ||
+        (newInput.dataViewId && !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId)))
     ) {
       // if the field name or data view id has changed in this editing session, selected values are invalid, so reset them.
       newInput.value = ['', ''];
@@ -46,7 +45,11 @@ export class RangeSliderEmbeddableFactory
     return newInput;
   };
 
-  public controlEditorComponent = RangeSliderEditor;
+  public isFieldCompatible = (dataControlField: DataControlField) => {
+    if (dataControlField.field.aggregatable && dataControlField.field.type === 'number') {
+      dataControlField.compatibleControlTypes.push(this.type);
+    }
+  };
 
   public isEditable = () => Promise.resolve(false);
 

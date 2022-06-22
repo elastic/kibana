@@ -11,24 +11,24 @@ import { BehaviorSubject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
-import realHits from '../../../../__fixtures__/real_hits.js';
+import realHits from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { DataViewAttributes } from '../../../../../../data_views/public';
-import { flattenHit } from '../../../../../../data/public';
-import { SavedObject } from '../../../../../../../core/types';
+import { DataViewAttributes } from '@kbn/data-views-plugin/public';
+import { flattenHit } from '@kbn/data-plugin/public';
+import { SavedObject } from '@kbn/core/types';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus } from '../../../types';
-import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
-import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
+import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
+import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const mockServices = {
   history: () => ({
@@ -52,6 +52,11 @@ const mockServices = {
     },
   },
   docLinks: { links: { discover: { fieldTypeHelp: '' } } },
+  dataViewEditor: {
+    userPermissions: {
+      editDataView: jest.fn(() => true),
+    },
+  },
 } as unknown as DiscoverServices;
 
 const mockfieldCounts: Record<string, number> = {};
@@ -111,6 +116,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     onEditRuntimeField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onDataViewCreated: jest.fn(),
+    useNewFieldsApi: true,
   };
 }
 
@@ -159,5 +165,32 @@ describe('discover responsive sidebar', function () {
     comp.update();
     expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(4);
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
+  });
+
+  it('should show "Add a field" button to create a runtime field', () => {
+    expect(mockServices.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
+    expect(findTestSubject(comp, 'indexPattern-add-field_btn').length).toBe(1);
+  });
+
+  it('should not show "Add a field" button in viewer mode', () => {
+    const mockedServicesInViewerMode = {
+      ...mockServices,
+      dataViewEditor: {
+        ...mockServices.dataViewEditor,
+        userPermissions: {
+          ...mockServices.dataViewEditor.userPermissions,
+          editDataView: jest.fn(() => false),
+        },
+      },
+    };
+    const compInViewerMode = mountWithIntl(
+      <KibanaContextProvider services={mockedServicesInViewerMode}>
+        <DiscoverSidebarResponsive {...props} />
+      </KibanaContextProvider>
+    );
+    expect(
+      mockedServicesInViewerMode.dataViewEditor.userPermissions.editDataView
+    ).toHaveBeenCalled();
+    expect(findTestSubject(compInViewerMode, 'indexPattern-add-field_btn').length).toBe(0);
   });
 });

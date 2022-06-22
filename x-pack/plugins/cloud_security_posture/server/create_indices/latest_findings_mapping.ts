@@ -21,7 +21,6 @@ export const latestFindingsMapping: MappingTypeMapping = {
         },
       },
     },
-
     agent: {
       properties: {
         id: {
@@ -49,32 +48,35 @@ export const latestFindingsMapping: MappingTypeMapping = {
     },
     resource: {
       properties: {
-        filename: {
-          type: 'text',
-          fields: {
-            keyword: {
-              ignore_above: 1024,
-              type: 'keyword',
-            },
-          },
-        },
         type: {
-          type: 'text',
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        id: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        name: {
+          type: 'keyword',
+          ignore_above: 1024,
           fields: {
-            keyword: {
-              ignore_above: 1024,
-              type: 'keyword',
+            text: {
+              type: 'text',
             },
           },
         },
-      },
-    },
-    resource_id: {
-      type: 'text',
-      fields: {
-        keyword: {
+        sub_type: {
           ignore_above: 1024,
           type: 'keyword',
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
+        },
+        raw: {
+          type: 'object',
+          enabled: false,
         },
       },
     },
@@ -90,6 +92,10 @@ export const latestFindingsMapping: MappingTypeMapping = {
             },
           },
         },
+        id: {
+          ignore_above: 1024,
+          type: 'keyword',
+        },
         benchmark: {
           properties: {
             name: {
@@ -102,6 +108,24 @@ export const latestFindingsMapping: MappingTypeMapping = {
               },
             },
           },
+        },
+        section: {
+          type: 'text',
+          fields: {
+            keyword: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+    cluster_id: {
+      type: 'text',
+      fields: {
+        keyword: {
+          ignore_above: 1024,
+          type: 'keyword',
         },
       },
     },

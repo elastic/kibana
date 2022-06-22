@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { getUiSettings } from './ui_settings';
 
 export class VisTypeVislibServerPlugin implements Plugin<object, object> {

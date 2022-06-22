@@ -31,7 +31,9 @@ const enabledActionTypes = [
 ];
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   const servers = {
     ...xpackFunctionalConfig.get('servers'),
@@ -48,8 +50,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     pageObjects,
     // list paths to the files that contain your plugins tests
     testFiles: [
-      resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/triggers_actions_ui'),
+      resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/uptime'),
       resolve(__dirname, './apps/ml'),
       resolve(__dirname, './apps/cases'),
@@ -71,7 +73,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=https://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
-        `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify(['internalAlertsTable'])}`,
+        `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
+          'internalAlertsTable',
+          'internalShareableComponentsSandbox',
+          'ruleTagFilter',
+          'ruleStatusFilter',
+        ])}`,
         `--xpack.alerting.rules.minimumScheduleInterval.value="2s"`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
         `--xpack.actions.preconfiguredAlertHistoryEsIndex=false`,

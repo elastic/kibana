@@ -7,14 +7,16 @@
 
 import React from 'react';
 import { EuiSpacer, EuiIcon } from '@elastic/eui';
+import { type KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { UseQueryResult } from 'react-query';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { SummarySection } from './dashboard_sections/summary_section';
 import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
 import { useComplianceDashboardDataApi } from '../../common/api';
 import { CspPageTemplate } from '../../components/csp_page_template';
-import { type KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
 import { CLOUD_POSTURE, NO_DATA_CONFIG_TEXT } from './translations';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 
 const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataConfig'] => ({
   pageTitle: NO_DATA_CONFIG_TEXT.PAGE_TITLE,
@@ -33,21 +35,27 @@ const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataCo
 });
 
 export const ComplianceDashboard = () => {
-  const getDashboardDataQuery = useComplianceDashboardDataApi();
+  const getInfo = useCspSetupStatusApi();
+  const isFindingsIndexApplicable = getInfo.data?.latestFindingsIndexStatus === 'applicable';
+  const getDashboardData = useComplianceDashboardDataApi({
+    enabled: isFindingsIndexApplicable,
+  });
   useCspBreadcrumbs([allNavigationItems.dashboard]);
+
+  const pageQuery: UseQueryResult = isFindingsIndexApplicable ? getDashboardData : getInfo;
 
   return (
     <CspPageTemplate
       pageHeader={{ pageTitle: CLOUD_POSTURE }}
       restrictWidth={1600}
-      query={getDashboardDataQuery}
-      noDataConfig={getNoDataConfig(getDashboardDataQuery.refetch)}
+      query={pageQuery}
+      noDataConfig={!isFindingsIndexApplicable ? getNoDataConfig(getInfo.refetch) : undefined}
     >
-      {getDashboardDataQuery.data && (
+      {getDashboardData.data && (
         <>
-          <SummarySection complianceData={getDashboardDataQuery.data} />
+          <SummarySection complianceData={getDashboardData.data} />
           <EuiSpacer />
-          <BenchmarksSection complianceData={getDashboardDataQuery.data} />
+          <BenchmarksSection complianceData={getDashboardData.data} />
           <EuiSpacer />
         </>
       )}

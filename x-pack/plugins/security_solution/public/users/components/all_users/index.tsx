@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { UserDetailsLink } from '../../../common/components/links';
+import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 
 import {
   Columns,
@@ -66,12 +67,16 @@ const getUsersColumns = (): UsersTableColumns => [
     sortable: true,
     mobileOptions: { show: true },
     render: (name) =>
-      getRowItemDraggables({
-        rowItems: [name],
-        attrName: 'user.name',
-        idPrefix: `users-table-${name}-name`,
-        render: (item) => <UserDetailsLink userName={item} />,
-      }),
+      name != null && name.length > 0
+        ? getRowItemDraggables({
+            rowItems: [name],
+            attrName: 'user.name',
+            idPrefix: `users-table-${name}-name`,
+            render: (item) => <UserDetailsLink userName={item} />,
+            isAggregatable: true,
+            fieldType: 'keyword',
+          })
+        : getOrEmptyTagFromValue(name),
   },
   {
     field: 'lastSeen',
@@ -88,11 +93,15 @@ const getUsersColumns = (): UsersTableColumns => [
     truncateText: false,
     mobileOptions: { show: true },
     render: (domain) =>
-      getRowItemDraggables({
-        rowItems: [domain],
-        attrName: 'user.domain',
-        idPrefix: `users-table-${domain}-domain`,
-      }),
+      domain != null && domain.length > 0
+        ? getRowItemDraggables({
+            rowItems: [domain],
+            attrName: 'user.domain',
+            idPrefix: `users-table-${domain}-domain`,
+            isAggregatable: true,
+            fieldType: 'keyword',
+          })
+        : getOrEmptyTagFromValue(domain),
   },
 ];
 

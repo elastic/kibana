@@ -8,9 +8,9 @@
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import { LogDataViewReference } from '../../../../common/log_views';
-import { useLinkProps } from '../../../../../observability/public';
 import { FormElement } from './form_elements';
 import { getFormRowProps } from './form_field_props';
 import { IndexPatternSelector } from './index_pattern_selector';

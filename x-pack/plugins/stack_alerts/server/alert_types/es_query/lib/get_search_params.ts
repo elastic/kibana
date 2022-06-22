@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { OnlyEsQueryAlertParams } from '../types';
-import { parseDuration } from '../../../../../alerting/common';
+import { parseDuration } from '@kbn/alerting-plugin/common';
+import { OnlyEsQueryRuleParams } from '../types';
 
-export function getSearchParams(queryParams: OnlyEsQueryAlertParams) {
+export function getSearchParams(queryParams: OnlyEsQueryRuleParams) {
   const date = Date.now();
   const { esQuery, timeWindowSize, timeWindowUnit } = queryParams;
 

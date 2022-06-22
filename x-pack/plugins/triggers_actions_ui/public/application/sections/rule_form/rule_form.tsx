@@ -36,13 +36,19 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
-import { KibanaFeature } from '../../../../../features/public';
+import { KibanaFeature } from '@kbn/features-plugin/public';
 import {
   formatDuration,
   getDurationNumberInItsUnit,
   getDurationUnitValue,
   parseDuration,
-} from '../../../../../alerting/common/parse_duration';
+} from '@kbn/alerting-plugin/common/parse_duration';
+import {
+  RuleActionParam,
+  ALERTS_FEATURE_ID,
+  RecoveredActionGroup,
+  isActionGroupDisabledForActionTypeId,
+} from '@kbn/alerting-plugin/common';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
@@ -56,12 +62,6 @@ import {
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
-import {
-  RuleActionParam,
-  ALERTS_FEATURE_ID,
-  RecoveredActionGroup,
-  isActionGroupDisabledForActionTypeId,
-} from '../../../../../alerting/common';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
@@ -120,6 +120,7 @@ export const RuleForm = ({
     charts,
     data,
     unifiedSearch,
+    dataViews,
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
@@ -487,7 +488,7 @@ export const RuleForm = ({
                 >
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.ruleForm.documentationLabel"
-                    defaultMessage="Documentation"
+                    defaultMessage="Learn more"
                   />
                 </EuiLink>
               )}
@@ -524,6 +525,7 @@ export const RuleForm = ({
               metadata={metadata}
               charts={charts}
               data={data}
+              dataViews={dataViews}
               unifiedSearch={unifiedSearch}
             />
           </Suspense>
@@ -558,7 +560,8 @@ export const RuleForm = ({
                     omitMessageVariables: selectedRuleType.doesSetRecoveryContext
                       ? 'keepContext'
                       : 'all',
-                    defaultActionMessage: recoveredActionGroupMessage,
+                    defaultActionMessage:
+                      ruleTypeModel?.defaultRecoveryMessage || recoveredActionGroupMessage,
                   }
                 : { ...actionGroup, defaultActionMessage: ruleTypeModel?.defaultActionMessage }
             )}
@@ -721,10 +724,10 @@ export const RuleForm = ({
                   name="interval"
                   data-test-subj="intervalInput"
                   onChange={(e) => {
-                    const interval =
-                      e.target.value !== '' ? parseInt(e.target.value, 10) : undefined;
+                    const value = e.target.value;
+                    const interval = value !== '' ? parseInt(value, 10) : undefined;
                     setRuleInterval(interval);
-                    setScheduleProperty('interval', `${e.target.value}${ruleIntervalUnit}`);
+                    setScheduleProperty('interval', `${value}${ruleIntervalUnit}`);
                   }}
                 />
               </EuiFlexItem>

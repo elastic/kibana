@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { APP_ID } from '../../../plugins/maps/common/constants';
+import { APP_ID } from '@kbn/maps-plugin/common/constants';
 import { FtrService } from '../ftr_provider_context';
 
 function escapeLayerName(layerName: string) {
@@ -193,6 +193,14 @@ export class GisPageObject extends FtrService {
 
   async expectMissingAddLayerButton() {
     await this.testSubjects.missingOrFail('addLayerButton');
+  }
+
+  async expectMissingToolsControl() {
+    await this.testSubjects.missingOrFail('mapToolsControlPopover');
+  }
+
+  async expectExistsToolsControl() {
+    await this.testSubjects.existOrFail('mapToolsControlPopover');
   }
 
   async expectExistAddLayerButton() {
@@ -600,6 +608,7 @@ export class GisPageObject extends FtrService {
   }
 
   async _getResponse(requestName: string) {
+    await this.inspector.openInspectorView('inspectorViewChooserRequests');
     if (requestName) {
       await this.testSubjects.click('inspectorRequestChooser');
       await this.testSubjects.click(`inspectorRequestChooser${requestName}`);

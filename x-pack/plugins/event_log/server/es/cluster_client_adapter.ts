@@ -9,7 +9,7 @@ import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
 import { reject, isUndefined, isNumber, pick } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger, ElasticsearchClient } from 'src/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
@@ -123,7 +123,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     for (const doc of docs) {
       if (doc.body === undefined) continue;
 
-      bulkBody.push({ create: { _index: doc.index } });
+      bulkBody.push({ create: { _index: doc.index, require_alias: true } });
       bulkBody.push(doc.body);
     }
 

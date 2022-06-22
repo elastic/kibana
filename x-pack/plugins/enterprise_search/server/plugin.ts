@@ -14,17 +14,18 @@ import {
   IRouter,
   KibanaRequest,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
-import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { InfraPluginSetup } from '../../infra/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { SpacesPluginStart } from '../../spaces/server';
+} from '@kbn/core/server';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { InfraPluginSetup } from '@kbn/infra-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ELASTICSEARCH_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
@@ -45,7 +46,7 @@ import {
 
 import { registerAppSearchRoutes } from './routes/app_search';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
-import { registerListRoute } from './routes/enterprise_search/indices';
+import { registerIndexRoutes } from './routes/enterprise_search/indices';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -53,7 +54,7 @@ import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 
-import { ConfigType } from './';
+import { ConfigType } from '.';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -93,6 +94,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     const PLUGIN_IDS = [
       ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
       ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      ELASTICSEARCH_PLUGIN.ID,
       APP_SEARCH_PLUGIN.ID,
       WORKPLACE_SEARCH_PLUGIN.ID,
     ];
@@ -134,12 +136,14 @@ export class EnterpriseSearchPlugin implements Plugin {
         navLinks: {
           enterpriseSearch: showEnterpriseSearch,
           enterpriseSearchContent: showEnterpriseSearch,
+          elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },
         catalogue: {
           enterpriseSearch: showEnterpriseSearch,
           enterpriseSearchContent: showEnterpriseSearch,
+          elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },
@@ -156,7 +160,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerConfigDataRoute(dependencies);
     registerAppSearchRoutes(dependencies);
     registerWorkplaceSearchRoutes(dependencies);
-    registerListRoute(dependencies);
+    registerIndexRoutes(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry

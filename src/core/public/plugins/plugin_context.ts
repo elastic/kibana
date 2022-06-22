@@ -7,12 +7,12 @@
  */
 
 import { omit } from 'lodash';
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 import { DiscoveredPlugin } from '../../server';
 import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
-import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { CoreSetup, CoreStart } from '../';
+import { CoreSetup, CoreStart } from '..';
 
 /**
  * The available core services passed to a `PluginInitializer`

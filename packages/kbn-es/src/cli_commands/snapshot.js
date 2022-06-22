@@ -8,7 +8,8 @@
 
 const dedent = require('dedent');
 const getopts = require('getopts');
-import { ToolingLog, getTimeReporter } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
 const { Cluster } = require('../cluster');
 const { parseTimeoutToMs } = require('../utils');
 

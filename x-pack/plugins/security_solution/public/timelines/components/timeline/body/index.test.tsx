@@ -38,7 +38,7 @@ jest.mock('../../../../common/lib/kibana/hooks');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
-  const mockCasesContract = jest.requireActual('../../../../../../cases/public/mocks');
+  const mockCasesContract = jest.requireActual('@kbn/cases-plugin/public/mocks');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
@@ -80,7 +80,8 @@ jest.mock('../../../../common/lib/kibana', () => {
 const mockSort: Sort[] = [
   {
     columnId: '@timestamp',
-    columnType: 'number',
+    columnType: 'date',
+    esTypes: ['date'],
     sortDirection: Direction.desc,
   },
 ];
@@ -207,43 +208,7 @@ describe('Body', () => {
         });
       });
     }, 20000);
-
-    test('it dispatches the `REMOVE_COLUMN` action when there is a field removed from the custom fields', async () => {
-      const customFieldId = 'my.custom.runtimeField';
-      const { storage } = createSecuritySolutionStorageMock();
-      const state: State = {
-        ...mockGlobalState,
-        timeline: {
-          ...mockGlobalState.timeline,
-          timelineById: {
-            ...mockGlobalState.timeline.timelineById,
-            'timeline-test': {
-              ...mockGlobalState.timeline.timelineById.test,
-              id: 'timeline-test',
-              columns: [
-                ...defaultHeaders,
-                { id: customFieldId, category: 'my', columnHeaderType: 'not-filtered' },
-              ],
-            },
-          },
-        },
-      };
-      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
-      mount(
-        <TestProviders store={store}>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
-
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch).toBeCalledWith({
-        payload: { columnId: customFieldId, id: 'timeline-test' },
-        type: 'x-pack/timelines/t-grid/REMOVE_COLUMN',
-      });
-    });
   });
-
   describe('action on event', () => {
     const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
       wrapper.find('[data-test-subj="add-note"]').first().find('button').simulate('click');

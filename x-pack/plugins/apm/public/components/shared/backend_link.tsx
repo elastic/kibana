@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useApmRouter } from '../../hooks/use_apm_router';
 import { truncate } from '../../utils/style';
 import { ApmRoutes } from '../routing/apm_route_config';
@@ -42,7 +42,9 @@ export function BackendLink({
         <EuiFlexItem grow={false}>
           <SpanIcon type={type} subtype={subtype} />
         </EuiFlexItem>
-        <EuiFlexItem>{query.backendName}</EuiFlexItem>
+        <EuiFlexItem className="eui-textTruncate">
+          <span className="eui-textTruncate">{query.backendName}</span>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </StyledLink>
   );

@@ -24,7 +24,7 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { getPolicyEditPath } from '../../application/services/navigation';
 import { Index, IndexLifecyclePolicy } from '../../../common/types';
 
@@ -140,7 +140,9 @@ export class IndexLifecycleSummary extends Component<Props, State> {
                 id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.phaseDefinitionTitle"
               />
             </EuiPopoverTitle>
-            <EuiCodeBlock lang="json">{JSON.stringify(ilm.phase_execution, null, 2)}</EuiCodeBlock>
+            <EuiCodeBlock language="json">
+              {JSON.stringify(ilm.phase_execution, null, 2)}
+            </EuiCodeBlock>
           </EuiPopover>
         </EuiDescriptionListDescription>
       </Fragment>

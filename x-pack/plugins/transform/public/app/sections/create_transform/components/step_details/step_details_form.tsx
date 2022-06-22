@@ -24,8 +24,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
-import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import {
   isEsIndices,

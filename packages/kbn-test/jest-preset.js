@@ -9,6 +9,8 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+const pkgMap = require('@kbn/synthetic-package-map').readPackageMap();
+
 /** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
 /** @type {JestConfig} */
 module.exports = {
@@ -36,13 +38,17 @@ module.exports = {
     '\\.(css|less|scss)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/style_mock.js',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/file_mock.js',
-    '\\.ace\\.worker.js$':
+    '\\.ace\\.worker$':
       '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/worker_module_mock.js',
-    '\\.editor\\.worker.js$':
+    '\\.editor\\.worker(\\.js)?$':
       '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/worker_module_mock.js',
     '^(!!)?file-loader!': '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/file_mock.js',
-    '^src/core/(.*)': '<rootDir>/src/core/$1',
-    '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
+    ...Object.fromEntries(
+      Array.from(pkgMap.entries()).map(([pkgId, repoRelativeDir]) => [
+        `^${pkgId}(/.*)?$`,
+        `<rootDir>/${repoRelativeDir}$1`,
+      ])
+    ),
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
@@ -57,12 +63,16 @@ module.exports = {
         rootDirectory: '.',
       },
     ],
-    [
-      '@kbn/test/target_node/jest/ci_stats_jest_reporter',
-      {
-        testGroupType: 'Jest Unit Tests',
-      },
-    ],
+    ...(process.env.TEST_GROUP_TYPE_UNIT
+      ? [
+          [
+            '@kbn/test/target_node/jest/ci_stats_jest_reporter',
+            {
+              testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
+            },
+          ],
+        ]
+      : []),
   ],
 
   // The paths to modules that run some code to configure or set up the testing environment before each test

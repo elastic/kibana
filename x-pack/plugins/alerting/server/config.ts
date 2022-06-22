@@ -6,25 +6,42 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { validateDurationSchema } from './lib';
+import { validateDurationSchema, parseDuration } from './lib';
 
+const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const ruleTypeSchema = schema.object({
   id: schema.string(),
   timeout: schema.maybe(schema.string({ validate: validateDurationSchema })),
 });
 
+const connectorTypeSchema = schema.object({
+  id: schema.string(),
+  max: schema.maybe(schema.number({ max: 100000 })),
+});
+
 const rulesSchema = schema.object({
   minimumScheduleInterval: schema.object({
     value: schema.string({
-      validate: validateDurationSchema,
+      validate: (duration: string) => {
+        const validationResult = validateDurationSchema(duration);
+        if (validationResult) {
+          return validationResult;
+        }
+
+        const parsedDurationMs = parseDuration(duration);
+        if (parsedDurationMs > ONE_DAY_IN_MS) {
+          return 'duration cannot exceed one day';
+        }
+      },
       defaultValue: '1m',
     }),
     enforce: schema.boolean({ defaultValue: false }), // if enforce is false, only warnings will be shown
   }),
-  execution: schema.object({
+  run: schema.object({
     timeout: schema.maybe(schema.string({ validate: validateDurationSchema })),
     actions: schema.object({
-      max: schema.number({ defaultValue: 100000 }),
+      max: schema.number({ defaultValue: 100000, max: 100000 }),
+      connectorTypeOverrides: schema.maybe(schema.arrayOf(connectorTypeSchema)),
     }),
     ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
   }),
@@ -48,5 +65,8 @@ export const configSchema = schema.object({
 
 export type AlertingConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
-export type RuleTypeConfig = Omit<RulesConfig, 'ruleTypeOverrides' | 'minimumScheduleInterval'>;
-export type AlertingRulesConfig = Pick<AlertingConfig['rules'], 'minimumScheduleInterval'>;
+export type AlertingRulesConfig = Pick<AlertingConfig['rules'], 'minimumScheduleInterval'> & {
+  isUsingSecurity: boolean;
+};
+export type ActionsConfig = RulesConfig['run']['actions'];
+export type ActionTypeConfig = Omit<ActionsConfig, 'connectorTypeOverrides'>;

@@ -22,10 +22,10 @@ import {
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
-import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
-import type { CodeEditorProps } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
 import { TooltipWrapper, useDebounceWithOptions } from '../../../../../shared_components';
-import { ParamEditorProps } from '../../index';
+import { ParamEditorProps } from '../..';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
 import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
 import {
@@ -66,6 +66,7 @@ export const WrappedFormulaEditor = ({
   ...rest
 }: ParamEditorProps<FormulaIndexPatternColumn>) => {
   const dateHistogramInterval = getDateHistogramInterval(
+    rest.data.datatableUtilities,
     rest.layer,
     rest.indexPattern,
     activeData,
@@ -89,7 +90,8 @@ export function FormulaEditor({
   columnId,
   indexPattern,
   operationDefinitionMap,
-  data,
+  unifiedSearch,
+  dataViews,
   toggleFullscreen,
   isFullscreen,
   setIsCloseable,
@@ -416,7 +418,8 @@ export function FormulaEditor({
             context,
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
-            data,
+            unifiedSearch,
+            dataViews,
             dateHistogramInterval: baseIntervalRef.current,
           });
         }
@@ -427,7 +430,8 @@ export function FormulaEditor({
           context,
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
-          data,
+          unifiedSearch,
+          dataViews,
           dateHistogramInterval: baseIntervalRef.current,
         });
       }
@@ -444,7 +448,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, data, baseIntervalRef]
+    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, baseIntervalRef]
   );
 
   const provideSignatureHelp = useCallback(
