@@ -22,6 +22,7 @@ import {
   FieldFormatParams as BaseFieldFormatParams,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
+import { FORMULA_COLUMN } from './configurations/constants';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',
@@ -52,12 +53,19 @@ export interface MetricOption {
   field?: string;
   label: string;
   description?: string;
-  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN' | 'unique_count';
+  columnType?:
+    | 'range'
+    | 'operation'
+    | 'FILTER_RECORDS'
+    | 'TERMS_COLUMN'
+    | 'unique_count'
+    | typeof FORMULA_COLUMN;
   columnFilters?: ColumnFilter[];
   columnFilter?: ColumnFilter;
   paramFilters?: ParamFilter[];
   timeScale?: string;
   showPercentileAnnotations?: boolean;
+  formula?: string;
 }
 
 export interface SeriesConfig {
