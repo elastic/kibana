@@ -10,6 +10,7 @@ import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { validate } from '../validation';
 import {
   ConfigKey,
+  MonitorFields,
   DataStream,
   TLSVersion,
   CommonFields,
@@ -602,8 +603,8 @@ describe('useBarChartsHooks', () => {
   it('handles browser data stream', async () => {
     const onChange = jest.fn();
     const initialProps = {
-      defaultConfig: defaultConfig[DataStream.BROWSER],
-      config: defaultConfig[DataStream.BROWSER],
+      defaultConfig: defaultConfig[DataStream.BROWSER] as Partial<MonitorFields>,
+      config: defaultConfig[DataStream.BROWSER] as Partial<MonitorFields>,
       newPolicy,
       onChange,
       validate,
@@ -637,7 +638,7 @@ describe('useBarChartsHooks', () => {
 
     rerender({
       ...initialProps,
-      config,
+      config: config as Partial<MonitorFields>,
     });
 
     await waitFor(() => {

@@ -6,14 +6,20 @@
  * Side Public License, v 1.
  */
 
-export const mockAnchorHit = {
-  _id: '123',
-  _index: 'the-index-pattern-id',
-  fields: { order_date: ['2021-06-07T18:52:17.000Z'] },
-  sort: [1623091937000, 2092],
-  isAnchor: true,
-  _version: 1,
-};
+import { indexPatternMock } from '../../../__mocks__/index_pattern';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
+
+export const mockAnchorHit = buildDataTableRecord(
+  {
+    _id: '123',
+    _index: 'the-index-pattern-id',
+    fields: { order_date: ['2021-06-07T18:52:17.000Z'] },
+    sort: [1623091937000, 2092],
+    _version: 1,
+  },
+  indexPatternMock,
+  true
+);
 
 export const mockPredecessorHits = [
   {
@@ -37,7 +43,7 @@ export const mockPredecessorHits = [
     sort: ['2021-06-07T19:10:22.000Z', 2435],
     _version: 1,
   },
-];
+].map((entry) => buildDataTableRecord(entry, indexPatternMock));
 
 export const mockSuccessorHits = [
   {
@@ -61,4 +67,4 @@ export const mockSuccessorHits = [
     sort: ['2021-06-07T18:47:16.000Z', 2437],
     _version: 1,
   },
-];
+].map((entry) => buildDataTableRecord(entry, indexPatternMock));
