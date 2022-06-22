@@ -16,7 +16,6 @@ import {
   EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
@@ -85,14 +84,12 @@ function getItemIdToExpandedRowMap(
 
 interface Props {
   isMlEnabledInSpace?: boolean;
-  spacesApi?: SpacesPluginStart;
   blockRefresh?: boolean;
   pageState: ListingPageUrlState;
   updatePageState: (update: Partial<ListingPageUrlState>) => void;
 }
 export const DataFrameAnalyticsList: FC<Props> = ({
   isMlEnabledInSpace = true,
-  spacesApi,
   blockRefresh = false,
   pageState,
   updatePageState,
