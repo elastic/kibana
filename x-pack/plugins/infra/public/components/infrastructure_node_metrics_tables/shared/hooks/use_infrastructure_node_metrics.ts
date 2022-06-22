@@ -19,6 +19,7 @@ import type {
   MetricsExplorerTimeOptions,
 } from '../../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
+import { NodeMetricsTableData } from '../types';
 
 export interface SortState<T> {
   field: keyof T;
@@ -51,10 +52,10 @@ export const useInfrastructureNodeMetrics = <T>(
 
   const [transformedNodes, setTransformedNodes] = useState<T[]>([]);
   const fetch = useKibanaHttpFetch();
-  const { source, isLoadingSource } = useSourceContext();
+  const { source, isLoadingSource, loadSourceRequest, metricIndicesExist } = useSourceContext();
   const timerangeWithInterval = useTimerangeWithInterval(timerange);
 
-  const [{ state: promiseState }, fetchNodes] = useTrackedPromise(
+  const [fetchNodesRequest, fetchNodes] = useTrackedPromise(
     {
       createPromise: (): Promise<MetricsExplorerResponse> => {
         if (!source) {
@@ -78,16 +79,22 @@ export const useInfrastructureNodeMetrics = <T>(
       onResolve: (response: MetricsExplorerResponse) => {
         setTransformedNodes(response.series.map(transform));
       },
-      onReject: (error) => {
-        // What to do about this?
-        // eslint-disable-next-line no-console
-        console.log(error);
-      },
       cancelPreviousOn: 'creation',
     },
     [source, metricsExplorerOptions, timerangeWithInterval]
   );
-  const isLoadingNodes = promiseState === 'pending' || promiseState === 'uninitialized';
+
+  const isLoadingNodes =
+    fetchNodesRequest.state === 'pending' || fetchNodesRequest.state === 'uninitialized';
+  const isLoading = isLoadingSource || isLoadingNodes;
+
+  const errors = useMemo<Error[]>(
+    () => [
+      ...(loadSourceRequest.state === 'rejected' ? [wrapAsError(loadSourceRequest.value)] : []),
+      ...(fetchNodesRequest.state === 'rejected' ? [wrapAsError(fetchNodesRequest.value)] : []),
+    ],
+    [fetchNodesRequest, loadSourceRequest]
+  );
 
   useEffect(() => {
     fetchNodes();
@@ -109,10 +116,23 @@ export const useInfrastructureNodeMetrics = <T>(
 
   const pageCount = useMemo(() => Math.ceil(top100Nodes.length / TABLE_PAGE_SIZE), [top100Nodes]);
 
+  const data = useMemo<NodeMetricsTableData<T>>(
+    () =>
+      errors.length > 0
+        ? { state: 'error', errors }
+        : metricIndicesExist == null
+        ? { state: 'unknown' }
+        : !metricIndicesExist
+        ? { state: 'no-indices' }
+        : nodes.length <= 0
+        ? { state: 'empty-indices' }
+        : { state: 'data', currentPageIndex, pageCount, rows: nodes },
+    [currentPageIndex, errors, metricIndicesExist, nodes, pageCount]
+  );
+
   return {
-    isLoading: isLoadingSource || isLoadingNodes,
-    nodes,
-    pageCount,
+    isLoading,
+    data,
   };
 };
 
@@ -188,3 +208,5 @@ function sortDescending(nodeAValue: unknown, nodeBValue: unknown) {
 
   return 0;
 }
+
+const wrapAsError = (value: any): Error => (value instanceof Error ? value : new Error(`${value}`));

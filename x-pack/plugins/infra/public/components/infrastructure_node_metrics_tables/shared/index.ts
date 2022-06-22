@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-export { MetricsNodeDetailsLink, NumberCell, StepwisePagination, UptimeCell } from './components';
+export {
+  MetricsNodeDetailsLink,
+  MetricsTableEmptyIndicesContent,
+  MetricsTableErrorContent,
+  MetricsTableLoadingContent,
+  MetricsTableNoIndicesContent,
+  NumberCell,
+  StepwisePagination,
+  UptimeCell,
+} from './components';
 export {
   averageOfValues,
   createMetricByFieldLookup,
@@ -17,6 +26,7 @@ export {
 export type { MetricsMap, MetricsQueryOptions, SortState } from './hooks';
 export type {
   IntegratedNodeMetricsTableProps,
+  NodeMetricsTableData,
   SourceProviderProps,
   UseNodeMetricsTableOptions,
 } from './types';
