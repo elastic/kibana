@@ -10,12 +10,14 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiLoadingSpinner,
-  EuiPopover,
+  EuiPanel,
   EuiTableFieldDataColumnType,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getOr } from 'lodash/fp';
 import { SavedObjectsImportSuccess } from '@kbn/core/public';
+import styled from 'styled-components';
 import { InnerLinkPanel, LinkPanel, LinkPanelListItem } from '../link_panel';
 import { LinkPanelViewProps } from '../link_panel/types';
 import { Link } from '../link_panel/link';
@@ -71,6 +73,17 @@ const warningPanel = (
     dataTestSubj="risky-hosts-inner-panel-warning"
   />
 );
+
+const Popover = styled(EuiPanel)`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: '340px';
+`;
+
+const PopoverWrapper = styled.div`
+  position: relative;
+`;
 
 export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
   isInspectEnabled,
@@ -186,23 +199,21 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
                 {status === 'loading' && <EuiLoadingSpinner size="m" />} {i18n.IMPORT_DASHBOARD}
               </EuiButton>
             ) : (
-              <EuiPopover
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-                button={
-                  <EuiButton
-                    onMouseEnter={onMouseEnter}
-                    color="warning"
-                    target="_blank"
-                    isDisabled={true}
-                    data-test-subj={`risky-host-disabled-import-module-button`}
-                  >
-                    {i18n.IMPORT_DASHBOARD}
-                  </EuiButton>
-                }
-              >
-                {i18n.IMPORT_DASHBOARD_TOOLTIP}
-              </EuiPopover>
+              <PopoverWrapper onMouseEnter={onMouseEnter} onMouseLeave={closePopover}>
+                {isPopoverOpen && (
+                  <Popover>
+                    <EuiText>{i18n.IMPORT_DASHBOARD_TOOLTIP} </EuiText>
+                  </Popover>
+                )}
+                <EuiButton
+                  color="warning"
+                  target="_blank"
+                  isDisabled={true}
+                  data-test-subj={`risky-host-disabled-import-module-button`}
+                >
+                  {i18n.IMPORT_DASHBOARD}
+                </EuiButton>
+              </PopoverWrapper>
             ),
           [buttonHref, dashboardUrl, importMyFile, isPopoverOpen, listItems.length, status]
         ),

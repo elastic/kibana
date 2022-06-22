@@ -5,8 +5,9 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiButton, EuiFlexItem, EuiLink, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiFlexItem, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import styled from 'styled-components';
 
 interface OpenInDevConsoleButtonProps {
   dataTestSubjPrefix?: string;
@@ -16,6 +17,17 @@ interface OpenInDevConsoleButtonProps {
   popoverContent?: string;
   title: string;
 }
+
+const Popover = styled(EuiPanel)`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 340px;
+`;
+
+const PopoverWrapper = styled.div`
+  position: relative;
+`;
 
 const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = ({
   dataTestSubjPrefix = 'open-in-dev-console',
@@ -35,7 +47,7 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
 
   return loadFromUrl ? (
     <EuiFlexItem>
-      {enableButton != null && enableButton ? (
+      {enableButton ? (
         <EuiButton
           href={href}
           color="warning"
@@ -46,33 +58,31 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
           {title}
         </EuiButton>
       ) : popoverContent ? (
-        <EuiPopover
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          button={
-            <EuiButton
-              href={href}
-              color="warning"
-              isDisabled={true}
-              data-test-subj={`${dataTestSubjPrefix}-disabled-module-button`}
-              onMouseEnter={onMouseEnter}
-            >
-              {title}
-            </EuiButton>
-          }
-        >
-          <p>
-            {popoverContent}{' '}
-            {learnMoreUrl && (
-              <EuiLink href={learnMoreUrl} target="_blank" external={false}>
-                <FormattedMessage
-                  defaultMessage="Learn More"
-                  id="xpack.securitySolution.openInDevConsole.tooltipTitle"
-                />
-              </EuiLink>
-            )}
-          </p>
-        </EuiPopover>
+        <PopoverWrapper onMouseEnter={onMouseEnter} onMouseLeave={closePopover}>
+          {isPopoverOpen && (
+            <Popover>
+              <EuiText>
+                {popoverContent}{' '}
+                {learnMoreUrl && (
+                  <EuiLink href={learnMoreUrl} target="_blank" external={false}>
+                    <FormattedMessage
+                      defaultMessage="Learn More"
+                      id="xpack.securitySolution.openInDevConsole.tooltipTitle"
+                    />
+                  </EuiLink>
+                )}
+              </EuiText>
+            </Popover>
+          )}
+          <EuiButton
+            href={href}
+            color="warning"
+            isDisabled={true}
+            data-test-subj={`${dataTestSubjPrefix}-disabled-module-button`}
+          >
+            {title}
+          </EuiButton>
+        </PopoverWrapper>
       ) : (
         <EuiButton
           href={href}
