@@ -11,10 +11,10 @@ import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard } from '..';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { NO_DATA_CONFIG_TEXT } from './translations';
 import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import * as TEXT from './translations';
 import { useComplianceDashboardDataApi } from '../../common/api/use_compliance_dashboard_data_api';
+import { MISSING_FINDINGS_NO_DATA_CONFIG } from './test_subjects';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_cis_kubernetes_integration');
@@ -206,9 +206,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage();
 
-    Object.values(NO_DATA_CONFIG_TEXT).forEach((text) =>
-      expect(screen.getAllByText(text)[0]).toBeInTheDocument()
-    );
+    expect(screen.queryByTestId(MISSING_FINDINGS_NO_DATA_CONFIG)).toBeInTheDocument();
     expect(screen.queryByText(TEXT.CLOUD_POSTURE_SCORE)).not.toBeInTheDocument();
   });
 
@@ -227,9 +225,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage();
 
-    [NO_DATA_CONFIG_TEXT.BUTTON_TITLE, NO_DATA_CONFIG_TEXT.DESCRIPTION].forEach((text) =>
-      expect(screen.queryByText(text)).not.toBeInTheDocument()
-    );
+    expect(screen.queryByTestId(MISSING_FINDINGS_NO_DATA_CONFIG)).not.toBeInTheDocument();
     expect(screen.getByText(TEXT.CLOUD_POSTURE_SCORE)).toBeInTheDocument();
   });
 });
