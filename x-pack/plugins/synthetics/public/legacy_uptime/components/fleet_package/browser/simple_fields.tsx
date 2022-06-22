@@ -9,7 +9,7 @@ import React, { memo, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow } from '@elastic/eui';
 import { Validation } from '../types';
-import { ConfigKey } from '../types';
+import { ConfigKey, MonitorFields } from '../types';
 import { useBrowserSimpleFieldsContext } from '../contexts';
 import { ScheduleField } from '../schedule_field';
 import { SourceField } from './source_field';
