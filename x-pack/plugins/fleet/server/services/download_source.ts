@@ -43,7 +43,7 @@ class DownloadSourceService {
   }
 
   public async list(soClient: SavedObjectsClientContract) {
-    const outputs = await soClient.find<DownloadSourceAttributes>({
+    const downloadSources = await soClient.find<DownloadSourceAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
@@ -52,10 +52,10 @@ class DownloadSourceService {
     });
 
     return {
-      items: outputs.saved_objects.map<DownloadSource>(savedObjectToDownloadSource),
-      total: outputs.total,
-      page: outputs.page,
-      perPage: outputs.per_page,
+      items: downloadSources.saved_objects.map<DownloadSource>(savedObjectToDownloadSource),
+      total: downloadSources.total,
+      page: downloadSources.page,
+      perPage: downloadSources.per_page,
     };
   }
 
