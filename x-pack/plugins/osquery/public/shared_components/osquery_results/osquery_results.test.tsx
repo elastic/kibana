@@ -16,6 +16,7 @@ import { useKibana } from '../../common/lib/kibana';
 import * as useActions from '../../actions/use_all_actions';
 import { PERMISSION_DENIED } from '../osquery_action/translations';
 import * as privileges from '../../action_results/use_action_privileges';
+
 jest.mock('../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -71,7 +72,7 @@ const renderWithContext = (Element: React.ReactElement) =>
     </IntlProvider>
   );
 
-describe.only('Osquery Results', () => {
+describe('Osquery Results', () => {
   beforeAll(() => {
     window.IntersectionObserver = jest.fn(() => ({
       root: null,
@@ -83,29 +84,27 @@ describe.only('Osquery Results', () => {
       disconnect: jest.fn(),
     }));
     mockKibana();
-    jest.spyOn(useActions, 'useInfiniteAllActions').mockImplementation(
-      () =>
-        ({
-          data: {
-            pages: [
+    // @ts-expect-error update types
+    jest.spyOn(useActions, 'useInfiniteAllActions').mockImplementation(() => ({
+      data: {
+        pages: [
+          {
+            actions: [
               {
-                actions: [
-                  {
-                    _source: {
-                      '@timestamp': 'test',
-                      action_id: 'action_id_test',
-                      data: {
-                        query: TEST_QUERY,
-                      },
-                    },
-                    _id: 'test',
+                _source: {
+                  '@timestamp': 'test',
+                  action_id: 'action_id_test',
+                  data: {
+                    query: TEST_QUERY,
                   },
-                ],
+                },
+                _id: 'test',
               },
             ],
           },
-        } as any)
-    );
+        ],
+      },
+    }));
   });
   it('should validate permissions', async () => {
     const { queryByText } = renderWithContext(<OsqueryResults {...defaultProps} />);
