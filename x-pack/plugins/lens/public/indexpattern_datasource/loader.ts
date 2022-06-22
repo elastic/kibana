@@ -354,7 +354,7 @@ export async function changeLayerIndexPattern({
   indexPatternsService: IndexPatternsService;
   uiActions: UiActionsStart;
 }) {
-  const fromDataView = state.currentIndexPatternId;
+  const fromDataView = state.layers[layerId].indexPatternId;
   const toDataView = indexPatternId;
 
   const trigger = uiActions.getTrigger('UPDATE_FILTER_REFERENCES_TRIGGER');
