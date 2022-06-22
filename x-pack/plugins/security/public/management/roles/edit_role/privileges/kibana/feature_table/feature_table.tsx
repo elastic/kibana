@@ -48,7 +48,11 @@ interface Props {
   disabled?: boolean;
 }
 
-export class FeatureTable extends Component<Props, {}> {
+interface State {
+  expandedPrivilegeControls: Set<string>;
+}
+
+export class FeatureTable extends Component<Props, State> {
   public static defaultProps = {
     privilegeIndex: -1,
     showLocks: true,
@@ -67,8 +71,11 @@ export class FeatureTable extends Component<Props, {}> {
         if (!this.featureCategories.has(feature.category.id)) {
           this.featureCategories.set(feature.category.id, []);
         }
+
         this.featureCategories.get(feature.category.id)!.push(feature);
       });
+
+    this.state = { expandedPrivilegeControls: new Set() };
   }
 
   public render() {
@@ -207,14 +214,14 @@ export class FeatureTable extends Component<Props, {}> {
     const renderFeatureMarkup = (
       buttonContent: EuiAccordionProps['buttonContent'],
       extraAction: EuiAccordionProps['extraAction'],
-      warningIcon: JSX.Element
+      infoIcon: JSX.Element
     ) => {
       const { canCustomizeSubFeaturePrivileges } = this.props;
       const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
 
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>{warningIcon}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{infoIcon}</EuiFlexItem>
           <EuiFlexItem>
             <EuiAccordion
               id={`featurePrivilegeControls_${feature.id}`}
@@ -227,6 +234,17 @@ export class FeatureTable extends Component<Props, {}> {
               arrowDisplay={
                 canCustomizeSubFeaturePrivileges && hasSubFeaturePrivileges ? 'left' : 'none'
               }
+              onToggle={(isOpen: boolean) => {
+                if (isOpen) {
+                  this.state.expandedPrivilegeControls.add(feature.id);
+                } else {
+                  this.state.expandedPrivilegeControls.delete(feature.id);
+                }
+
+                this.setState({
+                  expandedPrivilegeControls: this.state.expandedPrivilegeControls,
+                });
+              }}
             >
               <div className="subFeaturePrivilegeExpandedRegion">
                 <FeatureTableExpandedRow
@@ -292,17 +310,21 @@ export class FeatureTable extends Component<Props, {}> {
       isDisabled: this.props.disabled ?? false,
     });
 
-    let warningIcon = <EuiIconTip type="empty" content={null} />;
+    let infoIcon = <EuiIconTip type="empty" content={null} />;
+
+    const arePrivilegeControlsCollapsed = !this.state.expandedPrivilegeControls.has(feature.id);
+
     if (
+      arePrivilegeControlsCollapsed &&
       this.props.privilegeCalculator.hasCustomizedSubFeaturePrivileges(
         feature.id,
         this.props.privilegeIndex,
         this.props.allSpacesSelected
       )
     ) {
-      warningIcon = (
+      infoIcon = (
         <EuiIconTip
-          type="alert"
+          type="iInCircle"
           content={
             <FormattedMessage
               id="xpack.security.management.editRole.featureTable.privilegeCustomizationTooltip"
@@ -345,7 +367,7 @@ export class FeatureTable extends Component<Props, {}> {
       />
     );
 
-    return renderFeatureMarkup(buttonContent, extraAction, warningIcon);
+    return renderFeatureMarkup(buttonContent, extraAction, infoIcon);
   };
 
   private onChange = (featureId: string) => (featurePrivilegeId: string) => {
