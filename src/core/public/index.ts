@@ -33,6 +33,8 @@ import type {
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -57,7 +59,6 @@ import {
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
-import { I18nStart } from './i18n';
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
