@@ -7,6 +7,7 @@
  */
 
 import { Stream } from 'stream';
+import { isResponseError } from '../../elasticsearch/client/errors';
 import { ResponseHeaders } from './headers';
 
 /**
@@ -85,6 +86,10 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
   /** Bypass the default error formatting */
   bypassErrorFormat?: boolean;
   statusCode: number;
+  message?:string;
+  error_code?: number;
+  attributes?:T;
+
 }
 
 /**
@@ -186,7 +191,7 @@ const errorResponseFactory = {
    * Creates an error response with defined status code and payload.
    * @param options - {@link CustomHttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
    */
-  customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => {
+  customError: (options: CustomHttpResponseOptions<ResponseError| Buffer | Stream>) => {
     if (!options || !options.statusCode) {
       throw new Error(
         `options.statusCode is expected to be set. given options: ${options && options.statusCode}`
@@ -197,7 +202,8 @@ const errorResponseFactory = {
         `Unexpected Http status code. Expected from 400 to 599, but given: ${options.statusCode}`
       );
     }
-    return new KibanaResponse(options.statusCode, options.body, options);
+    
+    return new KibanaResponse(options.statusCode,options.body,options);
   },
 };
 /**
