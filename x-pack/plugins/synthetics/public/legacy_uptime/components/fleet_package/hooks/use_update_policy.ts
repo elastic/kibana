@@ -6,13 +6,13 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { ConfigKey, DataStream, Validation, MonitorFields } from '../types';
+import { ConfigKey, DataStream, Validation, SyntheticsMonitor } from '../types';
 import { formatters } from '../helpers/formatters';
 
 interface Props {
   monitorType: DataStream;
-  defaultConfig: Partial<MonitorFields>;
-  config: Partial<MonitorFields>;
+  defaultConfig: SyntheticsMonitor;
+  config: SyntheticsMonitor;
   newPolicy: NewPackagePolicy;
   onChange: (opts: {
     /** is current form state is valid */
