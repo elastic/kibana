@@ -75,6 +75,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
     const svgHeight = options.maxSize * 2 + HALF_FONT_SIZE + circleStyle.strokeWidth * 2;
     const circleCenterX = options.maxSize + circleStyle.strokeWidth;
     const circleBottomY = svgHeight - circleStyle.strokeWidth;
+    const maxLabelWidth = this._formatValue(fieldMeta.max).toString().replace(/[,.]/g, '').length;
 
     function makeMarker(radius: number, formattedValue: string | number) {
       const circleCenterY = circleBottomY - radius;
@@ -90,7 +91,8 @@ export class MarkerSizeLegend extends Component<Props, State> {
           />
           <text
             style={{ fontSize: FONT_SIZE, fill: euiThemeVars.euiTextColor }}
-            x={circleCenterX * 2.25 + HALF_FONT_SIZE}
+            textAnchor="end"
+            x={circleCenterX * 2.25 + (maxLabelWidth + 2) * HALF_FONT_SIZE}
             y={circleTopY + HALF_FONT_SIZE}
           >
             {formattedValue}
