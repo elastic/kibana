@@ -12,7 +12,10 @@ import {
   CoreStart,
 } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { ExpressionAstFunction } from '@kbn/expressions-plugin/public';
+import {
+  ExpressionAstExpressionBuilder,
+  ExpressionAstFunction,
+} from '@kbn/expressions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -55,6 +58,7 @@ import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types'
 import { DateRange, LayerType } from '../../../../common';
 import { rangeOperation } from './ranges';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
+import type { OriginalColumn } from '../../to_expression';
 
 export type {
   IncompleteColumn,
@@ -378,6 +382,17 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    * Title for the help component
    */
   helpComponentTitle?: string;
+  /**
+   * Optimizes EsAggs expression. Invoked only once per operation type.
+   */
+  optimizeEsAggs?: (
+    aggs: ExpressionAstExpressionBuilder[],
+    esAggsIdMap: Record<string, OriginalColumn[]>,
+    aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string>
+  ) => {
+    aggs: ExpressionAstExpressionBuilder[];
+    esAggsIdMap: Record<string, OriginalColumn[]>;
+  };
 }
 
 interface BaseBuildColumnArgs {

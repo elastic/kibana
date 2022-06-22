@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LineAnnotationDatum, RectAnnotationDatum } from '@elastic/charts';
 import type { ErrorType } from '../util/errors';
 import type { EntityField } from '../util/anomaly_utils';
-import type { Datafeed, JobId } from './anomaly_detection_jobs';
+import type { Datafeed, JobId, ModelSnapshot } from './anomaly_detection_jobs';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 import type { RecordForInfluencer } from './anomalies';
 
@@ -20,12 +20,14 @@ export interface GetStoppedPartitionResult {
 export interface MLRectAnnotationDatum extends RectAnnotationDatum {
   header: number;
 }
+export interface LineAnnotationDatumWithModelSnapshot extends LineAnnotationDatum {
+  modelSnapshot?: ModelSnapshot;
+}
 export interface GetDatafeedResultsChartDataResult {
   bucketResults: number[][];
   datafeedResults: number[][];
   annotationResultsRect: MLRectAnnotationDatum[];
   annotationResultsLine: LineAnnotationDatum[];
-  modelSnapshotResultsLine: LineAnnotationDatum[];
 }
 
 export interface DatafeedResultsChartDataParams {
