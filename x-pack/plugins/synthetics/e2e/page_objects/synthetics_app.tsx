@@ -117,8 +117,12 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       }
     },
 
-    async findEditMonitorConfiguration(monitorConfig: Array<[string, string]>) {
+    async findEditMonitorConfiguration(
+      monitorConfig: Array<[string, string]>,
+      monitorType: FormMonitorType
+    ) {
       await page.click('text="Advanced options"');
+      await this.findByText(monitorType);
 
       for (let i = 0; i < monitorConfig.length; i++) {
         const [selector, expected] = monitorConfig[i];

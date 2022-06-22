@@ -6,10 +6,8 @@
  */
 import uuid from 'uuid';
 import { journey, step, expect, before, after, Page } from '@elastic/synthetics';
-import { MONITOR_TYPE_CONFIG } from '../../../public/apps/synthetics/components/monitor_add_edit/form/config';
-import { DataStream, FormMonitorType } from '../../../common/runtime_types/monitor_management';
+import { FormMonitorType } from '../../../common/runtime_types/monitor_management';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
-import { byTestId } from '../utils';
 
 const customLocation = process.env.SYNTHETICS_TEST_LOCATION;
 
@@ -170,13 +168,13 @@ const createMonitorJourney = ({
         expect(await invalid.isVisible()).toBeFalsy();
       });
 
-      step(`create ${monitorType} monitor`, async () => {
+      step(`create ${monitorName}`, async () => {
         await syntheticsApp.createMonitor({ monitorConfig, monitorType });
         const isSuccessful = await syntheticsApp.confirmAndSave();
         expect(isSuccessful).toBeTruthy();
       });
 
-      step(`view ${monitorType} details in Monitor Management UI`, async () => {
+      step(`view ${monitorName} details in Monitor Management UI`, async () => {
         await syntheticsApp.navigateToMonitorManagement();
         const hasFailure = await syntheticsApp.findMonitorConfiguration(monitorListDetails);
         expect(hasFailure).toBeFalsy();
@@ -185,62 +183,18 @@ const createMonitorJourney = ({
       step('edit ${monitorType}', async () => {
         await syntheticsApp.navigateToEditMonitor();
         await syntheticsApp.findByText(monitorListDetails.location);
-        const hasFailure = await syntheticsApp.findEditMonitorConfiguration(monitorEditDetails);
+        const hasFailure = await syntheticsApp.findEditMonitorConfiguration(
+          monitorEditDetails,
+          monitorType
+        );
         expect(hasFailure).toBeFalsy();
       });
-
-      // if (isRemote) {
-      //   step('view results in overview page', async () => {
-      //     await syntheticsApp.navigateToOverviewPage();
-      //     await page.waitForSelector(`text=${monitorName}`, { timeout: 160 * 1000 });
-      //   });
-      // }
 
       step('delete monitor', async () => {
         await syntheticsApp.navigateToMonitorManagement();
         const isSuccessful = await syntheticsApp.deleteMonitors();
         expect(isSuccessful).toBeTruthy();
       });
-
-      // const createBasicMonitor = async () => {
-      //   await syntheticsApp.fillFirstMonitorDetails({
-      //     url: 'https://www.elastic.co',
-      //     locations: ['us_central'],
-      //     apmServiceName: 'synthetics',
-      //   });
-      // };
-
-      // before(async () => {
-      //   await syntheticsApp.waitForLoadingToFinish();
-      // });
-
-      // step('Go to add monitor', async () => {
-      //   await syntheticsApp.navigateToAddMonitor();
-      // });
-
-      // step('login to Kibana', async () => {
-      //   await syntheticsApp.loginToKibana();
-      //   const invalid = await page.locator(
-      //     `text=Username or password is incorrect. Please try again.`
-      //   );
-      //   expect(await invalid.isVisible()).toBeFalsy();
-      // });
-
-      // step('shows validation error on touch', async () => {
-      //   await page.click(byTestId('urls-input'));
-      //   await page.click(byTestId('comboBoxInput'));
-      //   expect(await page.isVisible('text=URL is required')).toBeTruthy();
-      // });
-
-      // step('create basic monitor', async () => {
-      //   await createBasicMonitor();
-      //   await syntheticsApp.confirmAndSave();
-      // });
-
-      // step('it navigates to details page after saving', async () => {
-      //   await page.click('text=Dismiss');
-      //   expect(await page.isVisible('text=My first monitor')).toBeTruthy();
-      // });
     }
   );
 };
@@ -248,7 +202,7 @@ const createMonitorJourney = ({
 Object.values(configuration).forEach((config) => {
   createMonitorJourney({
     monitorType: config.monitorType,
-    monitorName: `${config.monitorType} monitor`,
+    monitorName: `${config.monitorConfig.name} monitor`,
     monitorConfig: config.monitorConfig,
     monitorListDetails: config.monitorListDetails,
     monitorEditDetails: config.monitorEditDetails as Array<[string, string]>,
