@@ -63005,23 +63005,23 @@ async function setupRemoteCache(repoRootPath) {
  * Side Public License, v 1.
  */
 
+ // yarn integrity file checker
 
 async function removeYarnIntegrityFileIfExists(nodeModulesPath) {
   try {
     const nodeModulesRealPath = await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* tryRealpath */ "g"])(nodeModulesPath);
-    const yarnIntegrityFilePath = Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(nodeModulesRealPath, '.yarn-integrity'); // check if the file exists and delete it in that case
+    const yarnIntegrityFilePath = Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(nodeModulesRealPath, '.yarn-integrity'); // check if the file exists and delete it rin that case
 
     if (await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* isFile */ "d"])(yarnIntegrityFilePath)) {
       await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* unlink */ "h"])(yarnIntegrityFilePath);
     }
   } catch {// no-op
   }
-}
+} // yarn and bazel integration checkers
 
 async function areNodeModulesPresent(kbnRootPath) {
   try {
-    await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* tryRealpath */ "g"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'node_modules'));
-    return true;
+    return await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* isDirectory */ "c"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'node_modules'));
   } catch {
     return false;
   }
@@ -63029,8 +63029,7 @@ async function areNodeModulesPresent(kbnRootPath) {
 
 async function haveBazelBinPackagesBeenBuiltBefore(kbnRootPath) {
   try {
-    await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* tryRealpath */ "g"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'bazel-bin', 'packages'));
-    return true;
+    return await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* isDirectory */ "c"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'bazel-bin', 'packages'));
   } catch {
     return false;
   }

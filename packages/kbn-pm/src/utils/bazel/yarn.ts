@@ -7,7 +7,7 @@
  */
 
 import { join, resolve } from 'path';
-import { isFile, tryRealpath, unlink } from '../fs';
+import { isDirectory, isFile, tryRealpath, unlink } from '../fs';
 
 // yarn integrity file checker
 export async function removeYarnIntegrityFileIfExists(nodeModulesPath: string) {
@@ -15,7 +15,7 @@ export async function removeYarnIntegrityFileIfExists(nodeModulesPath: string) {
     const nodeModulesRealPath = await tryRealpath(nodeModulesPath);
     const yarnIntegrityFilePath = join(nodeModulesRealPath, '.yarn-integrity');
 
-    // check if the file exists and delete it in that case
+    // check if the file exists and delete it rin that case
     if (await isFile(yarnIntegrityFilePath)) {
       await unlink(yarnIntegrityFilePath);
     }
@@ -27,9 +27,7 @@ export async function removeYarnIntegrityFileIfExists(nodeModulesPath: string) {
 // yarn and bazel integration checkers
 async function areNodeModulesPresent(kbnRootPath: string) {
   try {
-    await tryRealpath(resolve(kbnRootPath, 'node_modules'));
-
-    return true;
+    return await isDirectory(resolve(kbnRootPath, 'node_modules'));
   } catch {
     return false;
   }
@@ -37,9 +35,7 @@ async function areNodeModulesPresent(kbnRootPath: string) {
 
 async function haveBazelBinPackagesBeenBuiltBefore(kbnRootPath: string) {
   try {
-    await tryRealpath(resolve(kbnRootPath, 'bazel-bin', 'packages'));
-
-    return true;
+    return await isDirectory(resolve(kbnRootPath, 'bazel-bin', 'packages'));
   } catch {
     return false;
   }
