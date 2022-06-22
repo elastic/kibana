@@ -86,13 +86,6 @@ export const findThresholdSignals = async ({
 
   const includeCardinalityFilter = shouldFilterByCardinality(threshold);
 
-  const compareBuckets = (bucket1: ThresholdBucket, bucket2: ThresholdBucket) =>
-    includeCardinalityFilter
-      ? // cardinality - descending
-        (bucket2.cardinality_count?.value ?? 0) - (bucket1.cardinality_count?.value ?? 0)
-      : // max_timestamp - ascending
-        (bucket1.max_timestamp.value ?? 0) - (bucket2.max_timestamp.value ?? 0);
-
   if (hasThresholdFields(threshold)) {
     do {
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
@@ -126,14 +119,10 @@ export const findThresholdSignals = async ({
       const thresholdTerms = searchResultWithAggs.aggregations?.thresholdTerms;
       sortKeys = thresholdTerms.after_key;
 
-      // sortKeys = isCompositeAggregate(thresholdTerms) ? thresholdTerms.after_key : undefined;
-
       buckets.push(
         ...(searchResultWithAggs.aggregations.thresholdTerms.buckets as ThresholdBucket[])
       );
-    } while (sortKeys); // we have to iterate over everything in order to sort
-
-    buckets.sort(compareBuckets);
+    } while (sortKeys && buckets.length <= maxSignals);
   } else {
     const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
       aggregations: buildThresholdSingleBucketAggregation({

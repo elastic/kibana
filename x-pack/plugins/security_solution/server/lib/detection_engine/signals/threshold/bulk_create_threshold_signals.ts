@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isPlainObject } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   AggregationsCardinalityAggregate,
@@ -27,7 +26,7 @@ import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type { ThresholdSignalHistory, BulkCreate, WrapHits, SignalSource } from '../types';
 import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
-import { ThresholdBucket, ThresholdCompositeBucket } from './types';
+import { ThresholdBucket } from './types';
 
 interface BulkCreateThresholdSignalsParams {
   buckets: ThresholdBucket[];
@@ -44,6 +43,16 @@ interface BulkCreateThresholdSignalsParams {
   wrapHits: WrapHits;
 }
 
+const getThresholdTerms = (bucket: ThresholdBucket) => {
+  return Object.keys(bucket.key).reduce(
+    (acc, val) => ({
+      ...acc,
+      [val]: bucket.key[val],
+    }),
+    {}
+  );
+};
+
 const getTransformedHits = (
   buckets: ThresholdBucket[],
   inputIndex: string,
@@ -51,11 +60,8 @@ const getTransformedHits = (
   from: Date,
   threshold: ThresholdNormalized,
   ruleId: string
-) => {
-  const isCompositeBucket = (bucket: ThresholdBucket): bucket is ThresholdCompositeBucket =>
-    isPlainObject(bucket.key);
-
-  return buckets.map((bucket, i) => ({
+) =>
+  buckets.map((bucket, i) => ({
     // In case of `terms` aggregation, `bucket.key` will be an empty string. Note that `Object.values('')` is `[]`,
     // so the below logic works in either case (whether `terms` or `composite`).
     _index: inputIndex,
@@ -67,22 +73,8 @@ const getTransformedHits = (
     ),
     _source: {
       [TIMESTAMP]: (bucket.max_timestamp as AggregationsMaxAggregate).value_as_string,
-      ...(isCompositeBucket(bucket)
-        ? Object.keys(bucket.key).reduce(
-            (acc, val) => ({
-              ...acc,
-              [val]: bucket.key[val],
-            }),
-            {}
-          )
-        : {}),
+      ...getThresholdTerms(bucket),
       threshold_result: {
-        terms: isCompositeBucket(bucket)
-          ? Object.keys(bucket.key).map((term, j) => ({
-              field: term,
-              value: bucket.key[term],
-            }))
-          : [],
         cardinality: threshold.cardinality?.length
           ? [
               {
@@ -98,7 +90,6 @@ const getTransformedHits = (
       },
     },
   }));
-};
 
 export const transformThresholdResultsToEcs = (
   buckets: ThresholdBucket[],

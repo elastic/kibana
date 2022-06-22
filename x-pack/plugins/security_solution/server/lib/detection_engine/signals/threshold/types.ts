@@ -10,7 +10,6 @@ import {
   AggregationsCompositeBucket,
   AggregationsMaxAggregate,
   AggregationsMinAggregate,
-  AggregationsStringTermsBucket,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { SignalSource } from '../types';
@@ -43,6 +42,5 @@ export type ThresholdSingleBucketAggregationResult = ESSearchResponse<
   }
 >;
 
-export type ThresholdTermsBucket = AggregationsStringTermsBucket & ThresholdLeafAggregates;
 export type ThresholdCompositeBucket = AggregationsCompositeBucket & ThresholdLeafAggregates;
-export type ThresholdBucket = ThresholdTermsBucket | ThresholdCompositeBucket;
+export type ThresholdBucket = ThresholdCompositeBucket;
