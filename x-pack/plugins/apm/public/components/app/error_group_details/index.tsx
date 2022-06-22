@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -29,6 +30,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { DetailView } from './detail_view';
 import { ErrorDistribution } from './distribution';
+import { TopErroneousTransactions } from './top_erroneous_transactions';
 
 const Titles = euiStyled.div`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
@@ -49,6 +51,7 @@ const Message = euiStyled.div`
 
 const Culprit = euiStyled.div`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 type ErrorDistributionAPIResponse =
@@ -194,52 +197,69 @@ export function ErrorGroupDetails() {
 
       <EuiSpacer size={'m'} />
 
-      <EuiPanel hasBorder={true}>
-        {showDetails && (
-          <Titles>
-            <EuiText>
-              {logMessage && (
-                <>
-                  <Label>
-                    {i18n.translate(
-                      'xpack.apm.errorGroupDetails.logMessageLabel',
-                      {
-                        defaultMessage: 'Log message',
-                      }
-                    )}
-                  </Label>
-                  <Message>{logMessage}</Message>
-                </>
+      {showDetails && (
+        <Titles>
+          <EuiText>
+            {logMessage && (
+              <>
+                <Label>
+                  {i18n.translate(
+                    'xpack.apm.errorGroupDetails.logMessageLabel',
+                    {
+                      defaultMessage: 'Log message',
+                    }
+                  )}
+                </Label>
+                <Message>{logMessage}</Message>
+              </>
+            )}
+            <Label>
+              {i18n.translate(
+                'xpack.apm.errorGroupDetails.exceptionMessageLabel',
+                {
+                  defaultMessage: 'Exception message',
+                }
               )}
-              <Label>
-                {i18n.translate(
-                  'xpack.apm.errorGroupDetails.exceptionMessageLabel',
-                  {
-                    defaultMessage: 'Exception message',
-                  }
-                )}
-              </Label>
-              <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
-              <Label>
-                {i18n.translate('xpack.apm.errorGroupDetails.culpritLabel', {
-                  defaultMessage: 'Culprit',
-                })}
-              </Label>
-              <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
-            </EuiText>
-          </Titles>
-        )}
-        <ErrorDistribution
-          fetchStatus={status}
-          distribution={showDetails ? errorDistributionData : emptyState}
-          title={i18n.translate(
-            'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-            {
-              defaultMessage: 'Occurrences',
-            }
-          )}
-        />
-      </EuiPanel>
+            </Label>
+            <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
+            <Label>
+              {i18n.translate('xpack.apm.errorGroupDetails.culpritLabel', {
+                defaultMessage: 'Culprit',
+              })}
+            </Label>
+            <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
+
+            <Label>
+              {i18n.translate('xpack.apm.errorGroupDetails.occurrencesLabel', {
+                defaultMessage: 'Occurrences',
+              })}
+            </Label>
+            {errorGroupData.occurrencesCount}
+          </EuiText>
+          <EuiHorizontalRule />
+        </Titles>
+      )}
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <EuiPanel hasBorder={true}>
+            <ErrorDistribution
+              fetchStatus={status}
+              distribution={showDetails ? errorDistributionData : emptyState}
+              title={i18n.translate(
+                'xpack.apm.errorGroupDetails.occurrencesChartLabel',
+                {
+                  defaultMessage: 'Occurrences',
+                }
+              )}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <EuiPanel hasBorder={true}>
+            <TopErroneousTransactions serviceName={serviceName} />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       {showDetails && (
         <DetailView

@@ -1,0 +1,264 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiTitle,
+  RIGHT_ALIGNMENT,
+  EuiSpacer,
+  EuiToolTip,
+  EuiIcon,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import { ValuesType } from 'utility-types';
+import { useHistory } from 'react-router-dom';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../shared/charts/helper/get_timeseries_color';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { asPercent } from '../../../../../common/utils/formatters';
+import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';
+import { TRANSACTION_NAME } from '../../../../../common/elasticsearch_fieldnames';
+
+type ErroneousTransactions =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions'>;
+
+interface Props {
+  serviceName: string;
+}
+
+const INITIAL_STATE: ErroneousTransactions = {
+  topErroneousTransactions: [],
+};
+
+export function TopErroneousTransactions({ serviceName }: Props) {
+  const history = useHistory();
+
+  const {
+    query,
+    path: { groupId },
+  } = useApmParams('/services/{serviceName}/errors/{groupId}');
+
+  const { rangeFrom, rangeTo, environment, kuery, offset, comparisonEnabled } =
+    query;
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { data = INITIAL_STATE, status } = useFetcher(
+    (callApmApi) => {
+      if (start && end) {
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions',
+          {
+            params: {
+              path: {
+                serviceName,
+                groupId,
+              },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                numBuckets: 20,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
+              },
+            },
+          }
+        );
+      }
+    },
+    [
+      environment,
+      kuery,
+      serviceName,
+      start,
+      end,
+      groupId,
+      comparisonEnabled,
+      offset,
+    ]
+  );
+
+  const loading =
+    status === FETCH_STATUS.LOADING || status === FETCH_STATUS.NOT_INITIATED;
+
+  const addKueryBarFilter = ({ key, value }: { key: string; value: any }) => {
+    pushNewItemToKueryBar({ kuery, history, key, value });
+  };
+
+  const columns: Array<
+    EuiBasicTableColumn<
+      ValuesType<ErroneousTransactions['topErroneousTransactions']>
+    >
+  > = [
+    {
+      field: 'transactionName',
+      width: '40%',
+      name: i18n.translate(
+        'xpack.apm.errorGroupTopTransactions.column.transactionName',
+        {
+          defaultMessage: 'Transaction name',
+        }
+      ),
+      render: (_, { transactionName, transactionType }) => {
+        return (
+          <>
+            <EuiButtonEmpty
+              onClick={() => {
+                addKueryBarFilter({
+                  key: TRANSACTION_NAME,
+                  value: transactionName,
+                });
+              }}
+              data-test-subj={`filter_by_transaction_name`}
+            >
+              <EuiToolTip
+                position="top"
+                content={i18n.translate(
+                  'xpack.apm.errorGroupTopTransactions.actionFilterLabel',
+                  { defaultMessage: 'Filter by value' }
+                )}
+              >
+                <EuiIcon type="filter" color="text" size="m" />
+              </EuiToolTip>
+            </EuiButtonEmpty>
+            <TruncateWithTooltip
+              text={transactionName}
+              content={
+                <TransactionDetailLink
+                  serviceName={serviceName}
+                  transactionName={transactionName}
+                  transactionType={transactionType ?? ''}
+                  comparisonEnabled={comparisonEnabled}
+                  offset={offset}
+                >
+                  {transactionName}
+                </TransactionDetailLink>
+              }
+            />
+          </>
+        );
+      },
+    },
+    {
+      field: 'occurrences',
+      name: i18n.translate(
+        'xpack.apm.errorGroupTopTransactions.column.occurrences',
+        {
+          defaultMessage: 'Number of transactions affected',
+        }
+      ),
+      align: RIGHT_ALIGNMENT,
+      dataType: 'number',
+      render: (
+        _,
+        { occurrences, currentPeriodTimeseries, previousPeriodTimeseries }
+      ) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.FAILED_TRANSACTION_RATE
+        );
+
+        return (
+          <SparkPlot
+            isLoading={loading}
+            valueLabel={occurrences}
+            series={currentPeriodTimeseries}
+            comparisonSeries={
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousPeriodTimeseries
+                : undefined
+            }
+            color={currentPeriodColor}
+            comparisonSeriesColor={previousPeriodColor}
+          />
+        );
+      },
+    },
+    {
+      field: 'errorRatio',
+      align: RIGHT_ALIGNMENT,
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.errorGroupTopTransactions.column.errorRatioTooltip',
+            {
+              defaultMessage:
+                'The ratio of the number of occurrences for this error group and transaction group to the total number of occurrences for this error group',
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.errorGroupTopTransactions.column.errorRatio',
+              {
+                defaultMessage: 'Error ratio',
+              }
+            )}{' '}
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+            />
+          </>
+        </EuiToolTip>
+      ),
+      render: (value: string) => asPercent(parseFloat(value), 1),
+    },
+  ];
+
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate('xpack.apm.errorGroupTopTransactions.title', {
+            defaultMessage: 'Top 5 affected transactions',
+          })}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <EuiBasicTable
+        items={data.topErroneousTransactions}
+        columns={columns}
+        loading={loading}
+        data-test-subj="top-erroneous-transactions-table"
+        error={
+          status === FETCH_STATUS.FAILURE
+            ? i18n.translate(
+                'xpack.apm.errorGroupTopTransactions.errorMessage',
+                { defaultMessage: 'Failed to fetch' }
+              )
+            : ''
+        }
+        noItemsMessage={
+          loading
+            ? i18n.translate('xpack.apm.errorGroupTopTransactions.loading', {
+                defaultMessage: 'Loading...',
+              })
+            : i18n.translate('xpack.apm.errorGroupTopTransactions.noResults', {
+                defaultMessage: 'No data found',
+              })
+        }
+      />
+    </>
+  );
+}

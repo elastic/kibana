@@ -15,6 +15,7 @@ import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_
 import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
 import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
 import { offsetRt } from '../../../common/comparison_rt';
+import { getTopErroneousTransactionsPeriods } from './erroneous_transactions/get_top_erroneous_transactions';
 
 const errorsMainStatisticsRoute = createApmServerRoute({
   endpoint:
@@ -204,9 +205,63 @@ const errorDistributionRoute = createApmServerRoute({
   },
 });
 
+const topErroneousTransactionsRoute = createApmServerRoute({
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+      groupId: t.string,
+    }),
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      offsetRt,
+      t.type({
+        numBuckets: toNumberRt,
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    topErroneousTransactions: Array<{
+      transactionName: string;
+      currentPeriodTimeseries: Array<{ x: number; y: number }>;
+      previousPeriodTimeseries: Array<{ x: number; y: number }>;
+      transactionType: string | undefined;
+      occurrences: number;
+      errorRatio: number;
+    }>;
+  }> => {
+    const { params } = resources;
+    const setup = await setupRequest(resources);
+
+    const {
+      path: { serviceName, groupId },
+      query: { environment, kuery, numBuckets, start, end, offset },
+    } = params;
+
+    return await getTopErroneousTransactionsPeriods({
+      environment,
+      groupId,
+      kuery,
+      serviceName,
+      setup,
+      start,
+      end,
+      numBuckets,
+      offset,
+    });
+  },
+});
+
 export const errorsRouteRepository = {
   ...errorsMainStatisticsRoute,
   ...errorsDetailedStatisticsRoute,
   ...errorGroupsRoute,
   ...errorDistributionRoute,
+  ...topErroneousTransactionsRoute,
 };
