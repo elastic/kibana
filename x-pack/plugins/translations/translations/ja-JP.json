@@ -27960,7 +27960,6 @@
     "xpack.stackAlerts.esQuery.ui.numQueryMatchesText": "前回の{window}でクエリが{count}個のドキュメントと一致しました。",
     "xpack.stackAlerts.esQuery.ui.queryEditor": "Elasticsearchクエリエディター",
     "xpack.stackAlerts.esQuery.ui.queryError": "クエリのテストエラー：{message}",
-    "xpack.stackAlerts.esQuery.ui.queryPrompt": "Elasticsearchクエリを定義",
     "xpack.stackAlerts.esQuery.ui.queryPrompt.help": "ElasticsearchクエリDSLドキュメント",
     "xpack.stackAlerts.esQuery.ui.queryPrompt.label": "Elasticsearch クエリ",
     "xpack.stackAlerts.esQuery.ui.sizeExpression": "サイズ",
