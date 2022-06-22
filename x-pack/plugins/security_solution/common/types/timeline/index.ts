@@ -21,7 +21,7 @@ import {
   success,
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
-import { FlowTarget } from '../../search_strategy/security_solution/network';
+import { FlowTargetSourceDest } from '../../search_strategy/security_solution/network';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 import { Direction, Maybe } from '../../search_strategy';
 
@@ -327,6 +327,7 @@ export enum TimelineId {
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
   rulePreview = 'rule-preview',
+  kubernetesPageSessions = 'kubernetes-page-sessions',
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
@@ -341,6 +342,7 @@ export const TimelineIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineId.active),
   runtimeTypes.literal(TimelineId.test),
   runtimeTypes.literal(TimelineId.rulePreview),
+  runtimeTypes.literal(TimelineId.kubernetesPageSessions),
 ]);
 
 export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
@@ -526,7 +528,7 @@ export type TimelineExpandedNetworkType =
       panelView?: 'networkDetail';
       params?: {
         ip: string;
-        flowTarget: FlowTarget;
+        flowTarget: FlowTargetSourceDest;
       };
     }
   | EmptyObject;

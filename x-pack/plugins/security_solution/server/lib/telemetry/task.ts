@@ -142,6 +142,12 @@ export class SecurityTelemetryTask {
       return 0;
     }
 
+    const isTelemetryServicesReachable = await this.sender.isTelemetryServicesReachable();
+    if (!isTelemetryServicesReachable) {
+      this.logger.debug(`[task ${taskId}]: cannot reach telemetry services`);
+      return 0;
+    }
+
     this.logger.debug(`[task ${taskId}]: running task`);
     return this.config.runTask(taskId, this.logger, this.receiver, this.sender, executionPeriod);
   };

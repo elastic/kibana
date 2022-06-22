@@ -1276,7 +1276,9 @@
           },
           ", field: string | ",
           "DataViewFieldBase",
-          ", values: any, operation: string, index: string) => ",
+          ", values: any, operation: string, index: ",
+          "DataViewBase",
+          ") => ",
           "Filter",
           "[]"
         ],
@@ -1357,14 +1359,14 @@
           {
             "parentPluginId": "data",
             "id": "def-public.generateFilters.$5",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "index",
             "description": [
               "- Index string to generate filters for"
             ],
             "signature": [
-              "string"
+              "DataViewBase"
             ],
             "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
             "deprecated": false,
@@ -1805,11 +1807,11 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/app.tsx"
+            "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/app.tsx"
+            "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
           },
           {
             "plugin": "maps",
@@ -3227,7 +3229,9 @@
         "signature": [
           "(timeRange: ",
           "TimeRange",
-          ", options: CalculateBoundsOptions) => ",
+          ", options: ",
+          "CalculateBoundsOptions",
+          ") => ",
           {
             "pluginId": "data",
             "scope": "common",

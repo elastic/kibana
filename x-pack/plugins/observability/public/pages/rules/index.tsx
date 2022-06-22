@@ -29,7 +29,6 @@ import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import { Pagination } from './types';
 import { DEFAULT_SEARCH_PAGE_SIZE, OBSERVABILITY_SOLUTIONS } from './config';
 import { RULES_PAGE_TITLE, RULES_BREADCRUMB_TEXT } from './translations';
-import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 
 function RulesPage() {
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
@@ -127,11 +126,7 @@ function RulesPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: (
-          <>
-            {RULES_PAGE_TITLE} <ExperimentalBadge />
-          </>
-        ),
+        pageTitle: <>{RULES_PAGE_TITLE}</>,
         rightSideItems: [
           authorizedToCreateAnyRules && (
             <EuiButton

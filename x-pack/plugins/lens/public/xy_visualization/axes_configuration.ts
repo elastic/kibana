@@ -9,6 +9,11 @@ import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../../common';
+import {
+  getDataBounds,
+  validateAxisDomain,
+  validateZeroInclusivityExtent,
+} from '../shared_components';
 import { XYDataLayerConfig } from './types';
 
 interface FormattedMetric {
@@ -29,6 +34,25 @@ export function isFormatterCompatible(
   formatter2: SerializedFieldFormat
 ) {
   return formatter1.id === formatter2.id;
+}
+
+export function getXDomain(layers: XYDataLayerConfig[] = [], tables?: Record<string, Datatable>) {
+  const dataBounds = layers.reduce(
+    (bounds, layer) => {
+      const tableBounds = getDataBounds(layer.layerId, tables, layer.xAccessor);
+      if (tableBounds) {
+        return {
+          min: Math.min(bounds.min, tableBounds.min),
+          max: Math.max(bounds.max, tableBounds.max),
+        };
+      }
+      return bounds;
+    },
+    { min: Infinity, max: -Infinity }
+  );
+  if (isFinite(dataBounds.min) && isFinite(dataBounds.max)) {
+    return dataBounds;
+  }
 }
 
 export function groupAxesByType(layers: XYDataLayerConfig[], tables?: Record<string, Datatable>) {
@@ -126,15 +150,8 @@ export function getAxesConfiguration(
 }
 
 export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
-  const inclusiveZeroError =
-    extent &&
-    hasBarOrArea &&
-    ((extent.lowerBound !== undefined && extent.lowerBound > 0) ||
-      (extent.upperBound !== undefined && extent.upperBound) < 0);
-  const boundaryError =
-    extent &&
-    extent.lowerBound !== undefined &&
-    extent.upperBound !== undefined &&
-    extent.upperBound <= extent.lowerBound;
-  return { inclusiveZeroError, boundaryError };
+  return {
+    inclusiveZeroError: hasBarOrArea && !validateZeroInclusivityExtent(extent),
+    boundaryError: !validateAxisDomain(extent),
+  };
 }
