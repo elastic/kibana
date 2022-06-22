@@ -6,6 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
   EuiButtonEmpty,
@@ -18,18 +20,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { RegistryStream, PackageInfo, NewPackagePolicy } from '../../../../../../types';
+import type { PackageInfo } from '../../../../../../types';
 import { useStartServices, useGetPipeline, useLink } from '../../../../../../hooks';
 import {
   getPipelineNameForDatastream,
   getCustomPipelineNameForDatastream,
 } from '../../../../../../../../../common';
-import { useRouteMatch } from 'react-router';
 
 interface Props {
-  packagePolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
-  packageInputStream: RegistryStream & { data_stream: { dataset: string; type: string } };
+  dataStream: { dataset: string; type: string };
 }
 
 interface PipelineItem {
@@ -43,12 +43,8 @@ function toPipelineItem(pipelineName: string, canEdit = false): PipelineItem {
 
 function useDatastreamIngestPipelines(
   packageInfo: PackageInfo,
-  dataStream?: { dataset: string; type: string }
+  dataStream: { dataset: string; type: string }
 ) {
-  if (!dataStream) {
-    return { pipelines: [] };
-  }
-
   const defaultPipelineName = getPipelineNameForDatastream({
     dataStream,
     packageVersion: packageInfo.version,
@@ -72,9 +68,8 @@ function useDatastreamIngestPipelines(
   };
 }
 
-export const DatastreamPipeline: React.FunctionComponent<Props> = ({
-  packagePolicy,
-  packageInputStream,
+export const DatastreamPipelines: React.FunctionComponent<Props> = ({
+  dataStream,
   packageInfo,
 }) => {
   const {
@@ -90,15 +85,12 @@ export const DatastreamPipeline: React.FunctionComponent<Props> = ({
         })
       : null;
 
-  const { application, share } = useStartServices();
+  const { application, share, docLinks } = useStartServices();
   const ingestPipelineLocator = share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR');
 
-  const { pipelines, hasCustom } = useDatastreamIngestPipelines(
-    packageInfo,
-    packageInputStream.data_stream
-  );
+  const { pipelines, hasCustom, isLoading } = useDatastreamIngestPipelines(packageInfo, dataStream);
 
-  if (!packageInputStream.data_stream) {
+  if (!dataStream) {
     return null;
   }
 
@@ -121,10 +113,10 @@ export const DatastreamPipeline: React.FunctionComponent<Props> = ({
             defaultMessage="Ingest pipelines perform common transformations on the ingested data. We recommend modifying only the custom ingest pipeline. These pipelines are shared between integration policies of the same integration type. Hence, any modifications tot he ingest pipelines would affect all the integration policies. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href="#TODO" external={true}>
+                <EuiLink href={docLinks.links.fleet.datastreams} external={true}>
                   <FormattedMessage
                     id="xpack.fleet.packagePolicyEdotpr.datastreamIngestPipelines.learnMoreLink"
-                    defaultMessage={'Learn more'}
+                    defaultMessage="Learn more"
                   />
                 </EuiLink>
               ),
@@ -134,6 +126,7 @@ export const DatastreamPipeline: React.FunctionComponent<Props> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBasicTable
+          loading={isLoading}
           items={pipelines}
           columns={[
             {
@@ -146,8 +139,14 @@ export const DatastreamPipeline: React.FunctionComponent<Props> = ({
                 {
                   icon: 'pencil',
                   type: 'icon',
-                  description: 'edit',
-                  name: 'inspect',
+                  description: i18n.translate(
+                    'xpack.fleet.packagePolicyEdotpr.datastreamIngestPipelines.editBtn',
+                    {
+                      defaultMessage: 'Edit pipeline',
+                    }
+                  ),
+                  'data-test-subj': 'datastreamEditPipelineBtn',
+                  name: 'edit',
                   isPrimary: true,
                   onClick: async (el) => {
                     if (!ingestPipelineLocator) {
@@ -165,8 +164,14 @@ export const DatastreamPipeline: React.FunctionComponent<Props> = ({
                 {
                   icon: 'inspect',
                   type: 'icon',
-                  description: 'test',
+                  description: i18n.translate(
+                    'xpack.fleet.packagePolicyEditor.datastreamIngestPipelines.inspectBtn',
+                    {
+                      defaultMessage: 'Inspect pipeline',
+                    }
+                  ),
                   name: 'inspect',
+                  'data-test-subj': 'datastreamInspectPipelineBtn',
                   isPrimary: true,
                   onClick: async (el) => {
                     if (!ingestPipelineLocator) {
@@ -186,12 +191,17 @@ export const DatastreamPipeline: React.FunctionComponent<Props> = ({
           ]}
         />
       </EuiFlexItem>
-      {!hasCustom && (
+      {!isLoading && !hasCustom && (
         <EuiFlexItem grow={false}>
           <EuiSpacer size="xs" />
-          <EuiButtonEmpty size="xs" flush="left" iconType="plusInCircle">
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            iconType="plusInCircle"
+            data-test-subj="datastreamAddCustomIngestPipelineBtn"
+          >
             <FormattedMessage
-              id="xpack.fleet.packagePolicyEdotpr.datastreamIngestPipelines.addCustomButn"
+              id="xpack.fleet.packagePolicyEditor.datastreamIngestPipelines.addCustomButn"
               defaultMessage="Add custom pipeline"
             />
           </EuiButtonEmpty>

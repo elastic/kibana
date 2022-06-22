@@ -55,7 +55,7 @@ export const DatastreamMappings: React.FunctionComponent<Props> = ({
                 <EuiLink href="#TODO" external={true}>
                   <FormattedMessage
                     id="xpack.fleet.packagePolicyEditor.datastreamMappings.learnMoreLink"
-                    defaultMessage={'Learn more'}
+                    defaultMessage="Learn more"
                   />
                 </EuiLink>
               ),
