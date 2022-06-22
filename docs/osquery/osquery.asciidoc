@@ -332,3 +332,5 @@ include::manage-integration.asciidoc[]
 include::exported-fields-reference.asciidoc[]
 
 include::prebuilt-packs.asciidoc[]
+
+include::osquery-faq.asciidoc[]
