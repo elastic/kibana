@@ -474,25 +474,26 @@ export const staticSourceData: SourceDataItem[] = [
     },
     accountContextOnly: false,
   },
-  {
-    name: SOURCE_NAMES.OUTLOOK,
-    categories: [
-      SOURCE_CATEGORIES.COMMUNICATION,
-      SOURCE_CATEGORIES.PRODUCTIVITY,
-      SOURCE_CATEGORIES.MICROSOFT,
-    ],
-    serviceType: 'custom',
-    baseServiceType: 'outlook',
-    configuration: {
-      isPublicKey: false,
-      hasOauthRedirect: false,
-      needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchOutlook,
-      applicationPortalUrl: '',
-      githubRepository: 'elastic/enterprise-search-outlook-connector',
-    },
-    accountContextOnly: false,
-  },
+  // TODO: Uncomment this in a future release when the Outlook custom api source is made public
+  // {
+  //   name: SOURCE_NAMES.OUTLOOK,
+  //   categories: [
+  //     SOURCE_CATEGORIES.COMMUNICATION,
+  //     SOURCE_CATEGORIES.PRODUCTIVITY,
+  //     SOURCE_CATEGORIES.MICROSOFT,
+  //   ],
+  //   serviceType: 'custom',
+  //   baseServiceType: 'outlook',
+  //   configuration: {
+  //     isPublicKey: false,
+  //     hasOauthRedirect: false,
+  //     needsBaseUrl: false,
+  //     documentationUrl: docLinks.workplaceSearchOutlook,
+  //     applicationPortalUrl: '',
+  //     githubRepository: 'elastic/enterprise-search-outlook-connector',
+  //   },
+  //   accountContextOnly: false,
+  // },
   {
     name: SOURCE_NAMES.SALESFORCE,
     serviceType: 'salesforce',
@@ -721,25 +722,26 @@ export const staticSourceData: SourceDataItem[] = [
     },
     accountContextOnly: true,
   },
-  {
-    name: SOURCE_NAMES.TEAMS,
-    categories: [
-      SOURCE_CATEGORIES.COMMUNICATION,
-      SOURCE_CATEGORIES.PRODUCTIVITY,
-      SOURCE_CATEGORIES.MICROSOFT,
-    ],
-    serviceType: 'custom',
-    baseServiceType: 'teams',
-    configuration: {
-      isPublicKey: false,
-      hasOauthRedirect: false,
-      needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchTeams,
-      applicationPortalUrl: '',
-      githubRepository: 'elastic/enterprise-search-teams-connector',
-    },
-    accountContextOnly: false,
-  },
+  // TODO: Uncomment this in a future release when the Teams custom api source is made public
+  // {
+  //   name: SOURCE_NAMES.TEAMS,
+  //   categories: [
+  //     SOURCE_CATEGORIES.COMMUNICATION,
+  //     SOURCE_CATEGORIES.PRODUCTIVITY,
+  //     SOURCE_CATEGORIES.MICROSOFT,
+  //   ],
+  //   serviceType: 'custom',
+  //   baseServiceType: 'teams',
+  //   configuration: {
+  //     isPublicKey: false,
+  //     hasOauthRedirect: false,
+  //     needsBaseUrl: false,
+  //     documentationUrl: docLinks.workplaceSearchTeams,
+  //     applicationPortalUrl: '',
+  //     githubRepository: 'elastic/enterprise-search-teams-connector',
+  //   },
+  //   accountContextOnly: false,
+  // },
   {
     name: SOURCE_NAMES.ZENDESK,
     serviceType: 'zendesk',
@@ -774,21 +776,22 @@ export const staticSourceData: SourceDataItem[] = [
     },
     accountContextOnly: false,
   },
-  {
-    name: SOURCE_NAMES.ZOOM,
-    categories: [SOURCE_CATEGORIES.COMMUNICATION, SOURCE_CATEGORIES.PRODUCTIVITY],
-    serviceType: 'custom',
-    baseServiceType: 'zoom',
-    configuration: {
-      isPublicKey: false,
-      hasOauthRedirect: false,
-      needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchZoom,
-      applicationPortalUrl: '',
-      githubRepository: 'elastic/enterprise-search-zoom-connector',
-    },
-    accountContextOnly: false,
-  },
+  // TODO: Uncomment this in a future release when the Zoom custom api source is made public
+  // {
+  //   name: SOURCE_NAMES.ZOOM,
+  //   categories: [SOURCE_CATEGORIES.COMMUNICATION, SOURCE_CATEGORIES.PRODUCTIVITY],
+  //   serviceType: 'custom',
+  //   baseServiceType: 'zoom',
+  //   configuration: {
+  //     isPublicKey: false,
+  //     hasOauthRedirect: false,
+  //     needsBaseUrl: false,
+  //     documentationUrl: docLinks.workplaceSearchZoom,
+  //     applicationPortalUrl: '',
+  //     githubRepository: 'elastic/enterprise-search-zoom-connector',
+  //   },
+  //   accountContextOnly: false,
+  // },
   staticGenericExternalSourceData,
 ];
 
