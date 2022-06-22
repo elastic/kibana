@@ -130,6 +130,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
         'lists-summary',
         'rac',
         'cloud-security-posture-all',
+        'cloud-security-posture-read',
       ],
       savedObject: {
         all: [
