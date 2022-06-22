@@ -15,7 +15,7 @@ export const cspRuleSchema = rt.object({
   impact: rt.string(),
   default_value: rt.string(),
   remediation: rt.string(),
-  benchmark: rt.object({ name: rt.string(), version: rt.string() }),
+  benchmark: rt.arrayOf(rt.object({ name: rt.string(), id: rt.string(), version: rt.string() })),
   rego_rule_id: rt.string(),
   tags: rt.arrayOf(rt.string()),
   enabled: rt.boolean(),

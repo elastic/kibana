@@ -15,7 +15,7 @@ const cspRuleTemplateSchema = rt.object({
   default_value: rt.string(),
   impact: rt.string(),
   remediation: rt.string(),
-  benchmark: rt.object({ name: rt.string(), version: rt.string() }),
+  benchmark: rt.arrayOf(rt.object({ name: rt.string(), id: rt.string(), version: rt.string() })),
   rego_rule_id: rt.string(),
   enabled: rt.boolean(),
   muted: rt.boolean(),

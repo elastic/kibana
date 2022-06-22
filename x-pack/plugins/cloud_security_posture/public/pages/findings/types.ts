@@ -39,7 +39,7 @@ export interface CspFinding {
 }
 
 interface CspRule {
-  benchmark: { name: string; version: string };
+  benchmark: { name: string; id: string; version: string };
   section: string;
   audit: string;
   references: string;

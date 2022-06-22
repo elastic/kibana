@@ -34,12 +34,18 @@ export const onPackagePolicyPostCreateCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
-  // Create csp-rules from the generic asset
+  console.log(packagePolicy.inputs[0].streams[0].vars.benchmark.value);
+  const benchmarkType = packagePolicy.inputs[0].streams[0].vars!.benchmark.value;
+  const benchmark = 'eks';
+
   const existingRuleTemplates: SavedObjectsFindResponse<CloudSecurityPostureRuleTemplateSchema> =
-    await savedObjectsClient.find({
+    await savedObjectsClient.find<CloudSecurityPostureRuleTemplateSchema>({
       type: cloudSecurityPostureRuleTemplateSavedObjectType,
+      filter: `${cloudSecurityPostureRuleTemplateSavedObjectType}.attributes.benchmark.id: ${benchmark}`,
       perPage: 10000,
     });
+
+  console.log({ existingRuleTemplates });
 
   if (existingRuleTemplates.total === 0) {
     return;

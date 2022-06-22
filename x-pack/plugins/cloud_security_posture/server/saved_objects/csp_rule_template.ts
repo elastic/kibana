@@ -14,7 +14,15 @@ import {
 const ruleTemplateAssetSavedObjectMappings: SavedObjectsType<CloudSecurityPostureRuleTemplateSchema>['mappings'] =
   {
     dynamic: false,
-    properties: {},
+    properties: {
+      benchmark: {
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+        },
+      },
+    },
   };
 
 export const cspRuleTemplateAssetType: SavedObjectsType<CloudSecurityPostureRuleTemplateSchema> = {
