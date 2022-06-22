@@ -25,7 +25,8 @@ import SANKEY_CHART_GRAPH from '../images/sankey_chart.png';
 import DESTINATION_HEATMAP from '../images/destination_heatmap.png';
 import REQUEST_MAP from '../images/total_requests_map.png';
 import BYTES_BAR_GRAPH from '../images/bytes_bar_graph.png';
-import { TestReactGrid } from '../components/test_grid';
+import { TestReactGrid } from '../components/new_grid';
+import { ControlledStack } from '../components/test_react_grid_demo';
 
 export default {
   component: EuiPanel,
@@ -34,24 +35,24 @@ export default {
   argTypes: {},
 };
 
-export const UncontrolledExample = () => {
-  return <Grid columns={12} />;
+export const DefaultReactExample = () => {
+  return <ControlledStack />;
 };
 
-export const TestExample = () => {
-  return <TestReactGrid columns={12} gridData={smallGridData} />;
+export const EmptyExample = () => {
+  return <TestReactGrid columns={12} />;
 };
 
 export const SmallGridExample = () => {
-  return <Grid columns={12} gridData={smallGridData} />;
+  return <TestReactGrid columns={12} gridData={smallGridData} />;
 };
 
 export const MediumGridExample = () => {
-  return <Grid columns={24} gridData={mediumGridData} />;
+  return <TestReactGrid columns={24} gridData={mediumGridData} />;
 };
 
 export const LargeGridExample = () => {
-  return <Grid columns={48} gridData={largeGridData} />;
+  return <TestReactGrid columns={48} gridData={largeGridData} />;
 };
 
 export const LogsDashboardExample = () => {
@@ -167,5 +168,5 @@ export const LogsDashboardExample = () => {
     },
   ];
 
-  return <Grid gridData={gridData} />;
+  return <TestReactGrid gridData={gridData} />;
 };

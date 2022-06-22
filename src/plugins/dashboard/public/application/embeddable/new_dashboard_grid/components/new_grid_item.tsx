@@ -16,25 +16,18 @@ interface Props {
 
 export const TestGridItem = React.forwardRef<HTMLDivElement, Props>(({ panel }, ref) => {
   return (
-    <div
-      id={panel.id as string}
-      gs-w={panel.w}
-      gs-h={panel.h}
-      gs-x={panel.x}
-      gs-y={panel.y}
-      ref={ref}
-      key={panel.id}
-      className={'grid-stack-item'}
-    >
-      <EuiPanel
-        key={panel.id}
-        hasShadow
-        hasBorder
-        className={'grid-stack-item-content'}
-        paddingSize="s"
-      >
-        {panel.render ? panel.render() : panel.content}
-      </EuiPanel>
+    <div id={panel.id as string} ref={ref} key={panel.id} className={'grid-stack-item'}>
+      {ref && (
+        <EuiPanel
+          key={panel.id}
+          hasShadow
+          hasBorder
+          className={'grid-stack-item-content'}
+          paddingSize="s"
+        >
+          {panel.render ? panel.render() : panel.content}
+        </EuiPanel>
+      )}
     </div>
   );
 });
