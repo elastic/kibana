@@ -141,6 +141,9 @@ describe('event details footer component', () => {
             getCasesContext: () => mockCasesContext,
           },
         },
+        osquery: {
+          OsqueryResults: jest.fn().mockReturnValue(null),
+        },
       },
     });
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue({

@@ -112,7 +112,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),
-      featureFlags: INTERNAL_OSQUERY_FEATURE_FLAGS,
       isOsqueryAvailable: useIsOsqueryAvailableSimple,
     };
   }

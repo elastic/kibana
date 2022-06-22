@@ -166,7 +166,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   } = useKibana();
 
   // @ts-expect-error the types are there
-  const { OsqueryResults, featureFlags: osqueryFeatureFlags } = osquery;
+  const { OsqueryResults } = osquery;
 
   const allEnrichments = useMemo(() => {
     if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
@@ -353,9 +353,6 @@ const EventDetailsComponent: React.FC<Props> = ({
   );
 
   const osqueryTab = useMemo(() => {
-    if (!osqueryFeatureFlags.DETECTION_ACTION) {
-      return;
-    }
     const osqueryActionsLength = rawEventData?._source['kibana.alert.rule.actions']?.filter(
       (action: { action_type_id: string }) => action.action_type_id === '.osquery'
     )?.length;
@@ -399,7 +396,7 @@ const EventDetailsComponent: React.FC<Props> = ({
           ),
         }
       : undefined;
-  }, [OsqueryResults, id, osqueryFeatureFlags.DETECTION_ACTION, rawEventData]);
+  }, [OsqueryResults, id, rawEventData]);
 
   const tabs = useMemo(() => {
     return [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(

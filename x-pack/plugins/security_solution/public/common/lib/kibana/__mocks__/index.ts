@@ -54,9 +54,6 @@ export const useKibana = jest.fn().mockReturnValue({
     },
     osquery: {
       OsqueryResults: jest.fn().mockReturnValue(null),
-      featureFlags: {
-        DETECTION_ACTION: true,
-      },
     },
     timelines: createTGridMocks(),
   },
