@@ -28,12 +28,11 @@ import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt'
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { GettingStartedSteps } from '../../../shared/getting_started_steps';
 import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
-
+import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
+import { IndicesLogic } from '../../logic/search_indices';
 import { SEARCH_INDEX_OVERVIEW_PATH, NEW_INDEX_PATH } from '../../routes';
 import { SearchIndex } from '../../types';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
-
-import { SearchIndicesLogic } from './search_indices_logic';
 
 const healthColorsMap = {
   red: 'danger',
@@ -52,12 +51,12 @@ export const baseBreadcrumbs = [
 ];
 
 export const SearchIndices: React.FC = () => {
-  const { initPage } = useActions(SearchIndicesLogic);
-  const { indices: searchIndices, meta } = useValues(SearchIndicesLogic);
+  const { fetchSearchIndices, onPaginate } = useActions(IndicesLogic);
+  const { indices, meta } = useValues(IndicesLogic);
 
   useEffect(() => {
-    initPage();
-  }, []);
+    fetchSearchIndices();
+  }, [meta.page.current]);
 
   const columns = [
     {
@@ -67,10 +66,12 @@ export const SearchIndices: React.FC = () => {
       }),
       sortable: true,
       truncateText: true,
-      render: (indexName: string, { indexSlug }: SearchIndex) => (
+      render: (indexName: string) => (
         <EuiLinkTo
           data-test-subj="search-index-link"
-          to={'' /*generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug }) */}
+          to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, {
+            indexSlug: encodeURIComponent(indexName),
+          })}
         >
           {indexName}
         </EuiLinkTo>
@@ -129,11 +130,13 @@ export const SearchIndices: React.FC = () => {
       }),
       actions: [
         {
-          render: ({ indexSlug }: SearchIndex) => (
+          render: ({ name }: SearchIndex) => (
             <EuiButtonIconTo
               iconType="eye"
               data-test-subj="view-search-index-button"
-              to={'' /*generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug })*/}
+              to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, {
+                indexSlug: encodeURIComponent(name),
+              })}
             />
           ),
         },
@@ -163,7 +166,7 @@ export const SearchIndices: React.FC = () => {
       <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <GettingStartedSteps step={searchIndices.length === 0 ? 'first' : 'second'} />
+          <GettingStartedSteps step={indices.length === 0 ? 'first' : 'second'} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ElasticsearchResources />
@@ -173,7 +176,7 @@ export const SearchIndices: React.FC = () => {
   );
 
   const pageTitle =
-    searchIndices.length !== 0
+    indices.length !== 0
       ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
           defaultMessage: 'Content',
         })
@@ -195,7 +198,7 @@ export const SearchIndices: React.FC = () => {
           rightSideItems: [createNewIndexButton],
         }}
       >
-        {searchIndices.length !== 0 ? (
+        {indices.length !== 0 ? (
           <>
             <EuiTitle>
               <h2>
@@ -209,23 +212,17 @@ export const SearchIndices: React.FC = () => {
             </EuiTitle>
             <EuiSpacer size="l" />
             <EuiBasicTable
-              items={searchIndices}
+              items={indices}
               columns={columns}
-              onChange={() => {
-                /* call backend */
-              }}
-              pagination={{
-                pageIndex: meta.page.current,
-                pageSize: meta.page.size,
-                totalItemCount: meta.page.totalResults,
-              }}
+              onChange={handlePageChange(onPaginate)}
+              pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
             />
           </>
         ) : (
           <AddContentEmptyPrompt />
         )}
         <EuiSpacer size="xxl" />
-        {searchIndices.length === 0 && engineSteps}
+        {indices.length === 0 && engineSteps}
       </EnterpriseSearchContentPageTemplate>
       )
     </>

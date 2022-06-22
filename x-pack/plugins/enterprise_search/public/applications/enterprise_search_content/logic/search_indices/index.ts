@@ -7,37 +7,27 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Meta } from '../../../../../common/types';
 import { HttpError } from '../../../../../common/types/api';
+import { DEFAULT_META } from '../../../shared/constants';
 import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
+import { updateMetaPageIndex } from '../../../shared/table_pagination';
 import { SearchIndex } from '../../types';
 
 export interface IndicesValues {
   indices: SearchIndex[];
-  meta: {
-    page: {
-      current: number;
-      size: number;
-      totalPages: number;
-      totalResults: number;
-    };
-  };
+  meta: Meta;
 }
 
 export interface IndicesActions {
   fetchSearchIndices(): void;
   fetchSearchIndicesError(code: number, error: string): HttpError;
-  fetchSearchIndicesSuccess(indicesResponse: { indices: SearchIndex[]; meta: object }): {
+  fetchSearchIndicesSuccess(indicesResponse: { indices: SearchIndex[]; meta: Meta }): {
     indices: SearchIndex[];
-    meta: {
-      page: {
-        current: number;
-        size: number;
-        totalPages: number;
-        totalResults: number;
-      };
-    };
+    meta: Meta;
   };
+  onPaginate(newPageIndex: number): { newPageIndex: number };
 }
 
 export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
@@ -46,6 +36,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
     fetchSearchIndices: true,
     fetchSearchIndicesError: (code, error) => ({ code, error }),
     fetchSearchIndicesSuccess: (indicesResponse) => indicesResponse,
+    onPaginate: (newPageIndex) => ({ newPageIndex }),
   },
   reducers: {
     indices: [
@@ -55,25 +46,20 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       },
     ],
     meta: [
-      {
-        page: {
-          current: 0,
-          size: 1,
-          totalPages: 0,
-          totalResults: 0,
-        },
-      },
+      DEFAULT_META,
       {
         fetchSearchIndicesSuccess: (_, { meta }) => meta,
+        onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
       },
     ],
   },
   listeners: ({ actions, values }) => ({
     fetchSearchIndices: async () => {
+      console.log('aaa');
       const { http } = HttpLogic.values;
       const { meta } = values;
       try {
-        const response = await http.get<{ indices: SearchIndex[]; meta: object }>(
+        const response = await http.get<{ indices: SearchIndex[]; meta: Meta }>(
           '/internal/enterprise_search/indices',
           {
             query: {

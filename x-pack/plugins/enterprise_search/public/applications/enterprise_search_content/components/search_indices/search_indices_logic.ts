@@ -18,7 +18,7 @@ export const SearchIndicesLogic = kea<MakeLogicType<IndicesValues, SearchIndices
   connect: {
     actions: [
       IndicesLogic,
-      ['fetchSearchIndices', 'fetchSearchIndicesSuccess', 'fetchSearchIndicesError'],
+      ['fetchSearchIndices', 'fetchSearchIndicesSuccess', 'fetchSearchIndicesError', 'onPaginate'],
     ],
     values: [IndicesLogic, ['indices', 'meta']],
   },

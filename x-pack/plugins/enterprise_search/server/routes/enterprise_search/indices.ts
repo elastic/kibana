@@ -46,16 +46,16 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
         const indices = await fetchIndices(client, '*', /.*/);
         const totalResults = indices.length;
         const totalPages = Math.ceil(totalResults / size);
-        const startIndex = page * size;
-        const endIndex = (page + 1) * size;
+        const startIndex = (page - 1) * size;
+        const endIndex = page * size;
         return response.ok({
           body: {
             meta: {
               page: {
                 current: page,
                 size,
-                totalPages,
-                totalResults,
+                total_pages: totalPages,
+                total_results: totalResults,
               },
             },
             indices: indices.slice(startIndex, endIndex),
