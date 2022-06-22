@@ -32,7 +32,7 @@ export const updatePreconfigurationHandler: FleetRequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
-  const defaultDownladSource = await downloadSourceService.ensureDefault(soClient);
+  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
   const spaceId = fleetContext.spaceId;
   const { agentPolicies, packages } = request.body;
 
@@ -43,7 +43,7 @@ export const updatePreconfigurationHandler: FleetRequestHandler<
       (agentPolicies as PreconfiguredAgentPolicy[]) ?? [],
       packages ?? [],
       defaultOutput,
-      defaultDownladSource,
+      defaultDownloadSource,
       spaceId
     );
     return response.ok({ body });

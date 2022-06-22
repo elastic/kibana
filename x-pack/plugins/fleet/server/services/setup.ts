@@ -77,7 +77,7 @@ async function createSetupSideEffects(
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
 
-  const defaultDownladSource = await downloadSourceService.ensureDefault(soClient);
+  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
 
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
     logger.debug('Setting up Fleet Elasticsearch assets');
@@ -112,7 +112,7 @@ async function createSetupSideEffects(
       policies,
       packages,
       defaultOutput,
-      defaultDownladSource,
+      defaultDownloadSource,
       DEFAULT_SPACE_ID
     );
 

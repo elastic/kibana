@@ -46,7 +46,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   policies: PreconfiguredAgentPolicy[] = [],
   packages: PreconfiguredPackage[] = [],
   defaultOutput: Output,
-  defaultDownladSource: DownloadSource,
+  defaultDownloadSource: DownloadSource,
   spaceId: string
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
@@ -158,7 +158,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
 
         const newFields = {
-          defaultDownladSourceId: defaultDownladSource.id,
+          defaultDownloadSourceId: defaultDownloadSource.id,
           ...fields,
         };
         if (hasChanged) {
