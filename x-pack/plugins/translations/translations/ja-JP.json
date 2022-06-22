@@ -4544,7 +4544,6 @@
     "indexPatternEditor.dataStreamLabel": "データストリーム",
     "indexPatternEditor.dataView.unableSaveLabel": "データビューの保存に失敗しました。",
     "indexPatternEditor.dataViewExists.ValidationErrorMessage": "このタイトルのデータビューはすでに存在します。",
-    "indexPatternEditor.editor.emptyPrompt.flyoutCloseButtonLabel": "閉じる",
     "indexPatternEditor.editor.flyoutCloseButtonLabel": "閉じる",
     "indexPatternEditor.editor.flyoutSaveButtonLabel": "データビューを作成",
     "indexPatternEditor.editor.form.advancedSettings.hideButtonLabel": "高度な SIEM 設定の非表示化",

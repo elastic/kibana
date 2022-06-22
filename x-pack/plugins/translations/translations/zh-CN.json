@@ -4555,7 +4555,6 @@
     "indexPatternEditor.dataStreamLabel": "数据流",
     "indexPatternEditor.dataView.unableSaveLabel": "无法保存数据视图。",
     "indexPatternEditor.dataViewExists.ValidationErrorMessage": "具有此名称的数据视图已存在。",
-    "indexPatternEditor.editor.emptyPrompt.flyoutCloseButtonLabel": "关闭",
     "indexPatternEditor.editor.flyoutCloseButtonLabel": "关闭",
     "indexPatternEditor.editor.flyoutSaveButtonLabel": "创建数据视图",
     "indexPatternEditor.editor.form.advancedSettings.hideButtonLabel": "隐藏高级设置",

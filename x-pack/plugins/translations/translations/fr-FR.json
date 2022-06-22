@@ -4451,7 +4451,6 @@
     "indexPatternEditor.dataStreamLabel": "Flux de données",
     "indexPatternEditor.dataView.unableSaveLabel": "Échec de l’enregistrement de la vue de données.",
     "indexPatternEditor.dataViewExists.ValidationErrorMessage": "Une vue de données avec ce titre existe déjà.",
-    "indexPatternEditor.editor.emptyPrompt.flyoutCloseButtonLabel": "Fermer",
     "indexPatternEditor.editor.flyoutCloseButtonLabel": "Fermer",
     "indexPatternEditor.editor.flyoutSaveButtonLabel": "Créer une vue de données",
     "indexPatternEditor.editor.form.advancedSettings.hideButtonLabel": "Masquer les paramètres avancés",
