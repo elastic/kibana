@@ -7,7 +7,7 @@
 
 import { partition, mapValues, pickBy, isArray } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
-import { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type {

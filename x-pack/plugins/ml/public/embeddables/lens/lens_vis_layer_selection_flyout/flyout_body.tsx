@@ -42,7 +42,7 @@ export const FlyoutBody: FC<Props> = ({ onClose, layerResults, embeddable, share
   return (
     <>
       {layerResults.map((layer, i) => (
-        <>
+        <React.Fragment key={layer.id}>
           <EuiSplitPanel.Outer grow>
             <EuiSplitPanel.Inner>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -62,7 +62,7 @@ export const FlyoutBody: FC<Props> = ({ onClose, layerResults, embeddable, share
             <EuiSplitPanel.Inner grow={false} color="subdued">
               {layer.isCompatible ? (
                 <>
-                  <EuiFlexGroup gutterSize="s">
+                  <EuiFlexGroup gutterSize="s" data-test-subj="mlLensLayerCompatible">
                     <EuiFlexItem grow={false}>
                       <EuiText size="s">
                         <EuiIcon type="checkInCircleFilled" color="success" />
@@ -90,6 +90,7 @@ export const FlyoutBody: FC<Props> = ({ onClose, layerResults, embeddable, share
                     color="success"
                     iconType="popout"
                     iconSide="right"
+                    data-test-subj={`mlLensLayerCompatibleButton_${i}`}
                   >
                     <FormattedMessage
                       id="xpack.ml.embeddables.lensLayerFlyout.createJobButton"
@@ -99,7 +100,11 @@ export const FlyoutBody: FC<Props> = ({ onClose, layerResults, embeddable, share
                 </>
               ) : (
                 <>
-                  <EuiFlexGroup gutterSize="s" color="subdued">
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    color="subdued"
+                    data-test-subj="mlLensLayerIncompatible"
+                  >
                     <EuiFlexItem grow={false}>
                       <EuiText size="s">
                         <EuiIcon type="crossInACircleFilled" color="subdued" />
@@ -123,7 +128,7 @@ export const FlyoutBody: FC<Props> = ({ onClose, layerResults, embeddable, share
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
           <EuiSpacer />
-        </>
+        </React.Fragment>
       ))}
     </>
   );
