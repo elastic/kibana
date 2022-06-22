@@ -218,7 +218,7 @@ Lens & Visualizations::
 
 Machine Learning::
 * Adds the ability to create anomaly detection jobs from Lens visualizations {kibana-pull}129762[#129762]
-* Additional testing of trained model in UI {kibana-pull}129209[#129209]
+* Adds trained model testing for additional pytorch models {kibana-pull}129209[#129209]
 
 Management::
 * Adds saved object relationships to data view management {kibana-pull}132385[#132385]
