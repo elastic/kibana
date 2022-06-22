@@ -70,7 +70,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
         <div>
           <EuiSpacer size="s" />
 
-          {isRunning && <EuiLoadingChart className="busy-indicator" />}
+          {isRunning && <EuiLoadingChart className="busy-indicator" mono={true} />}
 
           <RenderComponent
             command={command}
