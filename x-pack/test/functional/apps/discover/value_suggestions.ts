@@ -27,16 +27,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('value suggestions', function describeIndexTests() {
     before(async function () {
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/drilldowns');
+
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
+      );
       await kibanaServer.uiSettings.update({
         'doc_table:legacy': true,
       });
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/drilldowns');
       await kibanaServer.uiSettings.unset('doc_table:legacy');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('useTimeRange enabled', () => {
