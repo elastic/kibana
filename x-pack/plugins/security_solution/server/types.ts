@@ -16,7 +16,7 @@ import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/serv
 import type { FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { ListsApiRequestHandlerContext, ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { IRuleDataService } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataService, AlertsClient } from '@kbn/rule-registry-plugin/server';
 
 import { AppClient } from './client';
 import { ConfigType } from './config';
@@ -39,6 +39,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getSpaceId: () => string;
   getRuleDataService: () => IRuleDataService;
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
+  getRacClient: () => (req: KibanaRequest) => Promise<AlertsClient>;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
   getScopedFleetServices: (req: KibanaRequest) => EndpointScopedFleetServicesInterface;
