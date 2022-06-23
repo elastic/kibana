@@ -98,7 +98,6 @@ annotateForStaticSite() {
   for x in "${xs[@]}"; do
     markdownLinks+=(" - [$x](https://kibana-coverage.elastic.dev/${TIME_STAMP}/${x}-combined/index.html)")
   done
-  echo "### markdownLinks: ${markdownLinks[*]}"
 
   content=$(
     cat <<-EOF
