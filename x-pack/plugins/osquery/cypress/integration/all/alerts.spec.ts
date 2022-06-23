@@ -110,4 +110,15 @@ describe('Alert Event Details', () => {
     cy.contains('Unique identifier for the group on the system/platform.').should('exist');
     cy.contains('Group ID (unsigned)').should('exist');
   });
+  it('sees osquery results from last action', () => {
+    cy.visit('/app/security/alerts');
+    cy.getBySel('header-page-title').contains('Alerts').should('exist');
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.contains('Osquery Results').click();
+    cy.getBySel('osquery-results').should('exist');
+    cy.contains('SELECT * FROM users;');
+    cy.getBySel('osqueryResultsTable').within(() => {
+      checkResults();
+    });
+  });
 });
