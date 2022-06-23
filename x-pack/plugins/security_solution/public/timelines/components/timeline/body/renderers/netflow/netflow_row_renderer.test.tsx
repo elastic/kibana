@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import '../../../../../../common/mock/match_media';
 import { Ecs } from '../../../../../../../common/ecs';
 import { getMockNetflowData, TestProviders } from '../../../../../../common/mock';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
 import {
   eventActionMatches,
@@ -29,8 +28,6 @@ jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../../common/components/link_to');
 
 describe('netflowRowRenderer', () => {
-  const mount = useMountAppended();
-
   test('renders correctly against snapshot', () => {
     const children = netflowRowRenderer.renderRow({
       data: getMockNetflowData(),
@@ -38,8 +35,8 @@ describe('netflowRowRenderer', () => {
       timelineId: 'test',
     });
 
-    const wrapper = shallow(<span>{children}</span>);
-    expect(wrapper).toMatchSnapshot();
+    const { asFragment } = render(<TestProviders>{children}</TestProviders>);
+    expect(asFragment()).toMatchSnapshot();
   });
 
   describe('#isInstance', () => {
@@ -106,12 +103,12 @@ describe('netflowRowRenderer', () => {
       isDraggable: true,
       timelineId: 'test',
     });
-    const wrapper = mount(
+    render(
       <TestProviders>
         <span>{children}</span>
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="destination-bytes"]').first().text()).toEqual('40B');
+    expect(screen.getByText('40B')).toBeInTheDocument();
   });
 });

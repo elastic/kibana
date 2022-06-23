@@ -21,3 +21,24 @@ export interface SourceProviderProps {
 export type IntegratedNodeMetricsTableProps = UseNodeMetricsTableOptions &
   SourceProviderProps &
   CoreProvidersProps;
+
+export type NodeMetricsTableData<NodeMetricsRow> =
+  | {
+      state: 'unknown';
+    }
+  | {
+      state: 'no-indices';
+    }
+  | {
+      state: 'empty-indices';
+    }
+  | {
+      state: 'data';
+      currentPageIndex: number;
+      pageCount: number;
+      rows: NodeMetricsRow[];
+    }
+  | {
+      state: 'error';
+      errors: Error[];
+    };
