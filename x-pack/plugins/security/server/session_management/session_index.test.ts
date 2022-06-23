@@ -29,6 +29,7 @@ describe('Session index', () => {
   let sessionIndex: SessionIndex;
   let auditLogger: AuditLogger;
   const indexName = '.kibana_some_tenant_security_session_1';
+  const aliasName = '.kibana_some_tenant_security_session';
   const indexTemplateName = '.kibana_some_tenant_security_session_index_template_1';
   beforeEach(() => {
     mockElasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -55,7 +56,7 @@ describe('Session index', () => {
         name: indexTemplateName,
       });
       expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledWith({
-        index: getSessionIndexSettings(indexName).index,
+        index: getSessionIndexSettings({ indexName, aliasName }).index,
       });
     }
 
@@ -100,7 +101,7 @@ describe('Session index', () => {
         name: indexTemplateName,
       });
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
-        getSessionIndexSettings(indexName)
+        getSessionIndexSettings({ indexName, aliasName })
       );
     });
 
@@ -119,7 +120,7 @@ describe('Session index', () => {
         name: indexTemplateName,
       });
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
-        getSessionIndexSettings(indexName)
+        getSessionIndexSettings({ indexName, aliasName })
       );
     });
 
@@ -136,7 +137,7 @@ describe('Session index', () => {
         name: indexTemplateName,
       });
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
-        getSessionIndexSettings(indexName)
+        getSessionIndexSettings({ indexName, aliasName })
       );
     });
 
@@ -151,7 +152,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
-        getSessionIndexSettings(indexName)
+        getSessionIndexSettings({ indexName, aliasName })
       );
     });
 
@@ -863,16 +864,26 @@ describe('Session index', () => {
     });
 
     it('properly stores session value in the index, creating the index first if it does not exist', async () => {
-      mockElasticsearchClient.indices.exists.mockResolvedValue(false);
+      mockElasticsearchClient.indices.exists.mockResponse(false);
 
-      mockElasticsearchClient.create.mockResponse({
-        _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
-        _index: 'my-index',
-        _id: 'W0tpsmIBdwcYyG50zbta',
-        _version: 1,
-        _primary_term: 321,
-        _seq_no: 654,
-        result: 'created',
+      let callCount = 0;
+      mockElasticsearchClient.create.mockResponseImplementation((req, opts) => {
+        callCount++;
+        if (callCount === 1) {
+          return { statusCode: 404 };
+        }
+        return {
+          body: {
+            _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
+            _index: 'my-index',
+            _id: 'W0tpsmIBdwcYyG50zbta',
+            _version: 1,
+            _primary_term: 321,
+            _seq_no: 654,
+            result: 'created',
+          },
+          statusCode: 201,
+        };
       });
 
       const sid = 'some-long-sid';
@@ -893,13 +904,29 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledTimes(1);
 
-      expect(mockElasticsearchClient.create).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.create).toHaveBeenCalledWith({
-        id: sid,
-        index: indexName,
-        body: sessionValue,
-        refresh: 'wait_for',
-      });
+      expect(mockElasticsearchClient.create).toHaveBeenCalledTimes(2);
+      expect(mockElasticsearchClient.create).toHaveBeenNthCalledWith(
+        1,
+        {
+          id: sid,
+          index: aliasName,
+          body: sessionValue,
+          refresh: 'wait_for',
+          require_alias: true,
+        },
+        { ignore: [404], meta: true }
+      );
+      expect(mockElasticsearchClient.create).toHaveBeenNthCalledWith(
+        2,
+        {
+          id: sid,
+          index: aliasName,
+          body: sessionValue,
+          refresh: 'wait_for',
+          require_alias: true,
+        },
+        { ignore: [], meta: true }
+      );
     });
 
     it('properly stores session value in the index, skipping index creation if it already exists', async () => {
@@ -930,16 +957,20 @@ describe('Session index', () => {
         metadata: { primaryTerm: 321, sequenceNumber: 654 },
       });
 
-      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.exists).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
 
       expect(mockElasticsearchClient.create).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.create).toHaveBeenCalledWith({
-        id: sid,
-        index: indexName,
-        body: sessionValue,
-        refresh: 'wait_for',
-      });
+      expect(mockElasticsearchClient.create).toHaveBeenCalledWith(
+        {
+          id: sid,
+          index: aliasName,
+          body: sessionValue,
+          refresh: 'wait_for',
+          require_alias: true,
+        },
+        { meta: true, ignore: [404] }
+      );
     });
   });
 

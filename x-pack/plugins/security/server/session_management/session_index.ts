@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { CreateRequest, IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type {
   BulkOperationContainer,
   SortResults,
@@ -62,7 +62,13 @@ const SESSION_INDEX_CLEANUP_KEEP_ALIVE = '5m';
 /**
  * Returns index settings that are used for the current version of the session index.
  */
-export function getSessionIndexSettings(indexName: string): IndicesCreateRequest {
+export function getSessionIndexSettings({
+  indexName,
+  aliasName,
+}: {
+  indexName: string;
+  aliasName: string;
+}): IndicesCreateRequest {
   return Object.freeze({
     index: indexName,
     settings: {
@@ -72,6 +78,11 @@ export function getSessionIndexSettings(indexName: string): IndicesCreateRequest
       priority: 1000,
       refresh_interval: '1s',
       hidden: true,
+    },
+    aliases: {
+      [aliasName]: {
+        is_write_index: true,
+      },
     },
     mappings: {
       dynamic: 'strict',
@@ -157,6 +168,11 @@ export class SessionIndex {
   private readonly indexName: string;
 
   /**
+   * Name of the write alias to store session information in.
+   */
+  private readonly aliasName: string;
+
+  /**
    * Promise that tracks session index initialization process. We'll need to get rid of this as soon
    * as Core provides support for plugin statuses (https://github.com/elastic/kibana/issues/41983).
    * With this we won't mark Security as `Green` until index is fully initialized and hence consumers
@@ -166,6 +182,7 @@ export class SessionIndex {
 
   constructor(private readonly options: Readonly<SessionIndexOptions>) {
     this.indexName = `${this.options.kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`;
+    this.aliasName = `${this.options.kibanaIndexName}_security_session`;
   }
 
   /**
@@ -209,36 +226,27 @@ export class SessionIndex {
         'Attempted to create a new session while session index is initializing.'
       );
       await this.indexInitialization;
-    } else {
-      await this.ensureSessionIndexExists();
     }
 
-    // **************************************************
-    // !! There is potential for a race condition here !!
-    // **************************************************
-    // Prior to https://github.com/elastic/kibana/pull/134900, we maintained an index template with
-    // our desired settings and mappings for this session index. This allowed our index to almost
-    // always have the correct settings/mappings, even if the index was auto-created by this step.
-    // Now that the template is removed, we run the risk of the index being created without our desired
-    // settings/mappings, because they can't be specified as part of this `create` operation.
-    //
-    // The call to `this.ensureSessionIndexExists()` above attempts to mitigate this by creating the session index
-    // explicitly with our desired settings/mappings. A race condition exists because it's possible to delete the session index
-    // _after_ we've ensured it exists, but _before_ we make the call below to store the session document.
-    //
-    // The chances of this happening are very small.
-
-    const { sid, ...sessionValueToStore } = sessionValue;
     try {
-      const { _primary_term: primaryTerm, _seq_no: sequenceNumber } =
-        await this.options.elasticsearchClient.create({
-          id: sid,
-          index: this.indexName,
-          body: sessionValueToStore,
-          refresh: 'wait_for',
-        });
+      let { body, statusCode } = await this.writeNewSessionDocument(sessionValue, {
+        ignore404: true,
+      });
 
-      return { ...sessionValue, metadata: { primaryTerm, sequenceNumber } } as SessionIndexValue;
+      if (statusCode === 404) {
+        this.options.logger.warn(
+          'Attempted to create a new session, but session index or alias was missing.'
+        );
+        await this.ensureSessionIndexExists();
+        ({ body, statusCode } = await this.writeNewSessionDocument(sessionValue, {
+          ignore404: false,
+        }));
+      }
+
+      return {
+        ...sessionValue,
+        metadata: { primaryTerm: body._primary_term, sequenceNumber: body._seq_no },
+      } as SessionIndexValue;
     } catch (err) {
       this.options.logger.error(`Failed to create session value: ${err.message}`);
       throw err;
@@ -506,11 +514,20 @@ export class SessionIndex {
 
     // Create index if it doesn't exist.
     if (indexExists) {
-      this.options.logger.debug('Session index already exists.');
+      this.options.logger.debug('Session index already exists. Attaching alias to index...');
+      try {
+        await this.options.elasticsearchClient.indices.putAlias({
+          index: this.indexName,
+          name: this.aliasName,
+        });
+      } catch (err) {
+        this.options.logger.error(`Failed to attach alias to session index: ${err.message}`);
+        throw err;
+      }
     } else {
       try {
         await this.options.elasticsearchClient.indices.create(
-          getSessionIndexSettings(this.indexName)
+          getSessionIndexSettings({ indexName: this.indexName, aliasName: this.aliasName })
         );
         this.options.logger.debug('Successfully created session index.');
       } catch (err) {
@@ -523,6 +540,27 @@ export class SessionIndex {
         }
       }
     }
+  }
+
+  private async writeNewSessionDocument(
+    sessionValue: Readonly<Omit<SessionIndexValue, 'metadata'>>,
+    { ignore404 }: { ignore404: boolean }
+  ) {
+    const { sid, ...sessionValueToStore } = sessionValue;
+
+    const { body, statusCode } = await this.options.elasticsearchClient.create(
+      {
+        id: sid,
+        // We write to the alias for `create` operations so that we can prevent index auto-creation in the event it is missing.
+        index: this.aliasName,
+        body: sessionValueToStore,
+        refresh: 'wait_for',
+        require_alias: true,
+      } as CreateRequest,
+      { meta: true, ignore: ignore404 ? [404] : [] }
+    );
+
+    return { body, statusCode };
   }
 
   /**
