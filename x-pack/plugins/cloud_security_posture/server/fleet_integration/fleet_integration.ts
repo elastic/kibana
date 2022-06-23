@@ -13,6 +13,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { PackagePolicy, DeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
+import { isNonNullable } from '../../common/utils/helpers';
 import {
   cloudSecurityPostureRuleTemplateSavedObjectType,
   CloudSecurityPostureRuleTemplateSchema,
@@ -26,6 +27,24 @@ type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends Read
   ? ElementType
   : never;
 
+const getActivatedBenchmark = (packagePolicy: PackagePolicy): string[] => {
+  const benchmarks = Object.entries(packagePolicy.inputs[0].streams[0].vars!);
+
+  const activatedBenchmarks = benchmarks.map(([benchmarkName, benchmark]) => {
+    return benchmark.value ? benchmarkName : undefined;
+  });
+
+  const boo = activatedBenchmarks.filter(isNonNullable);
+  return boo.length ? boo : ['k8s_cis'];
+};
+
+const buildQuery = (query: string, benchmarks: string[]): string => {
+  const q = benchmarks.map((benchmark) => `${query}: ${benchmark}`);
+  const foo = q.reduce((a, b) => `${a} or ${b}`);
+
+  return foo;
+};
+
 /**
  * Callback to handle creation of PackagePolicies in Fleet
  */
@@ -34,18 +53,16 @@ export const onPackagePolicyPostCreateCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
-  console.log(packagePolicy.inputs[0].streams[0].vars.benchmark.value);
-  const benchmarkType = packagePolicy.inputs[0].streams[0].vars!.benchmark.value;
-  const benchmark = 'eks';
+  const activatedBenchmarks = getActivatedBenchmark(packagePolicy);
+  const baseQuery = `${cloudSecurityPostureRuleTemplateSavedObjectType}.attributes.benchmark.id`;
+  const composeQuery = buildQuery(baseQuery, activatedBenchmarks);
 
   const existingRuleTemplates: SavedObjectsFindResponse<CloudSecurityPostureRuleTemplateSchema> =
     await savedObjectsClient.find<CloudSecurityPostureRuleTemplateSchema>({
       type: cloudSecurityPostureRuleTemplateSavedObjectType,
-      filter: `${cloudSecurityPostureRuleTemplateSavedObjectType}.attributes.benchmark.id: ${benchmark}`,
+      filter: composeQuery,
       perPage: 10000,
     });
-
-  console.log({ existingRuleTemplates });
 
   if (existingRuleTemplates.total === 0) {
     return;
