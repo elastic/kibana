@@ -17,7 +17,8 @@ export type StaticPage =
   | 'data_streams'
   | 'settings'
   | 'settings_edit_fleet_server_hosts'
-  | 'settings_create_outputs';
+  | 'settings_create_outputs'
+  | 'debug';
 
 export type DynamicPage =
   | 'integrations_all'
@@ -67,6 +68,7 @@ export const FLEET_ROUTING_PATHS = {
   settings_edit_fleet_server_hosts: '/settings/edit-fleet-server-hosts',
   settings_create_outputs: '/settings/create-outputs',
   settings_edit_outputs: '/settings/outputs/:outputId',
+  debug: '/_debug',
 
   // TODO: Move this to the integrations app
   add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
@@ -190,4 +192,5 @@ export const pagePathGetters: {
     FLEET_ROUTING_PATHS.settings_edit_outputs.replace(':outputId', outputId as string),
   ],
   settings_create_outputs: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings_create_outputs],
+  debug: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.debug],
 };
