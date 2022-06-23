@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export {
-  convertKueryToDslFilter,
-  convertKueryToElasticSearchQuery,
-  convertToBuildEsQuery,
-  escapeKuery,
-  escapeQueryValue,
-} from '@kbn/timelines-plugin/public';
+export interface ConnectorPackage {
+  id: string;
+  indexName: string;
+  name: string;
+}
