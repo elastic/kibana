@@ -98,8 +98,9 @@ export enum TelemetryCounterType {
 export interface TelemetryCounter {
   /**
    * Indicates if the event contains data about succeeded, failed or dropped events.
+   * Refer to {@link TelemetryCounterType} for more details about each possible value.
    */
-  type: TelemetryCounterType;
+  type: keyof typeof TelemetryCounterType;
   /**
    * Who emitted the event? It can be "client" or the name of the shipper.
    */
