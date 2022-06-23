@@ -98,6 +98,8 @@ export interface RulesListProps {
   showActionFilter?: boolean;
   ruleDetailsLink?: string | undefined;
   showCreateRuleButton?: boolean;
+  statusFilter?: RuleStatus[] | undefined;
+  setStatusFilter?: (status: RuleStatus[]) => any;
 }
 
 interface RuleTypeState {
@@ -124,6 +126,8 @@ export const RulesList = ({
   showActionFilter = true,
   ruleDetailsLink,
   showCreateRuleButton = true,
+  statusFilter,
+  setStatusFilter,
 }: RulesListProps) => {
   const history = useHistory();
   const {
@@ -135,10 +139,7 @@ export const RulesList = ({
     kibanaFeatures,
   } = useKibana().services;
   const { lastResponse, setLastResponse } = useRulesPageStateContainer();
-  const { status, setStatus } = useRulesPageStateContainer();
-
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
-
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -148,7 +149,7 @@ export const RulesList = ({
   const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
-  // const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
+  let [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
@@ -162,6 +163,13 @@ export const RulesList = ({
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
+  if (statusFilter) {
+    ruleStatusesFilter = statusFilter;
+  }
+
+  // if (setStatusFilter) {
+  //   setRuleStatusesFilter = setStatusFilter;
+  // }
   useEffect(() => {
     (async () => {
       setConfig(await triggersActionsUiConfig({ http }));
@@ -204,7 +212,7 @@ export const RulesList = ({
     typesFilter: typesFilter.length > 0 ? typesFilter : filteredRulesTypes,
     actionTypesFilter,
     ruleExecutionStatusesFilter: lastResponse,
-    ruleStatusesFilter: status,
+    ruleStatusesFilter,
     tagsFilter,
     sort,
     onPage: setPage,
@@ -218,12 +226,9 @@ export const RulesList = ({
     [setLastResponse]
   );
 
-  const setRuleStatusFilter = useCallback(
-    (ids: RuleStatus[]) => {
-      setStatus(ids);
-    },
-    [setStatus]
-  );
+  // const setRuleStatusFilter = (ids: RuleStatus[]) => {
+  //   setStatus(ids);
+  // };
 
   const { tags, loadTags } = useLoadTags({
     onError,
@@ -234,7 +239,7 @@ export const RulesList = ({
     typesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter: lastResponse,
-    ruleStatusesFilter: status,
+    ruleStatusesFilter,
     tagsFilter,
     onError,
   });
@@ -424,9 +429,22 @@ export const RulesList = ({
     return [];
   };
 
+  const setRuleStatusFilter = useCallback(
+    (ids: RuleStatus[]) => {
+      if (setStatusFilter) {
+        setStatusFilter(ids);
+      } else {
+        setRuleStatusesFilter(ids);
+      }
+    },
+    [setStatusFilter]
+  );
+
   const renderRuleStatusFilter = () => {
     if (isRuleStatusFilterEnabled) {
-      return <RuleStatusFilter selectedStatuses={status} onChange={setRuleStatusFilter} />;
+      return (
+        <RuleStatusFilter selectedStatuses={ruleStatusesFilter} onChange={setRuleStatusFilter} />
+      );
     }
     return null;
   };

@@ -44,7 +44,7 @@ function RulesPage() {
   const [tagsFilter] = useState<string[]>([]);
   const [typesFilter] = useState<string[]>([]);
   const { lastResponse } = useRulesPageStateContainer();
-  const { status } = useRulesPageStateContainer();
+  const { status, setStatus } = useRulesPageStateContainer();
   const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
 
   const { rulesState, reload, noData, initialLoad } = useFetchRules({
@@ -117,6 +117,8 @@ function RulesPage() {
               showActionFilter: false,
               ruleDetailsLink: 'alerts/rules/:ruleId',
               showCreateRuleButton: false,
+              statusFilter: status,
+              setStatusFilter: setStatus,
             })}
           </EuiFlexItem>
         </EuiFlexGroup>
