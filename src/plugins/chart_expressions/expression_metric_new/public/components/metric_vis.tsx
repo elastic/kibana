@@ -19,6 +19,10 @@ import { getPaletteService } from '../services';
 // TODO - find a reasonable default (from EUI perhaps?)
 const defaultColor = '#5e5e5e';
 
+const maxDecimals = 3;
+
+const formatValue = (val: unknown) => String(Number(val).toFixed(maxDecimals));
+
 const getColor = (value: number, paletteParams: CustomPaletteState | undefined) =>
   paletteParams
     ? getPaletteService().get('custom')?.getColorForValue?.(value, paletteParams, {
@@ -55,8 +59,6 @@ const MetricVis = ({
     ? getColumnByAccessor(config.dimensions.breakdownBy, data.columns)
     : undefined;
 
-  const formatValue = (val: unknown) => String(val);
-
   const metricConfigs: MetricSpec['data'][number] = [];
 
   const useProgressBar =
@@ -82,7 +84,9 @@ const MetricVis = ({
       subtitle: secondaryMetricColumn?.name ?? config.metric.subtitle,
       extra: (
         <span>
-          {secondaryMetricColumn ? data.rows[0][secondaryMetricColumn.id] : config.metric.extraText}
+          {secondaryMetricColumn
+            ? formatValue(data.rows[0][secondaryMetricColumn.id])
+            : config.metric.extraText}
         </span>
       ),
       color: getColor(value, config.metric.palette),
@@ -100,7 +104,9 @@ const MetricVis = ({
         subtitle: primaryMetricColumn.name,
         extra: (
           <span>
-            {secondaryMetricColumn ? row[secondaryMetricColumn.id] : config.metric.extraText}
+            {secondaryMetricColumn
+              ? formatValue(row[secondaryMetricColumn.id])
+              : config.metric.extraText}
           </span>
         ),
         color: getColor(value, config.metric.palette),
