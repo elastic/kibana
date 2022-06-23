@@ -11,37 +11,28 @@ import type { FilterOptions } from '../../../../../../containers/detection_engin
 import { convertRulesFilterToKQL } from '../../../../../../containers/detection_engine/rules/utils';
 import { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../../../../common/constants';
 
-interface PrepareSearchFilterProps {
-  dryRunResult?: DryRunResult;
-  isAllSelected: boolean;
-  selectedRuleIds: string[];
-  filterOptions: FilterOptions;
-}
+type PrepareSearchFilterProps =
+  | { selectedRuleIds: string[]; dryRunResult?: DryRunResult }
+  | { filterOptions: FilterOptions; dryRunResult?: DryRunResult };
 
 /**
  * helper methods to prepare search params for bulk actions based on results of previous dry run
  * It excludes failed rules from search and perform bulk action on possible successfully edited rules
  * @param dryRunResult {@link DryRunResult} result of API _bulk_action dry_run
- * @param {boolean} isAllSelected - is all rules selected or only on a page
  * @param {string[]} selectedRuleIds - list of selected rule ids
  * @param filterOptions {@link FilterOptions} find filter
- * @returns either list of ids or KQL search query (if isAllSelected === true)
+ * @returns either list of ids or KQL search query
  */
-export const prepareSearchParams = ({
-  isAllSelected,
-  dryRunResult,
-  selectedRuleIds,
-  filterOptions,
-}: PrepareSearchFilterProps) => {
-  // if not all rules selected, filter out rules that failed during dry run
-  if (!isAllSelected) {
+export const prepareSearchParams = ({ dryRunResult, ...props }: PrepareSearchFilterProps) => {
+  // if selectedRuleIds present, filter out rules that failed during dry run
+  if ('selectedRuleIds' in props) {
     const failedRuleIdsSet = new Set(dryRunResult?.ruleErrors.flatMap(({ ruleIds }) => ruleIds));
 
-    return { ids: selectedRuleIds.filter((id) => !failedRuleIdsSet.has(id)) };
+    return { ids: props.selectedRuleIds.filter((id) => !failedRuleIdsSet.has(id)) };
   }
 
   // otherwise create filter that excludes failed results based on dry run errors
-  let modifiedFilterOptions = filterOptions;
+  let modifiedFilterOptions = { ...props.filterOptions };
   dryRunResult?.ruleErrors.forEach(({ errorCode }) => {
     switch (errorCode) {
       case BULK_ACTIONS_DRY_RUN_ERR_CODE.IMMUTABLE:

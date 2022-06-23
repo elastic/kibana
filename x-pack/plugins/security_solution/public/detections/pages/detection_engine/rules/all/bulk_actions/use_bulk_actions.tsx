@@ -266,9 +266,7 @@ export const useBulkActions = ({
           payload: { edit: [editPayload] },
           onFinish: () => hideWarningToast(),
           search: prepareSearchParams({
-            isAllSelected,
-            filterOptions,
-            selectedRuleIds,
+            ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
             dryRunResult: getBulkActionsDryRunFromCache(queryClient),
           }),
         });

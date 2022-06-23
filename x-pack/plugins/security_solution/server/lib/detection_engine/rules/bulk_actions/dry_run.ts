@@ -14,7 +14,7 @@ import { isIndexPatternsBulkEditAction } from './utils';
 
 /**
  * Error instance that has properties: errorCode & statusCode to use within run_dry
- * {@link BULK_ACTIONS_DRY_RUN_ERR_CODE | errorCode} is used to categorize error and make possible to handle it later
+ * errorCode({@link BULK_ACTIONS_DRY_RUN_ERR_CODE}) is used to categorize error and make possible to handle it later
  */
 export class DryRunError extends Error {
   public readonly errorCode: BULK_ACTIONS_DRY_RUN_ERR_CODE;
