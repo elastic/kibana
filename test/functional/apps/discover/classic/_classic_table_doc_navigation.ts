@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await kibanaServer.uiSettings.replace({ 'doc_table:legacy': false });
+      await kibanaServer.uiSettings.replace({});
     });
 
     beforeEach(async function () {

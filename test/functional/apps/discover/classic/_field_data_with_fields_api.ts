@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
-      await kibanaServer.uiSettings.replace({ 'doc_table:legacy': false });
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('doc view should sort ascending', async function () {

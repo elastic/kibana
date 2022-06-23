@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.replace({ 'doc_table:legacy': false });
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should correctly display documents', async function () {
