@@ -5,13 +5,21 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
-import { EuiButtonGroup, EuiPanel, useGeneratedHtmlId, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiButtonGroup, useGeneratedHtmlId, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  TREE_VIEW_INFRASTRUCTURE_VIEW,
+  TREE_VIEW_LOGICAL_VIEW,
+  TREE_VIEW_SWITCHER_LEGEND,
+} from '../../../../common/translations';
 import { useStyles } from './styles';
 import { DynamicTreeView } from '../dynamic_tree_view';
 import { addTimerangeToQuery } from '../../../utils/add_timerange_to_query';
+import { INFRASTRUCTURE, LOGICAL, TREE_VIEW } from './constants';
+import { TreeViewKind, TreeViewOptionsGroup } from './types';
 
 export const TreeNav = ({ indexPattern, globalFilter }: any) => {
   const styles = useStyles();
+  const [tree, setTree] = useState(TREE_VIEW.logical);
 
   const filterQueryWithTimeRange = useMemo(() => {
     return addTimerangeToQuery(
@@ -25,66 +33,58 @@ export const TreeNav = ({ indexPattern, globalFilter }: any) => {
     prefix: 'treeNavType',
   });
 
-  const [toggleIdSelected, setToggleIdSelected] = useState(`${treeNavTypePrefix}__0`);
+  const logicalTreeViewPrefix = `${treeNavTypePrefix}${LOGICAL}`;
 
-  const options = [
+  const [toggleIdSelected, setToggleIdSelected] = useState(logicalTreeViewPrefix);
+
+  const options: TreeViewOptionsGroup[] = [
     {
-      id: `${treeNavTypePrefix}__0`,
-      label: 'Logical view',
+      id: logicalTreeViewPrefix,
+      label: TREE_VIEW_LOGICAL_VIEW,
+      value: LOGICAL,
     },
     {
-      id: `${treeNavTypePrefix}__1`,
-      label: 'Infrastructure view',
+      id: `${treeNavTypePrefix}${INFRASTRUCTURE}`,
+      label: TREE_VIEW_INFRASTRUCTURE_VIEW,
+      value: INFRASTRUCTURE,
     },
   ];
 
+  const handleTreeViewSwitch = (id: string, value: TreeViewKind) => {
+    setToggleIdSelected(id);
+    setTree(TREE_VIEW[value]);
+  };
+
   return (
     <>
-      <EuiPanel hasBorder>
-        <EuiButtonGroup
-          name="coarsness"
-          legend="This is a basic group"
-          options={options}
-          idSelected={toggleIdSelected}
-          onChange={(id) => setToggleIdSelected(id)}
-          buttonSize="compressed"
-          isFullWidth
-          color="primary"
-          css={styles.treeViewSwitcher}
-        />
-        <EuiSpacer size="xs" />
-        <EuiText color="subdued" size="xs">
-          Cluster / {toggleIdSelected === `${treeNavTypePrefix}__0` ? 'Namespace' : 'Node'} / Pod /
-          Container Image
-        </EuiText>
-        <EuiSpacer size="s" />
+      <EuiButtonGroup
+        name="coarsness"
+        legend={TREE_VIEW_SWITCHER_LEGEND}
+        options={options}
+        idSelected={toggleIdSelected}
+        onChange={handleTreeViewSwitch}
+        buttonSize="compressed"
+        isFullWidth
+        color="primary"
+        css={styles.treeViewSwitcher}
+      />
+      <EuiSpacer size="xs" />
+      <EuiText color="subdued" size="xs">
+        Cluster / {toggleIdSelected === logicalTreeViewPrefix ? 'Namespace' : 'Node'} / Pod /
+        Container Image
+      </EuiText>
+      <EuiSpacer size="s" />
+      <div css={styles.treeViewContainer} className="eui-scrollBar">
         <DynamicTreeView
           query={JSON.parse(filterQueryWithTimeRange)}
           indexPattern={indexPattern.title}
-          tree={[
-            {
-              key: 'orchestrator.cluster.name',
-              iconProps: { type: 'heatmap', color: 'success' },
-            },
-            {
-              key: 'orchestrator.namespace',
-              iconProps: { type: 'nested', color: 'primary' },
-            },
-            {
-              key: 'orchestrator.resource.name',
-              iconProps: { type: 'package', color: 'warning' },
-            },
-            {
-              key: 'container.image.name',
-              iconProps: { type: 'image', color: 'danger' },
-            },
-          ]}
+          tree={tree}
           aria-label="Logical Tree View"
           onSelect={(key) => {
             // console.log(`${key} was clicked`);
           }}
         />
-      </EuiPanel>
+      </div>
     </>
   );
 };
