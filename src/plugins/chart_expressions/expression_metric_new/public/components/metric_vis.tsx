@@ -13,8 +13,7 @@ import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { VisParams } from '../../common';
-import { getThemeService } from '../services/theme_service';
-import { getPaletteService } from '../services';
+import { getPaletteService, getThemeService } from '../services';
 
 // TODO - find a reasonable default (from EUI perhaps?)
 const defaultColor = '#5e5e5e';
@@ -31,15 +30,13 @@ const getColor = (value: number, paletteParams: CustomPaletteState | undefined) 
       }) || defaultColor
     : defaultColor;
 
-const MetricVis = ({
-  data,
-  config,
-  renderComplete,
-}: {
+export interface MetricVisComponentProps {
   data: Datatable;
   config: Pick<VisParams, 'metric' | 'dimensions'>;
   renderComplete: IInterpreterRenderHandlers['done'];
-}) => {
+}
+
+const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponentProps) => {
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
       if (isRendered) {
@@ -140,4 +137,4 @@ const MetricVis = ({
 
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
-export { MetricVis as default };
+export { MetricVisComponent as default };
