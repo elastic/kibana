@@ -12,7 +12,10 @@ import {
   CoreStart,
 } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { ExpressionAstFunction } from '@kbn/expressions-plugin/public';
+import {
+  ExpressionAstExpressionBuilder,
+  ExpressionAstFunction,
+} from '@kbn/expressions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -51,10 +54,16 @@ import type {
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
+import {
+  DataViewDragDropOperation,
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternLayer,
+} from '../../types';
 import { DateRange, LayerType } from '../../../../common';
 import { rangeOperation } from './ranges';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
+import type { OriginalColumn } from '../../to_expression';
 
 export type {
   IncompleteColumn,
@@ -245,11 +254,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    * Based on the current column and the other updated columns, this function has to
    * return an updated column. If not implemented, the `id` function is used instead.
    */
-  onOtherColumnChanged?: (
-    layer: IndexPatternLayer,
-    thisColumnId: string,
-    changedColumnId: string
-  ) => C;
+  onOtherColumnChanged?: (layer: IndexPatternLayer, thisColumnId: string) => C;
   /**
    * React component for operation specific settings shown in the flyout editor
    */
@@ -378,6 +383,17 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    * Title for the help component
    */
   helpComponentTitle?: string;
+  /**
+   * Optimizes EsAggs expression. Invoked only once per operation type.
+   */
+  optimizeEsAggs?: (
+    aggs: ExpressionAstExpressionBuilder[],
+    esAggsIdMap: Record<string, OriginalColumn[]>,
+    aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string>
+  ) => {
+    aggs: ExpressionAstExpressionBuilder[];
+    esAggsIdMap: Record<string, OriginalColumn[]>;
+  };
 }
 
 interface BaseBuildColumnArgs {
@@ -608,12 +624,11 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
    * root level
    */
   createCopy: (
-    layer: IndexPatternLayer,
-    sourceColumnId: string,
-    targetColumnId: string,
-    indexPattern: IndexPattern,
+    layers: Record<string, IndexPatternLayer>,
+    source: DataViewDragDropOperation,
+    target: DataViewDragDropOperation,
     operationDefinitionMap: Record<string, GenericOperationDefinition>
-  ) => IndexPatternLayer;
+  ) => Record<string, IndexPatternLayer>;
 }
 
 interface OperationDefinitionMap<C extends BaseIndexPatternColumn, P = {}> {
