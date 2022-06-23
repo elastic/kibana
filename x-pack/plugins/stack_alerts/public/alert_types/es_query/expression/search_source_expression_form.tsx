@@ -253,7 +253,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onChangeWindowUnit={onChangeWindowUnit}
         onChangeSizeValue={onChangeSizeValue}
         errors={errors}
-        hasValidationErrors={hasExpressionValidationErrors(ruleParams) || !ruleConfiguration.index}
+        hasValidationErrors={hasExpressionValidationErrors(ruleParams) || !dataView}
         onTestFetch={onTestFetch}
       />
 

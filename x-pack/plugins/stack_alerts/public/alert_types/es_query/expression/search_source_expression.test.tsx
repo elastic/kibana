@@ -54,24 +54,24 @@ const testResultPartial = {
   running: true,
 };
 
+const searchSourceFieldsMock = {
+  query: {
+    query: '',
+    language: 'kuery',
+  },
+  filter: [],
+  index: {
+    id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+    title: 'kibana_sample_data_logs',
+    fields: [],
+  },
+};
+
 const searchSourceMock = {
   id: 'data_source6',
-  fields: {
-    query: {
-      query: '',
-      language: 'kuery',
-    },
-    filter: [],
-    index: {
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-      title: 'kibana_sample_data_logs',
-    },
-  },
+  fields: searchSourceFieldsMock,
   getField: (name: string) => {
-    if (name === 'filter') {
-      return [];
-    }
-    return '';
+    return (searchSourceFieldsMock as Record<string, object>)[name] || '';
   },
   setField: jest.fn(),
   createCopy: jest.fn(() => {
