@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 
-import { EuiSpacer, EuiBasicTable } from '@elastic/eui';
+import { EuiSpacer, EuiBasicTable, EuiBasicTableProps } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { euiLightVars as theme } from '@kbn/ui-theme';
@@ -34,6 +34,8 @@ interface Sorting {
 
 export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
   const [messages, setMessages] = useState<any[]>([]);
+  const [msgCount, setMsgCount] = useState<number>(0);
+
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -48,7 +50,10 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
 
   const api = useApi();
 
-  const getMessagesFactory = () => {
+  const getMessagesFactory = (
+    sortField: keyof TransformMessage = 'timestamp',
+    sortDirection: 'asc' | 'desc' = 'desc'
+  ) => {
     let concurrentLoads = 0;
 
     return async function getMessages() {
@@ -59,7 +64,11 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
       }
 
       setIsLoading(true);
-      const messagesResp = await api.getTransformAuditMessages(transformId);
+      const messagesResp = await api.getTransformAuditMessages(
+        transformId,
+        sortField,
+        sortDirection
+      );
 
       if (!isGetTransformsAuditMessagesResponseSchema(messagesResp)) {
         setIsLoading(false);
@@ -75,7 +84,8 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
       }
 
       setIsLoading(false);
-      setMessages(messagesResp as any[]);
+      setMessages(messagesResp.messages);
+      setMsgCount(messagesResp.total);
 
       concurrentLoads--;
 
@@ -85,7 +95,6 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
       }
     };
   };
-
   useRefreshTransformList({ onRefresh: getMessagesFactory() });
 
   const columns = [
@@ -113,6 +122,7 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
           defaultMessage: 'Node',
         }
       ),
+      sortable: true,
     },
     {
       field: 'message',
@@ -123,21 +133,20 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
         }
       ),
       width: '50%',
+      sortable: true,
     },
   ];
 
-  const getPageOfMessages = ({
-    index,
-    size,
-    sort,
-  }: {
-    index: number;
-    size: number;
-    sort: Sorting;
-  }) => {
-    const list = messages.sort((a: TransformMessage, b: TransformMessage) =>
-      sort.direction === 'asc' ? a.timestamp - b.timestamp : b.timestamp - a.timestamp
-    );
+  const getPageOfMessages = ({ index, size }: { index: number; size: number }) => {
+    let list = messages;
+    if (msgCount <= 500) {
+      const sortField = sorting.sort.field ?? 'timestamp';
+      list = messages.sort((a: TransformMessage, b: TransformMessage) => {
+        const prev = a[sortField] as any;
+        const curr = b[sortField] as any;
+        return sorting.sort.direction === 'asc' ? prev - curr : curr - prev;
+      });
+    }
     const listLength = list.length;
     const pageStart = index * size;
 
@@ -147,7 +156,7 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
     };
   };
 
-  const onChange = ({
+  const onChange: EuiBasicTableProps<TransformMessage>['onChange'] = ({
     page = { index: 0, size: 10 },
     sort,
   }: {
@@ -160,13 +169,18 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
     setPageSize(size);
     if (sort) {
       setSorting({ sort });
+
+      // Since we only show 500 messages, if user wants oldest messages first
+      // we need to make sure we fetch them from elasticsearch
+      if (msgCount > 500) {
+        getMessagesFactory(sort.field, sort.direction)();
+      }
     }
   };
 
   const { pageOfMessages, totalItemCount } = getPageOfMessages({
     index: pageIndex,
     size: pageSize,
-    sort: sorting.sort,
   });
 
   const pagination = {

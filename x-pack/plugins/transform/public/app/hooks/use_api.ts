@@ -196,10 +196,19 @@ export const useApi = () => {
         }
       },
       async getTransformAuditMessages(
-        transformId: TransformId
-      ): Promise<GetTransformsAuditMessagesResponseSchema | HttpFetchError> {
+        transformId: TransformId,
+        sortField: string,
+        sortDirection: 'asc' | 'desc'
+      ): Promise<
+        { messages: GetTransformsAuditMessagesResponseSchema; total: number } | HttpFetchError
+      > {
         try {
-          return await http.get(`${API_BASE_PATH}transforms/${transformId}/messages`);
+          return await http.get(`${API_BASE_PATH}transforms/${transformId}/messages`, {
+            query: {
+              sortField,
+              sortDirection,
+            },
+          });
         } catch (e) {
           return e;
         }

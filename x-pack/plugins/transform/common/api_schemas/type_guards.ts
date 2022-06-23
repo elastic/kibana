@@ -103,7 +103,7 @@ export const isFieldHistogramsResponseSchema = (
 export const isGetTransformsAuditMessagesResponseSchema = (
   arg: unknown
 ): arg is GetTransformsAuditMessagesResponseSchema => {
-  return Array.isArray(arg);
+  return isPopulatedObject(arg, ['messages', 'total']);
 };
 
 export const isPostTransformsPreviewResponseSchema = (

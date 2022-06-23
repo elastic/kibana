@@ -133,7 +133,7 @@ const apiFactory = () => ({
   async getTransformAuditMessages(
     transformId: TransformId
   ): Promise<GetTransformsAuditMessagesResponseSchema | HttpFetchError> {
-    return Promise.resolve([]);
+    return Promise.resolve({ messages: [], total: 0 });
   },
   async esSearch(payload: any): Promise<estypes.SearchResponse | HttpFetchError> {
     const hits = [];
