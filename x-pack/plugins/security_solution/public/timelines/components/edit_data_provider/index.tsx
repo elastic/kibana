@@ -235,7 +235,6 @@ export const StatefulEditDataProvider = React.memo<Props>(
               <EuiFormRow label={i18n.VALUE_LABEL}>
                 <EuiFieldText
                   className={VALUE_INPUT_CLASS_NAME}
-                  data-test-subj="value"
                   onChange={onValueChange}
                   placeholder={i18n.VALUE}
                   value={sanatizeValue(updatedValue)}

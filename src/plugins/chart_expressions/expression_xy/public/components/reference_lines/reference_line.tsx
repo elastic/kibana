@@ -10,47 +10,49 @@ import React, { FC } from 'react';
 import { Position } from '@elastic/charts';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { ReferenceLineConfig } from '../../../common/types';
-import { getGroupId } from './utils';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
+import { AxesMap, GroupsConfiguration } from '../../helpers';
+import { getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineProps {
   layer: ReferenceLineConfig;
   paddingMap: Partial<Record<Position, number>>;
-  formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
-  axesMap: Record<'left' | 'right', boolean>;
+  xAxisFormatter: FieldFormat;
+  axesConfiguration: GroupsConfiguration;
   isHorizontal: boolean;
   nextValue?: number;
+  yAxesMap: AxesMap;
 }
 
 export const ReferenceLine: FC<ReferenceLineProps> = ({
   layer,
-  axesMap,
-  formatters,
+  axesConfiguration,
+  xAxisFormatter,
   paddingMap,
   isHorizontal,
   nextValue,
+  yAxesMap,
 }) => {
   const {
-    yConfig: [yConfig],
+    decorations: [decorationConfig],
   } = layer;
 
-  if (!yConfig) {
+  if (!decorationConfig) {
     return null;
   }
 
-  const { axisMode, value } = yConfig;
+  const { value } = decorationConfig;
 
-  // Find the formatter for the given axis
-  const groupId = getGroupId(axisMode);
+  const axisGroup = getAxisGroupForReferenceLine(axesConfiguration, decorationConfig, isHorizontal);
 
-  const formatter = formatters[groupId || 'bottom'];
+  const formatter = axisGroup?.formatter || xAxisFormatter;
   const id = `${layer.layerId}-${value}`;
 
   return (
     <ReferenceLineAnnotations
-      config={{ id, ...yConfig, nextValue }}
+      config={{ id, ...decorationConfig, nextValue, axisGroup }}
       paddingMap={paddingMap}
-      axesMap={axesMap}
+      axesMap={yAxesMap}
       formatter={formatter}
       isHorizontal={isHorizontal}
     />
