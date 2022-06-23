@@ -8,11 +8,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { EuiInMemoryTable, Pagination, Direction } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
 import { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
-import { getColumnHeader, getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
+import { getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
-import { tGridActions } from '../../../../store/t_grid';
 import type { GetFieldTableColumns } from '../../../../../common/types/field_browser';
 import { FieldTableHeader } from './field_table_header';
 
@@ -22,7 +20,6 @@ const DEFAULT_SORTING: { field: string; direction: Direction } = {
 } as const;
 
 export interface FieldTableProps {
-  timelineId: string;
   columnHeaders: ColumnHeaderOptions[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
@@ -33,6 +30,7 @@ export interface FieldTableProps {
   /** when true, show only the the selected field */
   filterSelectedEnabled: boolean;
   onFilterSelectedChange: (enabled: boolean) => void;
+  onToggleColumn: (fieldId: string) => void;
   /**
    * Optional function to customize field table columns
    */
@@ -71,7 +69,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   searchInput,
   selectedCategoryIds,
   onFilterSelectedChange,
-  timelineId,
+  onToggleColumn,
   onHide,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
@@ -79,8 +77,6 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
 
   const [sortField, setSortField] = useState<string>(DEFAULT_SORTING.field);
   const [sortDirection, setSortDirection] = useState<Direction>(DEFAULT_SORTING.direction);
-
-  const dispatch = useDispatch();
 
   const fieldItems = useMemo(
     () =>
@@ -90,28 +86,6 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
         columnHeaders,
       }),
     [columnHeaders, filteredBrowserFields, selectedCategoryIds]
-  );
-
-  const onToggleColumn = useCallback(
-    (fieldId: string) => {
-      if (columnHeaders.some(({ id }) => id === fieldId)) {
-        dispatch(
-          tGridActions.removeColumn({
-            columnId: fieldId,
-            id: timelineId,
-          })
-        );
-      } else {
-        dispatch(
-          tGridActions.upsertColumn({
-            column: getColumnHeader(timelineId, fieldId),
-            id: timelineId,
-            index: 1,
-          })
-        );
-      }
-    },
-    [columnHeaders, dispatch, timelineId]
   );
 
   /**
