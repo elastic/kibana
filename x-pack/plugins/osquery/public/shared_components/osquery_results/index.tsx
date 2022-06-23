@@ -37,6 +37,7 @@ interface OsqueryResultsProps {
   ruleName: string;
   ruleActions: string[];
   eventDetailId: string;
+  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
@@ -44,6 +45,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
   ruleName,
   ruleActions,
   eventDetailId,
+  addToTimeline,
 }) => {
   const { ref, inView } = useInView();
 
@@ -112,7 +114,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
                 actionId={actionId}
                 agentIds={agentIds}
                 startDate={startDate}
-                // addToTimeline={}
+                addToTimeline={addToTimeline}
               />
             </EuiComment>
           );

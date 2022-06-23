@@ -20,6 +20,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import { useHandleAddToTimeline } from './add_to_timeline_button';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import { ThreatSummaryView } from './cti_details/threat_summary_view';
@@ -167,6 +168,8 @@ const EventDetailsComponent: React.FC<Props> = ({
 
   // @ts-expect-error the types are there
   const { OsqueryResults } = osquery;
+
+  const handleAddToTimeline = useHandleAddToTimeline();
 
   const allEnrichments = useMemo(() => {
     if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
@@ -390,6 +393,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                   ruleName={ruleName}
                   ruleActions={ruleActions}
                   eventDetailId={id}
+                  addToTimeline={handleAddToTimeline}
                 />
               </TabContentWrapper>
             </>
