@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataLayerConfig, AxisConfig } from '../../common';
+import { DataLayerConfig, YAxisConfigResult } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
@@ -221,10 +221,11 @@ describe('axes_configuration', () => {
     },
   };
 
-  const yAxisConfigs: AxisConfig[] = [
+  const yAxisConfigs: YAxisConfigResult[] = [
     {
       id: '1',
       position: 'right',
+      type: 'yAxisConfig',
     },
   ];
 

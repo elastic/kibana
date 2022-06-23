@@ -248,6 +248,14 @@ export function XYChart({
     yAxisConfigs
   );
 
+  const axesConfiguration = getAxesConfiguration(
+    dataLayers,
+    shouldRotate,
+    formatFactory,
+    fieldFormats,
+    [...(yAxisConfigs ?? []), ...(xAxisConfig ? [xAxisConfig] : [])]
+  );
+
   const xTitle = xAxisConfig?.title || (xAxisColumn && xAxisColumn.name);
   const yAxesMap = {
     left: yAxesConfiguration.find(
@@ -327,7 +335,7 @@ export function XYChart({
       .map((config) => ({
         ...config,
         position: config
-          ? getAxisGroupForReferenceLine(yAxesConfiguration, config, shouldRotate)?.position ??
+          ? getAxisGroupForReferenceLine(axesConfiguration, config, shouldRotate)?.position ??
             Position.Left
           : Position.Bottom,
       })),
@@ -705,7 +713,7 @@ export function XYChart({
         id="x"
         position={
           xAxisConfig?.position
-            ? getAxisPosition(xAxisConfig?.position, shouldRotate)
+            ? getOriginalAxisPosition(xAxisConfig?.position, shouldRotate)
             : defaultXAxisPosition
         }
         title={xTitle}
@@ -801,7 +809,7 @@ export function XYChart({
         <ReferenceLines
           layers={referenceLineLayers}
           xAxisFormatter={xAxisFormatter}
-          yAxesConfiguration={yAxesConfiguration}
+          axesConfiguration={axesConfiguration}
           isHorizontal={shouldRotate}
           paddingMap={linesPaddings}
           titles={titles}

@@ -21,13 +21,13 @@ interface ReferenceLineLayerProps {
   isHorizontal: boolean;
   titles?: LayerAccessorsTitles;
   xAxisFormatter: FieldFormat;
-  yAxesConfiguration: GroupsConfiguration;
+  axesConfiguration: GroupsConfiguration;
   yAxesMap: AxesMap;
 }
 
 export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
   layer,
-  yAxesConfiguration,
+  axesConfiguration,
   xAxisFormatter,
   paddingMap,
   isHorizontal,
@@ -54,7 +54,7 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
 
   const referenceLineElements = decorationConfigsByValue.flatMap((decorationConfig) => {
     const axisGroup = getAxisGroupForReferenceLine(
-      yAxesConfiguration,
+      axesConfiguration,
       decorationConfig,
       isHorizontal
     );

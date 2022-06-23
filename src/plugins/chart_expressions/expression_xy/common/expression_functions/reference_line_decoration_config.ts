@@ -29,7 +29,7 @@ export const referenceLineDecorationConfigFunction: ReferenceLineDecorationConfi
     ...commonDecorationConfigArgs,
     position: {
       types: ['string'],
-      options: [Position.Right, Position.Left],
+      options: [Position.Right, Position.Left, Position.Bottom],
       help: i18n.translate('expressionXY.referenceLine.position.help', {
         defaultMessage:
           'Position of axis (first axis of that position) to which the reference line belongs.',

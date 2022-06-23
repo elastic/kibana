@@ -98,7 +98,7 @@ describe('ReferenceLines', () => {
       defaultProps = {
         xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
-        yAxesConfiguration: [
+        axesConfiguration: [
           {
             groupId: 'left',
             position: 'left',
@@ -444,7 +444,7 @@ describe('ReferenceLines', () => {
       defaultProps = {
         xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
-        yAxesConfiguration: [
+        axesConfiguration: [
           {
             groupId: 'left',
             position: 'left',
