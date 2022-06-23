@@ -11,9 +11,9 @@ import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_
 import { MlAuthz } from '../../machine_learning/authz';
 import { throwAuthzError } from '../../machine_learning/validation';
 
-import { ruleParamsModifier } from './bulk_edit/rule_params_modifier';
-import { splitBulkEditActions } from './bulk_edit/split_bulk_edit_actions';
-import { bulkEditActionToRulesClientOperation } from './bulk_edit/action_to_rules_client_operation';
+import { ruleParamsModifier } from './bulk_actions/rule_params_modifier';
+import { splitBulkEditActions } from './bulk_actions/split_bulk_edit_actions';
+import { bulkEditActionToRulesClientOperation } from './bulk_actions/action_to_rules_client_operation';
 
 import { RuleAlertType } from './types';
 

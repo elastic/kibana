@@ -50,7 +50,7 @@ import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { legacyMigrate } from '../../rules/utils';
-import { DryRunError, throwDryRunError } from '../../rules/bulk_edit/dry_run';
+import { DryRunError, throwDryRunError } from '../../rules/bulk_actions/dry_run';
 
 import { RuleParams } from '../../schemas/rule_schemas';
 
