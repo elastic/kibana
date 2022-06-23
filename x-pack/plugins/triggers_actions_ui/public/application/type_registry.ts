@@ -42,30 +42,6 @@ export class TypeRegistry<T extends BaseObjectType> {
   }
 
   /**
-   * Registers async an object type to the type registry
-   */
-  public async registerAsync(getObjectType: () => Promise<T>) {
-    try {
-      const objectType = await getObjectType();
-      if (!this.has(objectType.id)) {
-        this.register(objectType);
-      }
-    } catch (err) {
-      throw new Error(
-        i18n.translate(
-          'xpack.triggersActionsUI.typeRegistry.registerAsync.ObjectTypeErrorMessage',
-          {
-            defaultMessage: 'Object type is not able to be registered. Error msg: "{msg}"',
-            values: {
-              msg: err.message,
-            },
-          }
-        )
-      );
-    }
-  }
-
-  /**
    * Returns an object type, throw error if not registered
    */
   public get(id: string): T {

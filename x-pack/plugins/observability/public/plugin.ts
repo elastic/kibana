@@ -290,7 +290,9 @@ export class Plugin
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
-    alertsTableConfigurationRegistry.registerAsync(getAsyncO11yAlertsTableConfiguration);
+    getAsyncO11yAlertsTableConfiguration().then((config) => {
+      alertsTableConfigurationRegistry.register(config);
+    });
 
     return {
       navigation: {
