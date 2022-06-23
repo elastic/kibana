@@ -9,7 +9,7 @@ import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { fetchSql } from './fetch_sql';
 import {
   sendCompleteMsg,
   sendErrorMsg,
@@ -81,37 +81,45 @@ export function fetchAll(
   };
 
   try {
-    const indexPattern = searchSource.getField('index')!;
-
+    const dataView = searchSource.getField('index')!;
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
     }
+    const { hideChart, sort, query } = appStateContainer.getState();
+    const language = query?.language || 'kql';
 
-    const { hideChart, sort } = appStateContainer.getState();
-
-    // Update the base searchSource, base for all child fetches
-    updateSearchSource(searchSource, false, {
-      indexPattern,
-      services,
-      sort: sort as SortOrder[],
-      useNewFieldsApi,
-    });
+    if (language !== 'sql') {
+      // Update the base searchSource, base for all child fetches
+      updateSearchSource(searchSource, false, {
+        indexPattern: dataView,
+        services,
+        sort: sort as SortOrder[],
+        useNewFieldsApi,
+      });
+    }
 
     // Mark all subjects as loading
-    sendLoadingMsg(dataSubjects.main$);
-    sendLoadingMsg(dataSubjects.documents$);
-    sendLoadingMsg(dataSubjects.totalHits$);
-    sendLoadingMsg(dataSubjects.charts$);
+    sendLoadingMsg(dataSubjects.main$, language);
+    sendLoadingMsg(dataSubjects.documents$, language);
+    sendLoadingMsg(dataSubjects.totalHits$, language);
+    sendLoadingMsg(dataSubjects.charts$, language);
 
     const isChartVisible =
-      !hideChart && indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP;
+      !hideChart && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
 
     // Start fetching all required requests
-    const documents = fetchDocuments(searchSource.createCopy(), fetchDeps);
-    const charts = isChartVisible ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;
-    const totalHits = !isChartVisible
-      ? fetchTotalHits(searchSource.createCopy(), fetchDeps)
-      : undefined;
+    const documents =
+      language === 'sql'
+        ? fetchSql(String(query?.query), fetchDeps.data)
+        : fetchDocuments(searchSource.createCopy(), fetchDeps);
+    const charts =
+      isChartVisible && language !== 'sql'
+        ? fetchChart(searchSource.createCopy(), fetchDeps)
+        : undefined;
+    const totalHits =
+      !isChartVisible && language !== 'sql'
+        ? fetchTotalHits(searchSource.createCopy(), fetchDeps)
+        : undefined;
 
     /**
      * This method checks the passed in hit count and will send a PARTIAL message to main$
@@ -140,13 +148,11 @@ export function fetchAll(
             result: docs.length,
           });
         }
-        const dataView = searchSource.getField('index')!;
-
-        const resultDocs = docs.map((doc) => buildDataTableRecord(doc, dataView));
 
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,
-          result: resultDocs,
+          result: docs,
+          language,
         });
 
         checkHitCount(docs.length);

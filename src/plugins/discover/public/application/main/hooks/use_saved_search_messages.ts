@@ -33,10 +33,12 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
   if (main$.getValue().fetchStatus === FetchStatus.COMPLETE) {
     return;
   }
+  const language = main$.getValue().language;
   main$.next({
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments,
     error: undefined,
+    language,
   });
 }
 
@@ -45,8 +47,10 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
  */
 export function sendPartialMsg(main$: DataMain$) {
   if (main$.getValue().fetchStatus === FetchStatus.LOADING) {
+    const language = main$.getValue().language;
     main$.next({
       fetchStatus: FetchStatus.PARTIAL,
+      language,
     });
   }
 }
@@ -54,10 +58,14 @@ export function sendPartialMsg(main$: DataMain$) {
 /**
  * Send LOADING message via main observable
  */
-export function sendLoadingMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$) {
+export function sendLoadingMsg(
+  data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$,
+  language: string
+) {
   if (data$.getValue().fetchStatus !== FetchStatus.LOADING) {
     data$.next({
       fetchStatus: FetchStatus.LOADING,
+      language,
     });
   }
 }
@@ -69,9 +77,11 @@ export function sendErrorMsg(
   data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$,
   error: Error
 ) {
+  const language = data$.getValue().language;
   data$.next({
     fetchStatus: FetchStatus.ERROR,
     error,
+    language,
   });
 }
 
@@ -80,21 +90,26 @@ export function sendErrorMsg(
  * Needed when index pattern is switched or a new runtime field is added
  */
 export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchStatus) {
+  const language = data.main$.getValue().language;
   data.main$.next({
     fetchStatus: initialFetchStatus,
     foundDocuments: undefined,
+    language,
   });
   data.documents$.next({
     fetchStatus: initialFetchStatus,
     result: [],
+    language,
   });
   data.charts$.next({
     fetchStatus: initialFetchStatus,
     chartData: undefined,
     bucketInterval: undefined,
+    language,
   });
   data.totalHits$.next({
     fetchStatus: initialFetchStatus,
     result: undefined,
+    language,
   });
 }

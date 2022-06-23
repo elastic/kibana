@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
 import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
+import { buildDataTableRecordList } from '../../../utils/build_data_record';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { FetchDeps } from './fetch_all';
 
@@ -18,7 +19,7 @@ import { FetchDeps } from './fetch_all';
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps
+  { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps,
 ) => {
   searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
@@ -31,6 +32,7 @@ export const fetchDocuments = (
     // not a rollup index pattern.
     searchSource.setOverwriteDataViewType(undefined);
   }
+  const dataView = searchSource.getField('index')!;
 
   const executionContext = {
     description: 'fetch documents',
@@ -53,7 +55,9 @@ export const fetchDocuments = (
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),
-      map((res) => res.rawResponse.hits.hits)
+      map((res) => {
+        return buildDataTableRecordList(res.rawResponse.hits.hits, dataView);
+      })
     );
 
   return lastValueFrom(fetch$);

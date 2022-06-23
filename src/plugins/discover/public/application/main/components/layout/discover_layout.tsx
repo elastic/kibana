@@ -91,6 +91,7 @@ export function DiscoverLayout({
   } = useDiscoverServices();
   const { main$, charts$, totalHits$ } = savedSearchData$;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
+  const dataState: DataMainMsg = useDataState(main$);
 
   const viewMode = useMemo(() => {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
@@ -113,7 +114,6 @@ export function DiscoverLayout({
   );
 
   const fetchCounter = useRef<number>(0);
-  const dataState: DataMainMsg = useDataState(main$);
 
   useEffect(() => {
     if (dataState.fetchStatus === FetchStatus.LOADING) {
@@ -325,20 +325,25 @@ export function DiscoverLayout({
                   gutterSize="none"
                   responsive={false}
                 >
-                  <EuiFlexItem grow={false}>
-                    <DiscoverChartMemoized
-                      resetSavedSearch={resetSavedSearch}
-                      savedSearch={savedSearch}
-                      savedSearchDataChart$={charts$}
-                      savedSearchDataTotalHits$={totalHits$}
-                      stateContainer={stateContainer}
-                      indexPattern={indexPattern}
-                      viewMode={viewMode}
-                      setDiscoverViewMode={setDiscoverViewMode}
-                      hideChart={state.hideChart}
-                      interval={state.interval}
-                    />
-                  </EuiFlexItem>
+                  {dataState.language !== 'sql' && (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <DiscoverChartMemoized
+                          resetSavedSearch={resetSavedSearch}
+                          savedSearch={savedSearch}
+                          savedSearchDataChart$={charts$}
+                          savedSearchDataTotalHits$={totalHits$}
+                          stateContainer={stateContainer}
+                          indexPattern={indexPattern}
+                          viewMode={viewMode}
+                          setDiscoverViewMode={setDiscoverViewMode}
+                          hideChart={state.hideChart}
+                          interval={state.interval}
+                        />
+                      </EuiFlexItem>
+                      <EuiHorizontalRule margin="none" />
+                    </>
+                  )}
                   <EuiHorizontalRule margin="none" />
                   {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
                     <DiscoverDocuments

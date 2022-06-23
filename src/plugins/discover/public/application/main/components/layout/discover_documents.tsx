@@ -54,7 +54,7 @@ function DiscoverDocumentsComponent({
   expandedDoc?: DataTableRecord;
   indexPattern: DataView;
   navigateTo: (url: string) => void;
-  onAddFilter: DocViewFilterFn;
+  onAddFilter?: DocViewFilterFn;
   savedSearch: SavedSearch;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   state: AppState;
@@ -109,8 +109,11 @@ function DiscoverDocumentsComponent({
   );
 
   const showTimeCol = useMemo(
-    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
-    [uiSettings, indexPattern.timeFieldName]
+    () =>
+      documentState.language !== 'sql' &&
+      !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
+      !!indexPattern.timeFieldName,
+    [uiSettings, indexPattern.timeFieldName, documentState.language]
   );
 
   if (
@@ -150,7 +153,7 @@ function DiscoverDocumentsComponent({
             onFilter={onAddFilter as DocViewFilterFn}
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
-            onSort={onSort}
+            onSort={documentState.language !== 'sql' ? onSort : undefined}
             useNewFieldsApi={useNewFieldsApi}
             dataTestSubj="discoverDocTable"
           />
@@ -180,11 +183,12 @@ function DiscoverDocumentsComponent({
               onFilter={onAddFilter as DocViewFilterFn}
               onRemoveColumn={onRemoveColumn}
               onSetColumns={onSetColumns}
-              onSort={onSort}
+              onSort={documentState.language !== 'sql' ? onSort : undefined}
               onResize={onResize}
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
+              isSortEnabled={documentState.language !== 'sql'}
             />
           </div>
         </>

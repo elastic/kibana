@@ -58,6 +58,7 @@ export type DataRefetchMsg = 'reset' | undefined;
 export interface DataMsg {
   fetchStatus: FetchStatus;
   error?: Error;
+  language?: string;
 }
 
 export interface DataMainMsg extends DataMsg {
@@ -106,6 +107,8 @@ export const useSavedSearch = ({
 }) => {
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
+  const { query } = stateContainer.appStateContainer.getState();
+  const language = String(query?.language) || 'kql';
 
   const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
 
@@ -113,17 +116,12 @@ export const useSavedSearch = ({
    * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
-  const main$: DataMain$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const documents$: DataDocuments$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const totalHits$: DataTotalHits$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const charts$: DataCharts$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const availableFields$: AvailableFields$ = useBehaviorSubject({
-    fetchStatus: initialFetchStatus,
-  });
+  const initialState = { fetchStatus: initialFetchStatus, language };
+  const main$: DataMain$ = useBehaviorSubject(initialState) as DataMain$;
+  const documents$: DataDocuments$ = useBehaviorSubject(initialState) as DataDocuments$;
+  const totalHits$: DataTotalHits$ = useBehaviorSubject(initialState) as DataTotalHits$;
+  const charts$: DataCharts$ = useBehaviorSubject(initialState) as DataCharts$;
+  const availableFields$: AvailableFields$ = useBehaviorSubject(initialState) as AvailableFields$;
 
   const dataSubjects = useMemo(() => {
     return {

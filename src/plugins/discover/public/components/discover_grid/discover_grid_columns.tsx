@@ -62,6 +62,7 @@ export function buildEuiGridColumn({
   services,
   valueToStringConverter,
   rowsCount,
+  isFilterEnabled = true,
 }: {
   columnName: string;
   columnWidth: number | undefined;
@@ -71,6 +72,7 @@ export function buildEuiGridColumn({
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
+  isFilterEnabled?: boolean;
 }) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
   const column: EuiDataGridColumn = {
@@ -107,7 +109,7 @@ export function buildEuiGridColumn({
         }),
       ],
     },
-    cellActions: indexPatternField ? buildCellActions(indexPatternField) : [],
+    cellActions: indexPatternField ? buildCellActions(indexPatternField, isFilterEnabled) : [],
   };
 
   if (column.id === indexPattern.timeFieldName) {
