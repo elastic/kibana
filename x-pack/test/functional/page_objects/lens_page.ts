@@ -111,22 +111,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param opts.field - the desired field for the dimension
      * @param layerIndex - the index of the layer
      */
-    async configureDimension(
-      opts: {
-        dimension: string;
-        operation: string;
-        field?: string;
-        isPreviousIncompatible?: boolean;
-        keepOpen?: boolean;
-        palette?: string;
-        formula?: string;
-        disableEmptyRows?: boolean;
-      },
-      layerIndex = 0
-    ) {
+    async configureDimension(opts: {
+      dimension: string;
+      operation: string;
+      field?: string;
+      isPreviousIncompatible?: boolean;
+      keepOpen?: boolean;
+      palette?: string;
+      formula?: string;
+      disableEmptyRows?: boolean;
+    }) {
       await retry.try(async () => {
         if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
-          await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
+          await testSubjects.click(opts.dimension);
         }
         await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
       });
@@ -450,8 +447,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param from - the selector of the dimension being moved
      * @param to - the selector of the dimension being dropped to
      * */
-    async dragDimensionToDimension(from: string, to: string) {
+    async dragDimensionToDimension({ from, to }: { from: string; to: string }) {
       await find.existsByCssSelector(from);
+      await find.existsByCssSelector(to);
       await browser.html5DragAndDrop(
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(to)
@@ -891,7 +889,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return dimensionTexts[index];
     },
     /**
-     * Gets label of all dimension triggers in dimension group
+     * Gets label of all dimension triggers in an element
      *
      * @param dimension - the selector of the dimension
      */
