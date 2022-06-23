@@ -41,8 +41,6 @@ export function renderApp(
 
   const canSave = (capabilities.uptime.save ?? false) as boolean; // TODO: Determine for synthetics
 
-  console.warn('render stuff');
-
   const props: SyntheticsAppProps = {
     isDev,
     plugins,
