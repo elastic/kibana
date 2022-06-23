@@ -11,7 +11,7 @@ export default function spaceSelectorFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  // const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
   const PageObjects = getPageObjects([
     'common',
