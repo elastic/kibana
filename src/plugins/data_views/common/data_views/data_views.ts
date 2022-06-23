@@ -11,6 +11,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import uuid from 'uuid';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, DEFAULT_ASSETS_TO_IGNORE } from '..';
 import { SavedObjectsClientCommon } from '../types';
 
@@ -52,7 +53,7 @@ export type IndexPatternListSavedObjectAttrs = Pick<
  */
 export interface DataViewListItem {
   /**
-   * Saved object id
+   * Saved object id (or generated id if in-memory only)
    */
   id: string;
   /**
@@ -762,9 +763,14 @@ export class DataViewsService {
    * @param skipFetchFields if true, will not fetch fields
    * @returns DataView
    */
-  async create(spec: DataViewSpec, skipFetchFields = false): Promise<DataView> {
+  async create({ id, ...restOfSpec }: DataViewSpec, skipFetchFields = false): Promise<DataView> {
     const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(META_FIELDS);
+
+    const spec = {
+      id: id ?? uuid.v4(),
+      ...restOfSpec,
+    };
 
     const indexPattern = new DataView({
       spec,
