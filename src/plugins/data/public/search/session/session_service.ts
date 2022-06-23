@@ -93,9 +93,13 @@ interface TrackSearchHandler {
   error(): void;
 
   /**
-   * Call to notify when search was polled
+   * Call to notify when search is about to be polled
+   * Returns a tuple with a current tracked search state and a callback to "confirm" when polling was completed and if search was successfully extended
    */
-  polled(): void;
+  beforePoll(): [
+    currentSearchState: { isSearchStored: boolean },
+    afterPoll: (newSearchState: { isSearchStored: boolean }) => void
+  ];
 }
 
 /**
@@ -331,11 +335,20 @@ export class SessionService {
       error: () => {
         this.state.transitions.errorSearch(searchDescriptor);
       },
-      polled: () => {
+      beforePoll: () => {
+        const search = this.state.selectors.getSearch(searchDescriptor);
         this.state.transitions.updateSearchMeta(searchDescriptor, {
           lastPollingTime: new Date(),
-          isStored: this.isStored(),
         });
+
+        return [
+          { isSearchStored: search?.searchMeta?.isStored ?? false },
+          ({ isSearchStored }) => {
+            this.state.transitions.updateSearchMeta(searchDescriptor, {
+              isStored: isSearchStored,
+            });
+          },
+        ];
       },
     };
   }
