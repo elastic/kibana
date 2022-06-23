@@ -1,4 +1,3 @@
-[role="xpack"]
 [[servicenow-action-type]]
 == {sn-itsm} connector and action
 ++++
@@ -63,6 +62,7 @@ A CORS rule is required for communication between Elastic and {sn}. To create a 
 
 This step is required to use OAuth for authentication between Elastic and {sn}.
 
+// tag::servicenow-rsa-key[]
 *Create an RSA keypair:*
 
 . Use https://www.openssl.org/docs/man1.0.2/man1/genrsa.html[OpenSSL] to generate an RSA private key:
@@ -84,7 +84,8 @@ openssl genrsa -passout pass:foobar -out example-private-key-with-password.pem 3
 openssl req -new -x509 -key example-private-key.pem -out example-sn-cert.pem -days 360
 ----
 --
-
+// end::servicenow-rsa-key[]
+// tag::servicenow-certificate[]
 *Add an X.509 certificate to ServiceNow:*
 
 . In your {sn} instance, go to *Certificates* and select *New*.
@@ -99,11 +100,13 @@ image::management/connectors/images/servicenow-new-certificate.png[Shows new cer
 --
 
 . Click *Submit* to create the certificate.
+// end::servicenow-certificate[]
 
 [float]
 [[servicenow-itsm-connector-prerequisites-endpoint]]
 ==== Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map
 
+// tag::servicenow-endpoint[]
 This step is required to use OAuth for authentication between Elastic and {sn}.
 
 . In your {sn} instance, go to *Application Registry* and select *New*.
@@ -146,6 +149,7 @@ image::management/connectors/images/servicenow-new-jwt-verifier-map.png[Shows ne
 [role="screenshot"]
 image::management/connectors/images/servicenow-oauth-values.png[Shows where to find OAuth values in ServiceNow]
 --
+// ::servicenow-endpoint[]
 
 [float]
 [[servicenow-itsm-connector-update]]
