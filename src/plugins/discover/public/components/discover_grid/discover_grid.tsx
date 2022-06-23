@@ -7,6 +7,7 @@
  */
 
 import React, { useCallback, useMemo, useState, useRef } from 'react';
+import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './discover_grid.scss';
 import {
@@ -19,6 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiDataGridRefProps,
+  EuiLink,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
@@ -41,15 +43,17 @@ import {
 import { getDisplayedColumns } from '../../utils/columns';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
+  SAMPLE_SIZE_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
 } from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
-import { SortPairArr } from '../doc_table/lib/get_sort';
+import { SortPairArr } from '../doc_table/utils/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
-import type { DataTableRecord } from '../../types';
-import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import type { DataTableRecord, ValueToStringConverter } from '../../types';
+import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { convertValueToString } from '../../utils/convert_value_to_string';
 
 interface SortObj {
   id: string;
@@ -230,6 +234,20 @@ export const DiscoverGrid = ({
     return rowsFiltered;
   }, [rows, usedSelectedDocs, isFilterActive]);
 
+  const valueToStringConverter: ValueToStringConverter = useCallback(
+    (rowIndex, columnId, options) => {
+      return convertValueToString({
+        rowIndex,
+        rows: displayedRows,
+        dataView: indexPattern,
+        columnId,
+        services,
+        options,
+      });
+    },
+    [displayedRows, indexPattern, services]
+  );
+
   /**
    * Pagination
    */
@@ -306,13 +324,14 @@ export const DiscoverGrid = ({
     () =>
       getEuiGridColumns({
         columns: displayedColumns,
-        rows: displayedRows,
+        rowsCount: displayedRows.length,
         settings,
         indexPattern,
         showTimeCol,
         defaultColumns,
         isSortEnabled,
         services,
+        valueToStringConverter,
       }),
     [
       displayedColumns,
@@ -323,6 +342,7 @@ export const DiscoverGrid = ({
       defaultColumns,
       isSortEnabled,
       services,
+      valueToStringConverter,
     ]
   );
 
@@ -447,46 +467,60 @@ export const DiscoverGrid = ({
             setIsFilterActive(false);
           }
         },
+        valueToStringConverter,
       }}
     >
-      <span
-        data-test-subj="discoverDocTable"
-        data-render-complete={!isLoading}
-        data-shared-item=""
-        data-title={searchTitle}
-        data-description={searchDescription}
-        data-document-number={displayedRows.length}
-        className={className}
-      >
-        <EuiDataGridMemoized
-          aria-describedby={randomId}
-          aria-labelledby={ariaLabelledBy}
-          columns={euiGridColumns}
-          columnVisibility={columnsVisibility}
-          data-test-subj="docTable"
-          leadingControlColumns={lead}
-          onColumnResize={onResize}
-          pagination={paginationObj}
-          renderCellValue={renderCellValue}
-          ref={dataGridRef}
-          rowCount={rowCount}
-          schemaDetectors={schemaDetectors}
-          sorting={sorting as EuiDataGridSorting}
-          toolbarVisibility={toolbarVisibility}
-          rowHeightsOptions={rowHeightsOptions}
-          gridStyle={GRID_STYLE}
-        />
-
+      <span className="dscDiscoverGrid__inner">
+        <div
+          data-test-subj="discoverDocTable"
+          data-render-complete={!isLoading}
+          data-shared-item=""
+          data-title={searchTitle}
+          data-description={searchDescription}
+          data-document-number={displayedRows.length}
+          className={classnames(className, 'dscDiscoverGrid__table')}
+        >
+          <EuiDataGridMemoized
+            aria-describedby={randomId}
+            aria-labelledby={ariaLabelledBy}
+            columns={euiGridColumns}
+            columnVisibility={columnsVisibility}
+            data-test-subj="docTable"
+            leadingControlColumns={lead}
+            onColumnResize={onResize}
+            pagination={paginationObj}
+            renderCellValue={renderCellValue}
+            ref={dataGridRef}
+            rowCount={rowCount}
+            schemaDetectors={schemaDetectors}
+            sorting={sorting as EuiDataGridSorting}
+            toolbarVisibility={toolbarVisibility}
+            rowHeightsOptions={rowHeightsOptions}
+            gridStyle={GRID_STYLE}
+          />
+        </div>
         {showDisclaimer && (
-          <p className="dscDiscoverGrid__footer">
+          <p className="dscDiscoverGrid__footer" data-test-subj="discoverTableFooter">
             <FormattedMessage
-              id="discover.howToSeeOtherMatchingDocumentsDescriptionGrid"
-              defaultMessage="These are the first {sampleSize} documents matching your search, refine your search to see others."
-              values={{ sampleSize }}
+              id="discover.gridSampleSize.description"
+              defaultMessage="You're viewing the first {sampleSize} documents that match your search. To change this value, go to {advancedSettingsLink}."
+              values={{
+                sampleSize,
+                advancedSettingsLink: (
+                  <EuiLink
+                    href={services.addBasePath(
+                      `/app/management/kibana/settings?query=${SAMPLE_SIZE_SETTING}`
+                    )}
+                    data-test-subj="discoverTableSampleSizeSettingsLink"
+                  >
+                    <FormattedMessage
+                      id="discover.gridSampleSize.advancedSettingsLinkLabel"
+                      defaultMessage="Advanced Settings"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
-            <a href={`#${ariaLabelledBy}`}>
-              <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
-            </a>
           </p>
         )}
         {searchTitle && (

@@ -24,7 +24,7 @@ type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
  * @param fieldsToShow A list of fields that should be included in the document summary.
  */
 export function formatHit(
-  row: DataTableRecord,
+  hit: estypes.SearchHit,
   dataView: DataView,
   fieldsToShow: string[],
   maxEntries: number

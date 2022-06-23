@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { indexPatternMock as dataViewMock } from '../__mocks__/index_pattern';
 import { formatHit } from './format_hit';
 import { discoverServiceMock } from '../__mocks__/services';
-import { DataTableRecord } from '../types';
+import { DataTableRecord, EsHitRecord } from '../types';
 import { buildDataTableRecord } from './build_data_record';
 
 describe('formatHit', () => {
   let row: DataTableRecord;
-  let hit: estypes.SearchHit;
+  let hit: EsHitRecord;
   beforeEach(() => {
     hit = {
       _id: '1',
@@ -39,8 +38,7 @@ describe('formatHit', () => {
 
   it('formats a document as expected', () => {
     const formatted = formatHit(
-      row.raw,
-      row.flattened,
+      row,
       dataViewMock,
       ['message', 'extension', 'object.value'],
       220,
@@ -56,9 +54,16 @@ describe('formatHit', () => {
   });
 
   it('orders highlighted fields first', () => {
+    const highlightHit = buildDataTableRecord(
+      {
+        ...hit,
+        highlight: { message: ['%%'] },
+      },
+      dataViewMock
+    );
+
     const formatted = formatHit(
-      { ...row.raw, highlight: { message: ['%%'] } },
-      row.flattened,
+      highlightHit,
       dataViewMock,
       ['message', 'extension', 'object.value'],
       220,
@@ -75,8 +80,7 @@ describe('formatHit', () => {
 
   it('only limits count of pairs based on advanced setting', () => {
     const formatted = formatHit(
-      row.raw,
-      row.flattened,
+      row,
       dataViewMock,
       ['message', 'extension', 'object.value'],
       2,
@@ -91,8 +95,7 @@ describe('formatHit', () => {
 
   it('should not include fields not mentioned in fieldsToShow', () => {
     const formatted = formatHit(
-      row.raw,
-      row.flattened,
+      row,
       dataViewMock,
       ['message', 'object.value'],
       220,
@@ -108,8 +111,7 @@ describe('formatHit', () => {
 
   it('should filter fields based on their real name not displayName', () => {
     const formatted = formatHit(
-      row.raw,
-      row.flattened,
+      row,
       dataViewMock,
       ['bytes'],
       220,

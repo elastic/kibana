@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { Query, TimeRange, SavedObject } from '@kbn/data-plugin/public';
+import type { Query, TimeRange } from '@kbn/es-query';
+import type { SavedObject } from '@kbn/data-plugin/public';
 import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin';
 import { DataTableRecord } from '../../../../types';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { DataRefetch$, SavedSearchData } from '../../utils/use_saved_search';
+import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 import { SavedSearch } from '../../../../services/saved_searches';
 
 export interface DiscoverLayoutProps {

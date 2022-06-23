@@ -11,10 +11,11 @@ import { get, last } from 'lodash';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { createContextSearchSourceStub } from './_stubs';
-import { DataPublicPluginStart, Query } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Query } from '@kbn/es-query';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { DataTableRecord, EsHitRecord } from '../../../types';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { DataTableRecord } from '../../../types';
+import { buildDataTableRecord, buildDataTableRecordList } from '../../../utils/build_data_record';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -63,12 +64,15 @@ describe('context successors', function () {
       fetchSuccessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
         const anchor = buildDataTableRecord(
           {
+            _index: 't',
+            _id: '1',
             _source: {
               [indexPattern.timeFieldName!]: timeValIso,
             },
             sort: [timeValNr, tieBreakerValue],
-          } as EsHitRecord,
-          indexPattern
+          },
+          indexPattern,
+          true
         );
 
         return fetchSurroundingDocs(
@@ -96,7 +100,9 @@ describe('context successors', function () {
       return fetchSuccessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
-          expect(hits).toMatchSnapshot();
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), indexPattern)
+          );
         }
       );
     });
@@ -126,8 +132,9 @@ describe('context successors', function () {
           // should have ended with a half-open interval
           expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'lte']);
           expect(intervals.length).toBeGreaterThan(1);
-
-          expect(hits).toMatchSnapshot();
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), indexPattern)
+          );
         }
       );
     });
@@ -155,8 +162,9 @@ describe('context successors', function () {
           // should have stopped before reaching MS_PER_DAY * 2200
           expect(moment(last(intervals)?.gte).valueOf()).toBeGreaterThan(MS_PER_DAY * 2200);
           expect(intervals.length).toBeGreaterThan(1);
-
-          expect(hits).toMatchSnapshot();
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 4), indexPattern)
+          );
         }
       );
     });
@@ -202,12 +210,15 @@ describe('context successors', function () {
       fetchSuccessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
         const anchor = buildDataTableRecord(
           {
+            _id: '1',
+            _index: 'test',
             _source: {
               [indexPattern.timeFieldName!]: timeValIso,
             },
             sort: [timeValNr, tieBreakerValue],
-          } as EsHitRecord,
-          indexPattern
+          },
+          indexPattern,
+          true
         );
 
         return fetchSurroundingDocs(
@@ -236,7 +247,9 @@ describe('context successors', function () {
       return fetchSuccessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
-          expect(hits).toMatchSnapshot();
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), indexPattern)
+          );
           const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
           expect(removeFieldsSpy.calledOnce).toBe(true);

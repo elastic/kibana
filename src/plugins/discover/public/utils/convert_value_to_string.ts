@@ -9,6 +9,7 @@
 import { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import { formatFieldValue } from './format_value';
+import { DiscoverServices } from '../build_services';
 import { DataTableRecord } from '../types';
 
 export interface ConvertedResult {
@@ -17,6 +18,8 @@ export interface ConvertedResult {
 }
 
 export const convertValueToString = ({
+  rowIndex,
+  rows,
   row,
   columnId,
   dataView,

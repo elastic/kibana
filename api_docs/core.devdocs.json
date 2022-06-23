@@ -651,9 +651,6 @@
         "description": [
           "\r\nAnalytics client's public APIs"
         ],
-        "signature": [
-          "AnalyticsClient"
-        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -1390,13 +1387,7 @@
               "{@link ThemeServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+              "ThemeServiceSetup"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -1514,13 +1505,7 @@
               "{@link DocLinksStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.DocLinksStart",
-                "text": "DocLinksStart"
-              }
+              "DocLinksStart"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -1598,13 +1583,7 @@
               "{@link I18nStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              }
+              "I18nStart"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -1724,13 +1703,7 @@
               "{@link ThemeServiceStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ThemeServiceStart",
-                "text": "ThemeServiceStart"
-              }
+              "ThemeServiceStart"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -1760,9 +1733,9 @@
         "tags": [],
         "label": "CoreTheme",
         "description": [
-          "\nContains all the required information to apply Kibana's theme at the various levels it can be used.\n"
+          "\r\nContains all the required information to apply Kibana's theme at the various levels it can be used.\r\n"
         ],
-        "path": "src/core/public/theme/types.ts",
+        "path": "node_modules/@types/kbn__core-theme-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -1774,7 +1747,7 @@
             "description": [
               "is dark mode enabled or not"
             ],
-            "path": "src/core/public/theme/types.ts",
+            "path": "node_modules/@types/kbn__core-theme-browser/index.d.ts",
             "deprecated": false
           }
         ],
@@ -1931,7 +1904,7 @@
         "tags": [],
         "label": "DocLinksStart",
         "description": [],
-        "path": "src/core/public/doc_links/doc_links_service.ts",
+        "path": "node_modules/@types/kbn__core-doc-links-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -1941,7 +1914,7 @@
             "tags": [],
             "label": "DOC_LINK_VERSION",
             "description": [],
-            "path": "src/core/public/doc_links/doc_links_service.ts",
+            "path": "node_modules/@types/kbn__core-doc-links-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -1951,7 +1924,7 @@
             "tags": [],
             "label": "ELASTIC_WEBSITE_URL",
             "description": [],
-            "path": "src/core/public/doc_links/doc_links_service.ts",
+            "path": "node_modules/@types/kbn__core-doc-links-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -1964,7 +1937,7 @@
             "signature": [
               "DocLinks"
             ],
-            "path": "src/core/public/doc_links/doc_links_service.ts",
+            "path": "node_modules/@types/kbn__core-doc-links-browser/index.d.ts",
             "deprecated": false
           }
         ],
@@ -1977,9 +1950,6 @@
         "tags": [],
         "label": "EnvironmentMode",
         "description": [],
-        "signature": [
-          "EnvironmentMode"
-        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -2158,9 +2128,6 @@
         "label": "EventContext",
         "description": [
           "\r\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
-        ],
-        "signature": [
-          "EventContext"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -2674,9 +2641,9 @@
         "tags": [],
         "label": "I18nStart",
         "description": [
-          "\nI18nStart.Context is required by any localizable React component from \\@kbn/i18n and \\@elastic/eui packages\nand is supposed to be used as the topmost component for any i18n-compatible React tree.\n"
+          "\r\nI18nStart.Context is required by any localizable React component from \\@kbn/i18n and \\@elastic/eui packages\r\nand is supposed to be used as the topmost component for any i18n-compatible React tree.\r\n"
         ],
-        "path": "src/core/public/i18n/i18n_service.tsx",
+        "path": "node_modules/@types/kbn__core-i18n-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -2686,12 +2653,12 @@
             "tags": [],
             "label": "Context",
             "description": [
-              "\nReact Context provider required as the topmost component for any i18n-compatible React tree."
+              "\r\nReact Context provider required as the topmost component for any i18n-compatible React tree."
             ],
             "signature": [
               "({ children }: { children: React.ReactNode; }) => JSX.Element"
             ],
-            "path": "src/core/public/i18n/i18n_service.tsx",
+            "path": "node_modules/@types/kbn__core-i18n-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -2701,7 +2668,7 @@
                 "tags": [],
                 "label": "{ children }",
                 "description": [],
-                "path": "src/core/public/i18n/i18n_service.tsx",
+                "path": "node_modules/@types/kbn__core-i18n-browser/index.d.ts",
                 "deprecated": false,
                 "children": [
                   {
@@ -2714,7 +2681,7 @@
                     "signature": [
                       "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
                     ],
-                    "path": "src/core/public/i18n/i18n_service.tsx",
+                    "path": "node_modules/@types/kbn__core-i18n-browser/index.d.ts",
                     "deprecated": false
                   }
                 ]
@@ -2790,9 +2757,6 @@
         "label": "IShipper",
         "description": [
           "\r\nBasic structure of a Shipper"
-        ],
-        "signature": [
-          "IShipper"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -3672,9 +3636,6 @@
         "label": "OptInConfig",
         "description": [
           "\r\n"
-        ],
-        "signature": [
-          "OptInConfig"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -4962,9 +4923,6 @@
         "tags": [],
         "label": "PackageInfo",
         "description": [],
-        "signature": [
-          "PackageInfo"
-        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -7055,9 +7013,6 @@
         "description": [
           "\r\nShape of the events emitted by the telemetryCounter$ observable"
         ],
-        "signature": [
-          "TelemetryCounter"
-        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -7134,7 +7089,7 @@
         "tags": [],
         "label": "ThemeServiceSetup",
         "description": [],
-        "path": "src/core/public/theme/types.ts",
+        "path": "node_modules/@types/kbn__core-theme-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -7147,16 +7102,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
-            "path": "src/core/public/theme/types.ts",
+            "path": "node_modules/@types/kbn__core-theme-browser/index.d.ts",
             "deprecated": false
           }
         ],
@@ -7169,7 +7118,7 @@
         "tags": [],
         "label": "ThemeServiceStart",
         "description": [],
-        "path": "src/core/public/theme/types.ts",
+        "path": "node_modules/@types/kbn__core-theme-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -7182,16 +7131,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
-            "path": "src/core/public/theme/types.ts",
+            "path": "node_modules/@types/kbn__core-theme-browser/index.d.ts",
             "deprecated": false
           }
         ],
@@ -7563,9 +7506,6 @@
         "description": [
           "\r\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
         ],
-        "signature": [
-          "TelemetryCounterType"
-        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -7579,7 +7519,7 @@
         "tags": [],
         "label": "AnalyticsServiceSetup",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the setup phase.\n{@link AnalyticsClient}"
+          "\r\nExposes the public APIs of the AnalyticsClient during the setup phase.\r\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -7600,7 +7540,7 @@
           "ContextProviderOpts",
           "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
         ],
-        "path": "src/core/public/analytics/analytics_service.ts",
+        "path": "node_modules/@types/kbn__core-analytics-browser/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7611,7 +7551,7 @@
         "tags": [],
         "label": "AnalyticsServiceStart",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the start phase\n{@link AnalyticsClient}"
+          "\r\nExposes the public APIs of the AnalyticsClient during the start phase\r\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -7622,7 +7562,7 @@
           "TelemetryCounter",
           ">; }"
         ],
-        "path": "src/core/public/analytics/analytics_service.ts",
+        "path": "node_modules/@types/kbn__core-analytics-browser/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8002,11 +7942,11 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: ",
+          "{ metric?: { type: string; name: string; } | undefined; type?: ",
           "UiSettingsType",
           " | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
-          " | undefined; metric?: { type: string; name: string; } | undefined; }"
+          " | undefined; }"
         ],
         "path": "src/core/types/ui_settings.ts",
         "deprecated": false,
@@ -9160,9 +9100,6 @@
         "description": [
           "\r\nAnalytics client's public APIs"
         ],
-        "signature": [
-          "AnalyticsClient"
-        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -10115,9 +10052,6 @@
         "description": [
           "\r\nDeprecation context provided to {@link ConfigDeprecation | config deprecations}\r\n"
         ],
-        "signature": [
-          "ConfigDeprecationContext"
-        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -10224,9 +10158,6 @@
         "label": "ConfigDeprecationFactory",
         "description": [
           "\r\nProvides helpers to generates the most commonly used {@link ConfigDeprecation}\r\nwhen invoking a {@link ConfigDeprecationProvider}.\r\n\r\nSee methods documentation for more detailed examples.\r\n"
-        ],
-        "signature": [
-          "ConfigDeprecationFactory"
         ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
@@ -11044,13 +10975,7 @@
               "{@link DocLinksServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DocLinksServiceSetup",
-                "text": "DocLinksServiceSetup"
-              }
+              "DocLinksServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -11158,13 +11083,7 @@
               "{@link LoggingServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.LoggingServiceSetup",
-                "text": "LoggingServiceSetup"
-              }
+              "LoggingServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -11366,13 +11285,7 @@
               "{@link DocLinksServiceStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DocLinksServiceSetup",
-                "text": "DocLinksServiceSetup"
-              }
+              "DocLinksServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -11847,9 +11760,6 @@
         "description": [
           "\r\nSmall container object used to expose information about discovered plugins that may\r\nor may not have been started."
         ],
-        "signature": [
-          "DiscoveredPlugin"
-        ],
         "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "children": [
@@ -11965,7 +11875,7 @@
         "tags": [],
         "label": "DocLinksServiceSetup",
         "description": [],
-        "path": "src/core/server/doc_links/types.ts",
+        "path": "node_modules/@types/kbn__core-doc-links-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -11977,7 +11887,7 @@
             "description": [
               "The branch/version the docLinks are pointing to"
             ],
-            "path": "src/core/server/doc_links/types.ts",
+            "path": "node_modules/@types/kbn__core-doc-links-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -11989,7 +11899,7 @@
             "description": [
               "The base url for the elastic website"
             ],
-            "path": "src/core/server/doc_links/types.ts",
+            "path": "node_modules/@types/kbn__core-doc-links-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -12004,7 +11914,7 @@
             "signature": [
               "DocLinks"
             ],
-            "path": "src/core/server/doc_links/types.ts",
+            "path": "node_modules/@types/kbn__core-doc-links-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -12435,9 +12345,6 @@
         "tags": [],
         "label": "EnvironmentMode",
         "description": [],
-        "signature": [
-          "EnvironmentMode"
-        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -12557,9 +12464,6 @@
         "label": "EventContext",
         "description": [
           "\r\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
-        ],
-        "signature": [
-          "EventContext"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -12880,7 +12784,7 @@
               "Headers used for authentication against Elasticsearch"
             ],
             "signature": [
-              "{ warning?: string | string[] | undefined; from?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; location?: string | string[] | undefined; origin?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; etag?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ warning?: string | string[] | undefined; from?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; origin?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; etag?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "src/core/server/elasticsearch/types.ts",
             "deprecated": false
@@ -14059,9 +13963,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
-              ">; }; helpers: ",
+              ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
-              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -16470,9 +16374,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
-              ">; }; helpers: ",
+              ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
-              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -17673,9 +17577,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
-              ">; }; helpers: ",
+              ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
-              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -18684,9 +18588,6 @@
         "description": [
           "\r\nBasic structure of a Shipper"
         ],
-        "signature": [
-          "IShipper"
-        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -19152,9 +19053,6 @@
         "description": [
           "\r\nLogger exposes all the necessary methods to log any type of information and\r\nthis is the interface used by the logging consumers including plugins.\r\n"
         ],
-        "signature": [
-          "Logger"
-        ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "children": [
@@ -19520,12 +19418,65 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.LoggerConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "LoggerConfigType",
+        "description": [
+          "\r\nDescribes the configuration of a given logger.\r\n"
+        ],
+        "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.LoggerConfigType.appenders",
+            "type": "Array",
+            "tags": [],
+            "label": "appenders",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.LoggerConfigType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.LoggerConfigType.level",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "level",
+            "description": [],
+            "signature": [
+              "\"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\""
+            ],
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.LoggerContextConfigInput",
         "type": "Interface",
         "tags": [],
         "label": "LoggerContextConfigInput",
-        "description": [],
-        "path": "src/core/server/logging/logging_config.ts",
+        "description": [
+          "\r\nInput used to configure logging dynamically using {@link LoggingServiceSetup.configure}"
+        ],
+        "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -19537,24 +19488,12 @@
             "description": [],
             "signature": [
               "Record<string, ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.AppenderConfigType",
-                "text": "AppenderConfigType"
-              },
+              "AppenderConfigType",
               "> | Map<string, ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.AppenderConfigType",
-                "text": "AppenderConfigType"
-              },
+              "AppenderConfigType",
               "> | undefined"
             ],
-            "path": "src/core/server/logging/logging_config.ts",
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -19565,9 +19504,10 @@
             "label": "loggers",
             "description": [],
             "signature": [
-              "Readonly<{} & { name: string; level: \"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; appenders: string[]; }>[] | undefined"
+              "LoggerConfigType",
+              "[] | undefined"
             ],
-            "path": "src/core/server/logging/logging_config.ts",
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -19581,9 +19521,6 @@
         "label": "LoggerFactory",
         "description": [
           "\r\nThe single purpose of `LoggerFactory` interface is to define a way to\r\nretrieve a context-based logger instance.\r\n"
-        ],
-        "signature": [
-          "LoggerFactory"
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -19633,9 +19570,9 @@
         "tags": [],
         "label": "LoggingServiceSetup",
         "description": [
-          "\nProvides APIs to plugins for customizing the plugin's logger."
+          "\r\nProvides APIs to plugins for customizing the plugin's logger."
         ],
-        "path": "src/core/server/logging/logging_service.ts",
+        "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -19645,22 +19582,16 @@
             "tags": [],
             "label": "configure",
             "description": [
-              "\nCustomizes the logging config for the plugin's context.\n"
+              "\r\nCustomizes the logging config for the plugin's context.\r\n"
             ],
             "signature": [
               "(config$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.LoggerContextConfigInput",
-                "text": "LoggerContextConfigInput"
-              },
+              "LoggerContextConfigInput",
               ">) => void"
             ],
-            "path": "src/core/server/logging/logging_service.ts",
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -19673,16 +19604,10 @@
                 "signature": [
                   "Observable",
                   "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.LoggerContextConfigInput",
-                    "text": "LoggerContextConfigInput"
-                  },
+                  "LoggerContextConfigInput",
                   ">"
                 ],
-                "path": "src/core/server/logging/logging_service.ts",
+                "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -20277,9 +20202,6 @@
         "description": [
           "\r\n"
         ],
-        "signature": [
-          "OptInConfig"
-        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -20325,9 +20247,6 @@
         "tags": [],
         "label": "PackageInfo",
         "description": [],
-        "signature": [
-          "PackageInfo"
-        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -21181,9 +21100,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
-              ">; }; helpers: ",
+              ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
-              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -23469,9 +23388,6 @@
         "description": [
           "\r\nShape of the events emitted by the telemetryCounter$ observable"
         ],
-        "signature": [
-          "TelemetryCounter"
-        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -24194,9 +24110,6 @@
         "tags": [],
         "label": "PluginType",
         "description": [],
-        "signature": [
-          "PluginType"
-        ],
         "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -24209,9 +24122,6 @@
         "label": "TelemetryCounterType",
         "description": [
           "\r\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
-        ],
-        "signature": [
-          "TelemetryCounterType"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -24229,7 +24139,9 @@
           "\r\nConfig deprecation hook used when invoking a {@link ConfigDeprecation}\r\n"
         ],
         "signature": [
-          "(details: DeprecatedConfigDetails) => void"
+          "(details: ",
+          "DeprecatedConfigDetails",
+          ") => void"
         ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
@@ -24258,7 +24170,7 @@
         "tags": [],
         "label": "AnalyticsServicePreboot",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the preboot phase\n{@link AnalyticsClient}"
+          "\r\nExposes the public APIs of the AnalyticsClient during the preboot phase\r\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -24279,7 +24191,7 @@
           "ContextProviderOpts",
           "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
         ],
-        "path": "src/core/server/analytics/analytics_service.ts",
+        "path": "node_modules/@types/kbn__core-analytics-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24290,7 +24202,7 @@
         "tags": [],
         "label": "AnalyticsServiceSetup",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the setup phase.\n{@link AnalyticsClient}"
+          "\r\nExposes the public APIs of the AnalyticsClient during the setup phase.\r\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -24311,7 +24223,7 @@
           "ContextProviderOpts",
           "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
         ],
-        "path": "src/core/server/analytics/analytics_service.ts",
+        "path": "node_modules/@types/kbn__core-analytics-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24322,7 +24234,7 @@
         "tags": [],
         "label": "AnalyticsServiceStart",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the start phase\n{@link AnalyticsClient}"
+          "\r\nExposes the public APIs of the AnalyticsClient during the start phase\r\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -24333,7 +24245,7 @@
           "TelemetryCounter",
           ">; }"
         ],
-        "path": "src/core/server/analytics/analytics_service.ts",
+        "path": "node_modules/@types/kbn__core-analytics-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24369,7 +24281,7 @@
           " | ",
           "RollingFileAppenderConfig"
         ],
-        "path": "src/core/server/logging/appenders/appenders.ts",
+        "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24523,7 +24435,9 @@
             "label": "addDeprecation",
             "description": [],
             "signature": [
-              "(details: DeprecatedConfigDetails) => void"
+              "(details: ",
+              "DeprecatedConfigDetails",
+              ") => void"
             ],
             "path": "node_modules/@types/kbn__config/index.d.ts",
             "deprecated": false,
@@ -24667,15 +24581,9 @@
         "label": "DocLinksServiceStart",
         "description": [],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.DocLinksServiceSetup",
-            "text": "DocLinksServiceSetup"
-          }
+          "DocLinksServiceSetup"
         ],
-        "path": "src/core/server/doc_links/types.ts",
+        "path": "node_modules/@types/kbn__core-doc-links-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24717,7 +24625,7 @@
         "label": "EcsEventKind",
         "description": [],
         "signature": [
-          "\"alert\" | \"state\" | \"metric\" | \"event\" | \"signal\" | \"pipeline_error\""
+          "\"metric\" | \"alert\" | \"state\" | \"event\" | \"signal\" | \"pipeline_error\""
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -24955,9 +24863,9 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "ClosePointInTimeResponse",
-          ">; }; helpers: ",
+          ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
           "default",
-          "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+          "; helpers: ",
           "default",
           "; child: (opts: ",
           "ClientOptions",
@@ -26894,20 +26802,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.LoggerConfigType",
-        "type": "Type",
-        "tags": [],
-        "label": "LoggerConfigType",
-        "description": [],
-        "signature": [
-          "{ readonly name: string; readonly level: \"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; readonly appenders: string[]; }"
-        ],
-        "path": "src/core/server/logging/logging_config.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.LogMeta",
         "type": "Type",
         "tags": [],
@@ -27096,11 +26990,11 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: ",
+          "{ metric?: { type: string; name: string; } | undefined; type?: ",
           "UiSettingsType",
           " | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
-          " | undefined; metric?: { type: string; name: string; } | undefined; }"
+          " | undefined; }"
         ],
         "path": "src/core/types/ui_settings.ts",
         "deprecated": false,

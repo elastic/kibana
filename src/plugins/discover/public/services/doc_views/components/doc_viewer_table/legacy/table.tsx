@@ -10,7 +10,7 @@ import '../table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { getTypeForFieldIcon } from '../../../../../utils/get_type_for_field_icon';
-import { useDiscoverServices } from '../../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { SHOW_MULTIFIELDS } from '../../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../../doc_views_types';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
@@ -78,7 +78,7 @@ export const DocViewerLegacyTable = ({
         : fieldMapping
         ? getTypeForFieldIcon(fieldMapping)
         : undefined;
-      const ignored = getIgnoredReason(fieldMapping ?? field, hit._ignored);
+      const ignored = getIgnoredReason(fieldMapping ?? field, hit.raw._ignored);
       return {
         action: {
           onToggleColumn,

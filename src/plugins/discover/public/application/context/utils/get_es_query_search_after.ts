@@ -33,7 +33,7 @@ export function getEsQuerySearchAfter(
     if (nanoSeconds) {
       afterTimeValue = useNewFieldsApi
         ? afterTimeDocRaw.fields?.[timeFieldName][0]
-        : ((afterTimeDocRaw._source as Record<string, unknown>)?.[timeFieldName] as string);
+        : afterTimeDocRaw._source?.[timeFieldName];
     }
     return [afterTimeValue, afterTimeDoc.raw.sort?.[1] as string | number];
   }
@@ -44,7 +44,7 @@ export function getEsQuerySearchAfter(
   if (nanoSeconds) {
     searchAfter[0] = useNewFieldsApi
       ? anchor.raw.fields?.[timeFieldName][0]
-      : (anchor.raw._source as Record<string, unknown>)?.[timeFieldName];
+      : anchor.raw._source?.[timeFieldName];
   }
   searchAfter[1] = anchor.raw.sort?.[1] as string | number;
   return searchAfter;

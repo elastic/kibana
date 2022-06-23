@@ -7,6 +7,7 @@
 import React, { useMemo, useState } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBasicTable,
@@ -45,6 +46,7 @@ import {
   Percentiles,
   TriggersActionsUiConfig,
   RuleTypeRegistryContract,
+  SnoozeSchedule,
 } from '../../../../types';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { PercentileSelectablePopover } from './percentile_selectable_popover';
@@ -112,12 +114,15 @@ export interface RulesListTableProps {
   onTagClose?: (rule: RuleTableItem) => void;
   onSelectionChange?: (updatedSelectedItemsList: RuleTableItem[]) => void;
   onPercentileOptionsChange?: (options: EuiSelectableOption[]) => void;
-  onRuleChanged: () => void;
+  onRuleChanged: () => Promise<void>;
   onEnableRule: (rule: RuleTableItem) => Promise<void>;
   onDisableRule: (rule: RuleTableItem) => Promise<void>;
-  onSnoozeRule: (rule: RuleTableItem, snoozeEndTime: string | -1) => Promise<void>;
-  onUnsnoozeRule: (rule: RuleTableItem) => Promise<void>;
-  renderCollapsedItemActions?: (rule: RuleTableItem) => React.ReactNode;
+  onSnoozeRule: (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => Promise<void>;
+  onUnsnoozeRule: (rule: RuleTableItem, scheduleIds?: string[]) => Promise<void>;
+  renderCollapsedItemActions?: (
+    rule: RuleTableItem,
+    onLoading: (isLoading: boolean) => void
+  ) => React.ReactNode;
   renderRuleError?: (rule: RuleTableItem) => React.ReactNode;
 }
 
@@ -168,7 +173,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     onManageLicenseClick = EMPTY_HANDLER,
     onSelectionChange = EMPTY_HANDLER,
     onPercentileOptionsChange = EMPTY_HANDLER,
-    onRuleChanged = EMPTY_HANDLER,
+    onRuleChanged,
     onEnableRule = EMPTY_HANDLER,
     onDisableRule = EMPTY_HANDLER,
     onSnoozeRule = EMPTY_HANDLER,
@@ -180,12 +185,21 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
   const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
 
+  const [isLoadingMap, setIsLoadingMap] = useState<Record<string, boolean>>({});
+
   const selectedPercentile = useMemo(() => {
     const selectedOption = percentileOptions.find((option) => option.checked === 'on');
     if (selectedOption) {
       return Percentiles[selectedOption.key as Percentiles];
     }
   }, [percentileOptions]);
+
+  const onLoading = (id: string, newIsLoading: boolean) => {
+    setIsLoadingMap((prevState) => ({
+      ...prevState,
+      [id]: newIsLoading,
+    }));
+  };
 
   const renderPercentileColumnName = () => {
     return (
@@ -229,10 +243,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
         hideSnoozeOption
         disableRule={async () => await onDisableRule(rule)}
         enableRule={async () => await onEnableRule(rule)}
-        snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
-          await onSnoozeRule(rule, snoozeEndTime);
-        }}
-        unsnoozeRule={async () => await onUnsnoozeRule(rule)}
+        snoozeRule={async () => {}}
+        unsnoozeRule={async () => {}}
         rule={rule}
         onRuleChanged={onRuleChanged}
         isEditable={rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)}
@@ -399,21 +411,47 @@ export const RulesListTable = (props: RulesListTableProps) => {
         },
       },
       {
-        name: 'Notify',
-        width: '16%',
+        name: (
+          <EuiToolTip
+            data-test-subj="rulesTableCell-notifyTooltip"
+            content={i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
+              {
+                defaultMessage: 'Snooze notifications for a rule.',
+              }
+            )}
+          >
+            <span>
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTitle',
+                {
+                  defaultMessage: 'Notify',
+                }
+              )}
+              &nbsp;
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        ),
+        width: '14%',
         'data-test-subj': 'rulesTableCell-rulesListNotify',
         render: (rule: RuleTableItem) => {
+          if (rule.consumer === AlertConsumers.SIEM || !rule.enabled) {
+            return null;
+          }
           return (
             <RulesListNotifyBadge
               rule={rule}
+              isLoading={!!isLoadingMap[rule.id]}
+              onLoading={(newIsLoading) => onLoading(rule.id, newIsLoading)}
               isOpen={currentlyOpenNotify === rule.id}
               onClick={() => setCurrentlyOpenNotify(rule.id)}
               onClose={() => setCurrentlyOpenNotify('')}
               onRuleChanged={onRuleChanged}
-              snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
-                await onSnoozeRule(rule, snoozeEndTime);
+              snoozeRule={async (snoozeSchedule) => {
+                await onSnoozeRule(rule, snoozeSchedule);
               }}
-              unsnoozeRule={async () => await onUnsnoozeRule(rule)}
+              unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
             />
           );
         },
@@ -644,7 +682,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
                   ) : null}
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{renderCollapsedItemActions(rule)}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {renderCollapsedItemActions(rule, (newIsLoading) =>
+                  onLoading(rule.id, newIsLoading)
+                )}
+              </EuiFlexItem>
             </EuiFlexGroup>
           );
         },

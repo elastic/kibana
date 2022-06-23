@@ -9,7 +9,7 @@
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import type { DataTableRecord } from '../../types';
+import type { DataTableRecord, ValueToStringConverter } from '../../types';
 
 export interface GridContext {
   expanded?: DataTableRecord | undefined;
@@ -20,6 +20,7 @@ export interface GridContext {
   isDarkMode: boolean;
   selectedDocs: string[];
   setSelectedDocs: (selected: string[]) => void;
+  valueToStringConverter: ValueToStringConverter;
 }
 
 const defaultContext = {} as unknown as GridContext;

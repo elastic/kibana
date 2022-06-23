@@ -7,7 +7,6 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ConvertedResult } from './utils/convert_value_to_string';
 
 export type ValueToStringConverter = (
   rowIndex: number,
@@ -15,9 +14,9 @@ export type ValueToStringConverter = (
   options?: { disableMultiline?: boolean }
 ) => { formattedString: string; withFormula: boolean };
 
-export type EsHitRecord = estypes.SearchHit;
-export type EsHitRecordList = EsHitRecord[];
-
+export interface EsHitRecord extends Omit<estypes.SearchHit, '_source'> {
+  _source?: Record<string, unknown>;
+}
 /**
  * This is the record/row of data provided to our Data Table
  */

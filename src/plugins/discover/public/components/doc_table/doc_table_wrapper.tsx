@@ -16,7 +16,7 @@ import { SortOrder } from './components/table_header/helpers';
 import { TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../types';
 
 export interface DocTableProps {
@@ -157,9 +157,9 @@ export const DocTableWrapper = forwardRef(
 
     const renderRows = useCallback(
       (rowsToRender: DataTableRecord[]) => {
-        return rowsToRender.map((current, index) => (
+        return rowsToRender.map((current) => (
           <TableRow
-            key={`${current.raw._index}${current.raw._id}${current.raw._score}${current.raw._version}${current.raw._routing}`}
+            key={`${current.id}${current.raw._score}${current.raw._version}`}
             columns={columns}
             filter={onFilter}
             indexPattern={indexPattern}

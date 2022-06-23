@@ -24,9 +24,10 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
+import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';
 import { DataTableRecord, EsHitRecord } from '../../types';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
 
 const CELL_CLASS = 'dscDiscoverGrid__cellValue';
@@ -157,12 +158,14 @@ function getJSON(columnId: string, row: DataTableRecord, useTopLevelObjectColumn
  */
 function renderPopoverContent({
   row,
+  field,
   columnId,
   dataView,
   useTopLevelObjectColumns,
   closePopover,
 }: {
   row: DataTableRecord;
+  field: DataViewField | undefined;
   columnId: string;
   dataView: DataView;
   useTopLevelObjectColumns: boolean;

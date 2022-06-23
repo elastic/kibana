@@ -17,7 +17,7 @@ import {
   sendNoResultsFoundMsg,
   sendPartialMsg,
   sendResetMsg,
-} from './use_saved_search_messages';
+} from '../hooks/use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
 import type { SavedSearch, SortOrder } from '../../../services/saved_searches';
 import { fetchDocuments } from './fetch_documents';
@@ -31,7 +31,7 @@ import {
   DataMain$,
   DataTotalHits$,
   SavedSearchData,
-} from './use_saved_search';
+} from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
 import { EsHitRecord } from '../../../types';
 
@@ -143,7 +143,7 @@ export function fetchAll(
         }
         const dataView = searchSource.getField('index')!;
 
-        const resultDocs = docs.map((doc) => buildDataTableRecord(doc as EsHitRecord, dataView));
+        const resultDocs = docs.map((doc) => buildDataTableRecord(doc, dataView));
 
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,

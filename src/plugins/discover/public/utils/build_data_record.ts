@@ -10,25 +10,24 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { flattenHit } from '@kbn/data-plugin/common';
 import { formatFieldValue } from './format_value';
 import { convertValueToString } from './convert_value_to_string';
-import type { DataTableRecord, EsHitRecord } from '../types';
 import { getDocId } from './get_doc_id';
+import type { DataTableRecord, EsHitRecord } from '../types';
 
 /**
  * Build a record for data table, explorer + classic one
- * @param hit the document returned from Elasticsearch
+ * @param doc the document returned from Elasticsearch
  * @param dataView this current data view
  * @param isAnchor determines if the given doc is the anchor doc when viewing surrounding documents
  */
 export function buildDataTableRecord(
-  hit: EsHitRecord,
-  dataView: DataView,
+  doc: EsHitRecord,
+  dataView?: DataView,
   isAnchor?: boolean
 ): DataTableRecord {
-  const flattened = flattenHit(hit, dataView, { includeIgnoredValues: true });
-  const record: DataTableRecord = {
-    id: getDocId(hit),
-    raw: hit,
-    flattened,
+  return {
+    id: getDocId(doc),
+    raw: doc,
+    flattened: flattenHit(doc, dataView, { includeIgnoredValues: true }),
     isAnchor,
     renderFormatted: (fieldName: string) => {
       return formatFieldValue(fieldName, record, dataView);
@@ -44,5 +43,16 @@ export function buildDataTableRecord(
       });
     },
   };
-  return record;
+}
+
+/**
+ * Helper to build multiple DataTableRecords at once, saved a bit of testing code lines
+ * @param docs Array of documents returned from Elasticsearch
+ * @param dataView this current data view
+ */
+export function buildDataTableRecordList(
+  docs: EsHitRecord[],
+  dataView?: DataView
+): DataTableRecord[] {
+  return docs.map((doc) => buildDataTableRecord(doc, dataView));
 }
