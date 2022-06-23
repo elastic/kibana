@@ -21,22 +21,18 @@ import type {
 } from '../../common/types/management';
 
 /**
- * Routes for job service
+ * Routes for management service
  */
 export function managementRoutes({ router, routeGuard }: RouteInitialization) {
   /**
-   * @apiGroup JobService
+   * @apiGroup Management
    *
-   * @api {post} /api/ml/jobs/jobs_summary Jobs summary
-   * @apiName JobsSummary
-   * @apiDescription Returns a list of anomaly detection jobs, with summary level information for every job.
-   *  For any supplied job IDs, full job information will be returned, which include the analysis configuration,
-   *  job stats, datafeed stats, and calendars.
+   * @api {get} /api/ml/management/list/:listType Management list
+   * @apiName ManagementList
+   * @apiDescription Returns a list of anomaly detection jobs, data frame analytics jobs or trained models
    *
-   * @apiSchema (body) optionalJobIdsSchema
+   * @apiSchema (params) listTypeSchema
    *
-   * @apiSuccess {Array} jobsList list of jobs. For any supplied job IDs, the job object will contain a fullJob property
-   *    which includes the full configuration and stats for the job.
    */
   router.get(
     {

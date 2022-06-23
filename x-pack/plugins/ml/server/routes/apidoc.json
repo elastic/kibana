@@ -175,6 +175,9 @@
     "InferTrainedModelDeployment",
 
     "Alerting",
-    "PreviewAlert"
+    "PreviewAlert",
+
+    "Management",
+    "ManagementList"
   ]
 }
