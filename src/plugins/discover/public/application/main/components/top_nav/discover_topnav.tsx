@@ -44,9 +44,14 @@ export const DiscoverTopNav = ({
   onEditRuntimeField,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
+  const language = useMemo(
+    () => stateContainer.appStateContainer.getState().query?.language,
+    [stateContainer.appStateContainer]
+  );
   const showDatePicker = useMemo(
-    () => indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
-    [indexPattern]
+    () =>
+      language !== 'sql' && indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
+    [indexPattern, language]
   );
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
@@ -188,7 +193,7 @@ export const DiscoverTopNav = ({
       savedQueryId={savedQuery}
       screenTitle={savedSearch.title}
       showDatePicker={showDatePicker}
-      showSaveQuery={!!services.capabilities.discover.saveQuery}
+      showSaveQuery={language !== 'sql' && Boolean(services.capabilities.discover.saveQuery)}
       showSearchBar={true}
       useDefaultBehaviors={true}
       dataViewPickerComponentProps={dataViewPickerProps}

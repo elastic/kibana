@@ -402,13 +402,15 @@ function DiscoverFieldComponent({
           </>
         )}
         {(showFieldStats || multiFields) && <EuiHorizontalRule margin="m" />}
-        <DiscoverFieldVisualize
-          field={field}
-          indexPattern={indexPattern}
-          multiFields={rawMultiFields}
-          trackUiMetric={trackUiMetric}
-          details={details}
-        />
+        {onAddFilter && (
+          <DiscoverFieldVisualize
+            field={field}
+            indexPattern={indexPattern}
+            multiFields={rawMultiFields}
+            trackUiMetric={trackUiMetric}
+            details={details}
+          />
+        )}
       </>
     );
   };

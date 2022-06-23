@@ -259,7 +259,9 @@ export function DiscoverLayout({
               documents$={savedSearchData$.documents$}
               indexPatternList={indexPatternList}
               onAddField={onAddColumn}
-              onAddFilter={onAddFilter}
+              onAddFilter={
+                dataState.language !== 'sql' ? (onAddFilter as DocViewFilterFn) : undefined
+              }
               onRemoveField={onRemoveColumn}
               onChangeIndexPattern={onChangeIndexPattern}
               selectedIndexPattern={indexPattern}
@@ -351,7 +353,9 @@ export function DiscoverLayout({
                       expandedDoc={expandedDoc}
                       indexPattern={indexPattern}
                       navigateTo={navigateTo}
-                      onAddFilter={onAddFilter as DocViewFilterFn}
+                      onAddFilter={
+                        dataState.language !== 'sql' ? (onAddFilter as DocViewFilterFn) : undefined
+                      }
                       savedSearch={savedSearch}
                       setExpandedDoc={setExpandedDoc}
                       state={state}
@@ -366,7 +370,9 @@ export function DiscoverLayout({
                       filters={state.filters}
                       columns={columns}
                       stateContainer={stateContainer}
-                      onAddFilter={onAddFilter}
+                      onAddFilter={
+                        dataState.language !== 'sql' ? (onAddFilter as DocViewFilterFn) : undefined
+                      }
                       trackUiMetric={trackUiMetric}
                       savedSearchRefetch$={savedSearchRefetch$}
                     />

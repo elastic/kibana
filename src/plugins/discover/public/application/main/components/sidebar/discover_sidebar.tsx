@@ -335,16 +335,18 @@ export function DiscoverSidebarComponent({
             }}
           />
         )}
-        <EuiFlexItem grow={false}>
-          <form>
-            <DiscoverFieldSearch
-              onChange={onChangeFieldSearch}
-              value={fieldFilter.name}
-              types={fieldTypes}
-              presentFieldTypes={presentFieldTypes}
-            />
-          </form>
-        </EuiFlexItem>
+        {onAddFilter && (
+          <EuiFlexItem grow={false}>
+            <form>
+              <DiscoverFieldSearch
+                onChange={onChangeFieldSearch}
+                value={fieldFilter.name}
+                types={fieldTypes}
+                presentFieldTypes={presentFieldTypes}
+              />
+            </form>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem className="eui-yScroll">
           <div
             ref={(el) => {

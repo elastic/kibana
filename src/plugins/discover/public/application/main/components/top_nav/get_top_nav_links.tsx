@@ -42,6 +42,7 @@ export const getTopNavLinks = ({
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
 }): TopNavMenuData[] => {
+  const language = state.appStateContainer.getState().query?.language;
   const options = {
     id: 'options',
     label: i18n.translate('discover.localMenu.localMenu.optionsTitle', {
@@ -183,8 +184,8 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
-    ...(services.triggersActionsUi ? [alerts] : []),
-    shareSearch,
+    ...(services.triggersActionsUi && language !== 'sql' ? [alerts] : []),
+    ...(language !== 'sql' ? [shareSearch] : []),
     inspectSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),
   ];
