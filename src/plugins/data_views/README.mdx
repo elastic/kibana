@@ -20,5 +20,5 @@ and field lists across the various Kibana apps. Its typically used in conjunctio
 
 **hasData:** A standardized way to check the empty state for indices and data views.
 - `hasESData: () => Promise<boolean>; // Check to see if ES data exists`
-- `hasDataView: () => Promise<boolean>; // Check to see if any data view exists (primitive or user created)`
-- `hasUserDataView: () => Promise; // Check to see if user created data views exists`
+- `hasDataView: () => Promise<boolean>; // Check to see if any data view exists (managed or user created)`
+- `hasUserDataView: () => Promise<boolean>; // Check to see if user created data views exists`

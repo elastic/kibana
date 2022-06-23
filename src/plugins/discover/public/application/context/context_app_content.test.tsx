@@ -18,8 +18,8 @@ import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
-import { EsHitRecordList } from '../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '../../utils/build_data_record';
 
 describe('ContextAppContent test', () => {
   const mountComponent = ({
@@ -56,7 +56,7 @@ describe('ContextAppContent test', () => {
       anchorStatus: anchorStatus || LoadingStatus.LOADED,
       predecessorsStatus: LoadingStatus.LOADED,
       successorsStatus: LoadingStatus.LOADED,
-      rows: [hit] as unknown as EsHitRecordList,
+      rows: [buildDataTableRecord(hit, indexPatternMock)],
       predecessors: [],
       successors: [],
       defaultStepSize: 5,
