@@ -120,6 +120,10 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       });
     }
 
+    performance.mark('kbnLoad', {
+      detail: 'load_started',
+    })
+
     load([
       ${jsDependencyPaths.map((path) => `'${path}'`).join(',')}
     ], function () {
