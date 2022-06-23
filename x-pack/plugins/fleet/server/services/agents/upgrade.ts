@@ -164,7 +164,7 @@ async function upgradeBatch(
       agents.push(result.value);
     } else {
       const id = givenAgents[index].id;
-      outgoingErrors[id] = result.reason;
+      errors[id] = result.reason;
     }
     return agents;
   }, []);
