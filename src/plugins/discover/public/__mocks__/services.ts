@@ -68,6 +68,8 @@ export const discoverServiceMock = {
         return 250;
       } else if (key === MAX_DOC_FIELDS_DISPLAYED) {
         return 50;
+      } else if (key === HIDE_ANNOUNCEMENTS) {
+        return false;
       }
     }),
     isDefault: (key: string) => {
