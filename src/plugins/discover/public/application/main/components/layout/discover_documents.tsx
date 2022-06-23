@@ -176,7 +176,7 @@ function DiscoverDocumentsComponent({
               sampleSize={sampleSize}
               searchDescription={savedSearch.description}
               searchTitle={savedSearch.title}
-              setExpandedDoc={setExpandedDoc}
+              setExpandedDoc={documentState.language !== 'sql' ? setExpandedDoc : undefined}
               showTimeCol={showTimeCol}
               settings={state.grid}
               onAddColumn={onAddColumn}

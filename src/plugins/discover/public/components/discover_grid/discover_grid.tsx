@@ -121,7 +121,7 @@ export interface DiscoverGridProps {
   /**
    * Function to set the expanded document, which is displayed in a flyout
    */
-  setExpandedDoc: (doc?: DataTableRecord) => void;
+  setExpandedDoc?: (doc?: DataTableRecord) => void;
   /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */
@@ -332,8 +332,10 @@ export const DiscoverGrid = ({
         isSortEnabled,
         services,
         valueToStringConverter,
+        onFilter,
       }),
     [
+      onFilter,
       displayedColumns,
       displayedRows,
       indexPattern,
@@ -367,8 +369,8 @@ export const DiscoverGrid = ({
     return { columns: sortingColumns, onSort: () => {} };
   }, [sortingColumns, onTableSort, isSortEnabled]);
   const lead = useMemo(
-    () => getLeadControlColumns().filter(({ id }) => controlColumnIds.includes(id)),
-    [controlColumnIds]
+    () => getLeadControlColumns(setExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
+    [controlColumnIds, setExpandedDoc]
   );
 
   const additionalControls = useMemo(
@@ -542,7 +544,7 @@ export const DiscoverGrid = ({
             </p>
           </EuiScreenReaderOnly>
         )}
-        {expandedDoc && (
+        {setExpandedDoc && expandedDoc && (
           <DiscoverGridFlyout
             indexPattern={indexPattern}
             hit={expandedDoc}
