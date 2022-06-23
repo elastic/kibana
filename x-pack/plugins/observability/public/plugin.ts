@@ -146,6 +146,7 @@ export class Plugin
       // Get start services
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
 
+      const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
       // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
       // subset of this privilege are not authorized to access this endpoint and will receive a 404
       // error that causes the Alerting view to fail to load.
