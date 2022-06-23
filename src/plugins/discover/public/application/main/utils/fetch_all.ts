@@ -33,7 +33,6 @@ import {
   SavedSearchData,
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
-import { EsHitRecord } from '../../../types';
 
 export interface FetchDeps {
   abortController: AbortController;

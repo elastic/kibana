@@ -12,7 +12,6 @@ import { dataViewComplexMock } from './data_view_complex';
 import { esHits } from './es_hits';
 import { esHitsComplex } from './es_hits_complex';
 import { GridContext } from '../components/discover_grid/discover_grid_context';
-import { convertValueToString } from '../utils/convert_value_to_string';
 import { buildDataTableRecord } from '../utils/build_data_record';
 import { EsHitRecord } from '../types';
 
