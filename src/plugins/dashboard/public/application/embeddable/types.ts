@@ -8,7 +8,7 @@
 
 export * from '../../../common/types';
 
-export type DashboardDataEventStatus = 'done' | 'error';
+export type DashboardLoadedEventStatus = 'done' | 'error';
 
 export interface DashboardLoadedEvent {
   // Time from start to when data is loaded
@@ -16,5 +16,5 @@ export interface DashboardLoadedEvent {
   // Time from start until render or error
   timeToDone: number;
   numOfPanels: number;
-  status: DashboardDataEventStatus;
+  status: DashboardLoadedEventStatus;
 }

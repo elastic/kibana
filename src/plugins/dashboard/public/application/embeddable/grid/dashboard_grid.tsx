@@ -21,7 +21,7 @@ import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout
 import { GridData } from '../../../../common';
 import { ViewMode, EmbeddablePhaseEvent } from '../../../services/embeddable';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
-import { DashboardDataEventStatus, DashboardLoadedEvent, DashboardPanelState } from '../types';
+import { DashboardLoadedEventStatus, DashboardLoadedEvent, DashboardPanelState } from '../types';
 import { withKibana } from '../../../services/kibana_react';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGridItem } from './dashboard_grid_item';
@@ -246,7 +246,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     const panelIds: Record<string, Record<string, number>> = {};
     const loadStartTime = performance.now();
     let lastTimeToData = 0;
-    let status: DashboardDataEventStatus = 'done';
+    let status: DashboardLoadedEventStatus = 'done';
     let doneCount = 0;
 
     /**
