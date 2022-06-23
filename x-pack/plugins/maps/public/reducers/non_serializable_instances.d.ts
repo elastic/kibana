@@ -74,7 +74,9 @@ export function registerCancelCallback(requestToken: symbol, callback: () => voi
 
 export function unregisterCancelCallback(requestToken: symbol): AnyAction;
 
-export function getOnMapMove(state: MapStoreState): ((lat: number, lon: number, zoom: number) => void) | undefined;
+export function getOnMapMove(
+  state: MapStoreState
+): ((lat: number, lon: number, zoom: number) => void) | undefined;
 
 export function setOnMapMove(
   onMapMove: (lat: number, lon: number, zoom: number) => void
