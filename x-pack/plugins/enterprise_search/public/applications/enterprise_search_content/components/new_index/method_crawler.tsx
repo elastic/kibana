@@ -21,6 +21,7 @@ import { NewSearchIndexTemplate } from './new_search_index_template';
 export const MethodCrawler: React.FC = () => {
   return (
     <NewSearchIndexTemplate
+      title="Crawler"
       description={i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.methodCrawler.description',
         {
@@ -30,6 +31,7 @@ export const MethodCrawler: React.FC = () => {
       )}
       docsUrl="#"
       type="crawler"
+      onSubmit={() => null}
     >
       <EuiPanel
         color="subdued"
