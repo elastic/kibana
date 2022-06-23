@@ -16,7 +16,7 @@ const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../component
 
 export const getCasesLazy = ({
   owner,
-  userCanCrud,
+  permissions,
   basePath,
   onComponentInitialized,
   actionsNavigation,
@@ -28,7 +28,7 @@ export const getCasesLazy = ({
   features,
   releasePhase,
 }: GetCasesProps) => (
-  <CasesProvider value={{ owner, userCanCrud, basePath, features, releasePhase }}>
+  <CasesProvider value={{ owner, permissions, basePath, features, releasePhase }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CasesRoutesLazy
         onComponentInitialized={onComponentInitialized}

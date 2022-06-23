@@ -23,10 +23,11 @@ import {
 import { FieldHook } from '../shared_imports';
 import { StartServices } from '../../types';
 import { ReleasePhase } from '../../components/types';
+import { CasesPermissions } from '../../client/helpers/capabilities';
 
 interface TestProviderProps {
   children: React.ReactNode;
-  userCanCrud?: boolean;
+  permissions?: CasesPermissions;
   features?: CasesFeatures;
   owner?: string[];
   releasePhase?: ReleasePhase;
@@ -41,7 +42,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   children,
   features,
   owner = [SECURITY_SOLUTION_OWNER],
-  userCanCrud = true,
+  permissions = allCasesPermissions(),
   releasePhase = 'ga',
 }) => {
   const queryClient = new QueryClient({
@@ -57,7 +58,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       <MockKibanaContextProvider>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
-            <CasesProvider value={{ features, owner, userCanCrud }}>{children}</CasesProvider>
+            <CasesProvider value={{ features, owner, permissions }}>{children}</CasesProvider>
           </QueryClientProvider>
         </ThemeProvider>
       </MockKibanaContextProvider>
@@ -82,10 +83,24 @@ export const testQueryClient = new QueryClient({
   },
 });
 
+export const buildCasesPermissions = (overrides: Partial<CasesPermissions> = {}) => {
+  const read = overrides.read ?? true;
+  const all = overrides.all ?? true;
+
+  return {
+    all,
+    read,
+  };
+};
+
+export const allCasesPermissions = () => buildCasesPermissions();
+export const noCasesPermissions = () => buildCasesPermissions({ read: false, all: false });
+export const readCasesPermissions = () => buildCasesPermissions({ all: false });
+
 export const createAppMockRenderer = ({
   features,
   owner = [SECURITY_SOLUTION_OWNER],
-  userCanCrud = true,
+  permissions = allCasesPermissions(),
   releasePhase = 'ga',
 }: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
   const services = createStartServicesMock();
@@ -102,7 +117,7 @@ export const createAppMockRenderer = ({
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
-            <CasesProvider value={{ features, owner, userCanCrud, releasePhase }}>
+            <CasesProvider value={{ features, owner, permissions, releasePhase }}>
               {children}
             </CasesProvider>
           </QueryClientProvider>
