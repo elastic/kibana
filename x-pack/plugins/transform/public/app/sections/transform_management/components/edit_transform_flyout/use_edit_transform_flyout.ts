@@ -11,8 +11,8 @@ import { merge } from 'lodash';
 import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { isPopulatedObject } from '../../../../../../common/shared_imports';
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
 import {
   DEFAULT_TRANSFORM_FREQUENCY,

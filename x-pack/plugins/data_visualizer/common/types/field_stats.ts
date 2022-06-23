@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Query } from '@kbn/es-query';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import { isPopulatedObject } from '../utils/object_utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { TimeBucketsInterval } from '../services/time_buckets';
 
 export interface FieldData {
