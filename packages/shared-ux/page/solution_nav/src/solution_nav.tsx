@@ -122,12 +122,12 @@ export const SolutionNav: FunctionComponent<SolutionNavProps> = ({
         )}
         <strong>
           <FormattedMessage
-            id="sharedUXComponents.solutionNav.mobileTitleText"
+            id="sharedUXPackages.solutionNav.mobileTitleText"
             defaultMessage="{solutionName} {menuText}"
             values={{
               solutionName: name || 'Navigation',
               menuText: isSmallerBreakpoint
-                ? i18n.translate('sharedUXComponents.solutionNav.menuText', {
+                ? i18n.translate('sharedUXPackages.solutionNav.menuText', {
                     defaultMessage: 'menu',
                   })
                 : '',

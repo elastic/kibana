@@ -17,7 +17,7 @@ exports[`SolutionNav accepts EuiSideNavProps 1`] = `
           <strong>
             <FormattedMessage
               defaultMessage="{solutionName} {menuText}"
-              id="sharedUXComponents.solutionNav.mobileTitleText"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
                 Object {
                   "menuText": "menu",
@@ -117,7 +117,7 @@ exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
           <strong>
             <FormattedMessage
               defaultMessage="{solutionName} {menuText}"
-              id="sharedUXComponents.solutionNav.mobileTitleText"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
                 Object {
                   "menuText": "menu",
@@ -216,7 +216,7 @@ exports[`SolutionNav heading accepts more headingProps 1`] = `
           <strong>
             <FormattedMessage
               defaultMessage="{solutionName} {menuText}"
-              id="sharedUXComponents.solutionNav.mobileTitleText"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
                 Object {
                   "menuText": "menu",
@@ -255,7 +255,7 @@ exports[`SolutionNav renders 1`] = `
           <strong>
             <FormattedMessage
               defaultMessage="{solutionName} {menuText}"
-              id="sharedUXComponents.solutionNav.mobileTitleText"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
                 Object {
                   "menuText": "menu",
@@ -359,7 +359,7 @@ exports[`SolutionNav renders with icon 1`] = `
           <strong>
             <FormattedMessage
               defaultMessage="{solutionName} {menuText}"
-              id="sharedUXComponents.solutionNav.mobileTitleText"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
               values={
                 Object {
                   "menuText": "menu",

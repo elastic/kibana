@@ -20,11 +20,11 @@ export type SolutionNavCollapseButtonProps = Partial<EuiButtonIconPropsForButton
   isCollapsed: boolean;
 };
 
-const collapseLabel = i18n.translate('sharedUXComponents.solutionNav.collapsibleLabel', {
+const collapseLabel = i18n.translate('sharedUXPackages.solutionNav.collapsibleLabel', {
   defaultMessage: 'Collapse side navigation',
 });
 
-const openLabel = i18n.translate('sharedUXComponents.solutionNav.openLabel', {
+const openLabel = i18n.translate('sharedUXPackages.solutionNav.openLabel', {
   defaultMessage: 'Open side navigation',
 });
 
