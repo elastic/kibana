@@ -92,7 +92,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
           ) => {
             const { badgeText, toolTipProps, ...badgeProps } = badge;
             return (
-              <EuiToolTip {...toolTipProps} >
+              <EuiToolTip {...toolTipProps}>
                 <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
                   {badgeText}
                 </EuiBadge>
