@@ -6,9 +6,8 @@
  */
 
 import styled from 'styled-components';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 
-type SpacingOptions = keyof EuiTheme['eui']['paddingSizes'];
+type SpacingOptions = 'xs' | 's' | 'm' | 'l' | 'xl';
 
 /**
  * A vertical divider - show a vertical line that spans 100% of the height of its parent container.
@@ -20,9 +19,13 @@ type SpacingOptions = keyof EuiTheme['eui']['paddingSizes'];
 export const VerticalDivider = styled.div<{ spacing?: SpacingOptions }>`
   width: 0;
   height: 100%;
-  border-left: ${(props) => {
-    return props.theme.eui.euiBorderThin;
+  border-left: ${(props) => props.theme.eui.euiBorderThin};
+  margin-left: ${(props) => {
+    const size = props?.spacing && `euiSize${props.spacing.toUpperCase()}`;
+    return size ? props.theme.eui[size] : 0;
   }};
-  margin-left: ${(props) => props.theme.eui.paddingSizes[props?.spacing ?? 'none'] || 0};
-  margin-right: ${(props) => props.theme.eui.paddingSizes[props?.spacing ?? 'none'] || 0};
+  margin-right: ${(props) => {
+    const size = props?.spacing && `euiSize${props.spacing.toUpperCase()}`;
+    return size ? props.theme.eui[size] : 0;
+  }};
 `;

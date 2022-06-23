@@ -52,7 +52,7 @@ exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
         class="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <div
-          class="euiText euiText--medium"
+          class="euiText css-1lo1kz-euiText-m"
         >
           206.3 GB
         </div>
@@ -106,7 +106,7 @@ exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
         class="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <div
-          class="euiText euiText--medium"
+          class="euiText css-1lo1kz-euiText-m"
         >
           0%
         </div>

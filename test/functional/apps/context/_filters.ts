@@ -15,39 +15,31 @@ const TEST_ANCHOR_FILTER_VALUE = 'IN';
 const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const docTable = getService('docTable');
+  const dataGrid = getService('dataGrid');
   const filterBar = getService('filterBar');
+  const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const kibanaServer = getService('kibanaServer');
 
   const PageObjects = getPageObjects(['common', 'context']);
 
   describe('context filters', function contextSize() {
-    before(async function () {
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
-    });
-
-    after(async function () {
-      await kibanaServer.uiSettings.replace({});
-    });
-
     beforeEach(async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
       });
     });
 
-    it('inclusive filter should be addable via expanded doc table rows', async function () {
+    it('inclusive filter should be addable via expanded data grid rows', async function () {
       await retry.waitFor(`filter ${TEST_ANCHOR_FILTER_FIELD} in filterbar`, async () => {
-        await docTable.toggleRowExpanded({ isAnchorRow: true });
-        const anchorDetailsRow = await docTable.getAnchorDetailsRow();
-        await docTable.addInclusiveFilter(anchorDetailsRow, TEST_ANCHOR_FILTER_FIELD);
+        await dataGrid.clickRowToggle({ isAnchorRow: true, renderMoreRows: true });
+        await testSubjects.click(`openFieldActionsButton-${TEST_ANCHOR_FILTER_FIELD}`);
+        await testSubjects.click(`addFilterForValueButton-${TEST_ANCHOR_FILTER_FIELD}`);
         await PageObjects.context.waitUntilContextLoadingHasFinished();
 
         return await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, true);
       });
-      await retry.waitFor(`filter matching docs in docTable`, async () => {
-        const fields = await docTable.getFields();
+      await retry.waitFor(`filter matching docs in data grid`, async () => {
+        const fields = await dataGrid.getFields();
         return fields
           .map((row) => row[2])
           .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
@@ -66,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await retry.waitFor('filters are disabled', async () => {
-        const fields = await docTable.getFields();
+        const fields = await dataGrid.getFields();
         const hasOnlyFilteredRows = fields
           .map((row) => row[2])
           .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
@@ -74,12 +66,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('filter for presence should be addable via expanded doc table rows', async function () {
-      await docTable.toggleRowExpanded({ isAnchorRow: true });
-
+    it('filter for presence should be addable via expanded data grid rows', async function () {
       await retry.waitFor('an exists filter in the filterbar', async () => {
-        const anchorDetailsRow = await docTable.getAnchorDetailsRow();
-        await docTable.addExistsFilter(anchorDetailsRow, TEST_ANCHOR_FILTER_FIELD);
+        await dataGrid.clickRowToggle({ isAnchorRow: true, renderMoreRows: true });
+        await testSubjects.click(`openFieldActionsButton-${TEST_ANCHOR_FILTER_FIELD}`);
+        await testSubjects.click(`addExistsFilterButton-${TEST_ANCHOR_FILTER_FIELD}`);
         await PageObjects.context.waitUntilContextLoadingHasFinished();
         return await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, 'exists', true);
       });

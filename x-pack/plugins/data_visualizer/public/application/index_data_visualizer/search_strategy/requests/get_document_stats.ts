@@ -7,8 +7,8 @@
 
 import { each, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type {
   DocumentCountStats,
   OverallStatsSearchStrategyParams,
@@ -23,6 +23,7 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
     runtimeFieldMap,
     searchQuery,
     intervalMs,
+    fieldsToFetch,
   } = params;
 
   const size = 0;
@@ -30,7 +31,6 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
 
   // Don't use the sampler aggregation as this can lead to some potentially
   // confusing date histogram results depending on the date range of data amongst shards.
-
   const aggs = {
     eventRate: {
       date_histogram: {
@@ -47,12 +47,15 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
         filter: filterCriteria,
       },
     },
-    aggs,
+    ...(!fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
+      ? { aggs }
+      : {}),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
+    track_total_hits: true,
+    size,
   };
   return {
     index,
-    size,
     body: searchBody,
   };
 };
@@ -61,13 +64,18 @@ export const processDocumentCountStats = (
   body: estypes.SearchResponse | undefined,
   params: OverallStatsSearchStrategyParams
 ): DocumentCountStats | undefined => {
+  if (!body) return undefined;
+
+  const totalCount = (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total ?? 0;
+
   if (
-    !body ||
     params.intervalMs === undefined ||
     params.earliest === undefined ||
     params.latest === undefined
   ) {
-    return undefined;
+    return {
+      totalCount,
+    };
   }
   const buckets: { [key: string]: number } = {};
   const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
@@ -85,5 +93,6 @@ export const processDocumentCountStats = (
     buckets,
     timeRangeEarliest: params.earliest,
     timeRangeLatest: params.latest,
+    totalCount,
   };
 };

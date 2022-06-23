@@ -7,7 +7,7 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["navigation", "dataViews", "home", "share"],
+  "requiredPlugins": ["navigation", "dataViews", "home", "share", "dataViewEditor"],
   "optionalPlugins": ["newsfeed", "usageCollection"],
   "requiredBundles": ["kibanaReact", "newsfeed"]
 }

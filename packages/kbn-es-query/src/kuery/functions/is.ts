@@ -111,6 +111,9 @@ export function toElasticsearchQuery(
             path: subTypeNested.nested.path,
             query,
             score_mode: 'none',
+            ...(typeof config.nestedIgnoreUnmapped === 'boolean' && {
+              ignore_unmapped: config.nestedIgnoreUnmapped,
+            }),
           },
         };
       }
