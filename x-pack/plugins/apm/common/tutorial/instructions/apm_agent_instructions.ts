@@ -618,7 +618,7 @@ export const createOpenTelemetryAgentInstructions = (
     }),
     textPre: i18n.translate('xpack.apm.tutorial.otel.configureAgent.textPre', {
       defaultMessage:
-        'Specify the following OpenTelemetry settings as part of the startup of your application. Note that OpenTelemetry SDKs require some boostrap code in addition to these configuration settings. For more details, see the [Elastic OpenTelemetry documentation]({openTelemetryDocumentationLink}) and the [OpenTelemetry community instrumentation guides]({openTelemetryInstrumentationLink}).',
+        'Specify the following OpenTelemetry settings as part of the startup of your application. Note that OpenTelemetry SDKs require some bootstrap code in addition to these configuration settings. For more details, see the [Elastic OpenTelemetry documentation]({openTelemetryDocumentationLink}) and the [OpenTelemetry community instrumentation guides]({openTelemetryInstrumentationLink}).',
       values: {
         openTelemetryDocumentationLink:
           '{config.docs.base_url}guide/en/apm/guide/current/open-telemetry.html',
