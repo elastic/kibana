@@ -171,6 +171,15 @@ export const fillAboutRuleAndContinue = (
   getAboutContinueButton().should('exist').click({ force: true });
 };
 
+export const fillBasicAboutRuleAndContinue = (
+  rule: CustomRule | MachineLearningRule | ThresholdRule | ThreatIndicatorRule
+) => {
+  cy.get(RULE_NAME_INPUT).clear({ force: true }).type(rule.name, { force: true });
+  cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true }).type(rule.description, { force: true });
+
+  getAboutContinueButton().should('exist').click({ force: true });
+};
+
 export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
   cy.get(RULE_NAME_INPUT).type(rule.name, { force: true });
   cy.get(RULE_DESCRIPTION_INPUT).type(rule.description, { force: true });
@@ -249,6 +258,27 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
   getAboutContinueButton().should('exist').click({ force: true });
 };
 
+export const fillDefineCustomRuleWithImportedQueryAndDataViewAndContinue = (
+  rule: CustomRule | OverrideRule
+) => {
+  cy.get('[data-test-subj="rule-index-toggle-dataView"]').click();
+
+  cy.get(
+    '[data-test-subj="detectionsDataViewSelectorDropdown"] [data-test-subj="comboBoxSearchInput"]'
+  )
+    .click()
+    .type('auditbeat-*{downarrow}{enter}{esc}');
+
+  // cy.get('#auditbeat-*').click();
+  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
+  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
+
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+
+  // cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
+};
+
 export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   rule: CustomRule | OverrideRule
 ) => {
@@ -258,7 +288,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
 
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
-  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
+  // cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRule) => {
