@@ -17,7 +17,7 @@ const LinkLabel = styled.span<{
   size?: 'm' | 'l';
 }>`
   display: inline-block;
-  padding-right: ${(props) => props.theme.eui.paddingSizes.s};
+  padding-right: ${(props) => props.theme.eui.euiSizeS};
   font-size: ${({ size, theme }) => (size === 'm' ? theme.eui.euiFontSizeXS : 'innherit')};
 `;
 
