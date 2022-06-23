@@ -11,7 +11,6 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiToolTip,
 } from '@elastic/eui';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +23,6 @@ import {
   ICMPSimpleFields,
   Ping,
   ServiceLocations,
-  SourceType,
   EncryptedSyntheticsMonitorWithId,
   TCPSimpleFields,
   BrowserFields,
@@ -36,6 +34,7 @@ import * as labels from '../../overview/monitor_list/translations';
 import { Actions } from './actions';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
+import { ManagementSettingsPortal } from './management_settings_portal';
 import { MonitorTags } from './tags';
 
 export interface MonitorManagementListPageState {
@@ -183,23 +182,12 @@ export const MonitorManagementList = ({
         defaultMessage: 'Enabled',
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsMonitorWithId) => (
-        <EuiToolTip
-          content={
-            monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
-              ? i18n.translate('xpack.synthetics.monitorManagement.monitorList.enabled.tooltip', {
-                  defaultMessage:
-                    'This monitor was added from an external project. Configuration is read only.',
-                })
-              : ''
-          }
-        >
-          <MonitorEnabled
-            id={monitor.id}
-            monitor={monitor}
-            isDisabled={!canEdit || monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT}
-            onUpdate={onUpdate}
-          />
-        </EuiToolTip>
+        <MonitorEnabled
+          id={monitor.id}
+          monitor={monitor}
+          isDisabled={!canEdit}
+          onUpdate={onUpdate}
+        />
       ),
     },
     {
@@ -222,6 +210,7 @@ export const MonitorManagementList = ({
 
   return (
     <EuiPanel hasBorder>
+      <ManagementSettingsPortal />
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={i18n.translate('xpack.synthetics.monitorManagement.monitorList.title', {
