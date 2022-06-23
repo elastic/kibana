@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useMonitorHistogram } from './use_monitor_histogram';
-import * as searchHooks from '../../../../../observability/public';
+import * as searchHooks from '../../../../../observability/public/hooks/use_es_search';
 import * as reduxHooks from 'react-redux';
 
 describe('useMonitorHistogram', () => {
