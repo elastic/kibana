@@ -9,6 +9,7 @@ import { truncate } from 'lodash';
 import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
 import { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { RulesClient, BulkEditError } from '@kbn/alerting-plugin/server';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
@@ -21,10 +22,7 @@ import {
   RULES_TABLE_MAX_PAGE_SIZE,
   BULK_ACTIONS_DRY_RUN_ERR_CODE,
 } from '../../../../../common/constants';
-import {
-  BulkAction,
-  BulkActionEditType,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   performBulkActionSchema,
   performBulkActionQuerySchema,
@@ -33,7 +31,7 @@ import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../utils/route_limited_concurrency_tag';
-import { invariant } from '../../../../../common/utils/invariant';
+
 import {
   initPromisePool,
   PromisePoolError,
@@ -50,8 +48,7 @@ import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { legacyMigrate } from '../../rules/utils';
-import { DryRunError, throwDryRunError } from '../../rules/bulk_actions/dry_run';
-
+import { DryRunError, throwDryRunError, dryRunBulkEdit } from '../../rules/bulk_actions/dry_run';
 import { RuleParams } from '../../schemas/rule_schemas';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
@@ -139,8 +136,8 @@ const buildBulkResponse = (
     total: numSucceeded + numFailed,
   };
 
-  // if response is for dry_run, empty lists of rule returned, as rules are not actually updated and stored within ES
-  // thus, it's impossible ti return reliably updated/copied/...etc rules
+  // if response is for dry_run, empty lists of rules returned, as rules are not actually updated and stored within ES
+  // thus, it's impossible to return reliably updated/duplicated/deleted rules
   const results = isDryRun
     ? {
         updated: [],
@@ -389,7 +386,7 @@ export const performBulkActionRoute = (
         let created: RuleAlertType[] = [];
         let deleted: RuleAlertType[] = [];
 
-        const throwDryRunMlAuth = (ruleType: RuleAlertType['params']['type']) =>
+        const throwDryRunMlAuth = (ruleType: Type) =>
           throwDryRunError(
             async () => throwAuthzError(await mlAuthz.validateRuleType(ruleType)),
             BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_AUTH
@@ -552,29 +549,7 @@ export const performBulkActionRoute = (
               items: rules,
               executor: async (rule) => {
                 await throwDryRunMlAuth(rule.params.type);
-
-                // if rule is immutable, it can't be edited
-                await throwDryRunError(
-                  () => invariant(rule.params.immutable === false, "Elastic rule can't be edited"),
-                  BULK_ACTIONS_DRY_RUN_ERR_CODE.IMMUTABLE
-                );
-
-                // if rule is machine_learning, index pattern action can't be applied to it
-                await throwDryRunError(
-                  () =>
-                    invariant(
-                      rule.params.type !== 'machine_learning' ||
-                        !body.edit.find((action) =>
-                          [
-                            BulkActionEditType.add_index_patterns,
-                            BulkActionEditType.delete_index_patterns,
-                            BulkActionEditType.set_index_patterns,
-                          ].includes(action.type)
-                        ),
-                      "Machine learning rule doesn't have index patterns"
-                    ),
-                  BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_INDEX_PATTERN
-                );
+                await dryRunBulkEdit(rule, body.edit);
 
                 return rule;
               },
