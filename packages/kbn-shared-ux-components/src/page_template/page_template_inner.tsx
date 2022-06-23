@@ -64,5 +64,4 @@ export const KibanaPageTemplateInner: FunctionComponent<Props> = ({
   );
 };
 
-export const KibanaPageTemplateWithSolutionNav =
-  withSolutionNav<KibanaPageTemplateProps>(KibanaPageTemplateInner);
+export const KibanaPageTemplateWithSolutionNav = withSolutionNav(KibanaPageTemplateInner);

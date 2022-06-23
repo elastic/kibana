@@ -95,7 +95,13 @@ describe('SolutionNav', () => {
   });
 
   test('accepts canBeCollapsed prop', () => {
-    const component = shallow(<SolutionNav name="Solution" canBeCollapsed={true} items={items} />);
-    expect(component).toMatchSnapshot();
+    const canBeCollapsed = shallow(
+      <SolutionNav name="Solution" canBeCollapsed={true} items={items} />
+    );
+    expect(canBeCollapsed).toMatchSnapshot();
+    const noCollapse = shallow(
+      <SolutionNav name="Solution" canBeCollapsed={false} items={items} />
+    );
+    expect(noCollapse).toMatchSnapshot();
   });
 });

@@ -37,5 +37,4 @@ export const NoDataConfigPage = (props: KibanaPageTemplateProps) => {
   );
 };
 
-export const NoDataConfigPageWithSolutionNavBar =
-  withSolutionNav<KibanaPageTemplateProps>(NoDataConfigPage);
+export const NoDataConfigPageWithSolutionNavBar = withSolutionNav(NoDataConfigPage);

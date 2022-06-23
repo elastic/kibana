@@ -9,7 +9,6 @@
 import React, { ComponentType, useState } from 'react';
 import classNames from 'classnames';
 import { useIsWithinBreakpoints, EuiPageTemplateProps } from '@elastic/eui';
-import { EuiPageSideBarProps } from '@elastic/eui/src/components/page/page_side_bar';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
 
 // https://reactjs.org/docs/higher-order-components.html#convention-wrap-the-display-name-for-easy-debugging
@@ -17,15 +16,25 @@ function getDisplayName(Component: ComponentType<any>) {
   return Component.displayName || Component.name || 'UnnamedComponent';
 }
 
-type Props<T> = T &
-  EuiPageTemplateProps & {
-    solutionNav: SolutionNavProps;
+type TemplateProps = Pick<
+  EuiPageTemplateProps,
+  'pageSideBar' | 'pageSideBarProps' | 'template' | 'children'
+>;
+
+type RequiredProps<T> = T &
+  TemplateProps & {
     isEmptyState?: boolean;
   };
 
+type Props<T> = RequiredProps<T> & {
+  solutionNav: SolutionNavProps;
+};
+
 const SOLUTION_NAV_COLLAPSED_KEY = 'solutionNavIsCollapsed';
 
-export const withSolutionNav = <T,>(WrappedComponent: ComponentType) => {
+export const withSolutionNav = <T extends object>(
+  WrappedComponent: ComponentType<RequiredProps<T>>
+) => {
   const WithSolutionNav = (props: Props<T>) => {
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
     const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
@@ -34,6 +43,7 @@ export const withSolutionNav = <T,>(WrappedComponent: ComponentType) => {
     );
     const { solutionNav, ...propagatedProps } = props;
     const { children, isEmptyState, template } = propagatedProps;
+
     const toggleOpenOnDesktop = () => {
       setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
       // Have to store it as the opposite of the default we want
@@ -60,14 +70,21 @@ export const withSolutionNav = <T,>(WrappedComponent: ComponentType) => {
         {...solutionNav}
       />
     );
+
     const pageSideBarProps = {
-      paddingSize: 'none',
+      paddingSize: 'none' as 'none',
       ...props.pageSideBarProps,
       className: sideBarClasses,
-    } as EuiPageSideBarProps; // needed because for some reason 'none' is not recognized as a valid value for paddingSize
+    };
+
     return (
       <WrappedComponent
-        {...{ ...propagatedProps, pageSideBar, pageSideBarProps, template: templateToUse }}
+        {...{
+          ...(propagatedProps as RequiredProps<T>),
+          pageSideBar,
+          pageSideBarProps,
+          template: templateToUse,
+        }}
       >
         {children}
       </WrappedComponent>
