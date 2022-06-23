@@ -15,7 +15,7 @@ import { GetExceptionSummaryResponse } from '../../../../../../../../common/endp
 
 const mockTheme = getMockTheme({
   eui: {
-    paddingSizes: { m: '2' },
+    euiSizeM: '2',
   },
 });
 

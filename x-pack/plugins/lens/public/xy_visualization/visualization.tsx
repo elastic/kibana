@@ -27,7 +27,7 @@ import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader } from './xy_config_panel/layer_header';
-import type { Visualization, AccessorConfig, FramePublicAPI } from '../types';
+import { Visualization, AccessorConfig, FramePublicAPI } from '../types';
 import { State, visualizationTypes, XYSuggestion, XYLayerConfig, XYDataLayerConfig } from './types';
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
@@ -45,6 +45,7 @@ import {
   getAnnotationsSupportedLayer,
   setAnnotationsDimension,
   getUniqueLabels,
+  onAnnotationDrop,
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
@@ -71,6 +72,7 @@ import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_pane
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
+import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 
 export const getXyVisualization = ({
   datatableUtilities,
@@ -303,6 +305,20 @@ export const getXyVisualization = ({
     return getFirstDataLayer(state.layers)?.palette;
   },
 
+  onDrop(props) {
+    const targetLayer: XYLayerConfig | undefined = props.prevState.layers.find(
+      (l) => l.layerId === props.target.layerId
+    );
+    if (!targetLayer) {
+      throw new Error('target layer should exist');
+    }
+
+    if (isAnnotationsLayer(targetLayer)) {
+      return onAnnotationDrop?.(props) || props.prevState;
+    }
+    return onDropForVisualization(props, this);
+  },
+
   setDimension(props) {
     const { prevState, layerId, columnId, groupId } = props;
 
@@ -337,7 +353,7 @@ export const getXyVisualization = ({
   },
 
   updateLayersConfigurationFromContext({ prevState, layerId, context }) {
-    const { chartType, axisPosition, palette, metrics } = context;
+    const { chartType, axisPosition, palette, metrics, collapseFn } = context;
     const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
     if (!foundLayer || !isDataLayer(foundLayer)) {
       return prevState;
@@ -356,6 +372,7 @@ export const getXyVisualization = ({
       ...foundLayer,
       ...(chartType && { seriesType: chartType as SeriesType }),
       ...(palette && { palette }),
+      collapseFn,
       yConfig,
       layerType: isReferenceLine ? layerTypes.REFERENCELINE : layerTypes.DATA,
     } as XYLayerConfig;

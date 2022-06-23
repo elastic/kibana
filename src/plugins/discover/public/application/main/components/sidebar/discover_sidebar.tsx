@@ -40,7 +40,7 @@ import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
-import { ElasticSearchHit } from '../../../../types';
+import type { DataTableRecord } from '../../../../types';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -68,9 +68,18 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
    */
   setFieldEditorRef?: (ref: () => void | undefined) => void;
 
-  editField: (fieldName?: string) => void;
+  /**
+   * Handles "Edit field" action
+   * Buttons will be hidden if not provided
+   * @param fieldName
+   */
+  editField?: (fieldName?: string) => void;
 
-  createNewDataView: () => void;
+  /**
+   * Handles "Create a data view action" action
+   * Buttons will be hidden if not provided
+   */
+  createNewDataView?: () => void;
 
   /**
    * a statistics of the distribution of fields in the given hits
@@ -79,7 +88,7 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
   /**
    * hits fetched from ES, displayed in the doc table
    */
-  documents?: ElasticSearchHit[];
+  documents?: DataTableRecord[];
   /**
    * Discover view mode
    */
@@ -94,7 +103,6 @@ export function DiscoverSidebarComponent({
   fieldCounts,
   fieldFilter,
   documents,
-  indexPatternList,
   onAddField,
   onAddFilter,
   onRemoveField,
@@ -113,9 +121,6 @@ export function DiscoverSidebarComponent({
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
-
-  const dataViewFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
-  const canEditDataViewField = !!dataViewFieldEditPermission && useNewFieldsApi;
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
@@ -258,7 +263,7 @@ export function DiscoverSidebarComponent({
 
   const deleteField = useMemo(
     () =>
-      canEditDataViewField && selectedIndexPattern
+      editField && selectedIndexPattern
         ? async (fieldName: string) => {
             const ref = dataViewFieldEditor.openDeleteModal({
               ctx: {
@@ -279,7 +284,7 @@ export function DiscoverSidebarComponent({
         : undefined,
     [
       selectedIndexPattern,
-      canEditDataViewField,
+      editField,
       setFieldEditorRef,
       closeFlyout,
       onEditRuntimeField,
@@ -396,8 +401,8 @@ export function DiscoverSidebarComponent({
                                 selected={true}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
-                                onEditField={canEditDataViewField ? editField : undefined}
-                                onDeleteField={canEditDataViewField ? deleteField : undefined}
+                                onEditField={editField}
+                                onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
                               />
                             </li>
@@ -456,8 +461,8 @@ export function DiscoverSidebarComponent({
                                 getDetails={getDetailsByField}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
-                                onEditField={canEditDataViewField ? editField : undefined}
-                                onDeleteField={canEditDataViewField ? deleteField : undefined}
+                                onEditField={editField}
+                                onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
                               />
                             </li>
@@ -485,8 +490,8 @@ export function DiscoverSidebarComponent({
                             getDetails={getDetailsByField}
                             trackUiMetric={trackUiMetric}
                             multiFields={multiFields?.get(field.name)}
-                            onEditField={canEditDataViewField ? editField : undefined}
-                            onDeleteField={canEditDataViewField ? deleteField : undefined}
+                            onEditField={editField}
+                            onDeleteField={deleteField}
                             showFieldStats={showFieldStats}
                           />
                         </li>
@@ -498,18 +503,20 @@ export function DiscoverSidebarComponent({
             )}
           </div>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            iconType="indexOpen"
-            data-test-subj="indexPattern-add-field_btn"
-            onClick={() => editField()}
-            size="s"
-          >
-            {i18n.translate('discover.fieldChooser.addField.label', {
-              defaultMessage: 'Add a field',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
+        {!!editField && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="indexOpen"
+              data-test-subj="indexPattern-add-field_btn"
+              onClick={() => editField()}
+              size="s"
+            >
+              {i18n.translate('discover.fieldChooser.addField.label', {
+                defaultMessage: 'Add a field',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPageSideBar>
   );

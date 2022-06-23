@@ -22,15 +22,15 @@ const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
   .and-badge {
     padding-top: 20px;
     padding-bottom: ${({ theme }) => {
-      return `calc(${theme.eui.euiButtonHeightSmall} + (${theme.eui.paddingSizes.s} * 2) + 3px);`;
+      return `calc(${theme.eui.euiButtonHeightSmall} + (${theme.eui.euiSizeS} * 2) + 3px);`;
     }};
   }
 
   .group-entries {
-    margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 
     & > * {
-      margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+      margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 
       &:last-child {
         margin-bottom: 0;

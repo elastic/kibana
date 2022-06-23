@@ -22,7 +22,7 @@ export class VisualizationError extends React.Component<VisualizationErrorProps>
         iconColor="danger"
         data-test-subj="visualization-error"
         body={
-          <EuiText size="xs">
+          <EuiText size="xs" data-test-subj="visualization-error-text">
             {typeof this.props.error === 'string' ? this.props.error : this.props.error.message}
           </EuiText>
         }
