@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
-export * from './get_cache_folders';
-export * from './install_tools';
-export * from './yarn';
+export function getYearAgoIso() {
+  const d = new Date();
+  const nowIso = d.toISOString();
+  d.setMonth(d.getMonth() - 12);
+  const yearAgoIso = d.toISOString();
+
+  return {
+    now: nowIso,
+    yearAgo: yearAgoIso,
+  };
+}

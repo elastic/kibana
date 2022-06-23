@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './get_cache_folders';
-export * from './install_tools';
-export * from './yarn';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-ci-stats-performance-metrics'],
+};

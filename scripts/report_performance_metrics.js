@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './get_cache_folders';
-export * from './install_tools';
-export * from './yarn';
+require('../src/setup_node_env');
+require('@kbn/ci-stats-performance-metrics').runCli();
