@@ -30,7 +30,7 @@ const CausedByHeading = euiStyled('span')`
 `;
 
 const FramesContainer = euiStyled('div')`
-  padding-left: ${({ theme }) => theme.eui.paddingSizes.m};
+  padding-left: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 function CausedBy({ message }: { message: string }) {
