@@ -16,7 +16,7 @@ import { dotnet } from './dotnet';
 import { php } from './php';
 import { rum, rumScript } from './rum';
 
-const commandsMap: Record<string, string> = {
+const apmAgentCommandsMap: Record<string, string> = {
   java,
   node,
   django,
@@ -30,7 +30,7 @@ const commandsMap: Record<string, string> = {
   js_script: rumScript,
 };
 
-export function getCommands({
+export function getApmAgentCommands({
   variantId,
   policyDetails,
 }: {
@@ -40,7 +40,7 @@ export function getCommands({
     secretToken?: string;
   };
 }) {
-  const commands = commandsMap[variantId];
+  const commands = apmAgentCommandsMap[variantId];
   if (!commands) {
     return '';
   }
