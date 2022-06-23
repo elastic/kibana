@@ -54,32 +54,6 @@ export const getAgentHandler: RequestHandler<
   }
 };
 
-export const getAllAgentsHandler: RequestHandler<
-  undefined,
-  TypeOf<typeof GetAgentsRequestSchema.query>
-> = async (context, request, response) => {
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-
-  try {
-    const agents = await AgentService.getAgents(esClient, {
-      perPage: request.query.perPage,
-      kuery: request.query.kuery!,
-    });
-
-    const body: GetAgentsResponse = {
-      items: agents.slice(0, 10),
-      total: agents.length,
-      totalInactive: 0,
-      page: 1,
-      perPage: 0,
-    };
-    return response.ok({ body });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
-
 export const deleteAgentHandler: RequestHandler<
   TypeOf<typeof DeleteAgentRequestSchema.params>
 > = async (context, request, response) => {

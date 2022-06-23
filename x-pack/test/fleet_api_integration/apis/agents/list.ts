@@ -71,13 +71,5 @@ export default function ({ getService }: FtrProviderContext) {
       const agent = apiResponse.items[0];
       expect(agent.access_api_key_id).to.eql('api-key-2');
     });
-
-    it('should query with pit', async () => {
-      const { body: apiResponse } = await supertest
-        .get(`/internal/fleet/agents?perPage=2`)
-        .expect(200);
-
-      expect(apiResponse.total).to.eql(4);
-    });
   });
 }
