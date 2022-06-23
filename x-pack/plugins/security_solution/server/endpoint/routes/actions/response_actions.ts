@@ -31,6 +31,7 @@ import {
   GET_RUNNING_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
+  ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -257,7 +258,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       try {
         logsEndpointActionsResult = await esClient.index<LogsEndpointAction>(
           {
-            index: `${ENDPOINT_ACTIONS_DS}-default`,
+            index: ENDPOINT_ACTIONS_INDEX,
             body: {
               ...doc,
             },

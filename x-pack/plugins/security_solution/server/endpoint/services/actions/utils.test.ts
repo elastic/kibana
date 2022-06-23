@@ -70,13 +70,14 @@ describe('When using Actions service utilities', () => {
         )
       ).toEqual({
         agents: ['6e6796b0-af39-4f12-b025-fcb06db499e5'],
-        command: 'isolate',
+        command: 'unisolate',
         comment: expect.any(String),
         createdAt: '2022-04-27T16:08:47.449Z',
         createdBy: 'elastic',
         expiration: '2022-04-29T16:08:47.449Z',
         id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
         type: 'ACTION_REQUEST',
+        parameters: undefined,
       });
     });
 
@@ -89,13 +90,14 @@ describe('When using Actions service utilities', () => {
         )
       ).toEqual({
         agents: ['90d62689-f72d-4a05-b5e3-500cad0dc366'],
-        command: 'isolate',
+        command: 'unisolate',
         comment: expect.any(String),
         createdAt: '2022-04-27T16:08:47.449Z',
         createdBy: 'Shanel',
         expiration: '2022-05-10T16:08:47.449Z',
         id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
         type: 'ACTION_REQUEST',
+        parameters: undefined,
       });
     });
   });

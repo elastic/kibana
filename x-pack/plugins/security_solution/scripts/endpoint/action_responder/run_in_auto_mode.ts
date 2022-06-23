@@ -126,19 +126,5 @@ const parseCommentTokens = (comment: string): CommentTokens => {
 };
 
 const getActionComment = (action: ActionDetails): string => {
-  const actionRequest = action.logEntries.find(
-    (entry) => entry.type === 'fleetAction' || entry.type === 'action'
-  );
-
-  if (actionRequest) {
-    if (actionRequest.type === 'fleetAction') {
-      return actionRequest.item.data.data.comment ?? '';
-    }
-
-    if (actionRequest.type === 'action') {
-      return actionRequest.item.data.EndpointActions.data.comment ?? '';
-    }
-  }
-
-  return '';
+  return action.comment ?? '';
 };
