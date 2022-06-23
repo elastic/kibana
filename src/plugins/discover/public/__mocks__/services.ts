@@ -16,6 +16,7 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
+  HIDE_ANNOUNCEMENTS,
 } from '../../common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { TopNavMenu } from '@kbn/navigation-plugin/public';
