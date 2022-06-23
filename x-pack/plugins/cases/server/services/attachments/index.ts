@@ -346,6 +346,7 @@ export class AttachmentService {
       const { transformedFields: migratedAttributes, references: refsWithExternalRefId } =
         soExtractor.extractFieldsToReferences<AttachmentAttributes>({
           data: updatedAttributes,
+          existingReferences: options?.references,
         });
 
       const res = await unsecuredSavedObjectsClient.update<AttachmentAttributesWithoutSORefs>(
@@ -354,7 +355,13 @@ export class AttachmentService {
         migratedAttributes,
         {
           ...options,
-          references: refsWithExternalRefId,
+          /**
+           * If options?.references are undefined and there is no field to move to the refs
+           * then the refsWithExternalRefId will be an empty array. If we pass the empty array
+           * on the update then all previously refs will be removed. The check below is needed
+           * to prevent this.
+           */
+          references: refsWithExternalRefId.length > 0 ? refsWithExternalRefId : undefined,
         }
       );
 
@@ -383,14 +390,20 @@ export class AttachmentService {
           const { transformedFields: migratedAttributes, references: refsWithExternalRefId } =
             soExtractor.extractFieldsToReferences<AttachmentAttributes>({
               data: c.updatedAttributes,
+              existingReferences: c.options?.references,
             });
 
           return {
+            ...c.options,
             type: CASE_COMMENT_SAVED_OBJECT,
             id: c.attachmentId,
             attributes: migratedAttributes,
-            references: refsWithExternalRefId,
-            ...c.options,
+            /* If c.options?.references are undefined and there is no field to move to the refs
+             * then the refsWithExternalRefId will be an empty array. If we pass the empty array
+             * on the update then all previously refs will be removed. The check below is needed
+             * to prevent this.
+             */
+            references: refsWithExternalRefId.length > 0 ? refsWithExternalRefId : undefined,
           };
         })
       );
@@ -469,7 +482,7 @@ export class AttachmentService {
     options?: SavedObjectFindOptionsKueryNode;
   }): Promise<SavedObjectsFindResponse<AttachmentAttributes>> {
     try {
-      this.log.debug(`Attempting to find cases`);
+      this.log.debug(`Attempting to find comments`);
       const res = await unsecuredSavedObjectsClient.find<AttachmentAttributes>({
         sortField: defaultSortField,
         ...options,
@@ -484,7 +497,7 @@ export class AttachmentService {
         }),
       };
     } catch (error) {
-      this.log.error(`Error on find cases: ${error}`);
+      this.log.error(`Error on find comments: ${error}`);
       throw error;
     }
   }
