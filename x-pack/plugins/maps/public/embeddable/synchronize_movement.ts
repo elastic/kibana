@@ -16,6 +16,8 @@ interface MapPanel {
 
 const registry: Record<string, MapPanel> = {};
 let location: MapCenterAndZoom | undefined;
+let primaryPanelId: string | undefined;
+let primaryPanelTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
 export const synchronizeMovement = {
   getLocation() {
@@ -36,9 +38,23 @@ export const synchronizeMovement = {
     registry[embeddableId] = mapPanel;
   },
   setLocation(triggeringEmbedableId: string, lat: number, lon: number, zoom: number) {
-    if (location && location.lat === lat && location.lon === lon && location.zoom === zoom) {
+    if (
+      (primaryPanelId && primaryPanelId !== triggeringEmbedableId) ||
+      (location && location.lat === lat && location.lon === lon && location.zoom === zoom)
+    ) {
+      // to avoid callstack overflow and bouncing between locations,
+      // do not propagate location changes from "follower" panels
       return;
     }
+
+    primaryPanelId = triggeringEmbedableId;
+    if (primaryPanelTimeoutId) {
+      clearTimeout(primaryPanelTimeoutId);
+    }
+    primaryPanelTimeoutId = setTimeout(() => {
+      // release "primary" panel lock on timeout allowing movement in other panels to all them to become "primary"
+      primaryPanelId = undefined;
+    }, 500);
 
     location = { lat, lon, zoom };
     Object.keys(registry).forEach((key) => {

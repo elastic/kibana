@@ -42,6 +42,7 @@ import {
   getInspectorAdapters,
   setChartsPaletteServiceGetColor,
   setEventHandlers,
+  setOnMapMove,
   EventHandlers,
 } from '../reducers/non_serializable_instances';
 import {
@@ -181,6 +182,9 @@ export class MapEmbeddable
         showTimesliderToggleButton: false,
       })
     );
+
+    // Passing callback into redux store instead of regular pattern of getting redux state changes for performance reasons
+    store.dispatch(setOnMapMove(this._propogateMapMovement));
 
     this._dispatchSetQuery({
       forceRefresh: false,
@@ -340,6 +344,12 @@ export class MapEmbeddable
     const zoom = getMapZoom(this._savedMap.getStore().getState());
     synchronizeMovement.setLocation(this.input.id, center.lat, center.lon, zoom);
   }
+
+  _propogateMapMovement = (lat: number, lon: number, zoom: number) => {
+    if (this._getIsMovementSynchronized()) {
+      synchronizeMovement.setLocation(this.input.id, lat, lon, zoom);
+    }
+  };
 
   _getFilters() {
     return this.input.filters
@@ -656,9 +666,6 @@ export class MapEmbeddable
       mapCenter.lon !== center.lon ||
       mapCenter.zoom !== zoom
     ) {
-      if (this._getIsMovementSynchronized()) {
-        synchronizeMovement.setLocation(this.input.id, center.lat, center.lon, zoom);
-      }
       this.updateInput({
         mapCenter: {
           lat: center.lat,
