@@ -27,6 +27,11 @@ interface Props {
   transformId: string;
 }
 
+interface Sorting {
+  field: keyof TransformMessage;
+  direction: 'asc' | 'desc';
+}
+
 export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +39,12 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [sorting, setSorting] = useState<{ sort: Sorting }>({
+    sort: {
+      field: 'timestamp' as const,
+      direction: 'desc' as const,
+    },
+  });
 
   const api = useApi();
 
@@ -84,13 +95,15 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
       width: theme.euiSizeXL,
     },
     {
+      field: 'timestamp',
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.messagesPane.timeLabel',
         {
           defaultMessage: 'Time',
         }
       ),
-      render: (message: any) => formatDate(message.timestamp, TIME_FORMAT),
+      render: (timestamp: number) => formatDate(timestamp, TIME_FORMAT),
+      sortable: true,
     },
     {
       field: 'node_name',
@@ -113,8 +126,18 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
     },
   ];
 
-  const getPageOfMessages = ({ index, size }: { index: number; size: number }) => {
-    const list = messages;
+  const getPageOfMessages = ({
+    index,
+    size,
+    sort,
+  }: {
+    index: number;
+    size: number;
+    sort: Sorting;
+  }) => {
+    const list = messages.sort((a: TransformMessage, b: TransformMessage) =>
+      sort.direction === 'asc' ? a.timestamp - b.timestamp : b.timestamp - a.timestamp
+    );
     const listLength = list.length;
     const pageStart = index * size;
 
@@ -126,18 +149,24 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
 
   const onChange = ({
     page = { index: 0, size: 10 },
+    sort,
   }: {
     page?: { index: number; size: number };
+    sort?: Sorting;
   }) => {
     const { index, size } = page;
 
     setPageIndex(index);
     setPageSize(size);
+    if (sort) {
+      setSorting({ sort });
+    }
   };
 
   const { pageOfMessages, totalItemCount } = getPageOfMessages({
     index: pageIndex,
     size: pageSize,
+    sort: sorting.sort,
   });
 
   const pagination = {
@@ -160,6 +189,7 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
         error={errorMessage}
         pagination={pagination}
         onChange={onChange}
+        sorting={sorting}
       />
     </div>
   );

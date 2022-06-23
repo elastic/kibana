@@ -85,7 +85,7 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
           size: SIZE,
           body: {
             sort: [
-              { timestamp: { order: 'desc' as const } },
+              { timestamp: { order: 'asc' as const } },
               { transform_id: { order: 'asc' as const } },
             ],
             query,
