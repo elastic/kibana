@@ -19,25 +19,23 @@ import {
 } from '@elastic/eui';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { HttpService } from '../../../../../services/http_service';
 import type { JobType, MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
 import type {
   ManagementListResponse,
   ManagementItems,
 } from '../../../../../../../common/types/management';
-import { managementApiProvider } from '../../../../../services/ml_api_service/management';
+import { useManagementApiService } from '../../../../../services/ml_api_service/management';
 import { getColumns } from './columns';
 import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
 import { getFilters } from './filters';
 
 interface Props {
   spacesApi: SpacesPluginStart | undefined;
-  httpService: HttpService;
   setCurrentTab: (tabId: MlSavedObjectType) => void;
 }
 
-export const SpaceManagement: FC<Props> = ({ spacesApi, httpService, setCurrentTab }) => {
-  const { getList } = managementApiProvider(httpService);
+export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
+  const { getList } = useManagementApiService();
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
   const [jobs, setJobs] = useState<ManagementListResponse>();
   const [columns, setColumns] = useState<Array<EuiBasicTableColumn<ManagementItems>>>([]);

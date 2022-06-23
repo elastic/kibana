@@ -157,7 +157,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
   };
 }
 
-type TrainedModelsApiService = ReturnType<typeof trainedModelsApiProvider>;
+export type TrainedModelsApiService = ReturnType<typeof trainedModelsApiProvider>;
 
 /**
  * Hooks for accessing {@link TrainedModelsApiService} in React components.

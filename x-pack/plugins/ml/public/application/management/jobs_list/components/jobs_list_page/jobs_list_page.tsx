@@ -174,11 +174,7 @@ export const JobsListPage: FC<{
                       <ImportJobsFlyout isDisabled={false} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                  <SpaceManagement
-                    spacesApi={spacesApi}
-                    httpService={httpService}
-                    setCurrentTab={setCurrentTabId}
-                  />
+                  <SpaceManagement spacesApi={spacesApi} setCurrentTab={setCurrentTabId} />
                 </EuiPageContentBody>
               </Router>
             </ContextWrapper>

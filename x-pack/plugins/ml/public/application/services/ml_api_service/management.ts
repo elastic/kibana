@@ -72,10 +72,10 @@ export function managementApiProvider(httpService: HttpService) {
   };
 }
 
-type ManagementApiService = ReturnType<typeof managementApiProvider>;
+export type ManagementApiService = ReturnType<typeof managementApiProvider>;
 
 /**
- * Hooks for accessing {@link TrainedModelsApiService} in React components.
+ * Hooks for accessing {@link ManagementApiService} in React components.
  */
 export function useManagementApiService(): ManagementApiService {
   const {

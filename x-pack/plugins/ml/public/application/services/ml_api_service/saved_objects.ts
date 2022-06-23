@@ -99,10 +99,10 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
   },
 });
 
-type SavedObjectsApiService = ReturnType<typeof savedObjectsApiProvider>;
+export type SavedObjectsApiService = ReturnType<typeof savedObjectsApiProvider>;
 
 /**
- * Hooks for accessing {@link TrainedModelsApiService} in React components.
+ * Hooks for accessing {@link SavedObjectsApiService} in React components.
  */
 export function useSavedObjectsApiService(): SavedObjectsApiService {
   const {

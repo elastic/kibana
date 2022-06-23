@@ -6,9 +6,12 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
+import { useMemo } from 'react';
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/core/types/elasticsearch';
-import type { CriteriaField } from '../results_service';
 import { HttpService } from '../http_service';
+import { useMlKibana } from '../../contexts/kibana';
+
+import type { CriteriaField } from '../results_service';
 import { basePath } from '.';
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
 import type {
@@ -22,8 +25,6 @@ import type { AnomalyRecordDoc, MLAnomalyDoc } from '../../../../common/types/an
 import type { EntityField } from '../../../../common/util/anomaly_utils';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import type { ExplorerChartsData } from '../../../../common/types/results';
-
-export type ResultsApiService = ReturnType<typeof resultsApiProvider>;
 
 export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
@@ -220,3 +221,17 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 });
+
+export type ResultsApiService = ReturnType<typeof resultsApiProvider>;
+
+/**
+ * Hooks for accessing {@link ResultsApiService} in React components.
+ */
+export function useResultsApiService(): ResultsApiService {
+  const {
+    services: {
+      mlServices: { httpService },
+    },
+  } = useMlKibana();
+  return useMemo(() => resultsApiProvider(httpService), [httpService]);
+}
