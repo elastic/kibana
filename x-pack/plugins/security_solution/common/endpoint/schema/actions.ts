@@ -71,16 +71,29 @@ export const ActionDetailsRequestSchema = {
 export const EndpointActionListRequestSchema = {
   query: schema.object({
     agentIds: schema.maybe(
-      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 })
+      schema.oneOf([
+        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 }),
+        schema.string({ minLength: 1 }),
+      ])
     ),
-    commands: schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 })),
+    commands: schema.maybe(
+      schema.oneOf([
+        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+        schema.string({ minLength: 1 }),
+      ])
+    ),
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
     pageSize: schema.maybe(
       schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE_SIZE, min: 1, max: 10000 })
     ),
     startDate: schema.maybe(schema.string()), // date ISO strings or moment date
     endDate: schema.maybe(schema.string()), // date ISO strings or moment date
-    userIds: schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 })),
+    userIds: schema.maybe(
+      schema.oneOf([
+        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+        schema.string({ minLength: 1 }),
+      ])
+    ),
   }),
 };
 

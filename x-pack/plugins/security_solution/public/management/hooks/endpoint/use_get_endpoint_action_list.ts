@@ -25,13 +25,13 @@ export const useGetEndpointActionList = (
     queryFn: async () => {
       return http.get<ActionListApiResponse>(ENDPOINTS_ACTION_LIST_ROUTE, {
         query: {
-          agentIds: JSON.stringify(query.agentIds),
-          commands: JSON.stringify(query.commands),
+          agentIds: query.agentIds,
+          commands: query.commands,
           endDate: query.endDate,
           page: query.page,
           pageSize: query.pageSize,
           startDate: query.startDate,
-          userIds: JSON.stringify(query.userIds),
+          userIds: query.userIds,
         },
       });
     },

@@ -7,10 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ENDPOINT_DEFAULT_PAGE,
-  ENDPOINT_DEFAULT_PAGE_SIZE,
-} from '../../../../common/endpoint/constants';
+import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
 

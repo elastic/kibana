@@ -27,10 +27,10 @@ describe('actions schemas', () => {
       }).toThrow();
     });
 
-    it('should not accept an agent ID if not in an array', () => {
+    it('should accept an agent ID if not in an array', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({ agentIds: uuid.v4() });
-      }).toThrow();
+      }).not.toThrow();
     });
 
     it('should accept an agent ID in an array', () => {
