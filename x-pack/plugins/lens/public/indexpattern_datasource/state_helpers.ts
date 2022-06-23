@@ -24,3 +24,19 @@ export function mergeLayer({
     },
   };
 }
+
+export function mergeLayers({
+  state,
+  newLayers,
+}: {
+  state: IndexPatternPrivateState;
+  newLayers: Record<string, IndexPatternLayer>;
+}) {
+  return {
+    ...state,
+    layers: {
+      ...state.layers,
+      ...newLayers,
+    },
+  };
+}

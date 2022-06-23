@@ -29,6 +29,7 @@ import { EventType } from '@kbn/analytics-client';
 import { EventTypeOpts } from '@kbn/analytics-client';
 import { History as History_2 } from 'history';
 import { Href } from 'history';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import { IconType } from '@elastic/eui';
 import { InjectedMetadataParams } from '@kbn/core-injected-metadata-browser-internal';
 import type { InjectedMetadataSetup } from '@kbn/core-injected-metadata-browser';
@@ -445,6 +446,8 @@ export interface CoreStart {
     fatalErrors: FatalErrorsStart;
     // (undocumented)
     http: HttpStart;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     i18n: I18nStart;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "InjectedMetadataStart"
@@ -688,12 +691,7 @@ export interface HttpSetup {
 // @public
 export type HttpStart = HttpSetup;
 
-// @public
-export interface I18nStart {
-    Context: ({ children }: {
-        children: React_2.ReactNode;
-    }) => JSX.Element;
-}
+export { I18nStart }
 
 // Warning: (ae-missing-release-tag) "IAnonymousPaths" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

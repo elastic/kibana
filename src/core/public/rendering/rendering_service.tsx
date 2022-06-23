@@ -11,10 +11,10 @@ import ReactDOM from 'react-dom';
 import { pairwise, startWith } from 'rxjs/operators';
 
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { InternalChromeStart } from '../chrome';
 import type { InternalApplicationStart } from '../application';
 import type { OverlayStart } from '../overlays';
-import type { I18nStart } from '../i18n';
 import { CoreContextProvider } from '../utils';
 import { AppWrapper } from './app_containers';
 
