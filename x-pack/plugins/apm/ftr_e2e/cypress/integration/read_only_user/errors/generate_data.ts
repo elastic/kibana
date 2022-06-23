@@ -40,12 +40,14 @@ export function generateData({ from, to }: { from: number; to: number }) {
     ]);
 }
 
-export function generateMultipleErrorsData({
+export function generateErrors({
   from,
   to,
+  errorCount,
 }: {
   from: number;
   to: number;
+  errorCount: number;
 }) {
   const range = timerange(from, to);
 
@@ -64,7 +66,7 @@ export function generateMultipleErrorsData({
         .duration(1000)
         .success()
         .errors(
-          ...Array(50)
+          ...Array(errorCount)
             .fill(0)
             .map((_, idx) => {
               return opbeansJava

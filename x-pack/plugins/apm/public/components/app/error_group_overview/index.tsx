@@ -37,11 +37,11 @@ type ErrorGroupDetailedStatistics =
 const INITIAL_STATE_MAIN_STATISTICS: {
   errorGroupMainStatistics: ErrorGroupMainStatistics['errorGroups'];
   requestId?: string;
-  currentPageErrorGroupMainStatistics: ErrorGroupMainStatistics['errorGroups'];
+  currentPageGroupIds: ErrorGroupMainStatistics['errorGroups'];
 } = {
   errorGroupMainStatistics: [],
   requestId: undefined,
-  currentPageErrorGroupMainStatistics: [],
+  currentPageGroupIds: [],
 };
 
 const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
@@ -100,17 +100,20 @@ export function ErrorGroupOverview() {
               },
             }
           ).then((response) => {
-            const currentPageErrorGroupMainStatistics = orderBy(
+            const currentPageGroupIds = orderBy(
               response.errorGroups,
               sortField,
               sortDirection
-            ).slice(page * pageSize, (page + 1) * pageSize);
+            )
+              .slice(page * pageSize, (page + 1) * pageSize)
+              .map(({ groupId }) => groupId)
+              .sort();
 
             return {
               // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
               requestId: uuid(),
               errorGroupMainStatistics: response.errorGroups,
-              currentPageErrorGroupMainStatistics,
+              currentPageGroupIds,
             };
           });
         }
@@ -128,23 +131,15 @@ export function ErrorGroupOverview() {
       ]
     );
 
-  const {
-    requestId,
-    errorGroupMainStatistics,
-    currentPageErrorGroupMainStatistics,
-  } = errorGroupListData;
+  const { requestId, errorGroupMainStatistics, currentPageGroupIds } =
+    errorGroupListData;
 
   const {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
     status: errorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      if (
-        requestId &&
-        currentPageErrorGroupMainStatistics.length &&
-        start &&
-        end
-      ) {
+      if (requestId && currentPageGroupIds.length && start && end) {
         return callApmApi(
           'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
@@ -162,11 +157,7 @@ export function ErrorGroupOverview() {
                     : undefined,
               },
               body: {
-                groupIds: JSON.stringify(
-                  currentPageErrorGroupMainStatistics
-                    .map(({ groupId }) => groupId)
-                    .sort()
-                ),
+                groupIds: JSON.stringify(currentPageGroupIds),
               },
             },
           }

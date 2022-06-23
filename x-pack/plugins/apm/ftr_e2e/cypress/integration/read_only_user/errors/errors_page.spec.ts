@@ -8,7 +8,7 @@
 import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
 import { checkA11y } from '../../../support/commands';
-import { generateData, generateMultipleErrorsData } from './generate_data';
+import { generateData, generateErrors } from './generate_data';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
@@ -115,9 +115,10 @@ describe('Check detailed statistics API with multiple errors', () => {
   before(async () => {
     cy.loginAsViewerUser();
     await synthtrace.index(
-      generateMultipleErrorsData({
+      generateErrors({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
+        errorCount: 50,
       })
     );
   });
