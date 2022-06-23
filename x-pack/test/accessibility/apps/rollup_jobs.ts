@@ -30,13 +30,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('create a rollup job wizard', async () => {
-      it('step 1', async () => {
+      it('step 1 - logistics', async () => {
         await testSubjects.click('createRollupJobButton');
         await PageObjects.rollup.verifyStepIsActive(1);
         await a11y.testAppSnapshot();
       });
 
-      it('step 2', async () => {
+      it('step 2 - date histogram', async () => {
         await PageObjects.rollup.addRollupNameandIndexPattern(rollupJobName, 'logstash*');
         await PageObjects.rollup.verifyIndexPatternAccepted();
         await PageObjects.rollup.setIndexName('rollupindex');
@@ -45,26 +45,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
 
-      it('step 3', async () => {
+      it('step 3 - terms', async () => {
         await PageObjects.rollup.setJobInterval('24h');
         await PageObjects.rollup.moveToNextStep(3);
         await PageObjects.rollup.verifyStepIsActive(3);
         await a11y.testAppSnapshot();
       });
 
-      it('step 4', async () => {
+      it('step 4 - histogram', async () => {
         await PageObjects.rollup.moveToNextStep(4);
         await PageObjects.rollup.verifyStepIsActive(4);
         await a11y.testAppSnapshot();
       });
 
-      it('step 5', async () => {
+      it('step 5 - metrics', async () => {
         await PageObjects.rollup.moveToNextStep(5);
         await PageObjects.rollup.verifyStepIsActive(5);
         await a11y.testAppSnapshot();
       });
 
-      it('step 6', async () => {
+      it('step 6 - review and save', async () => {
         await PageObjects.rollup.moveToNextStep(6);
         await PageObjects.rollup.verifyStepIsActive(6);
         await a11y.testAppSnapshot();
