@@ -5,27 +5,28 @@
  * 2.0.
  */
 
-import { FrameworkRequest } from '../../../framework';
-import { savedObjectsToCreate } from '../../../prebuilt_saved_objects/host_risk_score_dashboards';
+import { FrameworkRequest } from '../../framework';
+import * as savedObjectsToCreate from '../prebuilt_templates';
 
-export const createDashboards = async ({
+export const bulkCreateSavedObjects = async ({
   request,
   spaceId,
+  savedObjectTemplate,
 }: {
   request: FrameworkRequest;
-  spaceId: string;
+  spaceId?: string;
+  savedObjectTemplate: string;
 }) => {
   const savedObjectsClient = request.context.core.savedObjects.client;
 
   const regex = /<REPLACE-WITH-SPACE>/g;
-  const savedObjects = JSON.stringify(savedObjectsToCreate);
-  const replacedSO = savedObjects.replace(regex, spaceId);
+  const savedObjects = JSON.stringify(savedObjectsToCreate[savedObjectTemplate]);
+  const replacedSO = spaceId ? savedObjects.replace(regex, spaceId) : savedObjects;
 
   const createSO = await savedObjectsClient.bulkCreate(JSON.parse(replacedSO), {
     overwrite: true,
   });
 
-  // Create new note
   return {
     code: 200,
     message: createSO,

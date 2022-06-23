@@ -6,32 +6,40 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { schema } from '@kbn/config-schema';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
-import { CREATE_DASHBOARD_ROUTE } from '../../../../common/constants';
+import { BULK_CREATE_SAVED_OBJECTS_ROUTE } from '../../../../common/constants';
 
 import { SetupPlugins } from '../../../plugin';
 
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../timeline/utils/common';
-import { createDashboards } from '../../timeline/saved_object/console';
+import { bulkCreateSavedObjects } from '../helpers/bulk_create_saved_objects';
 
-export const createDashboardsRoute = (
+export const createPrebuiltSavedObjectsSchema = {
+  params: schema.object({
+    template_name: schema.string(),
+  }),
+};
+
+export const createPrebuiltSavedObjectsRoute = (
   router: SecuritySolutionPluginRouter,
   security: SetupPlugins['security']
 ) => {
   router.post(
     {
-      path: CREATE_DASHBOARD_ROUTE,
-      validate: false,
+      path: BULK_CREATE_SAVED_OBJECTS_ROUTE,
+      validate: createPrebuiltSavedObjectsSchema,
       options: {
         tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+      const { template_name: templateName } = request.params;
 
       try {
         const securitySolution = await context.securitySolution;
@@ -40,9 +48,10 @@ export const createDashboardsRoute = (
 
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
-        const res = await createDashboards({
+        const res = await bulkCreateSavedObjects({
           request: frameworkRequest,
           spaceId,
+          savedObjectTemplate: templateName,
         });
 
         return response.ok({

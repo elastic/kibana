@@ -118,7 +118,7 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
     setStatus('loading');
 
     try {
-      const res = await importFile(http);
+      const res = await importFile(http, { templateName: 'hostRiskScoreDashboards' });
       const savedObjects = getOr([], ['data', 'createDashboards', 'message', 'saved_objects'], res);
       setResponse(savedObjects);
       setStatus('success');

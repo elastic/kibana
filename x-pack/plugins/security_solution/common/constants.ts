@@ -257,7 +257,10 @@ export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
 export const DEV_TOOL_CONSOLE = `/internal/dev_tool/console/{console_id}` as const;
-export const CREATE_DASHBOARD_ROUTE = '/internal/dev_tool/console/dashboards';
+export const BULK_CREATE_SAVED_OBJECTS_ROUTE =
+  '/internal/saved_objects/_bulk_create/{template_name}';
+export const bulkCreateSavedObjects = (templateName: string) =>
+  `/internal/saved_objects/_bulk_create/${templateName}` as const;
 export const devToolConsoleUrl = (consoleId: string) =>
   `/internal/dev_tool/console/${consoleId}` as const;
 

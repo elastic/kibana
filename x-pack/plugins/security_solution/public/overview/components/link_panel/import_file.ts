@@ -6,10 +6,16 @@
  */
 
 import { HttpStart, SavedObjectsImportResponse } from '@kbn/core/public';
-import { CREATE_DASHBOARD_ROUTE } from '../../../../common/constants';
+import { bulkCreateSavedObjects } from '../../../../common/constants';
 
-export async function importFile(http: HttpStart) {
-  const res = await http.post<SavedObjectsImportResponse>(CREATE_DASHBOARD_ROUTE);
+interface Options {
+  templateName: string;
+}
+
+export async function importFile(http: HttpStart, options: Options) {
+  const res = await http.post<SavedObjectsImportResponse>(
+    bulkCreateSavedObjects(options.templateName)
+  );
 
   return res;
 }

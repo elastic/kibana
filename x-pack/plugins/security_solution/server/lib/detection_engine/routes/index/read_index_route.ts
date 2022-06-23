@@ -50,6 +50,7 @@ export const readIndexRoute = (
           core.elasticsearch.client.asInternalUser,
           index
         );
+
         if (indexExists) {
           let mappingOutdated: boolean | null = null;
           let aliasesOutdated: boolean | null = null;
