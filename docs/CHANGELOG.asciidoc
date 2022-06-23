@@ -59,6 +59,18 @@ When you use the `vis_type_timelion.graphiteUrls` kibana.yml setting, {kib} succ
 To leave your feedback about the removal of `.quandl` and `.graphite`, go to the link:https://discuss.elastic.co/c/elastic-stack/kibana/7[discuss forum].
 ====
       
+[discrete]
+[[breaking-134855]]
+.Makes Osquery All with All base privilege
+[%collapsible]
+====
+*Details* +
+The Osquery {kib} privilege has been updated, so that when the *Privileges for all features level* is set to *All*, this now applies *All* to Osquery privileges as well. Previously, users had to choose the *Customize* option to grant any access to Osquery. For more information, refer to {kibana-pull}130523[#130523].
+
+*Impact* +
+This impacts user roles that have *Privileges for all features* set to *All*. After this update, users with this role will have access to the Osquery page in {kib}. However, to use the Osquery feature fully, these requirements remain the same: users also need Read access to the logs-osquery_manager.result* index and the Osquery Manager integration must be deployed to Elastic Agents.
+====
+
 // end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following: 
