@@ -36,6 +36,7 @@ export const MethodApi: React.FC = () => {
       }
       docsUrl="#"
       type="api"
+      onSubmit={() => null}
     />
   );
 };

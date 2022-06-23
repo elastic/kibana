@@ -13,15 +13,21 @@
 
 import React from 'react';
 
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { useActions, useValues } from 'kea';
+
 import { i18n } from '@kbn/i18n';
+
+import { Status } from '../../../../../common/types/api';
+import { AddConnectorPackageApiLogic } from '../../api/connector_package/add_connector_package_api_logic';
 
 import { NewSearchIndexTemplate } from './new_search_index_template';
 
 export const MethodConnector: React.FC = () => {
+  const { makeRequest } = useActions(AddConnectorPackageApiLogic);
+  const { status } = useValues(AddConnectorPackageApiLogic);
   return (
     <NewSearchIndexTemplate
-      title="Connector"
+      title="Build a custom connector package"
       description={i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.methodConnector.description',
         {
@@ -31,20 +37,9 @@ export const MethodConnector: React.FC = () => {
       )}
       docsUrl="#"
       type="connector"
-    >
-      <EuiPanel
-        color="subdued"
-        style={{
-          minHeight: '30rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <EuiTitle size="s">
-          <h4>Place the connector flow here...</h4>
-        </EuiTitle>
-      </EuiPanel>
-    </NewSearchIndexTemplate>
+      onSubmit={(name) => makeRequest({ indexName: name })}
+      formDisabled={status === Status.LOADING}
+      buttonLoading={status === Status.LOADING}
+    />
   );
 };

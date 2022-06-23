@@ -31,6 +31,7 @@ export const MethodCrawler: React.FC = () => {
       )}
       docsUrl="#"
       type="crawler"
+      onSubmit={() => null}
     >
       <EuiPanel
         color="subdued"
