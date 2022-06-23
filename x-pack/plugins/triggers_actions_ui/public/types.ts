@@ -13,7 +13,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IconType } from '@elastic/eui';
+import type { EuiButtonIconPropsForButton, IconType } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
   ActionType,
@@ -409,6 +409,9 @@ export type AlertTableFlyoutComponent =
   | React.FunctionComponent<AlertsTableFlyoutBaseProps>
   | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
   | null;
+
+export type ActionButtonIcon = EuiButtonIconPropsForButton & { size?: 's' };
+
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
@@ -425,7 +428,7 @@ export interface AlertsTableConfigurationRegistry {
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
   useActionsColumn?: () => {
-    actionsColumn: JSX.Element;
+    actionButtonIcons?: ActionButtonIcon[];
   };
 }
 

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import { ActionButtonIcon } from '../../../../types';
 import {
   getActionsColumnWidth,
   MIN_ACTION_COLUMN_HEADER_WIDTH,
@@ -24,13 +24,12 @@ describe('actions column', () => {
 
   describe('getActionButtonCount', () => {
     it('should return the right number of actions', () => {
-      const emptyActions = <></>;
-      const nonEmptyActions = (
-        <>
-          <span>Element</span>
-          <span>SecondElement</span>
-        </>
-      );
+      const emptyActions = undefined;
+      const nonEmptyActions: ActionButtonIcon[] = [
+        { iconType: 'analyzeEvent', color: 'primary', onClick: () => {} },
+        { iconType: 'invert', color: 'primary', onClick: () => {} },
+      ];
+
       expect(getActionButtonCount(emptyActions, false)).toEqual(0);
       expect(getActionButtonCount(emptyActions, true)).toEqual(1);
       expect(getActionButtonCount(nonEmptyActions, false)).toEqual(2);

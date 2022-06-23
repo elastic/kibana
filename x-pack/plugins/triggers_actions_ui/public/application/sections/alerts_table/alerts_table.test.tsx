@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 import { AlertsTable } from './alerts_table';
-import { AlertsField, AlertsTableFlyoutState } from '../../../types';
+import { ActionButtonIcon, AlertsField, AlertsTableFlyoutState } from '../../../types';
 
 jest.mock('@kbn/data-plugin/public');
 
@@ -144,12 +144,20 @@ describe('AlertsTable', () => {
             ...alertsTableConfiguration,
             useActionsColumn: () => {
               return {
-                actionsColumn: (
-                  <>
-                    <span data-test-subj="testActionColumn" />
-                    <span data-test-subj="testActionColumn2" />
-                  </>
-                ),
+                actionButtonIcons: [
+                  {
+                    iconType: 'analyzeEvent',
+                    color: 'primary',
+                    onClick: () => {},
+                    'data-test-subj': 'testActionColumn',
+                  } as ActionButtonIcon,
+                  {
+                    iconType: 'invert',
+                    color: 'primary',
+                    onClick: () => {},
+                    'data-test-subj': 'testActionColumn2',
+                  } as ActionButtonIcon,
+                ],
               };
             },
           },
@@ -169,12 +177,20 @@ describe('AlertsTable', () => {
             ...alertsTableConfiguration,
             useActionsColumn: () => {
               return {
-                actionsColumn: (
-                  <>
-                    <span data-test-subj="testActionColumn" />
-                    <span data-test-subj="testActionColumn2" />
-                  </>
-                ),
+                actionButtonIcons: [
+                  {
+                    iconType: 'analyzeEvent',
+                    color: 'primary',
+                    onClick: () => {},
+                    'data-test-subj': 'testActionColumn',
+                  } as ActionButtonIcon,
+                  {
+                    iconType: 'invert',
+                    color: 'primary',
+                    onClick: () => {},
+                    'data-test-subj': 'testActionColumn2',
+                  } as ActionButtonIcon,
+                ],
               };
             },
           },
@@ -190,14 +206,6 @@ describe('AlertsTable', () => {
         const customTableProps = {
           ...tableProps,
           showExpandToDetails: false,
-          alertsTableConfiguration: {
-            ...alertsTableConfiguration,
-            useActionsColumn: () => {
-              return {
-                actionsColumn: <></>,
-              };
-            },
-          },
         };
 
         const { queryByTestId } = render(<AlertsTable {...customTableProps} />);

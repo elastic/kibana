@@ -37,6 +37,14 @@ const registerAlertsTableConfiguration = (
       const { header, body, footer } = useToGetInternalFlyout();
       return { header, body, footer };
     },
+    useActionsColumn: () => {
+      return {
+        actionButtonIcons: [
+          { iconType: 'analyzeEvent', color: 'primary', onClick: () => {} },
+          { iconType: 'invert', color: 'primary', onClick: () => {} },
+        ],
+      };
+    },
   });
 };
 
