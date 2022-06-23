@@ -24,7 +24,7 @@ import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
-import { ElasticSearchHit } from '../../../types';
+import { DataTableRecord } from '../../../types';
 
 export function useDiscoverState({
   services,
@@ -35,7 +35,7 @@ export function useDiscoverState({
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
-  setExpandedDoc: (doc?: ElasticSearchHit) => void;
+  setExpandedDoc: (doc?: DataTableRecord) => void;
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns, storage } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
