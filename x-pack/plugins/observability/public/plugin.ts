@@ -282,7 +282,7 @@ export class Plugin
       getSharedUXContext: pluginsStart.sharedUX.getContextServices,
     });
 
-    const o11yAlertsTableConfiguration = async () => {
+    const getAsyncO11yAlertsTableConfiguration = async () => {
       const { getO11yAlertsTableConfiguration } = await import(
         './config/register_alerts_table_configuration'
       );
@@ -290,7 +290,7 @@ export class Plugin
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
-    alertsTableConfigurationRegistry.registerAsync(o11yAlertsTableConfiguration);
+    alertsTableConfigurationRegistry.registerAsync(getAsyncO11yAlertsTableConfiguration);
 
     return {
       navigation: {

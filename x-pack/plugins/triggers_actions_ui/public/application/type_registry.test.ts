@@ -35,7 +35,7 @@ const getTestRuleType = (id?: string, iconClass?: string) => {
 const getAsyncTestRuleType = (id?: string, iconClass?: string) => {
   return () =>
     Promise.resolve({
-      id: id || 'test-async-alert-type',
+      id: id || 'test-async-rule-type',
       description: 'Test description',
       iconClass: iconClass || 'icon',
       documentationUrl: null,
@@ -47,11 +47,11 @@ const getAsyncTestRuleType = (id?: string, iconClass?: string) => {
     });
 };
 
-const getAsyncErrorTestRuleType = (() => {
+const getAsyncErrorTestRuleType = () => {
   return () => {
     throw new Error('one kind of error');
   };
-}) as unknown as () => Promise<RuleTypeModel>;
+};
 
 const getTestActionType = (
   id?: string,
@@ -91,23 +91,22 @@ describe('register()', () => {
 });
 
 describe('registerAsync()', () => {
-  test('able to register alert types', async () => {
+  test('able to register rule types', async () => {
     const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
     await ruleTypeRegistry.registerAsync(getAsyncTestRuleType());
-    expect(ruleTypeRegistry.has('test-async-alert-type')).toEqual(true);
+    expect(ruleTypeRegistry.has('test-async-rule-type')).toEqual(true);
   });
 
-  test('do Not throws error if alert type already registered', async () => {
+  test('do Not throws error if rule type already registered', async () => {
     const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
-    await ruleTypeRegistry.registerAsync(getAsyncTestRuleType('my-async-alert-type-1'));
+    await ruleTypeRegistry.registerAsync(getAsyncTestRuleType('my-async-rule-type-1'));
     expect(
-      async () =>
-        await ruleTypeRegistry.registerAsync(getAsyncTestRuleType('my-async-alert-type-1'))
+      async () => await ruleTypeRegistry.registerAsync(getAsyncTestRuleType('my-async-rule-type-1'))
     ).not.toThrowError();
-    expect(ruleTypeRegistry.has('my-async-alert-type-1')).toEqual(true);
+    expect(ruleTypeRegistry.has('my-async-rule-type-1')).toEqual(true);
   });
 
-  test('throws error if you can not load the alert type', async () => {
+  test('throws error if you can not load the rule type', async () => {
     const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
     expect(
       async () => await ruleTypeRegistry.registerAsync(getAsyncErrorTestRuleType())

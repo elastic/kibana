@@ -27,6 +27,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     ruleTypeRegistry: {
       has: jest.fn(),
       register: jest.fn(),
+      registerAsync: jest.fn(),
       get: jest.fn(),
       list: jest.fn(),
     } as RuleTypeRegistryContract,
@@ -45,12 +46,14 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     actionTypeRegistry: {
       has: jest.fn(),
       register: jest.fn(),
+      registerAsync: jest.fn(),
       get: jest.fn(),
       list: jest.fn(),
     } as ActionTypeRegistryContract,
     alertsTableConfigurationRegistry: {
       has: jest.fn(),
       register: jest.fn(),
+      registerAsync: jest.fn(),
       get: jest.fn(),
       list: jest.fn(),
     } as AlertsTableConfigurationRegistryContract,

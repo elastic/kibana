@@ -11,6 +11,7 @@ const createruleTypeRegistryMock = () => {
   const mocked: jest.Mocked<RuleTypeRegistryContract> = {
     has: jest.fn(),
     register: jest.fn(),
+    registerAsync: jest.fn(),
     get: jest.fn(),
     list: jest.fn(),
   };
