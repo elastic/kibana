@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   useEuiTheme,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
@@ -33,8 +32,7 @@ import {
 } from './text_based_languages_editor.styles';
 import { MemoizedDocumentation } from './documentation';
 import { useDebounceWithOptions } from './helpers';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+import { EditorFooter } from './editor_footer';
 
 interface TextBasedLanguagesEditorProps {
   query: any;
@@ -45,9 +43,9 @@ interface TextBasedLanguagesEditorProps {
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
-const COMMAND_KEY = isMac ? '⌘' : '^';
 const FONT_WIDTH = 8;
 const EDITOR_ONE_LINER_UNUSED_SPACE = 180;
+const EDITOR_ONE_LINER_UNUSED_SPACE_WITH_ERRORS = 220;
 
 const getTextBasedLanguage = (query: any) => {
   return Object.keys(query)[0];
@@ -200,7 +198,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         const text = hasLines ? code.split(/\r|\n/)[0] : code;
         const queryLength = text.length;
-        const charactersAlowed = Math.floor((width - EDITOR_ONE_LINER_UNUSED_SPACE) / FONT_WIDTH);
+        const unusedSpace =
+          errors && errors.length
+            ? EDITOR_ONE_LINER_UNUSED_SPACE_WITH_ERRORS
+            : EDITOR_ONE_LINER_UNUSED_SPACE;
+        const charactersAlowed = Math.floor((width - unusedSpace) / FONT_WIDTH);
         if (queryLength > charactersAlowed) {
           const shortedCode = text.substring(0, charactersAlowed) + '...';
           setCodeOneLiner(shortedCode);
@@ -210,7 +212,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
       }
     },
-    [code, isCompactFocused]
+    [code, errors, isCompactFocused]
   );
 
   const onResize = ({ width }: { width: number }) => {
@@ -350,6 +352,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         {`${lines} lines`}
                       </EuiBadge>
                     )}
+                    {!isCompactFocused && errors && errors.length > 0 && (
+                      <EuiBadge
+                        color={euiTheme.colors.danger}
+                        css={styles.errorsBadge}
+                        iconType="crossInACircleFilled"
+                        iconSide="left"
+                      >
+                        {errors.length}
+                      </EuiBadge>
+                    )}
                     <CodeEditor
                       languageId={languageId(language)}
                       value={codeOneLiner || code}
@@ -368,37 +380,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       }}
                     />
                     {isCompactFocused && !isCodeEditorExpanded && (
-                      <EuiFlexGroup
-                        gutterSize="s"
-                        justifyContent="spaceBetween"
-                        css={styles.bottomContainer}
-                        responsive={false}
-                      >
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="s" color="subdued">
-                            <p>{`${lines} lines`}</p>
-                          </EuiText>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiFlexGroup gutterSize="xs" responsive={false}>
-                            <EuiFlexItem grow={false}>
-                              <EuiText size="s" color="subdued">
-                                <p>
-                                  {i18n.translate(
-                                    'unifiedSearch.query.textBasedLanguagesEditor.runQuery',
-                                    {
-                                      defaultMessage: 'Run query',
-                                    }
-                                  )}
-                                </p>
-                              </EuiText>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiBadge color="default">{`${COMMAND_KEY} + Enter`} </EuiBadge>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
+                      <EditorFooter
+                        lines={lines}
+                        containerCSS={styles.bottomContainer}
+                        errors={errors}
+                      />
                     )}
                   </div>
                 </EuiFlexItem>
@@ -445,34 +431,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         )}
       </EuiFlexGroup>
       {isCodeEditorExpanded && (
-        <EuiFlexGroup
-          gutterSize="s"
-          justifyContent="spaceBetween"
-          css={styles.bottomContainer}
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              <p>{`${lines} lines`}</p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  <p>
-                    {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.runQuery', {
-                      defaultMessage: 'Run query',
-                    })}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="default">{`${COMMAND_KEY} + Enter`} </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EditorFooter lines={lines} containerCSS={styles.bottomContainer} errors={errors} />
       )}
       {isCodeEditorExpanded && (
         <div css={styles.dragResizeContainer} onMouseDown={onMouseDownResizeHandler}>

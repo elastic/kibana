@@ -384,7 +384,7 @@ export const QueryBarTopRow = React.memo(
         defaultMessage: 'Run query',
       });
 
-      const iconDirty = Boolean(isQueryLangSelected) ? 'playFilled' : 'kqlFunction';
+      const iconDirty = Boolean(isQueryLangSelected) ? 'play' : 'kqlFunction';
       const tooltipDirty = Boolean(isQueryLangSelected) ? buttonLabelRun : buttonLabelUpdate;
 
       const button = props.customSubmitButton ? (

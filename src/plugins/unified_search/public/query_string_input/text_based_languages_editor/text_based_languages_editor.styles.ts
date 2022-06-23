@@ -41,6 +41,13 @@ export const textBasedLanguagedEditorStyles = (
     linesBadge: {
       position: 'absolute' as 'absolute', // cast string to type 'absolute',
       zIndex: 1,
+      right: hasErrors ? '64px' : '16px',
+      top: '50%',
+      transform: 'translate(0, -50%)',
+    },
+    errorsBadge: {
+      position: 'absolute' as 'absolute', // cast string to type 'absolute',
+      zIndex: 1,
       right: '16px',
       top: '50%',
       transform: 'translate(0, -50%)',
