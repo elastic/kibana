@@ -15,6 +15,7 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiBadge,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -23,12 +24,14 @@ import {
   HorizontalAlignment,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { GettingStartedSteps } from '../../../shared/getting_started_steps';
 import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
+import { useLocalStorage } from '../../../shared/use_local_storage';
 import { IndicesLogic } from '../../logic/search_indices';
 import { SEARCH_INDEX_OVERVIEW_PATH, NEW_INDEX_PATH } from '../../routes';
 import { SearchIndex } from '../../types';
@@ -53,6 +56,11 @@ export const baseBreadcrumbs = [
 export const SearchIndices: React.FC = () => {
   const { fetchSearchIndices, onPaginate } = useActions(IndicesLogic);
   const { indices, meta } = useValues(IndicesLogic);
+
+  const [calloutDismissed, setCalloutDismissed] = useLocalStorage<boolean>(
+    'enterprise-search-indices-callout-dismissed',
+    false
+  );
 
   useEffect(() => {
     fetchSearchIndices();
@@ -88,7 +96,7 @@ export const SearchIndices: React.FC = () => {
     {
       field: 'health',
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.health.columnTitle', {
-        defaultMessage: 'Health',
+        defaultMessage: 'Index health',
       }),
       sortable: true,
       truncateText: true,
@@ -211,11 +219,46 @@ export const SearchIndices: React.FC = () => {
               </h2>
             </EuiTitle>
             <EuiSpacer size="l" />
+            {!calloutDismissed && (
+              <EuiCallOut
+                size="m"
+                title={i18n.translate('xpack.enterpriseSearch.content.callout.title', {
+                  defaultMessage: 'Introducing Elasticsearch indices in Enterprise Search',
+                })}
+                iconType="iInCircle"
+              >
+                <p>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.indices.callout.text"
+                    defaultMessage="Your Elasticsearch indices are now front and center in Enterprise Search. You can create new indices and build search experiences with them directly. To learn more about how to use Elasticsearch indices in Enterprise Search {docLink}"
+                    values={{
+                      docLink: (
+                        <EuiLinkTo data-test-subj="search-index-link" to="#">
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.indices.callout.docLink',
+                            {
+                              defaultMessage: 'read the documentation',
+                            }
+                          )}
+                        </EuiLinkTo>
+                      ),
+                    }}
+                  />
+                </p>
+                <EuiButton fill onClick={() => setCalloutDismissed(true)}>
+                  {i18n.translate('xpack.enterpriseSearch.content.callout.dismissButton', {
+                    defaultMessage: 'Dismiss',
+                  })}
+                </EuiButton>
+              </EuiCallOut>
+            )}
+            <EuiSpacer size="l" />
             <EuiBasicTable
               items={indices}
               columns={columns}
               onChange={handlePageChange(onPaginate)}
               pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
+              tableLayout="auto"
             />
           </>
         ) : (
