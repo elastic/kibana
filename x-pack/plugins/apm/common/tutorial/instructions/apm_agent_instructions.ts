@@ -614,7 +614,7 @@ export const createOpenTelemetryAgentInstructions = (
   {
     title: i18n.translate('xpack.apm.tutorial.otel.configureAgent.title', {
       defaultMessage:
-        'Start your application setting the OpenTelemetry configuration',
+        'Configure OpenTelemetry in your application',
     }),
     textPre: i18n.translate('xpack.apm.tutorial.otel.configureAgent.textPre', {
       defaultMessage:
