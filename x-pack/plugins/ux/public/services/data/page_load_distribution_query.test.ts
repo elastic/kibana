@@ -1,0 +1,22 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { pageLoadDistributionQuery } from './page_load_distribution_query';
+
+describe('page load distribution query', () => {
+  it('creates expected query', async () => {
+    expect(
+      pageLoadDistributionQuery({
+        uiFilters: { environment: 'staging' },
+        minPercentile: '0',
+        maxPercentile: '99',
+        start: 0,
+        end: 50000,
+      }).params
+    ).toMatchSnapshot();
+  });
+});
