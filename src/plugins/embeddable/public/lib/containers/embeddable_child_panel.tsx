@@ -11,7 +11,7 @@ import React from 'react';
 
 import { EuiLoadingChart } from '@elastic/eui';
 import { Subscription } from 'rxjs';
-import { distinct, tap, map } from 'rxjs/operators';
+import { distinct, map } from 'rxjs/operators';
 import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
 import { IContainer } from './i_container';
 import { EmbeddableStart } from '../../plugin';
@@ -82,6 +82,9 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
       .pipe(
         // Map loaded event properties
         map((output) => {
+          if (output.loading === true) {
+            loadingStartTime = performance.now();
+          }
           return {
             id: this.embeddable.id,
             status: this.getEventStatus(output),
@@ -89,20 +92,14 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
           };
         }),
         // Dedupe
-        distinct(output => output.id + output.status + !!output.error),
-        // Record start time if loading === true
-        tap((output) => {
-          if (output.status === 'loading') {
-            loadingStartTime = performance.now();
-          }
-        }),
+        distinct((output) => loadingStartTime + output.id + output.status + !!output.error),
         // Map loaded event properties
         map((output): EmbeddablePhaseEvent => {
           return {
             ...output,
             timeToEvent: performance.now() - loadingStartTime,
           };
-        }),
+        })
       )
       .subscribe((statusOutput) => {
         if (this.props.onPanelStatusChange) {

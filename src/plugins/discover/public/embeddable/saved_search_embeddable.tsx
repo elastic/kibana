@@ -216,8 +216,6 @@ export class SavedSearchEmbeddable
 
       this.updateOutput({
         ...this.getOutput(),
-        // TODO: rendering happens later - separate the rendered and loading events
-        rendered: true,
         loading: false,
       });
 
@@ -228,10 +226,8 @@ export class SavedSearchEmbeddable
       this.searchProps!.isLoading = false;
     } catch (error) {
       if (!this.destroyed) {
-        // TODO: rendering happens later - separate the rendered and loading events
         this.updateOutput({
           ...this.getOutput(),
-          rendered: true,
           loading: false,
           error,
         });
@@ -472,6 +468,11 @@ export class SavedSearchEmbeddable
         domNode
       );
     }
+
+    this.updateOutput({
+      ...this.getOutput(),
+      rendered: true,
+    });
   }
 
   public reload() {
