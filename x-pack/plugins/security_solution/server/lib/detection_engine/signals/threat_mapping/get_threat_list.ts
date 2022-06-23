@@ -13,7 +13,6 @@ import {
   ThreatListDoc,
   ThreatListItem,
   GetSortForThreatList,
-  SortForThreatList,
 } from './types';
 
 /**
