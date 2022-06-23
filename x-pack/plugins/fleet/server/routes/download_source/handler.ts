@@ -79,7 +79,11 @@ export const putDownloadSourcesHandler: RequestHandler<
     if (downloadSource.is_default) {
       await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
     } else {
-      await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, downloadSource.id);
+      await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(
+        soClient,
+        esClient,
+        downloadSource.id
+      );
     }
 
     const body: PutDownloadSourceResponse = {
