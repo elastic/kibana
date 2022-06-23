@@ -36,8 +36,6 @@ const onChange = jest.fn();
 const onBlur = jest.fn();
 
 describe('<ScriptRecorderFields />', () => {
-  const testScript = 'step(() => {})';
-  let file: File;
   const WrappedComponent = ({
     script = '',
     fileName = '',
@@ -66,7 +64,6 @@ describe('<ScriptRecorderFields />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    file = new File([testScript], 'samplescript.js', { type: 'text/javascript' });
   });
 
   it('renders ScriptRecorderFields as the default tab', () => {

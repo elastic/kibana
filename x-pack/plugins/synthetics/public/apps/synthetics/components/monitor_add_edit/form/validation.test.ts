@@ -66,7 +66,7 @@ describe('[Monitor Management] validation', () => {
       const validators = validate[DataStream.BROWSER];
       const keysToValidate = [ConfigKey.SCHEDULE, ConfigKey.TIMEOUT, configKey];
       const validatorFns = keysToValidate.map((key) => validators[key]);
-      const result = validatorFns.map((fn) => fn?.(browserProps) ?? true);
+      const result = validatorFns.map((fn) => fn?.(browserProps as Partial<MonitorFields>) ?? true);
 
       expect(result).not.toEqual(expect.arrayContaining([true]));
     });

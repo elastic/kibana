@@ -63,9 +63,10 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     },
 
     async deleteMonitors() {
-      // const isSuccessful: boolean = false;
       while (true) {
-        if ((await page.$(this.byTestId('syntheticsMonitorListActions'))) === null) break;
+        if ((await page.$(this.byTestId('syntheticsMonitorListActions'))) === null) {
+          return true;
+        }
         await page.click(this.byTestId('syntheticsMonitorListActions'), { delay: 800 });
         await page.click('text=delete', { delay: 800 });
         await page.waitForSelector('[data-test-subj="confirmModalTitleText"]');
@@ -122,7 +123,6 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       monitorType: FormMonitorType
     ) {
       await page.click('text="Advanced options"');
-      await this.findByText(monitorType);
 
       for (let i = 0; i < monitorConfig.length; i++) {
         const [selector, expected] = monitorConfig[i];

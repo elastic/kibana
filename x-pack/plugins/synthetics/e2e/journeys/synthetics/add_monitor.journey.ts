@@ -150,10 +150,9 @@ const createMonitorJourney = ({
 
       before(async () => {
         await syntheticsApp.waitForLoadingToFinish();
-      });
-
-      after(async () => {
         await syntheticsApp.navigateToMonitorManagement();
+        const isSuccessful = await syntheticsApp.deleteMonitors();
+        expect(isSuccessful).toBeTruthy();
       });
 
       step('Go to add monitor', async () => {
@@ -180,7 +179,7 @@ const createMonitorJourney = ({
         expect(hasFailure).toBeFalsy();
       });
 
-      step('edit ${monitorType}', async () => {
+      step(`edit ${monitorName}`, async () => {
         await syntheticsApp.navigateToEditMonitor();
         await syntheticsApp.findByText(monitorListDetails.location);
         const hasFailure = await syntheticsApp.findEditMonitorConfiguration(

@@ -273,7 +273,7 @@ describe('format', () => {
         'throttling.upload_speed': '3',
         timeout: '16',
         type: 'browser',
-        'url.port': undefined,
+        'url.port': null,
         urls: '',
       });
     }

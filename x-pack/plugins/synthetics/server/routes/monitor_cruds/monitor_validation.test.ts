@@ -75,6 +75,7 @@ describe('validateMonitor', () => {
         },
       ],
       [ConfigKey.NAMESPACE]: 'testnamespace',
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
     };
     testMetaData = {
       is_tls_enabled: false,
