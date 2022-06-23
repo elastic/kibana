@@ -21,3 +21,36 @@ export const SEARCH_GROUP_GROUP_BY = i18n.translate(
 export const SEARCH_GROUP_SORT_BY = i18n.translate('xpack.kubernetesSecurity.searchGroup.sortBy', {
   defaultMessage: 'Sort by',
 });
+
+export const TREE_VIEW_LOGICAL_VIEW = i18n.translate(
+  'xpack.kubernetesSecurity.treeView.logicalView',
+  {
+    defaultMessage: 'Logical view',
+  }
+);
+
+export const TREE_VIEW_INFRASTRUCTURE_VIEW = i18n.translate(
+  'xpack.kubernetesSecurity.treeView.infrastructureView',
+  {
+    defaultMessage: 'Infrastructure view',
+  }
+);
+
+export const TREE_VIEW_SWITCHER_LEGEND = i18n.translate(
+  'xpack.kubernetesSecurity.treeView.infrastructureView',
+  {
+    defaultMessage: 'You can switch between the Logical and Infrastructure view',
+  }
+);
+
+export const TREE_NAVIGATION_LOADING = i18n.translate(
+  'xpack.kubernetesSecurity.treeNavigation.loading',
+  {
+    defaultMessage: 'Loading',
+  }
+);
+export const TREE_NAVIGATION_SHOW_MORE = (name: string) =>
+  i18n.translate('xpack.kubernetesSecurity.treeNavigation.loadMore', {
+    values: { name },
+    defaultMessage: 'Show more {name}',
+  });
