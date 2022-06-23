@@ -61,6 +61,7 @@ export class DataViewsPublicPlugin
     );
 
     return new DataViewsServicePublic({
+      http,
       hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),

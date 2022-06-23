@@ -8,14 +8,14 @@
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService } from '../../common';
+import { IRouter, StartServicesAccessor, SavedObjectsClientContract } from '@kbn/core/server';
+import { DataViewsServiceServer } from '..';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import { handleErrors } from './util/handle_errors';
 import { SERVICE_PATH, SERVICE_PATH_LEGACY, SERVICE_KEY, SERVICE_KEY_LEGACY } from '../constants';
 
 interface GetDefaultArgs {
-  dataViewsService: DataViewsService;
+  dataViewsService: DataViewsServiceServer;
   usageCollection?: UsageCounter;
   counterName: string;
 }
@@ -26,11 +26,12 @@ export const getDefault = async ({
   counterName,
 }: GetDefaultArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  return dataViewsService.getDefaultId();
+  const dataView = await dataViewsService.getDefaultDataView();
+  return dataView?.id;
 };
 
 interface SetDefaultArgs {
-  dataViewsService: DataViewsService;
+  dataViewsService: DataViewsServiceServer;
   usageCollection?: UsageCounter;
   counterName: string;
   newDefaultId: string;
@@ -64,10 +65,12 @@ const manageDefaultIndexPatternRoutesFactory =
         validate: {},
       },
       handleErrors(async (ctx, req, res) => {
-        const core = await ctx.core;
-        const savedObjectsClient = core.savedObjects.client;
-        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-        const [, , { dataViewsServiceFactory }] = await getStartServices();
+        const [core, , { dataViewsServiceFactory }] = await getStartServices();
+        // const core = await ctx.core;
+        const savedObjectsClient =
+          core.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
+        const elasticsearchClient = core.elasticsearch.client.asInternalUser;
+
         const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,

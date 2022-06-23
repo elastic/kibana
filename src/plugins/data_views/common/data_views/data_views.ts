@@ -11,7 +11,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE, DEFAULT_ASSETS_TO_IGNORE } from '..';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '..';
 import { SavedObjectsClientCommon } from '../types';
 
 import { createDataViewCache } from '.';
@@ -256,7 +256,7 @@ export interface DataViewsServicePublicMethods {
  * @public
  */
 export class DataViewsService {
-  private config: UiSettingsCommon;
+  protected config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientCommon;
   private savedObjectsCache?: Array<SavedObject<DataViewSavedObjectAttrs>> | null;
   private apiClient: IDataViewsApiClient;
@@ -937,44 +937,6 @@ export class DataViewsService {
     }
     this.dataViewCache.clear(indexPatternId);
     return this.savedObjectsClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, indexPatternId);
-  }
-
-  /**
-   * Returns the default data view as an object.
-   * If no default is found, or it is missing
-   * another data view is selected as default and returned.
-   * If no possible data view found to become a default returns null.
-   *
-   * @returns default data view
-   */
-  async getDefaultDataView(): Promise<DataView | null> {
-    const patterns = await this.getIdsWithTitle();
-    let defaultId: string | undefined = await this.config.get('defaultIndex');
-    const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
-
-    if (defaultId && !exists) {
-      await this.config.remove('defaultIndex');
-      defaultId = undefined;
-    }
-
-    if (!defaultId && patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
-      // try to set first user created data view as default,
-      // otherwise fallback to any data view
-      const userDataViews = patterns.filter(
-        (pattern) =>
-          pattern.title !== DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN &&
-          pattern.title !== DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN
-      );
-
-      defaultId = userDataViews[0]?.id ?? patterns[0].id;
-      await this.config.set('defaultIndex', defaultId);
-    }
-
-    if (defaultId) {
-      return this.get(defaultId);
-    } else {
-      return null;
-    }
   }
 }
 

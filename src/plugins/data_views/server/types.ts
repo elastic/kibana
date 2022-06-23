@@ -15,7 +15,7 @@ import {
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { DataViewsService } from '../common';
+import { DataViewsServiceServer } from '.';
 
 /**
  * Data Views service factory
@@ -37,7 +37,7 @@ type ServiceFactory = (
    * Ignore capabilities
    */
   byPassCapabilities?: boolean
-) => Promise<DataViewsService>;
+) => Promise<DataViewsServiceServer>;
 
 /**
  * DataViews server plugin start api
