@@ -58,11 +58,14 @@ describe('TelemetryPlugin', () => {
       });
     });
     describe('EBT shipper registration', () => {
-      it('registers the UI telemetry shipper', () => {
+      it('registers the UI telemetry shipper', async () => {
         const initializerContext = coreMock.createPluginInitializerContext();
         const coreSetupMock = coreMock.createSetup();
 
         new TelemetryPlugin(initializerContext).setup(coreSetupMock, { screenshotMode, home });
+
+        // Await next tick for the lazy loading of the shipper to complete
+        await new Promise((resolve) => process.nextTick(resolve));
 
         expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
           ElasticV3BrowserShipper,
@@ -70,11 +73,14 @@ describe('TelemetryPlugin', () => {
         );
       });
 
-      it('registers the UI telemetry shipper (pointing to prod)', () => {
+      it('registers the UI telemetry shipper (pointing to prod)', async () => {
         const initializerContext = coreMock.createPluginInitializerContext({ sendUsageTo: 'prod' });
         const coreSetupMock = coreMock.createSetup();
 
         new TelemetryPlugin(initializerContext).setup(coreSetupMock, { screenshotMode, home });
+
+        // Await next tick for the lazy loading of the shipper to complete
+        await new Promise((resolve) => process.nextTick(resolve));
 
         expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
           ElasticV3BrowserShipper,

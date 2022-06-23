@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
-
 import type {
   Plugin,
   CoreStart,
@@ -28,11 +26,6 @@ import type {
   TelemetrySavedObjectAttributes,
   TelemetrySavedObject,
 } from '../common/telemetry_config/types';
-import {
-  getTelemetryAllowChangingOptInStatus,
-  getTelemetryOptIn,
-  getTelemetrySendUsageFrom,
-} from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
@@ -155,10 +148,12 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       telemetryConstants = getTelemetryConstants(docLinks);
     });
 
-    analytics.registerShipper(ElasticV3BrowserShipper, {
-      channelName: 'kibana-browser',
-      version: currentKibanaVersion,
-      sendTo: config.sendUsageTo === 'prod' ? 'production' : 'staging',
+    import('@kbn/analytics-shippers-elastic-v3-browser').then(({ ElasticV3BrowserShipper }) => {
+      analytics.registerShipper(ElasticV3BrowserShipper, {
+        channelName: 'kibana-browser',
+        version: currentKibanaVersion,
+        sendTo: config.sendUsageTo === 'prod' ? 'production' : 'staging',
+      });
     });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
@@ -320,6 +315,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const configTelemetryAllowChangingOptInStatus = this.config.allowChangingOptInStatus;
 
     const currentKibanaVersion = this.currentKibanaVersion;
+
+    const { getTelemetryAllowChangingOptInStatus, getTelemetryOptIn, getTelemetrySendUsageFrom } =
+      await import('../common/telemetry_config');
 
     const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
       configTelemetryAllowChangingOptInStatus,
