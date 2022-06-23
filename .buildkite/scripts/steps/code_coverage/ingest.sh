@@ -102,7 +102,7 @@ annotateForStaticSite() {
 
   content=$(
     cat <<-EOF
-### Browse the the Code Coverage Static Site
+### Browse the Code Coverage Static Site
 
 _Links are pinned to the current build number._
 
