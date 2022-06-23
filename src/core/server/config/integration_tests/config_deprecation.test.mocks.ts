@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+
 export const mockLoggingSystem = loggingSystemMock.create();
 mockLoggingSystem.asLoggerFactory.mockImplementation(() => mockLoggingSystem);
-jest.doMock('../../logging/logging_system', () => ({
-  LoggingSystem: jest.fn(() => mockLoggingSystem),
-}));
+jest.doMock('@kbn/core-logging-server-internal', () => {
+  const realModule = jest.requireActual('@kbn/core-logging-server-internal');
+  return {
+    ...realModule,
+    LoggingSystem: jest.fn(() => mockLoggingSystem),
+  };
+});
