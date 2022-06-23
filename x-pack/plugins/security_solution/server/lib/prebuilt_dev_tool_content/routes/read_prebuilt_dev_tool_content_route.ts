@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { CustomHttpResponseOptions, KibanaResponseFactory } from '@kbn/core/server';
-import { DEV_TOOL_CONSOLE } from '../../../../common/constants';
+import { DEV_TOOL_CONTENT } from '../../../../common/constants';
 
 import { SecuritySolutionPluginRouter } from '../../../types';
 import { mappings } from '../mappings';
@@ -63,10 +63,10 @@ const ReadConsoleRequestSchema = {
   }),
 };
 
-export const readConsoleRoute = (router: SecuritySolutionPluginRouter) => {
+export const readPrebuiltDevToolContentRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
-      path: DEV_TOOL_CONSOLE,
+      path: DEV_TOOL_CONTENT,
       validate: ReadConsoleRequestSchema,
       options: {
         tags: ['access:securitySolution'],

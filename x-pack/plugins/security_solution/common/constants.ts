@@ -256,13 +256,13 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
-export const DEV_TOOL_CONSOLE = `/internal/dev_tool/console/{console_id}` as const;
-export const BULK_CREATE_SAVED_OBJECTS_ROUTE =
-  '/internal/saved_objects/_bulk_create/{template_name}';
-export const bulkCreateSavedObjects = (templateName: string) =>
-  `/internal/saved_objects/_bulk_create/${templateName}` as const;
+export const DEV_TOOL_CONTENT = `/internal/prebuilt_content/dev_tool/{console_id}` as const;
 export const devToolConsoleUrl = (consoleId: string) =>
-  `/internal/dev_tool/console/${consoleId}` as const;
+  `/internal/prebuilt_content/dev_tool/${consoleId}` as const;
+export const BULK_CREATE_SAVED_OBJECTS_ROUTE =
+  '/internal/prebuilt_content/saved_objects/_bulk_create/{template_name}';
+export const bulkCreateSavedObjects = (templateName: string) =>
+  `/internal/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
 
 /**
  * Internal detection engine routes
