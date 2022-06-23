@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useLensFormulaHelper } from './use_lens_formula_helper';
 import { ALL_VALUES_SELECTED } from '../configurations/constants/url_constants';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import {
@@ -20,14 +20,12 @@ import {
   useSeriesStorage,
 } from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
-
 import { ReportViewType, SeriesUrl, UrlFilter } from '../types';
 import { DataViewState, useAppDataViewContext } from './use_app_data_view';
 import { useTheme } from '../../../../hooks/use_theme';
 import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
 import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
 import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
-import { ObservabilityPublicPluginsStart, useFetcher } from '../../../..';
 
 export const getFiltersFromDefs = (
   reportDefinitions: SeriesUrl['reportDefinitions'] | SeriesUrl['textReportDefinitions']
@@ -103,22 +101,14 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
 
   const theme = useTheme();
 
-  const {
-    services: { lens },
-  } = useKibana<ObservabilityPublicPluginsStart>();
-
-  const { data: lensHelper } = useFetcher(async () => {
-    return lens.stateHelperApi();
-  }, [lens]);
-
-  console.log(lensHelper.formula.insertOrReplaceFormulaColumn());
+  const lensFormulaHelper = useLensFormulaHelper();
 
   return useMemo(() => {
     // we only use the data from url to apply, since that gets updated to apply changes
     const allSeriesT: AllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
     const reportTypeT: ReportViewType = storage.get(reportTypeKey) as ReportViewType;
 
-    if (isEmpty(dataViews) || isEmpty(allSeriesT) || !reportTypeT) {
+    if (isEmpty(dataViews) || isEmpty(allSeriesT) || !reportTypeT || !lensFormulaHelper) {
       return null;
     }
     const layerConfigs = getLayerConfigs(
@@ -139,10 +129,10 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
       return lensAttributes.getJSON(lastRefresh);
     }
 
-    const lensAttributes = new LensAttributes(layerConfigs, reportTypeT);
+    const lensAttributes = new LensAttributes(layerConfigs, reportTypeT, lensFormulaHelper);
 
     return lensAttributes.getJSON(lastRefresh);
     // we also want to check the state on allSeries changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViews, reportType, storage, theme, lastRefresh, allSeries]);
+  }, [dataViews, reportType, storage, theme, lastRefresh, allSeries, lensFormulaHelper]);
 };
