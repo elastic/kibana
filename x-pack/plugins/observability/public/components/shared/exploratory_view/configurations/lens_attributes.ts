@@ -29,6 +29,7 @@ import {
   TypedLensByValueInput,
   XYCurveType,
   XYState,
+  YAxisMode,
   FormulaPublicApi,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -910,8 +911,8 @@ export class LensAttributes {
             this.layerConfigs[0].indexPattern.fieldFormatMap[
               this.layerConfigs[0].selectedMetricField
             ]?.id
-              ? 'left'
-              : 'right',
+              ? ('left' as YAxisMode)
+              : ('right' as YAxisMode),
         },
       ],
       xAccessor: `x-axis-column-layer${index}`,
