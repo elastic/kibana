@@ -55,7 +55,6 @@ import {
   obsOnlyRead,
   obsSecRead,
   secOnly,
-  secOnlyDelete,
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
@@ -508,14 +507,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      for (const user of [
-        globalRead,
-        secOnlyRead,
-        secOnlyDelete,
-        obsOnlyRead,
-        obsSecRead,
-        noKibanaPrivileges,
-      ]) {
+      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
         it(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should not create a comment`, async () => {

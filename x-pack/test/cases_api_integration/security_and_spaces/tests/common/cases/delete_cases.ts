@@ -31,7 +31,6 @@ import {
   noKibanaPrivileges,
   obsOnly,
   superUser,
-  secOnlyDelete,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -101,28 +100,24 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('rbac', () => {
-      for (const user of [secOnly, secOnlyDelete]) {
-        it(`User ${
-          user.username
-        } with role(s) ${user.roles.join()} - should delete a case`, async () => {
-          const postedCase = await createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-            200,
-            {
-              user: superUser,
-              space: 'space1',
-            }
-          );
+      it('should delete a case', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          {
+            user: secOnly,
+            space: 'space1',
+          }
+        );
 
-          await deleteCases({
-            supertest: supertestWithoutAuth,
-            caseIDs: [postedCase.id],
-            expectedHttpCode: 204,
-            auth: { user, space: 'space1' },
-          });
+        await deleteCases({
+          supertest: supertestWithoutAuth,
+          caseIDs: [postedCase.id],
+          expectedHttpCode: 204,
+          auth: { user: secOnly, space: 'space1' },
         });
-      }
+      });
 
       it('User: security solution only - should NOT delete a case of different owner', async () => {
         const postedCase = await createCase(
