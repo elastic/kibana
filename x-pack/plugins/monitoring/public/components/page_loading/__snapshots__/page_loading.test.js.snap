@@ -9,7 +9,7 @@ exports[`PageLoading should show a simple page loading component 1`] = `
     class="euiPageBody euiPageBody--borderRadiusNone"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter monNoData__content"
+      class="euiPanel euiPanel--plain euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter monNoData__content css-1nsffwn-euiPanel-grow-m-l-plain-hasShadow"
       role="main"
     >
       <div
