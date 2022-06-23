@@ -10,17 +10,14 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { Actions } from './rule_actions';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-// import { useKibana } from '../../../../common/lib/kibana';
-// import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { ActionConnector, ActionTypeModel } from '../../../../types';
-// import { coreMock } from '@kbn/core/public/mocks';
+import * as useFetchRuleActionConnectorsHook from '../../../hooks/use_fetch_rule_action_connectors';
 
-// const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const actionTypeRegistry = actionTypeRegistryMock.create();
-jest.mock('../../../hooks/use_fetch_rule_action_connectors', () => ({
-  useFetchRuleActionConnectors: jest.fn(),
-}));
-
+const mockedUseFetchRuleActionConnectorsHook = jest.spyOn(
+  useFetchRuleActionConnectorsHook,
+  'useFetchRuleActionConnectors'
+);
 describe('Actions', () => {
   async function setup() {
     const ruleActions = [
@@ -35,87 +32,32 @@ describe('Actions', () => {
         actionTypeId: '.slack',
       },
     ];
-    const { useFetchRuleActionConnectors } = jest.requireMock(
-      '../../../hooks/use_fetch_rule_action_connectors'
-    );
+
+    mockedUseFetchRuleActionConnectorsHook.mockReturnValue({
+      isLoadingActionConnectors: false,
+      actionConnectors: [
+        {
+          id: 'f57cabc0-e660-11ec-8241-7deb55b17f15',
+          name: 'logs',
+          config: {},
+          actionTypeId: '.server-log',
+        },
+        {
+          id: '05b7ab30-e683-11ec-843b-213c67313f8c',
+          name: 'Slack',
+          actionTypeId: '.slack',
+        },
+      ] as Array<ActionConnector<Record<string, unknown>>>,
+      errorActionConnectors: undefined,
+      reloadRuleActionConnectors: jest.fn(),
+    });
+
     actionTypeRegistry.list.mockReturnValue([
       { id: '.server-log', iconClass: 'logsApp' },
       { id: '.slack', iconClass: 'logoSlack' },
       { id: '.email', iconClass: 'email' },
       { id: '.index', iconClass: 'indexOpen' },
     ] as ActionTypeModel[]);
-    // jest.mock('../../../lib/action_connector_api', () => ({
-    //   loadAllActions: jest.fn().mockReturnValue([
-    //     {
-    //       id: 'a0d2f6c0-e682-11ec-843b-213c67313f8c',
-    //       name: 'Email',
-    //       config: {},
-    //       actionTypeId: '.email',
-    //     },
-    //     {
-    //       id: 'f57cabc0-e660-11ec-8241-7deb55b17f15',
-    //       name: 'logs',
-    //       config: {},
-    //       actionTypeId: '.server-log',
-    //     },
-    //     {
-    //       id: '05b7ab30-e683-11ec-843b-213c67313f8c',
-    //       name: 'Slack',
-    //       actionTypeId: '.slack',
-    //     },
-    //   ]),
-    // }));
-    useFetchRuleActionConnectors.mockResolvedValueOnce(
-      jest.fn(() => ({
-        isLoadingActionConnectors: false,
-        actionConnectors: [
-          {
-            id: 'a0d2f6c0-e682-11ec-843b-213c67313f8c',
-            name: 'Email',
-            config: {},
-            actionTypeId: '.email',
-          },
-          {
-            id: 'f57cabc0-e660-11ec-8241-7deb55b17f15',
-            name: 'logs',
-            config: {},
-            actionTypeId: '.server-log',
-          },
-          {
-            id: '05b7ab30-e683-11ec-843b-213c67313f8c',
-            name: 'Slack',
-            actionTypeId: '.slack',
-          },
-        ] as Array<ActionConnector<Record<string, unknown>>>,
-        errorActionConnectors: undefined,
-      }))
-    );
-    // jest.mock('../../../hooks/use_fetch_rule_action_connectors', () => ({
-    //   __esModule: true,
-    //   useFetchRuleActionConnectors: jest.fn(() => ({
-    //     isLoadingActionConnectors: false,
-    //     actionConnectors: [
-    //       {
-    //         id: 'a0d2f6c0-e682-11ec-843b-213c67313f8c',
-    //         name: 'Email',
-    //         config: {},
-    //         actionTypeId: '.email',
-    //       },
-    //       {
-    //         id: 'f57cabc0-e660-11ec-8241-7deb55b17f15',
-    //         name: 'logs',
-    //         config: {},
-    //         actionTypeId: '.server-log',
-    //       },
-    //       {
-    //         id: '05b7ab30-e683-11ec-843b-213c67313f8c',
-    //         name: 'Slack',
-    //         actionTypeId: '.slack',
-    //       },
-    //     ] as Array<ActionConnector<Record<string, unknown>>>,
-    //     errorActionConnectors: undefined,
-    //   })),
-    // }));
 
     const wrapper = mount(
       <Actions ruleActions={ruleActions} actionTypeRegistry={actionTypeRegistry} />
@@ -129,7 +71,7 @@ describe('Actions', () => {
 
   it("renders action connector icons for user's selected rule actions", async () => {
     const wrapper = await setup();
-    console.log(wrapper.debug());
+    expect(mockedUseFetchRuleActionConnectorsHook).toHaveBeenCalledTimes(1);
     expect(wrapper.find('[data-euiicon-type]').length).toBe(2);
     expect(wrapper.find('[data-euiicon-type="logsApp"]').length).toBe(1);
     expect(wrapper.find('[data-euiicon-type="logoSlack"]').length).toBe(1);

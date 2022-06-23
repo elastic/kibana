@@ -30,6 +30,7 @@ export function useFetchRuleActionConnectors({ ruleActions }: FetchRuleActionCon
     http,
     notifications: { toasts },
   } = useKibana().services;
+
   const [actionConnectors, setActionConnector] = useState<FetchActionConnectors>({
     isLoadingActionConnectors: true,
     actionConnectors: [] as Array<ActionConnector<Record<string, unknown>>>,
