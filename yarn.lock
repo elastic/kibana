@@ -3255,10 +3255,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kbn-ci-stats-performance-metrics@link:bazel-bin/packages/kbn-kbn-ci-stats-performance-metrics":
-  version "0.0.0"
-  uid ""
-
 "@kbn/kibana-json-schema@link:bazel-bin/packages/kbn-kibana-json-schema":
   version "0.0.0"
   uid ""
