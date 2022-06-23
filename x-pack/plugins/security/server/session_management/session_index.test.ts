@@ -86,6 +86,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
     });
 
@@ -103,6 +104,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
         getSessionIndexSettings({ indexName, aliasName })
       );
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
     });
 
     it('deletes legacy & modern index templates if needed and creates index if it does not exist', async () => {
@@ -122,6 +124,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
         getSessionIndexSettings({ indexName, aliasName })
       );
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
     });
 
     it('deletes modern index template if needed and creates index if it does not exist', async () => {
@@ -136,9 +139,30 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.deleteIndexTemplate).toHaveBeenCalledWith({
         name: indexTemplateName,
       });
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
         getSessionIndexSettings({ indexName, aliasName })
       );
+    });
+
+    it('attaches an alias to the index if the index already exists', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(true);
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
+
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
     });
 
     it('creates index if it does not exist', async () => {
@@ -151,6 +175,7 @@ describe('Session index', () => {
       assertExistenceChecksPerformed();
       expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
         getSessionIndexSettings({ indexName, aliasName })
       );
@@ -869,9 +894,11 @@ describe('Session index', () => {
       let callCount = 0;
       mockElasticsearchClient.create.mockResponseImplementation((req, opts) => {
         callCount++;
+        // Fail the first create attempt because the index/alias doesn't exist
         if (callCount === 1) {
           return { statusCode: 404 };
         }
+        // Pass the second create attempt
         return {
           body: {
             _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
@@ -903,6 +930,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
 
       expect(mockElasticsearchClient.create).toHaveBeenCalledTimes(2);
       expect(mockElasticsearchClient.create).toHaveBeenNthCalledWith(
@@ -959,6 +987,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.indices.exists).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
 
       expect(mockElasticsearchClient.create).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.create).toHaveBeenCalledWith(
