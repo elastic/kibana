@@ -21,7 +21,7 @@ import {
   installBazelTools,
   haveNodeModulesBeenManuallyDeleted,
   removeYarnIntegrityFileIfExists,
-  runBazel
+  runBazel,
 } from '../utils/bazel';
 import { setupRemoteCache } from '../utils/bazel/setup_remote_cache';
 
