@@ -105,7 +105,9 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiInMemoryTable
-              data-test-subj={`mlSpacesManagementTable-${currentTabId}`}
+              data-test-subj={`mlSpacesManagementTable-${currentTabId} ${
+                isLoading ? 'loading' : 'loaded'
+              }`}
               items={jobs as any}
               columns={columns}
               search={{

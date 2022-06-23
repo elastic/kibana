@@ -10,9 +10,10 @@ import { REPO_ROOT } from '@kbn/utils';
 import fs from 'fs';
 import path from 'path';
 
-import type { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { JobType, MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlADJobTable } from './job_table';
 import type { MlDFAJobTable } from './data_frame_analytics_table';
@@ -431,6 +432,58 @@ export function MachineLearningStackManagementJobsProvider(
           `Expected destination index to be '${expectedJob.dest.index}' (got '${sortedActualJobs[i].dest.index}')`
         );
       });
+    },
+
+    async waitForSpacesManagementTableToLoad(mlSavedObjectType: MlSavedObjectType) {
+      await testSubjects.existOrFail('mlSpacesManagementTable', { timeout: 60 * 1000 });
+      await testSubjects.existOrFail(`mlSpacesManagementTable-${mlSavedObjectType} loaded`, {
+        timeout: 30 * 1000,
+      });
+    },
+
+    async getSpaceManagementTableSearchInput(): Promise<WebElementWrapper> {
+      const tableListContainer = await testSubjects.find('mlSpacesManagementTable');
+      return await tableListContainer.findByClassName('euiFieldSearch');
+    },
+
+    async assertSpaceManagementTableSearchInputValue(expectedSearchValue: string) {
+      const searchBarInput = await this.getSpaceManagementTableSearchInput();
+      const actualSearchValue = await searchBarInput.getAttribute('value');
+      expect(actualSearchValue).to.eql(
+        expectedSearchValue,
+        `Analytics search input value should be '${expectedSearchValue}' (got '${actualSearchValue}')`
+      );
+    },
+
+    async getIdsFromTable() {
+      const tableListContainer = await testSubjects.find('mlSpacesManagementTable');
+      const rows = await tableListContainer.findAllByClassName('euiTableRow');
+
+      const ids: string[] = [];
+      for (const row of rows) {
+        const cols = await row.findAllByClassName('euiTableRowCell euiTableRowCell--middle');
+        ids.push(await cols[0].getVisibleText());
+      }
+      return ids;
+    },
+
+    async filterTableWithSearchString(
+      mlSavedObjectType: MlSavedObjectType,
+      filter: string,
+      expectedRowCount: number = 1
+    ) {
+      await this.waitForSpacesManagementTableToLoad(mlSavedObjectType);
+      const searchBarInput = await this.getSpaceManagementTableSearchInput();
+      await searchBarInput.clearValueWithKeyboard();
+      await searchBarInput.type(filter);
+      await this.assertSpaceManagementTableSearchInputValue(filter);
+      const ids = await this.getIdsFromTable();
+      const filteredIds = ids.filter((id) => id === filter);
+
+      expect(filteredIds).to.have.length(
+        expectedRowCount,
+        `Filtered DFA job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredIds}')`
+      );
     },
   };
 }

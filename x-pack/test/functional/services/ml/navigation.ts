@@ -211,7 +211,7 @@ export function MachineLearningNavigationProvider({
       await testSubjects.click('mlStackManagementJobsListAnomalyDetectionTab');
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the empty prompt for analytics jobs list got loaded
-        await testSubjects.existOrFail('mlSpacesManagementTable-anomaly-detection');
+        await testSubjects.existOrFail('mlSpacesManagementTable-anomaly-detection loaded');
       });
     },
 
@@ -220,7 +220,7 @@ export function MachineLearningNavigationProvider({
       await testSubjects.click('mlStackManagementJobsListAnalyticsTab');
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the empty prompt for analytics jobs list got loaded
-        await testSubjects.existOrFail('mlSpacesManagementTable-data-frame-analytics');
+        await testSubjects.existOrFail('mlSpacesManagementTable-data-frame-analytics loaded'); // FIX change for waitForSpacesManagementTableToLoad!!!!!!!!!!!!!!!!!!!!!!!!!!!
       });
     },
 
