@@ -14,6 +14,7 @@ import {
 import { compact, keyBy } from 'lodash';
 import {
   AGENT_NAME,
+  EVENT_OUTCOME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -25,6 +26,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { Environment } from '../../../common/environment_rt';
+import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
@@ -42,6 +44,7 @@ export interface BackendSpan {
   transactionType?: string;
   transactionName?: string;
   duration: number;
+  outcome: EventOutcome;
 }
 
 export async function getTopBackendSpans({
@@ -105,6 +108,7 @@ export async function getTopBackendSpans({
           SERVICE_ENVIRONMENT,
           AGENT_NAME,
           SPAN_DURATION,
+          EVENT_OUTCOME,
           '@timestamp',
         ],
       },
@@ -126,6 +130,9 @@ export async function getTopBackendSpans({
           },
         },
         _source: [TRANSACTION_ID, TRANSACTION_TYPE, TRANSACTION_NAME],
+        sort: {
+          '@timestamp': 'desc',
+        },
       },
     })
   ).hits.hits.map((hit) => hit._source);
@@ -147,6 +154,7 @@ export async function getTopBackendSpans({
       agentName: span.agent.name,
       duration: span.span.duration.us,
       traceId: span.trace.id,
+      outcome: (span.event?.outcome || EventOutcome.unknown) as EventOutcome,
       transactionId: transaction?.transaction.id,
       transactionType: transaction?.transaction.type,
       transactionName: transaction?.transaction.name,
