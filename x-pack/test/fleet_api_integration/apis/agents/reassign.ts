@@ -205,7 +205,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             agents: 'active: true',
             policy_id: 'policy2',
-            perPage: 2,
+            batchSize: 2,
           })
           .expect(200);
 

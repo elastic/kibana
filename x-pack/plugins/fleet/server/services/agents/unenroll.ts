@@ -71,6 +71,7 @@ export async function unenrollAgents(
   options: GetAgentsOptions & {
     force?: boolean;
     revoke?: boolean;
+    batchSize?: number;
   }
 ): Promise<{ items: BulkActionResult[] }> {
   if ('agentIds' in options) {
@@ -82,7 +83,7 @@ export async function unenrollAgents(
     {
       kuery: options.kuery,
       showInactive: options.showInactive ?? false,
-      perPage: options.perPage,
+      batchSize: options.batchSize,
     },
     async (agents: Agent[], skipSuccess?: boolean) =>
       await unenrollBatch(soClient, esClient, agents, options, skipSuccess)

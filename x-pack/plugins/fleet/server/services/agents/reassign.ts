@@ -79,7 +79,7 @@ function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetG
 export async function reassignAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options: ({ agents: Agent[] } | GetAgentsOptions) & { force?: boolean },
+  options: ({ agents: Agent[] } | GetAgentsOptions) & { force?: boolean; batchSize?: number },
   newAgentPolicyId: string
 ): Promise<{ items: BulkActionResult[] }> {
   const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
@@ -113,7 +113,7 @@ export async function reassignAgents(
       {
         kuery: options.kuery,
         showInactive: options.showInactive ?? false,
-        perPage: options.perPage,
+        batchSize: options.batchSize,
       },
       async (agents: Agent[], skipSuccess: boolean) =>
         await reassignBatch(

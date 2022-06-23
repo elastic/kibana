@@ -273,8 +273,9 @@ export async function getAgentsByKuery(
 
 export async function processAgentsInBatches(
   esClient: ElasticsearchClient,
-  options: Omit<ListWithKuery, 'page'> & {
+  options: Omit<ListWithKuery, 'page' | 'perPage'> & {
     showInactive: boolean;
+    batchSize?: number;
   },
   processAgents: (
     agents: Agent[],
@@ -283,7 +284,7 @@ export async function processAgentsInBatches(
 ): Promise<{ items: BulkActionResult[] }> {
   const pitId = await openAgentsPointInTime(esClient);
 
-  const perPage = options.perPage ?? SO_SEARCH_LIMIT;
+  const perPage = options.batchSize ?? SO_SEARCH_LIMIT;
 
   const res = await getAgentsByKueryPit(esClient, {
     ...options,

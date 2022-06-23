@@ -516,7 +516,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             agents: 'active:true',
             version: fleetServerVersion,
-            perPage: 2,
+            batchSize: 2,
           })
           .expect(200);
 

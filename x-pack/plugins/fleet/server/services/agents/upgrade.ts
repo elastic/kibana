@@ -80,6 +80,7 @@ export async function sendUpgradeAgentsActions(
     force?: boolean;
     upgradeDurationSeconds?: number;
     startTime?: string;
+    batchSize?: number;
   }
 ) {
   // Full set of agents
@@ -104,7 +105,7 @@ export async function sendUpgradeAgentsActions(
       {
         kuery: options.kuery,
         showInactive: options.showInactive ?? false,
-        perPage: options.perPage,
+        batchSize: options.batchSize,
       },
       async (agents: Agent[], skipSuccess: boolean) =>
         await upgradeBatch(soClient, esClient, agents, outgoingErrors, options, skipSuccess)

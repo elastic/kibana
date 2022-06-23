@@ -59,7 +59,7 @@ export const PostBulkAgentUnenrollRequestSchema = {
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     force: schema.maybe(schema.boolean()),
     revoke: schema.maybe(schema.boolean()),
-    perPage: schema.maybe(schema.number()),
+    batchSize: schema.maybe(schema.number()),
   }),
 };
 
@@ -98,7 +98,7 @@ export const PostBulkAgentUpgradeRequestSchema = {
         },
       })
     ),
-    perPage: schema.maybe(schema.number()),
+    batchSize: schema.maybe(schema.number()),
   }),
 };
 
@@ -115,7 +115,7 @@ export const PostBulkAgentReassignRequestSchema = {
   body: schema.object({
     policy_id: schema.string(),
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
-    perPage: schema.maybe(schema.number()),
+    batchSize: schema.maybe(schema.number()),
   }),
 };
 
