@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { v4 } from 'uuid';
 import {
   EuiDataGrid,
   EuiDataGridStyle,
@@ -226,6 +227,19 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     onChangePage,
   } = props;
 
+  const [key, setKey] = useState<string>(() => v4());
+  const initialFetched = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (initialFetched.current) {
+      return;
+    }
+    if (logs.length) {
+      initialFetched.current = true;
+      setKey(v4());
+    }
+  }, [logs]);
+
   const columnVisibilityProps = useMemo(
     () => ({
       visibleColumns,
@@ -277,6 +291,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
         totalItemCount={pagination.totalItemCount}
       />
       <EuiDataGrid
+        key={key}
         aria-label="rule event log"
         data-test-subj="ruleEventLogList"
         columns={columns}

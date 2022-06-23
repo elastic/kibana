@@ -55,6 +55,8 @@ const updateButtonProps = {
 
 const MAX_RESULTS = 1000;
 
+const ruleEventListContainerStyle = { minHeight: 400 };
+
 export type RuleEventLogListProps = {
   rule: Rule;
   localStorageKey?: string;
@@ -213,7 +215,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   }, [localStorageKey, visibleColumns]);
 
   return (
-    <div>
+    <div style={ruleEventListContainerStyle}>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
