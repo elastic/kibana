@@ -1,0 +1,78 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { FC } from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render, screen } from '@testing-library/react';
+
+import type { DryRunResult } from './use_bulk_actions_dry_run';
+import { BulkEditRuleErrorsList } from './bulk_edit_rule_errors_list';
+import { BULK_ACTIONS_DRY_RUN_ERR_CODE } from '../../../../../../../common/constants';
+
+const Wrapper: FC = ({ children }) => {
+  return (
+    <IntlProvider locale="en">
+      <>{children}</>
+    </IntlProvider>
+  );
+};
+
+describe('Component BulkEditRuleErrorsList', () => {
+  test('should not render component if no errors present', () => {
+    const { container } = render(<BulkEditRuleErrorsList ruleErrors={[]} />, { wrapper: Wrapper });
+
+    expect(container.childElementCount).toEqual(0);
+  });
+
+  test('should render multiple error messages', () => {
+    const ruleErrors: DryRunResult['ruleErrors'] = [
+      {
+        message: 'test failure',
+        ruleIds: ['rule:1', 'rule:2'],
+      },
+      {
+        message: 'another failure',
+        ruleIds: ['rule:1'],
+      },
+    ];
+    render(<BulkEditRuleErrorsList ruleErrors={ruleErrors} />, { wrapper: Wrapper });
+
+    expect(
+      screen.getByText("2 rules can't be edited due to error: test failure")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("1 rule can't be edited due to error: another failure")
+    ).toBeInTheDocument();
+  });
+
+  test.each([
+    [
+      BULK_ACTIONS_DRY_RUN_ERR_CODE.IMMUTABLE,
+      '2 prebuild Elastic rules (editing prebuilt rules is not supported)',
+    ],
+    [
+      BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_INDEX_PATTERN,
+      "2 custom Machine Learning rules (these rules don't have index patterns)",
+    ],
+    [
+      BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_AUTH,
+      "2 rules can't be edited due to error: test failure",
+    ],
+    [undefined, "2 rules can't be edited due to error: test failure"],
+  ])('should render correct message for "%s" errorCode', (errorCode, value) => {
+    const ruleErrors: DryRunResult['ruleErrors'] = [
+      {
+        message: 'test failure',
+        errorCode,
+        ruleIds: ['rule:1', 'rule:2'],
+      },
+    ];
+    render(<BulkEditRuleErrorsList ruleErrors={ruleErrors} />, { wrapper: Wrapper });
+
+    expect(screen.getByText(value)).toBeInTheDocument();
+  });
+});

@@ -34,7 +34,7 @@ const BulkEditRuleErrorsListComponent = ({ ruleErrors = [] }: BulkEditRuleErrors
           switch (errorCode) {
             case BULK_ACTIONS_DRY_RUN_ERR_CODE.IMMUTABLE:
               return (
-                <li>
+                <li key={message}>
                   <FormattedMessage
                     id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.elasticRulesEditDescription"
                     defaultMessage="{rulesCount, plural, =1 {# prebuild Elastic rule} other {# prebuild Elastic rules}} (editing prebuilt rules is not supported)"
@@ -44,7 +44,7 @@ const BulkEditRuleErrorsListComponent = ({ ruleErrors = [] }: BulkEditRuleErrors
               );
             case BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_INDEX_PATTERN:
               return (
-                <li>
+                <li key={message}>
                   <FormattedMessage
                     id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.machineLearningRulesIndexEditDescription"
                     defaultMessage="{rulesCount, plural, =1 {# custom Machine Learning rule} other {# custom Machine Learning rules}} (these rules don't have index patterns)"
@@ -54,7 +54,7 @@ const BulkEditRuleErrorsListComponent = ({ ruleErrors = [] }: BulkEditRuleErrors
               );
             default:
               return (
-                <li>
+                <li key={message}>
                   <FormattedMessage
                     id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.defaultRulesEditFailureDescription"
                     defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} can't be edited due to error: {message}"
