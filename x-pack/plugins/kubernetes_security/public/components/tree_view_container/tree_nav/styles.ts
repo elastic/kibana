@@ -21,8 +21,14 @@ export const useStyles = () => {
       },
     };
 
+    const treeViewContainer: CSSObject = {
+      height: 600,
+      overflowY: 'auto',
+    };
+
     return {
       treeViewSwitcher,
+      treeViewContainer,
     };
   }, [euiTheme]);
 
