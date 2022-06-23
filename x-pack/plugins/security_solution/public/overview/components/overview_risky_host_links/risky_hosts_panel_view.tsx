@@ -5,30 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import {
-  EuiButton,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiTableFieldDataColumnType,
-  EuiText,
-} from '@elastic/eui';
+import { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getOr } from 'lodash/fp';
-import { SavedObjectsImportSuccess } from '@kbn/core/public';
-import styled from 'styled-components';
+
 import { InnerLinkPanel, LinkPanel, LinkPanelListItem } from '../link_panel';
 import { LinkPanelViewProps } from '../link_panel/types';
 import { Link } from '../link_panel/link';
 import * as i18n from './translations';
-import { VIEW_DASHBOARD } from '../overview_cti_links/translations';
 import { NavigateToHost } from './navigate_to_host';
 import { HostRiskScoreQueryId } from '../../../risk_score/containers';
-import { importFile } from '../link_panel/import_file';
-import { useKibana, useToasts } from '../../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 import { RISKY_HOSTS_DASHBOARD_TITLE } from '../../../hosts/pages/navigation/constants';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
+import { ImportSavedObjectsButton } from '../../../common/components/create_prebuilt_saved_objects/components/bulk_create_button';
+import { VIEW_DASHBOARD } from '../overview_cti_links/translations';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   {
@@ -74,17 +66,6 @@ const warningPanel = (
   />
 );
 
-const Popover = styled(EuiPanel)`
-  position: absolute;
-  top: 100%;
-  right: 0;
-  width: '340px';
-`;
-
-const PopoverWrapper = styled.div`
-  position: relative;
-`;
-
 export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
   isInspectEnabled,
   listItems,
@@ -100,122 +81,53 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
         : undefined
       : splitPanel;
 
-  const [response, setResponse] = useState<SavedObjectsImportSuccess[] | null>(null);
-  const [status, setStatus] = useState('idle');
   const [dashboardUrl, setDashboardUrl] = useState<string | null>(null);
-  const [error, setError] = useState(undefined);
   const { buttonHref } = useDashboardButtonHref({
     to,
     from,
     title: RISKY_HOSTS_DASHBOARD_TITLE,
   });
   const {
-    services: { http, dashboard },
+    services: { dashboard },
   } = useKibana();
-  const toasts = useToasts();
 
-  const importMyFile = useCallback(async () => {
-    setStatus('loading');
-
-    try {
-      const res = await importFile(http, { templateName: 'hostRiskScoreDashboards' });
-      const savedObjects = getOr([], ['data', 'createDashboards', 'message', 'saved_objects'], res);
-      setResponse(savedObjects);
-      setStatus('success');
-    } catch (e) {
-      setStatus('error');
-      setError(e);
-    }
-  }, [http]);
-
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const onMouseEnter = () => {
-    setIsPopoverOpen(true);
-  };
-
-  const closePopover = () => setIsPopoverOpen(false);
-
-  useEffect(() => {
-    const fetchDashboardUrl = async (targetDashboardId: string | null | undefined) => {
-      if (to && from && targetDashboardId) {
-        const targetUrl = await dashboard?.locator?.getUrl({
-          dashboardId: targetDashboardId,
-          timeRange: {
-            to,
-            from,
-          },
-        });
-
-        setDashboardUrl(targetUrl ?? null);
-      }
-    };
-
-    if (status === 'success') {
-      const targetDashboard = (response ?? []).find(
+  const onImportDashboardSuccessCallback = useCallback(
+    (response) => {
+      const targetDashboard = response.find(
         (obj) => obj.type === 'dashboard' && obj.attributes.title === 'Current Risk Score for Hosts'
       );
 
+      const fetchDashboardUrl = async (targetDashboardId: string | null | undefined) => {
+        if (to && from && targetDashboardId) {
+          const targetUrl = await dashboard?.locator?.getUrl({
+            dashboardId: targetDashboardId,
+            timeRange: {
+              to,
+              from,
+            },
+          });
+
+          setDashboardUrl(targetUrl ?? null);
+        }
+      };
+
       fetchDashboardUrl(targetDashboard?.id);
-    }
-  }, [dashboard?.locator, from, response, status, to]);
-
-  useEffect(() => {
-    const res = response ?? [];
-    if (status === 'success' && response != null) {
-      toasts.addSuccess(
-        `${i18n.IMPORT_DASHBOARD_SUCCESS(res.length)}: ${(response ?? [])
-          .map((o, idx) => `${idx + 1}. ) ${o?.attributes?.title ?? o?.attributes?.name}`)
-          .join(' ,')}`
-      );
-    }
-
-    if (status === 'error' && error != null) {
-      toasts.addError(error, { title: 'Import dashboard failed', toastMessage: error.message });
-    }
-  }, [dashboard?.locator, error, from, response, status, to, toasts]);
+    },
+    [dashboard?.locator, from, to]
+  );
 
   return (
     <LinkPanel
       {...{
-        button: useMemo(
-          () =>
-            dashboardUrl || buttonHref || status === 'sccess' ? (
-              <EuiButton
-                href={(buttonHref || dashboardUrl) ?? undefined}
-                isDisabled={!buttonHref && !dashboardUrl}
-                data-test-subj="risky-hosts-view-dashboard-button"
-                target="_blank"
-              >
-                {VIEW_DASHBOARD}
-              </EuiButton>
-            ) : listItems.length > 0 ? (
-              <EuiButton
-                onClick={importMyFile}
-                color="warning"
-                target="_blank"
-                isDisabled={status === 'loading'}
-                data-test-subj={`risky-host-import-module-button`}
-              >
-                {status === 'loading' && <EuiLoadingSpinner size="m" />} {i18n.IMPORT_DASHBOARD}
-              </EuiButton>
-            ) : (
-              <PopoverWrapper onMouseEnter={onMouseEnter} onMouseLeave={closePopover}>
-                {isPopoverOpen && (
-                  <Popover>
-                    <EuiText>{i18n.IMPORT_DASHBOARD_TOOLTIP} </EuiText>
-                  </Popover>
-                )}
-                <EuiButton
-                  color="warning"
-                  target="_blank"
-                  isDisabled={true}
-                  data-test-subj={`risky-host-disabled-import-module-button`}
-                >
-                  {i18n.IMPORT_DASHBOARD}
-                </EuiButton>
-              </PopoverWrapper>
-            ),
-          [buttonHref, dashboardUrl, importMyFile, isPopoverOpen, listItems.length, status]
+        button: (
+          <ImportSavedObjectsButton
+            href={buttonHref || dashboardUrl}
+            ishostRiskScoreDataAvailable={listItems.length > 0}
+            onSuccessCallback={onImportDashboardSuccessCallback}
+            successTitle={VIEW_DASHBOARD}
+            title={i18n.IMPORT_DASHBOARD}
+            tooltip={i18n.IMPORT_DASHBOARD_TOOLTIP}
+          />
         ),
         columns,
         dataTestSubj: 'risky-hosts-dashboard-links',

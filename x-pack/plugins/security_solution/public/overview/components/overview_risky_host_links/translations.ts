@@ -65,12 +65,6 @@ export const IMPORT_DASHBOARD = i18n.translate('xpack.securitySolution.overview.
   defaultMessage: 'Import dashboard',
 });
 
-export const IMPORT_DASHBOARD_SUCCESS = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.overview.importDasboardSuccessTitle', {
-    values: { totalCount },
-    defaultMessage: `Following {totalCount, plural, =1 {saved object} other {saved objects}} has been imported successfully`,
-  });
-
 export const IMPORT_DASHBOARD_TOOLTIP = i18n.translate(
   'xpack.securitySolution.overview.importDasboardPopoverTitle',
   {
