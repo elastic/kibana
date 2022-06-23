@@ -256,6 +256,11 @@ export const ResponseActionsList = memo<
     },
     [itemIdToExpandedRowMap]
   );
+  // memoized callback for toggleDetails
+  const onClickCallback = useCallback(
+    (data: ActionDetails) => () => toggleDetails(data),
+    [toggleDetails]
+  );
 
   // table column
   const responseActionListColumns = useMemo(() => {
@@ -418,7 +423,7 @@ export const ResponseActionsList = memo<
         render: (data: ActionDetails) => {
           return (
             <EuiButtonIcon
-              onClick={() => toggleDetails(data)}
+              onClick={onClickCallback(data)}
               aria-label={itemIdToExpandedRowMap[data.id] ? 'Collapse' : 'Expand'}
               iconType={itemIdToExpandedRowMap[data.id] ? 'arrowUp' : 'arrowDown'}
             />
@@ -432,7 +437,7 @@ export const ResponseActionsList = memo<
       columns.splice(3, 1);
     }
     return columns;
-  }, [getTestId, hideHostNameColumn, itemIdToExpandedRowMap, toggleDetails]);
+  }, [getTestId, hideHostNameColumn, itemIdToExpandedRowMap, onClickCallback]);
 
   // table pagination
   const tablePagination = useMemo(() => {
