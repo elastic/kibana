@@ -94,12 +94,12 @@ export default function ({ getService }: FtrProviderContext) {
       {
         method: 'post',
         path: KILL_PROCESS_ROUTE,
-        body: { endpoint_ids: ['one'], parameters: { entity_id: 1234 } },
+        body: { endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } },
       },
       {
         method: 'post',
         path: SUSPEND_PROCESS_ROUTE,
-        body: { endpoint_ids: ['one'], parameters: { entity_id: 1234 } },
+        body: { endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } },
       },
     ];
 
