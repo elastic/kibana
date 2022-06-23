@@ -131,7 +131,6 @@ export const validateExpression = (ruleParams: EsQueryAlertParams): ValidationRe
   return validationResult;
 };
 
-// TODO: add tests
 export const hasExpressionValidationErrors = (ruleParams: EsQueryAlertParams) => {
   const { errors: validationErrors } = validateExpression(ruleParams);
   return Object.keys(validationErrors).some(
