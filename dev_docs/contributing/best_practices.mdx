@@ -138,9 +138,7 @@ It may be tempting to get caught up in the dream of writing the next package whi
 
 ## Breaking up packages
 
-We are currently working to fully leverage change-based tasks across the repository and those function best when the dependency tree is full of focused packages around a single responsibility. 
-Having that said we do not think that doing that from a theoretical perspective and over engineering from the beginning of your packages is the way to do it. Instead, breaking those up is expected 
-to be seen as an available tool if the build performance is being compromised or the dependency chain touched by a chain on a given package is too heavy.
+We are currently working to fully leverage change-based tasks across the repository and this functionality works best when the dependency tree is made of small packages focused around a single responsibility. Having said that, we do not think that contributors should break up their packages into single functions from day one; having 10k packages that contain a single function would also be a problem. Instead, breaking up packages over time will be a common practice used to address bottlenecks in the dependency tree and will be a valuable tool if build performance is being compromised.
 
 ### When should a package be broken-up into smaller packages?
 The goal when designing your package should be to mainly ensure that it has a single responsibility, and that anyone depending on your package would reasonably need everything exposed by it. This is 
