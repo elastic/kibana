@@ -20,6 +20,12 @@ import { percentileOperation } from '.';
 import { IndexPattern, IndexPatternLayer } from '../../types';
 import { PercentileIndexPatternColumn } from './percentile';
 import { TermsIndexPatternColumn } from './terms';
+import {
+  buildExpressionFunction,
+  buildExpression,
+  ExpressionAstExpressionBuilder,
+} from '@kbn/expressions-plugin/public';
+import type { OriginalColumn } from '../../to_expression';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -184,6 +190,441 @@ describe('percentile', () => {
         })
       );
       expect(column.label).toContain('memory');
+    });
+  });
+
+  describe('optimizeEsAggs', () => {
+    const makeEsAggBuilder = (name: string, params: object) =>
+      buildExpression({
+        type: 'expression',
+        chain: [buildExpressionFunction(name, params).toAst()],
+      });
+
+    const buildMapsFromAggBuilders = (aggs: ExpressionAstExpressionBuilder[]) => {
+      const esAggsIdMap: Record<string, OriginalColumn[]> = {};
+      const aggsToIdsMap = new Map();
+      aggs.forEach((builder, i) => {
+        const esAggsId = `col-${i}-${i}`;
+        esAggsIdMap[esAggsId] = [{ id: `original-${i}` } as OriginalColumn];
+        aggsToIdsMap.set(builder, esAggsId);
+      });
+      return {
+        esAggsIdMap,
+        aggsToIdsMap,
+      };
+    };
+
+    it('should collapse percentile dimensions with matching parameters', () => {
+      const field1 = 'foo';
+      const field2 = 'bar';
+      const timeShift1 = '1d';
+      const timeShift2 = '2d';
+
+      const aggs = [
+        // group 1
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: 10,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 2,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: 20,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 3,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: 30,
+          timeShift: undefined,
+        }),
+        // group 2
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 4,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 10,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 5,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 40,
+          timeShift: undefined,
+        }),
+        // group 3
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 6,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 50,
+          timeShift: timeShift1,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 7,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 60,
+          timeShift: timeShift1,
+        }),
+        // group 4
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 8,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 70,
+          timeShift: timeShift2,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 9,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 80,
+          timeShift: timeShift2,
+        }),
+      ];
+
+      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
+
+      const { esAggsIdMap: newIdMap, aggs: newAggs } = percentileOperation.optimizeEsAggs!(
+        aggs,
+        esAggsIdMap,
+        aggsToIdsMap
+      );
+
+      expect(newAggs.length).toBe(4);
+
+      expect(newAggs[0].functions[0].getArgument('field')![0]).toBe(field1);
+      expect(newAggs[0].functions[0].getArgument('timeShift')).toBeUndefined();
+      expect(newAggs[1].functions[0].getArgument('field')![0]).toBe(field2);
+      expect(newAggs[1].functions[0].getArgument('timeShift')).toBeUndefined();
+      expect(newAggs[2].functions[0].getArgument('field')![0]).toBe(field2);
+      expect(newAggs[2].functions[0].getArgument('timeShift')![0]).toBe(timeShift1);
+      expect(newAggs[3].functions[0].getArgument('field')![0]).toBe(field2);
+      expect(newAggs[3].functions[0].getArgument('timeShift')![0]).toBe(timeShift2);
+
+      expect(newAggs).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "findFunction": [Function],
+            "functions": Array [
+              Object {
+                "addArgument": [Function],
+                "arguments": Object {
+                  "enabled": Array [
+                    true,
+                  ],
+                  "field": Array [
+                    "foo",
+                  ],
+                  "id": Array [
+                    1,
+                  ],
+                  "percents": Array [
+                    10,
+                    20,
+                    30,
+                  ],
+                  "schema": Array [
+                    "metric",
+                  ],
+                },
+                "getArgument": [Function],
+                "name": "aggPercentiles",
+                "removeArgument": [Function],
+                "replaceArgument": [Function],
+                "toAst": [Function],
+                "toString": [Function],
+                "type": "expression_function_builder",
+              },
+            ],
+            "toAst": [Function],
+            "toString": [Function],
+            "type": "expression_builder",
+          },
+          Object {
+            "findFunction": [Function],
+            "functions": Array [
+              Object {
+                "addArgument": [Function],
+                "arguments": Object {
+                  "enabled": Array [
+                    true,
+                  ],
+                  "field": Array [
+                    "bar",
+                  ],
+                  "id": Array [
+                    4,
+                  ],
+                  "percents": Array [
+                    10,
+                    40,
+                  ],
+                  "schema": Array [
+                    "metric",
+                  ],
+                },
+                "getArgument": [Function],
+                "name": "aggPercentiles",
+                "removeArgument": [Function],
+                "replaceArgument": [Function],
+                "toAst": [Function],
+                "toString": [Function],
+                "type": "expression_function_builder",
+              },
+            ],
+            "toAst": [Function],
+            "toString": [Function],
+            "type": "expression_builder",
+          },
+          Object {
+            "findFunction": [Function],
+            "functions": Array [
+              Object {
+                "addArgument": [Function],
+                "arguments": Object {
+                  "enabled": Array [
+                    true,
+                  ],
+                  "field": Array [
+                    "bar",
+                  ],
+                  "id": Array [
+                    6,
+                  ],
+                  "percents": Array [
+                    50,
+                    60,
+                  ],
+                  "schema": Array [
+                    "metric",
+                  ],
+                  "timeShift": Array [
+                    "1d",
+                  ],
+                },
+                "getArgument": [Function],
+                "name": "aggPercentiles",
+                "removeArgument": [Function],
+                "replaceArgument": [Function],
+                "toAst": [Function],
+                "toString": [Function],
+                "type": "expression_function_builder",
+              },
+            ],
+            "toAst": [Function],
+            "toString": [Function],
+            "type": "expression_builder",
+          },
+          Object {
+            "findFunction": [Function],
+            "functions": Array [
+              Object {
+                "addArgument": [Function],
+                "arguments": Object {
+                  "enabled": Array [
+                    true,
+                  ],
+                  "field": Array [
+                    "bar",
+                  ],
+                  "id": Array [
+                    8,
+                  ],
+                  "percents": Array [
+                    70,
+                    80,
+                  ],
+                  "schema": Array [
+                    "metric",
+                  ],
+                  "timeShift": Array [
+                    "2d",
+                  ],
+                },
+                "getArgument": [Function],
+                "name": "aggPercentiles",
+                "removeArgument": [Function],
+                "replaceArgument": [Function],
+                "toAst": [Function],
+                "toString": [Function],
+                "type": "expression_function_builder",
+              },
+            ],
+            "toAst": [Function],
+            "toString": [Function],
+            "type": "expression_builder",
+          },
+        ]
+      `);
+
+      expect(newIdMap).toMatchInlineSnapshot(`
+        Object {
+          "col-?-1.10": Array [
+            Object {
+              "id": "original-0",
+            },
+          ],
+          "col-?-1.20": Array [
+            Object {
+              "id": "original-1",
+            },
+          ],
+          "col-?-1.30": Array [
+            Object {
+              "id": "original-2",
+            },
+          ],
+          "col-?-4.10": Array [
+            Object {
+              "id": "original-3",
+            },
+          ],
+          "col-?-4.40": Array [
+            Object {
+              "id": "original-4",
+            },
+          ],
+          "col-?-6.50": Array [
+            Object {
+              "id": "original-5",
+            },
+          ],
+          "col-?-6.60": Array [
+            Object {
+              "id": "original-6",
+            },
+          ],
+          "col-?-8.70": Array [
+            Object {
+              "id": "original-7",
+            },
+          ],
+          "col-?-8.80": Array [
+            Object {
+              "id": "original-8",
+            },
+          ],
+        }
+      `);
+    });
+
+    it('should handle multiple identical percentiles', () => {
+      const field1 = 'foo';
+      const field2 = 'bar';
+      const samePercentile = 90;
+
+      const aggs = [
+        // group 1
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: samePercentile,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 2,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: samePercentile,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 4,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 10,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 3,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: samePercentile,
+          timeShift: undefined,
+        }),
+      ];
+
+      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
+
+      const { esAggsIdMap: newIdMap, aggs: newAggs } = percentileOperation.optimizeEsAggs!(
+        aggs,
+        esAggsIdMap,
+        aggsToIdsMap
+      );
+
+      expect(newAggs.length).toBe(2);
+      expect(newIdMap[`col-?-1.${samePercentile}`].length).toBe(3);
+      expect(newIdMap).toMatchInlineSnapshot(`
+        Object {
+          "col-2-2": Array [
+            Object {
+              "id": "original-2",
+            },
+          ],
+          "col-?-1.90": Array [
+            Object {
+              "id": "original-0",
+            },
+            Object {
+              "id": "original-1",
+            },
+            Object {
+              "id": "original-3",
+            },
+          ],
+        }
+      `);
+    });
+
+    it("shouldn't touch non-percentile aggs or single percentiles with no siblings", () => {
+      const aggs = [
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field: 'foo',
+          percentile: 30,
+        }),
+        makeEsAggBuilder('aggMax', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field: 'bar',
+        }),
+      ];
+
+      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
+
+      const { esAggsIdMap: newIdMap, aggs: newAggs } = percentileOperation.optimizeEsAggs!(
+        aggs,
+        esAggsIdMap,
+        aggsToIdsMap
+      );
+
+      expect(newAggs).toEqual(aggs);
+      expect(newIdMap).toEqual(esAggsIdMap);
     });
   });
 

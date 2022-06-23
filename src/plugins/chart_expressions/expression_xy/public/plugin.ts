@@ -18,18 +18,16 @@ import {
   xyVisFunction,
   layeredXyVisFunction,
   extendedDataLayerFunction,
+  dataDecorationConfigFunction,
+  xAxisConfigFunction,
   yAxisConfigFunction,
-  extendedYAxisConfigFunction,
   legendConfigFunction,
-  gridlinesConfigFunction,
   axisExtentConfigFunction,
-  tickLabelsConfigFunction,
   referenceLineFunction,
   referenceLineLayerFunction,
   annotationLayerFunction,
-  labelsOrientationConfigFunction,
-  axisTitlesVisibilityConfigFunction,
   extendedAnnotationLayerFunction,
+  referenceLineDecorationConfigFunction,
 } from '../common/expression_functions';
 import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
 
@@ -55,18 +53,16 @@ export class ExpressionXyPlugin {
     { expressions, charts }: SetupDeps
   ): ExpressionXyPluginSetup {
     expressions.registerFunction(yAxisConfigFunction);
-    expressions.registerFunction(extendedYAxisConfigFunction);
+    expressions.registerFunction(dataDecorationConfigFunction);
+    expressions.registerFunction(referenceLineDecorationConfigFunction);
     expressions.registerFunction(legendConfigFunction);
-    expressions.registerFunction(gridlinesConfigFunction);
     expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);
-    expressions.registerFunction(tickLabelsConfigFunction);
+    expressions.registerFunction(xAxisConfigFunction);
     expressions.registerFunction(annotationLayerFunction);
     expressions.registerFunction(extendedAnnotationLayerFunction);
-    expressions.registerFunction(labelsOrientationConfigFunction);
     expressions.registerFunction(referenceLineFunction);
     expressions.registerFunction(referenceLineLayerFunction);
-    expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyVisFunction);
     expressions.registerFunction(layeredXyVisFunction);
 
