@@ -75,7 +75,27 @@ export class MarkerSizeLegend extends Component<Props, State> {
     const svgHeight = options.maxSize * 2 + HALF_FONT_SIZE + circleStyle.strokeWidth * 2;
     const circleCenterX = options.maxSize + circleStyle.strokeWidth;
     const circleBottomY = svgHeight - circleStyle.strokeWidth;
-    const maxLabelWidth = this._formatValue(fieldMeta.max).toString().length;
+    const markerDelta = options.maxSize - options.minSize;
+
+    const getValueWidth = (value: number): number => {
+      return this._formatValue(value).toString().length;
+    };
+
+    const getMaxValueWidth = (): number => {
+      let stops: number[] = [];
+      if (fieldMeta.delta > 0) {
+        stops.push(fieldMeta.min);
+        if (markerDelta > MIN_MARKER_DISTANCE * 3) {
+          stops = [...stops, ...[0.25, 0.5, 0.75].map(getValue)];
+        } else {
+          stops.push(getValue(0.5));
+        }
+      }
+      stops.push(fieldMeta.max);
+      return Math.max(...stops.map(getValueWidth));
+    };
+
+    const maxLabelWidth = getMaxValueWidth();
 
     function makeMarker(radius: number, formattedValue: string | number) {
       const circleCenterY = circleBottomY - radius;
@@ -121,7 +141,6 @@ export class MarkerSizeLegend extends Component<Props, State> {
       const smallestMarker = makeMarker(options.minSize, this._formatValue(fieldMeta.min));
       markers.push(smallestMarker);
 
-      const markerDelta = options.maxSize - options.minSize;
       if (markerDelta > MIN_MARKER_DISTANCE * 3) {
         markers.push(makeMarker(getMarkerRadius(0.25), this._formatValue(getValue(0.25))));
         markers.push(makeMarker(getMarkerRadius(0.5), this._formatValue(getValue(0.5))));
