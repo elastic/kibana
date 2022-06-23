@@ -183,6 +183,7 @@ export class ServiceAPIClient {
                 code: err.code,
                 status: err.response?.data?.status,
                 url,
+                kibanaVersion: this.server.kibanaVersion,
               });
               if (err.response?.data?.reason) {
                 this.logger.error(err.response?.data?.reason);

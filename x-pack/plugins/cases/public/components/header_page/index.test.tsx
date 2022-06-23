@@ -124,7 +124,7 @@ describe('HeaderPage', () => {
     const casesHeaderPage = wrapper.find('.casesHeaderPage').first();
 
     expect(casesHeaderPage).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(casesHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(casesHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -136,7 +136,7 @@ describe('HeaderPage', () => {
     const casesHeaderPage = wrapper.find('.casesHeaderPage').first();
 
     expect(casesHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(casesHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(casesHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 
   describe('Badges', () => {
