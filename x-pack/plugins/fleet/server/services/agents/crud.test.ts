@@ -207,7 +207,7 @@ describe('Agents CRUD test', () => {
         esClientMock,
         {
           kuery: 'active:true',
-          perPage: 2,
+          batchSize: 2,
           showInactive: false,
         },
         mockProcessAgents
