@@ -10,9 +10,10 @@ import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart } from '@kbn/core/public';
+import type { Query } from '@kbn/es-query';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { isEqual } from 'lodash';
-import { KIBANA_USER_QUERY_LANGUAGE_KEY, Query, UI_SETTINGS } from '../../../common';
+import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../common';
 
 function isOfQueryType(arg: any): arg is Query {
   return Boolean(arg && 'query' in arg);

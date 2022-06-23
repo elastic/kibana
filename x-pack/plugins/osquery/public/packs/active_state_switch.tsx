@@ -20,7 +20,7 @@ import { useUpdatePack } from './use_update_pack';
 import { PACKS_ID } from './constants';
 
 const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
-  margin-right: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-right: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 interface ActiveStateSwitchProps {

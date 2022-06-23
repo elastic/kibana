@@ -11,6 +11,7 @@ export type {
   DataViewBase,
   DataViewFieldBase,
   EsQueryConfig,
+  EsQueryFiltersConfig,
   IFieldSubType,
   IFieldSubTypeMulti,
   IFieldSubTypeNested,

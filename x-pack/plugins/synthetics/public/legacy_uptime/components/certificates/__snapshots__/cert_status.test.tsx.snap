@@ -26,13 +26,9 @@ exports[`CertStatus renders expected elements for valid props 1`] = `
       <span>
         OK  
         <div
-          class="euiText euiText--extraSmall c0"
+          class="euiText c0 css-pwgelg-euiText-xs-euiTextColor-subdued"
         >
-          <div
-            class="euiTextColor euiTextColor--subdued"
-          >
-             for 4 months
-          </div>
+           for 4 months
         </div>
       </span>
     </div>

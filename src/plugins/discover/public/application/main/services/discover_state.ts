@@ -16,6 +16,7 @@ import {
   compareFilters,
   COMPARE_ALL_OPTIONS,
   AggregateQuery,
+  Query,
 } from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
@@ -30,7 +31,6 @@ import {
   connectToQueryState,
   DataPublicPluginStart,
   FilterManager,
-  Query,
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';

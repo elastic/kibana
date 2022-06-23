@@ -5,21 +5,11 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockFlashMessageHelpers,
-  mockHttpValues,
-} from '../../../../../../__mocks__/kea_logic';
-import { sourceConfigData } from '../../../../../__mocks__/content_sources.mock';
-
-import { nextTick } from '@kbn/test-jest-helpers';
-
-import { itShowsServerErrorAsFlashMessage } from '../../../../../../test_helpers';
+import { LogicMounter } from '../../../../../../__mocks__/kea_logic';
 
 jest.mock('../../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
-import { AppLogic } from '../../../../../app_logic';
 
 import { CustomSource } from '../../../../../types';
 
@@ -30,14 +20,15 @@ const DEFAULT_VALUES = {
   buttonLoading: false,
   customSourceNameValue: '',
   newCustomSource: {} as CustomSource,
+  sourceApi: {
+    status: 'IDLE',
+  },
 };
 
 const MOCK_NAME = 'name';
 
 describe('AddCustomSourceLogic', () => {
   const { mount } = new LogicMounter(AddCustomSourceLogic);
-  const { http } = mockHttpValues;
-  const { clearFlashMessages } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -49,17 +40,27 @@ describe('AddCustomSourceLogic', () => {
   });
 
   describe('actions', () => {
-    describe('setButtonNotLoading', () => {
-      it('turns off the button loading flag', () => {
-        AddCustomSourceLogic.actions.setButtonNotLoading();
+    describe('addSourceSuccess', () => {
+      it('sets a new source', () => {
+        const customSource: CustomSource = {
+          accessToken: 'a',
+          name: 'b',
+          id: '1',
+        };
+        AddCustomSourceLogic.actions.addSourceSuccess(customSource);
 
         expect(AddCustomSourceLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          buttonLoading: false,
+          customSourceNameValue: '',
+          newCustomSource: customSource,
+          sourceApi: {
+            status: 'SUCCESS',
+            data: customSource,
+          },
+          currentStep: AddCustomSourceSteps.SaveCustomStep,
         });
       });
     });
-
     describe('setCustomSourceNameValue', () => {
       it('saves the name', () => {
         AddCustomSourceLogic.actions.setCustomSourceNameValue('name');
@@ -100,27 +101,11 @@ describe('AddCustomSourceLogic', () => {
 
     describe('organization context', () => {
       describe('createContentSource', () => {
-        it('calls API and sets values', async () => {
-          const setButtonNotLoadingSpy = jest.spyOn(
-            AddCustomSourceLogic.actions,
-            'setButtonNotLoading'
-          );
-          const setNewCustomSourceSpy = jest.spyOn(
-            AddCustomSourceLogic.actions,
-            'setNewCustomSource'
-          );
-          http.post.mockReturnValue(Promise.resolve({ sourceConfigData }));
+        it('calls addSource on AddCustomSourceApi logic', async () => {
+          const addSourceSpy = jest.spyOn(AddCustomSourceLogic.actions, 'addSource');
 
           AddCustomSourceLogic.actions.createContentSource();
-
-          expect(clearFlashMessages).toHaveBeenCalled();
-          expect(AddCustomSourceLogic.values.buttonLoading).toEqual(true);
-          expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/org/create_source', {
-            body: JSON.stringify({ service_type: 'custom', name: MOCK_NAME }),
-          });
-          await nextTick();
-          expect(setNewCustomSourceSpy).toHaveBeenCalledWith({ sourceConfigData });
-          expect(setButtonNotLoadingSpy).toHaveBeenCalled();
+          expect(addSourceSpy).toHaveBeenCalledWith(MOCK_NAME, undefined);
         });
 
         it('submits a base service type for pre-configured sources', () => {
@@ -133,66 +118,11 @@ describe('AddCustomSourceLogic', () => {
             }
           );
 
-          AddCustomSourceLogic.actions.createContentSource();
-
-          expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/org/create_source', {
-            body: JSON.stringify({
-              service_type: 'custom',
-              name: MOCK_NAME,
-              base_service_type: 'share_point_server',
-            }),
-          });
-        });
-
-        itShowsServerErrorAsFlashMessage(http.post, () => {
-          AddCustomSourceLogic.actions.createContentSource();
-        });
-      });
-    });
-
-    describe('account context routes', () => {
-      beforeEach(() => {
-        AppLogic.values.isOrganization = false;
-      });
-
-      describe('createContentSource', () => {
-        it('sends relevant fields to the API', () => {
-          AddCustomSourceLogic.actions.createContentSource();
-
-          expect(http.post).toHaveBeenCalledWith(
-            '/internal/workplace_search/account/create_source',
-            {
-              body: JSON.stringify({ service_type: 'custom', name: MOCK_NAME }),
-            }
-          );
-        });
-
-        it('submits a base service type for pre-configured sources', () => {
-          mount(
-            {
-              customSourceNameValue: MOCK_NAME,
-            },
-            {
-              baseServiceType: 'share_point_server',
-            }
-          );
+          const addSourceSpy = jest.spyOn(AddCustomSourceLogic.actions, 'addSource');
 
           AddCustomSourceLogic.actions.createContentSource();
 
-          expect(http.post).toHaveBeenCalledWith(
-            '/internal/workplace_search/account/create_source',
-            {
-              body: JSON.stringify({
-                service_type: 'custom',
-                name: MOCK_NAME,
-                base_service_type: 'share_point_server',
-              }),
-            }
-          );
-        });
-
-        itShowsServerErrorAsFlashMessage(http.post, () => {
-          AddCustomSourceLogic.actions.createContentSource();
+          expect(addSourceSpy).toHaveBeenCalledWith(MOCK_NAME, 'share_point_server');
         });
       });
     });
