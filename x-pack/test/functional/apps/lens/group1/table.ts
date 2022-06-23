@@ -73,10 +73,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow to transpose columns', async () => {
-      await PageObjects.lens.dragDimensionToDimension(
-        'lnsDatatable_rows > lns-dimensionTrigger',
-        'lnsDatatable_columns > lns-empty-dimension'
-      );
+      await PageObjects.lens.dragDimensionToDimension({
+        from: 'lnsDatatable_rows > lns-dimensionTrigger',
+        to: 'lnsDatatable_columns > lns-empty-dimension',
+      });
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal(
         '169.228.188.120 › Average of bytes'

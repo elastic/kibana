@@ -150,12 +150,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       },
     ];
   },
-  onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
-    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(
-      layer,
-      thisColumnId,
-      changedColumnId
-    ),
+  onOtherColumnChanged: (layer, thisColumnId) =>
+    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(layer, thisColumnId),
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCount']>('aggCount', {
       id: columnId,

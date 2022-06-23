@@ -16,6 +16,7 @@ import {
 import type { IndexPattern } from '../../types';
 import { useDebouncedValue } from '../../../shared_components';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
+import { getColumnOrder } from '../layer_helpers';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDefault', {
   defaultMessage: 'Static value',
@@ -132,13 +133,21 @@ export const staticValueOperation: OperationDefinition<
   isTransferable: (column) => {
     return true;
   },
-  createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap) {
-    const currentColumn = layer.columns[sourceId] as StaticValueIndexPatternColumn;
+  createCopy(layers, source, target) {
+    const currentColumn = layers[source.layerId].columns[
+      source.columnId
+    ] as StaticValueIndexPatternColumn;
+    const targetLayer = layers[target.layerId];
+    const columns = {
+      ...targetLayer.columns,
+      [target.columnId]: { ...currentColumn },
+    };
     return {
-      ...layer,
-      columns: {
-        ...layer.columns,
-        [targetId]: { ...currentColumn },
+      ...layers,
+      [target.layerId]: {
+        ...targetLayer,
+        columns,
+        columnOrder: getColumnOrder({ ...targetLayer, columns }),
       },
     };
   },

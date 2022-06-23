@@ -67,8 +67,8 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
     // TODO has to check all children
     return true;
   },
-  createCopy: (layer) => {
-    return { ...layer };
+  createCopy: (layers) => {
+    return { ...layers };
   },
 };
 

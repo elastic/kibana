@@ -174,13 +174,23 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     isTransferable: () => {
       return true;
     },
-    createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap) {
-      const currentColumn = layer.columns[sourceId] as FormulaIndexPatternColumn;
-
-      return insertOrReplaceFormulaColumn(targetId, currentColumn, layer, {
-        indexPattern,
-        operations: operationDefinitionMap,
-      }).layer;
+    createCopy(layers, source, target, operationDefinitionMap) {
+      const currentColumn = layers[source.layerId].columns[
+        source.columnId
+      ] as FormulaIndexPatternColumn;
+      const modifiedLayer = insertOrReplaceFormulaColumn(
+        target.columnId,
+        currentColumn,
+        layers[target.layerId],
+        {
+          indexPattern: target.dataView,
+          operations: operationDefinitionMap,
+        }
+      );
+      return {
+        ...layers,
+        [target.layerId]: modifiedLayer.layer,
+      };
     },
     timeScalingMode: 'optional',
     paramEditor: WrappedFormulaEditor,

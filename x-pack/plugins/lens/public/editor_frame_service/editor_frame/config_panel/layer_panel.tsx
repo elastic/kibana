@@ -19,7 +19,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
-import { StateSetter, Visualization, DraggedOperation, DropType } from '../../../types';
+import {
+  StateSetter,
+  Visualization,
+  DragDropOperation,
+  DropType,
+  isOperation,
+} from '../../../types';
 import { DragDropIdentifier, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
@@ -36,6 +42,7 @@ import {
   selectResolvedDateRange,
   selectDatasourceStates,
 } from '../../../state_management';
+import { onDropForVisualization } from './buttons/drop_targets_utils';
 
 const initialActiveDimensionState = {
   isNew: false,
@@ -109,19 +116,12 @@ export function LayerPanel(
   const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
   const layerDatasource = props.datasourceMap[datasourceId];
 
-  const layerDatasourceDropProps = useMemo(
-    () => ({
-      layerId,
-      state: layerDatasourceState,
-      setState: (newState: unknown) => {
-        updateDatasource(datasourceId, newState);
-      },
-    }),
-    [layerId, layerDatasourceState, datasourceId, updateDatasource]
-  );
-
   const layerDatasourceConfigProps = {
-    ...layerDatasourceDropProps,
+    state: layerDatasourceState,
+    setState: (newState: unknown) => {
+      updateDatasource(datasourceId, newState);
+    },
+    layerId,
     frame: props.framePublicAPI,
     dateRange,
   };
@@ -155,105 +155,70 @@ export function LayerPanel(
     registerNewRef: registerNewButtonRef,
   } = useFocusUpdate(allAccessors);
 
-  const layerDatasourceOnDrop = layerDatasource?.onDrop;
-
   const onDrop = useMemo(() => {
-    return (
-      droppedItem: DragDropIdentifier,
-      targetItem: DragDropIdentifier,
-      dropType?: DropType
-    ) => {
+    return (source: DragDropIdentifier, target: DragDropIdentifier, dropType?: DropType) => {
       if (!dropType) {
         return;
       }
-      const {
-        columnId,
-        groupId,
-        layerId: targetLayerId,
-      } = targetItem as unknown as DraggedOperation;
-      if (dropType === 'reorder' || dropType === 'field_replace' || dropType === 'field_add') {
-        setNextFocusedButtonId(droppedItem.id);
-      } else {
-        setNextFocusedButtonId(columnId);
+      if (!isOperation(target)) {
+        throw new Error('Drop target should be an operation');
       }
 
-      if (layerDatasource) {
-        const group = groups.find(({ groupId: gId }) => gId === groupId);
-        const filterOperations = group?.filterOperations || (() => false);
-        const dropResult = layerDatasourceOnDrop({
-          ...layerDatasourceDropProps,
-          droppedItem,
-          columnId,
-          layerId: targetLayerId,
-          filterOperations,
-          dimensionGroups: groups,
-          groupId,
-          dropType,
-        });
-        if (dropResult) {
-          let previousColumn =
-            typeof droppedItem.column === 'string' ? droppedItem.column : undefined;
-
-          // make it inherit only for moving and duplicate
-          if (!previousColumn) {
-            // when duplicating check if the previous column is required
-            if (
-              dropType === 'duplicate_compatible' &&
-              typeof droppedItem.columnId === 'string' &&
-              group?.requiresPreviousColumnOnDuplicate
-            ) {
-              previousColumn = droppedItem.columnId;
-            } else {
-              previousColumn = typeof dropResult === 'object' ? dropResult.deleted : undefined;
-            }
-          }
-          const newVisState = activeVisualization.setDimension({
-            columnId,
-            groupId,
-            layerId: targetLayerId,
-            prevState: props.visualizationState,
-            previousColumn,
-            frame: framePublicAPI,
-          });
-
-          if (typeof dropResult === 'object') {
-            // When a column is moved, we delete the reference to the old
-            updateVisualization(
-              activeVisualization.removeDimension({
-                columnId: dropResult.deleted,
-                layerId: targetLayerId,
-                prevState: newVisState,
-                frame: framePublicAPI,
-              })
-            );
-          } else {
-            updateVisualization(newVisState);
-          }
-        }
+      if (dropType === 'reorder' || dropType === 'field_replace' || dropType === 'field_add') {
+        setNextFocusedButtonId(source.id);
       } else {
-        if (dropType === 'duplicate_compatible' || dropType === 'reorder') {
-          const newVisState = activeVisualization.setDimension({
-            columnId,
-            groupId,
-            layerId: targetLayerId,
-            prevState: props.visualizationState,
-            previousColumn: droppedItem.id,
-            frame: framePublicAPI,
-          });
-          updateVisualization(newVisState);
-        }
+        setNextFocusedButtonId(target.columnId);
+      }
+
+      let hasDropSucceeded = true;
+      if (layerDatasource) {
+        hasDropSucceeded = Boolean(
+          layerDatasource?.onDrop({
+            state: layerDatasourceState,
+            setState: (newState: unknown) => {
+              updateDatasource(datasourceId, newState);
+            },
+            source,
+            target: {
+              ...(target as unknown as DragDropOperation),
+              filterOperations:
+                groups.find(({ groupId: gId }) => gId === target.groupId)?.filterOperations ||
+                Boolean,
+            },
+            dimensionGroups: groups,
+            dropType,
+          })
+        );
+      }
+      if (hasDropSucceeded) {
+        activeVisualization.onDrop = activeVisualization.onDrop?.bind(activeVisualization);
+
+        updateVisualization(
+          (activeVisualization.onDrop || onDropForVisualization)?.(
+            {
+              prevState: props.visualizationState,
+              frame: framePublicAPI,
+              target,
+              source,
+              dropType,
+              group: groups.find(({ groupId: gId }) => gId === target.groupId),
+            },
+            activeVisualization
+          )
+        );
       }
     };
   }, [
     layerDatasource,
+    layerDatasourceState,
     setNextFocusedButtonId,
     groups,
-    layerDatasourceOnDrop,
-    layerDatasourceDropProps,
     activeVisualization,
     props.visualizationState,
     framePublicAPI,
     updateVisualization,
+    datasourceId,
+    updateDatasource,
   ]);
 
   const isDimensionPanelOpen = Boolean(activeId);
@@ -462,15 +427,15 @@ export function LayerPanel(
                         return (
                           <DraggableDimensionButton
                             registerNewButtonRef={registerNewButtonRef}
-                            accessorIndex={accessorIndex}
                             columnId={columnId}
                             group={group}
-                            groups={groups}
+                            accessorIndex={accessorIndex}
                             groupIndex={groupIndex}
                             key={columnId}
-                            layerDatasourceDropProps={layerDatasourceDropProps}
+                            state={layerDatasourceState}
                             label={columnLabelMap?.[columnId]}
                             layerDatasource={layerDatasource}
+                            datasourceLayers={framePublicAPI.datasourceLayers}
                             layerIndex={layerIndex}
                             layerId={layerId}
                             onDragStart={() => setHideTooltip(true)}
@@ -562,12 +527,12 @@ export function LayerPanel(
                   {group.supportsMoreColumns ? (
                     <EmptyDimensionButton
                       group={group}
-                      groupIndex={groupIndex}
-                      groups={groups}
                       layerId={layerId}
+                      groupIndex={groupIndex}
                       layerIndex={layerIndex}
                       layerDatasource={layerDatasource}
-                      layerDatasourceDropProps={layerDatasourceDropProps}
+                      state={layerDatasourceState}
+                      datasourceLayers={framePublicAPI.datasourceLayers}
                       onClick={(id) => {
                         props.onEmptyDimensionAdd(id, group);
                         setActiveDimension({

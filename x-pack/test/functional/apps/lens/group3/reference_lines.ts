@@ -86,10 +86,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.closeDimensionEditor();
 
       // drag and drop it to the left axis
-      await PageObjects.lens.dragDimensionToDimension(
-        'lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger',
-        'lnsXY_yReferenceLineRightPanel > lns-empty-dimension'
-      );
+      await PageObjects.lens.dragDimensionToDimension({
+        from: 'lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger',
+        to: 'lnsXY_yReferenceLineRightPanel > lns-empty-dimension',
+      });
 
       await testSubjects.click('lnsXY_yReferenceLineRightPanel > lns-dimensionTrigger');
       expect(
@@ -100,10 +100,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should duplicate also the original style when duplicating a reference line', async () => {
       // drag and drop to the empty field to generate a duplicate
-      await PageObjects.lens.dragDimensionToDimension(
-        'lnsXY_yReferenceLineRightPanel > lns-dimensionTrigger',
-        'lnsXY_yReferenceLineRightPanel > lns-empty-dimension'
-      );
+      await PageObjects.lens.dragDimensionToDimension({
+        from: 'lnsXY_yReferenceLineRightPanel > lns-dimensionTrigger',
+        to: 'lnsXY_yReferenceLineRightPanel > lns-empty-dimension',
+      });
 
       await (
         await find.byCssSelector(

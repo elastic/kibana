@@ -325,7 +325,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       params: newParams,
     };
   },
-  onOtherColumnChanged: (layer, thisColumnId, changedColumnId) => {
+  onOtherColumnChanged: (layer, thisColumnId) => {
     const columns = layer.columns;
     const currentColumn = columns[thisColumnId] as TermsIndexPatternColumn;
     if (
