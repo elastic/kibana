@@ -25,15 +25,12 @@ export class SynchronizeMovementModal extends Component<Props> {
   _renderSwitches() {
     const mapPanels = synchronizeMovement.getMapPanels();
 
-    let numEnabled = 0;
-    mapPanels.forEach((mapPanel) => {
-      if (mapPanel.getIsMovementSynchronized()) {
-        numEnabled++;
-      }
+    const synchronizedPanels = mapPanels.filter((mapPanel) => {
+      return mapPanel.getIsMovementSynchronized();
     });
 
     return mapPanels.map((mapPanel) => {
-      const hasErrors = numEnabled === 1 && mapPanel.getIsMovementSynchronized();
+      const hasErrors = synchronizedPanels.length === 1 && mapPanel.getIsMovementSynchronized();
       return (
         <EuiFormRow
           display="columnCompressedSwitch"
@@ -44,7 +41,7 @@ export class SynchronizeMovementModal extends Component<Props> {
               ? [
                   i18n.translate('xpack.maps.synchronizeMovementModal.onlyOneMapSelectedError', {
                     defaultMessage:
-                      'Unable to synchronize map movement when only enabled for a single map',
+                      'Unable to synchronize map movement when single map is selected',
                   }),
                 ]
               : []
@@ -54,7 +51,20 @@ export class SynchronizeMovementModal extends Component<Props> {
             label={mapPanel.getTitle()}
             checked={mapPanel.getIsMovementSynchronized()}
             onChange={(event: EuiSwitchEvent) => {
-              mapPanel.setIsMovementSynchronized(event.target.checked);
+              const isChecked = event.target.checked;
+              if (!isChecked && synchronizedPanels.length === 2) {
+                // Auto uncheck last 2 switches when second to last switch is unchecked
+                synchronizedPanels.forEach((it) => {
+                  it.setIsMovementSynchronized(false);
+                });
+              } else if (isChecked && mapPanels.length === 2) {
+                // Auto check switches when there is only a pair of maps
+                mapPanels.forEach((it) => {
+                  it.setIsMovementSynchronized(true);
+                });
+              } else {
+                mapPanel.setIsMovementSynchronized(isChecked);
+              }
               this.forceUpdate();
             }}
             isInvalid={hasErrors}

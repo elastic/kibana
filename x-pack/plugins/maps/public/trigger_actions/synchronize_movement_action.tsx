@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
-import { Embeddable, EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/public';
+import { Embeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { getCore } from '../kibana_services';
@@ -30,7 +30,7 @@ export const synchronizeMovementAction = createAction<SynchronizeMovementActionC
   },
   getDisplayNameTooltip: () => {
     return i18n.translate('xpack.maps.synchronizeMovementAction.tooltipContent', {
-      defaultMessage: 'Configure map movement between map panels',
+      defaultMessage: 'Configure movement between map panels',
     });
   },
   getIconType: () => {
@@ -38,11 +38,7 @@ export const synchronizeMovementAction = createAction<SynchronizeMovementActionC
   },
   isCompatible: async ({ embeddable }: SynchronizeMovementActionContext) => {
     const { synchronizeMovement } = await import('../embeddable/synchronize_movement');
-    return (
-      synchronizeMovement.hasMultipleMaps() &&
-      embeddable.type === MAP_SAVED_OBJECT_TYPE &&
-      embeddable.getInput().viewMode === ViewMode.EDIT
-    );
+    return synchronizeMovement.hasMultipleMaps() && embeddable.type === MAP_SAVED_OBJECT_TYPE;
   },
   execute: async ({ embeddable }: SynchronizeMovementActionContext) => {
     const { SynchronizeMovementModal } = await import('./synchronize_movement_modal');

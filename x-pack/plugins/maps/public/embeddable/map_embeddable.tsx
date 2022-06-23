@@ -405,8 +405,16 @@ export class MapEmbeddable
 
     synchronizeMovement.register(this.input.id, {
       getTitle: () => {
-        const title = this.getOutput().title;
-        return title ? title : this.input.id;
+        const output = this.getOutput();
+        if (output.title) {
+          return output.title;
+        }
+
+        if (output.defaultTitle) {
+          return output.defaultTitle;
+        }
+
+        return this.input.id;
       },
       onLocationChange: this._mapSyncHandler,
       getIsMovementSynchronized: this._getIsMovementSynchronized,
