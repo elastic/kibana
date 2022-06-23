@@ -39,7 +39,21 @@
   font-size: $euiFontSizeS;
 }
 
+.dscDiscoverGrid__inner {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  height: 100%;
+}
+
+.dscDiscoverGrid__table {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-height: 0;
+}
+
 .dscDiscoverGrid__footer {
+  flex-shrink: 0;
   background-color: $euiColorLightShade;
   padding: $euiSize / 2 $euiSize;
   margin-top: $euiSize / 4;

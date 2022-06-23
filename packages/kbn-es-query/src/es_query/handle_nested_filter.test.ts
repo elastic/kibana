@@ -39,6 +39,28 @@ describe('handleNestedFilter', function () {
     });
   });
 
+  it('should allow to configure ignore_unmapped', () => {
+    const field = getField('nestedField.child');
+    const filter = buildPhraseFilter(field!, 'foo', indexPattern);
+    const result = handleNestedFilter(filter, indexPattern, { ignoreUnmapped: true });
+    expect(result).toEqual({
+      meta: {
+        index: 'logstash-*',
+      },
+      query: {
+        nested: {
+          path: 'nestedField',
+          query: {
+            match_phrase: {
+              'nestedField.child': 'foo',
+            },
+          },
+          ignore_unmapped: true,
+        },
+      },
+    });
+  });
+
   it('should return filter untouched if it does not target a nested field', () => {
     const field = getField('extension');
     const filter = buildPhraseFilter(field!, 'jpg', indexPattern);
