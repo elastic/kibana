@@ -40,7 +40,7 @@ test('ErrorEmbeddable renders in compact mode', async () => {
               class="euiPopover__anchor errorEmbeddableCompact__popoverAnchor"
             >
               <div
-                class="euiText euiText--extraSmall errorEmbeddableCompact__button"
+                class="euiText errorEmbeddableCompact__button css-1utxlgq-euiText-xs"
               >
                 <button
                   class="euiLink eui-textTruncate css-7rgcqt-euiLink-subdued"

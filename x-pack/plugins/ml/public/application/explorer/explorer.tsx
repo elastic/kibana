@@ -25,10 +25,13 @@ import {
   EuiBadge,
   EuiResizableContainer,
   useIsWithinBreakpoints,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { HelpPopover } from '../components/help_popover';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -348,7 +351,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const {
     services: { charts: chartsService },
   } = useMlKibana();
-
+  const { euiTheme } = useEuiTheme();
   const mlLocator = useMlLocator();
 
   const {
@@ -462,10 +465,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
       {annotationsError !== undefined && (
         <>
-          <EuiTitle
-            className="panel-title"
-            data-test-subj="mlAnomalyExplorerAnnotationsPanel error"
-          >
+          <EuiTitle data-test-subj="mlAnomalyExplorerAnnotationsPanel error" size={'xs'}>
             <h2>
               <FormattedMessage
                 id="xpack.ml.explorer.annotationsErrorTitle"
@@ -500,10 +500,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
             <EuiAccordion
               id={htmlIdGen()}
               buttonContent={
-                <EuiTitle
-                  className="panel-title"
-                  data-test-subj="mlAnomalyExplorerAnnotationsPanelButton"
-                >
+                <EuiTitle data-test-subj="mlAnomalyExplorerAnnotationsPanelButton" size={'xs'}>
                   <h2>
                     <FormattedMessage
                       id="xpack.ml.explorer.annotationsTitle"
@@ -517,6 +514,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
               }
             >
               <>
+                <EuiSpacer size={'m'} />
                 <AnnotationsTable
                   jobIds={selectedJobIds}
                   annotations={annotationsData}
@@ -534,7 +532,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         <EuiPanel hasBorder hasShadow={false}>
           <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiTitle className="panel-title">
+              <EuiTitle size={'xs'}>
                 <h2>
                   <FormattedMessage
                     id="xpack.ml.explorer.anomaliesTitle"
@@ -607,22 +605,21 @@ export const Explorer: FC<ExplorerUIProps> = ({
       {noInfluencersConfigured ? (
         <EuiFlexGroup gutterSize={'s'}>
           <EuiFlexItem grow={false}>
-            <div className="no-influencers-warning">
-              <EuiIconTip
-                content={i18n.translate('xpack.ml.explorer.noConfiguredInfluencersTooltip', {
-                  defaultMessage:
-                    'The Top Influencers list is hidden because no influencers have been configured for the selected jobs.',
-                })}
-                position="right"
-                type="iInCircle"
-              />
-            </div>
+            <EuiIconTip
+              content={i18n.translate('xpack.ml.explorer.noConfiguredInfluencersTooltip', {
+                defaultMessage:
+                  'The Top Influencers list is hidden because no influencers have been configured for the selected jobs.',
+              })}
+              position="right"
+              type="iInCircle"
+            />
           </EuiFlexItem>
           <EuiFlexItem>{mainPanelContent}</EuiFlexItem>
         </EuiFlexGroup>
       ) : (
         <div>
-          <EuiSpacer size={'s'} />
+          <EuiSpacer size={'m'} />
+
           <EuiResizableContainer
             direction={isMobile ? 'vertical' : 'horizontal'}
             onPanelWidthChange={onPanelWidthChange}
@@ -645,28 +642,51 @@ export const Explorer: FC<ExplorerUIProps> = ({
                     ]}
                     minSize={'200px'}
                     initialSize={20}
-                    paddingSize={'s'}
+                    paddingSize={'none'}
                     onToggleCollapsed={onToggleCollapsed}
                   >
-                    <div data-test-subj="mlAnomalyExplorerInfluencerList">
-                      <EuiSpacer size={'s'} />
-                      <EuiTitle className="panel-title">
-                        <h2>
-                          <FormattedMessage
-                            id="xpack.ml.explorer.topInfuencersTitle"
-                            defaultMessage="Top influencers"
-                          />
-                          <EuiIconTip
-                            content={
+                    <div
+                      data-test-subj="mlAnomalyExplorerInfluencerList"
+                      css={css`
+                        padding: calc(${euiTheme.size.base} + ${euiTheme.border.width.thin})
+                          ${euiTheme.size.l} ${euiTheme.size.l} 0;
+                      `}
+                    >
+                      <EuiFlexGroup
+                        direction="row"
+                        gutterSize="xs"
+                        responsive={false}
+                        alignItems="baseline"
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiTitle size={'xs'}>
+                            <h2>
+                              <FormattedMessage
+                                id="xpack.ml.explorer.topInfuencersTitle"
+                                defaultMessage="Top influencers"
+                              />
+                            </h2>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <HelpPopover
+                            anchorPosition="upCenter"
+                            title={i18n.translate('xpack.ml.explorer.topInfluencersPopoverTitle', {
+                              defaultMessage: 'Top influencers',
+                            })}
+                          >
+                            <p>
                               <FormattedMessage
                                 id="xpack.ml.explorer.topInfluencersTooltip"
                                 defaultMessage="View the relative impact of the top influencers in the selected time period and add them as filters on the results. Each influencer has a maximum anomaly score between 0-100 and a total anomaly score for that period."
                               />
-                            }
-                            position="right"
-                          />
-                        </h2>
-                      </EuiTitle>
+                            </p>
+                          </HelpPopover>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+
+                      <EuiSpacer size={'m'} />
+
                       {loading ? (
                         <EuiLoadingContent lines={10} />
                       ) : (
@@ -682,7 +702,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                     mode="main"
                     minSize={'70%'}
                     initialSize={80}
-                    paddingSize={'s'}
+                    paddingSize={'none'}
                   >
                     {mainPanelContent}
                   </EuiResizablePanel>
