@@ -80,4 +80,5 @@ export const LICENSE_OVERRIDES = {
   '@elastic/ems-client@8.3.3': ['Elastic License 2.0'],
   '@elastic/eui@60.0.0': ['SSPL-1.0 OR Elastic License 2.0'],
   'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry
+  'openpgp@5.3.0': ['LGPL-3.0+'],
 };
