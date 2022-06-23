@@ -31,7 +31,7 @@ import {
 } from '../../services/embeddable';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
-import { DashboardDataLoadedEvent, DashboardPanelState } from './types';
+import { DashboardLoadedEvent, DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import {
   KibanaContextProvider,
@@ -155,7 +155,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
   }
 
-  private onDataLoaded(data: DashboardDataLoadedEvent) {
+  private onDataLoaded(data: DashboardLoadedEvent) {
     this.services.analytics?.reportEvent('dashboard-data-loaded', {
       ...data,
       id: this.id,

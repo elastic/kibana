@@ -71,7 +71,7 @@ import {
   LibraryNotificationAction,
   CopyToDashboardAction,
   DashboardCapabilities,
-  DashboardDataLoadedEvent,
+  DashboardLoadedEvent,
 } from './application';
 import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
 import { createSavedDashboardLoader } from './saved_dashboards';
@@ -140,13 +140,9 @@ export class DashboardPlugin
   private locator?: DashboardAppLocator;
 
   private registerEvents(analytics: CoreSetup['analytics']) {
-    analytics.registerEventType<DashboardDataLoadedEvent>({
+    analytics.registerEventType<DashboardLoadedEvent>({
       eventType: 'dashboard-data-loaded',
       schema: {
-        id: {
-          type: 'keyword',
-          _meta: { description: 'Dashboard saved object id' },
-        },
         timeToData: {
           type: 'long',
           _meta: { description: 'Time all embeddables took to load data' },

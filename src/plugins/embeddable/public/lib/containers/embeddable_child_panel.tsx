@@ -46,7 +46,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
   [panel: string]: any;
   public mounted: boolean;
   public embeddable!: IEmbeddable | ErrorEmbeddable;
-  private subscription?: Subscription;
+  private subscription: Subscription = new Subscription();
 
   constructor(props: EmbeddableChildPanelProps) {
     super(props);
@@ -73,40 +73,42 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
     this.mounted = true;
     const { container } = this.props;
 
-    let loadingStartTime = 0;
-
     this.embeddable = await container.untilEmbeddableLoaded(this.props.embeddableId);
 
-    this.embeddable
-      .getOutput$()
-      .pipe(
-        // Map loaded event properties
-        map((output) => {
-          if (output.loading === true) {
-            loadingStartTime = performance.now();
-          }
-          return {
-            id: this.embeddable.id,
-            status: this.getEventStatus(output),
-            error: output.error,
-          };
-        }),
-        // Dedupe
-        distinct((output) => loadingStartTime + output.id + output.status + !!output.error),
-        // Map loaded event properties
-        map((output): EmbeddablePhaseEvent => {
-          return {
-            ...output,
-            timeToEvent: performance.now() - loadingStartTime,
-          };
-        })
-      )
-      .subscribe((statusOutput) => {
-        if (this.props.onPanelStatusChange) {
-          this.props.onPanelStatusChange(statusOutput);
-        }
-      });
     if (this.mounted) {
+      let loadingStartTime = 0;
+      this.subscription?.add(
+        this.embeddable
+          .getOutput$()
+          .pipe(
+            // Map loaded event properties
+            map((output) => {
+              if (output.loading === true) {
+                loadingStartTime = performance.now();
+              }
+              return {
+                id: this.embeddable.id,
+                status: this.getEventStatus(output),
+                error: output.error,
+              };
+            }),
+            // Dedupe
+            distinct((output) => loadingStartTime + output.id + output.status + !!output.error),
+            // Map loaded event properties
+            map((output): EmbeddablePhaseEvent => {
+              return {
+                ...output,
+                timeToEvent: performance.now() - loadingStartTime,
+              };
+            })
+          )
+          .subscribe((statusOutput) => {
+            if (this.props.onPanelStatusChange) {
+              this.props.onPanelStatusChange(statusOutput);
+            }
+          })
+      );
+
       this.setState({ firstTimeLoading: false });
     }
   }

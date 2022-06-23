@@ -19,13 +19,13 @@ import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { withSuspense } from '../../../services/presentation_util';
-import { DashboardDataLoadedEvent } from '../types';
+import { DashboardLoadedEvent } from '../types';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
   controlGroup?: ControlGroupContainer;
   controlsEnabled?: boolean;
-  onDataLoaded?: (data: DashboardDataLoadedEvent) => void;
+  onDataLoaded?: (data: DashboardLoadedEvent) => void;
 }
 
 interface State {

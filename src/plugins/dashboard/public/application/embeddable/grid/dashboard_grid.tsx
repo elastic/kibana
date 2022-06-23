@@ -21,7 +21,7 @@ import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout
 import { GridData } from '../../../../common';
 import { ViewMode, EmbeddablePhaseEvent } from '../../../services/embeddable';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
-import { DashboardDataEventStatus, DashboardDataLoadedEvent, DashboardPanelState } from '../types';
+import { DashboardDataEventStatus, DashboardLoadedEvent, DashboardPanelState } from '../types';
 import { withKibana } from '../../../services/kibana_react';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGridItem } from './dashboard_grid_item';
@@ -105,7 +105,7 @@ const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   kibana: DashboardReactContextValue;
   container: DashboardContainer;
-  onDataLoaded?: (data: DashboardDataLoadedEvent) => void;
+  onDataLoaded?: (data: DashboardLoadedEvent) => void;
 }
 
 interface State {
@@ -272,7 +272,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         doneCount++;
         if (doneCount === panelsInOrder.length) {
           const doneTime = performance.now();
-          const data: DashboardDataLoadedEvent = {
+          const data: DashboardLoadedEvent = {
             timeToData: (lastTimeToData || doneTime) - loadStartTime,
             timeToDone: doneTime - loadStartTime,
             numOfPanels: panelsInOrder.length,

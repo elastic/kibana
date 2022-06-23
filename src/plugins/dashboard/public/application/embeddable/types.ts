@@ -10,7 +10,7 @@ export * from '../../../common/types';
 
 export type DashboardDataEventStatus = 'done' | 'error';
 
-export interface DashboardDataLoadedEvent extends Record<string, unknown> {
+export interface DashboardLoadedEvent {
   // Time from start to when data is loaded
   timeToData: number;
   // Time from start until render or error
