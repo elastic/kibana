@@ -33,8 +33,8 @@ export const FleetDownloadElasticGpgKey: Task = {
         maxAttempts: 3,
       });
     } catch (error) {
-      log.warning(`Failed to download Elastic GPG key`);
-      log.warning(error);
+      log.error(`Error downloading Elastic GPG key from ${gpgKeyUrl} to ${destination}`);
+      throw error;
     }
   },
 };
