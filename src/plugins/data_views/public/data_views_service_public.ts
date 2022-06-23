@@ -54,7 +54,9 @@ export class DataViewsServicePublic extends DataViewsService {
     const { data_view_id: dataViewId } = await this.http.get<{ data_view_id?: string }>(
       '/api/data_views/default',
       {
-        asSystemRequest: true,
+        query: {
+          provideDefault: undefined,
+        },
       }
     );
     return dataViewId ? this.get(dataViewId) : null;

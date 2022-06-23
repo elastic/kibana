@@ -18,14 +18,20 @@ interface GetDefaultArgs {
   dataViewsService: DataViewsServiceServer;
   usageCollection?: UsageCounter;
   counterName: string;
+  provideDefault: boolean;
 }
 
 export const getDefault = async ({
   dataViewsService,
   usageCollection,
   counterName,
+  provideDefault,
 }: GetDefaultArgs) => {
   usageCollection?.incrementCounter({ counterName });
+
+  if (!provideDefault) {
+    return dataViewsService.getDefaultId();
+  }
   const dataView = await dataViewsService.getDefaultDataView();
   return dataView?.id;
 };
@@ -59,14 +65,14 @@ const manageDefaultIndexPatternRoutesFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.get(
+    router.get<{ provideDefault: string }, {}, {}>(
       {
         path,
         validate: {},
       },
       handleErrors(async (ctx, req, res) => {
         const [core, , { dataViewsServiceFactory }] = await getStartServices();
-        // const core = await ctx.core;
+        const provideDefault = Object.keys(req.params).includes('provideDefault');
         const savedObjectsClient =
           core.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
         const elasticsearchClient = core.elasticsearch.client.asInternalUser;
@@ -81,6 +87,7 @@ const manageDefaultIndexPatternRoutesFactory =
           dataViewsService,
           usageCollection,
           counterName: `${req.route.method} ${path}`,
+          provideDefault,
         });
 
         return res.ok({
