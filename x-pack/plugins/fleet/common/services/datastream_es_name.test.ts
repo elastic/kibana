@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { getCustomPipelineNameForDatastream } from './datastream_es_name';
+import {
+  getCustomPipelineNameForDatastream,
+  getRegistryDataStreamAssetBaseName,
+} from './datastream_es_name';
 
 describe('getCustomPipelineNameForDatastream', () => {
   it('return the correct custom pipeline for datastream', () => {
@@ -15,5 +18,36 @@ describe('getCustomPipelineNameForDatastream', () => {
     } as any);
 
     expect(res).toBe('logs-test@custom');
+  });
+});
+
+describe('getRegistryDataStreamAssetBaseName', () => {
+  it('return the asset name', () => {
+    const dataStream = {
+      dataset: 'nginx.access',
+      title: 'Nginx Acess Logs',
+      release: 'beta',
+      type: 'logs',
+      ingest_pipeline: 'default',
+      package: 'nginx',
+      path: 'access',
+    };
+    const name = getRegistryDataStreamAssetBaseName(dataStream);
+    expect(name).toStrictEqual('logs-nginx.access');
+  });
+
+  it('return the asset name for hidden index', () => {
+    const dataStream = {
+      dataset: 'nginx.access',
+      title: 'Nginx Acess Logs',
+      release: 'beta',
+      type: 'logs',
+      ingest_pipeline: 'default',
+      package: 'nginx',
+      path: 'access',
+      hidden: true,
+    };
+    const name = getRegistryDataStreamAssetBaseName(dataStream);
+    expect(name).toStrictEqual('.logs-nginx.access');
   });
 });

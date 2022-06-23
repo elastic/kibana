@@ -7,5 +7,3 @@
 
 export { PackagePolicyInputPanel } from './package_policy_input_panel';
 export { PackagePolicyInputVarField } from './package_policy_input_var_field';
-export { DatastreamPipelines } from './datastream_pipelines';
-export { DatastreamMappings } from './datastream_mappings';

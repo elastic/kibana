@@ -39,4 +39,6 @@ export { getMinVersion, getMaxVersion } from './get_min_max_version';
 export {
   getPipelineNameForDatastream,
   getCustomPipelineNameForDatastream,
+  getRegistryDataStreamAssetBaseName,
+  getComponentTemplateNameForDatastream,
 } from './datastream_es_name';

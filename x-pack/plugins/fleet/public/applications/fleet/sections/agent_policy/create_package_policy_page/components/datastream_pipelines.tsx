@@ -20,14 +20,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { PackageInfo } from '../../../../../../types';
-import { useStartServices, useGetPipeline, useLink } from '../../../../../../hooks';
+import type { PackageInfo } from '../../../../types';
+import { useStartServices, useGetPipeline, useLink } from '../../../../hooks';
 import {
   getPipelineNameForDatastream,
   getCustomPipelineNameForDatastream,
-} from '../../../../../../../../../common';
+} from '../../../../../../../common';
 
-interface Props {
+export interface PackagePolicyEditorDatastreamPipelinesProps {
   packageInfo: PackageInfo;
   dataStream: { dataset: string; type: string };
 }
@@ -68,10 +68,9 @@ function useDatastreamIngestPipelines(
   };
 }
 
-export const DatastreamPipelines: React.FunctionComponent<Props> = ({
-  dataStream,
-  packageInfo,
-}) => {
+export const PackagePolicyEditorDatastreamPipelines: React.FunctionComponent<
+  PackagePolicyEditorDatastreamPipelinesProps
+> = ({ dataStream, packageInfo }) => {
   const {
     params: { packagePolicyId, policyId },
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
@@ -100,7 +99,7 @@ export const DatastreamPipelines: React.FunctionComponent<Props> = ({
         <EuiTitle size="xxxs">
           <h5>
             <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.datastreamIngestPipelinesTitle"
+              id="xpack.fleet.packagePolicyEditor.datastreamIngestPipelinesTitle"
               defaultMessage="Ingest pipelines"
             />
           </h5>
@@ -109,7 +108,7 @@ export const DatastreamPipelines: React.FunctionComponent<Props> = ({
       <EuiFlexItem grow={false}>
         <EuiText color="subdued" size="xs">
           <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.datastreamIngestPipelinesLabel"
+            id="xpack.fleet.packagePolicyEditor.datastreamIngestPipelinesLabel"
             defaultMessage="Ingest pipelines perform common transformations on the ingested data. We recommend modifying only the custom ingest pipeline. These pipelines are shared between integration policies of the same integration type. Hence, any modifications tot he ingest pipelines would affect all the integration policies. {learnMoreLink}"
             values={{
               learnMoreLink: (
@@ -140,7 +139,7 @@ export const DatastreamPipelines: React.FunctionComponent<Props> = ({
                   icon: 'pencil',
                   type: 'icon',
                   description: i18n.translate(
-                    'xpack.fleet.packagePolicyEdotpr.datastreamIngestPipelines.editBtn',
+                    'xpack.fleet.packagePolicyEditor.datastreamIngestPipelines.editBtn',
                     {
                       defaultMessage: 'Edit pipeline',
                     }

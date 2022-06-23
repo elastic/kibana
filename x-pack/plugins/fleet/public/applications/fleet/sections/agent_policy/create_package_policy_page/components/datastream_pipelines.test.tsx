@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import { createFleetTestRendererMock } from '../../../../../../../../mock';
-import { useGetPipeline } from '../../../../../../hooks';
+import { createFleetTestRendererMock } from '../../../../../../mock';
+import { useGetPipeline } from '../../../../hooks';
 
-import { DatastreamPipelines } from './datastream_pipelines';
+import { PackagePolicyEditorDatastreamPipelines } from './datastream_pipelines';
 
 const mockedUseGetPipeline = useGetPipeline as jest.MockedFunction<typeof useGetPipeline>;
 
-jest.mock('../../../../../../hooks', () => {
+jest.mock('../../../../hooks', () => {
   return {
-    ...jest.requireActual('../../../../../../hooks'),
+    ...jest.requireActual('../../../../hooks'),
     FleetStatusProvider: (props: any) => {
       return props.children;
     },
@@ -36,7 +36,7 @@ describe('DatastreamPipelines', () => {
     } as any);
 
     const result = renderer.render(
-      <DatastreamPipelines
+      <PackagePolicyEditorDatastreamPipelines
         dataStream={{ dataset: 'test', type: 'logs' }}
         packageInfo={
           {
@@ -61,7 +61,7 @@ describe('DatastreamPipelines', () => {
     } as any);
 
     const result = renderer.render(
-      <DatastreamPipelines
+      <PackagePolicyEditorDatastreamPipelines
         dataStream={{ dataset: 'test', type: 'logs' }}
         packageInfo={
           {

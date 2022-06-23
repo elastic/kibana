@@ -28,10 +28,10 @@ import type {
 } from '../../../../../../types';
 import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
+import { PackagePolicyEditorDatastreamPipelines } from '../../datastream_pipelines';
+import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
-import { DatastreamPipelines } from './datastream_pipelines';
-import { DatastreamMappings } from './datastream_mappings';
 
 const FlexItemWithMaxWidth = styled(EuiFlexItem)`
   max-width: calc(50% - ${(props) => props.theme.eui.euiSizeL});
@@ -206,14 +206,14 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                     );
                   })}
                   <EuiFlexItem>
-                    <DatastreamPipelines
+                    <PackagePolicyEditorDatastreamPipelines
                       dataStream={packageInputStream.data_stream}
                       packageInfo={packageInfo}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <DatastreamMappings
-                      packageInputStream={packageInputStream}
+                    <PackagePolicyEditorDatastreamMappings
+                      dataStream={packageInputStream.data_stream}
                       packageInfo={packageInfo}
                     />
                   </EuiFlexItem>
