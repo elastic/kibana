@@ -47,6 +47,8 @@
       "@kbn/ui-actions-examples-plugin/*": ["examples/ui_action_examples/*"],
       "@kbn/ui-actions-explorer-plugin": ["examples/ui_actions_explorer"],
       "@kbn/ui-actions-explorer-plugin/*": ["examples/ui_actions_explorer/*"],
+      "@kbn/custom-kibana-logo-plugin": ["plugins/custom-kibana-logo"],
+      "@kbn/custom-kibana-logo-plugin/*": ["plugins/custom-kibana-logo/*"],
       "@kbn/advanced-settings-plugin": ["src/plugins/advanced_settings"],
       "@kbn/advanced-settings-plugin/*": ["src/plugins/advanced_settings/*"],
       "@kbn/bfetch-plugin": ["src/plugins/bfetch"],
