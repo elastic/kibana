@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
@@ -21,11 +20,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PackageInfo } from '../../../../types';
-import { useStartServices, useGetPipeline, useLink } from '../../../../hooks';
+import { useStartServices, useGetPipeline } from '../../../../hooks';
 import {
   getPipelineNameForDatastream,
   getCustomPipelineNameForDatastream,
 } from '../../../../../../../common';
+
+import { usePackagePolicyEditorPageUrl } from './datastream_hooks';
 
 export interface PackagePolicyEditorDatastreamPipelinesProps {
   packageInfo: PackageInfo;
@@ -92,23 +93,10 @@ function useDatastreamIngestPipelines(
 export const PackagePolicyEditorDatastreamPipelines: React.FunctionComponent<
   PackagePolicyEditorDatastreamPipelinesProps
 > = ({ dataStream, packageInfo }) => {
-  const {
-    params: { packagePolicyId, policyId },
-  } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
-  const { getHref } = useLink();
-
-  const pageUrl =
-    packagePolicyId && policyId
-      ? getHref('edit_integration', {
-          policyId,
-          packagePolicyId,
-        })
-      : getHref('integration_policy_edit', {
-          packagePolicyId,
-        });
-
   const { application, share, docLinks } = useStartServices();
   const ingestPipelineLocator = share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR');
+
+  const pageUrl = usePackagePolicyEditorPageUrl();
 
   const { pipelines, addPipelineUrl, hasCustom, isLoading } = useDatastreamIngestPipelines(
     packageInfo,
@@ -136,7 +124,7 @@ export const PackagePolicyEditorDatastreamPipelines: React.FunctionComponent<
         <EuiText color="subdued" size="xs">
           <FormattedMessage
             id="xpack.fleet.packagePolicyEditor.datastreamIngestPipelinesLabel"
-            defaultMessage="Ingest pipelines perform common transformations on the ingested data. We recommend modifying only the custom ingest pipeline. These pipelines are shared between integration policies of the same integration type. Hence, any modifications tot he ingest pipelines would affect all the integration policies. {learnMoreLink}"
+            defaultMessage="Ingest pipelines perform common transformations on the ingested data. We recommend modifying only the custom ingest pipeline. These pipelines are shared between integration policies of the same integration type. Hence, any modifications to the ingest pipelines would affect all the integration policies. {learnMoreLink}"
             values={{
               learnMoreLink: (
                 <EuiLink href={docLinks.links.fleet.datastreams} external={true}>

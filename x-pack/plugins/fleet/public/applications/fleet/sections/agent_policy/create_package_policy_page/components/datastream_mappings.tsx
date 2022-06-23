@@ -9,11 +9,12 @@ import React from 'react';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useRouteMatch } from 'react-router-dom';
 
 import type { PackageInfo } from '../../../../types';
 import { getComponentTemplateNameForDatastream } from '../../../../../../../common';
-import { useLink, useStartServices } from '../../../../hooks';
+import { useStartServices } from '../../../../hooks';
+
+import { usePackagePolicyEditorPageUrl } from './datastream_hooks';
 
 export interface PackagePolicyEditorDatastreamMappingsProps {
   packageInfo: PackageInfo;
@@ -35,20 +36,7 @@ function useComponentTemplates(dataStream: { dataset: string; type: string }) {
 export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
   PackagePolicyEditorDatastreamMappingsProps
 > = ({ dataStream, packageInfo }) => {
-  const {
-    params: { packagePolicyId, policyId },
-  } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
-  const { getHref } = useLink();
-
-  const pageUrl =
-    packagePolicyId && policyId
-      ? getHref('edit_integration', {
-          policyId,
-          packagePolicyId,
-        })
-      : getHref('integration_policy_edit', {
-          packagePolicyId,
-        });
+  const pageUrl = usePackagePolicyEditorPageUrl();
 
   const { application, docLinks } = useStartServices();
   const componentTemplateItems = useComponentTemplates(dataStream);
