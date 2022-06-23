@@ -4387,13 +4387,7 @@
             "text": "SavedObjectsStart"
           },
           " | undefined; i18n?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.I18nStart",
-            "text": "I18nStart"
-          },
+          "I18nStart",
           " | undefined; notifications?: ",
           {
             "pluginId": "core",
