@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaExecutionContext } from '../../types';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import {
   ExecutionContextContainer,
   BAGGAGE_MAX_PER_NAME_VALUE_PAIRS,

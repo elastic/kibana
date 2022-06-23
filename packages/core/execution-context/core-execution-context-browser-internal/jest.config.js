@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { KibanaExecutionContext } from '../../types';
-export { ExecutionContextContainer } from './execution_context_container';
-export { ExecutionContextService } from './execution_context_service';
-export type { ExecutionContextSetup, ExecutionContextStart } from './execution_context_service';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/execution-context/core-execution-context-browser-internal'],
+};

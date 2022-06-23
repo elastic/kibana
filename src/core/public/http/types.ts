@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { MaybePromise } from '@kbn/utility-types';
-import type { KibanaExecutionContext } from '../execution_context';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 /** @public */
 export interface HttpSetup {

@@ -18,6 +18,7 @@ import { ThemeService } from '@kbn/core-theme-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
+import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
@@ -33,7 +34,6 @@ import { IntegrationsService } from './integrations';
 import { DeprecationsService } from './deprecations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
-import { ExecutionContextService } from './execution_context';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 
 interface Params {
