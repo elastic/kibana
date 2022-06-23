@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const pngSessionFilePath = await compareImages.writeToSessionFile(sessionPng, captureData);
 
       expect(await compareImages.checkIfPngsMatch(pngSessionFilePath, baselineAPng)).to.be.lessThan(
-        0.009
+        0.01
       );
     });
   });
