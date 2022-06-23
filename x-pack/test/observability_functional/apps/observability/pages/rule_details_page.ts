@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
           'Rules table to be visible',
           async () => await testSubjects.exists('rulesList')
         );
-        await find.clickByLinkText(logThresholdRuleName);
+        await find.clickByButtonText(logThresholdRuleName);
         await retry.waitFor(
           'Rule details to be visible',
           async () => await testSubjects.exists('ruleDetails')
