@@ -6,7 +6,6 @@
  */
 
 import type {
-  AlertsTableConfigurationRegistryContract,
   AlertTableFlyoutComponent,
   GetRenderCellValue,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -27,20 +26,15 @@ const AlertsFlyoutFooterLazy = lazy(
   () => import('../pages/alerts/components/alerts_flyout/alerts_flyout_footer')
 );
 
-const registerAlertsTableConfiguration = (registry: AlertsTableConfigurationRegistryContract) => {
-  if (registry.has(observabilityFeatureId)) {
-    return;
-  }
-  registry.register({
-    id: observabilityFeatureId,
-    columns: alertO11yColumns.map(addDisplayNames),
-    externalFlyout: {
-      header: AlertsPageFlyoutHeaderLazy as AlertTableFlyoutComponent,
-      body: AlertsPageFlyoutBodyLazy as AlertTableFlyoutComponent,
-      footer: AlertsFlyoutFooterLazy as AlertTableFlyoutComponent,
-    },
-    getRenderCellValue: getRenderCellValue as GetRenderCellValue,
-  });
-};
+const getO11yAlertsTableConfiguration = () => ({
+  id: observabilityFeatureId,
+  columns: alertO11yColumns.map(addDisplayNames),
+  externalFlyout: {
+    header: AlertsPageFlyoutHeaderLazy as AlertTableFlyoutComponent,
+    body: AlertsPageFlyoutBodyLazy as AlertTableFlyoutComponent,
+    footer: AlertsFlyoutFooterLazy as AlertTableFlyoutComponent,
+  },
+  getRenderCellValue: getRenderCellValue as GetRenderCellValue,
+});
 
-export { registerAlertsTableConfiguration };
+export { getO11yAlertsTableConfiguration };
