@@ -7,18 +7,18 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from './ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'settings']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:searchFieldsFromSource': false,
+    'doc_table:legacy': true,
   };
   describe('discover uses fields API test', function describeIndexTests() {
     before(async function () {
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('displays _source viewer in doc viewer', async function () {
-      await dataGrid.clickRowToggle();
+      await PageObjects.discover.clickDocTableRowToggle(0);
       await PageObjects.discover.isShowingDocViewer();
       await PageObjects.discover.clickDocViewerTab(1);
       await PageObjects.discover.expectSourceViewerToExist();
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
 
-      expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
+      expect(await PageObjects.discover.getDocHeader()).to.have.string('_source');
     });
 
     it('switches to Document column when fields API is used', async function () {
