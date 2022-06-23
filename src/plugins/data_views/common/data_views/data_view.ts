@@ -265,6 +265,10 @@ export class DataView implements DataViewBase {
     };
   }
 
+  isPersisted() {
+    return typeof this.version === 'string';
+  }
+
   /**
    * Creates static representation of the data view.
    */
