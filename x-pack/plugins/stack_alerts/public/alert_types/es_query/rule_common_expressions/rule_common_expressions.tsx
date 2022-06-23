@@ -54,7 +54,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
 }) => {
   return (
     <>
-      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h5>
@@ -70,9 +70,6 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
             position="right"
             color="subdued"
             type="questionInCircle"
-            iconProps={{
-              className: 'eui-alignTop',
-            }}
             content={i18n.translate('xpack.stackAlerts.esQuery.ui.conditionPrompt.toolTip', {
               defaultMessage: 'The time window defined below applies only to the first rule check.',
             })}
@@ -101,7 +98,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
         onChangeWindowUnit={onChangeWindowUnit}
       />
       <EuiSpacer size="s" />
-      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h5>
@@ -117,9 +114,6 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
             position="right"
             color="subdued"
             type="questionInCircle"
-            iconProps={{
-              className: 'eui-alignTop',
-            }}
             content={i18n.translate('xpack.stackAlerts.esQuery.ui.selectSizePrompt.toolTip', {
               defaultMessage:
                 'Specifies the number of documents to pass to the configured actions when the threshold condition is met.',
