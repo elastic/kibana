@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { useRouteMatch } from 'react-router-dom';
 
 import type {
   NewPackagePolicy,
@@ -55,6 +56,12 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
     inputStreamValidationResults,
     forceShowErrors,
   }) => {
+    const {
+      params: { packagePolicyId },
+    } = useRouteMatch<{ packagePolicyId?: string }>();
+
+    const isPackagePolicyEdit = !!packagePolicyId;
+
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>();
 
@@ -146,80 +153,87 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                 </EuiFlexItem>
               );
             })}
-            {/* Advenced section */}
-            <Fragment>
-              <EuiFlexItem>
-                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      size="xs"
-                      iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
-                      onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
-                      flush="left"
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText"
-                        defaultMessage="Advanced options"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  {!isShowingAdvanced && hasErrors && advancedVarsWithErrorsCount ? (
+            {/* Advanced section */}
+            {(isPackagePolicyEdit || advancedVars.length) && (
+              <Fragment>
+                <EuiFlexItem>
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiText color="danger" size="s">
+                      <EuiButtonEmpty
+                        size="xs"
+                        iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                        onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
+                        flush="left"
+                      >
                         <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
-                          defaultMessage="{count, plural, one {# error} other {# errors}}"
-                          values={{ count: advancedVarsWithErrorsCount }}
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText"
+                          defaultMessage="Advanced options"
                         />
-                      </EuiText>
+                      </EuiButtonEmpty>
                     </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              {isShowingAdvanced ? (
-                <>
-                  {advancedVars.map((varDef) => {
-                    if (!packagePolicyInputStream.vars) return null;
-                    const { name: varName, type: varType } = varDef;
-                    const value = packagePolicyInputStream.vars?.[varName]?.value;
-
-                    return (
-                      <EuiFlexItem key={varName}>
-                        <PackagePolicyInputVarField
-                          varDef={varDef}
-                          value={value}
-                          onChange={(newValue: any) => {
-                            updatePackagePolicyInputStream({
-                              vars: {
-                                ...packagePolicyInputStream.vars,
-                                [varName]: {
-                                  type: varType,
-                                  value: newValue,
-                                },
-                              },
-                            });
-                          }}
-                          errors={inputStreamValidationResults?.vars![varName]}
-                          forceShowErrors={forceShowErrors}
-                        />
+                    {!isShowingAdvanced && hasErrors && advancedVarsWithErrorsCount ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiText color="danger" size="s">
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
+                            defaultMessage="{count, plural, one {# error} other {# errors}}"
+                            values={{ count: advancedVarsWithErrorsCount }}
+                          />
+                        </EuiText>
                       </EuiFlexItem>
-                    );
-                  })}
-                  <EuiFlexItem>
-                    <PackagePolicyEditorDatastreamPipelines
-                      dataStream={packageInputStream.data_stream}
-                      packageInfo={packageInfo}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <PackagePolicyEditorDatastreamMappings
-                      dataStream={packageInputStream.data_stream}
-                      packageInfo={packageInfo}
-                    />
-                  </EuiFlexItem>
-                </>
-              ) : null}
-            </Fragment>
+                    ) : null}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                {isShowingAdvanced ? (
+                  <>
+                    {advancedVars.map((varDef) => {
+                      if (!packagePolicyInputStream.vars) return null;
+                      const { name: varName, type: varType } = varDef;
+                      const value = packagePolicyInputStream.vars?.[varName]?.value;
+
+                      return (
+                        <EuiFlexItem key={varName}>
+                          <PackagePolicyInputVarField
+                            varDef={varDef}
+                            value={value}
+                            onChange={(newValue: any) => {
+                              updatePackagePolicyInputStream({
+                                vars: {
+                                  ...packagePolicyInputStream.vars,
+                                  [varName]: {
+                                    type: varType,
+                                    value: newValue,
+                                  },
+                                },
+                              });
+                            }}
+                            errors={inputStreamValidationResults?.vars![varName]}
+                            forceShowErrors={forceShowErrors}
+                          />
+                        </EuiFlexItem>
+                      );
+                    })}
+                    {/* Only show datastream pipelines and mappings on edit */}
+                    {isPackagePolicyEdit && (
+                      <>
+                        <EuiFlexItem>
+                          <PackagePolicyEditorDatastreamPipelines
+                            dataStream={packageInputStream.data_stream}
+                            packageInfo={packageInfo}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <PackagePolicyEditorDatastreamMappings
+                            dataStream={packageInputStream.data_stream}
+                            packageInfo={packageInfo}
+                          />
+                        </EuiFlexItem>
+                      </>
+                    )}
+                  </>
+                ) : null}
+              </Fragment>
+            )}
           </EuiFlexGroup>
         </FlexItemWithMaxWidth>
       </EuiFlexGrid>
