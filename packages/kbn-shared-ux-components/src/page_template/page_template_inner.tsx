@@ -9,8 +9,8 @@
 import React, { FunctionComponent } from 'react';
 
 import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
+import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 
-import { withSolutionNav } from './with_solution_nav';
 import { KibanaPageTemplateProps } from './types';
 import { getClasses } from './util';
 
@@ -64,4 +64,5 @@ export const KibanaPageTemplateInner: FunctionComponent<Props> = ({
   );
 };
 
-export const KibanaPageTemplateWithSolutionNav = withSolutionNav(KibanaPageTemplateInner);
+export const KibanaPageTemplateWithSolutionNav =
+  withSolutionNav<KibanaPageTemplateProps>(KibanaPageTemplateInner);

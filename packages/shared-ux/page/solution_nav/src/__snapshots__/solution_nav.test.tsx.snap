@@ -1,16 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
+exports[`SolutionNav accepts EuiSideNavProps 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    className="kbnPageTemplateSolutionNav"
+    className="kbnSolutionNav"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
     title={
       <EuiTitle
-        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        id="SolutionNav_generated-id_heading"
         size="xs"
       >
         <h2>
@@ -37,7 +37,7 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
     >
       <EuiSideNav
         aria-hidden={false}
-        aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+        aria-labelledby="SolutionNav_generated-id_heading"
         data-test-subj="DTS"
         items={
           Array [
@@ -100,17 +100,17 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
 </Fragment>
 `;
 
-exports[`KibanaPageTemplateSolutionNav accepts canBeCollapsed prop 1`] = `
+exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    className="kbnPageTemplateSolutionNav"
+    className="kbnSolutionNav"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
     title={
       <EuiTitle
-        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        id="SolutionNav_generated-id_heading"
         size="xs"
       >
         <h2>
@@ -137,7 +137,7 @@ exports[`KibanaPageTemplateSolutionNav accepts canBeCollapsed prop 1`] = `
     >
       <EuiSideNav
         aria-hidden={false}
-        aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+        aria-labelledby="SolutionNav_generated-id_heading"
         items={
           Array [
             Object {
@@ -199,11 +199,11 @@ exports[`KibanaPageTemplateSolutionNav accepts canBeCollapsed prop 1`] = `
 </Fragment>
 `;
 
-exports[`KibanaPageTemplateSolutionNav heading accepts more headingProps 1`] = `
+exports[`SolutionNav heading accepts more headingProps 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    className="kbnPageTemplateSolutionNav"
+    className="kbnSolutionNav"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
@@ -238,17 +238,17 @@ exports[`KibanaPageTemplateSolutionNav heading accepts more headingProps 1`] = `
 </Fragment>
 `;
 
-exports[`KibanaPageTemplateSolutionNav renders 1`] = `
+exports[`SolutionNav renders 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    className="kbnPageTemplateSolutionNav"
+    className="kbnSolutionNav"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
     title={
       <EuiTitle
-        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        id="SolutionNav_generated-id_heading"
         size="xs"
       >
         <h2>
@@ -275,7 +275,7 @@ exports[`KibanaPageTemplateSolutionNav renders 1`] = `
     >
       <EuiSideNav
         aria-hidden={false}
-        aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+        aria-labelledby="SolutionNav_generated-id_heading"
         items={
           Array [
             Object {
@@ -337,22 +337,22 @@ exports[`KibanaPageTemplateSolutionNav renders 1`] = `
 </Fragment>
 `;
 
-exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
+exports[`SolutionNav renders with icon 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
-    className="kbnPageTemplateSolutionNav"
+    className="kbnSolutionNav"
     initialIsOpen={false}
     isCollapsible={true}
     paddingSize="none"
     title={
       <EuiTitle
-        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        id="SolutionNav_generated-id_heading"
         size="xs"
       >
         <h2>
           <KibanaSolutionAvatar
-            className="kbnPageTemplateSolutionNav__avatar"
+            className="kbnSolutionNav__avatar"
             iconType="logoElastic"
             name="Solution"
           />
@@ -379,7 +379,7 @@ exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
     >
       <EuiSideNav
         aria-hidden={false}
-        aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+        aria-labelledby="SolutionNav_generated-id_heading"
         items={
           Array [
             Object {

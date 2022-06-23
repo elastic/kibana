@@ -7,16 +7,17 @@
  */
 
 import React from 'react';
-import { KibanaPageTemplateSolutionNav, KibanaPageTemplateSolutionNavProps } from './solution_nav';
+import { action } from '@storybook/addon-actions';
+import { SolutionNav as Component, SolutionNavProps } from './solution_nav';
 
 export default {
-  title: 'Page Template/Solution Nav/Solution Nav',
+  title: 'Page Template',
   description: 'Solution-specific navigation for the sidebar',
 };
 
-type Params = Pick<KibanaPageTemplateSolutionNavProps, 'name' | 'icon'>;
+type Params = Pick<SolutionNavProps, 'name' | 'icon'>;
 
-const items: KibanaPageTemplateSolutionNavProps['items'] = [
+const items: SolutionNavProps['items'] = [
   {
     name: <div>Ingest</div>,
     id: '1',
@@ -55,11 +56,13 @@ const items: KibanaPageTemplateSolutionNavProps['items'] = [
   },
 ];
 
-export const PureComponent = (params: Params) => {
-  return <KibanaPageTemplateSolutionNav items={items} isOpenOnDesktop={true} {...params} />;
+export const SolutionNav = (params: Params) => {
+  return (
+    <Component items={items} isOpenOnDesktop={true} {...params} onCollapse={action('onCollapse')} />
+  );
 };
 
-PureComponent.argTypes = {
+SolutionNav.argTypes = {
   name: {
     control: 'text',
     defaultValue: 'Kibana',
@@ -79,6 +82,6 @@ PureComponent.argTypes = {
   },
 };
 
-PureComponent.parameters = {
+SolutionNav.parameters = {
   layout: 'fullscreen',
 };

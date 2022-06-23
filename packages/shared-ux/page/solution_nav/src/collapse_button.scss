@@ -1,4 +1,4 @@
-.kbnPageTemplateSolutionNavCollapseButton {
+.kbnSolutionNavCollapseButton {
   position: absolute;
   opacity: 0;
   left: 248px - $euiSize;
@@ -26,12 +26,12 @@
   }
 
   &:not(&-isCollapsed) {
-    background-color: $euiColorEmptyShade !important; // Override all states
+    background-color: $euiColorEmptyShade  !important; // Override all states
   }
 }
 
 // Make the button take up the entire area of the collapsed navigation
-.kbnPageTemplateSolutionNavCollapseButton-isCollapsed {
+.kbnSolutionNavCollapseButton-isCollapsed {
   opacity: 1 !important;
   transition-delay: 0s !important;
   left: 0 !important;

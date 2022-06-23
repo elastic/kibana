@@ -3351,6 +3351,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-button-toolbar@link:bazel-bin/packages/shared-ux/button_toolbar":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data":
   version "0.0.0"
   uid ""
@@ -3371,15 +3375,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-page-solution-nav@link:bazel-bin/packages/shared-ux/page/solution_nav":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views":
   version "0.0.0"
   uid ""
 
 "@kbn/shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-button-toolbar@link:bazel-bin/packages/shared-ux/button_toolbar":
   version "0.0.0"
   uid ""
 
@@ -6726,6 +6730,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__shared-ux-button-toolbar@link:bazel-bin/packages/shared-ux/button_toolbar/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6746,15 +6754,15 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__shared-ux-page-solution-nav@link:bazel-bin/packages/shared-ux/page/solution_nav/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__shared-ux-button-toolbar@link:bazel-bin/packages/shared-ux/button_toolbar/npm_module_types":
   version "0.0.0"
   uid ""
 
