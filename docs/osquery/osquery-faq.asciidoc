@@ -23,7 +23,7 @@ Refer to the Fleet and Elastic Agent Guide for help with
 {fleet-guide}/upgrade-elastic-agent.html[upgrading Fleet-managed Elastic Agents].
 
 To check what Osquery version is installed on an Elastic Agent, you can run
-`SELECT * FROM osquery_info;` as a live query in {kib}. The `version` in the
+`SELECT version FROM osquery_info;` as a live query in {kib}. The `version` in the
 response is the Osquery version installed on the agent.
 
 [float]
