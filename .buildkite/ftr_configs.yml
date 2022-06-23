@@ -73,6 +73,7 @@ enabled:
   - test/functional/apps/discover/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
+  - test/functional/apps/kibana_overview/config.ts
   - test/functional/apps/management/config.ts
   - test/functional/apps/saved_objects_management/config.ts
   - test/functional/apps/status_page/config.ts
