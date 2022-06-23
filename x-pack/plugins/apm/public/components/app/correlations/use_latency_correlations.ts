@@ -82,7 +82,7 @@ export function useLatencyCorrelations() {
 
       // Initial call to fetch the overall distribution for the log-log plot.
       const { overallHistogram, percentileThresholdValue } = await callApmApi(
-        'POST /internal/apm/latency/overall_distribution',
+        'POST /internal/apm/latency/overall_distribution/transactions',
         {
           signal: abortCtrl.current.signal,
           params: {
@@ -107,7 +107,7 @@ export function useLatencyCorrelations() {
       setResponse.flush();
 
       const { fieldCandidates } = await callApmApi(
-        'GET /internal/apm/correlations/field_candidates',
+        'GET /internal/apm/correlations/field_candidates/transactions',
         {
           signal: abortCtrl.current.signal,
           params: {
@@ -133,7 +133,7 @@ export function useLatencyCorrelations() {
 
       for (const fieldCandidateChunk of fieldCandidateChunks) {
         const fieldValuePairChunkResponse = await callApmApi(
-          'POST /internal/apm/correlations/field_value_pairs',
+          'POST /internal/apm/correlations/field_value_pairs/transactions',
           {
             signal: abortCtrl.current.signal,
             params: {
@@ -180,7 +180,7 @@ export function useLatencyCorrelations() {
       const fallbackResults: LatencyCorrelation[] = [];
       for (const fieldValuePairChunk of fieldValuePairChunks) {
         const significantCorrelations = await callApmApi(
-          'POST /internal/apm/correlations/significant_correlations',
+          'POST /internal/apm/correlations/significant_correlations/transactions',
           {
             signal: abortCtrl.current.signal,
             params: {
@@ -240,7 +240,7 @@ export function useLatencyCorrelations() {
       setResponse.flush();
 
       const { stats } = await callApmApi(
-        'POST /internal/apm/correlations/field_stats',
+        'POST /internal/apm/correlations/field_stats/transactions',
         {
           signal: abortCtrl.current.signal,
           params: {

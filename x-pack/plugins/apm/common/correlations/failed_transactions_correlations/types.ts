@@ -27,7 +27,7 @@ export type FailedTransactionsCorrelationsImpactThreshold =
 export interface FailedTransactionsCorrelationsResponse {
   ccsWarning: boolean;
   failedTransactionsCorrelations?: FailedTransactionsCorrelation[];
-  percentileThresholdValue?: number;
+  percentileThresholdValue?: number | null;
   overallHistogram?: HistogramItem[];
   errorHistogram?: HistogramItem[];
   fieldStats?: FieldStats[];
