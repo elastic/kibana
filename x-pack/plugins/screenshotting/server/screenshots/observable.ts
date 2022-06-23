@@ -185,10 +185,9 @@ export class ScreenshotObservableHandler {
 
   private waitForElements() {
     const driver = this.driver;
-    const waitTimeout = this.timeouts.waitForElements.timeoutValue;
+    const waitTimeout = this.timeouts.waitForElements.timeoutValue * 1.8; // the waitUntil is needed to catch actually timing out
 
     return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
-      this.waitUntil(this.timeouts.waitForElements),
       mergeMap((itemsCount) =>
         waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout)
       ),

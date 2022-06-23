@@ -9,16 +9,14 @@ import { Actions, EventLogger } from './event_logger';
 import type { HeadlessChromiumDriver } from '../browsers';
 import type { Screenshot } from './types';
 
-export interface GetPdfOptions {
-  error?: Error;
-  logo?: string;
-}
-
 export async function getPdf(
   browser: HeadlessChromiumDriver,
   logger: EventLogger,
   title: string,
-  options?: GetPdfOptions
+  options?: {
+    error?: Error;
+    logo?: string;
+  }
 ): Promise<Screenshot[]> {
   logger.kbnLogger.info('printing PDF');
 

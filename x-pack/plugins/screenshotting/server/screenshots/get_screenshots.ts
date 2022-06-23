@@ -71,10 +71,6 @@ export const getScreenshots = async (
   const screenshots: Screenshot[] = [];
 
   try {
-    if (options.error) {
-      await browser.injectScreenshottingErrorHeader(options.error, layout);
-    }
-
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
       const { position, attributes } = element;
@@ -88,7 +84,7 @@ export const getScreenshots = async (
         eventLogger.getPixelsFromElementPosition(position)
       );
 
-      const data = await browser.screenshot(position);
+      const data = await browser.screenshot({ elementPosition: position, ...options });
 
       if (!data?.byteLength) {
         throw new Error(`Failure in getScreenshots! Screenshot data is void`);
