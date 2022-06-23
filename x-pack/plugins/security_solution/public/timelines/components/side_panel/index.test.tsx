@@ -129,9 +129,6 @@ describe('Details Panel Component', () => {
           },
           osquery: {
             OsqueryResults: jest.fn().mockReturnValue(null),
-            featureFlags: {
-              DETECTION_ACTION: true,
-            },
           },
         },
       });

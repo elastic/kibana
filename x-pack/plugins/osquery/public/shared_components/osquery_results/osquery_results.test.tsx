@@ -58,13 +58,6 @@ const mockKibana = (permissionType: unknown = defaultPermissions) => {
   } as unknown as ReturnType<typeof useKibana>);
 };
 
-// const properPermissions = {
-//   osquery: {
-//     runSavedQueries: true,
-//     writeLiveQueries: true,
-//   },
-// };
-
 const renderWithContext = (Element: React.ReactElement) =>
   render(
     <IntlProvider locale={'en'}>

@@ -21,10 +21,9 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineTabs } from '../../../../common/types/timeline';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
 
+jest.mock('../../lib/kibana');
 jest.mock('../../containers/cti/event_enrichment');
 
-// TODO it's still WIP
-jest.mock('../../lib/kibana');
 jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
   return {
     useRuleWithFallback: jest.fn().mockReturnValue({

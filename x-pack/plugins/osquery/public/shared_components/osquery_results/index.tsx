@@ -21,6 +21,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { useInView } from 'react-intersection-observer';
 
 import { map } from 'lodash';
+import { AGENT, AGENT_QUERY } from '../../agents/translations';
 import { OsqueryActionType } from '../../../common/types';
 import { useInfiniteAllActions } from '../../actions/use_all_actions';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
@@ -84,7 +85,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
             >
               <EuiSpacer size="m" />
               <EuiText>
-                <h6>Agent</h6>
+                <h6>{AGENT}</h6>
               </EuiText>
               <EuiCodeBlock
                 language="sql"
@@ -96,7 +97,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
               </EuiCodeBlock>
               <EuiSpacer size="m" />
               <EuiText>
-                <h6>Query</h6>
+                <h6>{AGENT_QUERY}</h6>
               </EuiText>
               <EuiCodeBlock
                 language="sql"

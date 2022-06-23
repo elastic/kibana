@@ -35,8 +35,15 @@ export const AGENT_POLICY_LABEL = i18n.translate('xpack.osquery.agents.policyLab
   defaultMessage: `Policy`,
 });
 
+export const AGENT = i18n.translate('xpack.osquery.agents.agent', {
+  defaultMessage: `Agent`,
+});
+
 export const AGENT_SELECTION_LABEL = i18n.translate('xpack.osquery.agents.selectionLabel', {
   defaultMessage: `Agents`,
+});
+export const AGENT_QUERY = i18n.translate('xpack.osquery.agents.query', {
+  defaultMessage: `Query`,
 });
 
 export const SELECT_AGENT_LABEL = i18n.translate('xpack.osquery.agents.selectAgentLabel', {
