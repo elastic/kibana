@@ -604,7 +604,7 @@ export const createOpenTelemetryAgentInstructions = (
     }),
     textPre: i18n.translate('xpack.apm.tutorial.otel.download.textPre', {
       defaultMessage:
-        'Download the OpenTelemetry APM Agent or SDK following the instructions of the OpenTelemetry community site: [OpenTelemetry Docs / Instrumentations]({openTelemetryInstrumentationLink}).',
+        'See the [OpenTelemetry Instrumentation guides]({openTelemetryInstrumentationLink}) to download the OpenTelemetry Agent or SDK for your language.',
       values: {
         openTelemetryInstrumentationLink:
           'https://opentelemetry.io/docs/instrumentation',
