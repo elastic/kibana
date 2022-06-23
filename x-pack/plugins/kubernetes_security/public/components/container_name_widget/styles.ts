@@ -37,11 +37,19 @@ export const useStyles = () => {
       fontWeight: font.weight.semiBold,
     };
 
+    const tablePadding: CSSObject = {
+      width: '332px',
+      height: '228px',
+      overflow: 'hiddne',
+      padding: '9px 8px 16px 16px',
+    };
+
     return {
       container,
       dataInfo,
       filters,
       countValue,
+      tablePadding,
     };
   }, [euiTheme]);
 

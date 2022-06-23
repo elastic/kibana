@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode, useMemo, useState } from 'react';
-import { EuiFlexItem, EuiText, EuiInMemoryTable } from '@elastic/eui';
+import React, { ReactNode, useMemo, useState, useCallback } from 'react';
+import { EuiDataGrid, EuiPanel, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
@@ -47,7 +47,6 @@ export const ContainerNameWidget = ({
   groupedBy,
   countBy,
 }: ContainerNameWidgetDeps) => {
-  const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
   const styles = useStyles();
 
   const filterQueryWithTimeRange = useMemo(() => {
@@ -119,64 +118,70 @@ export const ContainerNameWidget = ({
       })
     : [];
 
-  const columns = [
+  const columns: EuiDataGridColumn[] = [
     {
-      field: 'name',
-      name: widgetTitle,
-      'data-test-subj': 'containserImageNameSessionCount',
-      render: (name: string) => {
-        const indexHelper = containerNameArray.findIndex((obj) => {
-          return obj.name === name;
-        });
-        return (
-          <EuiFlexItem
-            key={`percentage-widget--haha}`}
-            onMouseEnter={() => setHoveredFilter(indexHelper)}
-            onMouseLeave={() => setHoveredFilter(null)}
-            data-test-subj={'test-alpha'}
-          >
-            <EuiText size="xs" css={styles.dataInfo}>
-              {name}
-              {hoveredFilter === indexHelper && (
-                <div css={styles.filters}>
-                  {filterButtons.filterForButtons[indexHelper]}
-                  {filterButtons.filterOutButtons[indexHelper]}
-                </div>
-              )}
-            </EuiText>
-          </EuiFlexItem>
-        );
-      },
-      align: 'left',
+      id: 'name',
+      displayAsText: widgetTitle,
+      actions: false,
+      initialWidth: 216,
+      isResizable: true,
+      cellActions: [
+        ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+          const indexHelper = containerNameArray.findIndex((obj) => {
+            return obj.name === containerNameArray[rowIndex][columnId];
+          });
+          return <> {filterButtons.filterForButtons[indexHelper]}</>;
+        },
+        ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+          const indexHelper = containerNameArray.findIndex((obj) => {
+            return obj.name === containerNameArray[rowIndex][columnId];
+          });
+          return <>{filterButtons.filterOutButtons[indexHelper]}</>;
+        },
+      ],
     },
     {
-      field: 'count',
-      name: 'Count',
-      'data-test-subj': 'containerImageNameSessionCount',
-      render: (count: number) => {
-        return <span css={styles.countValue}>{count}</span>;
-      },
-      sortable: true,
-      align: 'right',
+      id: 'count',
+      displayAsText: 'Count',
+      initialWidth: 75,
     },
   ];
 
-  const sorting = {
-    sort: {
-      field: 'count',
-      direction: 'desc',
+  const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
+
+  // Sorting
+  const [sortingColumns, setSortingColumns] = useState([]);
+  const onSort = useCallback(
+    (sortingColumn) => {
+      setSortingColumns(sortingColumn);
     },
-    allownNeutralSort: true,
-  };
+    [setSortingColumns]
+  );
 
   return (
-    <div css={styles.container}>
-      <EuiInMemoryTable
-        items={containerNameArray}
+    <EuiPanel css={styles.tablePadding}>
+      <EuiDataGrid
         columns={columns}
-        pagination={true}
-        sorting={sorting}
+        rowCount={containerNameArray.length}
+        toolbarVisibility={false}
+        gridStyle={{
+          border: 'none',
+          header: 'underline',
+          fontSize: 's',
+        }}
+        columnVisibility={{
+          visibleColumns,
+          setVisibleColumns,
+        }}
+        renderCellValue={({ rowIndex, columnId }: { rowIndex: number; columnId: string }) =>
+          containerNameArray[rowIndex][columnId]
+        }
+        inMemory={{ level: 'sorting' }}
+        sorting={{
+          columns: sortingColumns,
+          onSort,
+        }}
       />
-    </div>
+    </EuiPanel>
   );
 };
