@@ -7,12 +7,13 @@
 
 import { EuiCard } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { Meta } from '@storybook/react/types-6-0';
-import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { Meta, Story } from '@storybook/react/types-6-0';
+import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
-import { PodMetricsTable } from './pod_metrics_table';
 import type { PodMetricsTableProps } from './pod_metrics_table';
+import { PodMetricsTable } from './pod_metrics_table';
+import { PodNodeMetricsRow } from './use_pod_metrics_table';
 
 const mockServices = {
   application: {
@@ -32,6 +33,20 @@ export default {
     decorateWithGlobalStorybookThemeProviders,
   ],
   component: PodMetricsTable,
+  args: {
+    data: {
+      state: 'empty-indices',
+    },
+    isLoading: false,
+    sortState: {
+      direction: 'desc',
+      field: 'averageCpuUsagePercent',
+    },
+    timerange: {
+      from: 'now-15m',
+      to: 'now',
+    },
+  },
   argTypes: {
     setSortState: {
       action: 'Sort field or direction changed',
@@ -42,58 +57,100 @@ export default {
   },
 } as Meta;
 
-const storyArgs: Omit<PodMetricsTableProps, 'setSortState' | 'setCurrentPageIndex'> = {
-  isLoading: false,
-  pods: [
-    {
-      id: '358d96e3-026f-4440-a487-f6c2301884c0',
-      name: 'gke-edge-oblt-pool-1-9a60016d-lgg1',
-      uptime: 23000000,
-      averageCpuUsagePercent: 99,
-      averageMemoryUsageMegabytes: 34,
-    },
-    {
-      id: '358d96e3-026f-4440-a487-f6c2301884c1',
-      name: 'gke-edge-oblt-pool-1-9a60016d-lgg2',
-      uptime: 43000000,
-      averageCpuUsagePercent: 72,
-      averageMemoryUsageMegabytes: 68,
-    },
-    {
-      id: '358d96e3-026f-4440-a487-f6c2301884c0',
-      name: 'gke-edge-oblt-pool-1-9a60016d-lgg3',
-      uptime: 53000000,
-      averageCpuUsagePercent: 54,
-      averageMemoryUsageMegabytes: 132,
-    },
-    {
-      id: '358d96e3-026f-4440-a487-f6c2301884c0',
-      name: 'gke-edge-oblt-pool-1-9a60016d-lgg4',
-      uptime: 63000000,
-      averageCpuUsagePercent: 34,
-      averageMemoryUsageMegabytes: 264,
-    },
-    {
-      id: '358d96e3-026f-4440-a487-f6c2301884c0',
-      name: 'gke-edge-oblt-pool-1-9a60016d-lgg5',
-      uptime: 83000000,
-      averageCpuUsagePercent: 13,
-      averageMemoryUsageMegabytes: 512,
-    },
-  ],
-  currentPageIndex: 0,
-  pageCount: 10,
-  sortState: {
-    direction: 'desc',
-    field: 'averageCpuUsagePercent',
+const loadedPods: PodNodeMetricsRow[] = [
+  {
+    id: '358d96e3-026f-4440-a487-f6c2301884c0',
+    name: 'gke-edge-oblt-pool-1-9a60016d-lgg1',
+    uptime: 23000000,
+    averageCpuUsagePercent: 99,
+    averageMemoryUsageMegabytes: 34,
   },
-  timerange: {
-    from: 'now-15m',
-    to: 'now',
+  {
+    id: '358d96e3-026f-4440-a487-f6c2301884c1',
+    name: 'gke-edge-oblt-pool-1-9a60016d-lgg2',
+    uptime: 43000000,
+    averageCpuUsagePercent: 72,
+    averageMemoryUsageMegabytes: 68,
+  },
+  {
+    id: '358d96e3-026f-4440-a487-f6c2301884c0',
+    name: 'gke-edge-oblt-pool-1-9a60016d-lgg3',
+    uptime: 53000000,
+    averageCpuUsagePercent: 54,
+    averageMemoryUsageMegabytes: 132,
+  },
+  {
+    id: '358d96e3-026f-4440-a487-f6c2301884c0',
+    name: 'gke-edge-oblt-pool-1-9a60016d-lgg4',
+    uptime: 63000000,
+    averageCpuUsagePercent: 34,
+    averageMemoryUsageMegabytes: 264,
+  },
+  {
+    id: '358d96e3-026f-4440-a487-f6c2301884c0',
+    name: 'gke-edge-oblt-pool-1-9a60016d-lgg5',
+    uptime: 83000000,
+    averageCpuUsagePercent: 13,
+    averageMemoryUsageMegabytes: 512,
+  },
+];
+
+const Template: Story<PodMetricsTableProps> = (args) => {
+  return <PodMetricsTable {...args} />;
+};
+
+export const Basic = Template.bind({});
+Basic.args = {
+  data: {
+    state: 'data',
+    currentPageIndex: 1,
+    pageCount: 10,
+    rows: loadedPods,
   },
 };
 
-export const Demo = (args: PodMetricsTableProps) => {
-  return <PodMetricsTable {...args} />;
+export const Loading = Template.bind({});
+Loading.args = {
+  isLoading: true,
 };
-Demo.args = storyArgs;
+
+export const Reloading = Template.bind({});
+Reloading.args = {
+  data: {
+    state: 'data',
+    currentPageIndex: 1,
+    pageCount: 10,
+    rows: loadedPods,
+  },
+  isLoading: true,
+};
+
+export const MissingIndices = Template.bind({});
+MissingIndices.args = {
+  data: {
+    state: 'no-indices',
+  },
+};
+
+export const EmptyIndices = Template.bind({});
+EmptyIndices.args = {
+  data: {
+    state: 'empty-indices',
+  },
+};
+
+export const FailedToLoadSource = Template.bind({});
+FailedToLoadSource.args = {
+  data: {
+    state: 'error',
+    errors: [new Error('Failed to load source configuration')],
+  },
+};
+
+export const FailedToLoadMetrics = Template.bind({});
+FailedToLoadMetrics.args = {
+  data: {
+    state: 'error',
+    errors: [new Error('Failed to load metrics')],
+  },
+};
