@@ -31,3 +31,27 @@ export function isRouteWithTimeRange({
 
   return matchesRoute;
 }
+
+export function isRouteWithComparison({
+  apmRouter,
+  location,
+}: {
+  apmRouter: ApmRouter;
+  location: Location;
+}) {
+  const matchingRoutes = apmRouter.getRoutesToMatch(location.pathname);
+  const matchesRoute = matchingRoutes.some((route) => {
+    return (
+      route.path === '/services' ||
+      route.path === '/service-map' ||
+      route.path === '/backends' ||
+      route.path === '/backends/inventory' ||
+      route.path === '/services/{serviceName}' ||
+      route.path === '/service-groups' ||
+      location.pathname === '/' ||
+      location.pathname === ''
+    );
+  });
+
+  return matchesRoute;
+}
