@@ -195,7 +195,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
           gutterSize="xs"
         >
           <EuiFlexItem grow={false}>
-            <Label data-test-subj={`${type}-label`}>{label}</Label>
+            <Label>{label}</Label>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {isIpFieldPopulated({ destinationIp, sourceIp, type }) ? (

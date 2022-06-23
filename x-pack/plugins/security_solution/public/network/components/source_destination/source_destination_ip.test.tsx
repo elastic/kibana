@@ -7,8 +7,8 @@
 
 import { get } from 'lodash/fp';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
-import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
 import '../../../common/mock/match_media';
@@ -17,7 +17,6 @@ import { ID_FIELD_NAME } from '../../../common/components/event_details/event_id
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port/helpers';
 import * as i18n from '../../../timelines/components/timeline/body/renderers/translations';
-import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import {
   getPorts,
@@ -43,8 +42,6 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
 
 describe('SourceDestinationIp', () => {
-  const mount = useMountAppended();
-
   describe('#isIpFieldPopulated', () => {
     test('it returns true when type is `source` and sourceIp has an IP address', () => {
       expect(
@@ -333,7 +330,7 @@ describe('SourceDestinationIp', () => {
 
   test('it renders a `Source` label when type is `source` and (just) the sourceIp field is populated', () => {
     const type = 'source';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -377,12 +374,12 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="source-label"]').first().text()).toEqual(i18n.SOURCE);
+    expect(screen.getByText(i18n.SOURCE)).toBeInTheDocument();
   });
 
   test('it renders a `Destination` label when type is `destination` and (just) the destinationIp field is populated', () => {
     const type = 'destination';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -426,14 +423,12 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="destination-label"]').first().text()).toEqual(
-      i18n.DESTINATION
-    );
+    expect(screen.getByText(i18n.DESTINATION)).toBeInTheDocument();
   });
 
   test('it renders a `Source` label when type is `source` (just) the sourcePort field is populated', () => {
     const type = 'source';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -477,12 +472,12 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="source-label"]').first().text()).toEqual(i18n.SOURCE);
+    expect(screen.getByText(i18n.SOURCE)).toBeInTheDocument();
   });
 
   test('it renders a `Destination` label when type is `destination` and (just) the destinationPort field is populated', () => {
     const type = 'destination';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -526,15 +521,13 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="destination-label"]').first().text()).toEqual(
-      i18n.DESTINATION
-    );
+    expect(screen.getByText(i18n.DESTINATION)).toBeInTheDocument();
   });
 
   test('it renders a `Source` label when type is `source` and both sourceIp and sourcePort are populated', () => {
     const type = 'source';
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -578,12 +571,12 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="source-label"]').first().text()).toEqual(i18n.SOURCE);
+    expect(screen.getByText(i18n.SOURCE)).toBeInTheDocument();
   });
 
   test('it renders a `Destination` label when type is `destination` and both destinationIp and destinationPort are populated', () => {
     const type = 'destination';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -627,14 +620,12 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="destination-label"]').first().text()).toEqual(
-      i18n.DESTINATION
-    );
+    expect(screen.getByText(i18n.DESTINATION)).toBeInTheDocument();
   });
 
   test('it does NOT render a `Source` label when type is `source` and both sourceIp and sourcePort are empty', () => {
     const type = 'source';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -678,12 +669,12 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.exists('[data-test-subj="source-label"]')).toBe(false);
+    expect(screen.queryByText(i18n.SOURCE)).not.toBeInTheDocument();
   });
 
   test('it does NOT render a `Destination` label when type is `destination` and both destinationIp and destinationPort are empty', () => {
     const type = 'destination';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -727,12 +718,12 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.exists('[data-test-subj="destination-label"]')).toBe(false);
+    expect(screen.queryByText(i18n.DESTINATION)).not.toBeInTheDocument();
   });
 
   test('it renders the expected source IP when type is `source`, and both sourceIp and sourcePort are populated', () => {
     const type = 'source';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -776,14 +767,12 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').first().text()).toEqual(
-      '192.168.1.2'
-    );
+    expect(screen.getByText('192.168.1.2')).toBeInTheDocument();
   });
 
   test('it renders the expected source IP when type is `source`, but the length of the sourceIp and sourcePort arrays is different', () => {
     const type = 'source';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -827,14 +816,12 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').first().text()).toEqual(
-      '192.168.1.2'
-    );
+    expect(screen.getByText('192.168.1.2')).toBeInTheDocument();
   });
 
   test('it renders the expected destination IP when type is `destination`, and both destinationIp and destinationPort are populated', () => {
     const type = 'destination';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -878,14 +865,12 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').first().text()).toEqual(
-      '10.1.2.3'
-    );
+    expect(screen.getByText('10.1.2.3')).toBeInTheDocument();
   });
 
   test('it renders the expected destination IP when type is `destination`, but the length of the destinationIp and destinationPort port arrays is different', () => {
     const type = 'destination';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -929,14 +914,12 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').first().text()).toEqual(
-      '10.1.2.3'
-    );
+    expect(screen.getByText('10.1.2.3')).toBeInTheDocument();
   });
 
   test('it renders the expected source port when type is `source`, and both sourceIp and sourcePort are populated', () => {
     const type = 'source';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -980,16 +963,13 @@ describe('SourceDestinationIp', () => {
         />
       </TestProviders>
     );
-    expect(
-      removeExternalLinkText(
-        wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()
-      )
-    ).toContain('9987');
+
+    expect(screen.getByTestId('source-ip-badge').textContent).toContain('9987');
   });
 
   test('it renders the expected destination port when type is `destination`, and both destinationIp and destinationPort are populated', () => {
     const type = 'destination';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -1034,16 +1014,12 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      removeExternalLinkText(
-        wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
-      )
-    ).toContain('80');
+    expect(screen.getByTestId('destination-ip-badge').textContent).toContain('80');
   });
 
   test('it renders the expected source port when type is `source`, but only sourcePort is populated', () => {
     const type = 'source';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -1088,17 +1064,13 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      removeExternalLinkText(
-        wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()
-      )
-    ).toContain('9987');
+    expect(screen.getByTestId('source-ip-badge').textContent).toContain('9987');
   });
 
   test('it renders the expected destination port when type is `destination`, and only destinationPort is populated', () => {
     const type = 'destination';
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -1143,17 +1115,13 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      removeExternalLinkText(
-        wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
-      )
-    ).toContain('80');
+    expect(screen.getByTestId('destination-ip-badge').textContent).toContain('80');
   });
 
   test('it does NOT render the badge when type is `source`, but both sourceIp and sourcePort are undefined', () => {
     const type = 'source';
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -1197,13 +1165,13 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.exists(`[data-test-subj="${type}-ip-badge"]`)).toBe(false);
+    expect(screen.queryByTestId(`${type}-ip-badge`)).not.toBeInTheDocument();
   });
 
   test('it does NOT render the badge when type is `destination`, but both destinationIp and destinationPort are undefined', () => {
     const type = 'destination';
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -1247,12 +1215,12 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.exists(`[data-test-subj="${type}-ip-badge"]`)).toBe(false);
+    expect(screen.queryByTestId(`${type}-ip-badge`)).not.toBeInTheDocument();
   });
 
   test('it renders geo fields', () => {
     const type = 'source';
-    const wrapper = mount(
+    render(
       <TestProviders>
         <SourceDestinationIp
           contextId="test"
@@ -1297,8 +1265,8 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="draggable-content-source.geo.continent_name"]').first().text()
-    ).toEqual('North America');
+    expect(screen.getByTestId('draggable-content-source.geo.continent_name').textContent).toBe(
+      'North America'
+    );
   });
 });

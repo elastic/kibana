@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -54,13 +55,13 @@ describe('AddToCaseButton', () => {
       }
     );
     (useDeepEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AddToCaseButton timelineId={'timeline-1'} />
       </TestProviders>
     );
-    wrapper.find(`[data-test-subj="attach-timeline-case-button"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="attach-timeline-existing-case"]`).first().simulate('click');
+    userEvent.click(screen.getByTestId('attach-timeline-case-button'));
+    userEvent.click(screen.getByTestId('attach-timeline-existing-case'));
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: '/create',
@@ -76,13 +77,13 @@ describe('AddToCaseButton', () => {
         return <></>;
       });
     (useDeepEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AddToCaseButton timelineId={'timeline-1'} />
       </TestProviders>
     );
-    wrapper.find(`[data-test-subj="attach-timeline-case-button"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="attach-timeline-existing-case"]`).first().simulate('click');
+    userEvent.click(screen.getByTestId('attach-timeline-case-button'));
+    userEvent.click(screen.getByTestId('attach-timeline-existing-case'));
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: '/case-id',
