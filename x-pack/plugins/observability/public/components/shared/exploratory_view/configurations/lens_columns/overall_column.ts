@@ -28,19 +28,24 @@ export function getDistributionInPercentageColumn({
     lensFormula = `count(kql='${columnFilter}') / overall_sum(count(kql='${columnFilter}'))`;
   }
 
-  const { columns } =
-    lensFormulaHelper?.insertOrReplaceFormulaColumn(
-      yAxisColId,
-      {
-        formula: lensFormula,
-        label,
+  const { columns } = lensFormulaHelper?.insertOrReplaceFormulaColumn(
+    yAxisColId,
+    {
+      formula: lensFormula,
+      label,
+      format: {
+        id: 'percent',
+        params: {
+          decimals: 0,
+        },
       },
-      {
-        columns: {},
-        columnOrder: [],
-      },
-      dataView
-    ) ?? {};
+    },
+    {
+      columns: {},
+      columnOrder: [],
+    },
+    dataView
+  ) ?? { columns: {} };
 
   const { [yAxisColId]: main, ...supportingColumns } = columns;
 
