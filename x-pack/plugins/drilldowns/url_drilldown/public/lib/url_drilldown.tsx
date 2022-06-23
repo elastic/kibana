@@ -16,7 +16,7 @@ import {
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { Query, Filter, TimeRange } from '@kbn/data-plugin/public';
+import type { Query, Filter, TimeRange } from '@kbn/es-query';
 import { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import {
   reactToUiComponent,
