@@ -97,6 +97,10 @@ export class SenseEditor {
     }
 
     if (parsedReq.data.some((doc) => utils.hasComments(doc))) {
+      /**
+       * Comments require different approach for indentation and do not have condensed format
+       * We need to delegate indentation logic to coreEditor since it has access to session and other methods used for formatting and indenting the comments
+       */
       this.coreEditor.autoIndent(parsedReq.range);
       return;
     }

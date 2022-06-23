@@ -154,5 +154,50 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.console.hasSuccessBadge()).to.be(true);
       });
     });
+
+    describe('with comments', async () => {
+      const enterRequest = async (url: string, body: string) => {
+        await PageObjects.console.clearTextArea();
+        await PageObjects.console.enterRequest(url);
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.enterText(body);
+      };
+      const tests = [
+        {
+          url: '\n GET _search',
+          body: '{\n\t\t"query": {\n\t\t\t// "match_all": {}',
+          description: 'should allow single line comments in request body',
+        },
+        {
+          url: '\n GET _search',
+          body: '{\n\t\t"query": {\n\t\t\t/* "match_all": {} */',
+          description: 'should allow multiline comments in request body',
+        },
+        {
+          url: '\n// GET _search',
+          body: '',
+          description: 'should allow single line comments in request url',
+        },
+        {
+          url: '\n /* \nGET _search \n*/',
+          body: '',
+          description: 'should allow multiline comments in request url',
+        },
+      ];
+      before(async () => {
+        // blocks the close help button for several seconds so just retry until we can click it.
+        await retry.try(async () => {
+          await PageObjects.console.collapseHelp();
+        });
+      });
+
+      await asyncForEach(tests, async ({ description, url, body }) => {
+        it(description, async () => {
+          await enterRequest(url, body);
+          expect(await PageObjects.console.isInvalidRequest()).to.be(false);
+          expect(await PageObjects.console.hasErrorMarker()).to.be(false);
+        });
+      });
+    });
   });
 }

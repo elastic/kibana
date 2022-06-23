@@ -187,4 +187,22 @@ export class ConsolePageObject extends FtrService {
       return false;
     }
   }
+
+  public async isInvalidRequest() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      return Boolean(await requestEditor.findByCssSelector('.ace_invalid.ace_illegal'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async hasErrorMarker() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      return Boolean(await requestEditor.findByCssSelector('.ace_gutter-cell.ace_error'));
+    } catch (e) {
+      return false;
+    }
+  }
 }

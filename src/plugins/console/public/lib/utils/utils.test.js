@@ -114,4 +114,33 @@ describe('Utils class', () => {
       });
     });
   });
+
+  describe('hasComments', function () {
+    const tests = [
+      { source: '{\n  "test": {\n    "f": {}\n  }\n}', assert: false },
+      { source: '{\n  "test": {\n   // "f": {}\n   "a": "b"\n  }\n}', assert: true },
+      { source: '{\n /* "test": {\n    "a": "b"\n  } */\n}', assert: true },
+      {
+        source: '{\n  "test": {\n   "a": "b",\n   "f": {\n     # "b": {}\n   }\n  }\n}',
+        assert: true,
+      },
+      { source: '{"test":{"a":"b","f":{"b":{"c":{}}}}}', assert: false },
+      {
+        source: '{\n  "test": {\n    "a": "b",\n    "f": {\n      "b": {}\n    }\n  }\n}',
+        assert: false,
+      },
+      {
+        source:
+          '{\n  "test": {\n    "a": "b",\n   /* "f": {\n      "b": {}\n    } */\n    "c": 1\n  }\n}',
+        assert: true,
+      },
+    ];
+
+    tests.forEach(({ source, assert }, id) => {
+      test(`Test ${id}`, () => {
+        const hasComments = utils.hasComments(source);
+        expect(hasComments).toEqual(assert);
+      });
+    });
+  });
 });

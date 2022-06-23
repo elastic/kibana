@@ -1990,14 +1990,19 @@ ace.define(
           while (ch && ch <= ' ') {
             next();
           }
+          // if the current char in iteration is '#' or the char and the next char is equal to '//'
+          // we are on the single line comment
           if (ch === '#' || ch === '/' && peek(0) === '/') {
+            // Until we are on the new line, skip to the next char
             while (ch && ch !== '\n') {
               next();
             }
           } else if (ch === '/' && peek(0) === '*') {
+            // If the chars starts with '/*', we are on the multiline comment
             next();
             next();
             while (ch && !(ch === '*' && peek(0) === '/')) {
+              // Until we have closing tags '*/', skip to the next char
               next();
             }
             if (ch) {

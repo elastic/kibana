@@ -345,46 +345,6 @@ describe('Editor', () => {
     })
   );
 
-  const singleLineRequestBodyComment = {
-    prefix: 'PUT index_1/type1/1',
-    data: ['{', '  "f": 1', '// "f": 2', '}'].join('\n'),
-  };
-
-  const multiLineRequestBodyComment = {
-    prefix: 'PUT index_1/type1/2',
-    data: ['{', '  "f": 1', '/* "f": { "t": 2 } */', '}'].join('\n'),
-  };
-
-  utilsTest(
-    'request-body comments - single line',
-    singleLineRequestBodyComment.prefix,
-    singleLineRequestBodyComment.data,
-    callWithEditorMethod('getRequest', (request, done) => {
-      const expected = {
-        method: 'PUT',
-        url: 'index_1/type1/1',
-        data: [singleLineRequestBodyComment.data],
-      };
-      compareRequest(request, expected);
-      done();
-    })
-  );
-
-  utilsTest(
-    'request-body comments - multi line',
-    multiLineRequestBodyComment.prefix,
-    multiLineRequestBodyComment.data,
-    callWithEditorMethod('getRequest', (request, done) => {
-      const expected = {
-        method: 'PUT',
-        url: 'index_1/type1/2',
-        data: [multiLineRequestBodyComment.data],
-      };
-      compareRequest(request, expected);
-      done();
-    })
-  );
-
   function multiReqTest(name, editorInput, range, expected) {
     utilsTest('multi request select - ' + name, editorInput, async function (done) {
       const requests = await input.getRequestsInRange(range, false);
