@@ -92,7 +92,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
           <text
             style={{ fontSize: FONT_SIZE, fill: euiThemeVars.euiTextColor }}
             textAnchor="end"
-            x={circleCenterX * 2.25 + (maxLabelWidth + 2) * HALF_FONT_SIZE}
+            x={circleCenterX * 2.25 + (maxLabelWidth + 1) * HALF_FONT_SIZE}
             y={circleTopY + HALF_FONT_SIZE}
           >
             {formattedValue}
