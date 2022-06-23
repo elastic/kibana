@@ -73,6 +73,7 @@ export async function generateData({
       .rate(rate)
       .generator((timestamp) =>
         instance
+          .containerId('instance-a')
           .transaction(transaction.name)
           .timestamp(timestamp)
           .defaults({

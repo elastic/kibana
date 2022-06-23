@@ -11,12 +11,11 @@ import { ApmFields } from './apm_fields';
 import { Instance } from './instance';
 
 export class Service extends Entity<ApmFields> {
-  instance(instanceName: string, containerized = true) {
+  instance(instanceName: string) {
     return new Instance({
       ...this.fields,
       ['service.node.name']: instanceName,
       'host.name': instanceName,
-      ...(containerized ? { 'container.id': instanceName } : {}),
     });
   }
 }

@@ -20,9 +20,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const range = timerange(from, to);
       const timestamps = range.interval('1s').rate(3);
 
-      const instance = apm
-        .service('lambda-python', 'production', 'python')
-        .instance('instance', false);
+      const instance = apm.service('lambda-python', 'production', 'python').instance('instance');
 
       const traceEventsSetups = [
         { functionName: 'lambda-python-1', coldStart: true },
