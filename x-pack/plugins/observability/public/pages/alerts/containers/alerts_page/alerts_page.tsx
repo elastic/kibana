@@ -234,6 +234,7 @@ function AlertsPage() {
   return (
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
+      isPageDataLoaded={Boolean(hasAnyData || isAllRequestsComplete)}
       data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       pageHeader={{
         pageTitle: (

@@ -69,6 +69,7 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
         isMobile={isMobile}
         pageHeader={pageHeader}
         data-test-subj={'synthetics-page-template'}
+        isPageDataLoaded={Boolean(loading === false && data)}
         {...pageTemplateProps}
       >
         {showLoading && <EmptyStateLoading />}

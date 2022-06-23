@@ -58,6 +58,7 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
     <PageTemplate
       data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
       noDataConfig={noDataConfig}
+      isPageDataLoaded={hasData}
       {...pageTemplateProps}
     />
   );
