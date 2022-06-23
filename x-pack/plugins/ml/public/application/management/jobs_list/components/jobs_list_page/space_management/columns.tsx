@@ -33,7 +33,7 @@ export function getColumns(mlSavedObjectType: MlSavedObjectType) {
 const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
   {
     field: 'id',
-    name: i18n.translate('xpack.ml.analyticsSelector.id', {
+    name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.trainedModels.ad.idid', {
       defaultMessage: 'ID',
     }),
     sortable: true,
@@ -44,25 +44,31 @@ const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
   },
   {
     field: 'description',
-    name: i18n.translate('xpack.ml.analyticsSelector.description', {
-      defaultMessage: 'Description',
-    }),
+    name: i18n.translate(
+      'xpack.ml.management.spaceManagementTableColumn.trainedModels.ad.descriptiondescription',
+      {
+        defaultMessage: 'Description',
+      }
+    ),
     sortable: true,
     truncateText: true,
     'data-test-subj': 'mlAnalyticsSelectorColumnJobDescription',
   },
   {
     field: 'jobState',
-    name: i18n.translate('xpack.ml.analyticsSelector.sourceIndex', {
-      defaultMessage: 'Job state',
-    }),
+    name: i18n.translate(
+      'xpack.ml.management.spaceManagementTableColumn.trainedModels.ad.jobStatejobState',
+      {
+        defaultMessage: 'Job state',
+      }
+    ),
     sortable: true,
     truncateText: true,
     'data-test-subj': 'mlAnalyticsSelectorColumnSourceIndex',
   },
   {
     field: 'datafeedState',
-    name: i18n.translate('xpack.ml.analyticsSelector.sourceIndex', {
+    name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.ad.datafeedState', {
       defaultMessage: 'Datafeed state',
     }),
     sortable: true,
@@ -74,7 +80,7 @@ const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
 const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
   {
     field: 'id',
-    name: i18n.translate('xpack.ml.analyticsSelector.id', {
+    name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.dfa.id', {
       defaultMessage: 'ID',
     }),
     sortable: true,
@@ -85,7 +91,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
   },
   {
     field: 'description',
-    name: i18n.translate('xpack.ml.analyticsSelector.description', {
+    name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.dfa.description', {
       defaultMessage: 'Description',
     }),
     sortable: true,
@@ -94,7 +100,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
   },
   {
     field: 'source_index',
-    name: i18n.translate('xpack.ml.analyticsSelector.sourceIndex', {
+    name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.dfa.source_index', {
       defaultMessage: 'Source index',
     }),
     sortable: true,
@@ -103,7 +109,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
   },
   {
     field: 'dest_index',
-    name: i18n.translate('xpack.ml.analyticsSelector.sourceIndex', {
+    name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.dfa.dest_index', {
       defaultMessage: 'Destination index',
     }),
     sortable: true,
@@ -112,7 +118,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
   },
   {
     field: 'job_type',
-    name: i18n.translate('xpack.ml.analyticsSelector.sourceIndex', {
+    name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.dfa.job_type', {
       defaultMessage: 'Type',
     }),
     sortable: true,
@@ -121,7 +127,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
   },
   {
     field: 'state',
-    name: i18n.translate('xpack.ml.analyticsSelector.sourceIndex', {
+    name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.dfa.state', {
       defaultMessage: 'Status',
     }),
     sortable: true,
@@ -133,7 +139,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
 const trainedModelColumns: Array<EuiBasicTableColumn<TrainedModelsManagementItems>> = [
   {
     field: 'id',
-    name: i18n.translate('xpack.ml.analyticsSelector.id', {
+    name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.trainedModels.id', {
       defaultMessage: 'ID',
     }),
     sortable: true,
@@ -143,16 +149,19 @@ const trainedModelColumns: Array<EuiBasicTableColumn<TrainedModelsManagementItem
   },
   {
     field: 'description',
-    name: i18n.translate('xpack.ml.analyticsSelector.description', {
-      defaultMessage: 'Description',
-    }),
+    name: i18n.translate(
+      'xpack.ml.management.spaceManagementTableColumn.trainedModels.description',
+      {
+        defaultMessage: 'Description',
+      }
+    ),
     sortable: true,
     truncateText: true,
     'data-test-subj': 'mlAnalyticsSelectorColumnJobDescription',
   },
   {
     field: 'type',
-    name: i18n.translate('xpack.ml.analyticsSelector.sourceIndex', {
+    name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.trainedModels.type', {
       defaultMessage: 'Type',
     }),
     sortable: true,
@@ -161,7 +170,7 @@ const trainedModelColumns: Array<EuiBasicTableColumn<TrainedModelsManagementItem
   },
   {
     field: 'state',
-    name: i18n.translate('xpack.ml.analyticsSelector.sourceIndex', {
+    name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.trainedModels.state', {
       defaultMessage: 'State',
     }),
     sortable: true,

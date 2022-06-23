@@ -24,13 +24,13 @@ export function getFilters(mlSavedObjectType: MlSavedObjectType, jobs: Managemen
         [
           [
             'jobState',
-            i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
+            i18n.translate('xpack.ml.management.spaceManagementFilters.ada.jobState', {
               defaultMessage: 'Job state',
             }),
           ],
           [
             'datafeedState',
-            i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
+            i18n.translate('xpack.ml.management.spaceManagementFilters.ad.datafeedState', {
               defaultMessage: 'Datafeed state',
             }),
           ],
@@ -41,13 +41,13 @@ export function getFilters(mlSavedObjectType: MlSavedObjectType, jobs: Managemen
       return createOptions(jobs as AnalyticsManagementItems[], [
         [
           'job_type',
-          i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
+          i18n.translate('xpack.ml.management.spaceManagementFilters.dfa.job_type', {
             defaultMessage: 'Type',
           }),
         ],
         [
           'state',
-          i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
+          i18n.translate('xpack.ml.management.spaceManagementFilters.dfa.state', {
             defaultMessage: 'Status',
           }),
         ],
@@ -57,7 +57,7 @@ export function getFilters(mlSavedObjectType: MlSavedObjectType, jobs: Managemen
       return createOptions(jobs as TrainedModelsManagementItems[], [
         [
           'type',
-          i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
+          i18n.translate('xpack.ml.management.spaceManagementFilters.trainedModels.type', {
             defaultMessage: 'Type',
           }),
         ],

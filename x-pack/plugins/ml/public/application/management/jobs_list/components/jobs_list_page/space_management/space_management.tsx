@@ -70,7 +70,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
       ...(spacesApi !== undefined
         ? [
             {
-              name: i18n.translate('xpack.ml.analyticsSelector.destinationIndex', {
+              name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.spaces', {
                 defaultMessage: 'spaces',
               }),
               sortable: true,
