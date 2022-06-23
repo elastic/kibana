@@ -92,6 +92,7 @@ export const doSearch = async (
     body: {
       query: queryDSL,
       size: 0,
+      // TODO: Remove these runtime_mappings once they got added to EndpointPackage
       runtime_mappings: {
         'container.image.name': {
           type: 'keyword',
@@ -106,6 +107,9 @@ export const doSearch = async (
           type: 'keyword',
         },
         'orchestrator.resource.name': {
+          type: 'keyword',
+        },
+        'orchestrator.resource.node': {
           type: 'keyword',
         },
       },
