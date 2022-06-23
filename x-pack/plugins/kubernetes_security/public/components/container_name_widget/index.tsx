@@ -25,7 +25,7 @@ import { CONTAINER_IMAGE_NAME } from '../../../common/constants';
 
 export interface ContainerNameWidgetDataValueMap {
   key: string;
-  doc_count:number;
+  doc_count: number;
   count_by_aggs: {
     value: number;
   };
