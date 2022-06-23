@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -38,6 +38,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('discover doc table');
       await PageObjects.common.navigateToApp('discover');
+    });
+
+    after(async function () {
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should show records by default', async function () {

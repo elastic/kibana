@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
-  const defaultSettings = { defaultIndex: 'logstash-*', 'doc_table:legacy': false };
+  const defaultSettings = { defaultIndex: 'logstash-*' };
   const dataGrid = getService('dataGrid');
 
   describe('discover data grid field data tests', function describeIndexTests() {
