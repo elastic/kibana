@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
 import { scaleLog } from 'd3-scale';
+
+import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import {
   SPAN_DURATION,
