@@ -19,7 +19,7 @@ import { FatalErrorsScreen } from './fatal_errors_screen';
 import { getErrorInfo } from './get_error_info';
 
 /** @internal */
-export interface Deps {
+export interface FatalErrorsServiceSetupDeps {
   i18n: I18nStart;
   theme: ThemeServiceSetup;
   injectedMetadata: InternalInjectedMetadataSetup;
@@ -38,7 +38,7 @@ export class FatalErrorsService {
    */
   constructor(private rootDomElement: HTMLElement, private onFirstErrorCb: () => void) {}
 
-  public setup(deps: Deps) {
+  public setup(deps: FatalErrorsServiceSetupDeps) {
     this.errorInfo$
       .pipe(
         first(),
@@ -86,7 +86,7 @@ export class FatalErrorsService {
     return fatalErrors;
   }
 
-  private renderError({ i18n, theme, injectedMetadata }: Deps) {
+  private renderError({ i18n, theme, injectedMetadata }: FatalErrorsServiceSetupDeps) {
     // delete all content in the rootDomElement
     this.rootDomElement.textContent = '';
 
