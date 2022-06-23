@@ -72,6 +72,9 @@ describe('actions schemas', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({ page: -1 });
       }).toThrow();
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ page: 0 });
+      }).toThrow();
     });
 
     it('should not work with invalid value for `pageSize` query param', () => {

@@ -225,7 +225,7 @@ describe('When using `getActionList()', () => {
         data: [],
         elasticAgentIds: undefined,
         endDate: undefined,
-        page: 0,
+        page: 1,
         pageSize: 10,
         startDate: undefined,
         total: 0,

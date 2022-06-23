@@ -52,9 +52,9 @@ export const getActionList = async ({
   logger: Logger;
 }): Promise<ActionListApiResponse> => {
   const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
-  const page = _page ?? ENDPOINT_DEFAULT_PAGE;
+  const page = _page ?? 1;
   // # of hits to skip
-  const from = page * size;
+  const from = (page - 1) * size;
 
   const { actionDetails, totalRecords } = await getActionDetailsList({
     commands,

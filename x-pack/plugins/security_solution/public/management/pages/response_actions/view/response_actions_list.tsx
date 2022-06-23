@@ -83,7 +83,7 @@ export const ResponseActionsList = memo<
   }>({});
 
   const [queryParams, setQueryParams] = useState<EndpointActionListRequestQuery>({
-    page: 0,
+    page: 1,
     pageSize: 10,
     agentIds,
     commands,
@@ -437,7 +437,9 @@ export const ResponseActionsList = memo<
   // table pagination
   const tablePagination = useMemo(() => {
     return {
-      pageIndex: queryParams.page || 0,
+      // this controls the table UI page
+      // to match 0-based table paging
+      pageIndex: (queryParams.page || 1) - 1,
       pageSize: queryParams.pageSize || 10,
       totalItemCount,
       pageSizeOptions: MANAGEMENT_PAGE_SIZE_OPTIONS as number[],
@@ -447,10 +449,13 @@ export const ResponseActionsList = memo<
   // handle onChange
   const handleTableOnChange = useCallback(
     ({ page: _page }: CriteriaWithPagination<ActionDetails>) => {
+      // table paging is 0 based
       const { index, size } = _page;
       setQueryParams((prevState) => ({
         ...prevState,
-        page: index,
+        // adjust the page to conform to
+        // 1-based API page
+        page: index + 1,
         pageSize: size,
       }));
       reFetchEndpointActionList();
