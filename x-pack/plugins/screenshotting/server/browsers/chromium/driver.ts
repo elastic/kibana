@@ -18,7 +18,7 @@ import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
 import { ConfigType } from '../../config';
 import { Layout } from '../../layouts';
-import { printLayoutSelectors } from '../../layouts/print_layout';
+import { getPrintLayoutSelectors } from '../../layouts/print_layout';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
 import { getFooterTemplate, getHeaderTemplate } from './templates';
@@ -232,7 +232,7 @@ export class HeadlessChromiumDriver {
   }): Promise<Buffer> {
     await this.workaroundWebGLDrivenCanvases();
     if (error) {
-      await this.injectScreenshottingErrorHeader(error, printLayoutSelectors.screenshot);
+      await this.injectScreenshottingErrorHeader(error, getPrintLayoutSelectors().screenshot);
     }
     return this.page.pdf({
       format: 'a4',
@@ -283,11 +283,7 @@ export class HeadlessChromiumDriver {
     return undefined;
   }
 
-  evaluate<T = any>(
-    { fn, args = [] }: EvaluateOpts,
-    meta: EvaluateMetaOpts,
-    logger: Logger
-  ): Promise<T> {
+  evaluate({ fn, args = [] }: EvaluateOpts, meta: EvaluateMetaOpts, logger: Logger): Promise<any> {
     logger.debug(`evaluate ${meta.context}`);
 
     return this.page.evaluate(fn, ...args);

@@ -25,8 +25,8 @@ describe('getScreenshots', () => {
     {
       attributes: { description: 'description2', title: 'title2' },
       position: {
-        boundingClientRect: { top: 10, left: 10, height: 100, width: 100 },
-        scroll: { x: 100, y: 100 },
+        boundingClientRect: { top: 200, left: 10, height: 10, width: 100 },
+        scroll: { x: 100, y: 300 },
       },
     },
   ];
@@ -98,14 +98,16 @@ describe('getScreenshots', () => {
     await getScreenshots(browser, eventLogger, { elements: elementsPositionAndAttributes, layout });
 
     expect(browser.screenshot).toHaveBeenCalledTimes(2);
-    expect(browser.screenshot).toHaveBeenNthCalledWith(
-      1,
-      elementsPositionAndAttributes[0].position
-    );
-    expect(browser.screenshot).toHaveBeenNthCalledWith(
-      2,
-      elementsPositionAndAttributes[1].position
-    );
+    expect(browser.screenshot).toHaveBeenNthCalledWith(1, {
+      elementPosition: elementsPositionAndAttributes[0].position,
+      layout,
+      error: undefined,
+    });
+    expect(browser.screenshot).toHaveBeenNthCalledWith(2, {
+      elementPosition: elementsPositionAndAttributes[1].position,
+      layout,
+      error: undefined,
+    });
   });
 
   it('should reject when the taken screenshot is empty', async () => {
