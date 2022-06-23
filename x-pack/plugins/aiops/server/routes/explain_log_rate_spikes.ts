@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// import { firstValueFrom } from 'rxjs';
-
 import type { IRouter, Logger } from '@kbn/core/server';
 // import type { DataRequestHandlerContext, IEsSearchRequest } from '@kbn/data-plugin/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
@@ -18,6 +16,16 @@ import {
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
 import { API_ENDPOINT } from '../../common/api';
+
+import { fetchFieldCandidates } from './queries/fetch_field_candidates';
+
+// Overall progress is a float from 0 to 1.
+// const LOADED_OVERALL_HISTOGRAM = 0.05;
+const LOADED_FIELD_CANDIDATES = 0.05;
+// const LOADED_DONE = 1;
+// const PROGRESS_STEP_P_VALUES = 0.6;
+// const PROGRESS_STEP_HISTOGRAMS = 0.1;
+// const PROGRESS_STEP_FREQUENT_ITEMS = 0.1;
 
 export const defineExplainLogRateSpikesRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -31,10 +39,11 @@ export const defineExplainLogRateSpikesRoute = (
       },
     },
     async (context, request, response) => {
-      // const index = request.body.index;
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
 
       const controller = new AbortController();
 
+      let loaded = 0;
       let shouldStop = false;
       request.events.aborted$.subscribe(() => {
         shouldStop = true;
@@ -45,19 +54,6 @@ export const defineExplainLogRateSpikesRoute = (
         controller.abort();
       });
 
-      // const search = await context.search;
-      // const res = await firstValueFrom(
-      //   search.search(
-      //     {
-      //       params: {
-      //         index,
-      //         body: { size: 1 },
-      //       },
-      //     } as IEsSearchRequest,
-      //     { abortSignal: controller.signal }
-      //   )
-      // );
-
       const { end, push, responseWithHeaders } = streamFactory<AiopsExplainLogRateSpikesApiAction>(
         request.headers
       );
@@ -67,22 +63,26 @@ export const defineExplainLogRateSpikesRoute = (
         push(
           updateLoadingStateAction({
             ccsWarning: false,
-            loaded: 0,
+            loaded,
             loadingState: 'Loading field candidates.',
           })
         );
 
-        // This iteration just takes in an index name and based on a date histogram we identify the window params.
-        // Eventually it should be possible to pass these attributes from the client based on the brush selection.
+        const { fieldCandidates } = await fetchFieldCandidates(client, request.body);
 
-        // const resp = await getHistogramsForFields(
-        //   esClient,
-        //   dataViewTitle,
-        //   query,
-        //   fields,
-        //   samplerShardSize,
-        //   runtimeMappings
-        // );
+        if (shouldStop) {
+          end();
+          return;
+        }
+
+        loaded += LOADED_FIELD_CANDIDATES;
+        push(
+          updateLoadingStateAction({
+            ccsWarning: false,
+            loaded,
+            loadingState: `Identified ${fieldCandidates.length} field candidates.`,
+          })
+        );
 
         end();
       })();

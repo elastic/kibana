@@ -30,7 +30,16 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
 
   const { start, data, isRunning } = useFetchStream<ApiExplainLogRateSpikes, typeof basePath>(
     `${basePath}/internal/aiops/explain_log_rate_spikes`,
-    { index: dataView.title },
+    {
+      // TODO Consider time ranges.
+      start: 0,
+      end: 2147483647000,
+      // TODO Consider an optional Kuery.
+      kuery: '',
+      // TODO Handle data view without time fields.
+      timeFieldName: dataView.timeFieldName ?? '',
+      index: dataView.title,
+    },
     { reducer: streamReducer, initialState }
   );
 

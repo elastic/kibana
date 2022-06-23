@@ -8,6 +8,11 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const aiopsExplainLogRateSpikesSchema = schema.object({
+  start: schema.number(),
+  end: schema.number(),
+  kuery: schema.string(),
+  timeFieldName: schema.string(),
+  includeFrozen: schema.maybe(schema.boolean()),
   /** The index to query for log rate spikes */
   index: schema.string(),
 });
