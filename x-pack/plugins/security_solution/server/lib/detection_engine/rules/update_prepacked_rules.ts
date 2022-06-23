@@ -109,6 +109,7 @@ export const createPromises = (
       concurrent_searches: concurrentSearches,
       items_per_search: itemsPerSearch,
       timestamp_override: timestampOverride,
+      should_disable_timestamp_fallback: shouldDisableTimestampFallback,
       references,
       version,
       note,
@@ -202,6 +203,7 @@ export const createPromises = (
         threshold,
         throttle: migratedRule.throttle, // Throttle comes from the existing rule
         timestampOverride,
+        shouldDisableTimestampFallback,
         references,
         note,
         version,
@@ -245,6 +247,7 @@ export const createPromises = (
         severityMapping,
         tags,
         timestampOverride,
+        shouldDisableTimestampFallback,
         to,
         type,
         threat,

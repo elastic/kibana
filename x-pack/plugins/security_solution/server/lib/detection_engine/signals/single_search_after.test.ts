@@ -43,6 +43,7 @@ describe('singleSearchAfter', () => {
       pageSize: 1,
       filter: {},
       timestampOverride: undefined,
+      shouldDisableTimestampFallback: undefined,
       buildRuleMessage,
       runtimeMappings: undefined,
     });
@@ -62,6 +63,7 @@ describe('singleSearchAfter', () => {
       pageSize: 1,
       filter: {},
       timestampOverride: undefined,
+      shouldDisableTimestampFallback: undefined,
       buildRuleMessage,
       runtimeMappings: undefined,
     });
@@ -113,6 +115,7 @@ describe('singleSearchAfter', () => {
       pageSize: 1,
       filter: {},
       timestampOverride: undefined,
+      shouldDisableTimestampFallback: undefined,
       buildRuleMessage,
       runtimeMappings: undefined,
     });
@@ -137,6 +140,7 @@ describe('singleSearchAfter', () => {
       pageSize: 1,
       filter: {},
       timestampOverride: undefined,
+      shouldDisableTimestampFallback: undefined,
       buildRuleMessage,
       runtimeMappings: undefined,
     });
@@ -158,6 +162,7 @@ describe('singleSearchAfter', () => {
         pageSize: 1,
         filter: {},
         timestampOverride: undefined,
+        shouldDisableTimestampFallback: undefined,
         buildRuleMessage,
         runtimeMappings: undefined,
       })

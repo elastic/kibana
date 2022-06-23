@@ -81,7 +81,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let hasError = false;
           let inputIndex: string[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
-          const { from, maxSignals, meta, ruleId, timestampOverride, to } = params;
+          const {
+            from,
+            maxSignals,
+            meta,
+            ruleId,
+            timestampOverride,
+            shouldDisableTimestampFallback,
+            to,
+          } = params;
           const {
             alertWithPersistence,
             savedObjectsClient,
@@ -200,7 +208,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     {
                       index: inputIndex,
                       fields: hasTimestampOverride
-                        ? ['@timestamp', timestampOverride]
+                        ? [
+                            timestampOverride,
+                            ...(shouldDisableTimestampFallback ? [] : ['@timestamp']),
+                          ]
                         : ['@timestamp'],
                       include_unmapped: true,
                       runtime_mappings: runtimeMappings,

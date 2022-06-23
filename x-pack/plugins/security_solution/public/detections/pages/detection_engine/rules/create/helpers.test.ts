@@ -507,6 +507,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        should_disable_timestamp_fallback: true,
       };
 
       expect(result).toEqual(expected);
@@ -587,6 +588,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        should_disable_timestamp_fallback: true,
       };
 
       expect(result).toEqual(expected);
@@ -611,6 +613,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        should_disable_timestamp_fallback: true,
       };
 
       expect(result).toEqual(expected);
@@ -654,6 +657,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        should_disable_timestamp_fallback: true,
       };
 
       expect(result).toEqual(expected);
@@ -706,6 +710,7 @@ describe('helpers', () => {
             ],
           },
         ],
+        should_disable_timestamp_fallback: true,
       };
 
       expect(result).toEqual(expected);

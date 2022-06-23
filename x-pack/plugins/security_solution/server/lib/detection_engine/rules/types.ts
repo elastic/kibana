@@ -99,6 +99,7 @@ import {
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
+  ShouldDisableTimestampFallbackOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 
 import { PartialFilter } from '../types';
@@ -193,6 +194,7 @@ export interface CreateRulesOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   throttle: ThrottleOrNull;
   timestampOverride: TimestampOverrideOrUndefined;
+  shouldDisableTimestampFallback: ShouldDisableTimestampFallbackOrUndefined;
   to: To;
   type: Type;
   references: References;
@@ -263,6 +265,7 @@ interface PatchRulesFieldsOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   throttle: ThrottleOrUndefinedOrNull;
   timestampOverride: TimestampOverrideOrUndefined;
+  shouldDisableTimestampFallback: ShouldDisableTimestampFallbackOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;
   references: ReferencesOrUndefined;

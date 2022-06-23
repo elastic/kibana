@@ -27,6 +27,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
+      shouldDisableTimestampFallback: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -85,6 +86,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: 'event.ingested',
+      shouldDisableTimestampFallback: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -175,6 +177,78 @@ describe('create_signals', () => {
     });
   });
 
+  test('it builds a filter without @timestamp fallback if shouldDisableTimestampFallback is true', () => {
+    const query = buildEventsSearchQuery({
+      index: ['auditbeat-*'],
+      from: 'now-5m',
+      to: 'today',
+      filter: {},
+      size: 100,
+      searchAfterSortIds: undefined,
+      timestampOverride: 'event.ingested',
+      shouldDisableTimestampFallback: true,
+      runtimeMappings: undefined,
+    });
+    expect(query).toEqual({
+      allow_no_indices: true,
+      index: ['auditbeat-*'],
+      size: 100,
+      ignore_unavailable: true,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {},
+              {
+                bool: {
+                  should: [
+                    {
+                      range: {
+                        'event.ingested': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              {
+                match_all: {},
+              },
+            ],
+          },
+        },
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+          {
+            field: 'event.ingested',
+            format: 'strict_date_optional_time',
+          },
+        ],
+        sort: [
+          {
+            'event.ingested': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          },
+          {
+            '@timestamp': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          },
+        ],
+      },
+    });
+  });
+
   test('if searchAfterSortIds is a valid sortId string', () => {
     const fakeSortId = '123456789012';
     const query = buildEventsSearchQuery({
@@ -185,6 +259,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: [fakeSortId],
       timestampOverride: undefined,
+      shouldDisableTimestampFallback: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -244,6 +319,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: [fakeSortIdNumber],
       timestampOverride: undefined,
+      shouldDisableTimestampFallback: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -302,6 +378,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
+      shouldDisableTimestampFallback: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -367,6 +444,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
+      shouldDisableTimestampFallback: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -432,6 +510,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
+      shouldDisableTimestampFallback: undefined,
       trackTotalHits: false,
       runtimeMappings: undefined,
     });
@@ -447,6 +526,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
+      shouldDisableTimestampFallback: undefined,
       sortOrder: 'desc',
       trackTotalHits: false,
       runtimeMappings: undefined,
@@ -468,6 +548,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: 'event.ingested',
+      shouldDisableTimestampFallback: undefined,
       sortOrder: 'desc',
       runtimeMappings: undefined,
     });
@@ -487,18 +568,19 @@ describe('create_signals', () => {
 
   describe('buildEqlSearchRequest', () => {
     test('should build a basic request with time range', () => {
-      const request = buildEqlSearchRequest(
-        'process where true',
-        ['testindex1', 'testindex2'],
-        'now-5m',
-        'now',
-        100,
-        undefined,
-        undefined,
-        [],
-        undefined,
-        undefined
-      );
+      const request = buildEqlSearchRequest({
+        query: 'process where true',
+        index: ['testindex1', 'testindex2'],
+        from: 'now-5m',
+        to: 'now',
+        size: 100,
+        filters: undefined,
+        timestampOverride: undefined,
+        shouldDisableTimestampFallback: undefined,
+        exceptionLists: [],
+        runtimeMappings: undefined,
+        eventCategoryOverride: undefined,
+      });
       expect(request).toEqual({
         allow_no_indices: true,
         index: ['testindex1', 'testindex2'],
@@ -537,19 +619,20 @@ describe('create_signals', () => {
     });
 
     test('should build a request with timestamp and event category overrides', () => {
-      const request = buildEqlSearchRequest(
-        'process where true',
-        ['testindex1', 'testindex2'],
-        'now-5m',
-        'now',
-        100,
-        undefined,
-        'event.ingested',
-        [],
-        undefined,
-        'event.other_category',
-        undefined
-      );
+      const request = buildEqlSearchRequest({
+        query: 'process where true',
+        index: ['testindex1', 'testindex2'],
+        from: 'now-5m',
+        to: 'now',
+        size: 100,
+        filters: undefined,
+        timestampOverride: 'event.ingested',
+        shouldDisableTimestampFallback: undefined,
+        exceptionLists: [],
+        runtimeMappings: undefined,
+        eventCategoryOverride: 'event.other_category',
+        timestampField: undefined,
+      });
       expect(request).toEqual({
         allow_no_indices: true,
         index: ['testindex1', 'testindex2'],
@@ -623,19 +706,80 @@ describe('create_signals', () => {
       });
     });
 
+    test('should build a request without @timestamp fallback if shouldDisableTimestampFallback is true', () => {
+      const request = buildEqlSearchRequest({
+        query: 'process where true',
+        index: ['testindex1', 'testindex2'],
+        from: 'now-5m',
+        to: 'now',
+        size: 100,
+        filters: undefined,
+        timestampOverride: 'event.ingested',
+        shouldDisableTimestampFallback: true,
+        exceptionLists: [],
+        runtimeMappings: undefined,
+        eventCategoryOverride: 'event.other_category',
+        timestampField: undefined,
+      });
+      expect(request).toEqual({
+        allow_no_indices: true,
+        index: ['testindex1', 'testindex2'],
+        body: {
+          event_category_field: 'event.other_category',
+          size: 100,
+          query: 'process where true',
+          runtime_mappings: undefined,
+          filter: {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        range: {
+                          'event.ingested': {
+                            lte: 'now',
+                            gte: 'now-5m',
+                            format: 'strict_date_optional_time',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                emptyFilter,
+              ],
+            },
+          },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+            {
+              field: 'event.ingested',
+              format: 'strict_date_optional_time',
+            },
+          ],
+        },
+      });
+    });
+
     test('should build a request with exceptions', () => {
-      const request = buildEqlSearchRequest(
-        'process where true',
-        ['testindex1', 'testindex2'],
-        'now-5m',
-        'now',
-        100,
-        undefined,
-        undefined,
-        [getExceptionListItemSchemaMock()],
-        undefined,
-        undefined
-      );
+      const request = buildEqlSearchRequest({
+        query: 'process where true',
+        index: ['testindex1', 'testindex2'],
+        from: 'now-5m',
+        to: 'now',
+        size: 100,
+        filters: undefined,
+        timestampOverride: undefined,
+        shouldDisableTimestampFallback: undefined,
+        exceptionLists: [getExceptionListItemSchemaMock()],
+        runtimeMappings: undefined,
+        eventCategoryOverride: undefined,
+      });
       expect(request).toEqual({
         allow_no_indices: true,
         index: ['testindex1', 'testindex2'],
@@ -758,17 +902,18 @@ describe('create_signals', () => {
           },
         },
       ];
-      const request = buildEqlSearchRequest(
-        'process where true',
-        ['testindex1', 'testindex2'],
-        'now-5m',
-        'now',
-        100,
+      const request = buildEqlSearchRequest({
+        query: 'process where true',
+        index: ['testindex1', 'testindex2'],
+        from: 'now-5m',
+        to: 'now',
+        size: 100,
         filters,
-        undefined,
-        [],
-        undefined
-      );
+        timestampOverride: undefined,
+        shouldDisableTimestampFallback: undefined,
+        exceptionLists: [],
+        runtimeMappings: undefined,
+      });
       expect(request).toEqual({
         allow_no_indices: true,
         index: ['testindex1', 'testindex2'],

@@ -9,6 +9,7 @@ import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types'
 import { isEmpty } from 'lodash';
 import {
   FiltersOrUndefined,
+  ShouldDisableTimestampFallbackOrUndefined,
   TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
@@ -24,17 +25,36 @@ interface BuildEventsSearchQuery {
   sortOrder?: estypes.SortOrder;
   searchAfterSortIds: estypes.SortResults | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
+  shouldDisableTimestampFallback: ShouldDisableTimestampFallbackOrUndefined;
   trackTotalHits?: boolean;
+}
+
+interface BuildEqlSearchRequestParams {
+  query: string;
+  index: string[];
+  from: string;
+  to: string;
+  size: number;
+  filters: FiltersOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
+  shouldDisableTimestampFallback: ShouldDisableTimestampFallbackOrUndefined;
+  exceptionLists: ExceptionListItemSchema[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  eventCategoryOverride?: string;
+  timestampField?: string;
+  tiebreakerField?: string;
 }
 
 const buildTimeRangeFilter = ({
   to,
   from,
   timestampOverride,
+  shouldDisableTimestampFallback,
 }: {
   to: string;
   from: string;
   timestampOverride?: string;
+  shouldDisableTimestampFallback?: boolean;
 }): estypes.QueryDslQueryContainer => {
   // If the timestampOverride is provided, documents must either populate timestampOverride with a timestamp in the range
   // or must NOT populate the timestampOverride field at all and `@timestamp` must fall in the range.
@@ -53,30 +73,34 @@ const buildTimeRangeFilter = ({
                 },
               },
             },
-            {
-              bool: {
-                filter: [
-                  {
-                    range: {
-                      '@timestamp': {
-                        lte: to,
-                        gte: from,
-                        format: 'strict_date_optional_time',
-                      },
-                    },
-                  },
+            ...(shouldDisableTimestampFallback
+              ? []
+              : [
                   {
                     bool: {
-                      must_not: {
-                        exists: {
-                          field: timestampOverride,
+                      filter: [
+                        {
+                          range: {
+                            '@timestamp': {
+                              lte: to,
+                              gte: from,
+                              format: 'strict_date_optional_time',
+                            },
+                          },
                         },
-                      },
+                        {
+                          bool: {
+                            must_not: {
+                              exists: {
+                                field: timestampOverride,
+                              },
+                            },
+                          },
+                        },
+                      ],
                     },
                   },
-                ],
-              },
-            },
+                ]),
           ],
         },
       }
@@ -102,17 +126,25 @@ export const buildEventsSearchQuery = ({
   searchAfterSortIds,
   sortOrder,
   timestampOverride,
+  shouldDisableTimestampFallback,
   trackTotalHits,
 }: BuildEventsSearchQuery) => {
   const defaultTimeFields = ['@timestamp'];
   const timestamps =
-    timestampOverride != null ? [timestampOverride, ...defaultTimeFields] : defaultTimeFields;
+    timestampOverride != null
+      ? [timestampOverride, ...(shouldDisableTimestampFallback ? [] : defaultTimeFields)]
+      : defaultTimeFields;
   const docFields = timestamps.map((tstamp) => ({
     field: tstamp,
     format: 'strict_date_optional_time',
   }));
 
-  const rangeFilter = buildTimeRangeFilter({ to, from, timestampOverride });
+  const rangeFilter = buildTimeRangeFilter({
+    to,
+    from,
+    timestampOverride,
+    shouldDisableTimestampFallback,
+  });
 
   const filterWithTime: estypes.QueryDslQueryContainer[] = [filter, rangeFilter];
 
@@ -174,23 +206,26 @@ export const buildEventsSearchQuery = ({
   return searchQuery;
 };
 
-export const buildEqlSearchRequest = (
-  query: string,
-  index: string[],
-  from: string,
-  to: string,
-  size: number,
-  filters: FiltersOrUndefined,
-  timestampOverride: TimestampOverrideOrUndefined,
-  exceptionLists: ExceptionListItemSchema[],
-  runtimeMappings: estypes.MappingRuntimeFields | undefined,
-  eventCategoryOverride?: string,
-  timestampField?: string,
-  tiebreakerField?: string
-): estypes.EqlSearchRequest => {
+export const buildEqlSearchRequest = ({
+  query,
+  index,
+  from,
+  to,
+  size,
+  filters,
+  timestampOverride,
+  shouldDisableTimestampFallback,
+  exceptionLists,
+  runtimeMappings,
+  eventCategoryOverride,
+  timestampField,
+  tiebreakerField,
+}: BuildEqlSearchRequestParams): estypes.EqlSearchRequest => {
   const defaultTimeFields = ['@timestamp'];
   const timestamps =
-    timestampOverride != null ? [timestampOverride, ...defaultTimeFields] : defaultTimeFields;
+    timestampOverride != null
+      ? [timestampOverride, ...(shouldDisableTimestampFallback ? [] : defaultTimeFields)]
+      : defaultTimeFields;
   const docFields = timestamps.map((tstamp) => ({
     field: tstamp,
     format: 'strict_date_optional_time',
@@ -198,7 +233,12 @@ export const buildEqlSearchRequest = (
 
   const esFilter = getQueryFilter('', 'eql', filters || [], index, exceptionLists);
 
-  const rangeFilter = buildTimeRangeFilter({ to, from, timestampOverride });
+  const rangeFilter = buildTimeRangeFilter({
+    to,
+    from,
+    timestampOverride,
+    shouldDisableTimestampFallback,
+  });
   const requestFilter: estypes.QueryDslQueryContainer[] = [rangeFilter, esFilter];
   const fields = [
     {

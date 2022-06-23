@@ -62,6 +62,7 @@ import {
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
+  ShouldDisableTimestampFallbackOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
@@ -138,6 +139,7 @@ export interface UpdateProperties {
   concurrentSearches: ConcurrentSearchesOrUndefined;
   itemsPerSearch: ItemsPerSearchOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
+  shouldDisableTimestampFallback: ShouldDisableTimestampFallbackOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;
   references: ReferencesOrUndefined;

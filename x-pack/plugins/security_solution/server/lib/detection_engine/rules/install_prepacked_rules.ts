@@ -65,6 +65,7 @@ export const installPrepackagedRules = (
       threat_indicator_path: threatIndicatorPath,
       threshold,
       timestamp_override: timestampOverride,
+      should_disable_timestamp_fallback: shouldDisableTimestampFallback,
       references,
       namespace,
       note,
@@ -128,6 +129,7 @@ export const installPrepackagedRules = (
         threshold,
         throttle: null, // At this time there is no pre-packaged actions
         timestampOverride,
+        shouldDisableTimestampFallback,
         references,
         namespace,
         note,

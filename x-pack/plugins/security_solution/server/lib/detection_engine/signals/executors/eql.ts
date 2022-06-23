@@ -74,20 +74,21 @@ export const eqlExecutor = async ({
       result.warning = true;
     }
 
-    const request = buildEqlSearchRequest(
-      ruleParams.query,
-      inputIndex,
-      tuple.from.toISOString(),
-      tuple.to.toISOString(),
-      completeRule.ruleParams.maxSignals,
-      ruleParams.filters,
-      ruleParams.timestampOverride,
-      exceptionItems,
+    const request = buildEqlSearchRequest({
+      query: ruleParams.query,
+      index: inputIndex,
+      from: tuple.from.toISOString(),
+      to: tuple.to.toISOString(),
+      size: completeRule.ruleParams.maxSignals,
+      filters: ruleParams.filters,
+      timestampOverride: ruleParams.timestampOverride,
+      shouldDisableTimestampFallback: ruleParams.shouldDisableTimestampFallback,
+      exceptionLists: exceptionItems,
       runtimeMappings,
-      ruleParams.eventCategoryOverride,
-      ruleParams.timestampField,
-      ruleParams.tiebreakerField
-    );
+      eventCategoryOverride: ruleParams.eventCategoryOverride,
+      timestampField: ruleParams.timestampField,
+      tiebreakerField: ruleParams.tiebreakerField,
+    });
 
     const eqlSignalSearchStart = performance.now();
     logger.debug(`EQL query request: ${JSON.stringify(request)}`);
