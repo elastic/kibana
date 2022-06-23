@@ -7,6 +7,10 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from '@kbn/core/server';
+import type {
+  AlertsClient,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
 import { ResolverPaginatedEvents, SafeResolverEvent } from '../../../../common/endpoint/types';
 import { validateEvents } from '../../../../common/endpoint/schema/resolver';
 import { EventsQuery } from './queries/events';
@@ -29,7 +33,9 @@ function createEvents(
  * This function handles the `/events` api and returns an array of events and a cursor if more events exist than were
  * requested.
  */
-export function handleEvents(): RequestHandler<
+export function handleEvents(
+  ruleRegistry: RuleRegistryPluginStartContract
+): RequestHandler<
   unknown,
   TypeOf<typeof validateEvents.query>,
   TypeOf<typeof validateEvents.body>
@@ -39,13 +45,16 @@ export function handleEvents(): RequestHandler<
       query: { limit, afterEvent },
       body,
     } = req;
-    const client = (await context.core).elasticsearch.client;
-    const query = new EventsQuery({
+    const eventsClient = (await context.core).elasticsearch.client;
+    const alertsClient = await ruleRegistry.getRacClientWithRequest(req);
+
+    const eventsQuery = new EventsQuery({
       pagination: PaginationBuilder.createBuilder(limit, afterEvent),
       indexPatterns: body.indexPatterns,
       timeRange: body.timeRange,
     });
-    const results = await query.search(client, body.filter);
+    debugger;
+    const results = await eventsQuery.search(eventsClient, body.filter, alertsClient);
     return res.ok({
       body: createEvents(results, PaginationBuilder.buildCursorRequestLimit(limit, results)),
     });

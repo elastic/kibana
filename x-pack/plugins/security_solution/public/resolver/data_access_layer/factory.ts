@@ -176,22 +176,42 @@ export function dataAccessLayerFactory(
                 filter: [{ term: { 'event.id': eventID } }],
               },
             };
-      const response: ResolverPaginatedEvents = await context.services.http.post(
-        '/api/endpoint/resolver/events',
-        {
-          query: { limit: 1 },
-          body: JSON.stringify({
-            indexPatterns,
-            timeRange: {
-              from: timeRange.from,
-              to: timeRange.to,
-            },
-            filter: JSON.stringify(filter),
-          }),
-        }
-      );
-      const [oneEvent] = response.events;
-      return oneEvent ?? null;
+      if (eventCategory.includes('alerts') === false) {
+        const response: ResolverPaginatedEvents = await context.services.http.post(
+          '/api/endpoint/resolver/events',
+          {
+            query: { limit: 1 },
+            body: JSON.stringify({
+              indexPatterns,
+              timeRange: {
+                from: timeRange.from,
+                to: timeRange.to,
+              },
+              filter: JSON.stringify(filter),
+            }),
+          }
+        );
+        const [oneEvent] = response.events;
+        return oneEvent ?? null;
+      } else {
+        const response: ResolverPaginatedEvents = await context.services.http.post(
+          '/api/endpoint/resolver/events',
+          {
+            query: { limit: 1 },
+            body: JSON.stringify({
+              indexPatterns,
+              timeRange: {
+                from: timeRange.from,
+                to: timeRange.to,
+              },
+              entityType: 'alert',
+              eventID,
+            }),
+          }
+        );
+        const [oneEvent] = response.events;
+        return oneEvent ?? null;
+      }
     },
 
     /**

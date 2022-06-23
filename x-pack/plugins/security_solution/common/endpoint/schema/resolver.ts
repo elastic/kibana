@@ -61,6 +61,7 @@ export const validateEvents = {
     }),
     indexPatterns: schema.arrayOf(schema.string()),
     filter: schema.maybe(schema.string()),
+    entityType: schema.maybe(schema.string()),
   }),
 };
 

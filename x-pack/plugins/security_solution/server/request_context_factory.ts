@@ -108,6 +108,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getRuleDataService: () => ruleRegistry.ruleDataService,
 
+      getRacClient: () => startPlugins.ruleRegistry.getRacClientWithRequest,
+
       getRuleExecutionLog: memoize(() =>
         ruleExecutionLogForRoutesFactory(
           coreContext.savedObjects.client,

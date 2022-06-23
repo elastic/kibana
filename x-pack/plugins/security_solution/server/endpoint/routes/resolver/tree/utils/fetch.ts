@@ -6,6 +6,10 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
+import type {
+  AlertsClient,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
 import {
   firstNonNullValue,
   values,
@@ -42,7 +46,10 @@ export interface TreeOptions {
  * Handles retrieving nodes of a resolver tree.
  */
 export class Fetcher {
-  constructor(private readonly client: IScopedClusterClient) {}
+  private alertsClient: AlertsClient;
+  constructor(private readonly client: IScopedClusterClient, alertsClient: AlertsClient) {
+    this.alertsClient = alertsClient;
+  }
 
   /**
    * This method retrieves the ancestors and descendants of a resolver tree.
@@ -86,7 +93,7 @@ export class Fetcher {
       isInternalRequest,
     });
 
-    const eventStats = await query.search(this.client, statsIDs);
+    const eventStats = await query.search(this.client, statsIDs, this.alertsClient);
     const statsNodes: ResolverNode[] = [];
     for (const node of treeNodes) {
       const id = getIDField(node, options.schema);

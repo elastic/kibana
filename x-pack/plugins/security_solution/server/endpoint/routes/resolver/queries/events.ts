@@ -6,7 +6,11 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { JsonObject } from '@kbn/utility-types';
+import type {
+  AlertsClient,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
+import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { PaginationBuilder } from '../utils/pagination';
@@ -62,6 +66,33 @@ export class EventsQuery {
     };
   }
 
+  private alertsQuery(id: JsonValue): { query: object } {
+    return {
+      query: {
+        bool: {
+          filter: [
+            {
+              // TODO use schema.
+              term: { 'process.entity_id': id },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: this.timeRange.from,
+                  lte: this.timeRange.to,
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+          ],
+        },
+      },
+      // index:
+      //   typeof this.indexPatterns === 'string' ? this.indexPatterns : this.indexPatterns.join(','),
+      ...this.pagination.buildQueryFields('event.id', 'desc'),
+    };
+  }
+
   private buildSearch(filters: JsonObject[]) {
     return {
       body: this.query(filters),
@@ -77,6 +108,34 @@ export class EventsQuery {
     return [parseFilterQuery(filter)];
   }
 
+  private alertFilter(filters: JsonObject[]): JsonObject | undefined {
+    return filters.find((filter) => {
+      const termFilter = filter.term;
+      const category = termFilter ? termFilter['event.category'] : null;
+      return category === 'alerts';
+    });
+  }
+
+  private isAlertRequest(filters: JsonObject[]): boolean {
+    return this.alertFilter(filters) !== undefined;
+  }
+
+  private alertId(filters: JsonObject[]) {
+    // TODO reduce
+    return filters
+      .map((filter) => {
+        for (const [key, value] of Object.entries(filter.term)) {
+          if (key === 'process.entity_id') {
+            return value;
+          } else {
+            return null;
+          }
+        }
+        return null;
+      })
+      .filter((filter) => filter !== null);
+  }
+
   /**
    * Searches ES for the specified events and format the response.
    *
@@ -85,13 +144,22 @@ export class EventsQuery {
    */
   async search(
     client: IScopedClusterClient,
-    filter: string | undefined
+    filter: string | undefined,
+    alertsClient: AlertsClient
   ): Promise<SafeResolverEvent[]> {
     const parsedFilters = EventsQuery.buildFilters(filter);
-    const response = await client.asCurrentUser.search<SafeResolverEvent>(
-      this.buildSearch(parsedFilters)
-    );
-    // @ts-expect-error @elastic/elasticsearch _source is optional
-    return response.hits.hits.map((hit) => hit._source);
+    const [eventType] = parsedFilters;
+    const eventFilter = eventType.bool?.filter;
+    if (this.isAlertRequest(eventFilter)) {
+      const [processId] = this.alertId(eventFilter);
+      const response = await alertsClient.find(this.alertsQuery(processId));
+      return response.hits.hits.map((hit) => hit._source);
+    } else {
+      const response = await client.asCurrentUser.search<SafeResolverEvent>(
+        this.buildSearch(parsedFilters)
+      );
+      // @ts-expect-error @elastic/elasticsearch _source is optional
+      return response.hits.hits.map((hit) => hit._source);
+    }
   }
 }

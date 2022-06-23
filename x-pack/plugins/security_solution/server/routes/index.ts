@@ -70,6 +70,7 @@ import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/
 import { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
+import { registerResolverRoutes } from '../endpoint/routes/resolver';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -116,6 +117,7 @@ export const initRoutes = (
   patchRulesBulkRoute(router, ml, logger);
   deleteRulesBulkRoute(router, logger);
   performBulkActionRoute(router, ml, logger);
+  registerResolverRoutes(router, getStartServices);
 
   getRuleExecutionEventsRoute(router);
 

@@ -191,9 +191,16 @@ export function processNameSafeVersion(event: SafeResolverEvent): string | undef
 }
 
 export function eventID(event: SafeResolverEvent): number | undefined | string {
-  return firstNonNullValue(
-    isLegacyEventSafeVersion(event) ? event.endgame.serial_event_id : event.event?.id
-  );
+  console.log(event);
+  if (typeof event.event?.id === 'string') {
+    return event.event.id;
+  } else {
+    if (isLegacyEventSafeVersion(event)) {
+      return firstNonNullValue(event.endgame.serial_event_id);
+    } else {
+      return firstNonNullValue(event.event?.id);
+    }
+  }
 }
 
 /**

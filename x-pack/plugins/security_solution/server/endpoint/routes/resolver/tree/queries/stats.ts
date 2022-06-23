@@ -6,6 +6,10 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
+import type {
+  AlertsClient,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
 import { JsonObject } from '@kbn/utility-types';
 import { EventStats, ResolverSchema } from '../../../../../../common/endpoint/types';
 import { NodeID, TimeRange } from '../utils';
@@ -94,8 +98,42 @@ export class StatsQuery {
     };
   }
 
-  private static getEventStats(catAgg: CategoriesAgg): EventStats {
-    const total = catAgg.doc_count;
+  private alertStatsQuery(nodes: NodeID[], index: string): JsonObject {
+    return {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: this.timeRange.from,
+                  lte: this.timeRange.to,
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+            {
+              terms: { [this.schema.id]: nodes },
+            },
+          ],
+        },
+      },
+      //search_after: undefined,
+      index,
+      aggs: {
+        ids: {
+          terms: { field: this.schema.id },
+        },
+      },
+    };
+  }
+
+  private static getEventStats(catAgg: CategoriesAgg, alertsBody): EventStats {
+    console.log(catAgg, alertsBody);
+    const eventId = catAgg.key;
+    const eventAlertCount = alertsBody.find(({ key }) => key === eventId).doc_count;
+    const total = catAgg.doc_count + eventAlertCount;
     if (!catAgg.categories?.buckets) {
       return {
         total,
@@ -110,9 +148,13 @@ export class StatsQuery {
       }),
       {}
     );
+
     return {
       total,
-      byCategory,
+      byCategory:
+        eventAlertCount && eventAlertCount > 0
+          ? { ...byCategory, alerts: eventAlertCount }
+          : byCategory,
     };
   }
 
@@ -121,24 +163,33 @@ export class StatsQuery {
    * @param client used to make requests to Elasticsearch
    * @param nodes an array of unique IDs representing nodes in a resolver graph
    */
-  async search(client: IScopedClusterClient, nodes: NodeID[]): Promise<Record<string, EventStats>> {
+  async search(
+    client: IScopedClusterClient,
+    nodes: NodeID[],
+    alertsClient: AlertsClient
+  ): Promise<Record<string, EventStats>> {
     if (nodes.length <= 0) {
       return {};
     }
 
     const esClient = this.isInternalRequest ? client.asInternalUser : client.asCurrentUser;
+    const alertIndex =
+      typeof this.indexPatterns === 'string' ? this.indexPatterns : this.indexPatterns.join(',');
 
     // leaving unknown here because we don't actually need the hits part of the body
-    const body = await esClient.search({
-      body: this.query(nodes),
-      index: this.indexPatterns,
-    });
-
+    const [body, alertsBody] = await Promise.all([
+      await esClient.search({
+        body: this.query(nodes),
+        index: this.indexPatterns,
+      }),
+      await alertsClient.find(this.alertStatsQuery(nodes, alertIndex)),
+    ]);
+    const alertsAggs = alertsBody.aggregations?.ids.buckets;
     // @ts-expect-error declare aggegations type explicitly
     return body.aggregations?.ids?.buckets.reduce(
       (cummulative: Record<string, number>, bucket: CategoriesAgg) => ({
         ...cummulative,
-        [bucket.key]: StatsQuery.getEventStats(bucket),
+        [bucket.key]: StatsQuery.getEventStats(bucket, alertsAggs),
       }),
       {}
     );
