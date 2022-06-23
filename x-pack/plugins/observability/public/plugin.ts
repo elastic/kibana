@@ -146,14 +146,6 @@ export class Plugin
       // Get start services
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
 
-      // Register alerts metadata
-      const { registerAlertsTableConfiguration } = await import(
-        './config/register_alerts_table_configuration'
-      );
-      const { alertsTableConfigurationRegistry, ruleTypeRegistry, actionTypeRegistry } =
-        pluginsStart.triggersActionsUi;
-
-      registerAlertsTableConfiguration(alertsTableConfigurationRegistry);
       // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
       // subset of this privilege are not authorized to access this endpoint and will receive a 404
       // error that causes the Alerting view to fail to load.
@@ -289,6 +281,18 @@ export class Plugin
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
       getSharedUXContext: pluginsStart.sharedUX.getContextServices,
+    });
+
+    const getAsyncO11yAlertsTableConfiguration = async () => {
+      const { getO11yAlertsTableConfiguration } = await import(
+        './config/register_alerts_table_configuration'
+      );
+      return getO11yAlertsTableConfiguration();
+    };
+
+    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+    getAsyncO11yAlertsTableConfiguration().then((config) => {
+      alertsTableConfigurationRegistry.register(config);
     });
 
     return {
