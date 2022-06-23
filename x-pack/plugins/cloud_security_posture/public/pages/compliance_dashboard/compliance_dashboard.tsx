@@ -24,7 +24,7 @@ const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataCo
   pageTitle: i18n.translate('xpack.csp.dashboard.noDataConfig.pageTitle', {
     defaultMessage: 'Cloud Posture Dashboard',
   }),
-  solution: i18n.translate('xpack.csp.dashboard.noDataConfig.solutionNameLabel', {
+  solution: i18n.translate('xpack.csp.dashboard.noDataConfig.solutionNameTitle', {
     defaultMessage: 'Cloud Security Posture',
   }),
   // TODO: Add real docs link once we have it
