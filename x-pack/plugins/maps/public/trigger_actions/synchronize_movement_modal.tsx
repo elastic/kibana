@@ -67,7 +67,6 @@ export class SynchronizeMovementModal extends Component<Props> {
               }
               this.forceUpdate();
             }}
-            isInvalid={hasErrors}
             compressed
           />
         </EuiFormRow>
