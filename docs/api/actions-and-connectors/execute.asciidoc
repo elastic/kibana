@@ -13,13 +13,6 @@ Runs a connector by ID.
 
 `POST <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>/_execute`
 
-[[execute-connector-api-desc]]
-=== {api-description-title}
-
-You can use this API to test an <<alerting-concepts-actions,action>> that 
-involves interaction with Kibana services or integrations with third-party
-systems.
-
 [[execute-connector-api-prereq]]
 === {api-prereq-title}
 
@@ -29,6 +22,13 @@ You must have `read` privileges for the *Actions and Connectors* feature in the
 
 If you use an index connector, you must also have `all`, `create`, `index`, or
 `write` {ref}/security-privileges.html[indices privileges].
+
+[[execute-connector-api-desc]]
+=== {api-description-title}
+
+You can use this API to test an <<alerting-concepts-actions,action>> that 
+involves interaction with Kibana services or integrations with third-party
+systems.
 
 [[execute-connector-api-params]]
 === {api-path-parms-title}
@@ -50,6 +50,16 @@ depending on the connector type. For information about the parameter properties,
 refer to <<action-types>>.
 +
 --
+.Index connectors
+[%collapsible%open]
+====
+`documents`::
+(Required, array of objects) The documents to index in JSON format.
+
+For more information, refer to
+{kibana-ref}/index-action-type.html[Index connector and action].
+====
+
 .Jira connectors
 [%collapsible%open]
 ====
