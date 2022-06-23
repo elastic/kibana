@@ -10,13 +10,9 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
-
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'dashboard', 'home']);
   const browser = getService('browser');
-
-  const PANEL_TITLE = 'Visualization PieChart';
 
   describe('Dashboard controls a11y tests', () => {
     before(async () => {
