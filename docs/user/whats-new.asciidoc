@@ -13,6 +13,7 @@ Previous versions: {kibana-ref-all}/8.2/whats-new.html[8.2] | {kibana-ref-all}/8
 // tag::notable-highlights[]
 
 [float]
+[[highlights-8.3-discover]]
 === Alerts available from Discover
 
 You can now create search threshold rules from *Discover*,
@@ -20,27 +21,32 @@ making it easy to be notified when documents change so you can turn your data in
 Start by defining the data view, query, and filter conditions for when you want to be alerted.
 Then choose the messaging services where you want to be notified when your alert conditions are met,
 and finally, trigger workflows across third-party integrations such as ServiceNow and Slack.
-For information about alerts, check <<alerting-getting-started, Alerting>>.
+For information about alerts, check {kibana-ref}/alerting-getting-started.html[Alerting].
 
 [role="screenshot"]
 image::images/highlights-discover.png[A view of the Create rule form opened from Discover]
 
 [float]
-=== New controls for filtering dashboard data
+[[highlights-8.3-controls]]
+=== Controls for filtering dashboard data
 
 Dashboard controls bring interactive inputs in an easy drag and drop editing experience.
 Controls chain, disable when they need to, and offer several filtering form
 factors that make filtering fast. Now, you can make filtering on popular fields
 easy for all your dashboard users.
+For more information, check {kibana-ref}/add-controls.html[Filter dashboard data with controls].
 
 [role="screenshot"]
 image::images/highlights-controls.png[A dashboard view showing the new Controls menu]
 
 [float]
+[[highlights-8.3-query-bar]]
 === Query bar refreshed across {kib}
 
-8.3 brings a modern and responsive query and search experience to Kibana, which
+This release brings a modern and responsive query and search experience to Kibana, which
 makes more room for your data and content.
+For more information, check {kibana-ref}/kibana-concepts-analysts.html[Kibana concepts].
+
 
 [float]
 ==== Data view menu
@@ -48,7 +54,7 @@ makes more room for your data and content.
 The new data view menu consolidates all of the options you need to
 create, find, and edit your data views in a single location. Need to add a field to your data view?
 Changed your mind and need to create a data view? No problem. These options
-are all in the simplified menu.
+are available in the simplified menu.
 
 [role="screenshot"]
 image::discover/images/discover-data-view.png[How to set the {data-source}, width=50%]
@@ -56,117 +62,15 @@ image::discover/images/discover-data-view.png[How to set the {data-source}, widt
 [float]
 ==== Saved query and Add filter menus
 
-Querying and filtering your Elastic data just got easier with the improved *Saved query*
-and *Add filter* menus. In the *Saved query* menu, we’ve consolidated all of your
+Querying and filtering your Elastic data is now easier with the improved *Saved query*
+and *Add filter* menus. The *Saved query* menu consolidates all of your
 query and filter needs, including the option to change your filtering language.
 
 [role="screenshot"]
 image::images/highlights-saved-query-menu.png[Menu for saving queries and adding filters, width=50%]
 
-You can choose to add a filter directly from the *Saved query* menu or use the
-*Add filter* plus for a one click shortcut to the add filter experience.
-
-[role="screenshot"]
-image::images/highlights-add-filter.png[Menu for saving queries and adding filters]
-
-For more information, check <<kibana-concepts-analysts, Kibana concepts>>.
-
 [float]
-=== Enhancements to visualization editors
-
-[float]
-=== Range annotations in Lens
-
-Unlock insights by visualizing event data directly on your *Lens* visualizations.
-With range annotations, you can show windows of time such as releases,
-maintenance windows, holidays, and more to provide context to metric performance.
-
-Range annotation inside a visualization
-
-[role="screenshot"]
-image::images/highlights-lens-range-inside.png[Range annotation inside of the visualization]
-
-Range annotation outside of the visualization
-
-[role="screenshot"]
-image::images/highlights-lens-range-outside.png[Range annotation outside of the visualization]
-
-For information about *Lens* annotations, check <<add-annotations, Add annotations>>.
-
-[float]
-=== Create anomaly jobs from Lens visualizations
-See something interesting on a visualization on your dashboard?
-Turn any *Lens* panel into a new anomaly detection job with
-the *Create anomaly detection job* menu option in your dashboards.
-
-This images shows the
-*Create anomaly detection job* option and transition to create job wizard.
-
-[role="screenshot"]
-image::images/highlights-lens-anomaly.png[Create anomaly detection job option and transition to create job wizard]
-
-
-[float]
-=== New accuracy mode in Lens
-When creating *Lens* visualizations with the *Top values* function,
-you can now enable accuracy mode, improving the accuracy of results for
-high-cardinality data by using more resources in your {es} cluster.
-
-[role="screenshot"]
-image::images/highlights-lens-accuracy.png[Accuracy mode in Lens]
-
-For information about Lens, check <<lens,Lens>>.
-
-[float]
-=== Synchronized tooltips for Lens dashboard panels
-
-To make it easier to compare multiple time series visualizations,
-dashboards now include a *Sync tooltips across panels* option.
-When enabled and you hover your cursor over a chart, the tooltips on all
-other related dashboard charts automatically appear at the same data point or moment in time.
-
-[role="screenshot"]
-image::images/highlights-lens-sync.png[Sync tooltip across panels option]
-
-For information, check <<dashboard, Dashboard>>.
-
-[float]
-=== Collapse your break down by
-
-When creating *Lens* tables and XY visualizations, you can now collapse the breakdown dimension,
-allowing you to summarize aggregated data.
-
-For information, check <<create-custom-tables, Create custom tables>>.
-
-[float]
-=== Language selector in Maps
-
-You can now select Arabic, German, English, Spanish,
-French, Hindi, Italian, Japanese, Portuguese, Russian, and Chinese for country
-and region labels. By default, new maps use the {kib} locale setting to determine
-the language for basemap labels.
-
-[role="screenshot"]
-image::images/highlights-maps-labels.gif[Menu for selecting a language for country and region lables]
-
-Are you using vector tiles? Good news. You are now able to make <<maps-aggregations,joins>>.
-
-[role="screenshot"]
-image::images/highlights-maps-vector-tiles.png[Joins for vector tiles in Maps]
-
-[float]
-=== Improved Content Security Policy
-
-{kib} now has experimental support for a more restrictive Content Security Policy.
-Specifically, we have removed the need for script-src ‘unsafe-eval’,
-which provides an additional level of protection against Cross-Site Scripting (“XSS”) attacks.
-
-You can enable this feature by configuring csp.disableUnsafeEval: true in your kibana.yml:
-
-[role="screenshot"]
-​​image::images/highlights-security.png[Setting csp.disableUnsafeEval to true in your kibana.yml]
-
-[float]
+[[highlights-8.3-console]]
 === Support for {kib} APIs in Console
 
 **Dev Tools > Console** now supports sending requests to {kib} APIs.
@@ -174,8 +78,175 @@ Prepend any {kib} API endpoint with `kbn:`
 and send the request.
 
 [role="screenshot"]
-​​image::images/highlights-console.png[Console showing GET kbn:api/index_management/indices]
+image::images/highlights-console.png[Console showing how to send requests to Kibana APIs]
 
+
+[float]
+[[highlights-8.3-vis-editors]]
+=== Enhancements to visualization editors
+
+[float]
+==== Range annotations in Lens
+
+Unlock insights by visualizing event data directly on your *Lens* visualizations.
+With range annotations, you can show windows of time such as releases,
+maintenance windows, holidays, and more to provide context to metric performance.
+For information about *Lens* annotations, check {kibana-ref}/lens.html#add-annotations[Add annotations].
+
+[role="screenshot"]
+image::images/highlights-lens-range-inside.png[Range annotation inside of the visualization]
+
+[.text-center]
+*Range annotation inside a visualization*
+
+[role="screenshot"]
+image::images/highlights-lens-range-outside.png[Range annotation outside of the visualization]
+
+[.text-center]
+*Range annotation outside of a visualization*
+
+[float]
+==== Anomaly jobs from Lens visualizations
+See something interesting on a visualization on your dashboard?
+Turn any *Lens* panel into a new anomaly detection job with
+the *Create anomaly detection job* menu option in your dashboards.
+
+[role="screenshot"]
+image::images/highlights-lens-anomaly.png[Create anomaly detection job option and transition to create job wizard]
+
+
+[float]
+==== Accuracy mode in Lens
+When creating *Lens* visualizations with the *Top values* function,
+you can now enable accuracy mode. This mode improves the accuracy of results for
+high-cardinality data by using more resources in your {es} cluster.
+For information, check {kibana-ref}/lens.html[Lens].
+
+[role="screenshot"]
+image::images/highlights-lens-accuracy.png["Accuracy mode in Lens", width=50%]
+
+
+
+[float]
+==== Synchronized tooltips in Lens
+
+To make it easier to compare multiple time series visualizations,
+dashboards now include a *Sync tooltips across panels* option.
+When enabled and you hover your cursor over a chart, the tooltips on all
+other related dashboard charts automatically appear at the same data point or moment in time.
+For information, check {kibana-ref}/dashboard.html[Dashboard].
+
+[role="screenshot"]
+image::images/highlights-lens-sync.png[Sync tooltip across panels option]
+
+
+[float]
+==== Collapse break down by
+
+When creating *Lens* tables and XY visualizations, you can now collapse the breakdown dimension,
+allowing you to summarize aggregated data.
+For information, check <<create-custom-tables, Create custom tables>>.
+
+[float]
+[[highlights-8.3-maps]]
+=== Enhancements to Maps
+
+[float]
+==== Language selector
+
+You can now select Arabic, German, English, Spanish,
+French, Hindi, Italian, Japanese, Portuguese, Russian, and Chinese for country
+and region labels. By default, new maps use the {kib}
+{kibana-ref}/i18n-settings-kb.html#general-i18n-settings-kb[locale setting] to determine
+the language for basemap labels.
+
+[role="screenshot"]
+image::images/highlights-maps-labels.gif[Menu for selecting a language for country and region labels]
+
+[float]
+==== Vector tiles and joins
+Are you using vector tiles? Good news. You are now able to make
+{kibana-ref}/terms-join.html[joins].
+
+[role="screenshot"]
+image::images/highlights-maps-vector-tiles.png[Joins for vector tiles in Maps]
+
+[float]
+[[highlights-8.3-security]]
+=== Improved Content Security Policy
+
+{kib} now has experimental support for a more restrictive
+https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP[Content Security Policy].
+Specifically, we removed the need for script-src ‘unsafe-eval’,
+which provides an additional level of protection against Cross-Site Scripting (“XSS”) attacks.
+
+To enable this feature, configure` csp.disableUnsafeEval: true` in your kibana.yml.
+
+[role="screenshot"]
+image::images/highlights-security.png[Setting for a more restrictive Content Security Policy]
+
+[float]
+[[highlights-8.3-ml]]
+=== Trained models test in Machine Learning
+
+You can now visualize machine learning trained model output.
+A new Test model action in *Machine Learning > Trained Models* opens up a
+flyout, where you can enter input text for testing. View the output
+using text highlighting or as JSON output.
+
+Trained models are available for the following tasks:
+language identification, named entity recognition (NER), text classification,
+zero-shot text classification, text embedding and fill task.
+
+[role="screenshot"]
+image::images/highlights-test-trained-model.png["Trained models test in Machine Learning", width=75%]
+
+
+[float]
+[[highlights-8.3-alerting]]
+=== Enhancements to Alerting
+
+[float]
+==== OAuth support in ServiceNow connectors
+
+The ServiceNow connectors now support open authentication (OAuth).
+For configuration details, refer to
+{kibana-ref}/servicenow-action-type.html[ServiceNow ITSM],
+{kibana-ref}/servicenow-sir-action-type.html[ServiceNow SecOps],
+and
+{kibana-ref}/servicenow-itom-action-type.html[ServiceNow ITOM connector].
+
+[float]
+==== Severity levels on cases
+
+You can now assign a severity level to each of your cases
+(critical, high, medium, or low). You can also view information about the
+average duration of your cases and delete comments in {kib}.
+
+[float]
+[[highlights-8.3-osquery]]
+=== Enhancements to Qsquery
+
+[float]
+==== New saved queries available
+
+Osquery now includes a set of 17 saved queries that are available to run as a
+live query or add to a scheduled pack. These queries can help you get started
+using Osquery and show examples of the types of queries you can run.
+
+[role="screenshot"]
+image::images/highlights-saved-query.png[Saved queries page]
+
+[float]
+==== Support for multi-line queries
+
+Live and scheduled queries now have multi-line query support, which makes
+queries easier to read, understand, and maintain. This update better supports
+Osquery syntax, which is a superset of SQLite, so that you can save and run
+queries using a standard SQL format.
+
+[role="screenshot"]
+image::images/highlights-new-live-query.png[New live query page]
 
 
 
