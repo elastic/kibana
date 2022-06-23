@@ -39,4 +39,11 @@ export { nodeTypes } from './node_types';
 export interface KueryQueryOptions {
   filtersInMustClause?: boolean;
   dateFormatTZ?: string;
+
+  /**
+   * the Nested field type requires a special query syntax, which includes an optional ignore_unmapped parameter that indicates whether to ignore an unmapped path and not return any documents instead of an error.
+   * The optional ignore_unmapped parameter defaults to false.
+   * The `nestedIgnoreUnmapped` param allows creating queries with "ignore_unmapped": true
+   */
+  nestedIgnoreUnmapped?: boolean;
 }

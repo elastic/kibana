@@ -11,7 +11,6 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiToolTip,
 } from '@elastic/eui';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +23,6 @@ import {
   ICMPSimpleFields,
   Ping,
   ServiceLocations,
-  SourceType,
   EncryptedSyntheticsMonitorWithId,
   TCPSimpleFields,
   BrowserFields,
@@ -184,23 +182,12 @@ export const MonitorManagementList = ({
         defaultMessage: 'Enabled',
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsMonitorWithId) => (
-        <EuiToolTip
-          content={
-            monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
-              ? i18n.translate('xpack.synthetics.monitorManagement.monitorList.enabled.tooltip', {
-                  defaultMessage:
-                    'This monitor was added from an external project. Configuration is read only.',
-                })
-              : ''
-          }
-        >
-          <MonitorEnabled
-            id={monitor.id}
-            monitor={monitor}
-            isDisabled={!canEdit || monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT}
-            onUpdate={onUpdate}
-          />
-        </EuiToolTip>
+        <MonitorEnabled
+          id={monitor.id}
+          monitor={monitor}
+          isDisabled={!canEdit}
+          onUpdate={onUpdate}
+        />
       ),
     },
     {
