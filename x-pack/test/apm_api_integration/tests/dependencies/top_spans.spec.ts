@@ -94,6 +94,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                     .span('/_search', 'db', 'elasticsearch')
                     .destination('elasticsearch')
                     .duration(100)
+                    .success()
                     .timestamp(timestamp)
                 ),
               goInstance
@@ -150,6 +151,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             spanName: '/_search',
             transactionName: 'GET /api/my-endpoint',
             transactionType: 'request',
+            outcome: 'success',
           });
 
           expect(omit(goSpans[0], 'traceId', 'transactionId')).to.eql({
@@ -160,6 +162,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             spanName: '/_search',
             transactionName: 'GET /api/my-other-endpoint',
             transactionType: 'request',
+            outcome: 'unknown',
           });
         });
       });
@@ -227,6 +230,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             duration: 200000,
             serviceName: 'java',
             spanName: 'without transaction',
+            outcome: 'unknown',
           });
 
           expect(spans[0].transactionType).not.to.be.ok();

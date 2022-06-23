@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { scaleLog } from 'd3-scale';
-
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
+import { scaleLog } from 'd3-scale';
+import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import {
   SPAN_DURATION,
   TRANSACTION_DURATION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
+import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
-import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 
 const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
