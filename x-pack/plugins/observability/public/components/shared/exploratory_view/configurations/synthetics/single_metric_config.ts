@@ -28,7 +28,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
       { field: 'url.full', filters: buildExistsFilter('summary.up', dataView) },
     ],
     reportType: 'single-metric',
-    baseFilters: [],
+    baseFilters: [...buildExistsFilter('summary.up', dataView)],
     metricOptions: [
       {
         id: 'monitor_availability',

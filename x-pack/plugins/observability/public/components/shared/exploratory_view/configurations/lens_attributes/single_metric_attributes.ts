@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import { MetricState, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import {
+  FormulaPublicApi,
+  MetricState,
+  OperationType,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
 
+import type { DataView } from '@kbn/data-views-plugin/common';
+
+import { FORMULA_COLUMN } from '../constants';
+import { ColumnFilter } from '../../types';
+import { SeriesConfig } from '../../../../..';
 import {
   buildNumberColumn,
   LayerConfig,
@@ -17,8 +27,12 @@ import {
 export class SingleMetricLensAttributes extends LensAttributes {
   columnId: string;
 
-  constructor(layerConfigs: LayerConfig[], reportType: string) {
-    super(layerConfigs, reportType);
+  constructor(
+    layerConfigs: LayerConfig[],
+    reportType: string,
+    lensFormulaHelper: FormulaPublicApi
+  ) {
+    super(layerConfigs, reportType, lensFormulaHelper);
     this.layers = {};
     this.reportType = reportType;
 
@@ -32,12 +46,16 @@ export class SingleMetricLensAttributes extends LensAttributes {
   }
 
   getSingleMetricLayer() {
-    const { seriesConfig, selectedMetricField, operationType } = this.layerConfigs[0];
+    const { seriesConfig, selectedMetricField, operationType, indexPattern } = this.layerConfigs[0];
 
-    const { columnFilter, columnField, columnLabel } = parseCustomFieldName(
+    const { columnFilter, columnField, columnLabel, columnType, formula } = parseCustomFieldName(
       seriesConfig,
       selectedMetricField
     );
+
+    if (columnType === FORMULA_COLUMN && formula) {
+      return this.getFormulaLayer({ formula, label: columnLabel, dataView: indexPattern });
+    }
 
     const getSourceField = () => {
       if (selectedMetricField.startsWith('Records') || selectedMetricField.startsWith('records')) {
@@ -51,19 +69,13 @@ export class SingleMetricLensAttributes extends LensAttributes {
     const isPercentileColumn = operationType?.includes('th');
 
     if (isPercentileColumn) {
-      return {
-        layer0: {
-          columns: {
-            [this.columnId]: {
-              ...this.getPercentileNumberColumn(sourceField, operationType!, seriesConfig),
-              label: columnLabel ?? '',
-              filter: columnFilter,
-            },
-          },
-          columnOrder: [this.columnId],
-          incompleteColumns: {},
-        },
-      };
+      return this.getPercentileLayer({
+        sourceField,
+        operationType,
+        seriesConfig,
+        columnLabel,
+        columnFilter,
+      });
     }
 
     return {
@@ -82,11 +94,95 @@ export class SingleMetricLensAttributes extends LensAttributes {
     };
   }
 
+  getFormulaLayer({
+    formula,
+    label,
+    dataView,
+  }: {
+    formula: string;
+    label?: string;
+    dataView: DataView;
+  }) {
+    const layer = this.lensFormulaHelper?.insertOrReplaceFormulaColumn(
+      this.columnId,
+      {
+        formula,
+        label,
+        format: {
+          id: 'percent',
+          params: {
+            decimals: 2,
+          },
+        },
+      },
+      { columns: {}, columnOrder: [] },
+      dataView
+    );
+
+    return {
+      layer0: layer,
+    };
+  }
+
+  getPercentileLayer({
+    sourceField,
+    operationType,
+    seriesConfig,
+    columnLabel,
+    columnFilter,
+  }: {
+    sourceField: string;
+    operationType?: OperationType;
+    seriesConfig: SeriesConfig;
+    columnLabel?: string;
+    columnFilter?: ColumnFilter;
+  }) {
+    return {
+      layer0: {
+        columns: {
+          [this.columnId]: {
+            ...this.getPercentileNumberColumn(sourceField, operationType!, seriesConfig),
+            label: columnLabel ?? '',
+            filter: columnFilter,
+          },
+        },
+        columnOrder: [this.columnId],
+        incompleteColumns: {},
+      },
+    };
+  }
+
   getMetricState(): MetricState {
     return {
       accessor: this.columnId,
       layerId: 'layer0',
       layerType: 'data',
+      colorMode: 'Labels',
+      palette: {
+        name: 'custom',
+        type: 'palette',
+        params: {
+          steps: 3,
+          name: 'custom',
+          reverse: false,
+          rangeType: 'number',
+          rangeMin: 0.8,
+          rangeMax: 1,
+          progression: 'fixed',
+          stops: [
+            { color: '#cc5642', stop: 0.9 },
+            { color: '#d6bf57', stop: 0.95 },
+            { color: '#209280', stop: 1.9903347477604902 },
+          ],
+          colorStops: [
+            { color: '#cc5642', stop: 0.8 },
+            { color: '#d6bf57', stop: 0.9 },
+            { color: '#209280', stop: 0.95 },
+          ],
+          continuity: 'above',
+          maxSteps: 5,
+        },
+      },
     };
   }
 
@@ -113,3 +209,49 @@ export class SingleMetricLensAttributes extends LensAttributes {
     };
   }
 }
+
+const examples = {
+  type: 'lens',
+  id: '6404bdc0-f323-11ec-9d40-b32dc04774a8',
+  namespaces: ['default'],
+  attributes: {
+    title: 'Prefilled from exploratory view app',
+    description: '1656009072383',
+    visualizationType: 'lnsMetric',
+    state: {
+      visualization: {
+        accessor: 'layer-0-column-1',
+        layerId: 'layer0',
+        layerType: 'data',
+        colorMode: 'Labels',
+        palette: {
+          name: 'custom',
+          type: 'palette',
+          params: {
+            steps: 3,
+            name: 'custom',
+            reverse: false,
+            rangeType: 'number',
+            rangeMin: 0.8,
+            rangeMax: null,
+            progression: 'fixed',
+            stops: [
+              { color: '#cc5642', stop: 0.9 },
+              { color: '#d6bf57', stop: 0.95 },
+              { color: '#209280', stop: 1.9903347477604902 },
+            ],
+            colorStops: [
+              { color: '#cc5642', stop: 0.8 },
+              { color: '#d6bf57', stop: 0.9 },
+              { color: '#209280', stop: 0.95 },
+            ],
+            continuity: 'above',
+            maxSteps: 5,
+          },
+        },
+      },
+      query: { query: 'monitor.name: "Kibana_Health" and summary.up : *', language: 'kuery' },
+      filters: [],
+    },
+  },
+};

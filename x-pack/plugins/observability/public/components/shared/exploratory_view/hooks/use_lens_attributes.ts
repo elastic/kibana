@@ -124,7 +124,11 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
     }
 
     if (reportTypeT === 'single-metric') {
-      const lensAttributes = new SingleMetricLensAttributes(layerConfigs, reportTypeT);
+      const lensAttributes = new SingleMetricLensAttributes(
+        layerConfigs,
+        reportTypeT,
+        lensFormulaHelper
+      );
 
       return lensAttributes.getJSON(lastRefresh);
     }
