@@ -57,7 +57,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
 }
 
 <div
-  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c0"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium c0 css-khmtme-euiPanel-grow-m-m-plain-hasBorder"
   data-test-subj="table-users-authentications-loading-false"
 >
   <header

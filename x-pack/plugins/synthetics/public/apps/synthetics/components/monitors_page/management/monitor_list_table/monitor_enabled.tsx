@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 
+import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
 import { fetchUpsertMonitor } from '../../../../state';
 
@@ -19,10 +20,12 @@ interface Props {
   id: string;
   monitor: EncryptedSyntheticsMonitor;
   reloadPage: () => void;
-  isDisabled?: boolean;
+  initialLoading?: boolean;
 }
 
-export const MonitorEnabled = ({ id, monitor, reloadPage, isDisabled }: Props) => {
+export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Props) => {
+  const isDisabled = !useCanEditSynthetics();
+
   const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
 
   const { notifications } = useKibana();
@@ -69,7 +72,7 @@ export const MonitorEnabled = ({ id, monitor, reloadPage, isDisabled }: Props) =
 
   return (
     <>
-      {isLoading ? (
+      {isLoading || initialLoading ? (
         <EuiLoadingSpinner size="m" />
       ) : (
         <EuiSwitch

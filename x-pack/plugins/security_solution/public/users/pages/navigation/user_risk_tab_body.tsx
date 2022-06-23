@@ -24,7 +24,7 @@ import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_butt
 const QUERY_ID = UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.l};
+  margin-top: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
 const RISKY_USERS_DASHBOARD_TITLE = 'Current Risk Score For Users';

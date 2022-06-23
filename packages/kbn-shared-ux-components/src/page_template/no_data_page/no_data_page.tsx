@@ -7,6 +7,7 @@
  */
 
 import React, { useMemo, FunctionComponent } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 
 import { EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
@@ -14,7 +15,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 
-import { ElasticAgentCard } from './no_data_card';
+import { useSharedUxServices } from '@kbn/shared-ux-services';
+import { NoDataCard, NoDataCardProvider } from '@kbn/shared-ux-card-no-data';
 import { NoDataPageProps } from './types';
 
 export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
@@ -25,6 +27,19 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   pageTitle,
   ...rest
 }) => {
+  const services = useSharedUxServices();
+
+  // TODO: clintandrewhall - including the `NoDataCardProvider` here is a temporary solution
+  // to consumers using this context to populate the NoDataPage.  This will likely be removed soon,
+  // when NoDataPage is moved to its own package.
+  const currentAppId = useObservable(services.application.currentAppId$);
+  const noDataCardServices = {
+    currentAppId,
+    addBasePath: services.http.addBasePath,
+    canAccessFleet: services.permissions.canAccessFleet,
+    navigateToUrl: services.application.navigateToUrl,
+  };
+
   const actionKeys = Object.keys(action);
 
   const actionCard = useMemo(() => {
@@ -34,7 +49,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
     const actionKey = actionKeys[0];
     const key =
       actionKey === 'elasticAgent' ? 'empty-page-agent-action' : `empty-page-${actionKey}-action`;
-    return <ElasticAgentCard key={key} {...action[actionKey]} />;
+    return <NoDataCard key={key} {...action[actionKey]} />;
   }, [action, actionKeys]);
 
   const title =
@@ -74,7 +89,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
         </EuiTextColor>
       </EuiText>
       <EuiSpacer size="xxl" />
-      {actionCard}
+      <NoDataCardProvider {...noDataCardServices}>{actionCard}</NoDataCardProvider>
     </div>
   );
 };
