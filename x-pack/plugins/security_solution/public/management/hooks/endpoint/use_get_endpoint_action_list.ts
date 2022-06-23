@@ -14,7 +14,7 @@ import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constan
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 
 export const useGetEndpointActionList = (
-  query?: EndpointActionListRequestQuery,
+  query: EndpointActionListRequestQuery,
   options: UseQueryOptions<ActionListApiResponse, HttpFetchError> = {}
 ): UseQueryResult<ActionListApiResponse, HttpFetchError> => {
   const http = useHttp();
@@ -25,13 +25,13 @@ export const useGetEndpointActionList = (
     queryFn: async () => {
       return http.get<ActionListApiResponse>(ENDPOINTS_ACTION_LIST_ROUTE, {
         query: {
-          agentIds: JSON.stringify(query?.agentIds),
-          commands: JSON.stringify(query?.commands),
-          endDate: query?.endDate,
-          page: query?.page,
-          pageSize: query?.pageSize,
-          startDate: query?.startDate,
-          userIds: JSON.stringify(query?.userIds),
+          agentIds: JSON.stringify(query.agentIds),
+          commands: JSON.stringify(query.commands),
+          endDate: query.endDate,
+          page: query.page,
+          pageSize: query.pageSize,
+          startDate: query.startDate,
+          userIds: JSON.stringify(query.userIds),
         },
       });
     },

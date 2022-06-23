@@ -73,10 +73,13 @@ describe('useGetEndpointActionList hook', () => {
   it('should allow custom options to be used', async () => {
     await renderReactQueryHook(
       () =>
-        useGetEndpointActionList(undefined, {
-          queryKey: ['1', '2'],
-          enabled: false,
-        }),
+        useGetEndpointActionList(
+          {},
+          {
+            queryKey: ['1', '2'],
+            enabled: false,
+          }
+        ),
       false
     );
 
