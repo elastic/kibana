@@ -151,7 +151,7 @@ image::management/connectors/images/servicenow-new-jwt-verifier-map.png[Shows ne
 [role="screenshot"]
 image::management/connectors/images/servicenow-oauth-values.png[Shows where to find OAuth values in ServiceNow]
 --
-// ::servicenow-endpoint[]
+// end::servicenow-endpoint[]
 
 [float]
 [[servicenow-itsm-connector-update]]
