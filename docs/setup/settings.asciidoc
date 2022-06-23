@@ -131,14 +131,13 @@ logging:
       layout:
         type: pattern <3>
         highlight: true
-        pattern: "[%date][%level][%logger] %message"
   root:
     appenders: [default, console_appender]
     level: warn
   loggers:
-    - name: elasticsearch.query
-      level: debug <4>
-      appender: [console_appender]
+    - name: elasticsearch.query <4>
+      level: debug
+      appenders: [console_appender]
 --------------------------------------------------------------------------------
 
 <1> Appender names are entirely custom with the restriction that appender names must be unique. Appenders may be used for multiple loggers.
@@ -146,7 +145,7 @@ logging:
 <3> The `pattern` layout will use a default `[%date][%level][%logger] %message` configuration when not specified under the `pattern` key. 
 <4> Specifically logs the `elasticsearch.query` in debug mode, overriding the root logger configuration that will log other messages at a warn or error level.
 
-[NOTE]
+[TIP]
 ============================================================================
 To get the most value from logging {es} queries, we recommend configuring the `http.server.response` logger as well. With both loggers configured, you will be able to see the responses from {es} on each request {kib} makes to {es}.
 ============================================================================
@@ -308,9 +307,114 @@ This value must be a whole number greater than zero. *Default: `"1000"`*
 Maximum number of documents loaded by each shard to generate autocomplete
 suggestions. This value must be a whole number greater than zero.
 *Default: `"100000"`*
-+
+
 NOTE: To reload the <<logging-settings, logging settings>>, send a SIGHUP signal to {kib}.
 
+// deprecated logging configuration settings
+[[logging-dest]] `logging.dest`::
+ deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
+ Instead, specify an appender `type`. Options are `console` for stdout or `file` for sending logs to file.
+ +
+ Enables you to specify a file where Kibana stores log output. *Default: `stdout`*
+
+`logging.json`::
+deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
+ Instead, specify an appender `layout.type`. Options are `pattern` and `json`.
+ +
+ Logs output as JSON. When set to `true`, the logs are formatted as JSON
+ strings that include timestamp, log level, context, message text, and any other
+ metadata that may be associated with the log message.
+ When <<logging-dest, `logging.dest.stdout`>> is set, and there is no interactive terminal ("TTY"),this setting defaults to `true`. *Default: `false`*
+
+`logging.quiet`::
+deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
+ Instead, set the root logger `level` to `error`
+ +
+ Set the value of this setting to `true` to suppress all logging output other than error messages. *Default: `false`*
+
+`logging.rotate`::
+deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
+Instead, use the <<`rolling-file`, logging.appenders.rolling.file>> appender
+ +
+experimental[] Specifies the options for the logging rotate feature.
+When not defined, all the sub options defaults would be applied.
+The following example shows a valid logging rotate configuration:
++
+[source,text]
+--
+ logging.rotate:
+   enabled: true
+   everyBytes: 10485760
+   keepFiles: 10
+--
+
+`logging.rotate.enabled`::
+deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
+Instead, use the <<`rolling-file`, logging.appenders.rolling.file>> appender
+ +
+experimental[] Set the value of this setting to `true` to
+enable log rotation. If you do not have a <<logging-dest, `logging.dest`>> set that is different from `stdout`
+that feature would not take any effect. *Default: `false`*
+
+`logging.rotate.everyBytes`::
+deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
+Instead, use the <<`rolling-file`, logging.appenders.rolling.file>> appender
+ +
+experimental[] The maximum size of a log file (that is `not an exact` limit). After the
+limit is reached, a new log file is generated. The default size limit is 10485760 (10 MB) and
+this option should be in the range of 1048576 (1 MB) to 1073741824 (1 GB). *Default: `10485760`*
+
+`logging.rotate.keepFiles`::
+deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
+Instead, use the <<`rolling-file`, logging.appenders.rolling.file>> appender
+ +
+experimental[] The number of most recent rotated log files to keep
+on disk. Older files are deleted during log rotation. The default value is 7. The `logging.rotate.keepFiles`
+option has to be in the range of 2 to 1024 files. *Default: `7`*
+
+`logging.rotate.pollingInterval`::
+deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
+Instead, use the <<`rolling-file`, logging.appenders.rolling.file>> appender
+ +
+experimental[] The number of milliseconds for the polling strategy in case
+the <<logging-rotate-usePolling, `logging.rotate.usePolling`>> is enabled. `logging.rotate.usePolling` must be in the 5000 to 3600000 millisecond range. *Default: `10000`*
+
+[[logging-rotate-usePolling]] `logging.rotate.usePolling`::
+deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
+Instead, use the <<`rolling-file`, logging.appenders.rolling.file>> appender
+ +
+experimental[] By default we try to understand the best way to monitoring
+the log file and warning about it. Please be aware there are some systems where watch api is not accurate. In those cases, in order to get the feature working,
+the `polling` method could be used enabling that option. *Default: `false`*
+
+`logging.silent`::
+deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
+ Instead, set the root logger `level` to `off`
+ +
+Set the value of this setting to `true` to
+suppress all logging output. *Default: `false`*
+
+`logging.timezone`::
+deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
+Instead, use the {kibana-ref}/logging-service.html#pattern-layout[`pattern` appender layout] and specify a `%date` conversion pattern
+ +
+Set to the canonical time zone ID
+(for example, `America/Los_Angeles`) to log events using that time zone.
+For possible values, refer to
+https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[database time zones]. *Default: `UTC`*
+
+[[logging-verbose]] `logging.verbose` {ess-icon}::
+deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
+Instead, set the root logger `level` to `debug`
+ +
+Set to `true` to log all events, including system usage information and all
+requests. *Default: `false`*
+
+[WARNING]
+============================================================================
+While combining deprecated logging configuration with the current configuration, we strongly recommend switching over completely to avoid unforeseen consequences. If you use log rotation, combining deprecated with current configuration can lead to accidentally overwriting log files.
+============================================================================
+// new logging configuration settings
 [[logging-root]] `logging.root`::
 The `root` logger has is a <<dedicated-loggers, dedicated logger>> and is pre-configured. The `root` logger logs at `info` level by default. If any other logging configuration is specified, `root` _must_ also be explicitly configured.
 
@@ -336,7 +440,7 @@ Appender to use for logging records to *stdout*. By default, uses the `[%date][%
 `logging.appenders.file`::
 Allows you to specify a fileName to send log records to on disk. To send <<log-to-file-example,all log records to file>>, add the file appender to `root.appenders`.
 
-`logging.appenders.rolling-file`::
+[[logging-appenders-rolling-file]]`logging.appenders.rolling-file`::
 Similar to Log4j's `RollingFileAppender`, this appender will log into a file and rotate if following a rolling strategy when the configured policy triggers. There are currently two policies supported: `size-limit` and `time-interval`.
 +
 The size limit policy will perform a rollover when the log file reaches a maximum `size`. *Default 100mb*
