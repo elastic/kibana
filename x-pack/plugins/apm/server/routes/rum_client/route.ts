@@ -7,7 +7,6 @@
 import * as t from 'io-ts';
 import { Logger } from '@kbn/core/server';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
-import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getPageLoadDistBreakdown } from './get_pl_dist_breakdown';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
@@ -52,41 +51,6 @@ const uxQueryRt = t.intersection([
   rangeRt,
   t.partial({ urlQuery: t.string, percentile: t.string }),
 ]);
-
-const rumPageLoadDistributionRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/page-load-distribution',
-  params: t.type({
-    query: t.intersection([uxQueryRt, percentileRangeRt]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    pageLoadDistribution: {
-      pageLoadDistribution: Array<{ x: number; y: number }>;
-      percentiles: Record<string, number | null> | undefined;
-      minDuration: number;
-      maxDuration: number;
-    } | null;
-  }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { minPercentile, maxPercentile, urlQuery, start, end },
-    } = resources.params;
-
-    const pageLoadDistribution = await getPageLoadDistribution({
-      setup,
-      minPercentile,
-      maxPercentile,
-      urlQuery,
-      start,
-      end,
-    });
-
-    return { pageLoadDistribution };
-  },
-});
 
 const rumPageLoadDistBreakdownRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/ux/page-load-distribution/breakdown',
@@ -155,6 +119,5 @@ async function setupUXRequest<TParams extends SetupUXRequestParams>(
 }
 
 export const rumRouteRepository = {
-  ...rumPageLoadDistributionRoute,
   ...rumPageLoadDistBreakdownRoute,
 };

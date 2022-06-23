@@ -1,12 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`rum client dashboard queries fetches page load distribution 1`] = `
+exports[`page load distribution query creates expected query 1`] = `
 Object {
-  "apm": Object {
-    "events": Array [
-      "transaction",
-    ],
-  },
   "body": Object {
     "aggs": Object {
       "durPercentiles": Object {
@@ -250,6 +245,13 @@ Object {
           Object {
             "term": Object {
               "transaction.type": "page-load",
+            },
+          },
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+              ],
             },
           },
           Object {

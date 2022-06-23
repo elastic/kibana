@@ -16,7 +16,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
 import { PageLoadDistChart } from '../charts/page_load_dist_chart';
@@ -24,13 +23,14 @@ import { ResetPercentileZoom } from './reset_percentile_zoom';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { PercentileRange } from './types';
+import { usePageLoadDistribution } from '../../../../services/data/page_load_distribution_query';
 
 export function PageLoadDistribution() {
   const { http } = useKibanaServices();
 
   const { rangeId, urlParams, uxUiFilters } = useLegacyUrlParams();
 
-  const { start, end, rangeFrom, rangeTo, searchTerm } = urlParams;
+  const { start, end, rangeFrom, rangeTo } = urlParams;
 
   const { serviceName } = uxUiFilters;
 
@@ -41,40 +41,18 @@ export function PageLoadDistribution() {
 
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (start && end && serviceName) {
-        return callApmApi('GET /internal/apm/ux/page-load-distribution', {
-          params: {
-            query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uxUiFilters),
-              urlQuery: searchTerm,
-              ...(percentileRange.min && percentileRange.max
-                ? {
-                    minPercentile: String(percentileRange.min),
-                    maxPercentile: String(percentileRange.max),
-                  }
-                : {}),
-            },
-          },
-        });
-      }
-      return Promise.resolve(null);
-    },
-    // `rangeId` acts as a cache buster for stable ranges like "Today"
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      end,
-      start,
-      uxUiFilters,
-      percentileRange.min,
-      percentileRange.max,
-      searchTerm,
-      serviceName,
-      rangeId,
-    ]
+  const {
+    pageLoadDistribution,
+    percentiles,
+    minDuration,
+    maxDuration,
+    loading,
+  } = usePageLoadDistribution(
+    uxUiFilters,
+    percentileRange,
+    rangeId,
+    start,
+    end
   );
 
   const onPercentileChange = (min: number, max: number) => {
@@ -137,13 +115,17 @@ export function PageLoadDistribution() {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <PageLoadDistChart
-        data={data?.pageLoadDistribution}
+        data={
+          loading
+            ? null
+            : { pageLoadDistribution, percentiles, minDuration, maxDuration }
+        }
         onPercentileChange={onPercentileChange}
-        loading={status !== 'success'}
+        loading={!!loading}
         breakdown={breakdown}
         percentileRange={{
-          max: percentileRange.max || data?.pageLoadDistribution?.maxDuration,
-          min: percentileRange.min || data?.pageLoadDistribution?.minDuration,
+          max: percentileRange.max || maxDuration,
+          min: percentileRange.min || minDuration,
         }}
       />
     </div>
