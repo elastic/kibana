@@ -55,7 +55,6 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
   },
   listeners: ({ actions, values }) => ({
     fetchSearchIndices: async () => {
-      console.log('aaa');
       const { http } = HttpLogic.values;
       const { meta } = values;
       try {

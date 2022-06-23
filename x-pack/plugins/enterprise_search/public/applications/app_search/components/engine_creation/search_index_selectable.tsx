@@ -9,6 +9,8 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
+
 import {
   EuiSelectable,
   EuiPanel,
@@ -25,10 +27,9 @@ import { EngineCreationLogic } from './engine_creation_logic';
 
 import './search_index_selectable.scss';
 
-export type HealthStrings = 'red' | 'green' | 'yellow' | 'unavailable';
 export interface SearchIndexSelectableOption {
   label: string;
-  health: HealthStrings;
+  health: HealthStatus | 'unavailable';
   status?: string;
   total: {
     docs: {
@@ -44,8 +45,11 @@ export interface SearchIndexSelectableOption {
 
 const healthColorsMap = {
   red: 'danger',
+  RED: 'danger',
   green: 'success',
+  GREEN: 'success',
   yellow: 'warning',
+  YELLOW: 'warning',
   unavailable: '',
 };
 
