@@ -6,17 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { each, cloneDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-// @ts-expect-error
-import realHits from '../../../../__fixtures__/real_hits';
+import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DataViewAttributes } from '@kbn/data-views-plugin/public';
-import { flattenHit } from '@kbn/data-plugin/public';
 import { SavedObject } from '@kbn/core/types';
 import {
   DiscoverSidebarResponsive,
@@ -27,7 +24,6 @@ import { FetchStatus } from '../../../types';
 import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
 import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { ElasticSearchHit } from '../../../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const mockServices = {
@@ -79,9 +75,7 @@ jest.mock('../../utils/calc_field_counts', () => ({
 function getCompProps(): DiscoverSidebarResponsiveProps {
   const indexPattern = stubLogstashIndexPattern;
 
-  const hits = each(cloneDeep(realHits), (hit) =>
-    flattenHit(hit, indexPattern)
-  ) as unknown as ElasticSearchHit[];
+  const hits = getDataTableRecords(indexPattern);
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
@@ -90,7 +84,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   ];
 
   for (const hit of hits) {
-    for (const key of Object.keys(flattenHit(hit, indexPattern))) {
+    for (const key of Object.keys(hit.flattened)) {
       mockfieldCounts[key] = (mockfieldCounts[key] || 0) + 1;
     }
   }
@@ -99,7 +93,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     columns: ['extension'],
     documents$: new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
-      result: hits as ElasticSearchHit[],
+      result: hits,
     }) as DataDocuments$,
     availableFields$: new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
