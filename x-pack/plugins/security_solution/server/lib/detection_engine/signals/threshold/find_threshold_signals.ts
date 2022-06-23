@@ -128,7 +128,6 @@ export const findThresholdSignals = async ({
       aggregations: buildThresholdSingleBucketAggregation({
         threshold,
         timestampField: timestampOverride != null ? timestampOverride : TIMESTAMP,
-        sortKeys,
       }),
       searchAfterSortId: undefined,
       timestampOverride,

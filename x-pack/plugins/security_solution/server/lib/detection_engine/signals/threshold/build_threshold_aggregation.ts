@@ -81,12 +81,9 @@ export const buildThresholdMultiBucketAggregation = ({
 export const buildThresholdSingleBucketAggregation = ({
   threshold,
   timestampField,
-  sortKeys,
 }: {
   threshold: ThresholdNormalized;
   timestampField: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sortKeys: Record<string, any> | undefined;
 }) => ({
   max_timestamp: {
     max: {
