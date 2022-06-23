@@ -33,6 +33,8 @@ filegroup(
     "//packages/core/doc-links/core-doc-links-server-internal:build",
     "//packages/core/doc-links/core-doc-links-server-mocks:build",
     "//packages/core/doc-links/core-doc-links-server:build",
+    "//packages/core/environment/core-environment-server-internal:build",
+    "//packages/core/environment/core-environment-server-mocks:build",
     "//packages/core/i18n/core-i18n-browser-internal:build",
     "//packages/core/i18n/core-i18n-browser-mocks:build",
     "//packages/core/i18n/core-i18n-browser:build",
@@ -159,9 +161,6 @@ filegroup(
     "//packages/shared-ux/page/analytics_no_data:build",
     "//packages/shared-ux/page/kibana_no_data:build",
     "//packages/shared-ux/prompt/no_data_views:build",
-    "//x-pack/packages/ml/agg_utils:build",
-    "//x-pack/packages/ml/is_populated_object:build",
-    "//x-pack/packages/ml/string_hash:build",
   ],
 )
 
@@ -193,6 +192,8 @@ filegroup(
     "//packages/core/doc-links/core-doc-links-server-internal:build_types",
     "//packages/core/doc-links/core-doc-links-server-mocks:build_types",
     "//packages/core/doc-links/core-doc-links-server:build_types",
+    "//packages/core/environment/core-environment-server-internal:build_types",
+    "//packages/core/environment/core-environment-server-mocks:build_types",
     "//packages/core/i18n/core-i18n-browser-internal:build_types",
     "//packages/core/i18n/core-i18n-browser-mocks:build_types",
     "//packages/core/i18n/core-i18n-browser:build_types",
@@ -304,9 +305,6 @@ filegroup(
     "//packages/shared-ux/page/analytics_no_data:build_types",
     "//packages/shared-ux/page/kibana_no_data:build_types",
     "//packages/shared-ux/prompt/no_data_views:build_types",
-    "//x-pack/packages/ml/agg_utils:build_types",
-    "//x-pack/packages/ml/is_populated_object:build_types",
-    "//x-pack/packages/ml/string_hash:build_types",
   ],
 )
 
