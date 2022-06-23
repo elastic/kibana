@@ -34,6 +34,6 @@ export const addCustomSource = async ({
 };
 
 export const AddCustomSourceApiLogic = createApiLogic(
-  ['add_custom_source_api_logic'],
+  ['workplace_search', 'add_custom_source_api_logic'],
   addCustomSource
 );

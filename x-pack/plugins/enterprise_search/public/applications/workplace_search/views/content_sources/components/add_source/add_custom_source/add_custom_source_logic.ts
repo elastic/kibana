@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Status } from '../../../../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../../../../common/types/api';
 import { clearFlashMessages, flashAPIErrors } from '../../../../../../shared/flash_messages';
 import { CustomSource } from '../../../../../types';
 
@@ -26,6 +26,7 @@ export enum AddCustomSourceSteps {
 export interface AddCustomSourceActions {
   makeRequest: typeof AddCustomSourceApiLogic.actions.makeRequest;
   apiSuccess({ source }: { source: CustomSource }): { source: CustomSource };
+  apiError(error: HttpError): HttpError;
   createContentSource(): void;
   setCustomSourceNameValue(customSourceNameValue: string): string;
   setNewCustomSource(data: CustomSource): CustomSource;
@@ -62,8 +63,8 @@ export const AddCustomSourceLogic = kea<
       false,
       {
         createContentSource: () => true,
-        addSourceSuccess: () => false,
-        addSourceError: () => false,
+        apiSuccess: () => false,
+        apiError: () => false,
       },
     ],
     currentStep: [

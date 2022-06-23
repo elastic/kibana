@@ -44,8 +44,9 @@ describe('AddCustomSourceLogic', () => {
   });
 
   describe('actions', () => {
-    describe('addSourceSuccess', () => {
+    describe('apiSuccess', () => {
       it('sets a new source', () => {
+        AddCustomSourceLogic.actions.makeRequest({ name: 'name' });
         const source: CustomSource = {
           accessToken: 'a',
           name: 'b',
@@ -59,6 +60,29 @@ describe('AddCustomSourceLogic', () => {
           newCustomSource: source,
           status: Status.SUCCESS,
           currentStep: AddCustomSourceSteps.SaveCustomStep,
+        });
+      });
+    });
+    describe('makeRequest', () => {
+      it('sets button to loading', () => {
+        AddCustomSourceLogic.actions.makeRequest({ name: 'name' });
+
+        expect(AddCustomSourceLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          buttonLoading: true,
+          status: Status.LOADING,
+        });
+      });
+    });
+    describe('apiError', () => {
+      it('sets button to not loading', () => {
+        AddCustomSourceLogic.actions.makeRequest({ name: 'name' });
+        AddCustomSourceLogic.actions.apiError('error' as any);
+
+        expect(AddCustomSourceLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          buttonLoading: false,
+          status: Status.ERROR,
         });
       });
     });

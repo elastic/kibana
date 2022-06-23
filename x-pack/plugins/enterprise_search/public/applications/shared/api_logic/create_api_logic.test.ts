@@ -121,7 +121,9 @@ describe('CreateApiLogic', () => {
         expect(apiCallMock).toHaveBeenCalledWith({ arg: 'argument1' });
         await nextTick();
         expect(apiSuccessMock).not.toHaveBeenCalled();
-        expect(apiErrorMock).toHaveBeenCalledWith(404, 'message');
+        expect(apiErrorMock).toHaveBeenCalledWith({
+          body: { statusCode: 404, message: 'message' },
+        });
       });
     });
   });

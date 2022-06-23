@@ -28,7 +28,7 @@ export const createApiLogic = <Result, Args extends Record<string, unknown> | un
   apiFunction: (args: Args) => Promise<Result>
 ) =>
   kea<MakeLogicType<Values<Result>, Actions<Args, Result>>>({
-    path: ['enterprise_search', 'workplace_search', ...path],
+    path: ['enterprise_search', ...path],
     actions: {
       makeRequest: (args) => args,
       apiError: (error) => error,
