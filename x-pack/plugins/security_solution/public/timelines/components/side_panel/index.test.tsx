@@ -127,6 +127,11 @@ describe('Details Panel Component', () => {
           cases: {
             ui: { getCasesContext: () => mockCasesContext },
           },
+          timelines: {
+            getHoverActions: jest.fn().mockReturnValue({
+              getAddToTimelineButton: jest.fn(),
+            }),
+          },
           osquery: {
             OsqueryResults: jest.fn().mockReturnValue(null),
           },
