@@ -57,6 +57,8 @@ describe('[Monitor Management] validation', () => {
       ...commonPropsValid,
       [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
       [ConfigKey.TIMEOUT]: null,
+      [ConfigKey.URLS]: null,
+      [ConfigKey.PORT]: null,
       [configKey]: value,
     };
 

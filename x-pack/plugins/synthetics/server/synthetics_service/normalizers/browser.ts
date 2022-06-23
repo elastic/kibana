@@ -11,6 +11,7 @@ import {
   BrowserFields,
   ConfigKey,
   DataStream,
+  FormMonitorType,
   Locations,
   ProjectBrowserMonitor,
   ScheduleUnit,
@@ -56,6 +57,7 @@ export const normalizeProjectMonitor = ({
   const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
   const normalizedFields: NormalizedPublicFields = {
     [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+    [ConfigKey.FORM_MONTIOR_TYPE]: FormMonitorType.MULTISTEP,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
     [ConfigKey.NAME]: monitor.name || '',
     [ConfigKey.SCHEDULE]: {
