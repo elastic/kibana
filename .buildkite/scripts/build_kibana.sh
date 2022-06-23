@@ -15,6 +15,26 @@ else
   node scripts/build
 fi
 
+if is_pr_with_label "ci:build-cloud-image"; then
+  node scripts/build \
+  --skip-initialize \
+  --skip-generic-folders \
+  --skip-platform-folders \
+  --skip-archives \
+  --docker-images \
+  --docker-tag-qualifier="$GIT_COMMIT" \
+  --docker-push \
+  --skip-docker-ubi \
+  --skip-docker-ubuntu \
+  --skip-docker-contexts
+
+  CLOUD_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud)
+  cat << EOF | buildkite-agent annotate --style "info" --context kibana-cloud-image
+
+  Kibana cloud image: \`$CLOUD_IMAGE\`
+EOF
+fi
+
 echo "--- Archive Kibana Distribution"
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
 installDir="$KIBANA_DIR/install/kibana"
