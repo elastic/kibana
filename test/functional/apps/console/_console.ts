@@ -184,12 +184,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           description: 'should allow multiline comments in request url',
         },
       ];
-      before(async () => {
-        // blocks the close help button for several seconds so just retry until we can click it.
-        await retry.try(async () => {
-          await PageObjects.console.collapseHelp();
-        });
-      });
 
       await asyncForEach(tests, async ({ description, url, body }) => {
         it(description, async () => {
