@@ -205,10 +205,10 @@ export class TaskScheduling {
    * Run  task.
    *
    * @param taskId - The task being scheduled.
-   * @returns {Promise<ConcreteTaskInstance>}
+   * @returns {Promise<RunSoonResult>}
    */
   public async runSoon(taskId: string): Promise<RunSoonResult> {
-    const task = await this.getTask(taskId);
+    const task = await this.getIdleTask(taskId);
     try {
       await this.store.update({
         ...task,
@@ -216,7 +216,12 @@ export class TaskScheduling {
         runAt: new Date(),
       });
     } catch (e) {
-      if (e.statusCode !== 409) {
+      if (e.statusCode === 409) {
+        this.logger.debug(
+          `Failed to update the task (${taskId}) for runSoon due to conflict (409)`
+        );
+      } else {
+        this.logger.error(`Failed to update the task (${taskId}) for runSoon`);
         throw e;
       }
     }
@@ -399,7 +404,7 @@ export class TaskScheduling {
     );
   }
 
-  private async getTask(taskId: string) {
+  private async getIdleTask(taskId: string) {
     const task = await this.store.get(taskId);
     switch (task.status) {
       case TaskStatus.Claiming:
@@ -407,7 +412,7 @@ export class TaskScheduling {
         throw Error(`Failed to run task "${taskId}" as it is currently running`);
       case TaskStatus.Failed:
       case TaskStatus.Unrecognized:
-        throw Error(`Failed to run task "${taskId}" for unknown reason`);
+        throw Error(`Failed to run task "${taskId}" with status ${task.status}`);
       default:
         return task;
     }

@@ -292,6 +292,9 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runSoon(id);
       await expect(result).rejects.toEqual(500);
+      expect(taskSchedulingOpts.logger.error).toHaveBeenCalledWith(
+        'Failed to update the task (01ddff11-e88a-4d13-bc4e-256164e755e2) for runSoon'
+      );
     });
 
     test('ignores 409 conflict errors', async () => {
@@ -303,6 +306,9 @@ describe('TaskScheduling', () => {
 
       const result = await taskScheduling.runSoon(id);
       expect(result).toEqual({ id });
+      expect(taskSchedulingOpts.logger.debug).toHaveBeenCalledWith(
+        'Failed to update the task (01ddff11-e88a-4d13-bc4e-256164e755e2) for runSoon due to conflict (409)'
+      );
     });
 
     test('rejects when the task is being claimed', async () => {
@@ -344,7 +350,7 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runSoon(id);
       await expect(result).rejects.toEqual(
-        Error('Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason')
+        Error('Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" with status failed')
       );
     });
 
@@ -357,7 +363,7 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runSoon(id);
       await expect(result).rejects.toEqual(
-        Error('Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason')
+        Error('Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" with status unrecognized')
       );
     });
 

@@ -46,10 +46,8 @@ export function initializeDashboardTelemetryTask(
   registerDashboardTelemetryTask(logger, core, taskManager, embeddable);
 }
 
-export function scheduleDashboardTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
-  if (taskManager) {
-    return scheduleTasks(logger, taskManager);
-  }
+export function scheduleDashboardTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
+  return scheduleTasks(logger, taskManager);
 }
 
 function registerDashboardTelemetryTask(
