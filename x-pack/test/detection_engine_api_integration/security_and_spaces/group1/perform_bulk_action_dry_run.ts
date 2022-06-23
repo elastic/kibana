@@ -195,36 +195,46 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should return error if index patterns action is applied to machine learning rule', async () => {
-        const mlRule = await createRule(supertest, log, getSimpleMlRule());
+      describe('validate updating index pattern for machine learning rule', () => {
+        const actions = [
+          BulkActionEditType.add_index_patterns,
+          BulkActionEditType.set_index_patterns,
+          BulkActionEditType.delete_index_patterns,
+        ];
 
-        const { body } = await postDryRunBulkAction()
-          .send({
-            ids: [mlRule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.add_index_patterns,
-                value: ['index-*'],
-              },
-            ],
-          })
-          .expect(500);
+        actions.forEach((editAction) => {
+          it(`should return error if ${editAction} action is applied to machine learning rule`, async () => {
+            const mlRule = await createRule(supertest, log, getSimpleMlRule());
 
-        expect(body.attributes.summary).toEqual({ failed: 1, succeeded: 0, total: 1 });
-        expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+            const { body } = await postDryRunBulkAction()
+              .send({
+                ids: [mlRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: editAction,
+                    value: [],
+                  },
+                ],
+              })
+              .expect(500);
 
-        expect(body.attributes.errors).toHaveLength(1);
-        expect(body.attributes.errors[0]).toEqual({
-          err_code: 'MACHINE_LEARNING_INDEX_PATTERN',
-          message: "Machine learning rule doesn't have index patterns",
-          status_code: 500,
-          rules: [
-            {
-              id: mlRule.id,
-              name: mlRule.name,
-            },
-          ],
+            expect(body.attributes.summary).toEqual({ failed: 1, succeeded: 0, total: 1 });
+            expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+
+            expect(body.attributes.errors).toHaveLength(1);
+            expect(body.attributes.errors[0]).toEqual({
+              err_code: 'MACHINE_LEARNING_INDEX_PATTERN',
+              message: "Machine learning rule doesn't have index patterns",
+              status_code: 500,
+              rules: [
+                {
+                  id: mlRule.id,
+                  name: mlRule.name,
+                },
+              ],
+            });
+          });
         });
       });
     });

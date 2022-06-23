@@ -20,6 +20,7 @@ import {
   type,
   severity_mapping,
   severity,
+  Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   alias_purpose as savedObjectResolveAliasPurpose,
@@ -221,7 +222,7 @@ export interface FilterOptions {
   showCustomRules: boolean;
   showElasticRules: boolean;
   tags: string[];
-  excludeRuleTypes?: Array<Rule['type']>;
+  excludeRuleTypes?: Type[];
 }
 
 export interface FetchRulesResponse {
