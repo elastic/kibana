@@ -9,35 +9,20 @@ import // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 '@kbn/core/server/elasticsearch/client/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { defineGetComplianceDashboardRoute } from './compliance_dashboard';
-
-import { CspAppService } from '../../lib/csp_app_services';
-import { CspAppContext } from '../../plugin';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { createCspRequestHandlerContextMock } from '../../mocks';
 
 describe('compliance dashboard permissions API', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-
   beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
     jest.clearAllMocks();
   });
 
   it('should accept to a user with fleet.all privilege', async () => {
     const router = httpServiceMock.createRouter();
-    const cspAppContextService = new CspAppService();
 
-    const cspContext: CspAppContext = {
-      logger,
-      service: cspAppContextService,
-      security: securityMock.createSetup(),
-    };
-    defineGetComplianceDashboardRoute(router, cspContext);
+    defineGetComplianceDashboardRoute(router);
     const [_, handler] = router.get.mock.calls[0];
 
-    const mockContext = {
-      fleet: { authz: { fleet: { all: true } } },
-    } as unknown as KibanaRequest;
-
+    const mockContext = createCspRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
     const [context, req, res] = [mockContext, mockRequest, mockResponse];
@@ -49,20 +34,11 @@ describe('compliance dashboard permissions API', () => {
 
   it('should reject to a user without fleet.all privilege', async () => {
     const router = httpServiceMock.createRouter();
-    const cspAppContextService = new CspAppService();
 
-    const cspContext: CspAppContext = {
-      logger,
-      service: cspAppContextService,
-      security: securityMock.createSetup(),
-    };
-    defineGetComplianceDashboardRoute(router, cspContext);
+    defineGetComplianceDashboardRoute(router);
     const [_, handler] = router.get.mock.calls[0];
 
-    const mockContext = {
-      fleet: { authz: { fleet: { all: true } } },
-    } as unknown as KibanaRequest;
-
+    const mockContext = createCspRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
     const [context, req, res] = [mockContext, mockRequest, mockResponse];

@@ -124,7 +124,7 @@ export const updateAgentConfiguration = async (
   );
 };
 
-export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspAppContext): void =>
+export const defineUpdateRulesConfigRoute = (router: CspRouter): void =>
   router.post(
     {
       path: UPDATE_RULES_CONFIG_ROUTE_PATH,
@@ -134,6 +134,8 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
       },
     },
     async (context, request, response) => {
+      const cspContext = await context.csp;
+
       if (!(await context.fleet).authz.fleet.all) {
         return response.forbidden();
       }
@@ -143,12 +145,9 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
         const soClient = coreContext.savedObjects.client;
         const user = await cspContext.security.authc.getCurrentUser(request);
-        const packagePolicyService = cspContext.service.packagePolicyService;
+        const packagePolicyService = cspContext.fleet.packagePolicyService;
         const packagePolicyId = request.body.package_policy_id;
 
-        if (!packagePolicyService) {
-          throw new Error(`Failed to get Fleet services`);
-        }
         const packagePolicy = await getPackagePolicy(
           soClient,
           packagePolicyService,
