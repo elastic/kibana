@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y tests for getting the watches', async function () {
+    it('a11y tests for the watch list page', async function () {
       await PageObjects.watcher.getWatch('test');
       await a11y.testAppSnapshot();
     });
