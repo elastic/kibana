@@ -20,7 +20,8 @@
         "ml": ["all"],
         "siem": ["all"],
         "osquery": ["all"],
-        "visualize": ["read"]
+        "visualize": ["read"],
+        "actions": ["all"]
       },
       "spaces": ["*"]
     }

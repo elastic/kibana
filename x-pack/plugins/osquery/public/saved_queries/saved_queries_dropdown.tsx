@@ -138,6 +138,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
       fullWidth
     >
       <EuiComboBox
+        data-test-subj={'savedQuerySelect'}
         isDisabled={disabled}
         fullWidth
         placeholder={QUERIES_DROPDOWN_LABEL}

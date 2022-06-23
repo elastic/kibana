@@ -21,6 +21,8 @@ import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { ROLES } from '../../test';
 
 describe('Alert Event Details', () => {
+  const RULE_NAME = 'Test-rule';
+
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
@@ -36,7 +38,6 @@ describe('Alert Event Details', () => {
 
   it('should prepare packs and alert rules', () => {
     const PACK_NAME = 'testpack';
-    const RULE_NAME = 'Test-rule';
     navigateTo('/app/osquery/packs');
     preparePack(PACK_NAME);
     findAndClickButton('Edit');
@@ -82,5 +83,31 @@ describe('Alert Event Details', () => {
     cy.contains('Cancel').click();
     cy.contains(TIMELINE_NAME).click();
     cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
+  });
+  it('user is enabled to add detection action with osquery', () => {
+    cy.visit('/app/security/rules');
+    cy.contains(RULE_NAME).click();
+    cy.contains('Edit rule settings').click();
+    cy.getBySel('edit-rule-actions-tab').wait(500).click();
+    cy.contains('Perform no actions').get('select').select('On each rule execution');
+    cy.getBySel('.osquery-ActionTypeSelectOption').click();
+    cy.contains('Create a connector').click();
+    cy.getBySel('nameInput').type('test_osquery');
+    cy.getBySel('saveActionButtonModal').click();
+    cy.getBySel('alertActionAccordion-0').should('exist');
+    cy.contains('Search for a query to run, or write a new query below');
+    cy.getBySel('savedQuerySelect').type('users{downArrow}{enter}');
+    cy.getBySel('codeEditorContainer').within(() => {
+      cy.contains('SELECT * FROM users;');
+    });
+    cy.contains('Unique identifier for the group on the system/platform.').should('exist');
+    cy.contains('Group ID (unsigned)').should('exist');
+    cy.contains('Save changes').click();
+    cy.contains(`${RULE_NAME} was saved`).should('exist');
+    cy.contains('Edit rule settings').click();
+    cy.getBySel('edit-rule-actions-tab').wait(500).click();
+    cy.contains('SELECT * FROM users;');
+    cy.contains('Unique identifier for the group on the system/platform.').should('exist');
+    cy.contains('Group ID (unsigned)').should('exist');
   });
 });
