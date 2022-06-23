@@ -8,7 +8,11 @@
 
 import { AddConfigDeprecation } from '@kbn/config';
 import { AnalyticsClient } from '@kbn/analytics-client';
+import { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import apm from 'elastic-apm-node';
+import { AppenderConfigType } from '@kbn/core-logging-server';
 import { AwaitedProperties } from '@kbn/utility-types';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -29,7 +33,6 @@ import { DiscoveredPlugin } from '@kbn/core-base-common';
 import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { Duration } from 'moment';
-import { Duration as Duration_2 } from 'moment-timezone';
 import { Ecs } from '@kbn/logging';
 import { EcsEventCategory } from '@kbn/logging';
 import { EcsEventKind } from '@kbn/logging';
@@ -45,7 +48,10 @@ import { EventTypeOpts } from '@kbn/analytics-client';
 import { IncomingHttpHeaders } from 'http';
 import { IShipper } from '@kbn/analytics-client';
 import { Logger } from '@kbn/logging';
+import { LoggerConfigType } from '@kbn/core-logging-server';
+import { LoggerContextConfigInput } from '@kbn/core-logging-server';
 import { LoggerFactory } from '@kbn/logging';
+import { LoggingServiceSetup } from '@kbn/core-logging-server';
 import { LogLevel as LogLevel_2 } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { LogRecord } from '@kbn/logging';
@@ -79,20 +85,11 @@ export { AddConfigDeprecation }
 
 export { AnalyticsClient }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
-//
-// @public
-export type AnalyticsServicePreboot = Omit<AnalyticsClient, 'shutdown'>;
+export { AnalyticsServicePreboot }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
-//
-// @public
-export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
+export { AnalyticsServiceSetup }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
-//
-// @public
-export type AnalyticsServiceStart = Pick<AnalyticsClient, 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
+export { AnalyticsServiceStart }
 
 // @public
 export const APP_WRAPPER_CLASS = "kbnAppWrapper";
@@ -106,13 +103,7 @@ export interface AppCategory {
     order?: number;
 }
 
-// Warning: (ae-forgotten-export) The symbol "ConsoleAppenderConfig" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "FileAppenderConfig" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "RewriteAppenderConfig" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "RollingFileAppenderConfig" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | RewriteAppenderConfig | RollingFileAppenderConfig;
+export { AppenderConfigType }
 
 // @public @deprecated
 export interface AsyncPlugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
@@ -441,6 +432,8 @@ export type CoreIncrementUsageCounter = (params: CoreIncrementCounterParams) => 
 
 // @public
 export interface CorePreboot {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     analytics: AnalyticsServicePreboot;
     // (undocumented)
@@ -498,6 +491,8 @@ export interface CoreServicesUsageData {
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     analytics: AnalyticsServiceSetup;
     // (undocumented)
@@ -524,6 +519,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     };
     // (undocumented)
     i18n: I18nServiceSetup;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     logging: LoggingServiceSetup;
     // (undocumented)
@@ -538,6 +535,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     analytics: AnalyticsServiceStart;
     // (undocumented)
@@ -1515,25 +1514,13 @@ export type LifecycleResponseFactory = typeof lifecycleResponseFactory;
 
 export { Logger }
 
-// Warning: (ae-forgotten-export) The symbol "loggerSchema" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type LoggerConfigType = TypeOf<typeof loggerSchema>;
+export { LoggerConfigType }
 
-// @public (undocumented)
-export interface LoggerContextConfigInput {
-    // (undocumented)
-    appenders?: Record<string, AppenderConfigType> | Map<string, AppenderConfigType>;
-    // (undocumented)
-    loggers?: LoggerConfigType[];
-}
+export { LoggerContextConfigInput }
 
 export { LoggerFactory }
 
-// @public
-export interface LoggingServiceSetup {
-    configure(config$: Observable<LoggerContextConfigInput>): void;
-}
+export { LoggingServiceSetup }
 
 export { LogLevel_2 as LogLevel }
 
