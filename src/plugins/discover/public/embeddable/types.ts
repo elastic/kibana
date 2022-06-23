@@ -12,9 +12,8 @@ import {
   EmbeddableOutput,
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
-import type { TimeRange, Query } from '@kbn/data-plugin/public';
 import { SavedSearch } from '../services/saved_searches';
 import { SortOrder } from '../components/doc_table/components/table_header/helpers';
 

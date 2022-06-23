@@ -16,3 +16,5 @@ export const selectSelectedLocationId = createSelector(
 );
 
 export const selectMonitorStatus = createSelector(getState, (state) => state);
+
+export const syntheticsMonitorSelector = (state: SyntheticsAppState) => state.syntheticsMonitor;
