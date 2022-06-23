@@ -67,7 +67,7 @@ Array [
 exports[`Storyshots components/Tags/TagList with health tags 1`] = `
 Array [
   <div
-    className="euiHealth euiHealth--textSizeS"
+    className="euiHealth css-qn8ayk-euiHealth-s"
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -78,7 +78,9 @@ Array [
         <span
           color="#cc3b54"
           data-euiicon-type="dot"
-        />
+        >
+          
+        </span>
       </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -88,7 +90,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiHealth euiHealth--textSizeS"
+    className="euiHealth css-qn8ayk-euiHealth-s"
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -99,7 +101,9 @@ Array [
         <span
           color="#9b3067"
           data-euiicon-type="dot"
-        />
+        >
+          
+        </span>
       </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -109,7 +113,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiHealth euiHealth--textSizeS"
+    className="euiHealth css-qn8ayk-euiHealth-s"
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -120,7 +124,9 @@ Array [
         <span
           color="#d41e93"
           data-euiicon-type="dot"
-        />
+        >
+          
+        </span>
       </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"

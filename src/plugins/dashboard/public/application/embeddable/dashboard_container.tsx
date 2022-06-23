@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import uuid from 'uuid';
-import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from 'src/core/public';
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
+import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 
+import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { UiActionsStart } from '../../services/ui_actions';
 import { RefreshInterval, TimeRange, Query, Filter } from '../../services/data';
 import {
@@ -47,7 +47,6 @@ import {
   combineDashboardFiltersWithControlGroupFilters,
   syncDashboardControlGroup,
 } from '../lib/dashboard_control_group';
-import { ControlGroupContainer } from '../../../../controls/public';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
@@ -79,6 +78,7 @@ export interface InheritedChildInput extends IndexSignature {
   id: string;
   searchSessionId?: string;
   syncColors?: boolean;
+  syncTooltips?: boolean;
   executionContext?: KibanaExecutionContext;
 }
 
@@ -314,6 +314,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       filters,
       searchSessionId,
       syncColors,
+      syncTooltips,
       executionContext,
     } = this.input;
     let combinedFilters = filters;
@@ -330,6 +331,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       id,
       searchSessionId,
       syncColors,
+      syncTooltips,
       executionContext,
     };
   }

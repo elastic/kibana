@@ -10,7 +10,7 @@ import { createHash } from 'crypto';
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, basename, resolve } from 'path';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 import { escape } from 'he';
 
@@ -96,7 +96,10 @@ export function reportFailuresToFile(
     );
 
     let screenshot = '';
-    const screenshotName = `${failure.name.replace(/([^ a-zA-Z0-9-]+)/g, '_')}`;
+    const truncatedName = failure.name.replace(/([^ a-zA-Z0-9-]+)/g, '_').slice(0, 80);
+    const failureNameHash = createHash('sha256').update(failure.name).digest('hex');
+    const screenshotName = `${truncatedName}-${failureNameHash}`;
+
     if (screenshotsByName[screenshotName]) {
       try {
         screenshot = readFileSync(screenshotsByName[screenshotName]).toString('base64');

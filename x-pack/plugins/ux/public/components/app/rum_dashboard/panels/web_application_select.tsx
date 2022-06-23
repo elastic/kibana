@@ -6,38 +6,36 @@
  */
 
 import React from 'react';
+import { useEsSearch } from '@kbn/observability-plugin/public';
+import { serviceNameQuery } from '../../../../services/data/service_name_query';
 import { ServiceNameFilter } from '../url_filter/service_name_filter';
-import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { RUM_AGENT_NAMES } from '../../../../../common/agent_name';
+import { useDataView } from '../local_uifilters/use_data_view';
+import { callDateMath } from '../../../../services/data/call_date_math';
 
 export function WebApplicationSelect() {
   const {
+    rangeId,
     urlParams: { start, end },
   } = useLegacyUrlParams();
+  const { dataViewTitle } = useDataView();
 
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi('GET /internal/apm/ux/services', {
-          params: {
-            query: {
-              start,
-              end,
-              uiFilters: JSON.stringify({ agentName: RUM_AGENT_NAMES }),
-            },
-          },
-        });
-      }
+  const { data, loading } = useEsSearch(
+    {
+      index: dataViewTitle,
+      ...serviceNameQuery(callDateMath(start), callDateMath(end)),
     },
-    [start, end]
+    // `rangeId` works as a cache buster for ranges that never change, like `Today`
+    [start, end, rangeId, dataViewTitle],
+    { name: 'UxApplicationServices' }
   );
 
-  const rumServiceNames = data?.rumServices ?? [];
+  const rumServiceNames =
+    data?.aggregations?.services?.buckets.map(({ key }) => key as string) ?? [];
 
   return (
     <ServiceNameFilter
-      loading={status !== 'success'}
+      loading={loading ?? true}
       serviceNames={rumServiceNames}
     />
   );

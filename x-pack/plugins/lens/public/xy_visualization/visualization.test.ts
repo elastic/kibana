@@ -7,19 +7,48 @@
 
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
-import { Operation, VisualizeEditorContext, Suggestion } from '../types';
-import type { State, XYSuggestion } from './types';
-import type { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { Operation, VisualizeEditorContext, Suggestion, OperationDescriptor } from '../types';
+import type {
+  State,
+  XYState,
+  XYSuggestion,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+} from './types';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import type { SeriesType } from '@kbn/expression-xy-plugin/common';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
-import type { VisualizeEditorLayersContext } from '../../../../../src/plugins/visualizations/public';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { Datatable } from 'src/plugins/expressions';
-import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { Datatable } from '@kbn/expressions-plugin';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
+import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 
-function exampleState(): State {
+const exampleAnnotation: EventAnnotationConfig = {
+  id: 'an1',
+  label: 'Event 1',
+  key: {
+    type: 'point_in_time',
+    timestamp: '2022-03-18T08:25:17.140Z',
+  },
+  icon: 'circle',
+};
+const exampleAnnotation2: EventAnnotationConfig = {
+  icon: 'circle',
+  id: 'an2',
+  key: {
+    timestamp: '2022-04-18T11:01:59.135Z',
+    type: 'point_in_time',
+  },
+  label: 'Annotation2',
+};
+
+function exampleState(): XYState {
   return {
     legend: { position: Position.Bottom, isVisible: true },
     valueLabels: 'hide',
@@ -40,10 +69,12 @@ const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 const xyVisualization = getXyVisualization({
+  datatableUtilities: createDatatableUtilitiesMock(),
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
   useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
+  eventAnnotationService: eventAnnotationServiceMock,
 });
 
 describe('xy_visualization', () => {
@@ -100,12 +131,12 @@ describe('xy_visualization', () => {
   });
 
   describe('#getVisualizationTypeId', () => {
-    function mixedState(...types: SeriesType[]) {
+    function mixedState(...types: SeriesType[]): XYState {
       const state = exampleState();
       return {
         ...state,
         layers: types.map((t, i) => ({
-          ...state.layers[0],
+          ...(state.layers[0] as XYDataLayerConfig),
           layerId: `layer_${i}`,
           seriesType: t,
         })),
@@ -143,8 +174,8 @@ describe('xy_visualization', () => {
       const initialState = xyVisualization.initialize(() => 'l1');
 
       expect(initialState.layers).toHaveLength(1);
-      expect(initialState.layers[0].xAccessor).not.toBeDefined();
-      expect(initialState.layers[0].accessors).toHaveLength(0);
+      expect((initialState.layers[0] as XYDataLayerConfig).xAccessor).not.toBeDefined();
+      expect((initialState.layers[0] as XYDataLayerConfig).accessors).toHaveLength(0);
 
       expect(initialState).toMatchInlineSnapshot(`
         Object {
@@ -222,11 +253,62 @@ describe('xy_visualization', () => {
 
   describe('#getSupportedLayers', () => {
     it('should return a double layer types', () => {
-      expect(xyVisualization.getSupportedLayers()).toHaveLength(2);
+      expect(xyVisualization.getSupportedLayers()).toHaveLength(3);
     });
 
     it('should return the icon for the visualization type', () => {
       expect(xyVisualization.getSupportedLayers()[0].icon).not.toBeUndefined();
+    });
+    describe('annotations', () => {
+      let mockDatasource: ReturnType<typeof createMockDatasource>;
+      let frame: ReturnType<typeof createMockFramePublicAPI>;
+      beforeEach(() => {
+        frame = createMockFramePublicAPI();
+        mockDatasource = createMockDatasource('testDatasource');
+
+        frame.datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+        };
+        frame.datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'a') {
+            return {
+              dataType: 'date',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'date_histogram',
+              isStaticValue: false,
+              hasTimeShift: false,
+            };
+          }
+          return null;
+        });
+
+        frame.activeData = {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [],
+          },
+        };
+      });
+      it('when there is no date histogram annotation layer is disabled', () => {
+        const supportedAnnotationLayer = xyVisualization
+          .getSupportedLayers(exampleState())
+          .find((a) => a.type === 'annotations');
+        expect(supportedAnnotationLayer?.disabled).toBeTruthy();
+      });
+      it('for data with date histogram annotation layer is enabled and calculates initial dimensions', () => {
+        const supportedAnnotationLayer = xyVisualization
+          .getSupportedLayers(exampleState(), frame)
+          .find((a) => a.type === 'annotations');
+        expect(supportedAnnotationLayer?.disabled).toBeFalsy();
+        expect(supportedAnnotationLayer?.noDatasource).toBeTruthy();
+        expect(supportedAnnotationLayer?.initialDimensions).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ groupId: 'xAnnotations', columnId: expect.any(String) }),
+          ])
+        );
+      });
     });
   });
 
@@ -246,22 +328,24 @@ describe('xy_visualization', () => {
       mockDatasource = createMockDatasource('testDatasource');
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'd' },
-        { columnId: 'a' },
-        { columnId: 'b' },
-        { columnId: 'c' },
+        { columnId: 'd', fields: [] },
+        { columnId: 'a', fields: [] },
+        { columnId: 'b', fields: [] },
+        { columnId: 'c', fields: [] },
       ]);
 
-      frame.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-
-      frame.activeData = {
-        first: {
-          type: 'datatable',
-          rows: [],
-          columns: [],
+      frame = {
+        datasourceLayers: {
+          first: mockDatasource.publicAPIMock,
         },
+        activeData: {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [],
+          },
+        },
+        dateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
       };
     });
 
@@ -333,7 +417,6 @@ describe('xy_visualization', () => {
               {
                 layerId: 'referenceLine',
                 layerType: layerTypes.REFERENCELINE,
-                seriesType: 'line',
                 accessors: [],
               },
             ],
@@ -345,7 +428,6 @@ describe('xy_visualization', () => {
       ).toEqual({
         layerId: 'referenceLine',
         layerType: layerTypes.REFERENCELINE,
-        seriesType: 'line',
         accessors: ['newCol'],
         yConfig: [
           {
@@ -353,6 +435,308 @@ describe('xy_visualization', () => {
             forAccessor: 'newCol',
           },
         ],
+      });
+    });
+
+    describe('annotations', () => {
+      it('should add a dimension to a annotation layer', () => {
+        expect(
+          xyVisualization.setDimension({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'annotation',
+                  layerType: layerTypes.ANNOTATIONS,
+                  annotations: [exampleAnnotation],
+                },
+              ],
+            },
+            layerId: 'annotation',
+            groupId: 'xAnnotation',
+            columnId: 'newCol',
+          }).layers[0]
+        ).toEqual({
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [
+            exampleAnnotation,
+            {
+              icon: 'triangle',
+              id: 'newCol',
+              key: {
+                timestamp: '2022-04-15T00:00:00.000Z',
+                type: 'point_in_time',
+              },
+              label: 'Event',
+            },
+          ],
+        });
+      });
+      it('should copy previous column if passed and assign a new id', () => {
+        expect(
+          xyVisualization.onDrop!({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'annotation',
+                  layerType: layerTypes.ANNOTATIONS,
+                  annotations: [exampleAnnotation2],
+                },
+              ],
+            },
+            dropType: 'duplicate_compatible',
+            source: {
+              layerId: 'annotation',
+              groupId: 'xAnnotation',
+              columnId: 'an2',
+              id: 'an2',
+              humanData: { label: 'an2' },
+            },
+            target: {
+              layerId: 'annotation',
+              groupId: 'xAnnotation',
+              columnId: 'newColId',
+              filterOperations: Boolean,
+            },
+          }).layers[0]
+        ).toEqual({
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'newColId' }],
+        });
+      });
+      it('should reorder a dimension to a annotation layer', () => {
+        expect(
+          xyVisualization.onDrop!({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'annotation',
+                  layerType: layerTypes.ANNOTATIONS,
+                  annotations: [exampleAnnotation, exampleAnnotation2],
+                },
+              ],
+            },
+            source: {
+              layerId: 'annotation',
+              groupId: 'xAnnotation',
+              columnId: 'an2',
+              id: 'an2',
+              humanData: { label: 'label' },
+              filterOperations: () => true,
+            },
+            target: {
+              layerId: 'annotation',
+              groupId: 'xAnnotation',
+              columnId: 'an1',
+              filterOperations: () => true,
+            },
+            dropType: 'reorder',
+          }).layers[0]
+        ).toEqual({
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation2, exampleAnnotation],
+        });
+      });
+
+      it('should duplicate the annotations and replace the target in another annotation layer', () => {
+        expect(
+          xyVisualization.onDrop!({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'first',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation],
+                },
+                {
+                  layerId: 'second',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation2],
+                },
+              ],
+            },
+            source: {
+              layerId: 'first',
+              groupId: 'xAnnotation',
+              columnId: 'an1',
+              id: 'an1',
+              humanData: { label: 'label' },
+              filterOperations: () => true,
+            },
+            target: {
+              layerId: 'second',
+              groupId: 'xAnnotation',
+              columnId: 'an2',
+              filterOperations: () => true,
+            },
+            dropType: 'replace_duplicate_compatible',
+          }).layers
+        ).toEqual([
+          {
+            layerId: 'first',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [exampleAnnotation],
+          },
+          {
+            layerId: 'second',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [{ ...exampleAnnotation, id: 'an2' }],
+          },
+        ]);
+      });
+      it('should swap the annotations between layers', () => {
+        expect(
+          xyVisualization.onDrop!({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'first',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation],
+                },
+                {
+                  layerId: 'second',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation2],
+                },
+              ],
+            },
+            source: {
+              layerId: 'first',
+              groupId: 'xAnnotation',
+              columnId: 'an1',
+              id: 'an1',
+              humanData: { label: 'label' },
+              filterOperations: () => true,
+            },
+            target: {
+              layerId: 'second',
+              groupId: 'xAnnotation',
+              columnId: 'an2',
+              filterOperations: () => true,
+            },
+            dropType: 'swap_compatible',
+          }).layers
+        ).toEqual([
+          {
+            layerId: 'first',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [exampleAnnotation2],
+          },
+          {
+            layerId: 'second',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [exampleAnnotation],
+          },
+        ]);
+      });
+      it('should replace the target in another annotation layer', () => {
+        expect(
+          xyVisualization.onDrop!({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'first',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation],
+                },
+                {
+                  layerId: 'second',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation2],
+                },
+              ],
+            },
+            source: {
+              layerId: 'first',
+              groupId: 'xAnnotation',
+              columnId: 'an1',
+              id: 'an1',
+              humanData: { label: 'label' },
+              filterOperations: () => true,
+            },
+            target: {
+              layerId: 'second',
+              groupId: 'xAnnotation',
+              columnId: 'an2',
+              filterOperations: () => true,
+            },
+            dropType: 'replace_compatible',
+          }).layers
+        ).toEqual([
+          {
+            layerId: 'first',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [],
+          },
+          {
+            layerId: 'second',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [exampleAnnotation],
+          },
+        ]);
+      });
+      it('should move compatible to another annotation layer', () => {
+        expect(
+          xyVisualization.onDrop!({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'first',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation],
+                },
+                {
+                  layerId: 'second',
+                  layerType: 'annotations',
+                  annotations: [],
+                },
+              ],
+            },
+            source: {
+              layerId: 'first',
+              groupId: 'xAnnotation',
+              columnId: 'an1',
+              id: 'an1',
+              humanData: { label: 'label' },
+              filterOperations: () => true,
+            },
+            target: {
+              layerId: 'second',
+              groupId: 'xAnnotation',
+              columnId: 'an2',
+              filterOperations: () => true,
+            },
+            dropType: 'move_compatible',
+          }).layers
+        ).toEqual([
+          {
+            layerId: 'first',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [],
+          },
+          {
+            layerId: 'second',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [exampleAnnotation],
+          },
+        ]);
       });
     });
   });
@@ -367,10 +751,10 @@ describe('xy_visualization', () => {
       mockDatasource = createMockDatasource('testDatasource');
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'd' },
-        { columnId: 'a' },
-        { columnId: 'b' },
-        { columnId: 'c' },
+        { columnId: 'd', fields: [] },
+        { columnId: 'a', fields: [] },
+        { columnId: 'b', fields: [] },
+        { columnId: 'c', fields: [] },
       ]);
 
       frame.datasourceLayers = {
@@ -424,7 +808,7 @@ describe('xy_visualization', () => {
         context,
       });
       expect(state?.layers[0]).toHaveProperty('seriesType', 'area');
-      expect(state?.layers[0].yConfig).toStrictEqual([
+      expect((state?.layers[0] as XYDataLayerConfig).yConfig).toStrictEqual([
         {
           axisMode: 'right',
           color: '#68BC00',
@@ -432,10 +816,54 @@ describe('xy_visualization', () => {
         },
       ]);
 
-      expect(state?.layers[0].palette).toStrictEqual({
+      expect((state?.layers[0] as XYDataLayerConfig).palette).toStrictEqual({
         name: 'temperature',
         type: 'palette',
       });
+    });
+
+    it('sets the context configuration correctly for reference lines', () => {
+      const newContext = {
+        ...context,
+        metrics: [
+          {
+            agg: 'static_value',
+            fieldName: 'document',
+            isFullReference: true,
+            color: '#68BC00',
+            params: {
+              value: '10',
+            },
+          },
+        ],
+      };
+      const state = xyVisualization?.updateLayersConfigurationFromContext?.({
+        prevState: {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'line',
+              xAccessor: undefined,
+              accessors: ['a'],
+            },
+          ],
+        },
+        layerId: 'first',
+        context: newContext,
+      });
+      const firstLayer = state?.layers[0] as XYDataLayerConfig;
+      expect(firstLayer).toHaveProperty('seriesType', 'area');
+      expect(firstLayer).toHaveProperty('layerType', 'referenceLine');
+      expect(firstLayer.yConfig).toStrictEqual([
+        {
+          axisMode: 'right',
+          color: '#68BC00',
+          forAccessor: 'a',
+          fill: 'below',
+        },
+      ]);
     });
   });
 
@@ -603,10 +1031,10 @@ describe('xy_visualization', () => {
       mockDatasource = createMockDatasource('testDatasource');
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'd' },
-        { columnId: 'a' },
-        { columnId: 'b' },
-        { columnId: 'c' },
+        { columnId: 'd', fields: [] },
+        { columnId: 'a', fields: [] },
+        { columnId: 'b', fields: [] },
+        { columnId: 'c', fields: [] },
       ]);
 
       frame.datasourceLayers = {
@@ -649,6 +1077,45 @@ describe('xy_visualization', () => {
         accessors: [],
       });
     });
+    it('removes annotation dimension', () => {
+      expect(
+        xyVisualization.removeDimension({
+          frame,
+          prevState: {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+              {
+                layerId: 'ann',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation, { ...exampleAnnotation, id: 'an2' }],
+              },
+            ],
+          },
+          layerId: 'ann',
+          columnId: 'an2',
+        }).layers
+      ).toEqual([
+        {
+          layerId: 'first',
+          layerType: layerTypes.DATA,
+          seriesType: 'area',
+          xAccessor: 'a',
+          accessors: [],
+        },
+        {
+          layerId: 'ann',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation],
+        },
+      ]);
+    });
   });
 
   describe('#getConfiguration', () => {
@@ -660,10 +1127,10 @@ describe('xy_visualization', () => {
       mockDatasource = createMockDatasource('testDatasource');
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'd' },
-        { columnId: 'a' },
-        { columnId: 'b' },
-        { columnId: 'c' },
+        { columnId: 'd', fields: [] },
+        { columnId: 'a', fields: [] },
+        { columnId: 'b', fields: [] },
+        { columnId: 'c', fields: [] },
       ]);
 
       frame.datasourceLayers = {
@@ -787,7 +1254,11 @@ describe('xy_visualization', () => {
           state: {
             ...baseState,
             layers: [
-              { ...baseState.layers[0], accessors: ['a'], seriesType: 'bar_percentage_stacked' },
+              {
+                ...baseState.layers[0],
+                accessors: ['a'],
+                seriesType: 'bar_percentage_stacked',
+              } as XYLayerConfig,
             ],
           },
           frame,
@@ -1010,7 +1481,6 @@ describe('xy_visualization', () => {
             {
               layerId: 'referenceLine',
               layerType: layerTypes.REFERENCELINE,
-              seriesType: 'line',
               accessors: [],
               yConfig: [{ axisMode: 'left', forAccessor: 'a' }],
             },
@@ -1020,8 +1490,8 @@ describe('xy_visualization', () => {
 
       it('should support static value', () => {
         const state = getStateWithBaseReferenceLine();
-        state.layers[0].accessors = [];
-        state.layers[1].yConfig = undefined;
+        (state.layers[1] as XYReferenceLineLayerConfig).accessors = [];
+        (state.layers[1] as XYReferenceLineLayerConfig).yConfig = undefined;
         expect(
           xyVisualization.getConfiguration({
             state: getStateWithBaseReferenceLine(),
@@ -1033,8 +1503,8 @@ describe('xy_visualization', () => {
 
       it('should return no referenceLine groups for a empty data layer', () => {
         const state = getStateWithBaseReferenceLine();
-        state.layers[0].accessors = [];
-        state.layers[1].yConfig = undefined;
+        (state.layers[0] as XYDataLayerConfig).accessors = [];
+        (state.layers[1] as XYReferenceLineLayerConfig).yConfig = undefined;
 
         const options = xyVisualization.getConfiguration({
           state,
@@ -1058,8 +1528,8 @@ describe('xy_visualization', () => {
 
       it('should return a group for the vertical right axis', () => {
         const state = getStateWithBaseReferenceLine();
-        state.layers[0].yConfig = [{ axisMode: 'right', forAccessor: 'a' }];
-        state.layers[1].yConfig![0].axisMode = 'right';
+        (state.layers[0] as XYDataLayerConfig).yConfig = [{ axisMode: 'right', forAccessor: 'a' }];
+        (state.layers[1] as XYReferenceLineLayerConfig).yConfig![0].axisMode = 'right';
 
         const options = xyVisualization.getConfiguration({
           state,
@@ -1073,9 +1543,9 @@ describe('xy_visualization', () => {
 
       it('should compute no groups for referenceLines when the only data accessor available is a date histogram', () => {
         const state = getStateWithBaseReferenceLine();
-        state.layers[0].xAccessor = 'b';
-        state.layers[0].accessors = [];
-        state.layers[1].yConfig = []; // empty the configuration
+        (state.layers[0] as XYDataLayerConfig).xAccessor = 'b';
+        (state.layers[0] as XYDataLayerConfig).accessors = [];
+        (state.layers[1] as XYReferenceLineLayerConfig).yConfig = []; // empty the configuration
         // set the xAccessor as date_histogram
         frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
@@ -1084,6 +1554,8 @@ describe('xy_visualization', () => {
               isBucketed: true,
               scale: 'interval',
               label: 'date_histogram',
+              isStaticValue: false,
+              hasTimeShift: false,
             };
           }
           return null;
@@ -1100,9 +1572,9 @@ describe('xy_visualization', () => {
 
       it('should mark horizontal group is invalid when xAccessor is changed to a date histogram', () => {
         const state = getStateWithBaseReferenceLine();
-        state.layers[0].xAccessor = 'b';
-        state.layers[0].accessors = [];
-        state.layers[1].yConfig![0].axisMode = 'bottom';
+        (state.layers[0] as XYDataLayerConfig).xAccessor = 'b';
+        (state.layers[0] as XYDataLayerConfig).accessors = [];
+        (state.layers[1] as XYReferenceLineLayerConfig).yConfig![0].axisMode = 'bottom';
         // set the xAccessor as date_histogram
         frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
@@ -1111,6 +1583,8 @@ describe('xy_visualization', () => {
               isBucketed: true,
               scale: 'interval',
               label: 'date_histogram',
+              isStaticValue: false,
+              hasTimeShift: false,
             };
           }
           return null;
@@ -1132,14 +1606,14 @@ describe('xy_visualization', () => {
 
       it('should return groups in a specific order (left, right, bottom)', () => {
         const state = getStateWithBaseReferenceLine();
-        state.layers[0].xAccessor = 'c';
-        state.layers[0].accessors = ['a', 'b'];
+        (state.layers[0] as XYDataLayerConfig).xAccessor = 'c';
+        (state.layers[0] as XYDataLayerConfig).accessors = ['a', 'b'];
         // invert them on purpose
-        state.layers[0].yConfig = [
+        (state.layers[0] as XYDataLayerConfig).yConfig = [
           { axisMode: 'right', forAccessor: 'b' },
           { axisMode: 'left', forAccessor: 'a' },
         ];
-        state.layers[1].yConfig = [
+        (state.layers[1] as XYReferenceLineLayerConfig).yConfig = [
           { forAccessor: 'c', axisMode: 'bottom' },
           { forAccessor: 'b', axisMode: 'right' },
           { forAccessor: 'a', axisMode: 'left' },
@@ -1152,6 +1626,8 @@ describe('xy_visualization', () => {
               isBucketed: true,
               scale: 'interval',
               label: 'histogram',
+              isStaticValue: false,
+              hasTimeShift: false,
             };
           }
           return null;
@@ -1170,9 +1646,9 @@ describe('xy_visualization', () => {
 
       it('should ignore terms operation for xAccessor', () => {
         const state = getStateWithBaseReferenceLine();
-        state.layers[0].xAccessor = 'b';
-        state.layers[0].accessors = [];
-        state.layers[1].yConfig = []; // empty the configuration
+        (state.layers[0] as XYDataLayerConfig).xAccessor = 'b';
+        (state.layers[0] as XYDataLayerConfig).accessors = [];
+        (state.layers[1] as XYReferenceLineLayerConfig).yConfig = []; // empty the configuration
         // set the xAccessor as top values
         frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
@@ -1181,6 +1657,8 @@ describe('xy_visualization', () => {
               isBucketed: true,
               scale: 'ordinal',
               label: 'top values',
+              isStaticValue: false,
+              hasTimeShift: false,
             };
           }
           return null;
@@ -1197,9 +1675,9 @@ describe('xy_visualization', () => {
 
       it('should mark horizontal group is invalid when accessor is changed to a terms operation', () => {
         const state = getStateWithBaseReferenceLine();
-        state.layers[0].xAccessor = 'b';
-        state.layers[0].accessors = [];
-        state.layers[1].yConfig![0].axisMode = 'bottom';
+        (state.layers[0] as XYDataLayerConfig).xAccessor = 'b';
+        (state.layers[0] as XYDataLayerConfig).accessors = [];
+        (state.layers[1] as XYReferenceLineLayerConfig).yConfig![0].axisMode = 'bottom';
         // set the xAccessor as date_histogram
         frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
@@ -1208,6 +1686,8 @@ describe('xy_visualization', () => {
               isBucketed: true,
               scale: 'ordinal',
               label: 'top values',
+              isStaticValue: false,
+              hasTimeShift: false,
             };
           }
           return null;
@@ -1262,8 +1742,8 @@ describe('xy_visualization', () => {
         };
 
         const state = getStateWithBaseReferenceLine();
-        state.layers[0].accessors = ['yAccessorId', 'yAccessorId2'];
-        state.layers[1].yConfig = []; // empty the configuration
+        (state.layers[0] as XYDataLayerConfig).accessors = ['yAccessorId', 'yAccessorId2'];
+        (state.layers[1] as XYReferenceLineLayerConfig).yConfig = []; // empty the configuration
 
         const options = xyVisualization.getConfiguration({
           state,
@@ -1282,8 +1762,12 @@ describe('xy_visualization', () => {
       it('should be excluded and not crash when a custom palette is used for data layer', () => {
         const state = getStateWithBaseReferenceLine();
         // now add a breakdown on the data layer with a custom palette
-        state.layers[0].palette = { type: 'palette', name: 'custom', params: {} };
-        state.layers[0].splitAccessor = 'd';
+        (state.layers[0] as XYDataLayerConfig).palette = {
+          type: 'palette',
+          name: 'custom',
+          params: {},
+        };
+        (state.layers[0] as XYDataLayerConfig).splitAccessor = 'd';
 
         const options = xyVisualization.getConfiguration({
           state,
@@ -1292,6 +1776,83 @@ describe('xy_visualization', () => {
         }).groups;
         // it should not crash basically
         expect(options).toHaveLength(1);
+      });
+    });
+
+    describe('annotations', () => {
+      beforeEach(() => {
+        frame = createMockFramePublicAPI();
+        mockDatasource = createMockDatasource('testDatasource');
+
+        frame.datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+        };
+        frame.datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'a') {
+            return {
+              dataType: 'date',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'date_histogram',
+              isStaticValue: false,
+              hasTimeShift: false,
+            };
+          }
+          return null;
+        });
+
+        frame.activeData = {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [],
+          },
+        };
+      });
+
+      function getStateWithAnnotationLayer(): State {
+        return {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              splitAccessor: undefined,
+              xAccessor: 'a',
+              accessors: ['b'],
+            },
+            {
+              layerId: 'annotations',
+              layerType: layerTypes.ANNOTATIONS,
+              annotations: [exampleAnnotation],
+            },
+          ],
+        };
+      }
+
+      it('returns configuration correctly', () => {
+        const state = getStateWithAnnotationLayer();
+        const config = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'annotations',
+        });
+        expect(config.groups[0].accessors).toEqual([
+          { color: '#f04e98', columnId: 'an1', triggerIcon: 'color' },
+        ]);
+        expect(config.groups[0].invalid).toEqual(false);
+      });
+
+      it('When data layer is empty, should return invalid state', () => {
+        const state = getStateWithAnnotationLayer();
+        (state.layers[0] as XYDataLayerConfig).xAccessor = undefined;
+        const config = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'annotations',
+        });
+        expect(config.groups[0].invalid).toEqual(true);
       });
     });
 
@@ -1306,7 +1867,7 @@ describe('xy_visualization', () => {
                 ...baseState.layers[0],
                 splitAccessor: undefined,
                 ...layerConfigOverride,
-              },
+              } as XYLayerConfig,
             ],
           },
           frame,
@@ -1435,8 +1996,8 @@ describe('xy_visualization', () => {
 
       it('should respect the order of accessors coming from datasource', () => {
         mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-          { columnId: 'c' },
-          { columnId: 'b' },
+          { columnId: 'c', fields: [] },
+          { columnId: 'b', fields: [] },
         ]);
         const paletteGetter = jest.spyOn(paletteServiceMock, 'get');
         // overrite palette with a palette returning first blue, then green as color
@@ -1470,7 +2031,7 @@ describe('xy_visualization', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -1720,7 +2281,7 @@ describe('xy_visualization', () => {
           ? ({
               dataType: 'date',
               scale: 'interval',
-            } as unknown as Operation)
+            } as unknown as OperationDescriptor)
           : null
       );
       datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
@@ -1728,7 +2289,7 @@ describe('xy_visualization', () => {
           ? ({
               dataType: 'number',
               scale: 'interval',
-            } as unknown as Operation)
+            } as unknown as OperationDescriptor)
           : null
       );
       expect(
@@ -1776,7 +2337,7 @@ describe('xy_visualization', () => {
           ? ({
               dataType: 'date',
               scale: 'interval',
-            } as unknown as Operation)
+            } as unknown as OperationDescriptor)
           : null
       );
       datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
@@ -1784,7 +2345,7 @@ describe('xy_visualization', () => {
           ? ({
               dataType: 'string',
               scale: 'ordinal',
-            } as unknown as Operation)
+            } as unknown as OperationDescriptor)
           : null
       );
       expect(
@@ -1830,10 +2391,10 @@ describe('xy_visualization', () => {
       mockDatasource = createMockDatasource('testDatasource');
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'd' },
-        { columnId: 'a' },
-        { columnId: 'b' },
-        { columnId: 'c' },
+        { columnId: 'd', fields: [] },
+        { columnId: 'a', fields: [] },
+        { columnId: 'b', fields: [] },
+        { columnId: 'c', fields: [] },
       ]);
 
       frame.datasourceLayers = {
@@ -1889,6 +2450,89 @@ describe('xy_visualization', () => {
           }
         />
       `);
+    });
+  });
+  describe('#getUniqueLabels', () => {
+    it('creates unique labels for single annotations layer with repeating labels', async () => {
+      const xyState = {
+        layers: [
+          {
+            layerId: 'layerId',
+            layerType: 'annotations',
+            annotations: [
+              {
+                label: 'Event',
+                id: '1',
+              },
+              {
+                label: 'Event',
+                id: '2',
+              },
+              {
+                label: 'Custom',
+                id: '3',
+              },
+            ],
+          },
+        ],
+      } as XYState;
+
+      expect(xyVisualization.getUniqueLabels!(xyState)).toEqual({
+        '1': 'Event',
+        '2': 'Event [1]',
+        '3': 'Custom',
+      });
+    });
+    it('creates unique labels for multiple annotations layers with repeating labels', async () => {
+      const xyState = {
+        layers: [
+          {
+            layerId: 'layer1',
+            layerType: 'annotations',
+            annotations: [
+              {
+                label: 'Event',
+                id: '1',
+              },
+              {
+                label: 'Event',
+                id: '2',
+              },
+              {
+                label: 'Custom',
+                id: '3',
+              },
+            ],
+          },
+          {
+            layerId: 'layer2',
+            layerType: 'annotations',
+            annotations: [
+              {
+                label: 'Event',
+                id: '4',
+              },
+              {
+                label: 'Event [1]',
+                id: '5',
+              },
+              {
+                label: 'Custom',
+                id: '6',
+              },
+            ],
+          },
+        ],
+      } as XYState;
+
+      expect(xyVisualization.getUniqueLabels!(xyState)).toEqual({
+        '1': 'Event',
+        '2': 'Event [1]',
+        '3': 'Custom',
+        '4': 'Event [2]',
+        '5': 'Event [1] [1]',
+        '6': 'Custom [1]',
+      });
     });
   });
 });

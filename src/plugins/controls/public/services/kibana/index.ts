@@ -11,7 +11,7 @@ import {
   KibanaPluginServiceParams,
   PluginServiceProvider,
   PluginServiceRegistry,
-} from '../../../../presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
 import { ControlsPluginStartDeps } from '../../types';
 import { ControlsServices } from '..';
 
@@ -21,6 +21,8 @@ import { overlaysServiceFactory } from './overlays';
 import { dataServiceFactory } from './data';
 import { httpServiceFactory } from './http';
 import { optionsListServiceFactory } from './options_list';
+import { settingsServiceFactory } from './settings';
+import { unifiedSearchServiceFactory } from './unified_search';
 
 export const providers: PluginServiceProviders<
   ControlsServices,
@@ -28,8 +30,10 @@ export const providers: PluginServiceProviders<
 > = {
   http: new PluginServiceProvider(httpServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
+  unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
+  settings: new PluginServiceProvider(settingsServiceFactory),
 
   optionsList: new PluginServiceProvider(optionsListServiceFactory, ['data', 'http']),
   controls: new PluginServiceProvider(controlsServiceFactory),

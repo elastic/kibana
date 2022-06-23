@@ -9,19 +9,26 @@ import React, { useMemo } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Switch, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { coreMock } from '../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { CspAppDeps } from '../application/app';
 
 export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
   core = coreMock.createStart(),
-  deps = {},
+  deps = {
+    data: dataPluginMock.createStartContract(),
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+    charts: chartPluginMock.createStartContract(),
+  },
   params = coreMock.createAppMountParameters(),
   children,
 } = {}) => {
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
-    <KibanaContextProvider services={{ ...deps, ...core }}>
+    <KibanaContextProvider services={{ ...core, ...deps }}>
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <I18nProvider>

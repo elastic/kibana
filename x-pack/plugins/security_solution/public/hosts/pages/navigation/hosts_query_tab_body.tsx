@@ -6,17 +6,17 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React from 'react';
-import { useAllHost } from '../../containers/hosts';
+import React, { useEffect, useState } from 'react';
+import { useAllHost, ID } from '../../containers/hosts';
 import { HostsComponentsQueryProps } from './types';
 import { HostsTable } from '../../components/hosts_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const HostsTableManage = manageQuery(HostsTable);
 
 export const HostsQueryTabBody = ({
   deleteQuery,
-  docValueFields,
   endDate,
   filterQuery,
   indexNames,
@@ -25,8 +25,20 @@ export const HostsQueryTabBody = ({
   startDate,
   type,
 }: HostsComponentsQueryProps) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [loading, { hosts, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch }] =
-    useAllHost({ docValueFields, endDate, filterQuery, indexNames, skip, startDate, type });
+    useAllHost({
+      endDate,
+      filterQuery,
+      indexNames,
+      skip: querySkip,
+      startDate,
+      type,
+    });
 
   return (
     <HostsTableManage
@@ -40,6 +52,7 @@ export const HostsQueryTabBody = ({
       loadPage={loadPage}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={type}

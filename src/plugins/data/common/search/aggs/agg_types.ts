@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatsStartCommon } from '../../../../field_formats/common';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 import * as buckets from './buckets';
 import * as metrics from './metrics';
@@ -18,7 +18,9 @@ export interface AggTypesDependencies {
   calculateBounds: CalculateBoundsFn;
   getConfig: <T = any>(key: string) => T;
   getFieldFormatsStart: () => Pick<FieldFormatsStartCommon, 'deserialize' | 'getDefaultInstance'>;
-  isDefaultTimezone: () => boolean;
+  aggExecutionContext?: {
+    shouldDetectTimeZone?: boolean;
+  };
 }
 
 /** @internal */
@@ -29,6 +31,7 @@ export const getAggTypes = () => ({
     { name: METRIC_TYPES.SUM, fn: metrics.getSumMetricAgg },
     { name: METRIC_TYPES.MEDIAN, fn: metrics.getMedianMetricAgg },
     { name: METRIC_TYPES.SINGLE_PERCENTILE, fn: metrics.getSinglePercentileMetricAgg },
+    { name: METRIC_TYPES.SINGLE_PERCENTILE_RANK, fn: metrics.getSinglePercentileRankMetricAgg },
     { name: METRIC_TYPES.MIN, fn: metrics.getMinMetricAgg },
     { name: METRIC_TYPES.MAX, fn: metrics.getMaxMetricAgg },
     { name: METRIC_TYPES.STD_DEV, fn: metrics.getStdDeviationMetricAgg },
@@ -36,6 +39,7 @@ export const getAggTypes = () => ({
     { name: METRIC_TYPES.PERCENTILES, fn: metrics.getPercentilesMetricAgg },
     { name: METRIC_TYPES.PERCENTILE_RANKS, fn: metrics.getPercentileRanksMetricAgg },
     { name: METRIC_TYPES.TOP_HITS, fn: metrics.getTopHitMetricAgg },
+    { name: METRIC_TYPES.TOP_METRICS, fn: metrics.getTopMetricsMetricAgg },
     { name: METRIC_TYPES.DERIVATIVE, fn: metrics.getDerivativeMetricAgg },
     { name: METRIC_TYPES.CUMULATIVE_SUM, fn: metrics.getCumulativeSumMetricAgg },
     { name: METRIC_TYPES.MOVING_FN, fn: metrics.getMovingAvgMetricAgg },
@@ -101,6 +105,7 @@ export const getAggTypesFunctions = () => [
   metrics.aggMax,
   metrics.aggMedian,
   metrics.aggSinglePercentile,
+  metrics.aggSinglePercentileRank,
   metrics.aggMin,
   metrics.aggMovingAvg,
   metrics.aggPercentileRanks,
@@ -109,4 +114,5 @@ export const getAggTypesFunctions = () => [
   metrics.aggStdDeviation,
   metrics.aggSum,
   metrics.aggTopHit,
+  metrics.aggTopMetrics,
 ];

@@ -64,8 +64,8 @@ export class FilterBarService extends FtrService {
    * Removes all filters
    */
   public async removeAllFilters(): Promise<void> {
-    await this.testSubjects.click('showFilterActions');
-    await this.testSubjects.click('removeAllFilters');
+    await this.testSubjects.click('showQueryBarMenu');
+    await this.testSubjects.click('filter-sets-removeAllFilters');
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitUntilUrlIncludes('filters:!()');
   }
@@ -101,6 +101,11 @@ export class FilterBarService extends FtrService {
   public async getFilterCount(): Promise<number> {
     const filters = await this.testSubjects.findAll('~filter');
     return filters.length;
+  }
+
+  public async getFiltersLabel(): Promise<string[]> {
+    const filters = await this.testSubjects.findAll('~filter');
+    return Promise.all(filters.map((filter) => filter.getVisibleText()));
   }
 
   /**

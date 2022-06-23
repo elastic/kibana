@@ -9,11 +9,13 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IndexPatternLayer, IndexPattern } from '../../../types';
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { rangeOperation } from '../index';
+import { rangeOperation } from '..';
 import { RangeIndexPatternColumn } from './ranges';
 import {
   MODES,
@@ -51,6 +53,8 @@ jest.mock('lodash', () => {
 });
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
+const unifiedSearchPluginMockValue = unifiedSearchPluginMock.createStartContract();
+const dataViewsPluginMockValue = dataViewPluginMocks.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ id, params }) => {
   return {
@@ -84,6 +88,8 @@ const defaultOptions = {
     toDate: 'now',
   },
   data: dataPluginMockValue,
+  unifiedSearch: unifiedSearchPluginMockValue,
+  dataViews: dataViewsPluginMockValue,
   http: {} as HttpSetup,
   indexPattern: {
     id: '1',
@@ -189,6 +195,9 @@ describe('ranges', () => {
       expect(esAggsFn).toMatchInlineSnapshot(`
         Object {
           "arguments": Object {
+            "autoExtendBounds": Array [
+              false,
+            ],
             "enabled": Array [
               true,
             ],
@@ -249,6 +258,30 @@ describe('ranges', () => {
           function: 'aggHistogram',
           arguments: expect.objectContaining({
             maxBars: [10],
+          }),
+        })
+      );
+    });
+
+    it('should reflect show empty rows correctly', () => {
+      (layer.columns.col1 as RangeIndexPatternColumn).params.maxBars = 10;
+      (layer.columns.col1 as RangeIndexPatternColumn).params.includeEmptyRows = true;
+
+      const esAggsFn = rangeOperation.toEsAggsFn(
+        layer.columns.col1 as RangeIndexPatternColumn,
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        []
+      );
+
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggHistogram',
+          arguments: expect.objectContaining({
+            autoExtendBounds: [true],
+            min_doc_count: [true],
           }),
         })
       );
@@ -650,7 +683,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(RangePopover).find(EuiLink).simulate('click');
+          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -697,7 +730,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(RangePopover).find(EuiLink).simulate('click');
+          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -784,7 +817,7 @@ describe('ranges', () => {
         );
 
         act(() => {
-          instance.find(RangePopover).last().find(EuiLink).simulate('click');
+          instance.find(RangePopover).last().find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -891,7 +924,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(EuiLink).first().simulate('click');
+          instance.find(EuiLink).first().find('button').simulate('click');
         });
 
         expect(updateLayerSpy.mock.calls[0][0].columns.col1.params.format).toEqual({

@@ -6,6 +6,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
   role="dialog"
 >
   <button
+    aria-label="Close this dialog"
     data-test-subj="euiFlyoutCloseButton"
     onClick={[Function]}
     type="button"
@@ -14,7 +15,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
     className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
   >
     <h2
-      className="euiTitle euiTitle--small"
+      className="euiTitle css-1mr6cet-euiTitle-s"
     >
       Keyboard shortcuts
     </h2>
@@ -33,12 +34,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
           className="canvasKeyboardShortcut"
         >
           <h4
-            className="euiTitle euiTitle--xsmall"
+            className="euiTitle css-1c9cwui-euiTitle-xs"
           >
             Element controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
           />
           <dl
             className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
@@ -377,19 +378,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
           />
         </div>
         <div
           className="canvasKeyboardShortcut"
         >
           <h4
-            className="euiTitle euiTitle--xsmall"
+            className="euiTitle css-1c9cwui-euiTitle-xs"
           >
             Expression controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
           />
           <dl
             className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
@@ -414,19 +415,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
           />
         </div>
         <div
           className="canvasKeyboardShortcut"
         >
           <h4
-            className="euiTitle euiTitle--xsmall"
+            className="euiTitle css-1c9cwui-euiTitle-xs"
           >
             Editor controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
           />
           <dl
             className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
@@ -733,19 +734,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
           />
         </div>
         <div
           className="canvasKeyboardShortcut"
         >
           <h4
-            className="euiTitle euiTitle--xsmall"
+            className="euiTitle css-1c9cwui-euiTitle-xs"
           >
             Presentation controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
           />
           <dl
             className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
@@ -906,7 +907,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
           />
         </div>
       </div>

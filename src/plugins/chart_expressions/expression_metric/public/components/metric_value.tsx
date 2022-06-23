@@ -8,6 +8,7 @@
 
 import React, { CSSProperties } from 'react';
 import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
 import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';
 
 interface MetricVisValueProps {
@@ -28,11 +29,8 @@ export const MetricVisValue = ({
   autoScale,
 }: MetricVisValueProps) => {
   const containerClassName = classNames('mtrVis__container', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'mtrVis__container--light': metric.lightText,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'mtrVis__container-isfilterable': onFilter,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'mtrVis__container-isfull': !autoScale && colorFullBackground,
   });
 
@@ -43,6 +41,7 @@ export const MetricVisValue = ({
       style={autoScale && colorFullBackground ? {} : { backgroundColor: metric.bgColor }}
     >
       <div
+        data-test-subj="metric_value"
         className="mtrVis__value"
         style={{
           ...(style.spec as CSSProperties),
@@ -60,6 +59,7 @@ export const MetricVisValue = ({
       />
       {labelConfig.show && (
         <div
+          data-test-subj="metric_label"
           style={{
             ...(labelConfig.style.spec as CSSProperties),
             order: labelConfig.position === 'top' ? -1 : 2,
@@ -73,7 +73,13 @@ export const MetricVisValue = ({
 
   if (onFilter) {
     return (
-      <button style={{ display: 'block' }} onClick={() => onFilter()}>
+      <button
+        style={{ display: 'block' }}
+        onClick={() => onFilter()}
+        title={i18n.translate('expressionMetricVis.filterTitle', {
+          defaultMessage: 'Click to filter by field',
+        })}
+      >
         {metricComponent}
       </button>
     );

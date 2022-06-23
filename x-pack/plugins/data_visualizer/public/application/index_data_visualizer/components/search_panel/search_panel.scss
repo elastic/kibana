@@ -3,6 +3,10 @@
   padding: $euiSizeS;
 }
 
+.dvSearchPanel__container {
+  align-items: baseline;
+}
+
 @include euiBreakpoint('xs', 's', 'm', 'l') {
   .dvSearchPanel__container {
     flex-direction: column;
@@ -12,9 +16,5 @@
   }
   .dvSearchPanel__controls {
     padding: 0;
-  }
-  // prevent margin -16 which scrunches the filter bar
-  .globalFilterGroup__wrapper-isVisible {
-    margin: 0 !important;
   }
 }

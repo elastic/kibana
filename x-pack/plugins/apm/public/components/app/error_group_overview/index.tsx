@@ -15,15 +15,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import uuid from 'uuid';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
-import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
 
@@ -56,19 +56,12 @@ export function ErrorGroupOverview() {
       sortDirection,
       rangeFrom,
       rangeTo,
-      comparisonType,
+      offset,
       comparisonEnabled,
     },
   } = useApmParams('/services/{serviceName}/errors');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
-
   const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
@@ -116,6 +109,7 @@ export function ErrorGroupOverview() {
 
   const {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
+    status: errorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (requestId && errorGroupMainStatistics.length && start && end) {
@@ -133,8 +127,10 @@ export function ErrorGroupOverview() {
                 groupIds: JSON.stringify(
                   errorGroupMainStatistics.map(({ groupId }) => groupId).sort()
                 ),
-                comparisonStart,
-                comparisonEnd,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
               },
             },
           }
@@ -190,6 +186,10 @@ export function ErrorGroupOverview() {
           <ErrorGroupList
             mainStatistics={errorGroupMainStatistics}
             serviceName={serviceName}
+            detailedStatisticsLoading={
+              errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
+              errorGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED
+            }
             detailedStatistics={errorGroupDetailedStatistics}
             comparisonEnabled={comparisonEnabled}
           />

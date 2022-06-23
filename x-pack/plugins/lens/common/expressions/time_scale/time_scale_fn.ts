@@ -7,16 +7,8 @@
 
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import {
-  buildResultColumns,
-  Datatable,
-  ExecutionContext,
-} from '../../../../../../src/plugins/expressions/common';
-import {
-  calculateBounds,
-  getDateHistogramMetaDataByDatatableColumn,
-  parseInterval,
-} from '../../../../../../src/plugins/data/common';
+import { buildResultColumns, Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
+import { calculateBounds, DatatableUtilitiesService, parseInterval } from '@kbn/data-plugin/common';
 import type { TimeScaleExpressionFunction, TimeScaleUnit, TimeScaleArgs } from './types';
 
 const unitInMs: Record<TimeScaleUnit, number> = {
@@ -28,6 +20,9 @@ const unitInMs: Record<TimeScaleUnit, number> = {
 
 export const timeScaleFn =
   (
+    getDatatableUtilities: (
+      context: ExecutionContext
+    ) => DatatableUtilitiesService | Promise<DatatableUtilitiesService>,
     getTimezone: (context: ExecutionContext) => string | Promise<string>
   ): TimeScaleExpressionFunction['fn'] =>
   async (
@@ -63,7 +58,8 @@ export const timeScaleFn =
     }
 
     const targetUnitInMs = unitInMs[targetUnit];
-    const timeInfo = getDateHistogramMetaDataByDatatableColumn(dateColumnDefinition, {
+    const datatableUtilities = await getDatatableUtilities(context);
+    const timeInfo = datatableUtilities.getDateHistogramMeta(dateColumnDefinition, {
       timeZone: await getTimezone(context),
     });
     const intervalDuration = timeInfo?.interval && parseInterval(timeInfo.interval);

@@ -9,8 +9,14 @@
 import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
-import { Filter, FilterStateStore, compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
+import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
+import {
+  Filter,
+  FilterStateStore,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Query,
+} from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
@@ -19,16 +25,15 @@ import {
   StateContainer,
   syncState,
   withNotifyOnErrors,
-} from '../../../../../kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 import {
   connectToQueryState,
   DataPublicPluginStart,
   FilterManager,
-  Query,
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
-} from '../../../../../data/public';
-import { DataView } from '../../../../../data/common';
+} from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { SavedSearch } from '../../../services/saved_searches';
@@ -315,7 +320,7 @@ export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newS
 /**
  * Helper function to compare 2 different filter states
  */
-export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
+export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
   if (!filtersA && !filtersB) {
     return true;
   } else if (!filtersA || !filtersB) {

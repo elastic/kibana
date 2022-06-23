@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import { createQueryAlertType } from './create_query_alert_type';
@@ -41,6 +41,7 @@ describe('Custom Query Alerts', () => {
     ruleDataClient,
     eventLogService,
     ruleExecutionLoggerFactory: () => ruleExecutionLogMock.forExecutors.create(),
+    version: '8.3',
   });
   const eventsTelemetry = createMockTelemetryEventsSender(true);
 
@@ -60,7 +61,7 @@ describe('Custom Query Alerts', () => {
 
     alerting.registerType(queryAlertType);
 
-    services.search.asCurrentUser.search.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           hits: [],
@@ -104,7 +105,7 @@ describe('Custom Query Alerts', () => {
 
     alerting.registerType(queryAlertType);
 
-    services.search.asCurrentUser.search.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           hits: [sampleDocNoSortId()],

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { ILicenseState, AlertTypeDisabledError } from '../lib';
+import { ILicenseState, RuleTypeDisabledError } from '../lib';
 import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
 
@@ -28,13 +28,13 @@ export const disableRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         try {
           await rulesClient.disable({ id });
           return res.noContent();
         } catch (e) {
-          if (e instanceof AlertTypeDisabledError) {
+          if (e instanceof RuleTypeDisabledError) {
             return e.sendResponse(res);
           }
           throw e;

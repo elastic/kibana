@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { ScreenshotResult } from '../../../screenshotting/server';
+import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
 export type { JobParamsPNGDeprecated } from './export_types/png';
@@ -35,20 +35,13 @@ export interface ReportOutput extends TaskRunResult {
   size: number;
 }
 
-type ScreenshotMetrics = Required<ScreenshotResult>['metrics'];
-
 export interface CsvMetrics {
   rows: number;
 }
 
-export type PngMetrics = ScreenshotMetrics;
+export type PngMetrics = PngScreenshotResult['metrics'];
 
-export interface PdfMetrics extends Partial<ScreenshotMetrics> {
-  /**
-   * A number of emitted pages in the generated PDF report.
-   */
-  pages: number;
-}
+export type PdfMetrics = PdfScreenshotResult['metrics'];
 
 export interface TaskRunMetrics {
   csv?: CsvMetrics;
@@ -163,6 +156,7 @@ export interface JobSummary {
   status: JobStatus;
   jobtype: ReportSource['jobtype'];
   title: ReportSource['payload']['title'];
+  errorCode?: ReportOutput['error_code'];
   maxSizeReached: TaskRunResult['max_size_reached'];
   csvContainsFormulas: TaskRunResult['csv_contains_formulas'];
 }

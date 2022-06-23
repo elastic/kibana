@@ -4,4 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export type { RowRenderer } from '../../../../../timelines/common';
+export type { RowRenderer } from '@kbn/timelines-plugin/common';

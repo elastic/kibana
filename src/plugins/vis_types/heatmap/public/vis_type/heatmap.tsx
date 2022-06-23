@@ -9,9 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 
-import { AggGroupNames } from '../../../../data/public';
-import { ColorSchemas } from '../../../../charts/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../../visualizations/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { ColorSchemas } from '@kbn/charts-plugin/public';
+import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { HeatmapTypeProps, HeatmapVisParams, AxisType, ScaleType } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getHeatmapOptions } from '../editor/components';
@@ -28,6 +28,7 @@ export const getHeatmapVisTypeDefinition = ({
   description: i18n.translate('visTypeHeatmap.heatmap.heatmapDescription', {
     defaultMessage: 'Display values as colors in a matrix.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
   visConfig: {
@@ -63,6 +64,7 @@ export const getHeatmapVisTypeDefinition = ({
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: getHeatmapOptions({
       showElasticChartsOptions,
       palettes,
@@ -87,6 +89,7 @@ export const getHeatmapVisTypeDefinition = ({
           'top_hits',
           '!filtered_metric',
           '!single_percentile',
+          '!single_percentile_rank',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

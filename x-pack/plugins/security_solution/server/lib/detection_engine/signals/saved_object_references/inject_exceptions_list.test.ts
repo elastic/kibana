@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { SavedObjectReference } from 'src/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectReference } from '@kbn/core/server';
 import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 import { injectExceptionsReferences } from './inject_exceptions_list';
 import { RuleParams } from '../../schemas/rule_schemas';
@@ -122,7 +122,7 @@ describe('inject_exceptions_list', () => {
       savedObjectReferences: [{ ...mockSavedObjectReferences()[0], name: 'other-name_0' }],
     });
     expect(logger.error).toBeCalledWith(
-      'The saved object references were not found for our exception list when we were expecting to find it. Kibana migrations might not have run correctly or someone might have removed the saved object references manually. Returning the last known good exception list id which might not work. exceptionItem with its id being returned is: {"id":"123","list_id":"456","type":"detection","namespace_type":"agnostic"}'
+      'The saved object references were not found for our exception list when we were expecting to find it. Kibana migrations might not have run correctly or someone might have removed the saved object references manually. Returning the last known good exception list which might not work. Value being returned is: {"id":"123","list_id":"456","type":"detection","namespace_type":"agnostic"}'
     );
   });
 });

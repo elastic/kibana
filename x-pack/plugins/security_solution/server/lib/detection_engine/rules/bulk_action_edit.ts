@@ -13,6 +13,7 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 import { invariant } from '../../../../common/utils/invariant';
+import { isMachineLearningParams } from '../signals/utils';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));
@@ -27,6 +28,7 @@ export const applyBulkActionEditToRule = (
   action: BulkActionEditPayload
 ): RuleAlertType => {
   const rule = { ...existingRule, params: { ...existingRule.params } };
+
   switch (action.type) {
     // tags actions
     case BulkActionEditType.add_tags:
@@ -49,7 +51,11 @@ export const applyBulkActionEditToRule = (
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
 
+      if (!isMachineLearningParams(rule.params) && action.overwriteDataViews) {
+        rule.params.dataViewId = undefined;
+      }
       rule.params.index = addItemsToArray(rule.params.index ?? [], action.value);
+
       break;
 
     case BulkActionEditType.delete_index_patterns:
@@ -58,12 +64,16 @@ export const applyBulkActionEditToRule = (
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
       );
 
+      if (!isMachineLearningParams(rule.params) && action.overwriteDataViews) {
+        rule.params.dataViewId = undefined;
+      }
       rule.params.index = deleteItemsFromArray(rule.params.index ?? [], action.value);
 
       invariant(
         rule.params.index.length !== 0,
         "Can't delete all index patterns. At least one index pattern must be left"
       );
+
       break;
 
     case BulkActionEditType.set_index_patterns:
@@ -73,16 +83,21 @@ export const applyBulkActionEditToRule = (
       );
       invariant(action.value.length !== 0, "Index patterns can't be overwritten with empty list");
 
+      if (!isMachineLearningParams(rule.params) && action.overwriteDataViews) {
+        rule.params.dataViewId = undefined;
+      }
       rule.params.index = action.value;
+
       break;
 
     // timeline actions
     case BulkActionEditType.set_timeline:
-      rule.params = {
-        ...rule.params,
-        timelineId: action.value.timeline_id,
-        timelineTitle: action.value.timeline_title,
-      };
+      const timelineId = action.value.timeline_id.trim() || undefined;
+      const timelineTitle = timelineId ? action.value.timeline_title : undefined;
+
+      rule.params.timelineId = timelineId;
+      rule.params.timelineTitle = timelineTitle;
+      break;
   }
 
   return rule;

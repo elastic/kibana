@@ -12,7 +12,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
-import { ActionMenu } from '../../../../../../observability/public';
+import { ActionMenu } from '@kbn/observability-plugin/public';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { isJavaAgentName } from '../../../../../common/agent_name';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
@@ -48,20 +49,24 @@ export function getColumns({
   kuery,
   agentName,
   latencyAggregationType,
+  detailedStatsLoading,
   detailedStatsData,
   comparisonEnabled,
   toggleRowDetails,
   itemIdToExpandedRowMap,
   toggleRowActionMenu,
   itemIdToOpenActionMenuRowMap,
+  offset,
   shouldShowSparkPlots = true,
 }: {
   serviceName: string;
   kuery: string;
   agentName?: string;
   latencyAggregationType?: LatencyAggregationType;
+  detailedStatsLoading: boolean;
   detailedStatsData?: ServiceInstanceDetailedStatistics;
   comparisonEnabled?: boolean;
+  offset?: string;
   toggleRowDetails: (selectedServiceNodeName: string) => void;
   itemIdToExpandedRowMap: Record<string, ReactNode>;
   toggleRowActionMenu: (selectedServiceNodeName: string) => void;
@@ -125,9 +130,12 @@ export function getColumns({
             color={currentPeriodColor}
             valueLabel={asMillisecondDuration(latency)}
             hideSeries={!shouldShowSparkPlots}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousPeriodTimestamp
+                : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -158,9 +166,12 @@ export function getColumns({
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asTransactionRate(throughput)}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousPeriodTimestamp
+                : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -191,9 +202,12 @@ export function getColumns({
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(errorRate, 1)}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousPeriodTimestamp
+                : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -224,9 +238,12 @@ export function getColumns({
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(cpuUsage, 1)}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousPeriodTimestamp
+                : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -257,9 +274,12 @@ export function getColumns({
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(memoryUsage, 1)}
+            isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousPeriodTimestamp
+                : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />

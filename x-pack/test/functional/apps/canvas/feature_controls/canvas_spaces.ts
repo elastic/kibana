@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.clean({ types: ['canvas-workpad'] });
+      await kibanaServer.savedObjects.cleanStandardList();
       await soInfo.logSoTypes(log);
     });
 
@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`allows a workpad to be edited`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'canvas',
-          'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
+          '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
           {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,

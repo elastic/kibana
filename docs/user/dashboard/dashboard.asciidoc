@@ -87,7 +87,7 @@ To create panels from the dashboard toolbar, use one of the following options:
 
 * *Create visualization* &mdash; Opens the drag-and-drop editor, which is the recommended way to create visualization panels.
 
-* *All types* &mdash; Opens the menu for all of the editors and panel types. 
+* *Select type* &mdash; Opens the menu for all of the editors and panel types. 
 
 To create panels from the *Visualize Library*:
 
@@ -336,6 +336,8 @@ Apply a set of design options to the entire dashboard.
 * *Show panel titles* &mdash; Displays the titles in the panels headers.
 
 * *Sync color pallettes across panels* &mdash; Applies the same color palette to all panels on the dashboard.
+
+* *Sync tooltips across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart, the tooltips on all other related dashboard charts automatically appear.
 
 [float]
 [[save-dashboards]]

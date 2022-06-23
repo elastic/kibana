@@ -7,10 +7,10 @@
 import { encode } from 'rison-node';
 import { stringify } from 'query-string';
 import { SerializableRecord } from '@kbn/utility-types';
-import { Filter } from '@kbn/es-query';
-import { RefreshInterval, TimeRange } from '../../../../../../../src/plugins/data/common';
-import { LocatorDefinition, LocatorPublic } from '../../../../../../../src/plugins/share/common';
-import { QueryState } from '../../../../../../../src/plugins/data/public';
+import { Filter, TimeRange } from '@kbn/es-query';
+import { RefreshInterval } from '@kbn/data-plugin/common';
+import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { Dictionary, isRisonSerializationRequired } from '../../common/util/url_state';
 import { SearchQueryLanguage } from '../types/combined_query';
 
@@ -23,9 +23,9 @@ export interface IndexDataVisualizerLocatorParams extends SerializableRecord {
   savedSearchId?: string;
 
   /**
-   * Optionally set index pattern ID.
+   * Optionally set data view ID.
    */
-  indexPatternId?: string;
+  dataViewId?: string;
 
   /**
    * Optionally set the time range in the time picker.
@@ -89,7 +89,7 @@ export class IndexDataVisualizerLocatorDefinition
 
   public readonly getLocation = async (params: IndexDataVisualizerLocatorParams) => {
     const {
-      indexPatternId,
+      dataViewId,
       query,
       refreshInterval,
       savedSearchId,
@@ -124,7 +124,7 @@ export class IndexDataVisualizerLocatorDefinition
       sortField?: string;
       showDistributions?: number;
     } = {};
-    const queryState: QueryState = {};
+    const queryState: GlobalQueryStateFromUrl = {};
 
     if (query) {
       appState.searchQuery = query.searchQuery;
@@ -158,7 +158,7 @@ export class IndexDataVisualizerLocatorDefinition
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     const urlState: Dictionary<any> = {
-      ...(savedSearchId ? { savedSearchId } : { index: indexPatternId }),
+      ...(savedSearchId ? { savedSearchId } : { index: dataViewId }),
       ...(searchSessionId ? { searchSessionId } : {}),
       _a: { DATA_VISUALIZER_INDEX_VIEWER: appState },
       _g: queryState,

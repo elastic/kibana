@@ -4,14 +4,6 @@
 Docs should be written during development and accompany PRs when relevant. There are multiple types of documentation, and different places to add each.
 
 [discrete]
-=== Developer services documentation
-
-Documentation about specific services a plugin offers should be encapsulated in:
-
-* README.asciidoc at the base of the plugin folder.
-* Typescript comments for all public services.
-
-[discrete]
 === End user documentation
 
 Documentation about user facing features should be written in http://asciidoc.org/[asciidoc] at

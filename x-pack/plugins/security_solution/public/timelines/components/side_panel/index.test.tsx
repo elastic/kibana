@@ -17,14 +17,16 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
-import { DetailsPanel } from './index';
+import { DetailsPanel } from '.';
 import {
   TimelineExpandedDetail,
   TimelineId,
   TimelineTabs,
 } from '../../../../common/types/timeline';
-import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
+import { useKibana } from '../../../common/lib/kibana';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -64,7 +66,7 @@ describe('Details Panel Component', () => {
       panelView: 'networkDetail',
       params: {
         ip: 'woohoo!',
-        flowTarget: FlowTarget.source,
+        flowTarget: FlowTargetSourceDest.source,
       },
     },
   };
@@ -99,9 +101,34 @@ describe('Details Panel Component', () => {
     timelineId: 'test',
   };
 
+  const mockSearchStrategy = jest.fn();
+
   describe('DetailsPanel: rendering', () => {
     beforeEach(() => {
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          data: {
+            search: {
+              searchStrategyClient: jest.fn(),
+              search: mockSearchStrategy.mockReturnValue({
+                unsubscribe: jest.fn(),
+                subscribe: jest.fn(),
+              }),
+            },
+            query: jest.fn(),
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue([]),
+          },
+          application: {
+            navigateToApp: jest.fn(),
+          },
+          cases: {
+            ui: { getCasesContext: () => mockCasesContext },
+          },
+        },
+      });
     });
 
     test('it should not render the DetailsPanel if no expanded detail has been set in the reducer', () => {
@@ -152,7 +179,7 @@ describe('Details Panel Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('EventDetailsPanelComponent')).toMatchSnapshot();
+      expect(wrapper.find('EventDetailsPanelComponent').render()).toMatchSnapshot();
     });
 
     test('it should render the Event Details view of the Details Panel in the flyout when the panelView is eventDetail and the eventId is set', () => {
@@ -162,8 +189,9 @@ describe('Details Panel Component', () => {
           <DetailsPanel {...currentProps} />
         </TestProviders>
       );
-
-      expect(wrapper.find('[data-test-subj="timeline:details-panel:flyout"]')).toMatchSnapshot();
+      expect(
+        wrapper.find('[data-test-subj="timeline:details-panel:flyout"]').first().render()
+      ).toMatchSnapshot();
     });
 
     test('it should have the attributes isDraggable to be false when timelineId !== "active" and activeTab === "query"', () => {
@@ -236,7 +264,7 @@ describe('Details Panel Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('ExpandableHostDetails')).toMatchSnapshot();
+      expect(wrapper.find('ExpandableHostDetails').first().render()).toMatchSnapshot();
     });
   });
 
@@ -255,7 +283,7 @@ describe('Details Panel Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('ExpandableNetworkDetails')).toMatchSnapshot();
+      expect(wrapper.find('ExpandableNetworkDetails').render()).toMatchSnapshot();
     });
   });
 });

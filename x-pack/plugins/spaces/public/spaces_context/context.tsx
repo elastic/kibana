@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 
-import type { CoreStart } from 'src/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 import type { SpacesManager } from '../spaces_manager';
 import type { SpacesData } from '../types';

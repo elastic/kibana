@@ -17,21 +17,27 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Form } from '../shared_imports';
 import { useSavedQueryForm } from './form/use_saved_query_form';
-import { SavedQueryForm, SavedQueryFormRefObject } from './form';
+import { SavedQueryForm } from './form';
 import { useCreateSavedQuery } from './use_create_saved_query';
 
 interface AddQueryFlyoutProps {
   defaultValue: unknown;
   onClose: () => void;
+  isExternal?: boolean;
 }
 
-const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue, onClose }) => {
-  const savedQueryFormRef = useRef<SavedQueryFormRefObject>(null);
+const additionalZIndexStyle = { style: 'z-index: 6000' };
+
+const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
+  defaultValue,
+  onClose,
+  isExternal,
+}) => {
   const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: false });
 
   const handleSubmit = useCallback(
@@ -41,14 +47,19 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
 
   const { form } = useSavedQueryForm({
     defaultValue,
-    savedQueryFormRef,
     handleSubmit,
   });
   const { submit, isSubmitting } = form;
 
   return (
     <EuiPortal>
-      <EuiFlyout size="m" ownFocus onClose={onClose} aria-labelledby="flyoutTitle">
+      <EuiFlyout
+        size="m"
+        ownFocus
+        onClose={onClose}
+        aria-labelledby="flyoutTitle"
+        maskProps={isExternal ? additionalZIndexStyle : undefined} // For an edge case to display above the alerts flyout
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
@@ -61,7 +72,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <Form form={form}>
-            <SavedQueryForm ref={savedQueryFormRef} />
+            <SavedQueryForm />
           </Form>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

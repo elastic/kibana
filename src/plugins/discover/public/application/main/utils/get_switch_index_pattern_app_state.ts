@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from 'src/plugins/data/common';
-import { getSortArray, SortPairArr } from '../../../components/doc_table/lib/get_sort';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { getSortArray, SortPairArr } from '../../../components/doc_table/utils/get_sort';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next

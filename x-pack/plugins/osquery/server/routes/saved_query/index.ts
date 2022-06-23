@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '../../../../../../src/core/server';
+import { IRouter } from '@kbn/core/server';
 
 import { createSavedQueryRoute } from './create_saved_query_route';
 import { deleteSavedQueryRoute } from './delete_saved_query_route';
@@ -16,8 +16,8 @@ import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const initSavedQueryRoutes = (router: IRouter, context: OsqueryAppContext) => {
   createSavedQueryRoute(router, context);
-  deleteSavedQueryRoute(router);
-  findSavedQueryRoute(router);
-  readSavedQueryRoute(router);
+  deleteSavedQueryRoute(router, context);
+  findSavedQueryRoute(router, context);
+  readSavedQueryRoute(router, context);
   updateSavedQueryRoute(router, context);
 };

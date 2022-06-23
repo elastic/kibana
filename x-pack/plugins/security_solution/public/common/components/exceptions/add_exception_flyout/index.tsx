@@ -34,13 +34,14 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import { DataViewBase } from '@kbn/es-query';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { getExceptionBuilderComponentLazy } from '../../../../../../lists/public';
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
@@ -72,6 +73,7 @@ export interface AddExceptionFlyoutProps {
   ruleId: string;
   exceptionListType: ExceptionListType;
   ruleIndices: string[];
+  dataViewId?: string;
   alertData?: AlertData;
   /**
    * The components that use this may or may not define `alertData`
@@ -127,6 +129,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   ruleName,
   ruleId,
   ruleIndices,
+  dataViewId,
   exceptionListType,
   alertData,
   isAlertDataLoading,
@@ -135,7 +138,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onRuleChange,
   alertStatus,
 }: AddExceptionFlyoutProps) {
-  const { http, data } = useKibana().services;
+  const { http, unifiedSearch, data } = useKibana().services;
   const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -166,36 +169,21 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     }
   }, [jobs, ruleIndices]);
 
-  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
-  const onError = useCallback(
-    (error: Error): void => {
-      addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
-      onCancel();
-    },
-    [addError, onCancel]
-  );
+  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
+    useFetchIndex(memoRuleIndices);
 
-  const onSuccess = useCallback(
-    (updated: number, conflicts: number): void => {
-      addSuccess(i18n.ADD_EXCEPTION_SUCCESS);
-      onConfirm(shouldCloseAlert, shouldBulkCloseAlert);
-      if (conflicts > 0) {
-        addWarning({
-          title: i18nCommon.UPDATE_ALERT_STATUS_FAILED(conflicts),
-          text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
-        });
+  const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPatterns);
+
+  useEffect(() => {
+    const fetchSingleDataView = async () => {
+      if (dataViewId != null && dataViewId !== '') {
+        const dv = await data.dataViews.get(dataViewId);
+        setIndexPattern(dv);
       }
-    },
-    [addSuccess, addWarning, onConfirm, shouldBulkCloseAlert, shouldCloseAlert]
-  );
+    };
 
-  const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
-    {
-      http,
-      onSuccess,
-      onError,
-    }
-  );
+    fetchSingleDataView();
+  }, [data.dataViews, dataViewId, setIndexPattern]);
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -235,6 +223,37 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       onCancel();
     },
     [addError, onCancel]
+  );
+
+  const onError = useCallback(
+    (error: Error): void => {
+      addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
+      onCancel();
+    },
+    [addError, onCancel]
+  );
+
+  const onSuccess = useCallback(
+    (updated: number, conflicts: number): void => {
+      handleRuleChange(true);
+      addSuccess(i18n.ADD_EXCEPTION_SUCCESS);
+      onConfirm(shouldCloseAlert, shouldBulkCloseAlert);
+      if (conflicts > 0) {
+        addWarning({
+          title: i18nCommon.UPDATE_ALERT_STATUS_FAILED(conflicts),
+          text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
+        });
+      }
+    },
+    [addSuccess, addWarning, onConfirm, shouldBulkCloseAlert, shouldCloseAlert, handleRuleChange]
+  );
+
+  const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
+    {
+      http,
+      onSuccess,
+      onError,
+    }
   );
 
   const handleFetchOrCreateExceptionListError = useCallback(
@@ -503,7 +522,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 allowLargeValueLists:
                   !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
                 httpService: http,
-                autocompleteService: data.autocomplete,
+                autocompleteService: unifiedSearch.autocomplete,
                 exceptionListItems: initialExceptionItems,
                 listType: exceptionListType,
                 osTypes: osTypesSelection,
@@ -511,7 +530,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 listNamespaceType: ruleExceptionList.namespace_type,
                 listTypeSpecificIndexPatternFilter: filterIndexPatterns,
                 ruleName,
-                indexPatterns,
+                indexPatterns:
+                  dataViewId != null && dataViewId !== '' ? indexPattern : indexIndexPatterns,
                 isOrDisabled: isExceptionBuilderFormDisabled,
                 isAndDisabled: isExceptionBuilderFormDisabled,
                 isNestedDisabled: isExceptionBuilderFormDisabled,

@@ -96,29 +96,39 @@ export const validateTimelineTitle = (rule: AddPrepackagedRulesSchema): string[]
 };
 
 export const validateThreshold = (rule: AddPrepackagedRulesSchema): string[] => {
+  const errors: string[] = [];
   if (isThresholdRule(rule.type)) {
     if (!rule.threshold) {
-      return ['when "type" is "threshold", "threshold" is required'];
-    } else if (rule.threshold.value <= 0) {
-      return ['"threshold.value" has to be bigger than 0'];
+      errors.push('when "type" is "threshold", "threshold" is required');
     } else {
-      return [];
+      if (rule.threshold.value <= 0) {
+        errors.push('"threshold.value" has to be bigger than 0');
+      }
+      if (
+        rule.threshold.cardinality?.length &&
+        rule.threshold.field.includes(rule.threshold.cardinality[0].field)
+      ) {
+        errors.push('Cardinality of a field that is being aggregated on is always 1');
+      }
+      if (Array.isArray(rule.threshold.field) && rule.threshold.field.length > 3) {
+        errors.push('Number of fields must be 3 or less');
+      }
     }
   }
-  return [];
+  return errors;
 };
 
 export const addPrepackagedRuleValidateTypeDependents = (
-  schema: AddPrepackagedRulesSchema
+  rule: AddPrepackagedRulesSchema
 ): string[] => {
   return [
-    ...validateAnomalyThreshold(schema),
-    ...validateQuery(schema),
-    ...validateLanguage(schema),
-    ...validateSavedId(schema),
-    ...validateMachineLearningJobId(schema),
-    ...validateTimelineId(schema),
-    ...validateTimelineTitle(schema),
-    ...validateThreshold(schema),
+    ...validateAnomalyThreshold(rule),
+    ...validateQuery(rule),
+    ...validateLanguage(rule),
+    ...validateSavedId(rule),
+    ...validateMachineLearningJobId(rule),
+    ...validateTimelineId(rule),
+    ...validateTimelineTitle(rule),
+    ...validateThreshold(rule),
   ];
 };

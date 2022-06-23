@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { defaultsDeep } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
+import supertest from 'supertest';
+
+import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 import {
   createTestEsCluster,
@@ -15,12 +19,9 @@ import {
   kibanaServerTestUser,
   systemIndicesSuperuser,
 } from '@kbn/test';
-import { defaultsDeep } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
-import supertest from 'supertest';
+import { CliArgs, Env } from '@kbn/config';
 
 import { InternalCoreSetup, InternalCoreStart } from '../server/internal_types';
-import { CliArgs, Env } from '../server/config';
 import { Root } from '../server/root';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
@@ -229,18 +230,12 @@ export function createTestServers({
     writeTo: process.stdout,
   });
 
-  log.indent(6);
-  log.info('starting elasticsearch');
-  log.indent(4);
-
   const es = createTestEsCluster(
     defaultsDeep({}, settings.es ?? {}, {
       log,
       license,
     })
   );
-
-  log.indent(-4);
 
   // Add time for KBN and adding users
   adjustTimeout(es.getStartTimeout() + 100000);

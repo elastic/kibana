@@ -9,6 +9,7 @@
   "include": ["public/**/*", "server/**/*", "common/*", "../../../typings/**/*"],
   "references": [
     { "path": "../../core/tsconfig.json" },
+    { "path": "../kibana_react/tsconfig.json"},
     { "path": "../screenshot_mode/tsconfig.json" }
   ]
 }

@@ -28,7 +28,16 @@
  * @packageDocumentation
  */
 
+import { AwaitedProperties } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import type { AppenderConfigType, LoggingServiceSetup } from '@kbn/core-logging-server';
+import { appendersSchema } from '@kbn/core-logging-server-internal';
+import type {
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+  AnalyticsServicePreboot,
+} from '@kbn/core-analytics-server';
 import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
@@ -54,7 +63,6 @@ import {
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
-import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { DeprecationsServiceSetup, DeprecationsClient } from './deprecations';
@@ -69,7 +77,6 @@ import {
   CoreServicesUsageData,
 } from './core_usage_data';
 import { PrebootServicePreboot } from './preboot';
-import { DocLinksServiceStart, DocLinksServiceSetup } from './doc_links';
 
 export type { PrebootServicePreboot } from './preboot';
 
@@ -103,7 +110,7 @@ export type {
   AddConfigDeprecation,
   EnvironmentMode,
   PackageInfo,
-} from './config';
+} from '@kbn/config';
 export type {
   IContextContainer,
   IContextProvider,
@@ -111,7 +118,7 @@ export type {
   HandlerContextType,
   HandlerParameters,
 } from './context';
-export type { CoreId } from './core_context';
+export type { CoreId } from '@kbn/core-base-common-internal';
 
 export { CspConfig } from './csp';
 export type { ICspConfig } from './csp';
@@ -237,6 +244,12 @@ export type {
 
 export type { IRenderOptions } from './rendering';
 export type {
+  LoggingServiceSetup,
+  LoggerContextConfigInput,
+  LoggerConfigType,
+  AppenderConfigType,
+} from '@kbn/core-logging-server';
+export type {
   Logger,
   LoggerFactory,
   Ecs,
@@ -247,13 +260,9 @@ export type {
   LogMeta,
   LogRecord,
   LogLevel,
-  LoggingServiceSetup,
-  LoggerContextConfigInput,
-  LoggerConfigType,
-  AppenderConfigType,
-} from './logging';
+} from '@kbn/logging';
 
-export { PluginType } from './plugins';
+export { PluginType } from '@kbn/core-base-common';
 
 export type {
   DiscoveredPlugin,
@@ -268,6 +277,7 @@ export type {
   PluginName,
   SharedGlobalConfig,
   MakeUsageFromSchema,
+  ExposedToBrowserDescriptor,
 } from './plugins';
 
 export {
@@ -440,10 +450,60 @@ export type {
   CoreIncrementCounterParams,
 } from './core_usage_data';
 
-export type { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
+export type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+
+export type {
+  AnalyticsClient,
+  Event,
+  EventContext,
+  EventType,
+  EventTypeOpts,
+  IShipper,
+  ContextProviderOpts,
+  OptInConfig,
+  ShipperClassConstructor,
+  TelemetryCounter,
+} from '@kbn/analytics-client';
+export { TelemetryCounterType } from '@kbn/analytics-client';
+export type {
+  AnalyticsServiceSetup,
+  AnalyticsServicePreboot,
+  AnalyticsServiceStart,
+} from '@kbn/core-analytics-server';
+
+/** @public **/
+export interface RequestHandlerContextBase {
+  /**
+   * Await all the specified context parts and return them.
+   *
+   * @example
+   * ```ts
+   * const resolved = await context.resolve(['core', 'pluginA']);
+   * const esClient = resolved.core.elasticsearch.client;
+   * const pluginAService = resolved.pluginA.someService;
+   * ```
+   */
+  resolve: <T extends keyof Omit<this, 'resolve'>>(
+    parts: T[]
+  ) => Promise<AwaitedProperties<Pick<this, T>>>;
+}
 
 /**
- * Plugin specific context passed to a route handler.
+ * Base context passed to a route handler.
+ *
+ * @public
+ */
+export interface RequestHandlerContext extends RequestHandlerContextBase {
+  core: Promise<CoreRequestHandlerContext>;
+}
+
+/** @public */
+export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
+  [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+};
+
+/**
+ * The `core` context provided to route handler.
  *
  * Provides the following clients and services:
  *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
@@ -454,27 +514,24 @@ export type { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
  *      data client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
- *
  * @public
  */
-export interface RequestHandlerContext {
-  core: {
-    savedObjects: {
-      client: SavedObjectsClientContract;
-      typeRegistry: ISavedObjectTypeRegistry;
-      getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
-      getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
-      getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
-    };
-    elasticsearch: {
-      client: IScopedClusterClient;
-    };
-    uiSettings: {
-      client: IUiSettingsClient;
-    };
-    deprecations: {
-      client: DeprecationsClient;
-    };
+export interface CoreRequestHandlerContext {
+  savedObjects: {
+    client: SavedObjectsClientContract;
+    typeRegistry: ISavedObjectTypeRegistry;
+    getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+    getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+    getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
+  };
+  elasticsearch: {
+    client: IScopedClusterClient;
+  };
+  uiSettings: {
+    client: IUiSettingsClient;
+  };
+  deprecations: {
+    client: DeprecationsClient;
   };
 }
 
@@ -483,6 +540,8 @@ export interface RequestHandlerContext {
  * @public
  */
 export interface CorePreboot {
+  /** {@link AnalyticsServicePreboot} */
+  analytics: AnalyticsServicePreboot;
   /** {@link ElasticsearchServicePreboot} */
   elasticsearch: ElasticsearchServicePreboot;
   /** {@link HttpServicePreboot} */
@@ -501,6 +560,8 @@ export interface CorePreboot {
  * @public
  */
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+  /** {@link AnalyticsServiceSetup} */
+  analytics: AnalyticsServiceSetup;
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
@@ -555,6 +616,8 @@ export type StartServicesAccessor<
  * @public
  */
 export interface CoreStart {
+  /** {@link AnalyticsServiceStart} */
+  analytics: AnalyticsServiceStart;
   /** {@link CapabilitiesStart} */
   capabilities: CapabilitiesStart;
   /** {@link DocLinksServiceStart} */

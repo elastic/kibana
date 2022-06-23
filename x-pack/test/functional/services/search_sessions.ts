@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObjectsFindResponse } from 'src/core/server';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrService } from '../ftr_provider_context';
 

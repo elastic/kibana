@@ -8,6 +8,8 @@
 
 // Please also add new aliases to test/scripts/jenkins_storybook.sh
 export const storybookAliases = {
+  unified_search: 'src/plugins/unified_search/.storybook',
+  coloring: 'packages/kbn-coloring/.storybook',
   apm: 'x-pack/plugins/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
   ci_composite: '.ci/.storybook',
@@ -16,7 +18,7 @@ export const storybookAliases = {
   custom_integrations: 'src/plugins/custom_integrations/storybook',
   dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
   dashboard: 'src/plugins/dashboard/.storybook',
-  data_enhanced: 'x-pack/plugins/data_enhanced/.storybook',
+  data: 'src/plugins/data/.storybook',
   discover: 'src/plugins/discover/.storybook',
   embeddable: 'src/plugins/embeddable/.storybook',
   expression_error: 'src/plugins/expression_error/.storybook',
@@ -35,6 +37,6 @@ export const storybookAliases = {
   observability: 'x-pack/plugins/observability/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',
-  shared_ux: 'src/plugins/shared_ux/.storybook',
-  ui_actions_enhanced: 'x-pack/plugins/ui_actions_enhanced/.storybook',
+  shared_ux: 'packages/kbn-shared-ux-storybook/src/config',
+  ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
 };

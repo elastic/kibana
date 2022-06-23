@@ -18,12 +18,12 @@ import { createVisualizeServicesMock } from '../mocks';
 
 jest.mock('../utils');
 jest.mock('../create_visualize_app_state');
-jest.mock('../../../../../data/public');
+jest.mock('@kbn/data-plugin/public');
 
 describe('useVisualizeAppState', () => {
   const { visStateToEditorState } = jest.requireMock('../utils');
   const { createVisualizeAppState } = jest.requireMock('../create_visualize_app_state');
-  const { connectToQueryState } = jest.requireMock('../../../../../data/public');
+  const { connectToQueryState } = jest.requireMock('@kbn/data-plugin/public');
   const stopStateSyncMock = jest.fn();
   const stateContainerGetStateMock = jest.fn(() => visualizeAppStateStub);
   const stopSyncingAppFiltersMock = jest.fn();

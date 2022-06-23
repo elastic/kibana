@@ -89,15 +89,15 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
         class="euiFlexItem"
       >
         <div
-          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 css-1nab1hq-euiPanel-grow-none-s-plain"
         >
           <div
-            class="euiText euiText--small"
+            class="euiText css-1vkrgyt-euiText-s"
           >
             Status
           </div>
           <div
-            class="euiSpacer euiSpacer--s"
+            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
             class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -107,6 +107,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
             >
               <div
                 class="euiPopover euiPopover--anchorDownCenter"
+                data-test-subj="alertStatus"
               >
                 <div
                   class="euiPopover__anchor"
@@ -152,12 +153,20 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   <div
                     data-test-subj="hover-actions-filter-for"
                   >
-                    Filter button
+                    <span
+                      data-test-subj="test-filter-for"
+                    >
+                      Filter button
+                    </span>
                   </div>
                   <div
                     data-test-subj="hover-actions-filter-out"
                   >
-                    Filter out button
+                    <span
+                      data-test-subj="test-filter-out"
+                    >
+                      Filter out button
+                    </span>
                   </div>
                   <div
                     data-test-subj="more-actions-kibana.alert.workflow_status"
@@ -177,21 +186,22 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
         class="euiFlexItem"
       >
         <div
-          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 css-1nab1hq-euiPanel-grow-none-s-plain"
         >
           <div
-            class="euiText euiText--small"
+            class="euiText css-1vkrgyt-euiText-s"
           >
             Risk Score
           </div>
           <div
-            class="euiSpacer euiSpacer--s"
+            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
             class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
             <div
               class="c2"
+              data-test-subj="riskScore"
             >
               47
             </div>
@@ -212,12 +222,20 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   <div
                     data-test-subj="hover-actions-filter-for"
                   >
-                    Filter button
+                    <span
+                      data-test-subj="test-filter-for"
+                    >
+                      Filter button
+                    </span>
                   </div>
                   <div
                     data-test-subj="hover-actions-filter-out"
                   >
-                    Filter out button
+                    <span
+                      data-test-subj="test-filter-out"
+                    >
+                      Filter out button
+                    </span>
                   </div>
                   <div
                     data-test-subj="more-actions-kibana.alert.risk_score"
@@ -235,7 +253,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
       </div>
     </div>
     <div
-      class="euiSpacer euiSpacer--s"
+      class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
     />
     <div
       class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive c0"
@@ -244,15 +262,15 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
         class="euiFlexItem"
       >
         <div
-          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 css-1nab1hq-euiPanel-grow-none-s-plain"
         >
           <div
-            class="euiText euiText--small"
+            class="euiText css-1vkrgyt-euiText-s"
           >
             Rule
           </div>
           <div
-            class="euiSpacer euiSpacer--s"
+            class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
             class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -261,7 +279,8 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
               class="c2"
             >
               <button
-                class="euiLink euiLink--primary"
+                class="euiLink css-102pf9n-euiLink-primary"
+                data-test-subj="ruleName"
                 type="button"
               >
                 More than one event with user name
@@ -284,12 +303,20 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   <div
                     data-test-subj="hover-actions-filter-for"
                   >
-                    Filter button
+                    <span
+                      data-test-subj="test-filter-for"
+                    >
+                      Filter button
+                    </span>
                   </div>
                   <div
                     data-test-subj="hover-actions-filter-out"
                   >
-                    Filter out button
+                    <span
+                      data-test-subj="test-filter-out"
+                    >
+                      Filter out button
+                    </span>
                   </div>
                   <div
                     data-test-subj="more-actions-kibana.alert.rule.name"

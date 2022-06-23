@@ -11,12 +11,14 @@ import React from 'react';
 import classNames from 'classnames';
 import { get } from 'lodash';
 import { ClassNames } from '@emotion/react';
-import { Markdown } from '../../../../../../../../plugins/kibana_react/public';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 
 import { ErrorComponent } from '../../error';
 import { replaceVars } from '../../lib/replace_vars';
 import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
+
+import './_markdown.scss';
 
 function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, getConfig, fieldFormatMap } = props;

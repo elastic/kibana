@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { VisualizeEditorLayersContext } from '../../../../../src/plugins/visualizations/public';
+import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import { DatasourceSuggestion } from '../types';
 import { generateId } from '../id_generator';
 import type { IndexPatternPrivateState } from './types';
@@ -1189,6 +1189,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -1199,6 +1200,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'Count of records',
                     scale: 'ratio',
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
               ],
@@ -1276,6 +1278,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -1286,6 +1289,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'Count of records',
                     scale: 'ratio',
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
               ],
@@ -1604,7 +1608,7 @@ describe('IndexPattern Data Source suggestions', () => {
       const updatedContext = [
         {
           ...context[0],
-          splitField: 'source',
+          splitFields: ['source'],
           splitMode: 'terms',
           termsParams: {
             size: 10,
@@ -1634,6 +1638,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   id3: expect.objectContaining({
                     operationType: 'terms',
                     sourceField: 'source',
+                    label: 'Top 10 values of source',
                     params: expect.objectContaining({
                       size: 10,
                       otherBucket: false,
@@ -1831,6 +1836,61 @@ describe('IndexPattern Data Source suggestions', () => {
         })
       );
     });
+
+    it('should apply a static layer if it is provided', () => {
+      const updatedContext = [
+        {
+          ...context[0],
+          metrics: [
+            {
+              agg: 'static_value',
+              isFullReference: true,
+              fieldName: 'document',
+              params: {
+                value: '10',
+              },
+              color: '#68BC00',
+            },
+          ],
+        },
+      ];
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(
+        stateWithoutLayer(),
+        updatedContext
+      );
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            layers: {
+              id1: expect.objectContaining({
+                columnOrder: ['id2'],
+                columns: {
+                  id2: expect.objectContaining({
+                    operationType: 'static_value',
+                    isStaticValue: true,
+                    params: expect.objectContaining({
+                      value: '10',
+                    }),
+                  }),
+                },
+              }),
+            },
+          }),
+          table: {
+            changeType: 'initial',
+            label: undefined,
+            isMultiRow: false,
+            columns: [
+              expect.objectContaining({
+                columnId: 'id2',
+              }),
+            ],
+            layerId: 'id1',
+          },
+        })
+      );
+    });
   });
 
   describe('#getDatasourceSuggestionsForVisualizeField', () => {
@@ -1977,6 +2037,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2000,6 +2061,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2047,6 +2109,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'interval',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2057,6 +2120,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: false,
                   scale: 'ratio',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2118,6 +2182,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'ordinal',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2128,6 +2193,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'interval',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2138,6 +2204,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: false,
                   scale: 'ratio',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2218,6 +2285,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'ordinal',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2228,6 +2296,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'interval',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2238,6 +2307,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: false,
                   scale: 'ratio',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2341,6 +2411,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'My Custom Range',
                   scale: 'ordinal',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2351,6 +2422,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'timestampLabel',
                   scale: 'interval',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2361,6 +2433,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'Unique count of dest',
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2873,6 +2946,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'My Op',
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2883,6 +2957,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'Top 5',
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2947,6 +3022,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'timestampLabel',
                     scale: 'interval',
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -2957,6 +3033,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'Cumulative sum of Records label',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -2967,6 +3044,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'Cumulative sum of (incomplete)',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
               ],
@@ -3029,6 +3107,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -3039,6 +3118,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -3049,6 +3129,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
               ],

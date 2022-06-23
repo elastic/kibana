@@ -10,7 +10,12 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { DocValueFields, HostItem, HostRiskSeverity } from '../../../../common/search_strategy';
+import {
+  buildHostNamesFilter,
+  DocValueFields,
+  HostItem,
+  RiskSeverity,
+} from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
@@ -35,8 +40,8 @@ import {
 import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { HostRiskScore } from '../../../hosts/components/common/host_risk_score';
-import { useHostRiskScore } from '../../../hosts/containers/host_risk_score';
+import { useHostRiskScore } from '../../../risk_score/containers';
+import { RiskScore } from '../../../common/components/severity/common';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -81,7 +86,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
     const [_, { data: hostRisk, isModuleEnabled }] = useHostRiskScore({
-      hostName,
+      filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
     });
 
     const getDefaultRenderer = useCallback(
@@ -114,10 +119,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             description: (
               <>
                 {hostRiskData ? (
-                  <HostRiskScore
-                    severity={hostRiskData.risk as HostRiskSeverity}
-                    hideBackgroundColor
-                  />
+                  <RiskScore severity={hostRiskData.risk as RiskSeverity} hideBackgroundColor />
                 ) : (
                   getEmptyTagValue()
                 )}

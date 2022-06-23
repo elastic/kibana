@@ -14,6 +14,7 @@ import { IClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from 
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus } from '../status';
 import type { UnauthorizedErrorHandler } from './client/retry_unauthorized';
+import { ClusterInfo } from './get_cluster_info';
 
 /**
  * @public
@@ -81,13 +82,12 @@ export interface ElasticsearchServiceSetup {
 
   /**
    * @deprecated
-   * Use {@link ElasticsearchServiceStart.legacy} instead.
    */
   legacy: {
     /**
      * Provide direct access to the current elasticsearch configuration.
      *
-     * @deprecated this will be removed in a later version.
+     * @deprecated Can be removed when https://github.com/elastic/kibana/issues/119862 is done.
      */
     readonly config$: Observable<ElasticsearchConfig>;
   };
@@ -98,6 +98,7 @@ export type InternalElasticsearchServicePreboot = ElasticsearchServicePreboot;
 
 /** @internal */
 export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceSetup {
+  clusterInfo$: Observable<ClusterInfo>;
   esNodesCompatibility$: Observable<NodesVersionCompatibility>;
   status$: Observable<ServiceStatus<ElasticsearchStatusMeta>>;
 }
@@ -136,20 +137,6 @@ export interface ElasticsearchServiceStart {
     type: string,
     clientConfig?: Partial<ElasticsearchClientConfig>
   ) => ICustomClusterClient;
-
-  /**
-   * @deprecated
-   * Provided for the backward compatibility.
-   * Switch to the new elasticsearch client as soon as https://github.com/elastic/kibana/issues/35508 done.
-   * */
-  legacy: {
-    /**
-     * Provide direct access to the current elasticsearch configuration.
-     *
-     * @deprecated this will be removed in a later version.
-     */
-    readonly config$: Observable<ElasticsearchConfig>;
-  };
 }
 
 /**

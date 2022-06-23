@@ -7,8 +7,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { CommentType } from '../../../../../../cases/common';
-import { CaseAttachments } from '../../../../../../cases/public';
+import { CommentType } from '@kbn/cases-plugin/common';
+import { CaseAttachments } from '@kbn/cases-plugin/public';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../common/types';
@@ -21,6 +21,7 @@ export interface UseAddToCaseActions {
   ariaLabel?: string;
   ecsData?: Ecs;
   nonEcsData?: TimelineNonEcsData[];
+  onSuccess?: () => Promise<void>;
   timelineId: string;
 }
 
@@ -29,11 +30,16 @@ export const useAddToCaseActions = ({
   ariaLabel,
   ecsData,
   nonEcsData,
+  onSuccess,
   timelineId,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
   const casePermissions = useGetUserCasesPermissions();
   const hasWritePermissions = casePermissions?.crud ?? false;
+
+  const isAlert = useMemo(() => {
+    return ecsData?.event?.kind?.includes('signal');
+  }, [ecsData]);
 
   const caseAttachments: CaseAttachments = useMemo(() => {
     return ecsData?._id
@@ -50,26 +56,26 @@ export const useAddToCaseActions = ({
   }, [casesUi.helpers, ecsData, nonEcsData]);
 
   const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
-    attachments: caseAttachments,
     onClose: onMenuItemClick,
+    onSuccess,
   });
 
   const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
-    attachments: caseAttachments,
     onClose: onMenuItemClick,
+    onRowClick: onSuccess,
   });
 
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    createCaseFlyout.open();
-  }, [onMenuItemClick, createCaseFlyout]);
+    createCaseFlyout.open({ attachments: caseAttachments });
+  }, [onMenuItemClick, createCaseFlyout, caseAttachments]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    selectCaseModal.open();
-  }, [onMenuItemClick, selectCaseModal]);
+    selectCaseModal.open({ attachments: caseAttachments });
+  }, [caseAttachments, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems = useMemo(() => {
     if (
@@ -78,7 +84,8 @@ export const useAddToCaseActions = ({
         TimelineId.detectionsRulesDetailsPage,
         TimelineId.active,
       ].includes(timelineId as TimelineId) &&
-      hasWritePermissions
+      hasWritePermissions &&
+      isAlert
     ) {
       return [
         // add to existing case menu item
@@ -108,6 +115,7 @@ export const useAddToCaseActions = ({
     handleAddToNewCaseClick,
     hasWritePermissions,
     timelineId,
+    isAlert,
   ]);
 
   return {

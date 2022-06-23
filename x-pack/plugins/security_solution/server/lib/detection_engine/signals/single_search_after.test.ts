@@ -11,10 +11,10 @@ import {
   sampleDocSearchResultsWithSortId,
 } from './__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -23,14 +23,14 @@ const buildRuleMessage = buildRuleMessageFactory({
   name: 'fake name',
 });
 describe('singleSearchAfter', () => {
-  const mockService: AlertServicesMock = alertsMock.createAlertServices();
+  const mockService: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   test('if singleSearchAfter works without a given sort id', async () => {
-    mockService.search.asCurrentUser.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
     );
     const { searchResult } = await singleSearchAfter({
@@ -44,11 +44,12 @@ describe('singleSearchAfter', () => {
       filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
+      runtimeMappings: undefined,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsNoSortId());
   });
   test('if singleSearchAfter returns an empty failure array', async () => {
-    mockService.search.asCurrentUser.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
     );
     const { searchErrors } = await singleSearchAfter({
@@ -62,6 +63,7 @@ describe('singleSearchAfter', () => {
       filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
+      runtimeMappings: undefined,
     });
     expect(searchErrors).toEqual([]);
   });
@@ -83,7 +85,7 @@ describe('singleSearchAfter', () => {
         },
       },
     ];
-    mockService.search.asCurrentUser.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 10,
         timed_out: false,
@@ -112,6 +114,7 @@ describe('singleSearchAfter', () => {
       filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
+      runtimeMappings: undefined,
     });
     expect(searchErrors).toEqual([
       'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
@@ -119,7 +122,7 @@ describe('singleSearchAfter', () => {
   });
   test('if singleSearchAfter works with a given sort id', async () => {
     const searchAfterSortIds = ['1234567891111'];
-    mockService.search.asCurrentUser.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         sampleDocSearchResultsWithSortId()
       )
@@ -135,12 +138,13 @@ describe('singleSearchAfter', () => {
       filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
+      runtimeMappings: undefined,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsWithSortId());
   });
   test('if singleSearchAfter throws error', async () => {
     const searchAfterSortIds = ['1234567891111'];
-    mockService.search.asCurrentUser.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Fake Error'))
     );
     await expect(
@@ -155,6 +159,7 @@ describe('singleSearchAfter', () => {
         filter: {},
         timestampOverride: undefined,
         buildRuleMessage,
+        runtimeMappings: undefined,
       })
     ).rejects.toThrow('Fake Error');
   });

@@ -14,7 +14,8 @@
     ],
     "patterns": [
       "_data_stream",
-      "_data_stream/{name}"
+      "_data_stream/{name}",
+      "{data_stream}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams.html"
   }

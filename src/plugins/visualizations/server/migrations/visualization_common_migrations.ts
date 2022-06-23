@@ -215,3 +215,34 @@ export const commonUpdatePieVisApi = (visState: any) => {
 
   return visState;
 };
+
+export const commonPreserveOldLegendSizeDefault = (visState: any) => {
+  const visualizationTypesWithLegends = [
+    'pie',
+    'area',
+    'histogram',
+    'horizontal_bar',
+    'line',
+    'heatmap',
+  ];
+
+  const pixelsToLegendSize: Record<string, string> = {
+    undefined: 'auto',
+    '80': 'small',
+    '130': 'medium',
+    '180': 'large',
+    '230': 'xlarge',
+  };
+
+  if (visualizationTypesWithLegends.includes(visState?.type)) {
+    return {
+      ...visState,
+      params: {
+        ...visState.params,
+        legendSize: pixelsToLegendSize[visState.params?.legendSize],
+      },
+    };
+  }
+
+  return visState;
+};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getOperationTypesForField, getAvailableOperationsByMetadata } from './index';
+import { getOperationTypesForField, getAvailableOperationsByMetadata } from '.';
 import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../loader');
@@ -93,6 +93,7 @@ describe('getOperationTypesForField', () => {
         'max',
         'unique_count',
         'percentile',
+        'percentile_rank',
         'last_value',
       ]);
     });
@@ -117,6 +118,7 @@ describe('getOperationTypesForField', () => {
         'max',
         'unique_count',
         'percentile',
+        'percentile_rank',
         'last_value',
       ]);
     });
@@ -336,6 +338,10 @@ describe('getOperationTypesForField', () => {
                 "type": "fullReference",
               },
               Object {
+                "operationType": "normalize_by_unit",
+                "type": "fullReference",
+              },
+              Object {
                 "field": "bytes",
                 "operationType": "min",
                 "type": "field",
@@ -363,6 +369,11 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "bytes",
                 "operationType": "percentile",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "percentile_rank",
                 "type": "field",
               },
               Object {

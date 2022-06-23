@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../plugins/fleet/common';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -478,41 +478,6 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('sets given is_managed value', async () => {
-        const {
-          body: { item: createdPolicy },
-        } = await supertest
-          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'TEST2',
-            namespace: 'default',
-            is_managed: true,
-          })
-          .expect(200);
-
-        const getRes = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
-        const json = getRes.body;
-        expect(json.item.is_managed).to.equal(true);
-
-        const {
-          body: { item: createdPolicy2 },
-        } = await supertest
-          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'TEST2',
-            namespace: 'default',
-            is_managed: false,
-          })
-          .expect(200);
-
-        const {
-          body: { item: policy2 },
-        } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy2.id}`);
-        expect(policy2.is_managed).to.equal(false);
-      });
-
       it('should return a 409 if policy already exists with name given', async () => {
         const sharedBody = {
           name: 'Initial name',
@@ -543,6 +508,141 @@ export default function (providerContext: FtrProviderContext) {
           .expect(409);
 
         expect(body.message).to.match(/already exists?/);
+      });
+
+      it('sets given is_managed value', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST2',
+            namespace: 'default',
+            is_managed: true,
+          })
+          .expect(200);
+
+        const getRes = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
+        const json = getRes.body;
+        expect(json.item.is_managed).to.equal(true);
+
+        const {
+          body: { item: createdPolicy2 },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST2',
+            namespace: 'default',
+            is_managed: false,
+            force: true,
+          })
+          .expect(200);
+
+        const {
+          body: { item: policy2 },
+        } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy2.id}`);
+        expect(policy2.is_managed).to.equal(false);
+      });
+
+      it('should return a 400 if trying to update a managed policy', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Managed policy ${Date.now()}`,
+            description: 'Initial description',
+            namespace: 'default',
+            is_managed: true,
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .put(`/api/fleet/agent_policies/${originalPolicy.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Updated name',
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(400);
+
+        expect(body.message).to.equal(
+          'Cannot update name in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.'
+        );
+      });
+
+      it('should return a 200 if updating monitoring_enabled on a policy', async () => {
+        const fetchPackageList = async () => {
+          const response = await supertest
+            .get('/api/fleet/epm/packages')
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+          return response.body;
+        };
+
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test_policy',
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        // uninstall the elastic_agent and verify that is installed after the policy update
+        await supertest
+          .delete(`/api/fleet/epm/packages/elastic_agent/1.3.3`)
+          .set('kbn-xsrf', 'xxxx');
+
+        const listResponse = await fetchPackageList();
+        const installedPackages = listResponse.items.filter(
+          (item: any) => item.status === 'installed'
+        );
+
+        expect(installedPackages.length).to.be(0);
+
+        agentPolicyId = originalPolicy.id;
+        const {
+          body: { item: updatedPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test_policy_with_monitoring',
+            description: 'Updated description',
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+          })
+          .expect(200);
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { id, updated_at, ...newPolicy } = updatedPolicy;
+        createdPolicyIds.push(updatedPolicy.id);
+
+        expect(newPolicy).to.eql({
+          status: 'active',
+          name: 'Test_policy_with_monitoring',
+          description: 'Updated description',
+          namespace: 'default',
+          is_managed: false,
+          revision: 2,
+          updated_by: 'elastic',
+          package_policies: [],
+          monitoring_enabled: ['logs', 'metrics'],
+        });
+
+        const listResponseAfterUpdate = await fetchPackageList();
+
+        const installedPackagesAfterUpdate = listResponseAfterUpdate.items
+          .filter((item: any) => item.status === 'installed')
+          .map((item: any) => item.name);
+        expect(installedPackagesAfterUpdate).to.contain('elastic_agent');
       });
     });
 
@@ -586,6 +686,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Regular policy',
             namespace: 'default',
             is_managed: false,
+            force: true,
           })
           .expect(200);
 

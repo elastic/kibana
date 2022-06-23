@@ -7,15 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
+import { isNestedField, DataViewField } from '@kbn/data-views-plugin/common';
 import { IAggConfig } from '../agg_config';
-import {
-  SavedFieldNotFound,
-  SavedFieldTypeInvalidForAgg,
-} from '../../../../../../plugins/kibana_utils/common';
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
-import { isNestedField, IndexPatternField, DataViewField } from '../../../../../data_views/common';
 
 const filterByType = propFilter('type');
 
@@ -43,6 +40,7 @@ export class FieldParamType extends BaseParamType {
 
     this.filterFieldTypes = config.filterFieldTypes || '*';
     this.onlyAggregatable = config.onlyAggregatable !== false;
+    this.scriptable = config.scriptable !== false;
     this.filterField = config.filterField;
 
     if (!config.write) {
@@ -107,7 +105,7 @@ export class FieldParamType extends BaseParamType {
       };
     }
 
-    this.serialize = (field: IndexPatternField) => {
+    this.serialize = (field: DataViewField) => {
       return field.name;
     };
 
@@ -118,7 +116,7 @@ export class FieldParamType extends BaseParamType {
       const field = aggConfig.getIndexPattern().fields.getByName(fieldName);
 
       if (!field) {
-        return new IndexPatternField({
+        return new DataViewField({
           type: KBN_FIELD_TYPES.MISSING,
           name: fieldName,
           searchable: false,
@@ -135,7 +133,7 @@ export class FieldParamType extends BaseParamType {
    */
   getAvailableFields = (aggConfig: IAggConfig) => {
     const fields = aggConfig.getIndexPattern().fields;
-    const filteredFields = fields.filter((field: IndexPatternField) => {
+    const filteredFields = fields.filter((field: DataViewField) => {
       const { onlyAggregatable, scriptable, filterFieldTypes, filterField } = this;
 
       if (filterField) {

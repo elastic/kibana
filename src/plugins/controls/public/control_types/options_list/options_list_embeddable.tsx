@@ -20,21 +20,22 @@ import deepEqual from 'fast-deep-equal';
 import { merge, Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
+import {
+  withSuspense,
+  LazyReduxEmbeddableWrapper,
+  ReduxEmbeddableWrapperPropsWithChildren,
+} from '@kbn/presentation-util-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+
+import { OptionsListEmbeddableInput, OptionsListField, OPTIONS_LIST_CONTROL } from './types';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
-import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
-import { DataView, DataViewField } from '../../../../data_views/public';
-import { Embeddable, IContainer } from '../../../../embeddable/public';
+import { ControlsOptionsListService } from '../../services/options_list';
 import { ControlsDataViewsService } from '../../services/data_views';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlInput, ControlOutput } from '../..';
 import { pluginServices } from '../../services';
-import {
-  withSuspense,
-  LazyReduxEmbeddableWrapper,
-  ReduxEmbeddableWrapperPropsWithChildren,
-} from '../../../../presentation_util/public';
-import { ControlsOptionsListService } from '../../services/options_list';
 
 const OptionsListReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<OptionsListEmbeddableInput>
@@ -56,6 +57,7 @@ interface OptionsListDataFetchProps {
   search?: string;
   fieldName: string;
   dataViewId: string;
+  validate?: boolean;
   query?: ControlInput['query'];
   filters?: ControlInput['filters'];
 }
@@ -75,7 +77,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private typeaheadSubject: Subject<string> = new Subject<string>();
   private abortController?: AbortController;
   private dataView?: DataView;
-  private field?: DataViewField;
+  private field?: OptionsListField;
   private searchString = '';
 
   // State to be passed down to component
@@ -115,6 +117,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private setupSubscriptions = () => {
     const dataFetchPipe = this.getInput$().pipe(
       map((newInput) => ({
+        validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
@@ -138,66 +141,72 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         .subscribe(this.runOptionsListQuery)
     );
 
-    // build filters when selectedOptions or invalidSelections change
-    this.subscriptions.add(
-      this.componentStateSubject$
-        .pipe(
-          debounceTime(100),
-          distinctUntilChanged((a, b) => isEqual(a.validSelections, b.validSelections)),
-          skip(1) // skip the first input update because initial filters will be built by initialize.
-        )
-        .subscribe(() => this.buildFilter())
-    );
-
     /**
-     * when input selectedOptions changes, check all selectedOptions against the latest value of invalidSelections.
+     * when input selectedOptions changes, check all selectedOptions against the latest value of invalidSelections, and publish filter
      **/
     this.subscriptions.add(
       this.getInput$()
         .pipe(distinctUntilChanged((a, b) => isEqual(a.selectedOptions, b.selectedOptions)))
-        .subscribe(({ selectedOptions: newSelectedOptions }) => {
+        .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
           if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
             this.updateComponentState({
               validSelections: [],
               invalidSelections: [],
             });
-            return;
-          }
-          const { invalidSelections } = this.componentStateSubject$.getValue();
-          const newValidSelections: string[] = [];
-          const newInvalidSelections: string[] = [];
-          for (const selectedOption of newSelectedOptions) {
-            if (invalidSelections?.includes(selectedOption)) {
-              newInvalidSelections.push(selectedOption);
-              continue;
+          } else {
+            const { invalidSelections } = this.componentStateSubject$.getValue();
+            const newValidSelections: string[] = [];
+            const newInvalidSelections: string[] = [];
+            for (const selectedOption of newSelectedOptions) {
+              if (invalidSelections?.includes(selectedOption)) {
+                newInvalidSelections.push(selectedOption);
+                continue;
+              }
+              newValidSelections.push(selectedOption);
             }
-            newValidSelections.push(selectedOption);
+            this.updateComponentState({
+              validSelections: newValidSelections,
+              invalidSelections: newInvalidSelections,
+            });
           }
-          this.updateComponentState({
-            validSelections: newValidSelections,
-            invalidSelections: newInvalidSelections,
-          });
+          const newFilters = await this.buildFilter();
+          this.updateOutput({ filters: newFilters });
         })
     );
   };
 
   private getCurrentDataViewAndField = async (): Promise<{
-    dataView: DataView;
-    field: DataViewField;
+    dataView?: DataView;
+    field?: OptionsListField;
   }> => {
-    const { dataViewId, fieldName } = this.getInput();
+    const { dataViewId, fieldName, parentFieldName, childFieldName } = this.getInput();
+
     if (!this.dataView || this.dataView.id !== dataViewId) {
-      this.dataView = await this.dataViewsService.get(dataViewId);
-      if (this.dataView === undefined) {
-        this.onFatalError(
-          new Error(OptionsListStrings.errors.getDataViewNotFoundError(dataViewId))
-        );
+      try {
+        this.dataView = await this.dataViewsService.get(dataViewId);
+        if (!this.dataView)
+          throw new Error(OptionsListStrings.errors.getDataViewNotFoundError(dataViewId));
+      } catch (e) {
+        this.onFatalError(e);
       }
-      this.updateOutput({ dataViews: [this.dataView] });
+      this.updateOutput({ dataViews: this.dataView && [this.dataView] });
     }
 
-    if (!this.field || this.field.name !== fieldName) {
-      this.field = this.dataView.getFieldByName(fieldName);
+    if (this.dataView && (!this.field || this.field.name !== fieldName)) {
+      const originalField = this.dataView?.getFieldByName(fieldName);
+      const childField =
+        (childFieldName && this.dataView?.getFieldByName(childFieldName)) || undefined;
+      const parentField =
+        (parentFieldName && this.dataView?.getFieldByName(parentFieldName)) || undefined;
+
+      const textFieldName = childField?.esTypes?.includes('text')
+        ? childField.name
+        : parentField?.esTypes?.includes('text')
+        ? parentField.name
+        : undefined;
+      (originalField as OptionsListField).textFieldName = textFieldName;
+      this.field = originalField;
+
       if (this.field === undefined) {
         this.onFatalError(new Error(OptionsListStrings.errors.getDataViewNotFoundError(fieldName)));
       }
@@ -216,9 +225,13 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   }
 
   private runOptionsListQuery = async () => {
-    this.updateComponentState({ loading: true });
     const { dataView, field } = await this.getCurrentDataViewAndField();
-    const { ignoreParentSettings, filters, query, selectedOptions, timeRange } = this.getInput();
+    if (!dataView || !field) return;
+
+    this.updateComponentState({ loading: true });
+    this.updateOutput({ loading: true, dataViews: [dataView] });
+    const { ignoreParentSettings, filters, query, selectedOptions, timeRange, runPastTimeout } =
+      this.getInput();
 
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
@@ -226,16 +239,16 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       await this.optionsListService.runOptionsListRequest(
         {
           field,
+          query,
+          filters,
           dataView,
+          timeRange,
+          runPastTimeout,
           selectedOptions,
           searchString: this.searchString,
-          ...(ignoreParentSettings?.ignoreQuery ? {} : { query }),
-          ...(ignoreParentSettings?.ignoreFilters ? {} : { filters }),
-          ...(ignoreParentSettings?.ignoreTimerange ? {} : { timeRange }),
         },
         this.abortController.signal
       );
-
     if (!selectedOptions || isEmpty(invalidSelections) || ignoreParentSettings?.ignoreValidations) {
       this.updateComponentState({
         availableOptions: suggestions,
@@ -244,32 +257,35 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         totalCardinality,
         loading: false,
       });
-      return;
+    } else {
+      const valid: string[] = [];
+      const invalid: string[] = [];
+
+      for (const selectedOption of selectedOptions) {
+        if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
+        else valid.push(selectedOption);
+      }
+      this.updateComponentState({
+        availableOptions: suggestions,
+        invalidSelections: invalid,
+        validSelections: valid,
+        totalCardinality,
+        loading: false,
+      });
     }
 
-    const valid: string[] = [];
-    const invalid: string[] = [];
-
-    for (const selectedOption of selectedOptions) {
-      if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
-      else valid.push(selectedOption);
-    }
-    this.updateComponentState({
-      availableOptions: suggestions,
-      invalidSelections: invalid,
-      validSelections: valid,
-      totalCardinality,
-      loading: false,
-    });
+    // publish filter
+    const newFilters = await this.buildFilter();
+    this.updateOutput({ loading: false, filters: newFilters });
   };
 
   private buildFilter = async () => {
     const { validSelections } = this.componentState;
     if (!validSelections || isEmpty(validSelections)) {
-      this.updateOutput({ filters: [] });
-      return;
+      return [];
     }
     const { dataView, field } = await this.getCurrentDataViewAndField();
+    if (!dataView || !field) return;
 
     let newFilter: Filter;
     if (validSelections.length === 1) {
@@ -279,7 +295,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     newFilter.meta.key = field?.name;
-    this.updateOutput({ filters: [newFilter] });
+    return [newFilter];
   };
 
   reload = () => {

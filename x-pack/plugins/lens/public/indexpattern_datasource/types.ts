@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
-import type { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
-import type { FieldSpec } from '../../../../../src/plugins/data/common';
+import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { DragDropIdentifier } from '../drag_drop/providers';
-import type { FieldFormatParams } from '../../../../../src/plugins/field_formats/common';
+import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
+import { DragDropOperation } from '../types';
 
 export type {
   GenericIndexPatternColumn,
@@ -27,6 +28,7 @@ export type {
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
@@ -37,6 +39,7 @@ export type {
   MathIndexPatternColumn,
   OverallSumIndexPatternColumn,
   StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './operations';
 
 export type { FormulaPublicApi } from './operations/definitions/formula/formula_public_api';
@@ -51,6 +54,7 @@ export interface IndexPattern {
   fields: IndexPatternField[];
   getFieldByName(name: string): IndexPatternField | undefined;
   title: string;
+  name?: string;
   timeFieldName?: string;
   fieldFormatMap?: Record<
     string,
@@ -104,4 +108,10 @@ export interface IndexPatternPrivateState {
 export interface IndexPatternRef {
   id: string;
   title: string;
+  name?: string;
+}
+
+export interface DataViewDragDropOperation extends DragDropOperation {
+  dataView: IndexPattern;
+  column?: GenericIndexPatternColumn;
 }

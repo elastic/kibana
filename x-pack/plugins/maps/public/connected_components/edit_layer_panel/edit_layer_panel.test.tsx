@@ -89,13 +89,15 @@ const mockLayer = {
   supportsFitToBounds: () => {
     return true;
   },
+  getDescriptor: () => {
+    return {};
+  },
 } as unknown as ILayer;
 
 const defaultProps = {
   selectedLayer: mockLayer,
   fitToBounds: () => {},
   updateSourceProps: async () => {},
-  clearJoins: () => {},
 };
 
 describe('EditLayerPanel', () => {

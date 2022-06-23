@@ -2011,12 +2011,14 @@ export const mockTimelineModel: TimelineModel = {
   savedObjectId: 'ef579e40-jibber-jabber',
   selectAll: false,
   selectedEventIds: {},
+  sessionViewConfig: null,
   show: false,
   showCheckboxes: false,
   sort: [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ],
@@ -2065,7 +2067,13 @@ export const mockTimelineResult = {
 };
 
 const defaultTimelineColumns: CreateTimelineProps['timeline']['columns'] = [
-  { columnHeaderType: 'not-filtered', id: '@timestamp', type: 'number', initialWidth: 190 },
+  {
+    columnHeaderType: 'not-filtered',
+    id: '@timestamp',
+    type: 'date',
+    esTypes: ['date'],
+    initialWidth: 190,
+  },
   { columnHeaderType: 'not-filtered', id: 'message', initialWidth: 180 },
   { columnHeaderType: 'not-filtered', id: 'event.category', initialWidth: 180 },
   { columnHeaderType: 'not-filtered', id: 'event.action', initialWidth: 180 },
@@ -2132,9 +2140,17 @@ export const defaultTimelineProps: CreateTimelineProps = {
     savedObjectId: null,
     selectAll: false,
     selectedEventIds: {},
+    sessionViewConfig: null,
     show: false,
     showCheckboxes: false,
-    sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+    sort: [
+      {
+        columnId: '@timestamp',
+        columnType: 'date',
+        esTypes: ['date'],
+        sortDirection: Direction.desc,
+      },
+    ],
     status: TimelineStatus.draft,
     title: '',
     timelineType: TimelineType.default,

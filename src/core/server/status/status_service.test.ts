@@ -6,46 +6,34 @@
  * Side Public License, v 1.
  */
 
+import { of, BehaviorSubject, firstValueFrom } from 'rxjs';
+
 import {
-  getOverallStatusChangesMock,
-  getPluginsStatusChangesMock,
-  getServiceLevelChangeMessageMock,
-} from './status_service.test.mocks';
-
-import { of, BehaviorSubject, Subject } from 'rxjs';
-
-import { ServiceStatus, ServiceStatusLevels, CoreStatus } from './types';
+  ServiceStatus,
+  ServiceStatusLevels,
+  CoreStatus,
+  InternalStatusServiceSetup,
+} from './types';
 import { StatusService } from './status_service';
-import { first } from 'rxjs/operators';
-import { mockCoreContext } from '../core_context.mock';
+import { first, take, toArray } from 'rxjs/operators';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
 import { environmentServiceMock } from '../environment/environment_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { mockRouter, RouterMock } from '../http/router/router.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
-import { configServiceMock } from '../config/mocks';
+import { configServiceMock } from '@kbn/config-mocks';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import type { ServiceLevelChange } from './log_plugins_status';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { AnalyticsServiceSetup } from '..';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
 describe('StatusService', () => {
   let service: StatusService;
-  let logger: ReturnType<typeof loggingSystemMock.create>;
 
   beforeEach(() => {
-    logger = loggingSystemMock.create();
-    service = new StatusService(mockCoreContext.create({ logger }));
-
-    getOverallStatusChangesMock.mockReturnValue({ subscribe: jest.fn() });
-    getPluginsStatusChangesMock.mockReturnValue({ subscribe: jest.fn() });
-  });
-
-  afterEach(() => {
-    getOverallStatusChangesMock.mockReset();
-    getPluginsStatusChangesMock.mockReset();
-    getServiceLevelChangeMessageMock.mockReset();
+    service = new StatusService(mockCoreContext.create());
   });
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -64,8 +52,9 @@ describe('StatusService', () => {
   };
 
   type SetupDeps = Parameters<StatusService['setup']>[0];
-  const setupDeps = (overrides: Partial<SetupDeps> = {}): SetupDeps => {
+  const setupDeps = (overrides: Partial<SetupDeps>): SetupDeps => {
     return {
+      analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
       elasticsearch: {
         status$: of(available),
       },
@@ -258,20 +247,20 @@ describe('StatusService', () => {
 
         // Wait for timers to ensure that duplicate events are still filtered out regardless of debouncing.
         elasticsearch$.next(available);
-        await delay(500);
+        await delay(100);
         elasticsearch$.next(available);
-        await delay(500);
+        await delay(100);
         elasticsearch$.next({
           level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
-        await delay(500);
+        await delay(100);
         savedObjects$.next(degraded);
-        await delay(500);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(500);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(500);
+        await delay(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -319,9 +308,9 @@ describe('StatusService', () => {
         savedObjects$.next(available);
         savedObjects$.next(degraded);
         // Waiting for the debounce timeout should cut a new update
-        await delay(500);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(500);
+        await delay(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -429,20 +418,20 @@ describe('StatusService', () => {
 
         // Wait for timers to ensure that duplicate events are still filtered out regardless of debouncing.
         elasticsearch$.next(available);
-        await delay(500);
+        await delay(100);
         elasticsearch$.next(available);
-        await delay(500);
+        await delay(100);
         elasticsearch$.next({
           level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
-        await delay(500);
+        await delay(100);
         savedObjects$.next(degraded);
-        await delay(500);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(500);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(500);
+        await delay(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -490,9 +479,9 @@ describe('StatusService', () => {
         savedObjects$.next(available);
         savedObjects$.next(degraded);
         // Waiting for the debounce timeout should cut a new update
-        await delay(500);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(500);
+        await delay(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -554,89 +543,50 @@ describe('StatusService', () => {
         );
       });
     });
-  });
 
-  describe('start', () => {
-    it('calls getOverallStatusChanges and subscribe to the returned observable', async () => {
-      const mockSubscribe = jest.fn();
-      getOverallStatusChangesMock.mockReturnValue({
-        subscribe: mockSubscribe,
+    describe('analytics', () => {
+      let analyticsMock: jest.Mocked<AnalyticsServiceSetup>;
+      let setup: InternalStatusServiceSetup;
+
+      beforeEach(async () => {
+        analyticsMock = analyticsServiceMock.createAnalyticsServiceSetup();
+        setup = await service.setup(setupDeps({ analytics: analyticsMock }));
       });
 
-      await service.setup(setupDeps());
-      await service.start();
-
-      expect(getOverallStatusChangesMock).toHaveBeenCalledTimes(1);
-      expect(mockSubscribe).toHaveBeenCalledTimes(1);
-    });
-
-    it('logs a message everytime the getOverallStatusChangesMock observable emits', async () => {
-      const subject = new Subject<string>();
-      getOverallStatusChangesMock.mockReturnValue(subject);
-
-      await service.setup(setupDeps());
-      await service.start();
-
-      subject.next('some message');
-      subject.next('another message');
-
-      const log = logger.get();
-
-      expect(log.info).toHaveBeenCalledTimes(2);
-      expect(log.info).toHaveBeenCalledWith('some message');
-      expect(log.info).toHaveBeenCalledWith('another message');
-    });
-
-    it('calls getPluginsStatusChanges and subscribe to the returned observable', async () => {
-      const mockSubscribe = jest.fn();
-      getPluginsStatusChangesMock.mockReturnValue({
-        subscribe: mockSubscribe,
+      test('registers a context provider', async () => {
+        expect(analyticsMock.registerContextProvider).toHaveBeenCalledTimes(1);
+        const { context$ } = analyticsMock.registerContextProvider.mock.calls[0][0];
+        await expect(firstValueFrom(context$.pipe(take(2), toArray()))).resolves
+          .toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "overall_status_level": "initializing",
+                "overall_status_summary": "Kibana is starting up",
+              },
+              Object {
+                "overall_status_level": "available",
+                "overall_status_summary": "All services are available",
+              },
+            ]
+          `);
       });
 
-      await service.setup(setupDeps());
-      await service.start();
-
-      expect(getPluginsStatusChangesMock).toHaveBeenCalledTimes(1);
-      expect(mockSubscribe).toHaveBeenCalledTimes(1);
-    });
-
-    it('logs messages everytime the getPluginsStatusChangesMock observable emits', async () => {
-      const subject = new Subject<ServiceLevelChange[]>();
-      getPluginsStatusChangesMock.mockReturnValue(subject);
-
-      getServiceLevelChangeMessageMock.mockImplementation(
-        ({
-          impactedServices: services,
-          nextLevel: next,
-          previousLevel: previous,
-        }: ServiceLevelChange) => {
-          return `${previous}-${next}-${services[0]}`;
-        }
-      );
-
-      await service.setup(setupDeps());
-      await service.start();
-
-      subject.next([
-        {
-          previousLevel: 'available',
-          nextLevel: 'degraded',
-          impactedServices: ['pluginA'],
-        },
-      ]);
-      subject.next([
-        {
-          previousLevel: 'degraded',
-          nextLevel: 'available',
-          impactedServices: ['pluginB'],
-        },
-      ]);
-
-      const log = logger.get();
-
-      expect(log.info).toHaveBeenCalledTimes(2);
-      expect(log.info).toHaveBeenCalledWith('available-degraded-pluginA');
-      expect(log.info).toHaveBeenCalledWith('degraded-available-pluginB');
+      test('registers and reports an event', async () => {
+        expect(analyticsMock.registerEventType).toHaveBeenCalledTimes(1);
+        expect(analyticsMock.reportEvent).toHaveBeenCalledTimes(0);
+        // wait for an emission of overall$
+        await firstValueFrom(setup.overall$);
+        expect(analyticsMock.reportEvent).toHaveBeenCalledTimes(1);
+        expect(analyticsMock.reportEvent.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "core-overall_status_changed",
+            Object {
+              "overall_status_level": "available",
+              "overall_status_summary": "All services are available",
+            },
+          ]
+        `);
+      });
     });
   });
 });

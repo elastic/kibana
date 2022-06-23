@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { isEqual, isUndefined, omitBy } from 'lodash';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { CoreService, KibanaExecutionContext } from '../../types';
+import { compact, isEqual, isUndefined, omitBy } from 'lodash';
+import { BehaviorSubject, Observable, Subscription, map } from 'rxjs';
+import type { CoreService } from '@kbn/core-base-browser-internal';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { KibanaExecutionContext } from '../../types';
 
 // Should be exported from elastic/apm-rum
 export type LabelValue = string | number | boolean;
@@ -55,6 +57,10 @@ export interface ExecutionContextSetup {
  */
 export type ExecutionContextStart = ExecutionContextSetup;
 
+export interface SetupDeps {
+  analytics: AnalyticsServiceSetup;
+}
+
 export interface StartDeps {
   curApp$: Observable<string | undefined>;
 }
@@ -68,17 +74,16 @@ export class ExecutionContextService
   private subscription: Subscription = new Subscription();
   private contract?: ExecutionContextSetup;
 
-  public setup() {
+  public setup({ analytics }: SetupDeps) {
+    this.enrichAnalyticsContext(analytics);
+
     this.contract = {
       context$: this.context$.asObservable(),
       clear: () => {
-        this.context$.next({});
+        this.context$.next(this.getDefaultContext());
       },
       set: (c: KibanaExecutionContext) => {
-        const newVal = {
-          ...this.context$.value,
-          ...c,
-        };
+        const newVal = this.mergeContext(c);
         if (!isEqual(newVal, this.context$.value)) {
           this.context$.next(newVal);
         }
@@ -123,12 +128,59 @@ export class ExecutionContextService
     return omitBy(context, isUndefined);
   }
 
-  private mergeContext(context: KibanaExecutionContext = {}): KibanaExecutionContext {
+  private getDefaultContext() {
     return {
       name: this.appId,
       url: window.location.pathname,
+    };
+  }
+
+  private mergeContext(context: KibanaExecutionContext = {}): KibanaExecutionContext {
+    return {
+      ...this.getDefaultContext(),
       ...this.context$.value,
       ...context,
     };
+  }
+
+  /**
+   * Sets the analytics context provider based on the execution context details.
+   * @param analytics The analytics service
+   * @private
+   */
+  private enrichAnalyticsContext(analytics: AnalyticsServiceSetup) {
+    analytics.registerContextProvider({
+      name: 'execution_context',
+      context$: this.context$.pipe(
+        map(({ type, name, page, id }) => ({
+          pageName: `${compact([type, name, page]).join(':')}`,
+          applicationId: name ?? type ?? 'unknown',
+          page,
+          entityId: id,
+        }))
+      ),
+      schema: {
+        pageName: {
+          type: 'keyword',
+          _meta: { description: 'The name of the current page' },
+        },
+        page: {
+          type: 'keyword',
+          _meta: { description: 'The current page', optional: true },
+        },
+        applicationId: {
+          type: 'keyword',
+          _meta: { description: 'The id of the current application' },
+        },
+        entityId: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'The id of the current entity (dashboard, visualization, canvas, lens, etc)',
+            optional: true,
+          },
+        },
+      },
+    });
   }
 }

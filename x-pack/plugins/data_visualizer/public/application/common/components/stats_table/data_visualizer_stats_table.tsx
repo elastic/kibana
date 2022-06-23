@@ -19,6 +19,7 @@ import {
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
   EuiResizeObserver,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
@@ -224,15 +225,14 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         width: dimensions.docCount,
       },
       {
-        field: 'stats.cardinality',
+        field: 'cardinality',
         name: i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesColumnName', {
           defaultMessage: 'Distinct values',
         }),
-        render: (cardinality: number | undefined) => (
-          <DistinctValues cardinality={cardinality} showIcon={dimensions.showIcon} />
+        render: (_: undefined, item: DataVisualizerTableItem) => (
+          <DistinctValues cardinality={item?.stats?.cardinality} showIcon={dimensions.showIcon} />
         ),
-
-        sortable: true,
+        sortable: (item: DataVisualizerTableItem) => item?.stats?.cardinality,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDistinctValues',
         width: dimensions.distinctValues,
@@ -279,6 +279,15 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         ),
         render: (item: DataVisualizerTableItem) => {
           if (item === undefined || showDistributions === false) return null;
+
+          if ('loading' in item && item.loading === true) {
+            return (
+              <EuiText textAlign="center">
+                <EuiLoadingSpinner size="s" />
+              </EuiText>
+            );
+          }
+
           if (
             (item.type === JOB_FIELD_TYPES.KEYWORD || item.type === JOB_FIELD_TYPES.IP) &&
             item.stats?.topValues !== undefined

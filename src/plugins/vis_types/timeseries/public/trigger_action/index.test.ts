@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DataView } from '../../../../data/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import type { Panel, Series } from '../../common/types';
-import { triggerTSVBtoLensConfiguration } from './';
+import { triggerTSVBtoLensConfiguration } from '.';
 
 const dataViewsMap: Record<string, DataView> = {
   test1: { id: 'test1', title: 'test1', timeFieldName: 'timeField1' } as DataView,
@@ -22,14 +22,12 @@ const dataViewsMap: Record<string, DataView> = {
 const getDataview = (id: string): DataView | undefined => dataViewsMap[id];
 jest.mock('../services', () => {
   return {
-    getDataStart: jest.fn(() => {
+    getDataViewsStart: jest.fn(() => {
       return {
-        dataViews: {
-          getDefault: jest.fn(() => {
-            return { id: '12345', title: 'default', timeFieldName: '@timestamp' };
-          }),
-          get: getDataview,
-        },
+        getDefault: jest.fn(() => {
+          return { id: '12345', title: 'default', timeFieldName: '@timestamp' };
+        }),
+        get: getDataview,
       };
     }),
   };
@@ -89,7 +87,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           ...model.series[0],
           metrics: [
             {
-              type: 'percentile_rank',
+              type: 'std_deviation',
             },
           ] as Series['metrics'],
         },
@@ -119,6 +117,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
         '0': {
           axisPosition: 'left',
           chartType: 'line',
+          collapseFn: undefined,
           indexPatternId: 'test2',
           metrics: [
             {
@@ -136,6 +135,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           splitWithDateHistogram: false,
           timeFieldName: 'timeField2',
           timeInterval: 'auto',
+          dropPartialBuckets: false,
         },
       },
     });
@@ -220,12 +220,19 @@ describe('triggerTSVBtoLensConfiguration', () => {
     ]);
   });
 
-  test('should return termsParams information if the chart is broken down by terms', async () => {
+  test('should return termsParams information if the chart is broken down by terms including series agg collapse fn', async () => {
     const modelWithTerms = {
       ...model,
       series: [
         {
           ...model.series[0],
+          metrics: [
+            ...model.series[0].metrics,
+            {
+              type: 'series_agg',
+              function: 'sum',
+            },
+          ],
           split_mode: 'terms',
           terms_size: 6,
           terms_direction: 'desc',
@@ -234,6 +241,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
       ] as unknown as Series[],
     };
     const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithTerms);
+    expect(triggerOptions?.layers[0]?.collapseFn).toStrictEqual('sum');
     expect(triggerOptions?.layers[0]?.termsParams).toStrictEqual({
       size: 6,
       otherBucket: false,
@@ -252,6 +260,15 @@ describe('triggerTSVBtoLensConfiguration', () => {
     };
     const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithTerms);
     expect(triggerOptions?.layers[0]?.timeInterval).toBe('1h');
+  });
+
+  test('should return dropPartialbuckets if enabled', async () => {
+    const modelWithDropBuckets = {
+      ...model,
+      drop_last_bucket: 1,
+    };
+    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithDropBuckets);
+    expect(triggerOptions?.layers[0]?.dropPartialBuckets).toBe(true);
   });
 
   test('should return the correct chart configuration', async () => {
@@ -282,6 +299,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
         '0': {
           axisPosition: 'right',
           chartType: 'area_stacked',
+          collapseFn: undefined,
           indexPatternId: 'test2',
           metrics: [
             {
@@ -299,6 +317,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           splitWithDateHistogram: false,
           timeFieldName: 'timeField2',
           timeInterval: 'auto',
+          dropPartialBuckets: false,
         },
       },
     });

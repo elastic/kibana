@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FlowTarget, NetworkUsersItem } from '../../../../common/search_strategy';
+import { FlowTargetSourceDest, NetworkUsersItem } from '../../../../common/search_strategy';
 import { defaultToEmptyTag } from '../../../common/components/empty_value';
 import { Columns } from '../../../common/components/paginated_table';
 
@@ -23,7 +23,10 @@ export type UsersColumns = [
   Columns<NetworkUsersItem['count']>
 ];
 
-export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersColumns => [
+export const getUsersColumns = (
+  flowTarget: FlowTargetSourceDest,
+  tableId: string
+): UsersColumns => [
   {
     field: 'node.user.name',
     name: i18n.USER_NAME,
@@ -35,6 +38,8 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
         rowItem: userName,
         attrName: 'user.name',
         idPrefix: `${tableId}-table-${flowTarget}-user`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {
@@ -48,6 +53,8 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
         rowItems: userIds,
         attrName: 'user.id',
         idPrefix: `${tableId}-table-${flowTarget}`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {
@@ -61,6 +68,8 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
         rowItems: groupNames,
         attrName: 'user.group.name',
         idPrefix: `${tableId}-table-${flowTarget}`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {
@@ -74,6 +83,8 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
         rowItems: groupId,
         attrName: 'user.group.id',
         idPrefix: `${tableId}-table-${flowTarget}`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {

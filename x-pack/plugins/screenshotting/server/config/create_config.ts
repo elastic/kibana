@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep, set, upperFirst } from 'lodash';
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
 import { ConfigType } from './schema';
 
@@ -24,13 +24,13 @@ export async function createConfig(parentLogger: Logger, config: ConfigType) {
 
   // disableSandbox was not set by user, apply default for OS
   const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
-  const osName = [os.os, os.dist, os.release].filter(Boolean).map(upperFirst).join(' ');
+  const osName = [os.os, os.dist, os.release].filter(Boolean).map(upperFirst).join(' ').trim();
 
   logger.debug(`Running on OS: '${osName}'`);
 
   if (disableSandbox === true) {
     logger.warn(
-      `Chromium sandbox provides an additional layer of protection, but is not supported for ${osName} OS. Automatically setting 'xpack.screenshotting.capture.browser.chromium.disableSandbox: true'.`
+      `Chromium sandbox provides an additional layer of protection, but is not supported for ${osName} OS. Automatically setting 'xpack.screenshotting.browser.chromium.disableSandbox: true'.`
     );
   } else {
     logger.info(

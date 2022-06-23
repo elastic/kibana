@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspClientPluginSetup {}
@@ -25,6 +24,7 @@ export interface CspClientPluginSetupDeps {
 export interface CspClientPluginStartDeps {
   // required
   data: DataPublicPluginStart;
-
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  charts: ChartsPluginStart;
   // optional
 }

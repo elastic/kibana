@@ -7,8 +7,9 @@
 
 import { memoize } from 'lodash';
 
-import { Logger, KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
+import { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import { ConfigType } from './config';
@@ -29,7 +30,7 @@ import {
   getEndpointAuthzInitialState,
 } from '../common/endpoint/service/authz';
 import { licenseService } from './lib/license';
-import { FleetAuthz } from '../../fleet/common';
+import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 
 export interface IRequestContextFactory {
   create(
@@ -43,6 +44,7 @@ interface ConstructorOptions {
   logger: Logger;
   core: SecuritySolutionPluginCoreSetupDependencies;
   plugins: SecuritySolutionPluginSetupDependencies;
+  endpointAppContextService: EndpointAppContextService;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -57,7 +59,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const { config, logger, core, plugins } = options;
+    const { config, logger, core, plugins, endpointAppContextService } = options;
     const { lists, ruleRegistry, security } = plugins;
 
     const [, startPlugins] = await core.getStartServices();
@@ -72,11 +74,14 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     // If Fleet is enabled, then get its Authz
     if (startPlugins.fleet) {
-      fleetAuthz = context.fleet?.authz ?? (await startPlugins.fleet?.authz.fromRequest(request));
+      fleetAuthz =
+        (await context.fleet)?.authz ?? (await startPlugins.fleet?.authz.fromRequest(request));
     }
 
+    const coreContext = await context.core;
+
     return {
-      core: context.core,
+      core: coreContext,
 
       get endpointAuthz(): Immutable<EndpointAuthz> {
         // Lazy getter of endpoint Authz. No point in defining it if it is never used.
@@ -105,7 +110,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getRuleExecutionLog: memoize(() =>
         ruleExecutionLogForRoutesFactory(
-          context.core.savedObjects.client,
+          coreContext.savedObjects.client,
           startPlugins.eventLog.getClient(request),
           logger
         )
@@ -117,8 +122,14 @@ export class RequestContextFactory implements IRequestContextFactory {
         }
 
         const username = security?.authc.getCurrentUser(request)?.username || 'elastic';
-        return lists.getExceptionListClient(context.core.savedObjects.client, username);
+        return lists.getExceptionListClient(coreContext.savedObjects.client, username);
       },
+
+      getInternalFleetServices: memoize(() => endpointAppContextService.getInternalFleetServices()),
+
+      getScopedFleetServices: memoize((req: KibanaRequest) =>
+        endpointAppContextService.getScopedFleetServices(req)
+      ),
     };
   }
 }

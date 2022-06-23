@@ -440,6 +440,7 @@ export const getVis = (bucketType: string) => {
         },
       },
       editorConfig: {
+        enableDataViewChange: true,
         collections: {
           legendPositions: [
             {

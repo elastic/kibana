@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
   GeoItem,
   FlowTargetSourceDest,
@@ -77,7 +77,7 @@ export interface AutonomousSystemHit<T> {
       total: TotalValue | number;
       max_score: number | null;
       hits: Array<{
-        _source: T;
+        fields: T;
         sort?: [number];
         _index?: string;
         _type?: string;
@@ -113,7 +113,7 @@ export interface LocationHit<T> {
       total: TotalValue | number;
       max_score: number | null;
       hits: Array<{
-        _source: T;
+        fields: T;
         sort?: [number];
         _index?: string;
         _type?: string;

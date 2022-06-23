@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { KibanaServices } from '../common/lib/kibana';
 
-import { ConnectorTypes, CommentType, CaseStatuses } from '../../common/api';
-import { CASES_URL, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { ConnectorTypes, CommentType, CaseStatuses, CaseSeverity } from '../../common/api';
+import {
+  CASES_URL,
+  INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  SECURITY_SOLUTION_OWNER,
+} from '../../common/constants';
 
 import {
   deleteCases,
+  deleteComment,
   getActionLicense,
   getCase,
   getCases,
-  getCasesStatus,
   getCaseUserActions,
   getReporters,
   getTags,
@@ -23,9 +29,10 @@ import {
   patchCasesStatus,
   patchComment,
   postCase,
-  postComment,
+  createAttachments,
   pushCase,
   resolveCase,
+  getFeatureIds,
 } from './api';
 
 import {
@@ -45,9 +52,11 @@ import {
   tags,
   caseUserActionsSnake,
   casesStatusSnake,
+  basicCaseId,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
+import { getCasesStatus } from '../api';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -199,6 +208,47 @@ describe('Case Configuration API', () => {
       });
     });
 
+    test('should apply the severity field correctly (with severity value)', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          severity: CaseSeverity.HIGH,
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          reporters: [],
+          tags: [],
+          severity: CaseSeverity.HIGH,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('should not send the severity field with "all" severity value', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          severity: 'all',
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          reporters: [],
+          tags: [],
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
     test('should handle tags with weird chars', async () => {
       const weirdTags: string[] = ['(', '"double"'];
 
@@ -240,21 +290,33 @@ describe('Case Configuration API', () => {
   });
 
   describe('getCasesStatus', () => {
+    const http = httpServiceMock.createStartContract({ basePath: '' });
+    http.get.mockResolvedValue(casesStatusSnake);
+
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(casesStatusSnake);
     });
+
     test('should be called with correct check url, method, signal', async () => {
-      await getCasesStatus(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/status`, {
-        method: 'GET',
+      await getCasesStatus({
+        http,
+        signal: abortCtrl.signal,
+        query: { owner: [SECURITY_SOLUTION_OWNER] },
+      });
+
+      expect(http.get).toHaveBeenCalledWith(`${CASES_URL}/status`, {
         signal: abortCtrl.signal,
         query: { owner: [SECURITY_SOLUTION_OWNER] },
       });
     });
 
     test('should return correct response', async () => {
-      const resp = await getCasesStatus(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      const resp = await getCasesStatus({
+        http,
+        signal: abortCtrl.signal,
+        query: { owner: SECURITY_SOLUTION_OWNER },
+      });
+
       expect(resp).toEqual(casesStatus);
     });
   });
@@ -458,28 +520,43 @@ describe('Case Configuration API', () => {
     });
   });
 
-  describe('postComment', () => {
+  describe('createAttachments', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(basicCaseSnake);
     });
-    const data = {
-      comment: 'comment',
-      owner: SECURITY_SOLUTION_OWNER,
-      type: CommentType.user as const,
-    };
+    const data = [
+      {
+        comment: 'comment',
+        owner: SECURITY_SOLUTION_OWNER,
+        type: CommentType.user as const,
+      },
+      {
+        alertId: 'test-id',
+        index: 'test-index',
+        rule: {
+          id: 'test-rule',
+          name: 'Test',
+        },
+        owner: SECURITY_SOLUTION_OWNER,
+        type: CommentType.alert as const,
+      },
+    ];
 
     test('should be called with correct check url, method, signal', async () => {
-      await postComment(data, basicCase.id, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        signal: abortCtrl.signal,
-      });
+      await createAttachments(data, basicCase.id, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(
+        INTERNAL_BULK_CREATE_ATTACHMENTS_URL.replace('{case_id}', basicCase.id),
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+          signal: abortCtrl.signal,
+        }
+      );
     });
 
     test('should return correct response', async () => {
-      const resp = await postComment(data, basicCase.id, abortCtrl.signal);
+      const resp = await createAttachments(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
     });
   });
@@ -507,6 +584,48 @@ describe('Case Configuration API', () => {
     test('should return correct response', async () => {
       const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
       expect(resp).toEqual(pushedCase);
+    });
+  });
+
+  describe('deleteComment', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(null);
+    });
+    const commentId = 'ab1234';
+
+    test('should be called with correct check url, method, signal', async () => {
+      const resp = await deleteComment({
+        caseId: basicCaseId,
+        commentId,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments/${commentId}`, {
+        method: 'DELETE',
+        signal: abortCtrl.signal,
+      });
+      expect(resp).toBe(undefined);
+    });
+  });
+
+  describe('getFeatureIds', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(['siem', 'observability']);
+    });
+
+    test('should be called with correct check url, method, signal', async () => {
+      const resp = await getFeatureIds(
+        { registrationContext: ['security', 'observability.logs'] },
+        abortCtrl.signal
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(`${BASE_RAC_ALERTS_API_PATH}/_feature_ids`, {
+        query: { registrationContext: ['security', 'observability.logs'] },
+        signal: abortCtrl.signal,
+      });
+
+      expect(resp).toEqual(['siem', 'observability']);
     });
   });
 });

@@ -34,7 +34,9 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
           color="inherit"
           data-euiicon-type="arrowLeft"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
     <div
@@ -54,16 +56,12 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
             className="euiButtonEmpty__text"
           >
             <div
-              className="euiText euiText--small"
+              className="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
+              style={Object {}}
             >
-              <div
-                className="euiTextColor euiTextColor--ghost"
-                style={Object {}}
-              >
-                Page 
-                1
-                 of 10
-              </div>
+              Page 
+              1
+               of 10
             </div>
           </span>
         </span>
@@ -76,7 +74,6 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
         aria-label="Next Page"
         className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
         data-test-subj="pageControlsNextPage"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >
@@ -86,7 +83,9 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
           color="inherit"
           data-euiicon-type="arrowRight"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
   </div>
@@ -132,7 +131,9 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
           color="inherit"
           data-euiicon-type="arrowLeft"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
     <div
@@ -152,16 +153,12 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
             className="euiButtonEmpty__text"
           >
             <div
-              className="euiText euiText--small"
+              className="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
+              style={Object {}}
             >
-              <div
-                className="euiTextColor euiTextColor--ghost"
-                style={Object {}}
-              >
-                Page 
-                1
-                 of 28
-              </div>
+              Page 
+              1
+               of 28
             </div>
           </span>
         </span>
@@ -174,7 +171,6 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
         aria-label="Next Page"
         className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
         data-test-subj="pageControlsNextPage"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >
@@ -184,7 +180,9 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
           color="inherit"
           data-euiicon-type="arrowRight"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
   </div>
@@ -230,7 +228,9 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
           color="inherit"
           data-euiicon-type="arrowLeft"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
     <div
@@ -250,16 +250,12 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
             className="euiButtonEmpty__text"
           >
             <div
-              className="euiText euiText--small"
+              className="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
+              style={Object {}}
             >
-              <div
-                className="euiTextColor euiTextColor--ghost"
-                style={Object {}}
-              >
-                Page 
-                1
-                 of 28
-              </div>
+              Page 
+              1
+               of 28
             </div>
           </span>
         </span>
@@ -272,7 +268,6 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
         aria-label="Next Page"
         className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
         data-test-subj="pageControlsNextPage"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >
@@ -282,7 +277,9 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
           color="inherit"
           data-euiicon-type="arrowRight"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
   </div>

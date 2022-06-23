@@ -17,34 +17,39 @@ import {
   niceTimeFormatter,
   Position,
   ScaleType,
+  SeriesIdentifier,
   Settings,
   XYBrushEvent,
+  XYChartSeriesIdentifier,
   YDomainRange,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Suspense, useState } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  LazyAlertsFlyout,
-  useChartTheme,
-} from '../../../../../observability/public';
+import { useChartTheme } from '@kbn/observability-plugin/public';
+import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
-import { getAlertAnnotations } from './helper/get_alert_annotations';
-import { getTimeZone } from './helper/timezone';
+import {
+  expectedBoundsTitle,
+  getChartAnomalyTimeseries,
+} from './helper/get_chart_anomaly_timeseries';
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
-import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
-import { getChartAnomalyTimeseries } from './helper/get_chart_anomaly_timeseries';
+import { getTimeZone } from './helper/timezone';
 
+interface AnomalyTimeseries extends ServiceAnomalyTimeseries {
+  color?: string;
+}
 interface Props {
   id: string;
   fetchStatus: FETCH_STATUS;
@@ -61,9 +66,9 @@ interface Props {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
-  anomalyTimeseries?: ServiceAnomalyTimeseries;
+  anomalyTimeseries?: AnomalyTimeseries;
   customTheme?: Record<string, unknown>;
-  alerts?: APMServiceAlert[];
+  anomalyTimeseriesColor?: string;
 }
 export function TimeseriesChart({
   id,
@@ -77,42 +82,71 @@ export function TimeseriesChart({
   yDomain,
   anomalyTimeseries,
   customTheme = {},
-  alerts,
 }: Props) {
   const history = useHistory();
-  const { observabilityRuleTypeRegistry, core } = useApmPluginContext();
-  const { getFormatter } = observabilityRuleTypeRegistry;
+  const { core } = useApmPluginContext();
   const { annotations } = useAnnotationsContext();
   const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const theme = useTheme();
   const chartTheme = useChartTheme();
-  const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
-    undefined
-  );
-
-  const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
-
-  const timeZone = getTimeZone(core.uiSettings);
-
-  const min = Math.min(...xValues);
-  const max = Math.max(...xValues);
+  const {
+    query: { comparisonEnabled, offset },
+  } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
     theme,
+    anomalyTimeseriesColor: anomalyTimeseries?.color,
   });
 
-  const xFormatter = niceTimeFormatter([min, max]);
   const isEmpty = isTimeseriesEmpty(timeseries);
   const annotationColor = theme.eui.euiColorSuccess;
+
+  const isComparingExpectedBounds =
+    comparisonEnabled && isExpectedBoundsComparison(offset);
   const allSeries = [
     ...timeseries,
-    // TODO: re-enable anomaly boundaries when we have a fix for https://github.com/elastic/kibana/issues/100660
-    // ...(anomalyChartTimeseries?.boundaries ?? []),
+    ...(isComparingExpectedBounds
+      ? anomalyChartTimeseries?.boundaries ?? []
+      : []),
     ...(anomalyChartTimeseries?.scores ?? []),
-  ];
+  ]
+    // Sorting series so that area type series are before line series
+    // This is a workaround so that the legendSort works correctly
+    // Can be removed when https://github.com/elastic/elastic-charts/issues/1685 is resolved
+    .sort(
+      isComparingExpectedBounds
+        ? (prev, curr) => prev.type.localeCompare(curr.type)
+        : undefined
+    );
+
+  const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
+  const xValuesExpectedBounds =
+    anomalyChartTimeseries?.boundaries?.flatMap(({ data }) =>
+      data.map(({ x }) => x)
+    ) ?? [];
+
+  const timeZone = getTimeZone(core.uiSettings);
+
+  const min = Math.min(...xValues);
+  const max = Math.max(...xValues, ...xValuesExpectedBounds);
+  const xFormatter = niceTimeFormatter([min, max]);
+
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
+  // Using custom legendSort here when comparing expected bounds
+  // because by default elastic-charts will show legends for expected bounds first
+  // but for consistency, we are making `Expected bounds` last
+  // See https://github.com/elastic/elastic-charts/issues/1685
+  const legendSort = isComparingExpectedBounds
+    ? (a: SeriesIdentifier, b: SeriesIdentifier) => {
+        if ((a as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
+          return -1;
+        if ((b as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
+          return -1;
+        return 1;
+      }
+    : undefined;
   return (
     <ChartContainer
       hasData={!isEmpty}
@@ -122,7 +156,7 @@ export function TimeseriesChart({
     >
       <Chart ref={chartRef} id={id}>
         <Settings
-          tooltip={{ stickTo: 'top' }}
+          tooltip={{ stickTo: 'top', showNullValues: false }}
           onBrushEnd={(event) =>
             onBrushEnd({ x: (event as XYBrushEvent).x, history })
           }
@@ -140,7 +174,7 @@ export function TimeseriesChart({
             tooltip: { visible: true },
           }}
           showLegend
-          showLegendExtra
+          legendSort={legendSort}
           legendPosition={Position.Bottom}
           xDomain={xDomain}
           onLegendItemClick={(legend) => {
@@ -213,26 +247,6 @@ export function TimeseriesChart({
             />
           );
         })}
-
-        {getAlertAnnotations({
-          alerts,
-          chartStartTime: xValues[0],
-          getFormatter,
-          selectedAlertId,
-          setSelectedAlertId,
-          theme,
-        })}
-        <Suspense fallback={null}>
-          <LazyAlertsFlyout
-            alerts={alerts}
-            isInApp={true}
-            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-            onClose={() => {
-              setSelectedAlertId(undefined);
-            }}
-            selectedAlertId={selectedAlertId}
-          />
-        </Suspense>
       </Chart>
     </ChartContainer>
   );

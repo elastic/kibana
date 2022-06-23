@@ -7,14 +7,10 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 import { usersModel } from '.';
+import { RiskScoreSortField, RiskSeverity } from '../../../common/search_strategy';
+import { SortUsersField } from '../../../common/search_strategy/security_solution/users/common';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/users');
-
-export const updateUsersTable = actionCreator<{
-  usersType: usersModel.UsersType;
-  tableType: usersModel.UsersTableType | usersModel.UsersTableType;
-  updates: usersModel.TableUpdates;
-}>('UPDATE_NETWORK_TABLE');
 
 export const setUsersTablesActivePageToZero = actionCreator('SET_USERS_TABLES_ACTIVE_PAGE_TO_ZERO');
 
@@ -33,3 +29,12 @@ export const updateTableActivePage = actionCreator<{
   activePage: number;
   tableType: usersModel.UsersTableType;
 }>('UPDATE_USERS_ACTIVE_PAGE');
+
+export const updateTableSorting = actionCreator<{
+  tableType: usersModel.UsersTableType;
+  sort: RiskScoreSortField | SortUsersField;
+}>('UPDATE_USERS_SORTING');
+
+export const updateUserRiskScoreSeverityFilter = actionCreator<{
+  severitySelection: RiskSeverity[];
+}>('UPDATE_USERS_RISK_SEVERITY_FILTER');

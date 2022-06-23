@@ -14,7 +14,8 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../types';
@@ -24,16 +25,17 @@ import {
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../common';
-import { useColumns } from '../../../../utils/use_data_grid_columns';
-import { DataView } from '../../../../../../data/common';
+import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { SavedSearch } from '../../../../services/saved_searches';
-import { DataDocumentsMsg, DataDocuments$ } from '../../utils/use_saved_search';
+import { DataDocumentsMsg, DataDocuments$ } from '../../hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { useDataState } from '../../utils/use_data_state';
+import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
-import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
-import { ElasticSearchHit } from '../../../../types';
+import { SortPairArr } from '../../../../components/doc_table/utils/get_sort';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
+import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
+import { DiscoverTourProvider } from '../../../../components/discover_tour';
+import { DataTableRecord } from '../../../../types';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -49,12 +51,12 @@ function DiscoverDocumentsComponent({
   stateContainer,
 }: {
   documents$: DataDocuments$;
-  expandedDoc?: ElasticSearchHit;
+  expandedDoc?: DataTableRecord;
   indexPattern: DataView;
   navigateTo: (url: string) => void;
   onAddFilter: DocViewFilterFn;
   savedSearch: SavedSearch;
-  setExpandedDoc: (doc?: ElasticSearchHit) => void;
+  setExpandedDoc: (doc?: DataTableRecord) => void;
   state: AppState;
   stateContainer: GetStateReturn;
 }) {
@@ -155,32 +157,37 @@ function DiscoverDocumentsComponent({
         </>
       )}
       {!isLegacy && (
-        <div className="dscDiscoverGrid">
-          <DataGridMemoized
-            ariaLabelledBy="documentsAriaLabel"
-            columns={columns}
-            expandedDoc={expandedDoc}
-            indexPattern={indexPattern}
-            isLoading={isLoading}
-            rows={rows}
-            sort={(state.sort as SortPairArr[]) || []}
-            sampleSize={sampleSize}
-            searchDescription={savedSearch.description}
-            searchTitle={savedSearch.title}
-            setExpandedDoc={setExpandedDoc}
-            showTimeCol={showTimeCol}
-            settings={state.grid}
-            onAddColumn={onAddColumn}
-            onFilter={onAddFilter as DocViewFilterFn}
-            onRemoveColumn={onRemoveColumn}
-            onSetColumns={onSetColumns}
-            onSort={onSort}
-            onResize={onResize}
-            useNewFieldsApi={useNewFieldsApi}
-            rowHeightState={state.rowHeight}
-            onUpdateRowHeight={onUpdateRowHeight}
-          />
-        </div>
+        <>
+          <DiscoverTourProvider>
+            <DocumentExplorerUpdateCallout />
+          </DiscoverTourProvider>
+          <div className="dscDiscoverGrid">
+            <DataGridMemoized
+              ariaLabelledBy="documentsAriaLabel"
+              columns={columns}
+              expandedDoc={expandedDoc}
+              indexPattern={indexPattern}
+              isLoading={isLoading}
+              rows={rows}
+              sort={(state.sort as SortPairArr[]) || []}
+              sampleSize={sampleSize}
+              searchDescription={savedSearch.description}
+              searchTitle={savedSearch.title}
+              setExpandedDoc={setExpandedDoc}
+              showTimeCol={showTimeCol}
+              settings={state.grid}
+              onAddColumn={onAddColumn}
+              onFilter={onAddFilter as DocViewFilterFn}
+              onRemoveColumn={onRemoveColumn}
+              onSetColumns={onSetColumns}
+              onSort={onSort}
+              onResize={onResize}
+              useNewFieldsApi={useNewFieldsApi}
+              rowHeightState={state.rowHeight}
+              onUpdateRowHeight={onUpdateRowHeight}
+            />
+          </div>
+        </>
       )}
     </EuiFlexItem>
   );

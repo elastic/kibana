@@ -18,12 +18,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
-import { Case, DeleteCase } from '../../../common/ui/types';
-import { CaseStatuses, ActionConnector } from '../../../common/api';
+import { Case, DeleteCase, UpdateByKey } from '../../../common/ui/types';
+import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
@@ -31,16 +33,16 @@ import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
 import { ALERTS } from '../../common/translations';
 import { getActions } from './actions';
-import { UpdateCase } from '../../containers/use_get_cases';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
-import { useKibana } from '../../common/lib/kibana';
+import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
-import { PostComment } from '../../containers/use_post_comment';
-import type { CasesOwners } from '../../methods/can_use_cases';
-import { CaseAttachments } from '../../types';
+import type { CasesOwners } from '../../client/helpers/can_use_cases';
+import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { severities } from '../severity/config';
+import { useUpdateCase } from '../../containers/use_update_case';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -51,46 +53,28 @@ const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
-const Spacer = styled.span`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
-`;
-
-const TagWrapper = styled(EuiBadgeGroup)`
-  width: 100%;
-`;
-
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
 export interface GetCasesColumn {
-  dispatchUpdateCaseProperty: (u: UpdateCase) => void;
   filterStatus: string;
   handleIsLoading: (a: boolean) => void;
-  isLoadingCases: string[];
   refreshCases?: (a?: boolean) => void;
   isSelectorView: boolean;
   userCanCrud: boolean;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
-  attachments?: CaseAttachments;
-  postComment?: (args: PostComment) => Promise<void>;
-  updateCase?: (newCase: Case) => void;
 
   showSolutionColumn?: boolean;
 }
 export const useCasesColumns = ({
-  dispatchUpdateCaseProperty,
   filterStatus,
   handleIsLoading,
-  isLoadingCases,
   refreshCases,
   isSelectorView,
   userCanCrud,
   connectors = [],
   onRowClick,
-  attachments,
-  postComment,
-  updateCase,
   showSolutionColumn,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
@@ -103,10 +87,14 @@ export const useCasesColumns = ({
     isLoading: isDeleting,
   } = useDeleteCases();
 
+  const { isAlertsEnabled } = useCasesFeatures();
+
   const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
     id: '',
     title: '',
   });
+
+  const { updateCaseProperty, isLoading: isLoadingUpdateCase } = useUpdateCase();
 
   const toggleDeleteModal = useCallback(
     (deleteCase: Case) => {
@@ -117,15 +105,17 @@ export const useCasesColumns = ({
   );
 
   const handleDispatchUpdate = useCallback(
-    (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
-      dispatchUpdateCaseProperty({
-        ...args,
-        refetchCasesStatus: () => {
+    ({ updateKey, updateValue, caseData }: UpdateByKey) => {
+      updateCaseProperty({
+        updateKey,
+        updateValue,
+        caseData,
+        onSuccess: () => {
           if (refreshCases != null) refreshCases();
         },
       });
     },
-    [dispatchUpdateCaseProperty, refreshCases]
+    [refreshCases, updateCaseProperty]
   );
 
   const actions = useMemo(
@@ -138,29 +128,16 @@ export const useCasesColumns = ({
 
   const assignCaseAction = useCallback(
     async (theCase: Case) => {
-      // TODO currently the API only supports to add a comment at the time
-      // once the API is updated we should use bulk post comment #124814
-      // this operation is intentionally made in sequence
-      if (attachments !== undefined && attachments.length > 0) {
-        for (const attachment of attachments) {
-          await postComment?.({
-            caseId: theCase.id,
-            data: attachment,
-          });
-        }
-        updateCase?.(theCase);
-      }
-
       if (onRowClick) {
         onRowClick(theCase);
       }
     },
-    [attachments, onRowClick, postComment, updateCase]
+    [onRowClick]
   );
 
   useEffect(() => {
-    handleIsLoading(isDeleting || isLoadingCases.indexOf('caseUpdate') > -1);
-  }, [handleIsLoading, isDeleting, isLoadingCases]);
+    handleIsLoading(isDeleting || isLoadingUpdateCase);
+  }, [handleIsLoading, isDeleting, isLoadingUpdateCase]);
 
   useEffect(() => {
     if (isDeleted) {
@@ -201,16 +178,18 @@ export const useCasesColumns = ({
       render: (createdBy: Case['createdBy']) => {
         if (createdBy != null) {
           return (
-            <>
+            <EuiToolTip
+              position="top"
+              content={createdBy.username ?? i18n.UNKNOWN}
+              data-test-subj="case-table-column-createdBy-tooltip"
+            >
               <EuiAvatar
                 className="userAction__circle"
                 name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
                 size="s"
+                data-test-subj="case-table-column-createdBy"
               />
-              <Spacer data-test-subj="case-table-column-createdBy">
-                {createdBy.username ?? i18n.UNKNOWN}
-              </Spacer>
-            </>
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();
@@ -221,33 +200,47 @@ export const useCasesColumns = ({
       name: i18n.TAGS,
       render: (tags: Case['tags']) => {
         if (tags != null && tags.length > 0) {
-          return (
-            <TagWrapper>
+          const badges = (
+            <EuiBadgeGroup data-test-subj="case-table-column-tags">
               {tags.map((tag: string, i: number) => (
                 <EuiBadge
                   color="hollow"
                   key={`${tag}-${i}`}
-                  data-test-subj={`case-table-column-tags-${i}`}
+                  data-test-subj={`case-table-column-tags-${tag}`}
                 >
                   {tag}
                 </EuiBadge>
               ))}
-            </TagWrapper>
+            </EuiBadgeGroup>
+          );
+
+          return (
+            <EuiToolTip
+              data-test-subj="case-table-column-tags-tooltip"
+              position="left"
+              content={badges}
+            >
+              {badges}
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();
       },
       truncateText: true,
     },
-    {
-      align: RIGHT_ALIGNMENT,
-      field: 'totalAlerts',
-      name: ALERTS,
-      render: (totalAlerts: Case['totalAlerts']) =>
-        totalAlerts != null
-          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-          : getEmptyTagValue(),
-    },
+    ...(isAlertsEnabled
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            field: 'totalAlerts',
+            name: ALERTS,
+            render: (totalAlerts: Case['totalAlerts']) =>
+              totalAlerts != null
+                ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+                : getEmptyTagValue(),
+          },
+        ]
+      : []),
     ...(showSolutionColumn
       ? [
           {
@@ -314,6 +307,47 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
+    ...(!isSelectorView
+      ? [
+          {
+            name: i18n.STATUS,
+            render: (theCase: Case) => {
+              if (theCase.status === null || theCase.status === undefined) {
+                return getEmptyTagValue();
+              }
+
+              return (
+                <StatusContextMenu
+                  currentStatus={theCase.status}
+                  disabled={!userCanCrud || isLoadingUpdateCase}
+                  onStatusChanged={(status) =>
+                    handleDispatchUpdate({
+                      updateKey: 'status',
+                      updateValue: status,
+                      caseData: theCase,
+                    })
+                  }
+                />
+              );
+            },
+          },
+        ]
+      : []),
+    {
+      name: i18n.SEVERITY,
+      render: (theCase: Case) => {
+        if (theCase.severity != null) {
+          const severityData = severities[theCase.severity ?? CaseSeverity.LOW];
+          return (
+            <EuiHealth data-test-subj="case-table-column-severity" color={severityData.color}>
+              {severityData.label}
+            </EuiHealth>
+          );
+        }
+        return getEmptyTagValue();
+      },
+    },
+
     ...(isSelectorView
       ? [
           {
@@ -334,33 +368,6 @@ export const useCasesColumns = ({
                 );
               }
               return getEmptyTagValue();
-            },
-          },
-        ]
-      : []),
-    ...(!isSelectorView
-      ? [
-          {
-            name: i18n.STATUS,
-            render: (theCase: Case) => {
-              if (theCase.status === null || theCase.status === undefined) {
-                return getEmptyTagValue();
-              }
-
-              return (
-                <StatusContextMenu
-                  currentStatus={theCase.status}
-                  disabled={!userCanCrud || isLoadingCases.length > 0}
-                  onStatusChanged={(status) =>
-                    handleDispatchUpdate({
-                      updateKey: 'status',
-                      updateValue: status,
-                      caseId: theCase.id,
-                      version: theCase.version,
-                    })
-                  }
-                />
-              );
             },
           },
         ]
@@ -402,6 +409,7 @@ const IconWrapper = styled.span`
 
 export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) => {
   const { triggersActionsUi } = useKibana().services;
+  const { actions } = useApplicationCapabilities();
 
   if (theCase.externalService == null) {
     return renderStringField(i18n.NOT_PUSHED, `case-table-column-external-notPushed`);
@@ -419,13 +427,16 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) 
 
   return (
     <p>
-      <IconWrapper>
-        <EuiIcon
-          size="original"
-          title={theCase.externalService?.connectorName}
-          type={getConnectorIcon(triggersActionsUi, lastPushedConnector?.actionTypeId)}
-        />
-      </IconWrapper>
+      {actions.read && (
+        <IconWrapper>
+          <EuiIcon
+            size="original"
+            title={theCase.externalService?.connectorName}
+            type={getConnectorIcon(triggersActionsUi, lastPushedConnector?.actionTypeId)}
+            data-test-subj="cases-table-connector-icon"
+          />
+        </IconWrapper>
+      )}
       <EuiLink
         data-test-subj={`case-table-column-external`}
         title={theCase.externalService?.connectorName}

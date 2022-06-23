@@ -46,6 +46,7 @@ const connector: ActionConnector = {
   actionTypeId: '.test',
   name: 'Test',
   isPreconfigured: false,
+  isDeprecated: false,
 };
 
 const editAction = jest.fn();
@@ -142,7 +143,6 @@ describe('ServiceNowITSMParamsFields renders', () => {
   test('If short_description has errors, form row is invalid', () => {
     const newProps = {
       ...defaultProps,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       errors: { 'subActionParams.incident.short_description': ['error'] },
     };
     const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newProps} />);

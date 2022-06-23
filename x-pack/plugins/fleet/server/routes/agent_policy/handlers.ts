@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RequestHandler, ResponseHeaders } from 'src/core/server';
+import type { RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
 
@@ -22,6 +22,7 @@ import type {
   CopyAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
+  GetK8sManifestRequestSchema,
   FleetRequestHandler,
 } from '../../types';
 
@@ -35,6 +36,7 @@ import type {
   DeleteAgentPolicyResponse,
   GetFullAgentPolicyResponse,
   GetFullAgentConfigMapResponse,
+  GetFullAgentManifestResponse,
 } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
@@ -43,8 +45,10 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentPoliciesRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.epm.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
   try {
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
@@ -79,7 +83,8 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
 export const getOneAgentPolicyHandler: RequestHandler<
   TypeOf<typeof GetOneAgentPolicyRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
   try {
     const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
     if (agentPolicy) {
@@ -105,13 +110,15 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof CreateAgentPolicyRequestSchema.query>,
   TypeOf<typeof CreateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.epm.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   const monitoringEnabled = request.body.monitoring_enabled;
   const { has_fleet_server: hasFleetServer, ...newPolicy } = request.body;
-  const spaceId = context.fleet.spaceId;
+  const spaceId = fleetContext.spaceId;
   try {
     const body: CreateAgentPolicyResponse = {
       item: await createAgentPolicyWithPackages({
@@ -134,22 +141,28 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   }
 };
 
-export const updateAgentPolicyHandler: RequestHandler<
+export const updateAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.params>,
   unknown,
   TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+  const { force, ...data } = request.body;
+  const spaceId = fleetContext.spaceId;
   try {
     const agentPolicy = await agentPolicyService.update(
       soClient,
       esClient,
       request.params.agentPolicyId,
-      request.body,
+      data,
       {
+        force,
         user: user || undefined,
+        spaceId,
       }
     );
     const body: UpdateAgentPolicyResponse = { item: agentPolicy };
@@ -166,8 +179,9 @@ export const copyAgentPolicyHandler: RequestHandler<
   unknown,
   TypeOf<typeof CopyAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
     const agentPolicy = await agentPolicyService.copy(
@@ -194,8 +208,9 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   unknown,
   TypeOf<typeof DeleteAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
     const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
       soClient,
@@ -214,7 +229,8 @@ export const getFullAgentPolicy: FleetRequestHandler<
   TypeOf<typeof GetFullAgentPolicyRequestSchema.params>,
   TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.epm.internalSoClient;
 
   if (request.query.kubernetes === true) {
     try {
@@ -269,7 +285,8 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   TypeOf<typeof GetFullAgentPolicyRequestSchema.params>,
   TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.epm.internalSoClient;
   const {
     params: { agentPolicyId },
   } = request;
@@ -324,5 +341,60 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
     } catch (error) {
       return defaultIngestErrorHandler({ error, response });
     }
+  }
+};
+
+export const getK8sManifest: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetK8sManifestRequestSchema.query>
+> = async (context, request, response) => {
+  try {
+    const fleetServer = request.query.fleetServer ?? '';
+    const token = request.query.enrolToken ?? '';
+    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(fleetServer, token);
+    if (fullAgentManifest) {
+      const body: GetFullAgentManifestResponse = {
+        item: fullAgentManifest,
+      };
+      return response.ok({
+        body,
+      });
+    } else {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent manifest not found' },
+      });
+    }
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const downloadK8sManifest: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetK8sManifestRequestSchema.query>
+> = async (context, request, response) => {
+  try {
+    const fleetServer = request.query.fleetServer ?? '';
+    const token = request.query.enrolToken ?? '';
+    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(fleetServer, token);
+    if (fullAgentManifest) {
+      const body = fullAgentManifest;
+      const headers: ResponseHeaders = {
+        'content-type': 'text/x-yaml',
+        'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yaml"`,
+      };
+      return response.ok({
+        body,
+        headers,
+      });
+    } else {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent manifest not found' },
+      });
+    }
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };

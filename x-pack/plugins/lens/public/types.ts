@@ -6,36 +6,37 @@
  */
 import { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { CoreSetup, SavedObjectReference } from 'kibana/public';
-import type { PaletteOutput } from 'src/plugins/charts/public';
-import type { TopNavMenuData } from 'src/plugins/navigation/public';
+import type {
+  CoreSetup,
+  SavedObjectReference,
+  SavedObjectsResolveResponse,
+} from '@kbn/core/public';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
-import { Filter } from '@kbn/es-query';
+import { Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
-} from '../../../../src/plugins/expressions/public';
-import type { VisualizeEditorLayersContext } from '../../../../src/plugins/visualizations/public';
+} from '@kbn/expressions-plugin/public';
+import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import type { Query } from '@kbn/es-query';
+import type {
+  UiActionsStart,
+  RowClickContext,
+  VisualizeFieldContext,
+} from '@kbn/ui-actions-plugin/public';
+import { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
-import type { Query } from '../../../../src/plugins/data/public';
-import type {
-  RangeSelectContext,
-  ValueClickContext,
-} from '../../../../src/plugins/embeddable/public';
 import type {
   LensSortActionData,
   LensResizeActionData,
   LensToggleActionData,
   LensPagesizeActionData,
 } from './datatable_visualization/components/types';
-import type {
-  UiActionsStart,
-  RowClickContext,
-  VisualizeFieldContext,
-} from '../../../../src/plugins/ui_actions/public';
 
 import {
   LENS_EDIT_SORT_ACTION,
@@ -160,7 +161,12 @@ export interface DatasourceSuggestion<T = unknown> {
   keptLayerIds: string[];
 }
 
-export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
+type StateSetterArg<T> = T | ((prevState: T) => T);
+
+export type StateSetter<T, OptionsShape = unknown> = (
+  newState: StateSetterArg<T>,
+  options?: OptionsShape
+) => void;
 
 export interface InitializationOptions {
   isFullEditor?: boolean;
@@ -193,6 +199,19 @@ interface ChartSettings {
   };
 }
 
+export interface GetDropPropsArgs<T = unknown> {
+  state: T;
+  source?: DraggingIdentifier;
+  target: {
+    layerId: string;
+    groupId: string;
+    columnId: string;
+    filterOperations: (meta: OperationMetadata) => boolean;
+    prioritizedOperation?: string;
+    isNewColumn?: boolean;
+  };
+}
+
 /**
  * Interface for the datasource registry
  */
@@ -211,6 +230,7 @@ export interface Datasource<T = unknown, P = unknown> {
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
+  getCurrentIndexPatternId: (state: T) => string;
 
   insertLayer: (state: T, newLayerId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
@@ -222,10 +242,8 @@ export interface Datasource<T = unknown, P = unknown> {
     layerId: string,
     value: {
       columnId: string;
-      label: string;
-      dataType: string;
-      staticValue?: unknown;
       groupId: string;
+      staticValue?: unknown;
     }
   ) => T;
 
@@ -246,13 +264,9 @@ export interface Datasource<T = unknown, P = unknown> {
     props: DatasourceLayerPanelProps<T>
   ) => ((cleanupElement: Element) => void) | void;
   getDropProps: (
-    props: DatasourceDimensionDropProps<T> & {
-      groupId: string;
-      dragging: DragContextState['dragging'];
-      prioritizedOperation?: string;
-    }
+    props: GetDropPropsArgs<T>
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
-  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
+  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean | undefined;
   /**
    * The datasource is allowed to cancel a close event on the dimension editor,
    * mainly used for formulas
@@ -267,6 +281,14 @@ export interface Datasource<T = unknown, P = unknown> {
     columnId: string;
     state: T;
   }) => T | undefined;
+
+  updateCurrentIndexPatternId?: (props: {
+    indexPatternId: string;
+    state: T;
+    setState: StateSetter<T>;
+  }) => void;
+
+  refreshIndexPatternsList?: (props: { indexPatternId: string; setState: StateSetter<T> }) => void;
 
   toExpression: (state: T, layerId: string) => ExpressionAstExpression | string | null;
 
@@ -291,14 +313,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
-  getErrorMessages: (
-    state: T,
-    layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>,
-    dateRange?: {
-      fromDate: string;
-      toDate: string;
-    }
-  ) =>
+  getErrorMessages: (state: T) =>
     | Array<{
         shortMessage: string;
         longMessage: React.ReactNode;
@@ -350,18 +365,37 @@ export interface DatasourceFixAction<T> {
  */
 export interface DatasourcePublicAPI {
   datasourceId: string;
-  getTableSpec: () => Array<{ columnId: string }>;
-  getOperationForColumnId: (columnId: string) => Operation | null;
+  getTableSpec: () => Array<{ columnId: string; fields: string[] }>;
+  getOperationForColumnId: (columnId: string) => OperationDescriptor | null;
   /**
    * Collect all default visual values given the current state
    */
   getVisualDefaults: () => Record<string, Record<string, unknown>>;
+  /**
+   * Retrieve the specific source id for the current state
+   */
+  getSourceId: () => string | undefined;
+  /**
+   * Collect all defined filters from all the operations in the layer. If it returns undefined, this means that filters can't be constructed for the current layer
+   */
+  getFilters: (
+    activeData?: FramePublicAPI['activeData'],
+    timeRange?: TimeRange
+  ) =>
+    | { error: string }
+    | Record<
+        'enabled' | 'disabled',
+        {
+          kuery: Query[][];
+          lucene: Query[][];
+        }
+      >;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
   dragDropContext: DragContextState;
-  setState: StateSetter<T>;
+  setState: StateSetter<T, { applyImmediately?: boolean }>;
   showNoDataPopover: () => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
@@ -400,13 +434,13 @@ export type ParamEditorCustomProps = Record<string, unknown> & { label?: string 
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns
-  setState: (
-    newState: Parameters<StateSetter<T>>[0],
-    publishToVisualization?: {
+  setState: StateSetter<
+    T,
+    {
       isDimensionComplete?: boolean;
       forceRender?: boolean;
     }
-  ) => void;
+  >;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
@@ -427,16 +461,14 @@ export interface DatasourceLayerPanelProps<T> {
   activeData?: Record<string, Datatable>;
 }
 
-export interface DraggedOperation extends DraggingIdentifier {
+export interface DragDropOperation {
   layerId: string;
   groupId: string;
   columnId: string;
   filterOperations: (operation: OperationMetadata) => boolean;
 }
 
-export function isDraggedOperation(
-  operationCandidate: unknown
-): operationCandidate is DraggedOperation {
+export function isOperation(operationCandidate: unknown): operationCandidate is DragDropOperation {
   return (
     typeof operationCandidate === 'object' &&
     operationCandidate !== null &&
@@ -444,21 +476,31 @@ export function isDraggedOperation(
   );
 }
 
-export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
-  layerId: string;
-  groupId: string;
-  columnId: string;
+export interface DatasourceDimensionDropProps<T> {
+  target: DragDropOperation;
   state: T;
-  setState: StateSetter<T>;
+  setState: StateSetter<
+    T,
+    {
+      isDimensionComplete?: boolean;
+      forceRender?: boolean;
+    }
+  >;
   dimensionGroups: VisualizationDimensionGroupConfig[];
-};
+}
 
-export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
-  droppedItem: unknown;
+export type DatasourceDimensionDropHandlerProps<S> = DatasourceDimensionDropProps<S> & {
+  source: DragDropIdentifier;
   dropType: DropType;
 };
 
-export type FieldOnlyDataType = 'document' | 'ip' | 'histogram' | 'geo_point' | 'geo_shape';
+export type FieldOnlyDataType =
+  | 'document'
+  | 'ip'
+  | 'histogram'
+  | 'geo_point'
+  | 'geo_shape'
+  | 'murmur3';
 export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
 
 // An operation represents a column in a table, not any information
@@ -487,13 +529,20 @@ export interface OperationMetadata {
   // TODO currently it's not possible to differentiate between a field from a raw
   // document and an aggregated metric which might be handy in some cases. Once we
   // introduce a raw document datasource, this should be considered here.
-
   isStaticValue?: boolean;
+}
+
+/**
+ * Specific type used to store some meta information on top of the Operation type
+ * Rather than populate the Operation type with optional types, it can leverage a super type
+ */
+export interface OperationDescriptor extends Operation {
+  hasTimeShift: boolean;
 }
 
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+  frame: FramePublicAPI;
   state: T;
 }
 
@@ -516,7 +565,7 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
 
 export interface AccessorConfig {
   columnId: string;
-  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible';
+  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible' | 'aggregate';
   color?: string;
   palette?: string[] | Array<{ color: string; stop: number }>;
 }
@@ -553,13 +602,14 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   supportStaticValue?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   supportFieldFormat?: boolean;
+  labels?: { buttonAriaLabel: string; buttonLabel: string };
 };
 
-interface VisualizationDimensionChangeProps<T> {
+export interface VisualizationDimensionChangeProps<T> {
   layerId: string;
   columnId: string;
   prevState: T;
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+  frame: FramePublicAPI;
 }
 export interface Suggestion {
   visualizationId: string;
@@ -605,6 +655,7 @@ export interface SuggestionRequest<T = unknown> {
    */
   state?: T;
   mainPalette?: PaletteOutput;
+  isFromContext?: boolean;
   /**
    * The visualization needs to know which table is being suggested
    */
@@ -613,6 +664,7 @@ export interface SuggestionRequest<T = unknown> {
    * Different suggestions can be generated for each subtype of the visualization
    */
   subVisualizationId?: string;
+  activeData?: Record<string, Datatable>;
 }
 
 /**
@@ -649,8 +701,11 @@ export interface VisualizationSuggestion<T = unknown> {
   previewIcon: IconType;
 }
 
+export type DatasourceLayers = Record<string, DatasourcePublicAPI>;
+
 export interface FramePublicAPI {
-  datasourceLayers: Record<string, DatasourcePublicAPI>;
+  datasourceLayers: DatasourceLayers;
+  dateRange: DateRange;
   /**
    * Data of the chart currently rendered in the preview.
    * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
@@ -659,7 +714,6 @@ export interface FramePublicAPI {
   activeData?: Record<string, Datatable>;
 }
 export interface FrameDatasourceAPI extends FramePublicAPI {
-  dateRange: DateRange;
   query: Query;
   filters: Filter[];
 }
@@ -751,14 +805,13 @@ export interface Visualization<T = unknown> {
     type: LayerType;
     label: string;
     icon?: IconType;
+    noDatasource?: boolean;
     disabled?: boolean;
     toolTipContent?: string;
     initialDimensions?: Array<{
-      groupId: string;
       columnId: string;
-      dataType: string;
-      label: string;
-      staticValue: unknown;
+      groupId: string;
+      staticValue?: unknown;
     }>;
   }>;
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
@@ -801,7 +854,17 @@ export interface Visualization<T = unknown> {
    * look at its internal state to determine which dimension is being affected.
    */
   removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
-
+  /**
+   * Allow defining custom behavior for the visualization when the drop action occurs.
+   */
+  onDrop?: (props: {
+    prevState: T;
+    target: DragDropOperation;
+    source: DragDropIdentifier;
+    frame: FramePublicAPI;
+    dropType: DropType;
+    group?: VisualizationDimensionGroupConfig;
+  }) => T;
   /**
    * Update the configuration for the visualization. This is used to update the state
    */
@@ -823,7 +886,20 @@ export interface Visualization<T = unknown> {
     domElement: Element,
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
-
+  /**
+   * Renders dimension trigger. Used only for noDatasource layers
+   */
+  renderDimensionTrigger?: (props: {
+    columnId: string;
+    label: string;
+    hideTooltip?: boolean;
+    invalid?: boolean;
+    invalidMessage?: string;
+  }) => JSX.Element | null;
+  /**
+   * Creates map of columns ids and unique lables. Used only for noDatasource layers
+   */
+  getUniqueLabels?: (state: T) => Record<string, string>;
   /**
    * The frame will call this function on all visualizations at different times. The
    * main use cases where visualization suggestions are requested are:
@@ -837,8 +913,9 @@ export interface Visualization<T = unknown> {
 
   toExpression: (
     state: T,
-    datasourceLayers: Record<string, DatasourcePublicAPI>,
-    attributes?: Partial<{ title: string; description: string }>
+    datasourceLayers: DatasourceLayers,
+    attributes?: Partial<{ title: string; description: string }>,
+    datasourceExpressionsByLayers?: Record<string, Ast>
   ) => ExpressionAstExpression | string | null;
   /**
    * Expression to render a preview version of the chart in very constrained space.
@@ -846,7 +923,8 @@ export interface Visualization<T = unknown> {
    */
   toPreviewExpression?: (
     state: T,
-    datasourceLayers: Record<string, DatasourcePublicAPI>
+    datasourceLayers: DatasourceLayers,
+    datasourceExpressionsByLayers?: Record<string, Ast>
   ) => ExpressionAstExpression | string | null;
   /**
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
@@ -854,7 +932,7 @@ export interface Visualization<T = unknown> {
    */
   getErrorMessages: (
     state: T,
-    datasourceLayers?: Record<string, DatasourcePublicAPI>
+    datasourceLayers?: DatasourceLayers
   ) =>
     | Array<{
         shortMessage: string;
@@ -871,16 +949,6 @@ export interface Visualization<T = unknown> {
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
-}
-
-export interface LensFilterEvent {
-  name: 'filter';
-  data: ValueClickContext['data'];
-}
-
-export interface LensBrushEvent {
-  name: 'brush';
-  data: RangeSelectContext['data'];
 }
 
 // Use same technique as TriggerContext
@@ -909,11 +977,11 @@ export interface LensTableRowContextMenuEvent {
   data: RowClickContext['data'];
 }
 
-export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
+export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';
 }
 
-export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensBrushEvent {
+export function isLensBrushEvent(event: ExpressionRendererEvent): event is BrushTriggerEvent {
   return event.name === 'brush';
 }
 
@@ -925,7 +993,7 @@ export function isLensEditEvent<T extends LensEditSupportedActions>(
 
 export function isLensTableRowContextMenuClickEvent(
   event: ExpressionRendererEvent
-): event is LensBrushEvent {
+): event is BrushTriggerEvent {
   return event.name === 'tableRowContextMenuClick';
 }
 
@@ -937,16 +1005,17 @@ export function isLensTableRowContextMenuClickEvent(
 export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
   event: (
     event:
-      | LensFilterEvent
-      | LensBrushEvent
+      | ClickTriggerEvent
+      | BrushTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
   ) => void;
 }
 
 export interface SharingSavedObjectProps {
-  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
-  aliasTargetId?: string;
+  outcome?: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
   sourceId?: string;
 }
 

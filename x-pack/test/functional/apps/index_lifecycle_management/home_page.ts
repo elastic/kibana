@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Home page', function () {
     before(async () => {
-      await security.testUser.setRoles(['manage_ilm'], true);
+      await security.testUser.setRoles(['manage_ilm']);
       const isCloud = await deployment.isCloud();
       if (!isCloud) {
         await esClient.snapshot.createRepository({
@@ -29,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           body: {
             type: 'fs',
             settings: {
-              // use one of the values defined in path.repo in test/functional/config.js
+              // use one of the values defined in path.repo in test/functional/config.base.js
               location: '/tmp/',
             },
           },

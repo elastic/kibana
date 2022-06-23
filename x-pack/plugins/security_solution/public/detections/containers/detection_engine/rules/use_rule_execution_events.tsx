@@ -5,21 +5,73 @@
  * 2.0.
  */
 
+import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useQuery } from 'react-query';
+import {
+  AggregateRuleExecutionEvent,
+  RuleExecutionStatus,
+} from '../../../../../common/detection_engine/schemas/common';
+import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchRuleExecutionEvents } from './api';
 import * as i18n from './translations';
 
-export const useRuleExecutionEvents = (ruleId: string) => {
+export interface UseRuleExecutionEventsArgs {
+  ruleId: string;
+  start: string;
+  end: string;
+  queryText?: string;
+  statusFilters?: RuleExecutionStatus[];
+  page?: number;
+  perPage?: number;
+  sortField?: keyof AggregateRuleExecutionEvent;
+  sortOrder?: SortOrder;
+}
+
+export const useRuleExecutionEvents = ({
+  ruleId,
+  start,
+  end,
+  queryText,
+  statusFilters,
+  page,
+  perPage,
+  sortField,
+  sortOrder,
+}: UseRuleExecutionEventsArgs) => {
   const { addError } = useAppToasts();
 
-  return useQuery(
-    ['ruleExecutionEvents', ruleId],
+  return useQuery<GetAggregateRuleExecutionEventsResponse>(
+    [
+      'ruleExecutionEvents',
+      {
+        ruleId,
+        start,
+        end,
+        queryText,
+        statusFilters,
+        page,
+        perPage,
+        sortField,
+        sortOrder,
+      },
+    ],
     async ({ signal }) => {
-      const response = await fetchRuleExecutionEvents({ ruleId, signal });
-      return response.events;
+      return fetchRuleExecutionEvents({
+        ruleId,
+        start,
+        end,
+        queryText,
+        statusFilters,
+        page,
+        perPage,
+        sortField,
+        sortOrder,
+        signal,
+      });
     },
     {
+      keepPreviousData: true,
       onError: (e) => {
         addError(e, { title: i18n.RULE_EXECUTION_EVENTS_FETCH_FAILURE });
       },

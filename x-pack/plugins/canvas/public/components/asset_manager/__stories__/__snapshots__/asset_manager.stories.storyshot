@@ -17,7 +17,6 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
-      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -27,7 +26,9 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      />
+      >
+        
+      </span>
     </button>
     <div
       className="euiModal__flex"
@@ -74,7 +75,9 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
                     className="euiFilePicker__icon"
                     data-euiicon-type="importAction"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                   <div
                     className="euiFilePicker__promptText"
                   >
@@ -93,25 +96,21 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
           className="euiModalBody__overflow"
         >
           <div
-            className="euiText euiText--small"
+            className="euiText css-czh9ev-euiText-s-euiTextColor-subdued"
+            style={Object {}}
           >
-            <div
-              className="euiTextColor euiTextColor--subdued"
-              style={Object {}}
-            >
-              <p>
-                Below are the image assets in this workpad. Any assets that are currently in use cannot be determined at this time. To reclaim space, delete assets.
-              </p>
-            </div>
+            <p>
+              Below are the image assets in this workpad. Any assets that are currently in use cannot be determined at this time. To reclaim space, delete assets.
+            </p>
           </div>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
           />
           <div
-            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAssetManager__emptyPanel"
+            className="euiPanel euiPanel--plain euiPanel--paddingMedium canvasAssetManager__emptyPanel css-f2xo4o-euiPanel-grow-m-m-plain-hasShadow"
           >
             <div
-              className="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+              className="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge css-7iihzj-euiPanel-m-transparent"
             >
               <div
                 className="euiEmptyPrompt__main"
@@ -123,7 +122,9 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
                     color="subdued"
                     data-euiicon-type="importAction"
                     size="xxl"
-                  />
+                  >
+                    
+                  </span>
                 </div>
                 <div
                   className="euiEmptyPrompt__content"
@@ -132,7 +133,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
                     className="euiEmptyPrompt__contentInner"
                   >
                     <h2
-                      className="euiTitle euiTitle--xsmall"
+                      className="euiTitle css-1c9cwui-euiTitle-xs"
                     >
                       Import your assets to get started
                     </h2>
@@ -165,7 +166,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
             className="euiFlexItem euiFlexItem--flexGrowZero eui-textNoWrap"
           >
             <div
-              className="euiText euiText--medium"
+              className="euiText css-1lo1kz-euiText-m"
               id="CanvasAssetManagerLabel"
             >
               0% space used
@@ -216,7 +217,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
-      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -226,7 +226,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      />
+      >
+        
+      </span>
     </button>
     <div
       className="euiModal__flex"
@@ -273,7 +275,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                     className="euiFilePicker__icon"
                     data-euiicon-type="importAction"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                   <div
                     className="euiFilePicker__promptText"
                   >
@@ -292,19 +296,15 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
           className="euiModalBody__overflow"
         >
           <div
-            className="euiText euiText--small"
+            className="euiText css-czh9ev-euiText-s-euiTextColor-subdued"
+            style={Object {}}
           >
-            <div
-              className="euiTextColor euiTextColor--subdued"
-              style={Object {}}
-            >
-              <p>
-                Below are the image assets in this workpad. Any assets that are currently in use cannot be determined at this time. To reclaim space, delete assets.
-              </p>
-            </div>
+            <p>
+              Below are the image assets in this workpad. Any assets that are currently in use cannot be determined at this time. To reclaim space, delete assets.
+            </p>
           </div>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
           />
           <div
             className="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths euiFlexGrid--responsive"
@@ -313,7 +313,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
               className="euiFlexItem"
             >
               <div
-                className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAsset"
+                className="euiPanel euiPanel--plain euiPanel--paddingSmall canvasAsset css-2969qh-euiPanel-grow-m-s-plain-hasShadow"
               >
                 <div
                   className="canvasAsset__thumb canvasCheckered"
@@ -330,10 +330,10 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   </figure>
                 </div>
                 <div
-                  className="euiSpacer euiSpacer--s"
+                  className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
                 />
                 <div
-                  className="euiText euiText--extraSmall eui-textBreakAll"
+                  className="euiText eui-textBreakAll css-1utxlgq-euiText-xs"
                 >
                   <p
                     className="eui-textBreakAll"
@@ -343,7 +343,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                     </strong>
                     <br />
                     <span
-                      className="euiTextColor euiTextColor--subdued"
+                      className="css-xv0fhq-euiTextColor-subdued"
                       style={Object {}}
                     >
                       <small>
@@ -355,7 +355,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   </p>
                 </div>
                 <div
-                  className="euiSpacer euiSpacer--s"
+                  className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
                 />
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow"
@@ -371,7 +371,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Create image element"
                         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -383,7 +382,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                           color="inherit"
                           data-euiicon-type="vector"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </span>
                   </div>
@@ -405,7 +406,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Download"
                           className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                          disabled={false}
                           type="button"
                         >
                           <span
@@ -414,7 +414,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                             color="inherit"
                             data-euiicon-type="sortDown"
                             size="m"
-                          />
+                          >
+                            
+                          </span>
                         </button>
                       </div>
                     </span>
@@ -437,7 +439,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Copy id to clipboard"
                           className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                          disabled={false}
                           type="button"
                         >
                           <span
@@ -446,7 +447,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                             color="inherit"
                             data-euiicon-type="copyClipboard"
                             size="m"
-                          />
+                          >
+                            
+                          </span>
                         </button>
                       </div>
                     </span>
@@ -462,7 +465,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Delete"
                         className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -474,7 +476,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                           color="inherit"
                           data-euiicon-type="trash"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </span>
                   </div>
@@ -485,7 +489,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
               className="euiFlexItem"
             >
               <div
-                className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAsset"
+                className="euiPanel euiPanel--plain euiPanel--paddingSmall canvasAsset css-2969qh-euiPanel-grow-m-s-plain-hasShadow"
               >
                 <div
                   className="canvasAsset__thumb canvasCheckered"
@@ -502,10 +506,10 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   </figure>
                 </div>
                 <div
-                  className="euiSpacer euiSpacer--s"
+                  className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
                 />
                 <div
-                  className="euiText euiText--extraSmall eui-textBreakAll"
+                  className="euiText eui-textBreakAll css-1utxlgq-euiText-xs"
                 >
                   <p
                     className="eui-textBreakAll"
@@ -515,7 +519,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                     </strong>
                     <br />
                     <span
-                      className="euiTextColor euiTextColor--subdued"
+                      className="css-xv0fhq-euiTextColor-subdued"
                       style={Object {}}
                     >
                       <small>
@@ -527,7 +531,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   </p>
                 </div>
                 <div
-                  className="euiSpacer euiSpacer--s"
+                  className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
                 />
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow"
@@ -543,7 +547,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Create image element"
                         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -555,7 +558,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                           color="inherit"
                           data-euiicon-type="vector"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </span>
                   </div>
@@ -577,7 +582,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Download"
                           className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                          disabled={false}
                           type="button"
                         >
                           <span
@@ -586,7 +590,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                             color="inherit"
                             data-euiicon-type="sortDown"
                             size="m"
-                          />
+                          >
+                            
+                          </span>
                         </button>
                       </div>
                     </span>
@@ -609,7 +615,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Copy id to clipboard"
                           className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                          disabled={false}
                           type="button"
                         >
                           <span
@@ -618,7 +623,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                             color="inherit"
                             data-euiicon-type="copyClipboard"
                             size="m"
-                          />
+                          >
+                            
+                          </span>
                         </button>
                       </div>
                     </span>
@@ -634,7 +641,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Delete"
                         className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -646,7 +652,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                           color="inherit"
                           data-euiicon-type="trash"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </span>
                   </div>
@@ -678,7 +686,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
             className="euiFlexItem euiFlexItem--flexGrowZero eui-textNoWrap"
           >
             <div
-              className="euiText euiText--medium"
+              className="euiText css-1lo1kz-euiText-m"
               id="CanvasAssetManagerLabel"
             >
               0% space used

@@ -10,18 +10,15 @@ import {
   EmbeddableInput,
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
-} from '../../../embeddable/common';
-import { SavedObjectReference } from '../../../../core/types';
-import {
-  DashboardContainerControlGroupInput,
-  DashboardContainerStateWithType,
-  DashboardPanelState,
-} from '../types';
-import { CONTROL_GROUP_TYPE } from '../../../controls/common';
+} from '@kbn/embeddable-plugin/common';
+import { SavedObjectReference } from '@kbn/core/types';
+import { CONTROL_GROUP_TYPE, PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { DashboardContainerStateWithType, DashboardPanelState } from '../types';
 
 const getPanelStatePrefix = (state: DashboardPanelState) => `${state.explicitInput.id}:`;
 
 const controlGroupReferencePrefix = 'controlGroup_';
+const controlGroupId = 'dashboard_control_group';
 
 export const createInject = (
   persistableStateService: EmbeddablePersistableStateService
@@ -89,11 +86,12 @@ export const createInject = (
         {
           ...workingState.controlGroupInput,
           type: CONTROL_GROUP_TYPE,
+          id: controlGroupId,
         },
         controlGroupReferences
       );
       workingState.controlGroupInput =
-        injectedControlGroupState as DashboardContainerControlGroupInput;
+        injectedControlGroupState as unknown as PersistableControlGroupInput;
     }
 
     return workingState as EmbeddableStateWithType;
@@ -155,9 +153,10 @@ export const createExtract = (
         persistableStateService.extract({
           ...workingState.controlGroupInput,
           type: CONTROL_GROUP_TYPE,
+          id: controlGroupId,
         });
       workingState.controlGroupInput =
-        extractedControlGroupState as DashboardContainerControlGroupInput;
+        extractedControlGroupState as unknown as PersistableControlGroupInput;
       const prefixedControlGroupReferences = controlGroupReferences.map((reference) => ({
         ...reference,
         name: `${controlGroupReferencePrefix}${reference.name}`,

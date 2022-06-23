@@ -6,9 +6,9 @@
  */
 
 import type { ArchivePackage, RegistryPackage } from '../../../../common';
-import { appContextService } from '../../';
+import { appContextService } from '../..';
 
-import type { ArchiveEntry } from './index';
+import type { ArchiveEntry } from '.';
 
 const archiveEntryCache: Map<ArchiveEntry['path'], ArchiveEntry['buffer']> = new Map();
 export const getArchiveEntry = (key: string) => archiveEntryCache.get(key);

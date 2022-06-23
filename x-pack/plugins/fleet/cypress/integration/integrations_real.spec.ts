@@ -50,7 +50,19 @@ describe('Add Integration - Real API', () => {
   });
 
   function addAndVerifyIntegration() {
-    cy.intercept('GET', '/api/fleet/epm/packages?*').as('packages');
+    cy.intercept(
+      '/api/fleet/epm/packages?*',
+      {
+        middleware: true,
+      },
+      (req) => {
+        req.on('before:response', (res) => {
+          // force all API responses to not be cached
+          res.headers['cache-control'] = 'no-store';
+        });
+      }
+    ).as('packages');
+
     navigateTo(INTEGRATIONS);
     cy.wait('@packages');
     cy.get('.euiLoadingSpinner').should('not.exist');
@@ -75,7 +87,20 @@ describe('Add Integration - Real API', () => {
         .map((policy: any) => policy.id);
 
       cy.visit(`/app/fleet/policies/${agentPolicyId}`);
-      cy.intercept('GET', '/api/fleet/epm/packages?*').as('packages');
+
+      cy.intercept(
+        '/api/fleet/epm/packages?*',
+        {
+          middleware: true,
+        },
+        (req) => {
+          req.on('before:response', (res) => {
+            // force all API responses to not be cached
+            res.headers['cache-control'] = 'no-store';
+          });
+        }
+      ).as('packages');
+
       cy.getBySel(ADD_PACKAGE_POLICY_BTN).click();
       cy.wait('@packages');
       cy.get('.euiLoadingSpinner').should('not.exist');

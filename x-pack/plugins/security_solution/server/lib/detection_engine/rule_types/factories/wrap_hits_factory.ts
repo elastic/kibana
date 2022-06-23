@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import type { ConfigType } from '../../../../config';
-import { filterDuplicateSignals } from '../../signals/filter_duplicate_signals';
-import { SimpleHit, WrapHits } from '../../signals/types';
+import { SignalSource, SimpleHit } from '../../signals/types';
 import { CompleteRule, RuleParams } from '../../schemas/rule_schemas';
 import { generateId } from '../../signals/utils';
 import { buildBulkBody } from './utils/build_bulk_body';
+import { BuildReasonMessage } from '../../signals/reason_formatters';
+import {
+  BaseFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/detection_engine/schemas/alerts';
 
 export const wrapHitsFactory =
   ({
@@ -20,14 +25,19 @@ export const wrapHitsFactory =
     ignoreFields,
     mergeStrategy,
     spaceId,
+    indicesToQuery,
   }: {
     completeRule: CompleteRule<RuleParams>;
     ignoreFields: ConfigType['alertIgnoreFields'];
     mergeStrategy: ConfigType['alertMergeStrategy'];
     spaceId: string | null | undefined;
-  }): WrapHits =>
-  (events, buildReasonMessage) => {
-    const wrappedDocs = events.map((event) => {
+    indicesToQuery: string[];
+  }) =>
+  (
+    events: Array<estypes.SearchHit<SignalSource>>,
+    buildReasonMessage: BuildReasonMessage
+  ): Array<WrappedFieldsLatest<BaseFieldsLatest>> => {
+    const wrappedDocs = events.map((event): WrappedFieldsLatest<BaseFieldsLatest> => {
       const id = generateId(
         event._index,
         event._id,
@@ -45,12 +55,17 @@ export const wrapHitsFactory =
             mergeStrategy,
             ignoreFields,
             true,
-            buildReasonMessage
+            buildReasonMessage,
+            indicesToQuery
           ),
           [ALERT_UUID]: id,
         },
       };
     });
-
-    return filterDuplicateSignals(completeRule.alertId, wrappedDocs, true);
+    return wrappedDocs.filter(
+      (doc) =>
+        !doc._source['kibana.alert.ancestors'].some(
+          (ancestor) => ancestor.rule === completeRule.alertId
+        )
+    );
   };

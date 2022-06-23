@@ -10,12 +10,12 @@ import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/utils';
 import { schema } from '@kbn/config-schema';
+import { Env } from '@kbn/config';
 
-import { Env } from '../config';
-import { CoreContext } from '../core_context';
+import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '../mocks';
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import { configServiceMock, getEnvOptions } from '../config/mocks';
 
 import { PluginWrapper } from './plugin';
 import { PluginManifest, PluginType } from './types';
@@ -467,7 +467,7 @@ describe('#getConfigSchema()', () => {
       schema: pluginSchema,
     };
     jest.doMock(
-      'plugin-with-schema/server',
+      join('plugin-with-schema', 'server'),
       () => ({
         config: configDescriptor,
       }),
@@ -491,7 +491,7 @@ describe('#getConfigSchema()', () => {
   });
 
   it('returns null if config definition not specified', () => {
-    jest.doMock('plugin-with-no-definition/server', () => ({}), { virtual: true });
+    jest.doMock(join('plugin-with-no-definition', 'server'), () => ({}), { virtual: true });
     const manifest = createPluginManifest();
     const opaqueId = Symbol();
     const plugin = new PluginWrapper({
@@ -527,7 +527,7 @@ describe('#getConfigSchema()', () => {
 
   it('throws if plugin contains invalid schema', () => {
     jest.doMock(
-      'plugin-invalid-schema/server',
+      join('plugin-invalid-schema', 'server'),
       () => ({
         config: {
           schema: {

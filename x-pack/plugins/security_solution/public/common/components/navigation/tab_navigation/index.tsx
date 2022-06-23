@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiBetaBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -14,6 +14,7 @@ import deepEqual from 'fast-deep-equal';
 import { useNavigation } from '../../../lib/kibana';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { TabNavigationProps, TabNavigationItemProps } from './types';
+import { BETA } from '../../../translations';
 
 const TabNavigationItemComponent = ({
   disabled,
@@ -21,6 +22,7 @@ const TabNavigationItemComponent = ({
   id,
   name,
   isSelected,
+  isBeta,
 }: TabNavigationItemProps) => {
   const { getAppUrl, navigateTo } = useNavigation();
 
@@ -45,6 +47,7 @@ const TabNavigationItemComponent = ({
       isSelected={isSelected}
       href={appHref}
       onClick={handleClick}
+      append={isBeta && <EuiBetaBadge label={BETA} size="s" />}
     >
       {name}
     </EuiTab>
@@ -53,11 +56,7 @@ const TabNavigationItemComponent = ({
 
 const TabNavigationItem = React.memo(TabNavigationItemComponent);
 
-export const TabNavigationComponent: React.FC<TabNavigationProps> = ({
-  display,
-  navTabs,
-  tabName,
-}) => {
+export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs, tabName }) => {
   const mapLocationToTab = useCallback(
     (): string =>
       getOr(
@@ -92,13 +91,14 @@ export const TabNavigationComponent: React.FC<TabNavigationProps> = ({
             name={tab.name}
             disabled={tab.disabled}
             isSelected={isSelected}
+            isBeta={tab.isBeta}
           />
         );
       }),
     [navTabs, selectedTabId, search]
   );
 
-  return <EuiTabs display={display}>{renderTabs}</EuiTabs>;
+  return <EuiTabs>{renderTabs}</EuiTabs>;
 };
 
 TabNavigationComponent.displayName = 'TabNavigationComponent';
