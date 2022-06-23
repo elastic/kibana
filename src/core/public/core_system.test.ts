@@ -248,7 +248,7 @@ describe('#start()', () => {
     );
   });
 
-  it('reports the event Loaded Kibana', async () => {
+  it('reports the event Loaded Kibana and clears marks', async () => {
     await startCore();
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
@@ -256,6 +256,8 @@ describe('#start()', () => {
       load_started: 456,
       bootstrap_started: 123,
     });
+
+    expect(window.performance.clearMarks).toHaveBeenCalledTimes(1);
   });
 
   it('reports the event Loaded Kibana (with memory)', async () => {

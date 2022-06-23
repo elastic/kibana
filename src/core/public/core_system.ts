@@ -35,9 +35,8 @@ import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import { ExecutionContextService } from './execution_context';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
+import { KBN_LOAD_MARKS } from './utils';
 
-/** @internal */
-export const KBN_LOAD_MARKS = 'kbnLoad';
 interface Params {
   rootDomElement: HTMLElement;
   browserSupportsCsp: boolean;

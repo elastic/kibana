@@ -7,8 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSystem, KBN_LOAD_MARKS } from './core_system';
+import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
+import { KBN_LOAD_MARKS } from './utils';
 
 /** @internal */
 export async function __kbnBootstrap__() {
