@@ -129,7 +129,7 @@ export function OpenTelemetryInstructions({
         <br />
         <FormattedMessage
           id="xpack.apm.tutorial.config_otel.description3"
-          defaultMessage="The exhaustive list of configuration environment variables, command line parameters, and configuration code snippets is available in the {otelInstrumentationGuide} according to the OpenTelemetry specifications. Some unstable OpenTelemetry clients may not yet support those and require alternate configuration mechanisms."
+          defaultMessage="The exhaustive list of environment variables, command line parameters, and configuration code snippets (according to the OpenTelemetry specification) is available in the {otelInstrumentationGuide}. Some unstable OpenTelemetry clients may not support all features and may require alternate configuration mechanisms."
           values={{
             otelInstrumentationGuide: (
               <EuiLink
