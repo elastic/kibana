@@ -6,7 +6,6 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import { parse, stringify } from 'query-string';
 import { useCallback, useEffect, useState } from 'react';
 
 /**
@@ -17,10 +16,13 @@ import { useCallback, useEffect, useState } from 'react';
  */
 export function useUrlParams() {
   const { search } = useLocation();
-  const [urlParams, setUrlParams] = useState(() => parse(search));
-  const toUrlParams = useCallback((params = urlParams) => stringify(params), [urlParams]);
+  const [urlParams, setUrlParams] = useState(() => Object.fromEntries(new URLSearchParams(search)));
+  const toUrlParams = useCallback(
+    (params = urlParams) => new URLSearchParams(params).toString(),
+    [urlParams]
+  );
   useEffect(() => {
-    setUrlParams(parse(search));
+    setUrlParams(Object.fromEntries(new URLSearchParams(search)));
   }, [search]);
   return {
     urlParams,

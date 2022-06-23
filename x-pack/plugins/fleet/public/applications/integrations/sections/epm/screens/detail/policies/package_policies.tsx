@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { stringify, parse } from 'query-string';
+
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, useLocation, useHistory } from 'react-router-dom';
 import type { CriteriaWithPagination, EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -336,8 +336,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         <AgentEnrollmentFlyout
           onClose={() => {
             setFlyoutOpenForPolicyId(null);
-            const { addAgentToPolicyId, ...rest } = parse(search);
-            history.replace({ search: stringify(rest) });
+            const { addAgentToPolicyId, ...rest } = Object.fromEntries(new URLSearchParams(search));
+            history.replace({ search: new URLSearchParams(rest).toString() });
           }}
           agentPolicy={agentPolicy}
           isIntegrationFlow={true}

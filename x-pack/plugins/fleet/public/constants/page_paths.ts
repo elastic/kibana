@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { stringify } from 'query-string';
-
 export type StaticPage =
   | 'base'
   | 'overview'
@@ -124,8 +122,11 @@ export const pagePathGetters: {
     `/detail/${pkgkey}/overview${integration ? `?integration=${integration}` : ''}`,
   ],
   integration_details_policies: ({ pkgkey, integration, addAgentToPolicyId }) => {
-    const qs = stringify({ integration, addAgentToPolicyId });
-    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/policies${qs ? `?${qs}` : ''}`];
+    const qs = new URLSearchParams({
+      integration: integration?.toString(),
+      ...(addAgentToPolicyId ? { addAgentToPolicyId: addAgentToPolicyId.toString() } : {}),
+    });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/policies${qs ? `?${qs.toString()}` : ''}`];
   },
   integration_details_assets: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
@@ -156,9 +157,9 @@ export const pagePathGetters: {
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
   add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, useMultiPageLayout }) => {
-    const qs = stringify({
-      ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
-      ...(useMultiPageLayout ? { useMultiPageLayout: null } : {}),
+    const qs = new URLSearchParams({
+      ...(agentPolicyId ? { policyId: agentPolicyId.toString() } : {}),
+      ...(useMultiPageLayout ? { useMultiPageLayout: 'true' } : {}),
     });
     return [
       FLEET_BASE_PATH,

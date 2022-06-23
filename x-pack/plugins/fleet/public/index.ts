@@ -18,11 +18,11 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
   return new FleetPlugin(initializerContext);
 };
 
-export type { NewPackagePolicy } from './types';
+export type { NewPackagePolicy } from '../common/types/models/package_policy';
 export * from './types/intra_app_route_state';
 export * from './types/ui_extensions';
 
-export { pagePathGetters } from './constants';
-export { pkgKeyFromPackageInfo } from './services';
+export { pagePathGetters } from './constants/page_paths';
+export { pkgKeyFromPackageInfo } from './services/pkg_key_from_package_info';
 export type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 export { CustomAssetsAccordion } from './components/custom_assets_accordion';

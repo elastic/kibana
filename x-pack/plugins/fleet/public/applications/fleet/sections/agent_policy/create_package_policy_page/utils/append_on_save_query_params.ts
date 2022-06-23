@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { parse, stringify } from 'query-string';
 
 import type {
   CreatePackagePolicyRouteState,
@@ -25,7 +24,7 @@ export function appendOnSaveQueryParamsToPath({
   mappingOptions?: CreatePackagePolicyRouteState['onSaveQueryParams'];
 }) {
   const [basePath, queryStringIn] = path.split('?');
-  const queryParams = parse(queryStringIn);
+  const queryParams = Object.fromEntries(new URLSearchParams(queryStringIn));
 
   paramsToApply.forEach((paramName) => {
     const paramOptions = mappingOptions[paramName];
@@ -37,7 +36,7 @@ export function appendOnSaveQueryParamsToPath({
     }
   });
 
-  const queryString = stringify(queryParams);
+  const queryString = new URLSearchParams(queryParams).toString();
 
   return basePath + (queryString ? `?${queryString}` : '');
 }
