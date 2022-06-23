@@ -15,6 +15,8 @@ export type {
   DataViewsServerPluginStartDependencies,
 } from './types';
 
+export type { DataViewsServiceServer } from './data_views_service_server';
+
 import { PluginInitializerContext } from '@kbn/core/server';
 import { DataViewsServerPlugin } from './plugin';
 import { DataViewsServerPluginSetup, DataViewsServerPluginStart } from './types';
