@@ -14,7 +14,15 @@ import {
 } from './plugins_service.test.mocks';
 
 import { PluginName, PluginType } from '../../server';
-import { coreMock } from '../mocks';
+import {
+  coreMock,
+  docLinksServiceMock,
+  themeServiceMock,
+  analyticsServiceMock,
+  injectedMetadataServiceMock,
+  i18nServiceMock,
+  executionContextServiceMock,
+} from '../mocks';
 import {
   PluginsService,
   PluginsServiceStartDeps,
@@ -22,14 +30,8 @@ import {
 } from './plugins_service';
 
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
-import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { applicationServiceMock } from '../application/application_service.mock';
-import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';

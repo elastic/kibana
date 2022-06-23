@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { injectedMetadataServiceMock, executionContextServiceMock } from '../public/mocks';
 import { HttpService } from '../public/http';
 import { fatalErrorsServiceMock } from '../public/fatal_errors/fatal_errors_service.mock';
 
