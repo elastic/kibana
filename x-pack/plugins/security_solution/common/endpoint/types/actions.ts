@@ -87,7 +87,7 @@ interface ResponseActionParametersWithPid {
 
 interface ResponseActionParametersWithEntityId {
   pid?: never;
-  entity_id: number;
+  entity_id: string;
 }
 
 export type ResponseActionParametersWithPidOrEntityId =
