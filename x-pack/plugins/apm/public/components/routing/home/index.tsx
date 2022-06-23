@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Outlet, Route } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React, { ComponentProps } from 'react';
-import { toBooleanRt } from '@kbn/io-ts-utils';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { TraceSearchType } from '../../../../common/trace_explorer';
@@ -284,9 +284,15 @@ export const home = {
 
               '/backends/operation': {
                 params: t.type({
-                  query: t.type({
-                    spanName: t.string,
-                  }),
+                  query: t.intersection([
+                    t.type({
+                      spanName: t.string,
+                    }),
+                    t.partial({
+                      sampleRangeFrom: toNumberRt,
+                      sampleRangeTo: toNumberRt,
+                    }),
+                  ]),
                 }),
                 element: <BackendOperationDetailView />,
               },

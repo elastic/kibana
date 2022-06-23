@@ -6,12 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-
-import type { ElasticsearchClient } from '@kbn/core/server';
-
-import type { CorrelationsParams } from '../../../../common/correlations/types';
+import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import {
   FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE,
   FIELDS_TO_ADD_AS_CANDIDATE,
@@ -20,8 +16,9 @@ import {
 } from '../../../../common/correlations/constants';
 import { hasPrefixToInclude } from '../../../../common/correlations/utils';
 
-import { getQueryWithParams } from './get_query_with_params';
-import { getRequestBase } from './get_request_base';
+import { Setup } from '../../../lib/helpers/setup_request';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
@@ -38,34 +35,49 @@ export const shouldBeExcluded = (fieldName: string) => {
   );
 };
 
-export const getRandomDocsRequest = (
-  params: CorrelationsParams
-): estypes.SearchRequest => ({
-  ...getRequestBase(params),
-  body: {
-    fields: ['*'],
-    _source: false,
-    query: {
-      function_score: {
-        query: getQueryWithParams({ params }),
-        // @ts-ignore
-        random_score: {},
-      },
-    },
-    size: POPULATED_DOC_COUNT_SAMPLE_SIZE,
-  },
-});
+export const fetchDurationFieldCandidates = async ({
+  setup,
+  eventType,
+  query,
+  start,
+  end,
+  environment,
+  kuery,
+}: CommonCorrelationsQueryParams & {
+  query: estypes.QueryDslQueryContainer;
+  setup: Setup;
+  eventType: ProcessorEvent.transaction | ProcessorEvent.span;
+}): Promise<{
+  fieldCandidates: string[];
+}> => {
+  const { apmEventClient } = setup;
 
-export const fetchTransactionDurationFieldCandidates = async (
-  esClient: ElasticsearchClient,
-  params: CorrelationsParams
-): Promise<{ fieldCandidates: string[] }> => {
-  const { index } = params;
   // Get all supported fields
-  const respMapping = await esClient.fieldCaps({
-    index,
-    fields: '*',
-  });
+  const [respMapping, respRandomDoc] = await Promise.all([
+    apmEventClient.fieldCaps('get_field_caps', {
+      apm: {
+        events: [eventType],
+      },
+      fields: '*',
+    }),
+    apmEventClient.search('get_random_doc_for_field_candidate', {
+      apm: {
+        events: [eventType],
+      },
+      body: {
+        fields: ['*'],
+        _source: false,
+        query: getCommonCorrelationsQuery({
+          start,
+          end,
+          environment,
+          kuery,
+          query,
+        }),
+        size: POPULATED_DOC_COUNT_SAMPLE_SIZE,
+      },
+    }),
+  ]);
 
   const finalFieldCandidates = new Set(FIELDS_TO_ADD_AS_CANDIDATE);
   const acceptableFields: Set<string> = new Set();
@@ -86,8 +98,7 @@ export const fetchTransactionDurationFieldCandidates = async (
     }
   });
 
-  const resp = await esClient.search(getRandomDocsRequest(params));
-  const sampledDocs = resp.hits.hits.map((d) => d.fields ?? {});
+  const sampledDocs = respRandomDoc.hits.hits.map((d) => d.fields ?? {});
 
   // Get all field names for each returned doc and flatten it
   // to a list of unique field names used across all docs

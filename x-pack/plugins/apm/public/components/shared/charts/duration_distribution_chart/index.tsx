@@ -39,21 +39,33 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 
 import { ChartContainer } from '../chart_container';
+import { ProcessorEvent } from '../../../../../common/processor_event';
 
-export interface TransactionDistributionChartData {
+const NUMBER_OF_TRANSACTIONS_LABEL = i18n.translate(
+  'xpack.apm.durationDistribution.chart.numberOfTransactionsLabel',
+  { defaultMessage: 'Transactions' }
+);
+
+const NUMBER_OF_SPANS_LABEL = i18n.translate(
+  'xpack.apm.durationDistribution.chart.numberOfSpansLabel',
+  { defaultMessage: 'Spans' }
+);
+
+export interface DurationDistributionChartData {
   id: string;
   histogram: HistogramItem[];
   areaSeriesColor: string;
 }
 
-interface TransactionDistributionChartProps {
-  data: TransactionDistributionChartData[];
+interface DurationDistributionChartProps {
+  data: DurationDistributionChartData[];
   hasData: boolean;
-  markerCurrentTransaction?: number;
+  markerCurrentEvent?: number;
   markerValue: number;
   onChartSelection?: BrushEndListener;
   selection?: [number, number];
   status: FETCH_STATUS;
+  eventType: ProcessorEvent.span | ProcessorEvent.transaction;
 }
 
 const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
@@ -93,15 +105,16 @@ export const replaceHistogramDotsWithBars = (histogramItems: HistogramItem[]) =>
 const xAxisTickFormat: TickFormatter<number> = (d) =>
   getDurationFormatter(d, 0.9999)(d).formatted;
 
-export function TransactionDistributionChart({
+export function DurationDistributionChart({
   data,
   hasData,
-  markerCurrentTransaction,
+  markerCurrentEvent,
   markerValue,
   onChartSelection,
   selection,
   status,
-}: TransactionDistributionChartProps) {
+  eventType,
+}: DurationDistributionChartProps) {
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
   const markerPercentile = DEFAULT_PERCENTILE_THRESHOLD;
@@ -110,7 +123,7 @@ export function TransactionDistributionChart({
     {
       dataValue: markerValue,
       details: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.percentileMarkerLabel',
+        'xpack.apm.durationDistribution.chart.percentileMarkerLabel',
         {
           defaultMessage: '{markerPercentile}th percentile',
           values: {
@@ -198,15 +211,15 @@ export function TransactionDistributionChart({
               hideTooltips={true}
             />
           )}
-          {typeof markerCurrentTransaction === 'number' && (
+          {typeof markerCurrentEvent === 'number' && (
             <LineAnnotation
-              id="annotation_current_transaction"
+              id="annotation_current_event"
               domainType={AnnotationDomainType.XDomain}
               dataValues={[
                 {
-                  dataValue: markerCurrentTransaction,
+                  dataValue: markerCurrentEvent,
                   details: i18n.translate(
-                    'xpack.apm.transactionDistribution.chart.currentTransactionMarkerLabel',
+                    'xpack.apm.durationDistribution.chart.currentEventMarkerLabel',
                     {
                       defaultMessage: 'Current sample',
                     }
@@ -215,7 +228,7 @@ export function TransactionDistributionChart({
               ]}
               style={getAnnotationsStyle(euiPaletteColorBlind()[0])}
               marker={i18n.translate(
-                'xpack.apm.transactionDistribution.chart.currentTransactionMarkerLabel',
+                'xpack.apm.durationDistribution.chart.currentEventMarkerLabel',
                 {
                   defaultMessage: 'Current sample',
                 }
@@ -234,7 +247,7 @@ export function TransactionDistributionChart({
           <Axis
             id="x-axis"
             title={i18n.translate(
-              'xpack.apm.transactionDistribution.chart.latencyLabel',
+              'xpack.apm.durationDistribution.chart.latencyLabel',
               { defaultMessage: 'Latency' }
             )}
             position={Position.Bottom}
@@ -244,10 +257,11 @@ export function TransactionDistributionChart({
           <Axis
             id="y-axis"
             domain={yAxisDomain}
-            title={i18n.translate(
-              'xpack.apm.transactionDistribution.chart.numberOfTransactionsLabel',
-              { defaultMessage: 'Transactions' }
-            )}
+            title={
+              eventType === ProcessorEvent.transaction
+                ? NUMBER_OF_TRANSACTIONS_LABEL
+                : NUMBER_OF_SPANS_LABEL
+            }
             position={Position.Left}
             ticks={yTicks}
             gridLine={{ visible: true }}
@@ -267,7 +281,7 @@ export function TransactionDistributionChart({
               // To make the area appear without the orphaned points technique,
               // we changed the original data to replace values of 0 with 0.0001.
               // To show the correct values again in tooltips, we use a custom tickFormat to round values.
-              // We can safely do this because all transaction values above 0 are without decimal points anyway.
+              // We can safely do this because all duration values above 0 are without decimal points anyway.
               // An update for Elastic Charts is in the works to be able to customize the above "fit"
               // attribute. Once that is available we can get rid of the full workaround.
               // Elastic Charts issue: https://github.com/elastic/elastic-charts/issues/1489

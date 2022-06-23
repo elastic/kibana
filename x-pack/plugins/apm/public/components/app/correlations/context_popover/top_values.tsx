@@ -185,15 +185,18 @@ export function TopValues({
         fieldName !== undefined &&
         fieldValue !== undefined
       ) {
-        return callApmApi('GET /internal/apm/correlations/field_value_stats', {
-          params: {
-            query: {
-              ...params,
-              fieldName,
-              fieldValue,
+        return callApmApi(
+          'GET /internal/apm/correlations/field_value_stats/transactions',
+          {
+            params: {
+              query: {
+                ...params,
+                fieldName,
+                fieldValue,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [params, fieldName, fieldValue, idxToHighlight]
