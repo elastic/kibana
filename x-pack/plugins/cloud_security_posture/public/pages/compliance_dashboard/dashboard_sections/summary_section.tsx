@@ -50,12 +50,9 @@ export const SummarySection = ({ complianceData }: { complianceData: ComplianceD
     <EuiFlexGrid columns={3} style={summarySectionWrapperStyle}>
       <EuiFlexItem>
         <ChartPanel
-          title={i18n.translate(
-            'xpack.csp.complianceDashboard.summarySection.cloudPostureScorePanelTitle',
-            {
-              defaultMessage: 'Cloud Posture Score',
-            }
-          )}
+          title={i18n.translate('xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle', {
+            defaultMessage: 'Cloud Posture Score',
+          })}
         >
           <CloudPostureScoreChart
             id="cloud_posture_score_chart"
@@ -67,12 +64,9 @@ export const SummarySection = ({ complianceData }: { complianceData: ComplianceD
       </EuiFlexItem>
       <EuiFlexItem>
         <ChartPanel
-          title={i18n.translate(
-            'xpack.csp.complianceDashboard.summarySection.failedFindingsPanelTitle',
-            {
-              defaultMessage: 'Failed Findings',
-            }
-          )}
+          title={i18n.translate('xpack.csp.dashboard.summarySection.failedFindingsPanelTitle', {
+            defaultMessage: 'Failed Findings',
+          })}
         >
           <RisksTable
             data={complianceData.groupedFindingsEvaluation}
@@ -84,12 +78,9 @@ export const SummarySection = ({ complianceData }: { complianceData: ComplianceD
       </EuiFlexItem>
       <EuiFlexItem>
         <ChartPanel
-          title={i18n.translate(
-            'xpack.csp.complianceDashboard.summarySection.openCasesPanelTitle',
-            {
-              defaultMessage: 'Open Cases',
-            }
-          )}
+          title={i18n.translate('xpack.csp.dashboard.summarySection.openCasesPanelTitle', {
+            defaultMessage: 'Open Cases',
+          })}
         >
           <CasesTable />
         </ChartPanel>

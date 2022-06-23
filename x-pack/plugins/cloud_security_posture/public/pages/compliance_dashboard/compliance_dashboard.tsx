@@ -10,7 +10,7 @@ import { EuiSpacer, EuiIcon } from '@elastic/eui';
 import { type KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 import { UseQueryResult } from 'react-query';
 import { i18n } from '@kbn/i18n';
-import { MISSING_FINDINGS_NO_DATA_CONFIG } from './test_subjects';
+import { DASHBOARD_PAGE_HEADER, MISSING_FINDINGS_NO_DATA_CONFIG } from './test_subjects';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { SummarySection } from './dashboard_sections/summary_section';
@@ -21,10 +21,10 @@ import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 
 const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataConfig'] => ({
   'data-test-subj': MISSING_FINDINGS_NO_DATA_CONFIG,
-  pageTitle: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.pageTitle', {
+  pageTitle: i18n.translate('xpack.csp.dashboard.noDataConfig.pageTitle', {
     defaultMessage: 'Cloud Posture Dashboard',
   }),
-  solution: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.solutionNameLabel', {
+  solution: i18n.translate('xpack.csp.dashboard.noDataConfig.solutionNameLabel', {
     defaultMessage: 'Cloud Security Posture',
   }),
   // TODO: Add real docs link once we have it
@@ -34,10 +34,10 @@ const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataCo
     dashboardNoDataCard: {
       icon: <EuiIcon type="refresh" size="xxl" />,
       onClick,
-      title: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.actionTitle', {
+      title: i18n.translate('xpack.csp.dashboard.noDataConfig.actionTitle', {
         defaultMessage: 'Try Again',
       }),
-      description: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.actionDescription', {
+      description: i18n.translate('xpack.csp.dashboard.noDataConfig.actionDescription', {
         defaultMessage:
           "The cloud posture dashboard can't be presented since there are no findings. This can happen due to the agent not being installed yet, or since data is still being processed.",
       }),
@@ -58,7 +58,8 @@ export const ComplianceDashboard = () => {
   return (
     <CspPageTemplate
       pageHeader={{
-        pageTitle: i18n.translate('xpack.csp.complianceDashboard.cspPageTemplate.pageTitle', {
+        'data-test-subj': DASHBOARD_PAGE_HEADER,
+        pageTitle: i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
           defaultMessage: 'Cloud Posture',
         }),
       }}

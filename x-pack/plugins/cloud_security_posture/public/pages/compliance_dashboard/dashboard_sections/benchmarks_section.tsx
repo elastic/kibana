@@ -98,7 +98,7 @@ export const BenchmarksSection = ({
                 >
                   <ChartPanel
                     title={i18n.translate(
-                      'xpack.csp.complianceDashboard.benchmarkSection.complianceScorePanelTitle',
+                      'xpack.csp.dashboard.benchmarkSection.complianceScorePanelTitle',
                       {
                         defaultMessage: 'Compliance Score',
                       }
@@ -118,7 +118,7 @@ export const BenchmarksSection = ({
                 <EuiFlexItem grow={4}>
                   <ChartPanel
                     title={i18n.translate(
-                      'xpack.csp.complianceDashboard.benchmarkSection.failedFindingsPanelTitle',
+                      'xpack.csp.dashboard.benchmarkSection.failedFindingsPanelTitle',
                       {
                         defaultMessage: 'Failed Findings',
                       }

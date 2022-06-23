@@ -12,9 +12,8 @@ import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard } from '..';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
-import * as TEXT from './translations';
 import { useComplianceDashboardDataApi } from '../../common/api/use_compliance_dashboard_data_api';
-import { MISSING_FINDINGS_NO_DATA_CONFIG } from './test_subjects';
+import { DASHBOARD_PAGE_HEADER, MISSING_FINDINGS_NO_DATA_CONFIG } from './test_subjects';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_cis_kubernetes_integration');
@@ -207,7 +206,7 @@ describe('<ComplianceDashboard />', () => {
     renderComplianceDashboardPage();
 
     expect(screen.queryByTestId(MISSING_FINDINGS_NO_DATA_CONFIG)).toBeInTheDocument();
-    expect(screen.queryByText(TEXT.CLOUD_POSTURE_SCORE)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(DASHBOARD_PAGE_HEADER)).not.toBeInTheDocument();
   });
 
   it('shows dashboard when latestFindingsIndexStatus is applicable', () => {
@@ -226,6 +225,6 @@ describe('<ComplianceDashboard />', () => {
     renderComplianceDashboardPage();
 
     expect(screen.queryByTestId(MISSING_FINDINGS_NO_DATA_CONFIG)).not.toBeInTheDocument();
-    expect(screen.getByText(TEXT.CLOUD_POSTURE_SCORE)).toBeInTheDocument();
+    expect(screen.getByTestId(DASHBOARD_PAGE_HEADER)).toBeInTheDocument();
   });
 });
