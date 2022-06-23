@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { KubernetesCollection } from '../../../types';
+
 const LOGICAL_TREE_VIEW = [
   {
     key: 'orchestrator.cluster.name',
     iconProps: { type: 'heatmap', color: 'success' },
+    type: KubernetesCollection.cluster,
     name: 'clusters',
   },
   {
     key: 'orchestrator.namespace',
     iconProps: { type: 'nested', color: 'primary' },
+    type: KubernetesCollection.namespace,
     name: 'namespaces',
   },
   {
     key: 'orchestrator.resource.name',
     iconProps: { type: 'package', color: 'warning' },
+    type: KubernetesCollection.pod,
     name: 'pods',
   },
   {
     key: 'container.image.name',
     iconProps: { type: 'image', color: 'danger' },
+    type: KubernetesCollection.containerImage,
     name: 'container images',
   },
 ];
@@ -33,6 +39,7 @@ const INFRASTRUCTURE_TREE_VIEW = LOGICAL_TREE_VIEW.map((tree, index) => {
     return {
       key: 'orchestrator.resource.node',
       iconProps: { type: 'node', color: 'primary' },
+      type: KubernetesCollection.node,
       name: 'nodes',
     };
   }

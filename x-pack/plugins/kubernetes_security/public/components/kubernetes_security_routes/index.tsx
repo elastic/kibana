@@ -53,7 +53,7 @@ const KubernetesSecurityRoutesComponent = ({
   const onReduceRootAggs = useCallback(
     (result: AggregateResult): Record<string, number> =>
       result.buckets.reduce((groupedByKeyValue, aggregate) => {
-        if (aggregate.key === 0) {
+        if (aggregate.key.toString() === '0') {
           groupedByKeyValue[aggregate.key] = aggregate.count_by_aggs.value;
         } else {
           groupedByKeyValue.nonRoot =

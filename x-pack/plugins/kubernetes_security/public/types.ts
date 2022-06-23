@@ -45,3 +45,19 @@ export interface KubernetesSecurityStart {
 export type QueryDslQueryContainerBool = {
   bool: BoolQuery;
 };
+
+export enum KubernetesCollection {
+  cluster = 'cluster',
+  namespace = 'namespace',
+  node = 'node',
+  pod = 'pod',
+  containerImage = 'containerImage',
+}
+
+export interface TreeNavSelection {
+  [KubernetesCollection.cluster]?: string;
+  [KubernetesCollection.namespace]?: string;
+  [KubernetesCollection.node]?: string;
+  [KubernetesCollection.pod]?: string;
+  [KubernetesCollection.containerImage]?: string;
+}

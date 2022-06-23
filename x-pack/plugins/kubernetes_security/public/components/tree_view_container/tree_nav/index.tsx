@@ -12,12 +12,20 @@ import {
   TREE_VIEW_SWITCHER_LEGEND,
 } from '../../../../common/translations';
 import { useStyles } from './styles';
+import { IndexPattern, GlobalFilter, TreeNavSelection } from '../../../types';
 import { DynamicTreeView } from '../dynamic_tree_view';
 import { addTimerangeToQuery } from '../../../utils/add_timerange_to_query';
 import { INFRASTRUCTURE, LOGICAL, TREE_VIEW } from './constants';
 import { TreeViewKind, TreeViewOptionsGroup } from './types';
 
-export const TreeNav = ({ indexPattern, globalFilter }: any) => {
+interface TreeNavDeps {
+  indexPattern?: IndexPattern;
+  globalFilter: GlobalFilter;
+  onSelect: (selection: TreeNavSelection) => void;
+  hasSelection: boolean;
+}
+
+export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: TreeNavDeps) => {
   const styles = useStyles();
   const [tree, setTree] = useState(TREE_VIEW.logical);
 
@@ -77,12 +85,17 @@ export const TreeNav = ({ indexPattern, globalFilter }: any) => {
       <div css={styles.treeViewContainer} className="eui-scrollBar">
         <DynamicTreeView
           query={JSON.parse(filterQueryWithTimeRange)}
-          indexPattern={indexPattern.title}
+          indexPattern={indexPattern?.title}
+          selectionDepth={{}}
           tree={tree}
           aria-label="Logical Tree View"
-          onSelect={(key) => {
-            // console.log(`${key} was clicked`);
+          onSelect={(selectionDepth, key, type) => {
+            onSelect({
+              ...selectionDepth,
+              [type]: key,
+            });
           }}
+          hasSelection={hasSelection}
         />
       </div>
     </>

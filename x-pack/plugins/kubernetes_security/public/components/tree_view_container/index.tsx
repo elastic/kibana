@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiSplitPanel, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
-import type { IndexPattern, GlobalFilter } from '../../types';
+import { IndexPattern, GlobalFilter, TreeNavSelection, KubernetesCollection } from '../../types';
 import { TreeNav } from './tree_nav';
+import { addTreeNavSelectionToFilterQuery } from './helpers';
 
 export interface TreeViewContainerDeps {
   globalFilter: GlobalFilter;
@@ -23,17 +24,29 @@ export const TreeViewContainer = ({
   indexPattern,
 }: TreeViewContainerDeps) => {
   const styles = useStyles();
-  // TODO: combine filterQuery with filters from tree view nav
+  const [treeNavSelection, setTreeNavSelection] = useState<TreeNavSelection>({});
+
+  const onTreeNavSelect = (selection: TreeNavSelection) => {
+    setTreeNavSelection(selection);
+  };
 
   return (
     <EuiSplitPanel.Outer direction="row" hasBorder borderRadius="m" css={styles.outerPanel}>
       <EuiSplitPanel.Inner color="subdued" grow={false} css={styles.navPanel}>
         <EuiText css={styles.treeViewNav}>
-          <TreeNav indexPattern={indexPattern} globalFilter={globalFilter} />
+          <TreeNav
+            indexPattern={indexPattern}
+            globalFilter={globalFilter}
+            onSelect={onTreeNavSelect}
+            hasSelection={!!treeNavSelection[KubernetesCollection.cluster]}
+          />
         </EuiText>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner css={styles.sessionsPanel}>
-        {renderSessionsView(globalFilter.filterQuery)}
+        {treeNavSelection[KubernetesCollection.cluster] &&
+          renderSessionsView(
+            addTreeNavSelectionToFilterQuery(globalFilter.filterQuery, treeNavSelection)
+          )}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

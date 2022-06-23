@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-interface Aggregate<T = string> {
-  key: T;
+interface Aggregate {
+  key: string | number;
   doc_count: number;
 }
 
-interface Buckets extends Aggregate<number> {
+interface Buckets extends Aggregate {
   key_as_string?: string;
   count_by_aggs: {
     value: number;

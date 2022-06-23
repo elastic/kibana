@@ -20,7 +20,7 @@ import {
   TREE_NAVIGATION_LOADING,
   TREE_NAVIGATION_SHOW_MORE,
 } from '../../../../common/translations';
-import { QueryDslQueryContainerBool } from '../../../types';
+import { QueryDslQueryContainerBool, KubernetesCollection, TreeNavSelection } from '../../../types';
 import { useFetchDynamicTreeView } from './hooks';
 import { useStyles } from './styles';
 
@@ -42,6 +42,7 @@ const DynamicTreeViewExpander = ({
 
 type DynamicTree = {
   key: string;
+  type: KubernetesCollection;
   iconProps: EuiIconProps;
   name: string;
 };
@@ -49,18 +50,22 @@ type DynamicTree = {
 type Props = {
   tree: DynamicTree[];
   depth?: number;
+  selectionDepth: TreeNavSelection;
   query: QueryDslQueryContainerBool;
-  indexPattern: string;
-  onSelect?: (key: string | number) => void;
+  indexPattern?: string;
+  onSelect?: (selectionDepth: TreeNavSelection, key: string | number, type: string) => void;
+  hasSelection?: boolean;
   'aria-label': string;
 };
 
 export const DynamicTreeView = ({
   tree,
   depth = 0,
+  selectionDepth,
   query,
   indexPattern,
   onSelect,
+  hasSelection,
   ...props
 }: Props) => {
   const styles = useStyles(depth);
@@ -124,6 +129,12 @@ export const DynamicTreeView = ({
     fetchNextPage();
   }, [fetchNextPage]);
 
+  useEffect(() => {
+    if (!hasSelection && !depth && data && data.pages?.[0].buckets?.[0]?.key) {
+      onSelect?.({}, data.pages[0].buckets[0].key, tree[depth].type);
+    }
+  }, [data, depth, hasSelection, onSelect, tree]);
+
   const onClickNextPageHandler = (e: MouseEvent<HTMLButtonElement>) => {
     fetchNextPage();
   };
@@ -172,7 +183,7 @@ export const DynamicTreeView = ({
                     if (!isLastNode) {
                       onToggleExpand();
                     }
-                    onSelect?.(aggData.key);
+                    onSelect?.(selectionDepth, aggData.key, tree[depth].type);
                   };
 
                   // Enable keyboard navigation
@@ -253,13 +264,17 @@ export const DynamicTreeView = ({
                       {isExpanded && (
                         <div
                           onKeyDown={(event: React.KeyboardEvent) =>
-                            onChildrenKeydown(event, aggData.key)
+                            onChildrenKeydown(event, aggData.key.toString())
                           }
                         >
                           <DynamicTreeView
                             key={aggData.key}
                             query={queryFilter}
                             depth={depth + 1}
+                            selectionDepth={{
+                              ...selectionDepth,
+                              [tree[depth].type]: aggData.key,
+                            }}
                             tree={tree}
                             indexPattern={indexPattern}
                             onSelect={onSelect}
