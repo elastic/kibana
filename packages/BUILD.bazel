@@ -65,6 +65,7 @@ filegroup(
     "//packages/kbn-bazel-packages:build",
     "//packages/kbn-bazel-runner:build",
     "//packages/kbn-ci-stats-core:build",
+    "//packages/kbn-ci-stats-performance-metrics:build",
     "//packages/kbn-ci-stats-reporter:build",
     "//packages/kbn-cli-dev-mode:build",
     "//packages/kbn-coloring:build",
@@ -161,6 +162,9 @@ filegroup(
     "//packages/shared-ux/page/analytics_no_data:build",
     "//packages/shared-ux/page/kibana_no_data:build",
     "//packages/shared-ux/prompt/no_data_views:build",
+    "//x-pack/packages/ml/agg_utils:build",
+    "//x-pack/packages/ml/is_populated_object:build",
+    "//x-pack/packages/ml/string_hash:build",
   ],
 )
 
@@ -220,6 +224,7 @@ filegroup(
     "//packages/kbn-bazel-packages:build_types",
     "//packages/kbn-bazel-runner:build_types",
     "//packages/kbn-ci-stats-core:build_types",
+    "//packages/kbn-ci-stats-performance-metrics:build_types",
     "//packages/kbn-ci-stats-reporter:build_types",
     "//packages/kbn-cli-dev-mode:build_types",
     "//packages/kbn-coloring:build_types",
@@ -305,6 +310,9 @@ filegroup(
     "//packages/shared-ux/page/analytics_no_data:build_types",
     "//packages/shared-ux/page/kibana_no_data:build_types",
     "//packages/shared-ux/prompt/no_data_views:build_types",
+    "//x-pack/packages/ml/agg_utils:build_types",
+    "//x-pack/packages/ml/is_populated_object:build_types",
+    "//x-pack/packages/ml/string_hash:build_types",
   ],
 )
 
