@@ -187,7 +187,12 @@ const getSteps = ({
 
   const lastStepFooterAction = (
     // data-test-subj is used for testing and to track FS usage
-    <EuiButtonEmpty size="xs" color="text" onClick={() => endTour()} data-test-subj="observTourEndButton">
+    <EuiButtonEmpty
+      size="xs"
+      color="text"
+      onClick={() => endTour()}
+      data-test-subj="observTourEndButton"
+    >
       {i18n.translate('xpack.observability.tour.endButtonLabel', {
         defaultMessage: 'End tour',
       })}
