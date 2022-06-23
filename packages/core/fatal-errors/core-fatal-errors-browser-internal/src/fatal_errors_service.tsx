@@ -8,55 +8,26 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import * as Rx from 'rxjs';
-import { first, tap } from 'rxjs/operators';
+import { ReplaySubject, first, tap } from 'rxjs';
 
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import { CoreContextProvider } from '../utils';
+import type { FatalErrorInfo, FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
+import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
 import { FatalErrorsScreen } from './fatal_errors_screen';
-import { FatalErrorInfo, getErrorInfo } from './get_error_info';
+import { getErrorInfo } from './get_error_info';
 
-export interface Deps {
+/** @internal */
+export interface FatalErrorsServiceSetupDeps {
   i18n: I18nStart;
   theme: ThemeServiceSetup;
   injectedMetadata: InternalInjectedMetadataSetup;
 }
 
-/**
- * FatalErrors stop the Kibana Public Core and displays a fatal error screen
- * with details about the Kibana build and the error.
- *
- * @public
- */
-export interface FatalErrorsSetup {
-  /**
-   * Add a new fatal error. This will stop the Kibana Public Core and display
-   * a fatal error screen with details about the Kibana build and the error.
-   *
-   * @param error - The error to display
-   * @param source - Adds a prefix of the form `${source}: ` to the error message
-   */
-  add: (error: string | Error, source?: string) => never;
-
-  /**
-   * An Observable that will emit whenever a fatal error is added with `add()`
-   */
-  get$: () => Rx.Observable<FatalErrorInfo>;
-}
-
-/**
- * FatalErrors stop the Kibana Public Core and displays a fatal error screen
- * with details about the Kibana build and the error.
- *
- * @public
- */
-export type FatalErrorsStart = FatalErrorsSetup;
-
 /** @internal */
 export class FatalErrorsService {
-  private readonly errorInfo$ = new Rx.ReplaySubject<FatalErrorInfo>();
+  private readonly errorInfo$ = new ReplaySubject<FatalErrorInfo>();
   private fatalErrors?: FatalErrorsSetup;
 
   /**
@@ -67,7 +38,7 @@ export class FatalErrorsService {
    */
   constructor(private rootDomElement: HTMLElement, private onFirstErrorCb: () => void) {}
 
-  public setup(deps: Deps) {
+  public setup(deps: FatalErrorsServiceSetupDeps) {
     this.errorInfo$
       .pipe(
         first(),
@@ -115,7 +86,7 @@ export class FatalErrorsService {
     return fatalErrors;
   }
 
-  private renderError({ i18n, theme, injectedMetadata }: Deps) {
+  private renderError({ i18n, theme, injectedMetadata }: FatalErrorsServiceSetupDeps) {
     // delete all content in the rootDomElement
     this.rootDomElement.textContent = '';
 
