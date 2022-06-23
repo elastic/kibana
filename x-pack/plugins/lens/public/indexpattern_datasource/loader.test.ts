@@ -28,6 +28,14 @@ import {
 import { createMockedRestrictedIndexPattern, createMockedIndexPattern } from './mocks';
 import { documentField } from './document_field';
 import { DateHistogramIndexPatternColumn } from './operations';
+import { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  updateFilterReferencesTrigger,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/unified-search-plugin/public/triggers';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { createUpdateFilterReferencesAction } from '@kbn/unified-search-plugin/public/actions/update_filter_references_action';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {
@@ -888,6 +896,18 @@ describe('loader', () => {
   });
 
   describe('changeLayerIndexPattern', () => {
+    let action: Action<object>;
+    let filterManager: FilterManager;
+    let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
+    beforeEach(() => {
+      filterManager = new FilterManager(coreMock.createStart().uiSettings);
+      uiActions = uiActionsPluginMock.createPlugin();
+      action = createUpdateFilterReferencesAction(filterManager);
+      uiActions.setup.registerAction(action);
+      uiActions.setup.registerTrigger(updateFilterReferencesTrigger);
+      uiActions.setup.addTriggerAction(UPDATE_FILTER_REFERENCES_TRIGGER, action);
+    });
+
     it('loads the index pattern and then changes the specified layer', async () => {
       const setState = jest.fn();
       const state: IndexPatternPrivateState = {
@@ -933,7 +953,7 @@ describe('loader', () => {
         indexPatternsService: mockIndexPatternsService(),
         onError: jest.fn(),
         storage,
-        uiActions: uiActionsPluginMock.createStartContract(),
+        uiActions: uiActions.setup as UiActionsStart,
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
@@ -1008,7 +1028,7 @@ describe('loader', () => {
         },
         onError,
         storage,
-        uiActions: uiActionsPluginMock.createStartContract(),
+        uiActions: uiActions.setup as UiActionsStart,
       });
 
       expect(setState).not.toHaveBeenCalled();
