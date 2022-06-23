@@ -309,6 +309,38 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ci-stats-reporter",
+            "id": "def-server.CiStatsReporter.reportPerformanceMetrics",
+            "type": "Function",
+            "tags": [],
+            "label": "reportPerformanceMetrics",
+            "description": [],
+            "signature": [
+              "(metrics: ",
+              "PerformanceMetrics",
+              ") => Promise<boolean | undefined>"
+            ],
+            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ci-stats-reporter",
+                "id": "def-server.CiStatsReporter.reportPerformanceMetrics.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "metrics",
+                "description": [],
+                "signature": [
+                  "PerformanceMetrics"
+                ],
+                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

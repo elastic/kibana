@@ -42,8 +42,8 @@ const FormWrapper = styled.div`
       margin-top: 0;
     }
 
-    padding-top: ${theme.eui.paddingSizes.xl};
-    padding-bottom: ${theme.eui.paddingSizes.xl};
+    padding-top: ${theme.eui.euiSizeXL};
+    padding-bottom: ${theme.eui.euiSizeXL};
     .euiFlyout {
       z-index: ${theme.eui.euiZNavigation + 1};
     }

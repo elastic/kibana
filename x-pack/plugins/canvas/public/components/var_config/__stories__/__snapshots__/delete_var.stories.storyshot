@@ -44,14 +44,10 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            className="euiText euiText--small"
+            className="euiText css-czh9ev-euiText-s-euiTextColor-subdued"
+            style={Object {}}
           >
-            <div
-              className="euiTextColor euiTextColor--subdued"
-              style={Object {}}
-            >
-              Deleting this variable may adversely affect the workpad. Are you sure you wish to continue?
-            </div>
+            Deleting this variable may adversely affect the workpad. Are you sure you wish to continue?
           </div>
         </div>
       </div>
