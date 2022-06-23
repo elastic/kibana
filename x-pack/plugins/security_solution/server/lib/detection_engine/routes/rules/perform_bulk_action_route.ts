@@ -594,6 +594,7 @@ export const performBulkActionRoute = (
           deleted,
           created,
           errors: [...fetchRulesOutcome.errors, ...bulkActionOutcome.errors],
+          isDryRun,
         });
       } catch (err) {
         const error = transformError(err);
