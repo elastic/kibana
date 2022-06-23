@@ -59,13 +59,13 @@ describe('useGetEndpointActionList hook', () => {
     expect(apiMocks.responseProvider.actionList).toHaveBeenCalledWith({
       path: `${ENDPOINTS_ACTION_LIST_ROUTE}`,
       query: {
-        agentIds: JSON.stringify(['123', '456']),
-        commands: JSON.stringify(['isolate', 'unisolate']),
+        agentIds: ['123', '456'],
+        commands: ['isolate', 'unisolate'],
         endDate: 'now',
         page: 2,
         pageSize: 20,
         startDate: 'now-5d',
-        userIds: JSON.stringify(['elastic', 'citsale']),
+        userIds: ['elastic', 'citsale'],
       },
     });
   });
