@@ -2991,6 +2991,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ci-stats-performance-metrics@link:bazel-bin/packages/kbn-ci-stats-performance-metrics":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ci-stats-reporter@link:bazel-bin/packages/kbn-ci-stats-reporter":
   version "0.0.0"
   uid ""
@@ -3060,6 +3064,14 @@
   uid ""
 
 "@kbn/core-base-server-mocks@link:bazel-bin/packages/core/base/core-base-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-config-server-internal@link:bazel-bin/packages/core/config/core-config-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-config-server-mocks@link:bazel-bin/packages/core/config/core-config-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -3243,6 +3255,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/kbn-ci-stats-performance-metrics@link:bazel-bin/packages/kbn-kbn-ci-stats-performance-metrics":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kibana-json-schema@link:bazel-bin/packages/kbn-kibana-json-schema":
   version "0.0.0"
   uid ""
@@ -3256,6 +3272,18 @@
   uid ""
 
 "@kbn/mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-agg-utils@link:bazel-bin/x-pack/packages/ml/agg_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-is-populated-object@link:bazel-bin/x-pack/packages/ml/is_populated_object":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-string-hash@link:bazel-bin/x-pack/packages/ml/string_hash":
   version "0.0.0"
   uid ""
 
@@ -6394,6 +6422,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__ci-stats-performance-metrics@link:bazel-bin/packages/kbn-ci-stats-performance-metrics/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__ci-stats-reporter@link:bazel-bin/packages/kbn-ci-stats-reporter/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6475,6 +6507,14 @@
   uid ""
 
 "@types/kbn__core-common-internal-base@link:bazel-bin/packages/core/common/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-config-server-internal@link:bazel-bin/packages/core/config/core-config-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-config-server-mocks@link:bazel-bin/packages/core/config/core-config-server-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6646,6 +6686,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__kbn-ci-stats-performance-metrics@link:bazel-bin/packages/kbn-kbn-ci-stats-performance-metrics/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__kibana-json-schema@link:bazel-bin/packages/kbn-kibana-json-schema/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6659,6 +6703,18 @@
   uid ""
 
 "@types/kbn__mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ml-agg-utils@link:bazel-bin/x-pack/packages/ml/agg_utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ml-is-populated-object@link:bazel-bin/x-pack/packages/ml/is_populated_object/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ml-string-hash@link:bazel-bin/x-pack/packages/ml/string_hash/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -23844,6 +23900,13 @@ qs@^6.10.0:
   version "6.10.1"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.10.1.tgz#4931482fa8d647a5aab799c5271d2133b981fb6a"
   integrity sha512-M528Hph6wsSVOBiYUnGf+K/7w0hNshs/duGsNXPUCLH5XAqjEtiPGwNONLV0tBH8NoGb0mvD5JubnUTrujKDTg==
+  dependencies:
+    side-channel "^1.0.4"
+
+qs@^6.10.5:
+  version "6.10.5"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.10.5.tgz#974715920a80ff6a262264acd2c7e6c2a53282b4"
+  integrity sha512-O5RlPh0VFtR78y79rgcgKK4wbAI0C5zGVLztOIdpWX6ep368q5Hv6XRxDvXuZ9q3C6v+e3n8UfZZJw7IIG27eQ==
   dependencies:
     side-channel "^1.0.4"
 
