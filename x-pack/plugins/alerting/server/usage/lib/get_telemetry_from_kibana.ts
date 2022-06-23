@@ -10,20 +10,19 @@ import type {
   AggregationsCardinalityAggregate,
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
-  AggregationsBuckets,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { AlertingUsage } from '../types';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
-import { replaceDotSymbolsInRuleTypeIds } from './replace_dots_in_rule_type_id';
+import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 
-export interface GetTotalCountsOpts {
+interface Opts {
   esClient: ElasticsearchClient;
   kibanaIndex: string;
   logger: Logger;
 }
 
-export type GetTotalCountsResults = Pick<
+type GetTotalCountsResults = Pick<
   AlertingUsage,
   | 'count_total'
   | 'count_by_type'
@@ -32,21 +31,27 @@ export type GetTotalCountsResults = Pick<
   | 'throttle_time_number_s'
   | 'schedule_time_number_s'
   | 'connectors_per_alert'
-  | 'count_rules_namespaces'
 >;
+
+interface GetTotalCountInUseResults {
+  countTotal: number;
+  countByType: Record<string, number>;
+  countNamespaces: number;
+}
 
 export async function getTotalCountAggregations({
   esClient,
   kibanaIndex,
   logger,
-}: GetTotalCountsOpts): Promise<GetTotalCountsResults> {
+}: Opts): Promise<GetTotalCountsResults> {
   try {
-    const results = await esClient.search({
+    const query = {
       index: kibanaIndex,
+      size: 0,
       body: {
-        size: 0,
         query: {
           bool: {
+            // Aggregate over all rule saved objects
             filter: [{ term: { type: 'alert' } }],
           },
         },
@@ -66,6 +71,7 @@ export async function getTotalCountAggregations({
                 }`,
             },
           },
+          // Convert schedule interval duration string from rule saved object to interval in seconds
           rule_schedule_interval: {
             type: 'long',
             script: {
@@ -101,6 +107,7 @@ export async function getTotalCountAggregations({
               `,
             },
           },
+          // Convert throttle interval duration string from rule saved object to interval in seconds
           rule_throttle_interval: {
             type: 'long',
             script: {
@@ -144,7 +151,6 @@ export async function getTotalCountAggregations({
               size: NUM_ALERTING_RULE_TYPES,
             },
           },
-          namespaces_count: { cardinality: { field: 'namespaces' } },
           max_throttle_time: { max: { field: 'rule_throttle_interval' } },
           min_throttle_time: { min: { field: 'rule_throttle_interval' } },
           avg_throttle_time: { avg: { field: 'rule_throttle_interval' } },
@@ -156,11 +162,15 @@ export async function getTotalCountAggregations({
           avg_actions_count: { avg: { field: 'rule_action_count' } },
         },
       },
-    });
+    };
+
+    logger.debug(`query for getTotalCountAggregations - ${JSON.stringify(query)}`);
+    const results = await esClient.search(query);
+
+    logger.debug(`results for getTotalCountAggregations query - ${JSON.stringify(results)}`);
 
     const aggregations = results.aggregations as {
       by_rule_type_id: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
-      namespaces_count: AggregationsCardinalityAggregate;
       max_throttle_time: AggregationsSingleMetricAggregateBase;
       min_throttle_time: AggregationsSingleMetricAggregateBase;
       avg_throttle_time: AggregationsSingleMetricAggregateBase;
@@ -177,9 +187,7 @@ export async function getTotalCountAggregations({
 
     return {
       count_total: totalRulesCount ?? 0,
-      count_by_type: replaceDotSymbolsInRuleTypeIds(
-        parseRuleTypeBucket(aggregations.by_rule_type_id.buckets)
-      ),
+      count_by_type: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
       throttle_time: {
         min: `${aggregations.min_throttle_time.value}s`,
         avg: `${aggregations.avg_throttle_time.value}s`,
@@ -205,7 +213,6 @@ export async function getTotalCountAggregations({
         avg: aggregations.avg_actions_count.value ?? 0,
         max: aggregations.max_actions_count.value ?? 0,
       },
-      count_rules_namespaces: aggregations.namespaces_count.value ?? 0,
     };
   } catch (err) {
     logger.warn(
@@ -239,20 +246,64 @@ export async function getTotalCountAggregations({
         avg: 0,
         max: 0,
       },
-      count_rules_namespaces: 0,
     };
   }
 }
 
-export function parseRuleTypeBucket(
-  ruleTypeBuckets: AggregationsBuckets<AggregationsStringTermsBucketKeys>
-) {
-  const buckets = ruleTypeBuckets as AggregationsStringTermsBucketKeys[];
-  return (buckets ?? []).reduce((acc, curr) => {
-    const ruleType: string = curr.key;
-    return {
-      ...acc,
-      [ruleType]: curr.doc_count,
+export async function getTotalCountInUse({
+  esClient,
+  kibanaIndex,
+  logger,
+}: Opts): Promise<GetTotalCountInUseResults> {
+  try {
+    const query = {
+      index: kibanaIndex,
+      size: 0,
+      body: {
+        query: {
+          bool: {
+            // Aggregate over only enabled rule saved objects
+            filter: [{ term: { type: 'alert' } }, { term: { 'alert.enabled': true } }],
+          },
+        },
+        aggs: {
+          namespaces_count: { cardinality: { field: 'namespaces' } },
+          by_rule_type_id: {
+            terms: {
+              field: 'alert.alertTypeId',
+              size: NUM_ALERTING_RULE_TYPES,
+            },
+          },
+        },
+      },
     };
-  }, {});
+
+    logger.debug(`query for getTotalCountInUse - ${JSON.stringify(query)}`);
+    const results = await esClient.search(query);
+
+    logger.debug(`results for getTotalCountInUse query - ${JSON.stringify(results)}`);
+
+    const aggregations = results.aggregations as {
+      by_rule_type_id: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
+      namespaces_count: AggregationsCardinalityAggregate;
+    };
+
+    const totalEnabledRulesCount =
+      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
+
+    return {
+      countTotal: totalEnabledRulesCount ?? 0,
+      countByType: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+      countNamespaces: aggregations.namespaces_count.value ?? 0,
+    };
+  } catch (err) {
+    logger.warn(
+      `Error executing alerting telemetry task: getTotalCountInUse - ${JSON.stringify(err)}`
+    );
+    return {
+      countTotal: 0,
+      countByType: {},
+      countNamespaces: 0,
+    };
+  }
 }

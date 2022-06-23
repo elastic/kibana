@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-function replaceDotSymbols(strToReplace: string) {
+export function replaceDotSymbols(strToReplace: string) {
   return strToReplace.replaceAll('.', '__');
 }
 
