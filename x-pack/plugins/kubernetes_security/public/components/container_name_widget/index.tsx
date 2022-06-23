@@ -17,6 +17,7 @@ import { CONTAINER_IMAGE_NAME } from '../../../common/constants';
 
 export interface ContainerNameWidgetDataValueMap {
   key: string;
+  doc_count:number;
   count_by_aggs: {
     value: number;
   };
@@ -163,6 +164,7 @@ export const ContainerNameWidget = ({
     border: 'none',
     header: 'underline',
     fontSize: 's',
+    footer:'overline'
   }
 
   const ColumnVisibility : EuiDataGridColumnVisibility = {
@@ -178,8 +180,9 @@ export const ContainerNameWidget = ({
   }
 
   return (
-    <EuiPanel css={styles.tablePadding}>
+    <EuiPanel css={styles.tablePadding} hasShadow={false}>
       <EuiDataGrid
+        aria-label="Container name sessions table widget"
         columns={columns}
         rowCount={containerNameArray.length}
         toolbarVisibility={false}

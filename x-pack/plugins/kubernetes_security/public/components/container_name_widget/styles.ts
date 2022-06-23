@@ -42,6 +42,8 @@ export const useStyles = () => {
       height: '228px',
       overflow: 'hiddne',
       padding: '9px 8px 16px 16px',
+      border: euiTheme.border.thin,
+      borderRadius: euiTheme.border.radius.medium,
     };
 
     return {
