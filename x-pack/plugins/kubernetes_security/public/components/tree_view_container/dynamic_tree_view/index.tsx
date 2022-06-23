@@ -6,31 +6,23 @@
  */
 
 import React, { useEffect, useState, useRef, MouseEvent } from 'react';
-import { EuiIcon, EuiText, EuiIconProps, EuiI18n, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiText,
+  EuiIconProps,
+  EuiI18n,
+  EuiScreenReaderOnly,
+  EuiBadge,
+  keys,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import {
+  TREE_NAVIGATION_LOADING,
+  TREE_NAVIGATION_SHOW_MORE,
+} from '../../../../common/translations';
 import { QueryDslQueryContainerBool } from '../../../types';
 import { useFetchDynamicTreeView } from './hooks';
-
-export const ENTER = 'Enter';
-export const SPACE = ' ';
-export const ESCAPE = 'Escape';
-export const TAB = 'Tab';
-export const BACKSPACE = 'Backspace';
-export const F2 = 'F2';
-
-export const ALT = 'Alt';
-export const SHIFT = 'Shift';
-export const CTRL = 'Control';
-export const META = 'Meta'; // Windows, Command, Option
-
-export const ARROW_DOWN = 'ArrowDown';
-export const ARROW_UP = 'ArrowUp';
-export const ARROW_LEFT = 'ArrowLeft';
-export const ARROW_RIGHT = 'ArrowRight';
-
-export const PAGE_UP = 'PageUp';
-export const PAGE_DOWN = 'PageDown';
-export const END = 'End';
-export const HOME = 'Home';
+import { useStyles } from './styles';
 
 const DynamicTreeViewExpander = ({
   children,
@@ -51,6 +43,7 @@ const DynamicTreeViewExpander = ({
 type DynamicTree = {
   key: string;
   iconProps: EuiIconProps;
+  name: string;
 };
 
 type Props = {
@@ -70,18 +63,17 @@ export const DynamicTreeView = ({
   onSelect,
   ...props
 }: Props) => {
-  const { data, fetchNextPage, hasNextPage, isLoading } = useFetchDynamicTreeView(
-    query,
-    tree[depth].key,
-    indexPattern
-  );
+  const styles = useStyles(depth);
+
+  const { data, fetchNextPage, isFetchingNextPage, hasNextPage, isLoading } =
+    useFetchDynamicTreeView(query, tree[depth].key, indexPattern);
 
   const ariaLabel = props['aria-label'];
 
   const buttonRef = useRef<Record<string, any>>({});
 
   const onChildrenKeydown = (event: React.KeyboardEvent, key: string) => {
-    if (event.key === ARROW_LEFT) {
+    if (event.key === keys.ARROW_LEFT) {
       event.preventDefault();
       event.stopPropagation();
       buttonRef.current[key].focus();
@@ -90,7 +82,7 @@ export const DynamicTreeView = ({
 
   const onLoadMoreKeydown = (event: React.KeyboardEvent) => {
     switch (event.key) {
-      case ARROW_DOWN: {
+      case keys.ARROW_DOWN: {
         const nodeButtons = Array.from(
           document.querySelectorAll(`[data-test-subj="dynamicTreeViewButton"]`)
         );
@@ -105,7 +97,7 @@ export const DynamicTreeView = ({
         }
         break;
       }
-      case ARROW_UP: {
+      case keys.ARROW_UP: {
         const nodeButtons = Array.from(
           document.querySelectorAll(`[data-test-subj="dynamicTreeViewButton"]`)
         );
@@ -120,7 +112,7 @@ export const DynamicTreeView = ({
         }
         break;
       }
-      case ARROW_RIGHT: {
+      case keys.ARROW_RIGHT: {
         event.preventDefault();
         event.stopPropagation();
         fetchNextPage();
@@ -138,8 +130,13 @@ export const DynamicTreeView = ({
 
   return (
     <EuiText size="s" className="euiTreeView__wrapper">
-      {isLoading && <div>Loading</div>}
-      {data?.pages?.length && (
+      {isLoading && (
+        <div>
+          <EuiLoadingSpinner size="s" />
+          <span css={styles.loadMoreTextLeft}>{TREE_NAVIGATION_LOADING}</span>
+        </div>
+      )}
+      {depth === 0 && (
         <EuiI18n
           token="euiTreeView.listNavigationInstructions"
           default="You can quickly navigate this list using arrow keys."
@@ -181,7 +178,7 @@ export const DynamicTreeView = ({
                   // Enable keyboard navigation
                   const onKeyDown = (event: React.KeyboardEvent) => {
                     switch (event.key) {
-                      case ARROW_DOWN: {
+                      case keys.ARROW_DOWN: {
                         const nodeButtons = Array.from(
                           document.querySelectorAll(`[data-test-subj="dynamicTreeViewButton"]`)
                         );
@@ -196,7 +193,7 @@ export const DynamicTreeView = ({
                         }
                         break;
                       }
-                      case ARROW_UP: {
+                      case keys.ARROW_UP: {
                         const nodeButtons = Array.from(
                           document.querySelectorAll(`[data-test-subj="dynamicTreeViewButton"]`)
                         );
@@ -211,19 +208,19 @@ export const DynamicTreeView = ({
                         }
                         break;
                       }
-                      case ARROW_RIGHT: {
+                      case keys.ARROW_RIGHT: {
                         if (!isExpanded && !isLastNode) {
                           event.preventDefault();
                           event.stopPropagation();
-                          onToggleExpand();
+                          onToggle();
                         }
                         break;
                       }
-                      case ARROW_LEFT: {
+                      case keys.ARROW_LEFT: {
                         if (isExpanded) {
                           event.preventDefault();
                           event.stopPropagation();
-                          onToggleExpand();
+                          onToggle();
                         }
                       }
                       default:
@@ -235,6 +232,7 @@ export const DynamicTreeView = ({
                       className={`euiTreeView__node ${
                         isExpanded ? 'euiTreeView__node--expanded' : ''
                       }`}
+                      key={aggData.key}
                     >
                       <button
                         data-test-subj="dynamicTreeViewButton"
@@ -249,10 +247,7 @@ export const DynamicTreeView = ({
                             type={isExpanded ? 'arrowDown' : 'arrowRight'}
                           />
                         )}
-                        <EuiIcon
-                          {...tree[depth].iconProps}
-                          style={{ marginLeft: 4, marginRight: 4 }}
-                        />
+                        <EuiIcon {...tree[depth].iconProps} css={styles.labelIcon} />
                         <span className="euiTreeView__nodeLabel">{aggData.key}</span>
                       </button>
                       {isExpanded && (
@@ -280,14 +275,25 @@ export const DynamicTreeView = ({
           });
         })}
         {hasNextPage && (
-          <li className="euiTreeView__node">
-            <button
+          <li className="euiTreeView__node" css={styles.loadMoreButtonWrapper}>
+            <EuiBadge
+              css={styles.loadMoreButton}
+              onClickAriaLabel={TREE_NAVIGATION_SHOW_MORE(tree[depth].name)}
               data-test-subj="dynamicTreeViewButton"
               onKeyDown={(event: React.KeyboardEvent) => onLoadMoreKeydown(event)}
               onClick={onClickNextPageHandler}
             >
-              load more
-            </button>
+              <span css={styles.loadMoreText}>
+                {isFetchingNextPage
+                  ? TREE_NAVIGATION_LOADING
+                  : TREE_NAVIGATION_SHOW_MORE(tree[depth].name)}
+              </span>
+              {isFetchingNextPage ? (
+                <EuiLoadingSpinner size="s" />
+              ) : (
+                <EuiIcon size="s" type="arrowDown" />
+              )}
+            </EuiBadge>
           </li>
         )}
       </ul>
