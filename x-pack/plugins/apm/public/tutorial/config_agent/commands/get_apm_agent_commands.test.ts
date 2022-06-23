@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { getCommands } from './get_commands';
+import { getApmAgentCommands } from './get_apm_agent_commands';
 
 describe('getCommands', () => {
   describe('unknown agent', () => {
     it('renders empty command', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'foo',
         policyDetails: {
           apmServerUrl: 'localhost:8220',
@@ -22,7 +22,7 @@ describe('getCommands', () => {
   });
   describe('java agent', () => {
     it('renders empty commands', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'java',
         policyDetails: {},
       });
@@ -37,7 +37,7 @@ describe('getCommands', () => {
       `);
     });
     it('renders with secret token and url', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'java',
         policyDetails: {
           apmServerUrl: 'localhost:8220',
@@ -58,7 +58,7 @@ describe('getCommands', () => {
   });
   describe('RUM(js) agent', () => {
     it('renders empty commands', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'js',
         policyDetails: {},
       });
@@ -82,7 +82,7 @@ describe('getCommands', () => {
       `);
     });
     it('renders with secret token and url', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'js',
         policyDetails: {
           apmServerUrl: 'localhost:8220',
@@ -111,7 +111,7 @@ describe('getCommands', () => {
   });
   describe('Node.js agent', () => {
     it('renders empty commands', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'node',
         policyDetails: {},
       });
@@ -136,7 +136,7 @@ describe('getCommands', () => {
       `);
     });
     it('renders with secret token and url', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'node',
         policyDetails: {
           apmServerUrl: 'localhost:8220',
@@ -166,7 +166,7 @@ describe('getCommands', () => {
   });
   describe('Django agent', () => {
     it('renders empty commands', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'django',
         policyDetails: {},
       });
@@ -201,7 +201,7 @@ describe('getCommands', () => {
       `);
     });
     it('renders with secret token and url', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'django',
         policyDetails: {
           apmServerUrl: 'localhost:8220',
@@ -241,7 +241,7 @@ describe('getCommands', () => {
   });
   describe('Flask agent', () => {
     it('renders empty commands', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'flask',
         policyDetails: {},
       });
@@ -273,7 +273,7 @@ describe('getCommands', () => {
       `);
     });
     it('renders with secret token and url', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'flask',
         policyDetails: {
           apmServerUrl: 'localhost:8220',
@@ -310,7 +310,7 @@ describe('getCommands', () => {
   });
   describe('Ruby on Rails agent', () => {
     it('renders empty commands', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'rails',
         policyDetails: {},
       });
@@ -333,7 +333,7 @@ describe('getCommands', () => {
       `);
     });
     it('renders with secret token and url', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'rails',
         policyDetails: {
           apmServerUrl: 'localhost:8220',
@@ -361,7 +361,7 @@ describe('getCommands', () => {
   });
   describe('Rack agent', () => {
     it('renders empty commands', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'rack',
         policyDetails: {},
       });
@@ -384,7 +384,7 @@ describe('getCommands', () => {
       `);
     });
     it('renders with secret token and url', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'rack',
         policyDetails: {
           apmServerUrl: 'localhost:8220',
@@ -412,7 +412,7 @@ describe('getCommands', () => {
   });
   describe('Go agent', () => {
     it('renders empty commands', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'go',
         policyDetails: {},
       });
@@ -436,7 +436,7 @@ describe('getCommands', () => {
       `);
     });
     it('renders with secret token and url', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'go',
         policyDetails: {
           apmServerUrl: 'localhost:8220',
@@ -465,7 +465,7 @@ describe('getCommands', () => {
   });
   describe('dotNet agent', () => {
     it('renders empty commands', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'dotnet',
         policyDetails: {},
       });
@@ -482,7 +482,7 @@ describe('getCommands', () => {
       `);
     });
     it('renders with secret token and url', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'dotnet',
         policyDetails: {
           apmServerUrl: 'localhost:8220',
@@ -504,7 +504,7 @@ describe('getCommands', () => {
   });
   describe('PHP agent', () => {
     it('renders empty commands', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'php',
         policyDetails: {},
       });
@@ -517,7 +517,7 @@ describe('getCommands', () => {
       `);
     });
     it('renders with secret token and url', () => {
-      const commands = getCommands({
+      const commands = getApmAgentCommands({
         variantId: 'php',
         policyDetails: {
           apmServerUrl: 'localhost:8220',
