@@ -21,7 +21,7 @@ import { writePidFile } from './write_pid_file';
 /**
  * @internal
  */
-export interface PrebootDeps {
+export interface EnvironmentServicePrebootDeps {
   /**
    * {@link AnalyticsServicePreboot}
    */
@@ -59,7 +59,7 @@ export class EnvironmentService {
     this.configService = core.configService;
   }
 
-  public async preboot({ analytics }: PrebootDeps) {
+  public async preboot({ analytics }: EnvironmentServicePrebootDeps) {
     // IMPORTANT: This code is based on the assumption that none of the configuration values used
     // here is supposed to change during preboot phase and it's safe to read them only once.
     const [pathConfig, serverConfig, pidConfig] = await Promise.all([

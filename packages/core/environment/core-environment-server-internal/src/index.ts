@@ -10,6 +10,7 @@ export { EnvironmentService } from './environment_service';
 export type {
   InternalEnvironmentServicePreboot,
   InternalEnvironmentServiceSetup,
+  EnvironmentServicePrebootDeps,
 } from './environment_service';
 export { pidConfig } from './pid_config';
 export type { PidConfigType } from './pid_config';
