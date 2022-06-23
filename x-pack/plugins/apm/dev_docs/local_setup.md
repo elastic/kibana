@@ -90,8 +90,8 @@ node x-pack/plugins/apm/scripts/create_apm_users.js --username admin --password 
 
 This will create:
 
-- **viewer_user**: User with `viewer` role (read-only)
-- **editor_user**: User with `editor` role (read/write)
+- **viewer**: User with `viewer` role (read-only)
+- **editor**: User with `editor` role (read/write)
 
 # Debugging Elasticsearch queries
 
