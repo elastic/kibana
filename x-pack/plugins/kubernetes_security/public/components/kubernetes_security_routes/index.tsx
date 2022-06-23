@@ -12,7 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiLoadingContent,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -31,11 +30,13 @@ import { PercentWidget } from '../percent_widget';
 import { KubernetesSecurityDeps } from '../../types';
 import { AggregateResult } from '../../../common/types/aggregate';
 import { useStyles } from './styles';
+import { TreeViewContainer } from '../tree_view_container';
 
 const KubernetesSecurityRoutesComponent = ({
   filter,
   indexPattern,
   globalFilter,
+  renderSessionsView,
 }: KubernetesSecurityDeps) => {
   const styles = useStyles();
 
@@ -203,10 +204,7 @@ const KubernetesSecurityRoutesComponent = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <div css={styles.treeViewContainer}>
-          <EuiLoadingContent lines={3} />
-          <EuiLoadingContent lines={3} />
-        </div>
+        <TreeViewContainer globalFilter={globalFilter} renderSessionsView={renderSessionsView} />
       </Route>
     </Switch>
   );

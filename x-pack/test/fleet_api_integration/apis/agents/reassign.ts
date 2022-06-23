@@ -16,7 +16,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('reassign agent(s)', () => {
+  describe('fleet_reassign_agent', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
@@ -190,6 +190,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy2',
           })
           .expect(200);
+
         const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
         expect(body.total).to.eql(4);
         body.items.forEach((agent: any) => {

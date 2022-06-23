@@ -8,7 +8,7 @@ Array [
     class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
   />,
   <div
-    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger eui-textLeft css-1flvw80-euiCallOut"
+    class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger eui-textLeft css-j9niqn-euiPanel-none-m-danger-euiCallOut"
   >
     <p
       class="euiTitle euiCallOutHeader__title css-st4zhi-euiTitle-xs-euiCallOutHeader-danger"
@@ -16,39 +16,35 @@ Array [
       Errors found
     </p>
     <div
-      class="euiText euiText--small css-i7i3v9-euiCallOut__description"
+      class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
     >
-      <div
-        class="euiTextColor euiTextColor--default"
+      <p>
+        There were some errors encountered in trying to check Elasticsearch settings. You need administrator rights to check the settings and, if needed, to enable the monitoring collection setting.
+      </p>
+      <dl
+        class="euiDescriptionList euiDescriptionList--row"
       >
-        <p>
-          There were some errors encountered in trying to check Elasticsearch settings. You need administrator rights to check the settings and, if needed, to enable the monitoring collection setting.
-        </p>
-        <dl
-          class="euiDescriptionList euiDescriptionList--row"
+        <dt
+          class="euiDescriptionList__title"
         >
-          <dt
-            class="euiDescriptionList__title"
-          >
-            403 Forbidden
-          </dt>
-          <dd
-            class="euiDescriptionList__description"
-          >
-            no access for you
-          </dd>
-          <dt
-            class="euiDescriptionList__title"
-          >
-            500 Internal Server Error
-          </dt>
-          <dd
-            class="euiDescriptionList__description"
-          >
-            An internal server error occurred
-          </dd>
-        </dl>
-      </div>
+          403 Forbidden
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          no access for you
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+        >
+          500 Internal Server Error
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          An internal server error occurred
+        </dd>
+      </dl>
     </div>
   </div>,
 ]
