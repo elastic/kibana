@@ -382,7 +382,9 @@ export const RulesList: React.FunctionComponent = () => {
 
   const getRuleTagFilter = () => {
     if (isRuleTagFilterEnabled) {
-      return [<RuleTagFilter tags={tags} selectedTags={tagsFilter} onChange={setTagsFilter} />];
+      return [
+        <RuleTagFilter isGrouped tags={tags} selectedTags={tagsFilter} onChange={setTagsFilter} />,
+      ];
     }
     return [];
   };
