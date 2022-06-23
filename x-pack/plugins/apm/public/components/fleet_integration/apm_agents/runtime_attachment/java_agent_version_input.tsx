@@ -38,14 +38,14 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
       data &&
       (version === null || version === undefined)
     ) {
-      const latestVersion = data.versions[0];
+      const latestVersion = data?.versions?.[0] || 'latest';
       onChange(latestVersion);
     }
   }, [data, status, version, onChange]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
   const options =
-    !isLoading && data
+    !isLoading && data?.versions
       ? data.versions.map((aVersion) => ({ label: aVersion }))
       : [];
   const hasOptions = !!options.length;

@@ -264,7 +264,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
 const javaAgentVersions = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/java_agent_versions',
   options: { tags: [] },
-  handler: async (): Promise<{ versions: string[] }> => {
+  handler: async (): Promise<{ versions: string[] | undefined }> => {
     const versions = await getJavaAgentVersionsFromRegistry();
     return {
       versions,

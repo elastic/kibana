@@ -14,7 +14,12 @@ const versionRegex = /<version>(\d+\.\d+\.\d+.*?)<\/version>/gm;
 
 export async function getJavaAgentVersionsFromRegistry() {
   const response = await (await fetch(mavenJavaAgentUrl)).text();
-  const versions = [...response.matchAll(versionRegex)]
+  const matchedVersions = [...response.matchAll(versionRegex)];
+
+  if (!matchedVersions.length) {
+    return undefined;
+  }
+  const versions = matchedVersions
     .map((aMatch) => aMatch[1])
     .concat(['latest'])
     .reverse();
