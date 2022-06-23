@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
@@ -43,8 +43,14 @@ function toPipelineItem(pipelineName: string, canEdit = false): PipelineItem {
 
 function useDatastreamIngestPipelines(
   packageInfo: PackageInfo,
-  dataStream: { dataset: string; type: string }
+  dataStream: { dataset: string; type: string },
+  pageUrl: string | null
 ) {
+  const [addPipelineUrl, setAddPipelineUrl] = useState('');
+
+  const { share } = useStartServices();
+  const ingestPipelineLocator = share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR');
+
   const defaultPipelineName = getPipelineNameForDatastream({
     dataStream,
     packageVersion: packageInfo.version,
@@ -61,10 +67,25 @@ function useDatastreamIngestPipelines(
     return [toPipelineItem(defaultPipelineName)];
   }, [defaultPipelineName, customPipelineName, res.data]);
 
+  useEffect(() => {
+    async function getUrl() {
+      if (!ingestPipelineLocator) {
+        return;
+      }
+      const createUrl = await ingestPipelineLocator.getUrl({
+        page: 'pipeline_create',
+      });
+      setAddPipelineUrl(`${createUrl}?name=${customPipelineName}&redirect_path=${pageUrl}`);
+    }
+
+    getUrl();
+  }, [customPipelineName, pageUrl, ingestPipelineLocator]);
+
   return {
     isLoading: res.isLoading,
     hasCustom: !res.isLoading && res.error?.statusCode !== 404,
     pipelines,
+    addPipelineUrl,
   };
 }
 
@@ -82,12 +103,18 @@ export const PackagePolicyEditorDatastreamPipelines: React.FunctionComponent<
           policyId,
           packagePolicyId,
         })
-      : null;
+      : getHref('integration_policy_edit', {
+          packagePolicyId,
+        });
 
   const { application, share, docLinks } = useStartServices();
   const ingestPipelineLocator = share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR');
 
-  const { pipelines, hasCustom, isLoading } = useDatastreamIngestPipelines(packageInfo, dataStream);
+  const { pipelines, addPipelineUrl, hasCustom, isLoading } = useDatastreamIngestPipelines(
+    packageInfo,
+    dataStream,
+    pageUrl
+  );
 
   if (!dataStream) {
     return null;
@@ -198,6 +225,7 @@ export const PackagePolicyEditorDatastreamPipelines: React.FunctionComponent<
             flush="left"
             iconType="plusInCircle"
             data-test-subj="datastreamAddCustomIngestPipelineBtn"
+            href={addPipelineUrl}
           >
             <FormattedMessage
               id="xpack.fleet.packagePolicyEditor.datastreamIngestPipelines.addCustomButn"

@@ -32,7 +32,6 @@ function useComponentTemplates(dataStream: { dataset: string; type: string }) {
   ];
 }
 
-// Work in progress only here for demo for now
 export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
   PackagePolicyEditorDatastreamMappingsProps
 > = ({ dataStream, packageInfo }) => {
@@ -47,7 +46,9 @@ export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
           policyId,
           packagePolicyId,
         })
-      : null;
+      : getHref('integration_policy_edit', {
+          packagePolicyId,
+        });
 
   const { application, docLinks } = useStartServices();
   const componentTemplateItems = useComponentTemplates(dataStream);
