@@ -10,34 +10,17 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'common',
-    'spaceSelector',
-    'home',
-    'header',
-    'watcher',
-    'security',
-  ]);
+  const PageObjects = getPageObjects(['common', 'home', 'header', 'watcher', 'security']);
   const a11y = getService('a11y');
-  // const testSubjects = getService('testSubjects');
-  // private readonly find = this.ctx.getService('find');
 
   describe('Kibana Stack Management Watcher a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('watcher');
-      // await a11y.testAppSnapshot();
     });
 
-    it('renders the page without a11y errors', async () => {
-      await PageObjects.common.navigateToApp('watcher');
+    it('renders the watcher page without a11y errors', async () => {
       await a11y.testAppSnapshot();
     });
-
-    // //add noWatchesPage() in watcher page
-    // it('a11y tests for no watches found', async () => {
-    //   await PageObjects.watcher.noWatchesPage();
-    //   await a11y.testAppSnapshot();
-    // });
 
     it('a11y tests for create watch button', async function () {
       await PageObjects.watcher.createWatch('test', 'test');
