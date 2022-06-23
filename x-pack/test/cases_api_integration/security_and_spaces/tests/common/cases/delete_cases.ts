@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('rbac', () => {
-      it('should delete a case', async () => {
+      it('User: security solution only - should delete a case', async () => {
         const postedCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),

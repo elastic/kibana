@@ -30,7 +30,6 @@ import {
   obsSecRead,
   noKibanaPrivileges,
   testDisabled,
-  secOnlyDelete,
 } from '../../../../common/lib/authentication/users';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -315,14 +314,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      for (const user of [
-        globalRead,
-        secOnlyDelete,
-        secOnlyRead,
-        obsOnlyRead,
-        obsSecRead,
-        noKibanaPrivileges,
-      ]) {
+      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
         it(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should NOT create a case`, async () => {
