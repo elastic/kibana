@@ -48,7 +48,11 @@ import { useTableSettings } from '../../data_frame_analytics/pages/analytics_man
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
-import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../../common/constants/trained_models';
+import {
+  DEPLOYMENT_STATE,
+  TRAINED_MODEL_TYPE,
+  BUILT_IN_MODEL_TYPE,
+} from '../../../../common/constants/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
 import { TestTrainedModelFlyout, isTestable, isTestEnabled } from './test_models';
@@ -69,11 +73,6 @@ export const getDefaultModelsListState = (): ListingPageUrlState => ({
   sortField: ModelsTableToConfigMapping.id,
   sortDirection: 'asc',
 });
-
-export const BUILT_IN_MODEL_TYPE = i18n.translate(
-  'xpack.ml.trainedModels.modelsList.builtInModelLabel',
-  { defaultMessage: 'built-in' }
-);
 
 interface Props {
   pageState?: ListingPageUrlState;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const DEPLOYMENT_STATE = {
   STARTED: 'started',
   STARTING: 'starting',
@@ -30,3 +32,8 @@ export const SUPPORTED_PYTORCH_TASKS = {
 } as const;
 export type SupportedPytorchTasksType =
   typeof SUPPORTED_PYTORCH_TASKS[keyof typeof SUPPORTED_PYTORCH_TASKS];
+
+export const BUILT_IN_MODEL_TYPE = i18n.translate(
+  'xpack.ml.trainedModels.modelsList.builtInModelLabel',
+  { defaultMessage: 'built-in' }
+);

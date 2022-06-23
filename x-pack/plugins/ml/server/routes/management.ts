@@ -13,14 +13,13 @@ import { listTypeSchema } from './schemas/management_schema';
 import { jobServiceProvider } from '../models/job_service';
 import { checksFactory } from '../saved_objects';
 import { BUILT_IN_MODEL_TAG } from '../../common/constants/data_frame_analytics';
+import { BUILT_IN_MODEL_TYPE } from '../../common/constants/trained_models';
 import type {
   AnomalyDetectionManagementItems,
   AnalyticsManagementItems,
   TrainedModelsManagementItems,
 } from '../../common/types/management';
 
-// TODO translate??
-const BUILT_IN_MODEL_TYPE = 'built-in';
 /**
  * Routes for job service
  */
@@ -102,8 +101,6 @@ export function managementRoutes({ router, routeGuard }: RouteInitialization) {
                   dest_index: j.dest.index,
                   job_type: Object.keys(j.analysis)[0] ?? '',
                   state: dfaStatsMapped[id]?.state ?? '',
-                  // memory_status: statsMapped[id]?.memory_usage.status ?? '',
-                  // progress: statsMapped[id]?.progress ?? {},
                   spaces: dfaJobStatus['data-frame-analytics'][id] ?? [],
                 };
               });
@@ -132,7 +129,6 @@ export function managementRoutes({ router, routeGuard }: RouteInitialization) {
                 return {
                   id,
                   description: m.description ?? '',
-                  // create_time: m.create_time,
                   state: modelStatsMapped[id].deployment_stats?.state ?? '',
                   type: [
                     m.model_type,
