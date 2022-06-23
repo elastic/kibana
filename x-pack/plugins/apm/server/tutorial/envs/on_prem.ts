@@ -22,6 +22,7 @@ import {
   createPhpAgentInstructions,
   createRackAgentInstructions,
   createRailsAgentInstructions,
+  createOpenTelemetryAgentInstructions,
 } from '../../../common/tutorial/instructions/apm_agent_instructions';
 import { getOnPremApmServerInstructionSet } from './on_prem_apm_server_instruction_set';
 
@@ -79,6 +80,10 @@ export function onPremInstructions({
           {
             id: INSTRUCTION_VARIANT.PHP,
             instructions: createPhpAgentInstructions(),
+          },
+          {
+            id: INSTRUCTION_VARIANT.OPEN_TELEMETRY,
+            instructions: createOpenTelemetryAgentInstructions(),
           },
         ],
         statusCheck: {
