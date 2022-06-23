@@ -214,7 +214,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
     const results = await AgentService.reassignAgents(
       soClient,
       esClient,
-      agentOptions,
+      { ...agentOptions, perPage: request.body.perPage },
       request.body.policy_id
     );
 
