@@ -99,6 +99,8 @@ export class SavedSearchEmbeddable
 
   private node?: HTMLElement;
 
+  reportsEmbeddableLoad = true;
+
   constructor(
     {
       savedSearch,

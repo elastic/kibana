@@ -119,6 +119,8 @@ export class VisualizeEmbeddable
     VisualizeByReferenceInput
   >;
 
+  reportsEmbeddableLoad = true;
+
   constructor(
     timefilter: TimefilterContract,
     { vis, editPath, editUrl, indexPatterns, deps, capabilities }: VisualizeEmbeddableConfiguration,

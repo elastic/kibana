@@ -209,6 +209,7 @@ export class Embeddable
   type = DOC_TYPE;
 
   deferEmbeddableLoad = true;
+  reportsEmbeddableLoad = true;
 
   private expressionRenderer: ReactExpressionRendererType;
   private savedVis: Document | undefined;

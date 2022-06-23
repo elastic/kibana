@@ -101,6 +101,7 @@ export class MapEmbeddable
 {
   type = MAP_SAVED_OBJECT_TYPE;
   deferEmbeddableLoad = true;
+  reportsEmbeddableLoad = true;
 
   private _isActive: boolean;
   private _savedMap: SavedMap;
