@@ -284,5 +284,5 @@ const getCheckedLabel = (timestamp: Moment) => {
 };
 
 const PaddedText = euiStyled(EuiText)`
-  padding-right: ${(props) => props.theme.eui.paddingSizes.xs};
+  padding-right: ${(props) => props.theme.eui.euiSizeXS};
 `;
