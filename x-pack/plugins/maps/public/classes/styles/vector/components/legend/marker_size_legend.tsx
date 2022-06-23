@@ -6,6 +6,7 @@
  */
 
 import React, { Component } from 'react';
+import _ from 'lodash';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { DynamicSizeProperty } from '../../properties/dynamic_size_property';
@@ -22,10 +23,13 @@ interface Props {
 
 interface State {
   label: string;
+  maxLabelWidth?: number;
 }
 
 export class MarkerSizeLegend extends Component<Props, State> {
   private _isMounted: boolean = false;
+  private _textRefs: Record<string, RefObject<TextElement>> = {};
+  private _prevFieldMeta = this.props.style.getRangeFieldMeta();
 
   state: State = {
     label: EMPTY_VALUE,
@@ -38,6 +42,29 @@ export class MarkerSizeLegend extends Component<Props, State> {
 
   componentDidUpdate() {
     this._loadLabel();
+
+    if (this.state.maxLabelWidth === undefined && Object.values(this._textRefs).length) {
+      const missingRefElements = Object.values(this._textRefs).some(ref => {
+        return ref.current == null;
+      });
+      if (!missingRefElements) {
+        let maxLabelWidth = 0;
+        Object.values(this._textRefs).forEach(ref => {
+          const width = ref.current.getBBox().width;
+          if (width > maxLabelWidth) {
+            maxLabelWidth = width;
+          }
+        });
+        this.setState({ maxLabelWidth });
+      }
+    }
+
+    const nextFieldMeta = this.props.style.getRangeFieldMeta();
+    if (!_.isEqual(this._prevFieldMeta, nextFieldMeta)) {
+      this._prevFieldMeta = nextFieldMeta;
+      this._textRefs = {};
+      this.setState({ maxLabelWidth: undefined });
+    }
   }
 
   componentWillUnmount() {
@@ -75,11 +102,18 @@ export class MarkerSizeLegend extends Component<Props, State> {
     const svgHeight = options.maxSize * 2 + HALF_FONT_SIZE + circleStyle.strokeWidth * 2;
     const circleCenterX = options.maxSize + circleStyle.strokeWidth;
     const circleBottomY = svgHeight - circleStyle.strokeWidth;
-    const maxLabelWidth = this._formatValue(fieldMeta.max).toString().length;
-
-    function makeMarker(radius: number, formattedValue: string | number) {
+    
+    const makeMarker = (radius: number, formattedValue: string | number) => {
       const circleCenterY = circleBottomY - radius;
       const circleTopY = circleCenterY - radius;
+      let ref = this._textRefs[formattedValue];
+      if (!ref) {
+        ref = React.createRef<TextElement>();
+        this._textRefs[formattedValue] = ref;
+      }
+      const textOffset = this.state.maxLabelWidth === undefined
+        ? -1000 // render labels off screen until max length is known
+        : this.state.maxLabelWidth + HALF_FONT_SIZE;
       return (
         <g key={radius}>
           <line
@@ -90,9 +124,10 @@ export class MarkerSizeLegend extends Component<Props, State> {
             y2={circleTopY}
           />
           <text
+            ref={ref}
             style={{ fontSize: FONT_SIZE, fill: euiThemeVars.euiTextColor }}
             textAnchor="end"
-            x={circleCenterX * 2.25 + (maxLabelWidth + 1) * HALF_FONT_SIZE}
+            x={circleCenterX * 2.25 + textOffset}
             y={circleTopY + HALF_FONT_SIZE}
           >
             {formattedValue}
