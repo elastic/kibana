@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -35,8 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('test/functional/fixtures/es_archiver/message_with_newline');
       await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.uiSettings.unset('defaultIndex');
-      await kibanaServer.uiSettings.unset('doc_table:legacy');
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should break text on newlines', async function () {
@@ -47,6 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const heightWithoutNewline = await dscTableRows[0].getAttribute('clientHeight');
         const heightWithNewline = await dscTableRows[1].getAttribute('clientHeight');
         log.debug(`Without newlines: ${heightWithoutNewline}, With newlines: ${heightWithNewline}`);
+
+        await PageObjects.common.sleep(10000);
         return Number(heightWithNewline) > Number(heightWithoutNewline);
       });
     });
