@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { ThemeService } from './theme_service';
-export { CoreThemeProvider } from './core_theme_provider';
-export type { ThemeServiceSetupDeps } from './theme_service';
-export { CoreContextProvider } from './core_context_provider';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/fatal-errors/core-fatal-errors-browser-mocks'],
+};

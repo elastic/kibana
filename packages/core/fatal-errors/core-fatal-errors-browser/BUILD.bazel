@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "core-theme-browser-internal"
-PKG_REQUIRE_NAME = "@kbn/core-theme-browser-internal"
+PKG_DIRNAME = "core-fatal-errors-browser"
+PKG_REQUIRE_NAME = "@kbn/core-fatal-errors-browser"
 
 SOURCE_FILES = glob(
   [
@@ -27,12 +27,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "@npm//react",
-  "@npm//rxjs",
-  "@npm//@elastic/eui",
-  "@npm//@emotion/cache",
-  "@npm//react-use",
-  "//packages/core/base/core-base-common",
+  "@npm//react"
 ]
 
 TYPES_DEPS = [
@@ -40,13 +35,6 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/react",
   "@npm//rxjs",
-  "@npm//@emotion/cache",
-  "@npm//react-use",
-  "@npm//@elastic/eui",
-  "//packages/core/base/core-base-common:npm_module_types",
-  "//packages/core/injected-metadata/core-injected-metadata-browser-internal:npm_module_types",
-  "//packages/core/theme/core-theme-browser:npm_module_types",
-  "//packages/core/i18n/core-i18n-browser:npm_module_types",
 ]
 
 jsts_transpiler(
