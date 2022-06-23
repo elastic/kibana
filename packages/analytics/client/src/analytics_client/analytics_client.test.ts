@@ -105,6 +105,28 @@ describe('AnalyticsClient', () => {
       );
     });
 
+    test('fails to validate the event and throws', () => {
+      analyticsClient.registerEventType({
+        eventType: 'testEvent',
+        schema: {
+          a_field: {
+            type: 'keyword',
+            _meta: {
+              description: 'description of a_field',
+            },
+          },
+        },
+      });
+      analyticsClient.optIn({ global: { enabled: true } });
+
+      expect(
+        () => analyticsClient.reportEvent('testEvent', { a_field: 100 }) // a_field is expected to be a string
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "Failed to validate payload coming from \\"Event Type 'testEvent'\\":
+        	- [a_field]: {\\"expected\\":\\"string\\",\\"actual\\":\\"number\\",\\"value\\":100}"
+      `);
+    });
+
     test('enqueues multiple events before specifying the optIn consent and registering a shipper', async () => {
       analyticsClient.registerEventType({
         eventType: 'testEvent',
@@ -422,6 +444,13 @@ describe('AnalyticsClient', () => {
     });
 
     test('It does not break if context emits `undefined`', async () => {
+      analyticsClient.shutdown();
+      analyticsClient = new AnalyticsClient({
+        logger,
+        isDev: false, // setting to `false` so the validation piece of logic does not kick in.
+        sendTo: 'staging',
+      });
+
       const context$ = new Subject<{ a_field: boolean } | undefined | void>();
       analyticsClient.registerContextProvider({
         name: 'contextProviderA',
@@ -436,6 +465,8 @@ describe('AnalyticsClient', () => {
         context$,
       });
 
+      // eslint-disable-next-line dot-notation
+      globalContext$ = analyticsClient['context$'];
       const globalContextPromise = lastValueFrom(globalContext$.pipe(take(3), toArray()));
       context$.next();
       context$.next(undefined);
@@ -669,6 +700,56 @@ describe('AnalyticsClient', () => {
         { a_field: true },
         { a_field: true },
         {},
+      ]);
+    });
+
+    test('validates the input and logs the error if invalid', () => {
+      const context$ = new Subject<{ a_field: boolean } | undefined>();
+      analyticsClient.registerContextProvider({
+        name: 'contextProviderA',
+        schema: {
+          a_field: {
+            type: 'boolean',
+            _meta: {
+              description: 'a_field description',
+            },
+          },
+        },
+        context$,
+      });
+
+      context$.next(undefined);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect((logger.error.mock.calls[0][0] as Error).message).toContain(
+        `Failed to validate payload coming from "Context Provider 'contextProviderA'"`
+      );
+    });
+
+    test('it does not stop the subscription after an error', async () => {
+      const context$ = new Subject<{ a_field: boolean } | undefined>();
+      analyticsClient.registerContextProvider({
+        name: 'contextProviderA',
+        schema: {
+          a_field: {
+            type: 'boolean',
+            _meta: {
+              description: 'a_field description',
+            },
+          },
+        },
+        context$,
+      });
+
+      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(2), toArray()));
+      context$.next({ a_field: '123' as unknown as boolean }); // cause the error
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect((logger.error.mock.calls[0][0] as Error).message).toContain(
+        `Failed to validate payload coming from "Context Provider 'contextProviderA'"`
+      );
+      context$.next({ a_field: true }); // send a good one
+      await expect(globalContextPromise).resolves.toEqual([
+        {}, // Original empty state
+        { a_field: true }, // 2nd emission (the errored one does not spread)
       ]);
     });
   });
