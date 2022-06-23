@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
-  const defaultSettings = { defaultIndex: 'logstash-*', 'doc_table:legacy': false };
+  const defaultSettings = { defaultIndex: 'logstash-*' };
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
