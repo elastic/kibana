@@ -324,10 +324,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    // Register alerts metadata
-    const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
-    registerAlertsTableConfiguration(alertsTableConfigurationRegistry);
-
     registerApmAlerts(observabilityRuleTypeRegistry);
 
     const locator = plugins.share.url.locators.create(

@@ -76,8 +76,8 @@ export function AlertsOverview() {
   const alertStateProps = {
     alertsTableConfigurationRegistry,
     id: 'service-overview-alerts',
-    configurationId: AlertConsumers.APM,
-    featureIds: [AlertConsumers.APM],
+    configurationId: AlertConsumers.OBSERVABILITY,
+    featureIds: [AlertConsumers.OBSERVABILITY],
     flyoutState: AlertsTableFlyoutState.external,
     query: alertQuery,
     showExpandToDetails: false,
