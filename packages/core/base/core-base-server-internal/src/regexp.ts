@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { EnvironmentService } from './environment_service';
-export type {
-  InternalEnvironmentServicePreboot,
-  InternalEnvironmentServiceSetup,
-} from './environment_service';
-export { config } from './pid_config';
-export type { PidConfigType } from './pid_config';
+export const uuidRegexp =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { EnvironmentService } from './environment_service';
-export type {
-  InternalEnvironmentServicePreboot,
-  InternalEnvironmentServiceSetup,
-} from './environment_service';
-export { pidConfig } from './pid_config';
-export type { PidConfigType } from './pid_config';
+import { TypeOf, schema } from '@kbn/config-schema';
+
+export const pidConfig = {
+  path: 'pid',
+  schema: schema.object({
+    file: schema.maybe(schema.string()),
+    exclusive: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export type PidConfigType = TypeOf<typeof pidConfig.schema>;

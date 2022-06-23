@@ -10,9 +10,9 @@ import uuid from 'uuid';
 import { join } from 'path';
 import { PathConfigType } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
+import { uuidRegexp } from '@kbn/core-base-server-internal';
 import { readFile, writeFile } from './fs';
-import { HttpConfigType } from '../http';
-import { uuidRegexp } from '../http/http_config';
+import { HttpConfigType } from './types';
 
 const FILE_ENCODING = 'utf8';
 const FILE_NAME = 'uuid';

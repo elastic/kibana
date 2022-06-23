@@ -12,8 +12,8 @@ import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
-import { HttpConfigType, config as httpConfigDef } from '../http';
-import { PidConfigType, config as pidConfigDef } from './pid_config';
+import { HttpConfigType } from './types';
+import { PidConfigType, pidConfig as pidConfigDef } from './pid_config';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { createDataFolder } from './create_data_folder';
 import { writePidFile } from './write_pid_file';
@@ -43,6 +43,9 @@ export interface InternalEnvironmentServicePreboot {
  */
 export type InternalEnvironmentServiceSetup = InternalEnvironmentServicePreboot;
 
+// hardcoding the http config path to avoid a cyclic dependency with the http packages
+const httpConfigPath = 'server';
+
 /** @internal */
 export class EnvironmentService {
   private readonly log: Logger;
@@ -61,7 +64,7 @@ export class EnvironmentService {
     // here is supposed to change during preboot phase and it's safe to read them only once.
     const [pathConfig, serverConfig, pidConfig] = await Promise.all([
       firstValueFrom(this.configService.atPath<PathConfigType>(pathConfigDef.path)),
-      firstValueFrom(this.configService.atPath<HttpConfigType>(httpConfigDef.path)),
+      firstValueFrom(this.configService.atPath<HttpConfigType>(httpConfigPath)),
       firstValueFrom(this.configService.atPath<PidConfigType>(pidConfigDef.path)),
     ]);
 
