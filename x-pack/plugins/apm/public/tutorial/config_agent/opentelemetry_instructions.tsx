@@ -121,12 +121,12 @@ export function OpenTelemetryInstructions({
             ),
           }}
         />
-        <br />
+        <EuiSpacer size="xs" />
         <FormattedMessage
           id="xpack.apm.tutorial.config_otel.description2"
           defaultMessage="The 'OTEL_METRICS_EXPORTER` and 'OTEL_LOGS_EXPORTER' environment variables may not be supported by some SDKs."
         />
-        <br />
+        <EuiSpacer size="xs" />
         <FormattedMessage
           id="xpack.apm.tutorial.config_otel.description3"
           defaultMessage="The exhaustive list of environment variables, command line parameters, and configuration code snippets (according to the OpenTelemetry specification) is available in the {otelInstrumentationGuide}. Some unstable OpenTelemetry clients may not support all features and may require alternate configuration mechanisms."
