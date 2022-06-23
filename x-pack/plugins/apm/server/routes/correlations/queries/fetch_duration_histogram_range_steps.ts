@@ -69,7 +69,7 @@ export const fetchDurationHistogramRangeSteps = async ({
     }
   );
 
-  if ((resp.hits.total as estypes.SearchTotalHits).value === 0) {
+  if (resp.hits.total.value === 0) {
     return getHistogramRangeSteps(0, 1, 100);
   }
 

@@ -203,10 +203,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(finalRawResponse?.overallHistogram?.length).to.be(101);
       expect(finalRawResponse?.fieldStats?.length).to.be(fieldsToSample.size);
 
-      // expect(finalRawResponse?.failedTransactionsCorrelations?.length).to.eql(
-      //   30,
-      //   `Expected 30 identified correlations, got ${finalRawResponse?.failedTransactionsCorrelations?.length}.`
-      // );
+      expect(finalRawResponse?.failedTransactionsCorrelations?.length).to.eql(
+        30,
+        `Expected 30 identified correlations, got ${finalRawResponse?.failedTransactionsCorrelations?.length}.`
+      );
 
       const sortedCorrelations = finalRawResponse?.failedTransactionsCorrelations?.sort(
         (a, b) => b.score - a.score

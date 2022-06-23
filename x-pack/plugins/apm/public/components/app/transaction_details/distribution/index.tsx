@@ -87,7 +87,7 @@ export function TransactionDistribution({
           chartData={chartData}
           hasData={hasData}
           percentileThresholdValue={percentileThresholdValue}
-          eventType={ProcessorEvent.span}
+          eventType={ProcessorEvent.transaction}
         />
 
         <EuiSpacer size="s" />

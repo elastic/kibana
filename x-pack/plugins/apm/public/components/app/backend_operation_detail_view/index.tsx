@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -44,10 +44,14 @@ export function BackendOperationDetailView() {
         </ChartPointerEventContextProvider>
       </EuiFlexItem>
       <EuiFlexItem>
-        <BackendOperationDistributionChart />
+        <EuiPanel hasBorder>
+          <BackendOperationDistributionChart />
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <BackendOperationDetailTraceList />
+        <EuiPanel hasBorder>
+          <BackendOperationDetailTraceList />
+        </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

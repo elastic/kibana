@@ -17,7 +17,6 @@ import {
   CORRELATION_THRESHOLD,
   KS_TEST_THRESHOLD,
 } from '../../../../common/correlations/constants';
-import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -88,13 +87,13 @@ export async function fetchDurationCorrelationWithHistogram({
         correlation,
         ksTest,
         histogram: logHistogram,
-      } as LatencyCorrelation;
+      };
     } else {
       return {
         ...fieldValuePair,
         correlation,
         ksTest,
-      } as Omit<LatencyCorrelation, 'histogram'>;
+      };
     }
   }
 

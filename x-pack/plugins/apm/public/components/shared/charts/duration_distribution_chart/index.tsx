@@ -41,12 +41,12 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { ChartContainer } from '../chart_container';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 
-const NO_OF_TRANSACTIONS_LABEL = i18n.translate(
+const NUMBER_OF_TRANSACTIONS_LABEL = i18n.translate(
   'xpack.apm.durationDistribution.chart.numberOfTransactionsLabel',
   { defaultMessage: 'Transactions' }
 );
 
-const NO_OF_SPANS_LABEL = i18n.translate(
+const NUMBER_OF_SPANS_LABEL = i18n.translate(
   'xpack.apm.durationDistribution.chart.numberOfSpansLabel',
   { defaultMessage: 'Spans' }
 );
@@ -259,8 +259,8 @@ export function DurationDistributionChart({
             domain={yAxisDomain}
             title={
               eventType === ProcessorEvent.transaction
-                ? NO_OF_TRANSACTIONS_LABEL
-                : NO_OF_SPANS_LABEL
+                ? NUMBER_OF_TRANSACTIONS_LABEL
+                : NUMBER_OF_SPANS_LABEL
             }
             position={Position.Left}
             ticks={yTicks}
