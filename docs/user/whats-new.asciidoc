@@ -1,6 +1,8 @@
 [[whats-new]]
 == What's new in 8.0
 
+coming::[8.3.0]
+
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
@@ -145,7 +147,7 @@ image::images/highlights-lens-sync.png[Sync tooltip across panels option]
 
 When creating *Lens* tables and XY visualizations, you can now collapse the breakdown dimension,
 allowing you to summarize aggregated data.
-For information, check <<create-custom-tables, Create custom tables>>.
+For information, check {kibana-ref}/lens.html#create-custom-tables[Create custom tables].
 
 [float]
 [[highlights-8.3-maps]]
