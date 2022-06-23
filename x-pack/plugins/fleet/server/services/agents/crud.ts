@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import type { KueryNode } from '@kbn/es-query';
@@ -68,6 +69,7 @@ export type GetAgentsOptions =
   | {
       kuery: string;
       showInactive?: boolean;
+      perPage?: number;
     };
 
 export async function getAgents(esClient: ElasticsearchClient, options: GetAgentsOptions) {
@@ -90,10 +92,12 @@ export async function getAgents(esClient: ElasticsearchClient, options: GetAgent
   return agents;
 }
 
-export async function getAgentsByKuery(
+export async function getAgentsByKueryPit(
   esClient: ElasticsearchClient,
   options: ListWithKuery & {
     showInactive: boolean;
+    pitId: string;
+    searchAfter?: SortResults;
   }
 ): Promise<{
   agents: Agent[];
@@ -106,6 +110,113 @@ export async function getAgentsByKuery(
     perPage = 20,
     sortField = 'enrolled_at',
     sortOrder = 'desc',
+    kuery,
+    showInactive = false,
+    showUpgradeable,
+    searchAfter,
+  } = options;
+  const { pitId } = options;
+  const filters = [];
+
+  if (kuery && kuery !== '') {
+    filters.push(kuery);
+  }
+
+  if (showInactive === false) {
+    filters.push(ACTIVE_AGENT_CONDITION);
+  }
+
+  const kueryNode = _joinFilters(filters);
+  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+
+  const queryAgents = async (from: number, size: number) => {
+    return esClient.search<FleetServerAgent, {}>({
+      from,
+      size,
+      track_total_hits: true,
+      rest_total_hits_as_int: true,
+      body: {
+        ...body,
+        sort: [{ [sortField]: { order: sortOrder } }],
+      },
+      pit: {
+        id: pitId,
+        keep_alive: '1m',
+      },
+      ...(searchAfter ? { search_after: searchAfter, from: 0 } : {}),
+    });
+  };
+
+  const res = await queryAgents((page - 1) * perPage, perPage);
+
+  let agents = res.hits.hits.map(searchHitToAgent);
+  let total = res.hits.total as number;
+
+  // filtering for a range on the version string will not work,
+  // nor does filtering on a flattened field (local_metadata), so filter here
+  if (showUpgradeable) {
+    // query all agents, then filter upgradeable, and return the requested page and correct total
+    // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
+    if (total < SO_SEARCH_LIMIT) {
+      const response = await queryAgents(0, SO_SEARCH_LIMIT);
+      agents = response.hits.hits
+        .map(searchHitToAgent)
+        .filter((agent) => isAgentUpgradeable(agent, appContextService.getKibanaVersion()));
+      total = agents.length;
+      const start = (page - 1) * perPage;
+      agents = agents.slice(start, start + perPage);
+    } else {
+      agents = agents.filter((agent) =>
+        isAgentUpgradeable(agent, appContextService.getKibanaVersion())
+      );
+    }
+  }
+
+  return {
+    agents,
+    total,
+    page,
+    perPage,
+  };
+}
+
+export async function openAgentsPointInTime(esClient: ElasticsearchClient): Promise<string> {
+  const pitKeepAlive = '10m';
+  const pitRes = await esClient.openPointInTime({
+    index: AGENTS_INDEX,
+    keep_alive: pitKeepAlive,
+  });
+  return pitRes.id;
+}
+
+export async function closeAgentsPointInTime(esClient: ElasticsearchClient, pitId: string) {
+  try {
+    await esClient.closePointInTime({ id: pitId });
+  } catch (error) {
+    appContextService
+      .getLogger()
+      .warn(`Error closing point in time with id: ${pitId}. Error: ${error.message}`);
+  }
+}
+
+export async function getAgentsByKuery(
+  esClient: ElasticsearchClient,
+  options: ListWithKuery & {
+    showInactive: boolean;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }
+): Promise<{
+  agents: Agent[];
+  total: number;
+  page: number;
+  perPage: number;
+}> {
+  const {
+    page = 1,
+    perPage = 20,
+    sortField = options.sortField ?? 'enrolled_at',
+    sortOrder = options.sortOrder ?? 'desc',
     kuery,
     showInactive = false,
     showUpgradeable,
@@ -166,6 +277,83 @@ export async function getAgentsByKuery(
     page,
     perPage,
   };
+}
+
+export async function processAgentsInBatches(
+  esClient: ElasticsearchClient,
+  options: Omit<ListWithKuery, 'page' | 'perPage'> & {
+    showInactive: boolean;
+    batchSize?: number;
+  },
+  processAgents: (
+    agents: Agent[],
+    includeSuccess: boolean
+  ) => Promise<{ items: BulkActionResult[] }>
+): Promise<{ items: BulkActionResult[] }> {
+  const pitId = await openAgentsPointInTime(esClient);
+
+  const perPage = options.batchSize ?? SO_SEARCH_LIMIT;
+
+  const res = await getAgentsByKueryPit(esClient, {
+    ...options,
+    page: 1,
+    perPage,
+    pitId,
+  });
+
+  let currentAgents = res.agents;
+  // include successful agents if total agents does not exceed 10k
+  const skipSuccess = res.total > SO_SEARCH_LIMIT;
+
+  let results = await processAgents(currentAgents, skipSuccess);
+  let allAgentsProcessed = currentAgents.length;
+
+  while (allAgentsProcessed < res.total) {
+    const lastAgent = currentAgents[currentAgents.length - 1];
+    const nextPage = await getAgentsByKueryPit(esClient, {
+      ...options,
+      page: 1,
+      perPage,
+      pitId,
+      searchAfter: lastAgent.sort!,
+    });
+    currentAgents = nextPage.agents;
+    const currentResults = await processAgents(currentAgents, skipSuccess);
+    results = { items: results.items.concat(currentResults.items) };
+    allAgentsProcessed += currentAgents.length;
+  }
+
+  await closeAgentsPointInTime(esClient, pitId);
+
+  return results;
+}
+
+export function errorsToResults(
+  agents: Agent[],
+  errors: Record<Agent['id'], Error>,
+  agentIds?: string[],
+  skipSuccess?: boolean
+): BulkActionResult[] {
+  if (!skipSuccess) {
+    const givenOrder = agentIds ? agentIds : agents.map((agent) => agent.id);
+    return givenOrder.map((agentId) => {
+      const hasError = agentId in errors;
+      const result: BulkActionResult = {
+        id: agentId,
+        success: !hasError,
+      };
+      if (hasError) {
+        result.error = errors[agentId];
+      }
+      return result;
+    });
+  } else {
+    return Object.entries(errors).map(([agentId, error]) => ({
+      id: agentId,
+      success: false,
+      error,
+    }));
+  }
 }
 
 export async function getAllAgentsByKuery(

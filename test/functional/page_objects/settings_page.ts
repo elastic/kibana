@@ -51,6 +51,19 @@ export class SettingsPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  async clickSnapshotRestore() {
+    await this.testSubjects.click('snapshot_restore');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitFor('snapshot restore header to be visible', async () => {
+      return (await this.testSubjects.getVisibleText('appTitle')) === 'Snapshot and Restore';
+    });
+  }
+
+  async clickIndexManagement() {
+    await this.testSubjects.click('index_management');
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   async getAdvancedSettings(propertyName: string) {
     this.log.debug('in getAdvancedSettings');
     return await this.testSubjects.getAttribute(
@@ -537,20 +550,16 @@ export class SettingsPageObject extends FtrService {
   async clickAddNewIndexPatternButton() {
     await this.common.scrollKibanaBodyTop();
 
-    // if flyout is open
-    const flyoutView = await this.testSubjects.exists('createDataViewButtonFlyout');
-    if (flyoutView) {
-      await this.testSubjects.click('createDataViewButtonFlyout');
+    // if showing no data view prompt
+    const noDataView = await this.testSubjects.exists('createDataViewButton');
+    if (noDataView) {
+      await this.testSubjects.click('createDataViewButton');
       return;
     }
 
     const tableView = await this.testSubjects.exists('createIndexPatternButton');
     if (tableView) {
       await this.testSubjects.click('createIndexPatternButton');
-    }
-    const flyoutView2 = await this.testSubjects.exists('createDataViewButtonFlyout');
-    if (flyoutView2) {
-      await this.testSubjects.click('createDataViewButtonFlyout');
     }
   }
 

@@ -13,7 +13,7 @@
 
 import React from 'react';
 
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiSteps, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { NewSearchIndexTemplate } from './new_search_index_template';
@@ -21,6 +21,7 @@ import { NewSearchIndexTemplate } from './new_search_index_template';
 export const MethodCrawler: React.FC = () => {
   return (
     <NewSearchIndexTemplate
+      title="Crawler"
       description={i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.methodCrawler.description',
         {
@@ -30,20 +31,82 @@ export const MethodCrawler: React.FC = () => {
       )}
       docsUrl="#"
       type="crawler"
+      onSubmit={() => null}
     >
-      <EuiPanel
-        color="subdued"
-        style={{
-          minHeight: '30rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <EuiTitle size="s">
-          <h4>Place the crawler domain validation here...</h4>
-        </EuiTitle>
-      </EuiPanel>
+      <EuiSteps
+        steps={[
+          {
+            title: i18n.translate(
+              'xpack.enterpriseSearch.content.newIndex.steps.createIndex.title',
+              {
+                defaultMessage: 'Create an Elasticsearch index',
+              }
+            ),
+
+            titleSize: 'xs',
+            children: (
+              <EuiText size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.steps.createIndex.content',
+                    {
+                      defaultMessage:
+                        'Provide a unique name for your index and select an optional language analyzer.',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            ),
+            status: 'incomplete',
+          },
+          {
+            title: i18n.translate(
+              'xpack.enterpriseSearch.content.newIndex.steps.configureIngestion.title',
+              {
+                defaultMessage: 'Configure ingestion settings',
+              }
+            ),
+            titleSize: 'xs',
+            children: (
+              <EuiText size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.methodCrawler.steps.configureIngestion.content',
+                    {
+                      defaultMessage:
+                        'Enter the domains you’d like to crawl, configure crawl rules and entry points, set up a crawl schedule and let Enterprise Search do the rest.',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            ),
+            status: 'incomplete',
+          },
+          {
+            title: i18n.translate(
+              'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.title',
+              {
+                defaultMessage: 'Build a search experience',
+              }
+            ),
+            titleSize: 'xs',
+            children: (
+              <EuiText size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.content',
+                    {
+                      defaultMessage:
+                        'Connect your newly created Elasticsearch index to an App Search engine to build a cusomtizable search experience.',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            ),
+            status: 'incomplete',
+          },
+        ]}
+      />
     </NewSearchIndexTemplate>
   );
 };

@@ -88,6 +88,7 @@ export const DocumentExplorerCallout = () => {
       >
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="tryDocumentExplorerButton"
             iconType="tableDensityNormal"
             size="s"
             href={addBasePath(`/app/management/kibana/settings?query=${DOC_TABLE_LEGACY}`)}
