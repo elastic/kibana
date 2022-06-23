@@ -97,7 +97,7 @@ describe('When using `getActionDetailsById()', () => {
                 action_id: '123',
                 data: {
                   command: 'isolate',
-                  comment: expect.any(String),
+                  comment: '5wb6pu6kh2xix5i',
                 },
                 expiration: expect.any(String),
                 input_type: 'endpoint',

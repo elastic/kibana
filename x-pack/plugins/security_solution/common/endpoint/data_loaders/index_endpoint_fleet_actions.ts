@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import faker from 'faker';
 import { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
@@ -64,7 +62,7 @@ export const indexEndpointAndFleetActionsForHost = async (
   for (let i = 0; i < total; i++) {
     // create an action
     const action = fleetActionGenerator.generate({
-      data: { comment: faker.lorem.sentence() },
+      data: { comment: 'data generator: this host is bad' },
     });
 
     action.agents = [agentId];

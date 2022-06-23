@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import faker from 'faker';
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -43,7 +41,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           input_type: 'endpoint',
           data: {
             command: this.randomIsolateCommand(),
-            comment: faker.lorem.sentence(),
+            comment: this.randomString(15),
           },
         },
         error: undefined,
