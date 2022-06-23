@@ -80,7 +80,7 @@ export const MethodConnector: React.FC = () => {
               <EuiText size="s">
                 <p>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.methodCrawler.steps.configureIngestion.content',
+                    'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.configureIngestion.content',
                     {
                       defaultMessage:
                         'Clone the connector package repository on GitHub and build a custom connector that suits your needs.',
