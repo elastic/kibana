@@ -12,11 +12,10 @@ import * as reduxHooks from 'react-redux';
 
 describe('useMonitorHistogram', () => {
   const dynamicIndexPattern = 'synthetics-*';
-  const useEsSearch = jest.fn().mockReturnValue({});
   jest
     .spyOn(reduxHooks, 'useSelector')
     .mockReturnValue({ settings: { heartbeatIndices: dynamicIndexPattern } });
-  jest.spyOn(searchHooks, 'useEsSearch').mockImplementation(useEsSearch);
+  const useEsSearch = jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({});
 
   beforeEach(() => {
     jest.clearAllMocks();
