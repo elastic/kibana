@@ -12,6 +12,7 @@ import React from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import { Subscription } from 'rxjs';
 import { distinct, map } from 'rxjs/operators';
+import { isNil } from 'lodash';
 import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
 import { IContainer } from './i_container';
 import { EmbeddableStart } from '../../plugin';
@@ -58,7 +59,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
   }
 
   private getEventStatus(output: EmbeddableOutput): EmbeddablePhase {
-    if (output.error !== undefined) {
+    if (!isNil(output.error)) {
       return 'error';
     } else if (output.rendered === true) {
       return 'rendered';
