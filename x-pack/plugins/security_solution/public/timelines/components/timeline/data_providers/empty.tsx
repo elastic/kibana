@@ -91,7 +91,7 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false, browserFields, t
     {!showSmallMsg && (
       <>
         <NoWrap>
-          <Text color="subdued" size="s">
+          <Text color="subdued" size="s" className="timeline-drop-area-empty__text">
             {i18n.DROP_ANYTHING}
           </Text>
           <HighlightedBackground>
@@ -99,11 +99,11 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false, browserFields, t
               {i18n.HIGHLIGHTED}
             </BadgeHighlighted>
           </HighlightedBackground>
-          <Text color="subdued" size="s">
+          <Text color="subdued" size="s" className="timeline-drop-area-empty__text">
             {i18n.HERE_TO_BUILD_AN}
           </Text>
           <AndOrBadge type="or" />
-          <Text color="subdued" size="s">
+          <Text color="subdued" size="s" className="timeline-drop-area-empty__text">
             {i18n.QUERY}
           </Text>
         </NoWrap>
