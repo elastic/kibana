@@ -1,10 +1,12 @@
 [[servicenow-itom-action-type]]
-== {sn} ITOM connector and action
+== {sn-itom} connector and action
 ++++
-<titleabbrev>{sn} ITOM</titleabbrev>
+<titleabbrev>{sn-itom}</titleabbrev>
 ++++
 
-The {sn} ITOM connector uses the https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html[Event API] to create {sn} events.
+The {sn-itom} connector uses the
+https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html[event API]
+to create {sn} events.
 
 [float]
 [[servicenow-itom-connector-prerequisites]]
@@ -50,7 +52,7 @@ include::servicenow.asciidoc[tag=servicenow-endpoint]
 [[servicenow-itom-connector-configuration]]
 === Connector configuration
 
-{sn} ITOM connectors have the following configuration properties.
+{sn-itom} connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** connector listing, and in the connector list when configuring an action.
 Is OAuth::  The type of authentication to use.
@@ -125,24 +127,24 @@ Secrets defines sensitive information for the connector type.
 [[define-servicenow-itom-ui]]
 === Define connector in Stack Management
 
-Define {sn} ITOM connector properties. Choose whether to use OAuth for authentication.
+Define {sn-itom} connector properties. Choose whether to use OAuth for authentication.
 
 [role="screenshot"]
-image::management/connectors/images/servicenow-itom-connector-basic.png[{sn} ITOM connector using basic auth]
+image::management/connectors/images/servicenow-itom-connector-basic.png[{sn-itom} connector using basic auth]
 
 [role="screenshot"]
-image::management/connectors/images/servicenow-itom-connector-oauth.png[{sn} ITOM connector using OAuth]
+image::management/connectors/images/servicenow-itom-connector-oauth.png[{sn-itom} connector using OAuth]
 
-Test {sn} ITOM action parameters.
+Test {sn-itom} action parameters.
 
 [role="screenshot"]
-image::management/connectors/images/servicenow-itom-params-test.png[{sn} ITOM params test]
+image::management/connectors/images/servicenow-itom-params-test.png[{sn-itom} params test]
 
 [float]
 [[servicenow-itom-action-configuration]]
 === Action configuration
 
-{sn} ITOM actions have the following configuration properties.
+{sn-itom} actions have the following configuration properties.
 
 Source::       The name of the event source type.
 Node::         The Host that the event was triggered for.
@@ -158,6 +160,6 @@ Refer to https://docs.servicenow.com/bundle/rome-it-operations-management/page/p
 
 [float]
 [[configuring-servicenow-itom]]
-=== Configure {sn} ITOM
+=== Configure {sn-itom}
 
 {sn} offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

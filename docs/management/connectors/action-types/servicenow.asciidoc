@@ -4,7 +4,9 @@
 <titleabbrev>{sn-itsm}</titleabbrev>
 ++++
 
-The {sn-itsm} connector uses the https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[Import Set API] to create {sn} incidents.
+The {sn-itsm} connector uses the
+https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[import set API]
+to create {sn} incidents.
 
 [float]
 [[servicenow-itsm-connector-prerequisites]]
