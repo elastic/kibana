@@ -101,7 +101,7 @@ export const normalizeProjectMonitor = ({
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.ORIGINAL_SPACE],
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: `${monitor.id}-${projectId}-${namespace}`,
     [ConfigKey.TIMEOUT]: null,
-    [ConfigKey.ENABLED]: monitor.enabled || defaultFields[ConfigKey.ENABLED],
+    [ConfigKey.ENABLED]: monitor.enabled ?? defaultFields[ConfigKey.ENABLED],
   };
   return {
     ...DEFAULT_FIELDS[DataStream.BROWSER],
