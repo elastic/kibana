@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
-import { SeriesType } from '@kbn/expression-xy-plugin/common';
 import { DatasourceLayers, OperationMetadata, VisualizationType } from '../types';
 import {
   State,
@@ -17,6 +16,7 @@ import {
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
+  SeriesType,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '..';

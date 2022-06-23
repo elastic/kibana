@@ -20,6 +20,9 @@ describe('#isTimeChart', () => {
         seriesType: 'bar',
         xScaleType: 'time',
         isHistogram: false,
+        isHorizontal: false,
+        isPercentage: false,
+        isStacked: false,
         table: {
           rows: [],
           columns: [

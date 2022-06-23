@@ -20,6 +20,9 @@ describe('extendedDataLayerConfig', () => {
     splitAccessor: 'd',
     xScaleType: 'linear',
     isHistogram: false,
+    isHorizontal: false,
+    isPercentage: false,
+    isStacked: false,
     palette: mockPaletteOutput,
   };
 

@@ -6,22 +6,46 @@
  * Side Public License, v 1.
  */
 
-import { Y_CONFIG } from '../constants';
-import { YConfigFn } from '../types';
+import { Position } from '@elastic/charts';
 import { strings } from '../i18n';
-import { commonYConfigArgs } from './common_y_config_args';
+import { Y_AXIS_CONFIG, AxisModes, YScaleTypes } from '../constants';
+import { YAxisConfigFn } from '../types';
+import { commonAxisConfigArgs } from './common_axis_args';
 
-export const yAxisConfigFunction: YConfigFn = {
-  name: Y_CONFIG,
+export const yAxisConfigFunction: YAxisConfigFn = {
+  name: Y_AXIS_CONFIG,
   aliases: [],
-  type: Y_CONFIG,
-  help: strings.getYConfigFnHelp(),
+  type: Y_AXIS_CONFIG,
+  help: strings.getYAxisConfigFnHelp(),
   inputTypes: ['null'],
-  args: { ...commonYConfigArgs },
+  args: {
+    ...commonAxisConfigArgs,
+    mode: {
+      types: ['string'],
+      options: [...Object.values(AxisModes)],
+      help: strings.getAxisModeHelp(),
+    },
+    boundsMargin: {
+      types: ['number'],
+      help: strings.getAxisBoundsMarginHelp(),
+    },
+    scaleType: {
+      options: [...Object.values(YScaleTypes)],
+      help: strings.getAxisScaleTypeHelp(),
+      default: YScaleTypes.LINEAR,
+    },
+    position: {
+      types: ['string'],
+      options: [Position.Right, Position.Left],
+      help: strings.getAxisPositionHelp(),
+      strict: true,
+    },
+  },
   fn(input, args) {
     return {
-      type: Y_CONFIG,
+      type: Y_AXIS_CONFIG,
       ...args,
+      position: args.position ?? Position.Left,
     };
   },
 };

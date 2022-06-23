@@ -17,7 +17,6 @@ import {
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,
   ReferenceLineLayerConfig,
-  SeriesType,
 } from '../../common/types';
 import { GroupsConfiguration } from './axes_configuration';
 import { getFormat } from './format';
@@ -110,7 +109,7 @@ const getAccessorWithFieldFormat = (
 const getYAccessorWithFieldFormat = (
   dimension: string | ExpressionValueVisDimension | undefined,
   columns: Datatable['columns'],
-  seriesType: SeriesType
+  isPercentage: boolean
 ) => {
   if (!dimension) {
     return {};
@@ -118,7 +117,7 @@ const getYAccessorWithFieldFormat = (
 
   const accessor = getAccessorByDimension(dimension, columns);
   let format = getFormat(columns, dimension) ?? { id: 'number' };
-  if (format?.id !== 'percent' && seriesType.includes('percentage')) {
+  if (format?.id !== 'percent' && isPercentage) {
     format = { id: 'percent', params: { pattern: '0.[00]%' } };
   }
 
@@ -126,7 +125,7 @@ const getYAccessorWithFieldFormat = (
 };
 
 export const getLayerFormats = (
-  { xAccessor, accessors, splitAccessor, table, seriesType }: CommonXYDataLayerConfig,
+  { xAccessor, accessors, splitAccessor, table, isPercentage }: CommonXYDataLayerConfig,
   { splitColumnAccessor, splitRowAccessor }: SplitAccessors
 ): LayerFieldFormats => {
   const yAccessors: Array<string | ExpressionValueVisDimension> = accessors;
@@ -135,7 +134,7 @@ export const getLayerFormats = (
     yAccessors: yAccessors.reduce(
       (formatters, a) => ({
         ...formatters,
-        ...getYAccessorWithFieldFormat(a, table.columns, seriesType),
+        ...getYAccessorWithFieldFormat(a, table.columns, isPercentage),
       }),
       {}
     ),
@@ -160,28 +159,21 @@ export const getLayersFormats = (
 const getTitleForYAccessor = (
   layerId: string,
   yAccessor: string | ExpressionValueVisDimension,
-  { yTitle, yRightTitle }: Omit<CustomTitles, 'xTitle'>,
   groups: GroupsConfiguration,
   columns: Datatable['columns']
 ) => {
   const column = getColumnByAccessor(yAccessor, columns);
-  const isRight = groups.some((group) =>
-    group.series.some(
-      ({ accessor, layer }) =>
-        accessor === yAccessor && layer === layerId && group.groupId === 'right'
-    )
+  const axisGroup = groups.find((group) =>
+    group.series.some(({ accessor, layer }) => accessor === yAccessor && layer === layerId)
   );
-  if (isRight) {
-    return yRightTitle || column!.name;
-  }
 
-  return yTitle || column!.name;
+  return axisGroup?.title || column!.name;
 };
 
 export const getLayerTitles = (
   { xAccessor, accessors, splitAccessor, table, layerId }: CommonXYDataLayerConfig,
   { splitColumnAccessor, splitRowAccessor }: SplitAccessors,
-  { xTitle, yTitle, yRightTitle }: CustomTitles,
+  { xTitle }: CustomTitles,
   groups: GroupsConfiguration
 ): LayerAccessorsTitles => {
   const mapTitle = (dimension?: string | ExpressionValueVisDimension) => {
@@ -194,13 +186,7 @@ export const getLayerTitles = (
   };
 
   const getYTitle = (accessor: string) => ({
-    [accessor]: getTitleForYAccessor(
-      layerId,
-      accessor,
-      { yTitle, yRightTitle },
-      groups,
-      table.columns
-    ),
+    [accessor]: getTitleForYAccessor(layerId, accessor, groups, table.columns),
   });
 
   const xColumnId = xAccessor && getAccessorByDimension(xAccessor, table.columns);

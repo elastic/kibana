@@ -5,28 +5,6 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "axisTitlesVisibilitySettings": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "x": Array [
-                    true,
-                  ],
-                  "yLeft": Array [
-                    true,
-                  ],
-                  "yRight": Array [
-                    true,
-                  ],
-                },
-                "function": "axisTitlesVisibilityConfig",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-        ],
         "curveType": Array [
           "LINEAR",
         ],
@@ -42,52 +20,8 @@ Object {
         "fittingFunction": Array [
           "Carry",
         ],
-        "gridlinesVisibilitySettings": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "x": Array [
-                    false,
-                  ],
-                  "yLeft": Array [
-                    true,
-                  ],
-                  "yRight": Array [
-                    true,
-                  ],
-                },
-                "function": "gridlinesConfig",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-        ],
         "hideEndzones": Array [
           true,
-        ],
-        "labelsOrientation": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "x": Array [
-                    0,
-                  ],
-                  "yLeft": Array [
-                    -90,
-                  ],
-                  "yRight": Array [
-                    -45,
-                  ],
-                },
-                "function": "labelsOrientationConfig",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
         ],
         "layers": Array [
           Object {
@@ -101,12 +35,16 @@ Object {
                   "columnToLabel": Array [
                     "{\\"b\\":\\"col_b\\",\\"c\\":\\"col_c\\",\\"d\\":\\"col_d\\"}",
                   ],
+                  "decorations": Array [],
                   "hide": Array [
                     false,
                   ],
                   "isHistogram": Array [
                     false,
                   ],
+                  "isHorizontal": Array [],
+                  "isPercentage": Array [],
+                  "isStacked": Array [],
                   "layerId": Array [
                     "first",
                   ],
@@ -144,7 +82,6 @@ Object {
                   "xScaleType": Array [
                     "linear",
                   ],
-                  "yConfig": Array [],
                 },
                 "function": "extendedDataLayer",
                 "type": "function",
@@ -182,102 +119,137 @@ Object {
             "type": "expression",
           },
         ],
-        "tickLabelsVisibilitySettings": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "x": Array [
-                    false,
-                  ],
-                  "yLeft": Array [
-                    true,
-                  ],
-                  "yRight": Array [
-                    true,
-                  ],
-                },
-                "function": "tickLabelsConfig",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-        ],
         "valueLabels": Array [
           "hide",
         ],
         "valuesInLegend": Array [
           false,
         ],
-        "xExtent": Array [
+        "xAxisConfig": Array [
           Object {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "lowerBound": Array [],
-                  "mode": Array [],
-                  "upperBound": Array [],
+                  "extent": Array [],
+                  "id": Array [
+                    "x",
+                  ],
+                  "labelsOrientation": Array [
+                    0,
+                  ],
+                  "position": Array [
+                    "bottom",
+                  ],
+                  "showGridLines": Array [
+                    false,
+                  ],
+                  "showLabels": Array [
+                    false,
+                  ],
+                  "showTitle": Array [
+                    true,
+                  ],
+                  "title": Array [
+                    "",
+                  ],
                 },
-                "function": "axisExtentConfig",
+                "function": "xAxisConfig",
                 "type": "function",
               },
             ],
             "type": "expression",
           },
         ],
-        "xTitle": Array [
-          "",
-        ],
-        "yLeftExtent": Array [
+        "yAxisConfigs": Array [
           Object {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "lowerBound": Array [],
-                  "mode": Array [],
-                  "upperBound": Array [],
+                  "extent": Array [],
+                  "id": Array [],
+                  "labelsOrientation": Array [
+                    -90,
+                  ],
+                  "position": Array [
+                    "left",
+                  ],
+                  "scaleType": Array [
+                    "linear",
+                  ],
+                  "showGridLines": Array [
+                    true,
+                  ],
+                  "showLabels": Array [
+                    true,
+                  ],
+                  "showTitle": Array [
+                    true,
+                  ],
+                  "title": Array [
+                    "",
+                  ],
                 },
-                "function": "axisExtentConfig",
+                "function": "yAxisConfig",
                 "type": "function",
               },
             ],
             "type": "expression",
           },
-        ],
-        "yLeftScale": Array [
-          "linear",
-        ],
-        "yRightExtent": Array [
           Object {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "lowerBound": Array [
-                    123,
+                  "extent": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "lowerBound": Array [
+                              123,
+                            ],
+                            "mode": Array [
+                              "custom",
+                            ],
+                            "upperBound": Array [
+                              456,
+                            ],
+                          },
+                          "function": "axisExtentConfig",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
                   ],
-                  "mode": Array [
-                    "custom",
+                  "id": Array [],
+                  "labelsOrientation": Array [
+                    -45,
                   ],
-                  "upperBound": Array [
-                    456,
+                  "position": Array [
+                    "right",
+                  ],
+                  "scaleType": Array [
+                    "linear",
+                  ],
+                  "showGridLines": Array [
+                    true,
+                  ],
+                  "showLabels": Array [
+                    true,
+                  ],
+                  "showTitle": Array [
+                    true,
+                  ],
+                  "title": Array [
+                    "",
                   ],
                 },
-                "function": "axisExtentConfig",
+                "function": "yAxisConfig",
                 "type": "function",
               },
             ],
             "type": "expression",
           },
-        ],
-        "yRightScale": Array [
-          "linear",
-        ],
-        "yRightTitle": Array [
-          "",
-        ],
-        "yTitle": Array [
-          "",
         ],
       },
       "function": "layeredXyVis",

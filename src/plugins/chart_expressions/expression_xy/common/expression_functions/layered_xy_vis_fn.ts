@@ -15,6 +15,7 @@ import {
   validateMinTimeBarInterval,
   hasBarLayer,
   errors,
+  validateAxes,
 } from './validate';
 import { appendLayerIds, getDataLayers } from '../helpers';
 
@@ -34,6 +35,8 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
   if (!hasMarkSizeAccessors && args.markSizeRatio !== undefined) {
     throw new Error(errors.markSizeRatioWithoutAccessor());
   }
+
+  validateAxes(dataLayers, args.yAxisConfigs);
 
   return {
     type: 'render',

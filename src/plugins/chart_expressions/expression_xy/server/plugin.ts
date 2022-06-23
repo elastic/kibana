@@ -11,16 +11,14 @@ import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
 import {
   xyVisFunction,
-  yAxisConfigFunction,
-  extendedYAxisConfigFunction,
   legendConfigFunction,
-  gridlinesConfigFunction,
+  dataDecorationConfigFunction,
+  xAxisConfigFunction,
+  yAxisConfigFunction,
+  referenceLineDecorationConfigFunction,
   axisExtentConfigFunction,
-  tickLabelsConfigFunction,
   annotationLayerFunction,
-  labelsOrientationConfigFunction,
   referenceLineFunction,
-  axisTitlesVisibilityConfigFunction,
   extendedDataLayerFunction,
   referenceLineLayerFunction,
   layeredXyVisFunction,
@@ -33,18 +31,16 @@ export class ExpressionXyPlugin
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps) {
     expressions.registerFunction(yAxisConfigFunction);
-    expressions.registerFunction(extendedYAxisConfigFunction);
+    expressions.registerFunction(dataDecorationConfigFunction);
+    expressions.registerFunction(xAxisConfigFunction);
+    expressions.registerFunction(referenceLineDecorationConfigFunction);
     expressions.registerFunction(legendConfigFunction);
-    expressions.registerFunction(gridlinesConfigFunction);
     expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);
-    expressions.registerFunction(tickLabelsConfigFunction);
     expressions.registerFunction(annotationLayerFunction);
     expressions.registerFunction(extendedAnnotationLayerFunction);
-    expressions.registerFunction(labelsOrientationConfigFunction);
     expressions.registerFunction(referenceLineFunction);
     expressions.registerFunction(referenceLineLayerFunction);
-    expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyVisFunction);
     expressions.registerFunction(layeredXyVisFunction);
   }
