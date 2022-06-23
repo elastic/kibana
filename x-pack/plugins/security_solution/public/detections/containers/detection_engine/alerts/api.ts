@@ -27,6 +27,7 @@ import {
   AlertsIndex,
   UpdateAlertStatusProps,
   CasesFromAlertsResponse,
+  CheckSignalIndex,
 } from './types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
@@ -108,8 +109,8 @@ export const getSignalIndex = async ({ signal }: BasicSignals): Promise<AlertsIn
     signal,
   });
 
-export const checkSignalIndex = async ({ signal }: BasicSignals): Promise<AlertsIndex> =>
-  KibanaServices.get().http.fetch<AlertsIndex>(DETECTION_ENGINE_SIGNAL_INDEX_URL, {
+export const checkSignalIndex = async ({ signal }: BasicSignals): Promise<CheckSignalIndex> =>
+  KibanaServices.get().http.fetch<CheckSignalIndex>(DETECTION_ENGINE_SIGNAL_INDEX_URL, {
     method: 'GET',
     signal,
   });
