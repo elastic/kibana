@@ -18,12 +18,11 @@ Slack workspace and GitHub project. You can find links for both at https://osque
 [[osquery-updates]]
 ===  How often is Osquery updated for Osquery Manager?
 When a new https://github.com/osquery/osquery/releases[version of Osquery is released], 
-those updates are included in a subsequent Osquery Manager update and 
-applied to Elastic Agents when the integration is upgraded. 
+it is included in a subsequent Elastic Agent release and applied when the agent is upgraded. 
 Refer to the Fleet and Elastic Agent Guide for help with 
-{fleet-guide}/upgrade-integration.html[upgrading an integration].
+{fleet-guide}/upgrade-elastic-agent.html[upgrading Fleet-managed Elastic Agents].
 
-To check what Osquery version is installed on agent, you can run
+To check what Osquery version is installed on an Elastic Agent, you can run
 `SELECT * FROM osquery_info;` as a live query in {kib}. The `version` in the
 response is the Osquery version installed on the agent.
 
