@@ -35,7 +35,7 @@ import { i18n } from '@kbn/i18n';
 import { SUPPORTED_LANGUAGES } from './constants';
 import { NewSearchIndexLogic } from './new_search_index_logic';
 
-interface SearchIndex {
+export interface Props {
   title: React.ReactNode;
   description: React.ReactNode;
   docsUrl: string;
@@ -46,7 +46,7 @@ interface SearchIndex {
   formDisabled?: boolean;
 }
 
-export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
+export const NewSearchIndexTemplate: React.FC<Props> = ({
   children,
   title,
   description,
