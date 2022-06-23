@@ -7,7 +7,6 @@
 
 import { scaleLog } from 'd3-scale';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
 import {
   SPAN_DURATION,
