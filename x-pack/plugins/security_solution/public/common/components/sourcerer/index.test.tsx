@@ -30,7 +30,6 @@ import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 
 const mockDispatch = jest.fn();
 
-jest.mock('../../utils/global_query_string');
 jest.mock('../../containers/sourcerer');
 jest.mock('../../containers/sourcerer/use_signal_helpers');
 const mockUseUpdateDataView = jest.fn().mockReturnValue(() => true);

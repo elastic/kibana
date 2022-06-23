@@ -11,7 +11,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 
 import { url } from '@kbn/kibana-utils-plugin/public';
 import { isEmpty, pickBy } from 'lodash/fp';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import {
   decodeRisonUrlState,
@@ -41,12 +41,10 @@ export const useInitializeUrlParam = <State>(
   onInitialize: (state: State | null) => void
 ) => {
   const dispatch = useDispatch();
+  const { search } = useLocation();
 
   useEffect(() => {
-    const initialValue = getParamFromQueryString(
-      getQueryStringFromLocation(window.location.search),
-      urlParamKey
-    );
+    const initialValue = getParamFromQueryString(getQueryStringFromLocation(search), urlParamKey);
 
     dispatch(
       globalUrlParamActions.registerUrlParam({
@@ -112,7 +110,10 @@ export const useSyncGlobalQueryString = () => {
     }));
 
     if (params.length > 0) {
-      replaceUrlParams(params, history);
+      // window.location.search provides the most updated representation of the url search.
+      // It prevents unnecessary re-renders which useLocation would create because 'replaceUrlParams' does update the location.
+      // window.location.search also guarantees that we don't overwrite URL param managed outside react-router.
+      replaceUrlParams(params, history, window.location.search);
     }
   }, [globalUrlParam, pageName, history]);
 };
@@ -122,9 +123,10 @@ const encodeQueryString = (urlParams: ParsedQuery<string>): string =>
 
 const replaceUrlParams = (
   params: Array<{ key: string; value: string | null }>,
-  history: H.History
+  history: H.History,
+  search: string
 ) => {
-  const urlParams = parse(window.location.search, { sort: false });
+  const urlParams = parse(search, { sort: false });
 
   params.forEach(({ key, value }) => {
     if (value == null || value === '') {
@@ -134,9 +136,9 @@ const replaceUrlParams = (
     }
   });
 
-  const search = encodeQueryString(urlParams);
+  const newSearch = encodeQueryString(urlParams);
 
-  if (getQueryStringFromLocation(window.location.search) !== search) {
-    history.replace({ search });
+  if (getQueryStringFromLocation(search) !== newSearch) {
+    history.replace({ search: newSearch });
   }
 };
