@@ -6,8 +6,8 @@
  */
 
 // @ts-ignore
-import { distanceFromIntersectArea } from 'venn.js';
 import React from 'react';
+import { distanceFromIntersectArea } from './distance_from_intersect_area';
 
 export interface VennDiagramProps {
   leftValue: number;
