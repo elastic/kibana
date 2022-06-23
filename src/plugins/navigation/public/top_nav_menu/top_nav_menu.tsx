@@ -95,7 +95,7 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
           ) => {
             const { badgeText, toolTipProps, ...badgeProps } = badge;
             return (
-              <EuiToolTip {...toolTipProps} >
+              <EuiToolTip {...toolTipProps}>
                 <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
                   {badgeText}
                 </EuiBadge>
