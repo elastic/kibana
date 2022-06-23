@@ -268,7 +268,7 @@ export class DataView implements DataViewBase {
   /**
    * Creates static representation of the data view.
    */
-  public toSpec(includeFields = false): DataViewSpec {
+  public toSpec(includeFields = true): DataViewSpec {
     const fields =
       includeFields && this.fields
         ? this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) })
