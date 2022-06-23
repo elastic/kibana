@@ -23,6 +23,7 @@ import {
   checkScaleOperation,
   getAxisName,
   getDataLayers,
+  getReferenceLayers,
   isNumericMetric,
   isReferenceLayer,
 } from './visualization_helpers';
@@ -347,7 +348,10 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
   newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
   const hasYConfig = newLayer.yConfig?.some(({ forAccessor }) => forAccessor === columnId);
   const previousYConfig = previousColumn
-    ? newLayer.yConfig?.find(({ forAccessor }) => forAccessor === previousColumn)
+    ? getReferenceLayers(prevState.layers)
+        .map(({ yConfig }) => yConfig)
+        .flat()
+        ?.find((yConfig) => yConfig?.forAccessor === previousColumn)
     : false;
   if (!hasYConfig) {
     const axisMode: YAxisMode =

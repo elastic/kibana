@@ -22,7 +22,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Empty filt
             className="euiFlexItem"
           >
             <div
-              className="euiText euiText--medium"
+              className="euiText css-1lo1kz-euiText-m"
             >
               <h5>
                 Group by
@@ -109,7 +109,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
             className="euiFlexItem"
           >
             <div
-              className="euiText euiText--medium"
+              className="euiText css-1lo1kz-euiText-m"
             >
               <h5>
                 Group by
@@ -181,13 +181,13 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
           }
         >
           <div
-            className="euiAccordion__triggerWrapper"
+            className="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
           >
             <button
               aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               aria-labelledby="generated-id"
-              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
+              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen css-1n6daz4-euiAccordion__iconButton-isOpen"
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -205,7 +205,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
             <button
               aria-controls="canvas-filter-group-0"
               aria-expanded={true}
-              className="euiAccordion__button"
+              className="euiAccordion__button css-ot1kdj-euiAccordion__button"
               id="generated-id"
               onClick={[Function]}
               type="button"
@@ -219,7 +219,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
           </div>
           <div
             aria-labelledby="generated-id"
-            className="euiAccordion__childWrapper"
+            className="euiAccordion__childWrapper css-1ymmbjr-euiAccordion__childWrapper-isOpen"
             id="canvas-filter-group-0"
             role="region"
             tabIndex={-1}
@@ -253,7 +253,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
             className="euiFlexItem"
           >
             <div
-              className="euiText euiText--medium"
+              className="euiText css-1lo1kz-euiText-m"
             >
               <h5>
                 Group by
@@ -325,13 +325,13 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
           }
         >
           <div
-            className="euiAccordion__triggerWrapper"
+            className="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
           >
             <button
               aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               aria-labelledby="generated-id"
-              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
+              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen css-1n6daz4-euiAccordion__iconButton-isOpen"
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -349,7 +349,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
             <button
               aria-controls="canvas-filter-group-0"
               aria-expanded={true}
-              className="euiAccordion__button"
+              className="euiAccordion__button css-ot1kdj-euiAccordion__button"
               id="generated-id"
               onClick={[Function]}
               type="button"
@@ -363,7 +363,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
           </div>
           <div
             aria-labelledby="generated-id"
-            className="euiAccordion__childWrapper"
+            className="euiAccordion__childWrapper css-1ymmbjr-euiAccordion__childWrapper-isOpen"
             id="canvas-filter-group-0"
             role="region"
             tabIndex={-1}
@@ -397,7 +397,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
             className="euiFlexItem"
           >
             <div
-              className="euiText euiText--medium"
+              className="euiText css-1lo1kz-euiText-m"
             >
               <h5>
                 Group by
@@ -469,13 +469,13 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
           }
         >
           <div
-            className="euiAccordion__triggerWrapper"
+            className="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
           >
             <button
               aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               aria-labelledby="generated-id"
-              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
+              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen css-1n6daz4-euiAccordion__iconButton-isOpen"
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -493,7 +493,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
             <button
               aria-controls="canvas-filter-group-0"
               aria-expanded={true}
-              className="euiAccordion__button"
+              className="euiAccordion__button css-ot1kdj-euiAccordion__button"
               id="generated-id"
               onClick={[Function]}
               type="button"
@@ -507,7 +507,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
           </div>
           <div
             aria-labelledby="generated-id"
-            className="euiAccordion__childWrapper"
+            className="euiAccordion__childWrapper css-1ymmbjr-euiAccordion__childWrapper-isOpen"
             id="canvas-filter-group-0"
             role="region"
             tabIndex={-1}
@@ -541,7 +541,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
             className="euiFlexItem"
           >
             <div
-              className="euiText euiText--medium"
+              className="euiText css-1lo1kz-euiText-m"
             >
               <h5>
                 Group by
@@ -613,13 +613,13 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
           }
         >
           <div
-            className="euiAccordion__triggerWrapper"
+            className="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
           >
             <button
               aria-controls="canvas-filter-group-0"
               aria-expanded={true}
               aria-labelledby="generated-id"
-              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
+              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen css-1n6daz4-euiAccordion__iconButton-isOpen"
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -637,7 +637,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
             <button
               aria-controls="canvas-filter-group-0"
               aria-expanded={true}
-              className="euiAccordion__button"
+              className="euiAccordion__button css-ot1kdj-euiAccordion__button"
               id="generated-id"
               onClick={[Function]}
               type="button"
@@ -651,7 +651,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
           </div>
           <div
             aria-labelledby="generated-id"
-            className="euiAccordion__childWrapper"
+            className="euiAccordion__childWrapper css-1ymmbjr-euiAccordion__childWrapper-isOpen"
             id="canvas-filter-group-0"
             role="region"
             tabIndex={-1}
@@ -670,13 +670,13 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
           }
         >
           <div
-            className="euiAccordion__triggerWrapper"
+            className="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
           >
             <button
               aria-controls="canvas-filter-group-1"
               aria-expanded={true}
               aria-labelledby="generated-id"
-              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
+              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen css-1n6daz4-euiAccordion__iconButton-isOpen"
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -694,7 +694,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
             <button
               aria-controls="canvas-filter-group-1"
               aria-expanded={true}
-              className="euiAccordion__button"
+              className="euiAccordion__button css-ot1kdj-euiAccordion__button"
               id="generated-id"
               onClick={[Function]}
               type="button"
@@ -708,7 +708,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
           </div>
           <div
             aria-labelledby="generated-id"
-            className="euiAccordion__childWrapper"
+            className="euiAccordion__childWrapper css-1ymmbjr-euiAccordion__childWrapper-isOpen"
             id="canvas-filter-group-1"
             role="region"
             tabIndex={-1}
