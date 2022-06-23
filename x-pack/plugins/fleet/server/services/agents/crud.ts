@@ -81,7 +81,6 @@ export async function getAgents(esClient: ElasticsearchClient, options: GetAgent
       await getAllAgentsByKuery(esClient, {
         kuery: options.kuery,
         showInactive: options.showInactive ?? false,
-        perPage: options.perPage,
       })
     ).agents;
   } else {
@@ -350,42 +349,17 @@ export function errorsToResults(
 
 export async function getAllAgentsByKuery(
   esClient: ElasticsearchClient,
-  options: Omit<ListWithKuery, 'page'> & {
+  options: Omit<ListWithKuery, 'page' | 'perPage'> & {
     showInactive: boolean;
   }
 ): Promise<{
   agents: Agent[];
   total: number;
 }> {
-  const pitId = await openAgentsPointInTime(esClient);
-
-  const perPage = options.perPage ?? SO_SEARCH_LIMIT;
-
-  const res = await getAgentsByKueryPit(esClient, {
-    ...options,
-    page: 1,
-    perPage,
-    pitId,
-  });
-
-  let allAgents = res.agents;
-
-  while (allAgents.length < res.total) {
-    const lastAgent = allAgents[allAgents.length - 1];
-    const nextPage = await getAgentsByKueryPit(esClient, {
-      ...options,
-      page: 1,
-      perPage,
-      pitId,
-      searchAfter: lastAgent.sort!,
-    });
-    allAgents = allAgents.concat(nextPage.agents);
-  }
-
-  await closeAgentsPointInTime(esClient, pitId);
+  const res = await getAgentsByKuery(esClient, { ...options, page: 1, perPage: SO_SEARCH_LIMIT });
 
   return {
-    agents: allAgents,
+    agents: res.agents,
     total: res.total,
   };
 }
