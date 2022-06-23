@@ -149,7 +149,7 @@ export const RulesList = ({
   const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
-  let [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
+  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
@@ -163,9 +163,9 @@ export const RulesList = ({
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
-  if (statusFilter) {
-    ruleStatusesFilter = statusFilter;
-  }
+  // if (statusFilter) {
+  //   ruleStatusesFilter = statusFilter;
+  // }
 
   // if (setStatusFilter) {
   //   setRuleStatusesFilter = setStatusFilter;
@@ -212,7 +212,7 @@ export const RulesList = ({
     typesFilter: typesFilter.length > 0 ? typesFilter : filteredRulesTypes,
     actionTypesFilter,
     ruleExecutionStatusesFilter: lastResponse,
-    ruleStatusesFilter,
+    ruleStatusesFilter: statusFilter ? statusFilter : ruleStatusesFilter,
     tagsFilter,
     sort,
     onPage: setPage,
@@ -239,7 +239,7 @@ export const RulesList = ({
     typesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter: lastResponse,
-    ruleStatusesFilter,
+    ruleStatusesFilter: statusFilter ? statusFilter : ruleStatusesFilter,
     tagsFilter,
     onError,
   });
@@ -443,7 +443,10 @@ export const RulesList = ({
   const renderRuleStatusFilter = () => {
     if (isRuleStatusFilterEnabled) {
       return (
-        <RuleStatusFilter selectedStatuses={ruleStatusesFilter} onChange={setRuleStatusFilter} />
+        <RuleStatusFilter
+          selectedStatuses={statusFilter ? statusFilter : ruleStatusesFilter}
+          onChange={setRuleStatusFilter}
+        />
       );
     }
     return null;
