@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import { useMemo } from 'react';
 import { HttpService } from '../http_service';
 import { basePath } from '.';
@@ -42,10 +40,6 @@ export interface IngestStats {
 export interface InferenceStatsResponse {
   count: number;
   trained_model_stats: TrainedModelStat[];
-}
-
-export interface MlInferTrainedModelDeploymentResponse {
-  inference_results: estypes.MlInferTrainedModelDeploymentResponse[];
 }
 
 /**
