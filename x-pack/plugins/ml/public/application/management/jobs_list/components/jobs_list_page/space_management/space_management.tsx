@@ -105,6 +105,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiInMemoryTable
+              data-test-subj={`mlSpacesManagementTable-${currentTabId}`}
               items={jobs as any}
               columns={columns}
               search={{
@@ -159,6 +160,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
   return (
     <>
       <EuiTabbedContent
+        data-test-subj="mlSpacesManagementTable"
         onTabClick={({ id }: { id: string }) => {
           setCurrentTabId(id as JobType);
         }}
