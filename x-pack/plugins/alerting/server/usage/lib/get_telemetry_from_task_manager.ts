@@ -85,9 +85,11 @@ export async function getFailedAndUnrecognizedTasksPerDay({
             },
             aggs: {
               by_task_type: {
-                field: 'task.taskType',
-                // Use number of alerting rule types because we're filtering by 'alerting:'
-                terms: NUM_ALERTING_RULE_TYPES,
+                terms: {
+                  field: 'task.taskType',
+                  // Use number of alerting rule types because we're filtering by 'alerting:'
+                  size: NUM_ALERTING_RULE_TYPES,
+                },
               },
             },
           },
