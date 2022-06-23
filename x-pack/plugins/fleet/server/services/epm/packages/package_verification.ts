@@ -8,6 +8,7 @@
 import { readFile } from 'fs/promises';
 
 import * as openpgp from 'openpgp';
+import type { Logger } from '@kbn/logging';
 
 import { appContextService } from '../../app_context';
 let cachedKey: openpgp.Key | undefined | null = null;
@@ -43,4 +44,46 @@ export async function _readGpgKey(): Promise<openpgp.Key | undefined> {
   }
 
   return key;
+}
+
+export interface PackageVerificationResult {
+  verified: boolean;
+  keyId: string;
+}
+
+export async function verifyPackageSignature({
+  pkgZipBuffer,
+  pkgZipSignature,
+  verificationKey,
+  logger,
+}: {
+  pkgZipBuffer: Buffer;
+  pkgZipSignature: string;
+  verificationKey: openpgp.Key;
+  logger: Logger;
+}): Promise<PackageVerificationResult> {
+  const signature = await openpgp.readSignature({
+    armoredSignature: pkgZipSignature,
+  });
+
+  const message = await openpgp.createMessage({
+    binary: pkgZipBuffer,
+  });
+
+  const verificationResult = await openpgp.verify({
+    verificationKeys: verificationKey,
+    signature,
+    message,
+  });
+
+  const signatureVerificationResult = verificationResult.signatures[0];
+
+  const verified = false;
+  try {
+    await signatureVerificationResult.verified;
+  } catch (e) {
+    logger.error(`Error verifying package ${e}`); // TODO: make this nicer?
+  }
+
+  return { verified, keyId: signatureVerificationResult.keyID.toHex() };
 }
