@@ -31,10 +31,72 @@ export default function spaceSelectorFunctionalTests({
         name: 'Another Space',
         disabledFeatures: [],
       });
+      await spacesService.create({
+        id: 'space-1',
+        name: 'Space 1',
+        disabledFeatures: [],
+      });
+
+      await spacesService.create({
+        id: 'space-2',
+        name: 'Space 2',
+        disabledFeatures: [],
+      });
+
+      await spacesService.create({
+        id: 'space-3',
+        name: 'Space 3',
+        disabledFeatures: [],
+      });
+
+      await spacesService.create({
+        id: 'space-4',
+        name: 'Space 4',
+        disabledFeatures: [],
+      });
+
+      await spacesService.create({
+        id: 'space-5',
+        name: 'Space 5',
+        disabledFeatures: [],
+      });
+
+      await spacesService.create({
+        id: 'space-6',
+        name: 'Space 6',
+        disabledFeatures: [],
+      });
+
+      await spacesService.create({
+        id: 'space-7',
+        name: 'Space 7',
+        disabledFeatures: [],
+      });
+
+      await spacesService.create({
+        id: 'space-8',
+        name: 'Space 8',
+        disabledFeatures: [],
+      });
+
+      await spacesService.create({
+        id: 'space-9',
+        name: 'Space 9',
+        disabledFeatures: [],
+      });
     });
     after(async () => {
       // await esArchiver.unload('x-pack/test/functional/es_archives/spaces/selector')
       await spacesService.delete('another-space');
+      await spacesService.delete('space-1');
+      await spacesService.delete('space-2');
+      await spacesService.delete('space-3');
+      await spacesService.delete('space-4');
+      await spacesService.delete('space-5');
+      await spacesService.delete('space-6');
+      await spacesService.delete('space-7');
+      await spacesService.delete('space-8');
+      await spacesService.delete('space-9');
     });
 
     this.tags('includeFirefox');
@@ -48,7 +110,7 @@ export default function spaceSelectorFunctionalTests({
         await PageObjects.security.forceLogout();
       });
 
-      it.only('allows user to navigate to different spaces', async () => {
+      it('allows user to navigate to different spaces', async () => {
         const spaceId = 'another-space';
 
         await PageObjects.security.login(undefined, undefined, {
