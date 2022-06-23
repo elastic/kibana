@@ -18,6 +18,7 @@ import { ThemeService } from '@kbn/core-theme-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
+import { first } from 'rxjs/operators';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
@@ -301,14 +302,11 @@ export class CoreSystem {
       });
 
       // Wait for the first app navigation to report Kibana Loaded
-      const appSub = application.currentAppId$.subscribe((appId) => {
-        if (appId === undefined) return;
-
+      application.currentAppId$.pipe(first((appId) => appId !== undefined)).subscribe(() => {
         performance.mark(KBN_LOAD_MARKS, {
           detail: 'first_app_nav',
         });
         this.reportKibanaLoadedEvent(analytics);
-        appSub.unsubscribe();
       });
 
       return {
