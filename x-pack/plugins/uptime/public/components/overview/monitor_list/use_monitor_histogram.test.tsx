@@ -24,9 +24,7 @@ describe('useMonitorHistogram', () => {
   });
 
   it('calls dynamic heartbeat index', () => {
-    renderHook(() => useMonitorHistogram({ items: [] }), {
-      wrapper: WrappedHelper,
-    });
+    renderHook(() => useMonitorHistogram({ items: [] }));
     expect(useEsSearch).toBeCalledWith(
       expect.objectContaining({ index: dynamicIndexPattern }),
       ['[]', 0],
