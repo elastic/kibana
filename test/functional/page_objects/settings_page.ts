@@ -51,6 +51,19 @@ export class SettingsPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  async clickSnapshotRestore() {
+    await this.testSubjects.click('snapshot_restore');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitFor('snapshot restore header to be visible', async () => {
+      return (await this.testSubjects.getVisibleText('appTitle')) === 'Snapshot and Restore';
+    });
+  }
+
+  async clickIndexManagement() {
+    await this.testSubjects.click('index_management');
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   async getAdvancedSettings(propertyName: string) {
     this.log.debug('in getAdvancedSettings');
     return await this.testSubjects.getAttribute(
