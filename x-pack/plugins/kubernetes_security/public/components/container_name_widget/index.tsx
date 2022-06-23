@@ -6,7 +6,15 @@
  */
 
 import React, { ReactNode, useMemo, useState, useCallback } from 'react';
-import { EuiDataGrid, EuiPanel, EuiDataGridColumn, EuiDataGridColumnVisibility, EuiDataGridStyle, EuiDataGridSorting, EuiDataGridInMemory } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  EuiPanel,
+  EuiDataGridColumn,
+  EuiDataGridColumnVisibility,
+  EuiDataGridStyle,
+  EuiDataGridSorting,
+  EuiDataGridInMemory,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
@@ -160,24 +168,23 @@ export const ContainerNameWidget = ({
     [setSortingColumns]
   );
 
-  const GridStyle : EuiDataGridStyle = {
+  const GridStyle: EuiDataGridStyle = {
     border: 'none',
     header: 'underline',
     fontSize: 's',
-    footer:'overline'
-  }
+  };
 
-  const ColumnVisibility : EuiDataGridColumnVisibility = {
+  const ColumnVisibility: EuiDataGridColumnVisibility = {
     visibleColumns,
     setVisibleColumns,
-  }
+  };
 
-  const InMemory : EuiDataGridInMemory =   { level: 'sorting' }
+  const InMemory: EuiDataGridInMemory = { level: 'sorting' };
 
-  const Sorting : EuiDataGridSorting = {
+  const Sorting: EuiDataGridSorting = {
     columns: sortingColumns,
     onSort,
-  }
+  };
 
   return (
     <EuiPanel css={styles.tablePadding} hasShadow={false}>
