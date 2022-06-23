@@ -199,7 +199,7 @@ function RulesPage() {
         'data-test-subj': 'rulesTableCell-tagsPopover',
         render: (ruleTags: string[], item: RuleTableItem) => {
           return ruleTags.length > 0
-            ? triggersActionsUi.getRuleTagBadge({
+            ? triggersActionsUi.getRuleTagBadge<'default'>({
                 isOpen: tagPopoverOpenIndex === item.index,
                 tags: ruleTags,
                 onClick: () => setTagPopoverOpenIndex(item.index),

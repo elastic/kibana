@@ -21,6 +21,8 @@ import {
   RuleTypeModel,
   AlertsTableProps,
   AlertsTableConfigurationRegistry,
+  RuleTagBadgeOptions,
+  RuleTagBadgeProps,
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -90,8 +92,8 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     getRuleStatusFilter: (props) => {
       return getRuleStatusFilterLazy(props);
     },
-    getRuleTagBadge: (props) => {
-      return getRuleTagBadgeLazy(props);
+    getRuleTagBadge: <T extends RuleTagBadgeOptions>(props: RuleTagBadgeProps<T>) => {
+      return getRuleTagBadgeLazy<T>(props);
     },
     getRuleEventLogList: (props) => {
       return getRuleEventLogListLazy(props);
