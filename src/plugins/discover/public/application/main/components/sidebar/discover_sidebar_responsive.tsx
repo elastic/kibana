@@ -62,7 +62,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Callback function when adding a filter from sidebar
    */
-  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Callback function when changing an index pattern
    */
@@ -210,7 +210,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const editField = useMemo(
     () =>
-      canEditDataView && selectedIndexPattern
+      documentState.language !== 'sql' && canEditDataView && selectedIndexPattern
         ? (fieldName?: string) => {
             const ref = dataViewFieldEditor.openEditor({
               ctx: {
@@ -236,6 +236,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       selectedIndexPattern,
       setFieldEditorRef,
       onEditRuntimeField,
+      documentState.language,
     ]
   );
 

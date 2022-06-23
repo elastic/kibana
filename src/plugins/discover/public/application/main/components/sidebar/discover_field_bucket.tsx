@@ -17,7 +17,7 @@ import './discover_field_bucket.scss';
 interface Props {
   bucket: Bucket;
   field: DataViewField;
-  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
 export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
@@ -66,7 +66,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
             count={bucket.count}
           />
         </EuiFlexItem>
-        {field.filterable && (
+        {onAddFilter && field.filterable && (
           <EuiFlexItem grow={false}>
             <div>
               <EuiButtonIcon
