@@ -19,14 +19,14 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-export enum EsQueryFormType {
+export enum QueryFormType {
   KQL_OR_LUCENE = 'kql_or_lucene',
   QUERY_DSL = 'query_dsl',
 }
 
-const FORM_TYPE_ITEMS: Array<{ formType: EsQueryFormType; label: string; description: string }> = [
+const FORM_TYPE_ITEMS: Array<{ formType: QueryFormType; label: string; description: string }> = [
   {
-    formType: EsQueryFormType.KQL_OR_LUCENE,
+    formType: QueryFormType.KQL_OR_LUCENE,
     label: i18n.translate(
       'xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeLabel',
       {
@@ -42,7 +42,7 @@ const FORM_TYPE_ITEMS: Array<{ formType: EsQueryFormType; label: string; descrip
     ),
   },
   {
-    formType: EsQueryFormType.QUERY_DSL,
+    formType: QueryFormType.QUERY_DSL,
     label: i18n.translate(
       'xpack.stackAlerts.esQuery.ui.selectQueryFormType.queryDslFormTypeLabel',
       {
@@ -58,12 +58,12 @@ const FORM_TYPE_ITEMS: Array<{ formType: EsQueryFormType; label: string; descrip
   },
 ];
 
-export interface EsQueryFormTypeProps {
-  activeFormType: EsQueryFormType | null;
-  onFormTypeSelect: (formType: EsQueryFormType | null) => void;
+export interface QueryFormTypeProps {
+  activeFormType: QueryFormType | null;
+  onFormTypeSelect: (formType: QueryFormType | null) => void;
 }
 
-export const EsQueryFormTypeChooser: React.FC<EsQueryFormTypeProps> = ({
+export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
   activeFormType,
   onFormTypeSelect,
 }) => {
@@ -82,6 +82,7 @@ export const EsQueryFormTypeChooser: React.FC<EsQueryFormTypeProps> = ({
             <EuiButtonIcon
               iconType="cross"
               color="danger"
+              data-test-subj="queryFormTypeChooserCancel"
               aria-label={i18n.translate(
                 'xpack.stackAlerts.esQuery.ui.selectQueryFormType.deleteAriaLabel',
                 {
@@ -100,7 +101,7 @@ export const EsQueryFormTypeChooser: React.FC<EsQueryFormTypeProps> = ({
   return (
     <>
       <EuiTitle size="xs">
-        <h5>
+        <h5 data-test-subj="queryFormTypeChooserTitle">
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectQueryFormTypeLabel"
             defaultMessage="Select a query type"
@@ -112,7 +113,7 @@ export const EsQueryFormTypeChooser: React.FC<EsQueryFormTypeProps> = ({
           <EuiListGroupItem
             wrapText
             key={`form-type-${item.formType}`}
-            data-test-subj={`formType-${item.formType}`}
+            data-test-subj={`queryFormType_${item.formType}`}
             color="primary"
             label={
               <span>

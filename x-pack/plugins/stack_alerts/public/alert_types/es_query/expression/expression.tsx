@@ -14,7 +14,7 @@ import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/p
 import { ErrorKey, EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
-import { EsQueryFormType, EsQueryFormTypeChooser } from './es_query_form_type_chooser';
+import { QueryFormType, QueryFormTypeChooser } from './query_form_type_chooser';
 import { isSearchSourceAlert } from '../util';
 import { EXPRESSION_ERROR_KEYS } from '../constants';
 
@@ -37,24 +37,24 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
 > = (props) => {
   const { ruleParams, errors, setRuleProperty } = props;
   const isSearchSource = isSearchSourceAlert(ruleParams);
-  const [activeEsQueryFormType, setActiveEsQueryFormType] = useState<EsQueryFormType | null>(null);
+  const [activeQueryFormType, setActiveQueryFormType] = useState<QueryFormType | null>(null);
 
   const resetFormType = useCallback(() => {
     // @ts-ignore Reset rule params regardless of their type
     setRuleProperty('params', {});
-    setActiveEsQueryFormType(null);
-  }, [setActiveEsQueryFormType, setRuleProperty]);
+    setActiveQueryFormType(null);
+  }, [setActiveQueryFormType, setRuleProperty]);
 
   const formTypeSelected = useCallback(
-    (formType: EsQueryFormType | null) => {
+    (formType: QueryFormType | null) => {
       if (!formType) {
         resetFormType();
         return;
       }
 
-      setActiveEsQueryFormType(formType);
+      setActiveQueryFormType(formType);
     },
-    [setActiveEsQueryFormType, resetFormType]
+    [setActiveQueryFormType, resetFormType]
   );
 
   const hasExpressionErrors = Object.keys(errors).some((errorKey) => {
@@ -85,9 +85,9 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
 
       {isSearchSource ? (
         <>
-          {activeEsQueryFormType === EsQueryFormType.KQL_OR_LUCENE && (
-            <EsQueryFormTypeChooser
-              activeFormType={activeEsQueryFormType}
+          {activeQueryFormType === QueryFormType.KQL_OR_LUCENE && (
+            <QueryFormTypeChooser
+              activeFormType={activeQueryFormType}
               onFormTypeSelect={formTypeSelected}
             />
           )}
@@ -95,14 +95,14 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         </>
       ) : (
         <>
-          <EsQueryFormTypeChooser
-            activeFormType={activeEsQueryFormType}
+          <QueryFormTypeChooser
+            activeFormType={activeQueryFormType}
             onFormTypeSelect={formTypeSelected}
           />
-          {activeEsQueryFormType === EsQueryFormType.QUERY_DSL && (
+          {activeQueryFormType === QueryFormType.QUERY_DSL && (
             <EsQueryExpression {...props} ruleParams={ruleParams} />
           )}
-          {activeEsQueryFormType === EsQueryFormType.KQL_OR_LUCENE && (
+          {activeQueryFormType === QueryFormType.KQL_OR_LUCENE && (
             <SearchSourceExpressionMemoized
               {...props}
               ruleParams={{
