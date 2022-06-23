@@ -27,3 +27,10 @@ Users can create data views via [Data view management](https://www.elastic.co/gu
 Additionally, they can be created through the data view API.
 
 Data views also allow formatters and custom labels to be defined for fields.
+
+### Services
+
+**hasData:** A standardized way to check the empty state for indices and data views.
+- `hasESData: () => Promise<boolean>; // Check to see if ES data exists`
+- `hasDataView: () => Promise<boolean>; // Check to see if any data view exists (managed or user created)`
+- `hasUserDataView: () => Promise<boolean>; // Check to see if user created data views exists`
