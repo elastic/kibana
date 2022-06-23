@@ -368,7 +368,9 @@ function DiscoverFieldComponent({
       </EuiFlexGroup>
     </EuiPopoverTitle>
   );
-
+  if (!onAddFilter) {
+    return popoverTitle;
+  }
   const renderPopover = () => {
     const details = getDetails(field);
     return (
@@ -402,15 +404,13 @@ function DiscoverFieldComponent({
           </>
         )}
         {(showFieldStats || multiFields) && <EuiHorizontalRule margin="m" />}
-        {onAddFilter && (
-          <DiscoverFieldVisualize
-            field={field}
-            indexPattern={indexPattern}
-            multiFields={rawMultiFields}
-            trackUiMetric={trackUiMetric}
-            details={details}
-          />
-        )}
+        <DiscoverFieldVisualize
+          field={field}
+          indexPattern={indexPattern}
+          multiFields={rawMultiFields}
+          trackUiMetric={trackUiMetric}
+          details={details}
+        />
       </>
     );
   };
