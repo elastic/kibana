@@ -46,7 +46,7 @@ export const OverwriteModal = ({ conflict, onFinish }: OverwriteModalProps) => {
             <Fragment>
               <strong>{header}</strong>
               <EuiText size="s" color="subdued">
-                <p className="euiTextColor--subdued">
+                <p>
                   {idText}
                   <br />
                   {lastUpdatedText}

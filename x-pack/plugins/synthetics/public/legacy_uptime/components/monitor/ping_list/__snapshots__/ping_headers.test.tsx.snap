@@ -5,8 +5,7 @@ exports[`Ping Headers shallow renders expected elements for valid props 1`] = `
   <EuiSpacer
     size="s"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <WithEuiTheme(EuiAccordionClass)
     buttonContent={
       <EuiText
         size="s"
@@ -16,13 +15,7 @@ exports[`Ping Headers shallow renders expected elements for valid props 1`] = `
         </h3>
       </EuiText>
     }
-    buttonElement="button"
-    element="div"
     id="responseHeaderAccord"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <EuiSpacer
       size="s"
@@ -91,6 +84,6 @@ exports[`Ping Headers shallow renders expected elements for valid props 1`] = `
       }
       type="responsiveColumn"
     />
-  </EuiAccordion>
+  </WithEuiTheme(EuiAccordionClass)>
 </Fragment>
 `;

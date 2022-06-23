@@ -38,7 +38,7 @@ const CommandCode = styled.div.attrs(() => {
     className: 'eui-textBreakAll',
   };
 })`
-  margin-right: ${(props) => props.theme.eui.paddingSizes.m};
+  margin-right: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 export const getGenerateServiceTokenStep = ({

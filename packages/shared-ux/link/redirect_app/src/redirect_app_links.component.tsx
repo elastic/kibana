@@ -29,12 +29,7 @@ export interface Props extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>,
  * </RedirectAppLinks>
  * ```
  */
-export const RedirectAppLinks: FC<Props> = ({
-  children,
-  navigateToUrl,
-  currentAppId,
-  ...otherProps
-}) => {
+export const RedirectAppLinks: FC<Props> = ({ children, navigateToUrl, currentAppId }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleClick: MouseEventHandler<HTMLDivElement> = useCallback(
@@ -50,7 +45,7 @@ export const RedirectAppLinks: FC<Props> = ({
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <div {...otherProps} ref={containerRef} onClick={handleClick}>
+    <div ref={containerRef} onClick={handleClick}>
       {children}
     </div>
   );
