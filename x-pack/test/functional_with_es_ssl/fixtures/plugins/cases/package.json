@@ -1,10 +1,10 @@
 {
-  "name": "cases",
+  "name": "cases-fixture",
   "version": "0.0.0",
   "kibana": {
     "version": "kibana"
   },
-  "main": "target/test/functional_with_es_ssl/fixtures/plugins/alerts",
+  "main": "target/test/functional_with_es_ssl/fixtures/plugins/cases",
   "scripts": {
     "kbn": "node ../../../../../../scripts/kbn.js",
     "build": "rm -rf './target' && ../../../../../../node_modules/.bin/tsc"
