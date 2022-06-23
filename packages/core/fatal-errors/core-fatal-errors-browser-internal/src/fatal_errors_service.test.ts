@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as Rx from 'rxjs';
+import { Observable } from 'rxjs';
 
 expect.addSnapshotSerializer({
-  test: (val) => val instanceof Rx.Observable,
+  test: (val) => val instanceof Observable,
   print: () => `Rx.Observable`,
 });
 

@@ -10,7 +10,7 @@
 import fetchMock from 'fetch-mock/es5/client';
 import { loadingServiceMock } from './http_service.test.mocks';
 
-import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { HttpService } from './http_service';
 import { Observable } from 'rxjs';

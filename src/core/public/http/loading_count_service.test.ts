@@ -9,7 +9,7 @@
 import { Observable, throwError, of, Subject } from 'rxjs';
 import { toArray } from 'rxjs/operators';
 
-import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { LoadingCountService } from './loading_count_service';
 
 describe('LoadingCountService', () => {

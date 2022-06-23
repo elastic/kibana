@@ -7,7 +7,7 @@
  */
 
 import { inspect } from 'util';
-
+import type { FatalErrorInfo } from '@kbn/core-fatal-errors-browser';
 /**
  * Produce a string version of an error,
  */
@@ -62,14 +62,4 @@ export function getErrorInfo(error: any, source?: string): FatalErrorInfo {
     message: prefix + formatErrorMessage(error),
     stack: formatStack(error),
   };
-}
-
-/**
- * Represents the `message` and `stack` of a fatal Error
- *
- * @public
- * */
-export interface FatalErrorInfo {
-  message: string;
-  stack: string | undefined;
 }

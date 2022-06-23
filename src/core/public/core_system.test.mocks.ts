@@ -12,7 +12,7 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from './http/http_service.mock';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
@@ -48,7 +48,7 @@ export const MockFatalErrorsService = fatalErrorsServiceMock.create();
 export const FatalErrorsServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockFatalErrorsService);
-jest.doMock('./fatal_errors', () => ({
+jest.doMock('@kbn/core-fatal-errors-browser-internal', () => ({
   FatalErrorsService: FatalErrorsServiceConstructor,
 }));
 
