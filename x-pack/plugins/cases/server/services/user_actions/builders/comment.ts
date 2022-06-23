@@ -5,18 +5,65 @@
  * 2.0.
  */
 
-import { ActionTypes, Actions } from '../../../../common/api';
+import { SavedObjectReference } from '@kbn/core/types';
+import { EXTERNAL_REFERENCE_REF_NAME } from '../../../common/constants';
+import {
+  ActionTypes,
+  Actions,
+  CommentUserAction,
+  CommentType,
+  ExternalReferenceStorageType,
+} from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
 import { UserActionParameters, BuilderReturnValue } from '../types';
 
 export class CommentUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'comment'>): BuilderReturnValue {
-    return this.buildCommonUserAction({
+    const commentUserAction = this.buildCommonUserAction({
       ...args,
       action: args.action ?? Actions.update,
       valueKey: 'comment',
-      value: args.payload.attachment,
+      value: extractAttachmentFrameworkIds(args.payload.attachment),
       type: ActionTypes.comment,
     });
+
+    return {
+      ...commentUserAction,
+      references: [
+        ...commentUserAction.references,
+        ...createAttachmentFrameworkSOReference(args.payload.attachment),
+      ],
+    };
   }
 }
+
+const extractAttachmentFrameworkIds = (attachment: CommentUserAction['payload']['comment']) => {
+  if (
+    attachment.type === CommentType.externalReference &&
+    attachment.externalReferenceStorage.type === ExternalReferenceStorageType.so
+  ) {
+    const { externalReferenceId, ...restAttachment } = attachment;
+    return restAttachment;
+  }
+
+  return attachment;
+};
+
+const createAttachmentFrameworkSOReference = (
+  attachment: CommentUserAction['payload']['comment']
+): SavedObjectReference[] => {
+  if (
+    attachment.type === CommentType.externalReference &&
+    attachment.externalReferenceStorage.type === ExternalReferenceStorageType.so
+  ) {
+    return [
+      {
+        id: attachment.externalReferenceId,
+        name: EXTERNAL_REFERENCE_REF_NAME,
+        type: attachment.externalReferenceStorage.soType,
+      },
+    ];
+  }
+
+  return [];
+};

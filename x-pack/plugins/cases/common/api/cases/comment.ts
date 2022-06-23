@@ -73,12 +73,11 @@ export const ActionsCommentRequestRt = rt.type({
 export enum ExternalReferenceStorageType {
   so = 'so',
   doc = 'doc',
-  other = 'other',
 }
 
 const ExternalReferenceStorageRt = rt.union([
   rt.type({ type: rt.literal(ExternalReferenceStorageType.so), soType: rt.string }),
-  rt.type({ type: rt.literal(ExternalReferenceStorageType.other) }),
+  rt.type({ type: rt.literal(ExternalReferenceStorageType.doc) }),
 ]);
 
 export const ExternalReferenceRt = rt.type({

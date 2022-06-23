@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { CaseResponse, CommentPatchRequest } from '../../../common/api';
+import { CaseResponse, CommentPatchRequest, CommentType } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
@@ -71,6 +71,15 @@ export async function update(
 
     if (myComment.attributes.owner !== queryRestAttributes.owner) {
       throw Boom.badRequest(`You cannot change the owner of the comment.`);
+    }
+
+    if (
+      myComment.attributes.type === CommentType.externalReference &&
+      queryRestAttributes.type === CommentType.externalReference &&
+      myComment.attributes.externalReferenceStorage.type !==
+        queryRestAttributes.externalReferenceStorage.type
+    ) {
+      throw Boom.badRequest(`You cannot change the storage type of an external reference comment.`);
     }
 
     const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);

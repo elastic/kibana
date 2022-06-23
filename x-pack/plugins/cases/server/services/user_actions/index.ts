@@ -23,6 +23,7 @@ import {
   isPushedUserAction,
   isUserActionType,
   isCreateCaseUserAction,
+  isCommentUserAction,
 } from '../../../common/utils/user_actions';
 import {
   Actions,
@@ -32,6 +33,8 @@ import {
   CaseUserActionAttributesWithoutConnectorId,
   CaseUserActionResponse,
   CommentRequest,
+  CommentType,
+  ExternalReferenceStorageType,
   NONE_CONNECTOR_ID,
   User,
 } from '../../../common/api';
@@ -46,6 +49,7 @@ import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
   CONNECTOR_ID_REFERENCE_NAME,
+  EXTERNAL_REFERENCE_REF_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
@@ -588,6 +592,26 @@ const addReferenceIdToPayload = (
         connector_id: connectorId ?? NONE_CONNECTOR_ID,
       },
     };
+  } else if (isCommentUserAction(userActionAttributes)) {
+    if (
+      userActionAttributes.payload.comment.type === CommentType.externalReference &&
+      userActionAttributes.payload.comment.externalReferenceStorage.type ===
+        ExternalReferenceStorageType.so
+    ) {
+      const externalReferenceId = findReferenceId(
+        EXTERNAL_REFERENCE_REF_NAME,
+        userActionAttributes.payload.comment.externalReferenceStorage.soType,
+        userAction.references
+      );
+
+      return {
+        ...userAction.attributes.payload,
+        comment: {
+          ...userActionAttributes.payload.comment,
+          externalReferenceId: externalReferenceId ?? '',
+        },
+      };
+    }
   }
 
   return userAction.attributes.payload;

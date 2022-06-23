@@ -19,7 +19,6 @@ import {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
-import { get } from 'lodash';
 import {
   AttributesTypeAlerts,
   CommentAttributes as AttachmentAttributes,
@@ -539,7 +538,7 @@ export class AttachmentService {
     ) {
       fieldsToExtract.push({
         path: 'externalReferenceId',
-        type: get(attributes, `externalReferenceStorage.soType`),
+        type: attributes.externalReferenceStorage.soType,
         name: EXTERNAL_REFERENCE_REF_NAME,
       });
     }

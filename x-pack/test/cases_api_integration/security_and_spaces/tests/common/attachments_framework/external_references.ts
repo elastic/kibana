@@ -8,13 +8,11 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
+import { CommentRequest, ExternalReferenceStorageType } from '@kbn/cases-plugin/common/api';
 import {
-  AttributesTypeUser,
-  CommentAttributes,
-  ExternalReferenceStorageType,
-} from '@kbn/cases-plugin/common/api';
-import { CASE_COMMENT_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
-import { SavedObject } from '@kbn/core/types';
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+} from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -30,6 +28,7 @@ import {
   removeServerGeneratedPropertiesFromSavedObject,
   bulkCreateAttachments,
   updateComment,
+  getSOFromKibanaIndex,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -49,9 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         params: postExternalReferenceReq,
       });
-      const comment = removeServerGeneratedPropertiesFromSavedObject(
-        patchedCase.comments![0] as AttributesTypeUser
-      );
+      const comment = removeServerGeneratedPropertiesFromSavedObject(patchedCase.comments![0]);
 
       expect(comment).to.eql({
         ...postExternalReferenceReq,
@@ -81,9 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         params: req,
       });
-      const comment = removeServerGeneratedPropertiesFromSavedObject(
-        patchedCase.comments![0] as AttributesTypeUser
-      );
+      const comment = removeServerGeneratedPropertiesFromSavedObject(patchedCase.comments![0]);
 
       expect(comment).to.eql({
         ...req,
@@ -111,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(commentUserAction.payload).to.eql({ comment: postExternalReferenceReq });
     });
 
-    it('should put the externalReferenceId to the SO references if externalReferenceType===so', async () => {
+    it('should create references and attributes correctly if externalReferenceType===so', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       const patchedCase = await createComment({
         supertest,
@@ -119,52 +114,134 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postExternalReferenceReq,
       });
 
-      const esResponse = await es.get<SavedObject<CommentAttributes>>(
-        {
-          index: '.kibana',
-          id: `${CASE_COMMENT_SAVED_OBJECT}:${patchedCase.comments![0].id}`,
-        },
-        { meta: true }
-      );
+      const esResponse = await getSOFromKibanaIndex({
+        es,
+        soType: CASE_COMMENT_SAVED_OBJECT,
+        soId: patchedCase.comments![0].id,
+      });
 
-      const ref = esResponse.body._source?.references.find(
+      const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
+      const ref = esResponse.body._source?.references?.find(
         (r) => r.id === postExternalReferenceReq.externalReferenceId
       );
+
+      const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
+      const { externalReferenceId, ...withoutId } = postExternalReferenceReq;
 
       expect(ref).to.eql({
         id: 'my-id',
         name: 'externalReferenceId',
         type: 'test-type',
       });
+
+      expect(comment).to.eql({
+        ...withoutId,
+        created_by: defaultUser,
+        pushed_at: null,
+        pushed_by: null,
+        updated_by: null,
+      });
     });
 
-    it('should NOT add the externalReferenceId to the SO references if externalReferenceType===other', async () => {
+    it('should create references and attributes correctly if externalReferenceType===so on user actions', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postExternalReferenceReq,
+      });
+
+      const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+      const createCommentUserAction = userActions[1];
+
+      const esResponse = await getSOFromKibanaIndex({
+        es,
+        soType: CASE_USER_ACTION_SAVED_OBJECT,
+        soId: createCommentUserAction.action_id,
+      });
+
+      const commentOnES = esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
+      const ref = esResponse.body._source?.references?.find(
+        (r) => r.id === postExternalReferenceReq.externalReferenceId
+      );
+
+      const { externalReferenceId, ...withoutId } = postExternalReferenceReq;
+      expect(ref).to.eql({
+        id: 'my-id',
+        name: 'externalReferenceId',
+        type: 'test-type',
+      });
+
+      expect(commentOnES).to.eql(withoutId);
+    });
+
+    it('should create references and attributes correctly if externalReferenceType===doc', async () => {
+      const docAttachment: CommentRequest = {
+        ...postExternalReferenceReq,
+        externalReferenceStorage: { type: ExternalReferenceStorageType.doc },
+      };
+
       const postedCase = await createCase(supertest, postCaseReq);
       const patchedCase = await createComment({
         supertest,
         caseId: postedCase.id,
-        params: {
-          ...postExternalReferenceReq,
-          externalReferenceStorage: { type: ExternalReferenceStorageType.other },
-        },
+        params: docAttachment,
       });
 
-      const esResponse = await es.get<SavedObject<CommentAttributes>>(
-        {
-          index: '.kibana',
-          id: `${CASE_COMMENT_SAVED_OBJECT}:${patchedCase.comments![0].id}`,
-        },
-        { meta: true }
-      );
+      const esResponse = await getSOFromKibanaIndex({
+        es,
+        soType: CASE_COMMENT_SAVED_OBJECT,
+        soId: patchedCase.comments![0].id,
+      });
 
-      const ref = esResponse.body._source?.references.find(
+      const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
+      const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
+      const ref = esResponse.body._source?.references?.find(
         (r) => r.id === postExternalReferenceReq.externalReferenceId
       );
 
       expect(ref).to.be(undefined);
+      expect(comment).to.eql({
+        ...docAttachment,
+        created_by: defaultUser,
+        pushed_at: null,
+        pushed_by: null,
+        updated_by: null,
+      });
     });
 
-    it('should put the externalReferenceId to the SO references if externalReferenceType===so when bulk create', async () => {
+    it('should create references and attributes correctly if externalReferenceType===doc on user actions', async () => {
+      const docAttachment: CommentRequest = {
+        ...postExternalReferenceReq,
+        externalReferenceStorage: { type: ExternalReferenceStorageType.doc },
+      };
+
+      const postedCase = await createCase(supertest, postCaseReq);
+      await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: docAttachment,
+      });
+
+      const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+      const createCommentUserAction = userActions[1];
+
+      const esResponse = await getSOFromKibanaIndex({
+        es,
+        soType: CASE_USER_ACTION_SAVED_OBJECT,
+        soId: createCommentUserAction.action_id,
+      });
+
+      const commentOnES = esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
+      const ref = esResponse.body._source?.references?.find(
+        (r) => r.id === postExternalReferenceReq.externalReferenceId
+      );
+
+      expect(ref).to.be(undefined);
+      expect(commentOnES).to.eql(docAttachment);
+    });
+
+    it('should create references and attributes correctly if externalReferenceType===so when bulk create', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       const patchedCase = await bulkCreateAttachments({
         supertest,
@@ -172,52 +249,69 @@ export default ({ getService }: FtrProviderContext): void => {
         params: [postCommentUserReq, postExternalReferenceReq],
       });
 
-      const esResponse = await es.get<SavedObject<CommentAttributes>>(
-        {
-          index: '.kibana',
-          id: `${CASE_COMMENT_SAVED_OBJECT}:${patchedCase.comments![1].id}`,
-        },
-        { meta: true }
-      );
+      const esResponse = await getSOFromKibanaIndex({
+        es,
+        soType: CASE_COMMENT_SAVED_OBJECT,
+        soId: patchedCase.comments![1].id,
+      });
 
-      const ref = esResponse.body._source?.references.find(
+      const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
+
+      const ref = esResponse.body._source?.references?.find(
         (r) => r.id === postExternalReferenceReq.externalReferenceId
       );
+
+      const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
+      const { externalReferenceId, ...withoutId } = postExternalReferenceReq;
 
       expect(ref).to.eql({
         id: 'my-id',
         name: 'externalReferenceId',
         type: 'test-type',
       });
+
+      expect(comment).to.eql({
+        ...withoutId,
+        created_by: defaultUser,
+        pushed_at: null,
+        pushed_by: null,
+        updated_by: null,
+      });
     });
 
-    it('should NOT add the externalReferenceId to the SO references if externalReferenceType===other when bulk create', async () => {
+    it('should create references and attributes correctly if externalReferenceType===doc when bulk create', async () => {
+      const docAttachment: CommentRequest = {
+        ...postExternalReferenceReq,
+        externalReferenceStorage: { type: ExternalReferenceStorageType.doc },
+      };
+
       const postedCase = await createCase(supertest, postCaseReq);
       const patchedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [
-          postCommentUserReq,
-          {
-            ...postExternalReferenceReq,
-            externalReferenceStorage: { type: ExternalReferenceStorageType.other },
-          },
-        ],
+        params: [postCommentUserReq, docAttachment],
       });
 
-      const esResponse = await es.get<SavedObject<CommentAttributes>>(
-        {
-          index: '.kibana',
-          id: `${CASE_COMMENT_SAVED_OBJECT}:${patchedCase.comments![1].id}`,
-        },
-        { meta: true }
-      );
+      const esResponse = await getSOFromKibanaIndex({
+        es,
+        soType: CASE_COMMENT_SAVED_OBJECT,
+        soId: patchedCase.comments![1].id,
+      });
 
-      const ref = esResponse.body._source?.references.find(
+      const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
+      const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
+      const ref = esResponse.body._source?.references?.find(
         (r) => r.id === postExternalReferenceReq.externalReferenceId
       );
 
       expect(ref).to.be(undefined);
+      expect(comment).to.eql({
+        ...docAttachment,
+        created_by: defaultUser,
+        pushed_at: null,
+        pushed_by: null,
+        updated_by: null,
+      });
     });
 
     it('should put the new externalReferenceId to the SO references when updating the attachment', async () => {
@@ -239,20 +333,81 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      const esResponse = await es.get<SavedObject<CommentAttributes>>(
-        {
-          index: '.kibana',
-          id: `${CASE_COMMENT_SAVED_OBJECT}:${patchedCase.comments![0].id}`,
-        },
-        { meta: true }
-      );
+      const esResponse = await getSOFromKibanaIndex({
+        es,
+        soType: CASE_COMMENT_SAVED_OBJECT,
+        soId: patchedCase.comments![0].id,
+      });
 
-      const ref = esResponse.body._source?.references.find((r) => r.id === 'my-new-id');
+      const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
+      const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
+      const ref = esResponse.body._source?.references?.find((r) => r.id === 'my-new-id');
+      const { externalReferenceId, ...withoutId } = postExternalReferenceReq;
 
       expect(ref).to.eql({
         id: 'my-new-id',
         name: 'externalReferenceId',
         type: 'test-type',
+      });
+
+      expect(comment).to.eql({
+        ...withoutId,
+        created_by: defaultUser,
+        pushed_at: null,
+        pushed_by: null,
+        updated_by: defaultUser,
+      });
+    });
+
+    it('should return 400 when updating from so to doc', async () => {
+      const docAttachment: CommentRequest = {
+        ...postExternalReferenceReq,
+        externalReferenceStorage: { type: ExternalReferenceStorageType.doc },
+        externalReferenceId: 'my-doc-id',
+      };
+
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postExternalReferenceReq,
+      });
+
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          ...docAttachment,
+        },
+        expectedHttpCode: 400,
+      });
+    });
+
+    it('should return 400 when updating from doc to so', async () => {
+      const docAttachment: CommentRequest = {
+        ...postExternalReferenceReq,
+        externalReferenceStorage: { type: ExternalReferenceStorageType.doc },
+        externalReferenceId: 'my-doc-id',
+      };
+
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: docAttachment,
+      });
+
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          ...postExternalReferenceReq,
+        },
+        expectedHttpCode: 400,
       });
     });
 
