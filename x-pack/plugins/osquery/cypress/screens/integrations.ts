@@ -26,4 +26,4 @@ export const PACKAGE_VERSION = 'packageVersionText';
 export const SAVE_PACKAGE_CONFIRM = '[data-test-subj=confirmModalConfirmButton]';
 
 export const getAdvancedButton = () =>
-  cy.react('EuiAccordion', { props: { buttonContent: 'Advanced' } });
+  cy.react('EuiAccordionClass', { props: { buttonContent: 'Advanced' } }).last();
