@@ -50,29 +50,34 @@ export const SearchSourceExpression = ({
   );
 
   useEffect(() => {
-    let initialSearchConfiguration = searchConfiguration;
+    const initSearchSource = async () => {
+      let initialSearchConfiguration = searchConfiguration;
 
-    if (shouldResetSearchConfiguration) {
-      const newSearchSource = data.search.searchSource.createEmpty();
-      newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
-      initialSearchConfiguration = newSearchSource.getSerializedFields();
-    }
+      if (shouldResetSearchConfiguration) {
+        const newSearchSource = data.search.searchSource.createEmpty();
+        newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
+        const defaultDataView = await data.dataViews.getDefaultDataView();
+        if (defaultDataView) {
+          newSearchSource.setField('index', defaultDataView);
+        }
+        initialSearchConfiguration = newSearchSource.getSerializedFields();
+      }
 
-    setRuleProperty('params', {
-      searchConfiguration: initialSearchConfiguration,
-      searchType: SearchType.searchSource,
-      timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
-      timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
-      threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
-      thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      size: size ?? DEFAULT_VALUES.SIZE,
-    });
+      setRuleProperty('params', {
+        searchConfiguration: initialSearchConfiguration,
+        searchType: SearchType.searchSource,
+        timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+        timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+        threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
+        thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+        size: size ?? DEFAULT_VALUES.SIZE,
+      });
 
-    const initSearchSource = () =>
       data.search.searchSource
         .create(initialSearchConfiguration)
         .then((fetchedSearchSource) => setSearchSource(fetchedSearchSource))
         .catch(setParamsError);
+    };
 
     initSearchSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps

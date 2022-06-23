@@ -208,36 +208,40 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onSelectDataView={onSelectDataView}
       />
 
-      <EuiSpacer size="s" />
+      {dataViews.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
 
-      <SearchBar
-        onQuerySubmit={onQueryBarSubmit}
-        onQueryChange={onChangeQuery}
-        suggestionsSize="s"
-        displayStyle="inPage"
-        placeholder={i18n.translate('xpack.stackAlerts.searchSource.ui.searchQuery', {
-          defaultMessage: 'Search query',
-        })}
-        query={query}
-        indexPatterns={dataViews}
-        savedQuery={savedQuery}
-        filters={filters}
-        onFiltersUpdated={onUpdateFilters}
-        onClearSavedQuery={onClearSavedQuery}
-        onSavedQueryUpdated={onSavedQuery}
-        onSaved={onSavedQuery}
-        showSaveQuery
-        showQueryBar
-        showQueryInput
-        showFilterBar
-        showDatePicker={false}
-        showAutoRefreshOnly={false}
-        showSubmitButton={false}
-        dateRangeFrom={undefined}
-        dateRangeTo={undefined}
-        timeHistory={timeHistory}
-        hiddenFilterPanelOptions={HIDDEN_FILTER_PANEL_OPTIONS}
-      />
+          <SearchBar
+            onQuerySubmit={onQueryBarSubmit}
+            onQueryChange={onChangeQuery}
+            suggestionsSize="s"
+            displayStyle="inPage"
+            placeholder={i18n.translate('xpack.stackAlerts.searchSource.ui.searchQuery', {
+              defaultMessage: 'Search query',
+            })}
+            query={query}
+            indexPatterns={dataViews}
+            savedQuery={savedQuery}
+            filters={filters}
+            onFiltersUpdated={onUpdateFilters}
+            onClearSavedQuery={onClearSavedQuery}
+            onSavedQueryUpdated={onSavedQuery}
+            onSaved={onSavedQuery}
+            showSaveQuery
+            showQueryBar
+            showQueryInput
+            showFilterBar
+            showDatePicker={false}
+            showAutoRefreshOnly={false}
+            showSubmitButton={false}
+            dateRangeFrom={undefined}
+            dateRangeTo={undefined}
+            timeHistory={timeHistory}
+            hiddenFilterPanelOptions={HIDDEN_FILTER_PANEL_OPTIONS}
+          />
+        </>
+      )}
 
       <EuiSpacer />
 
