@@ -93,7 +93,7 @@ export function OpenTelemetryInstructions({
       <EuiText size="xs" color="subdued">
         <FormattedMessage
           id="xpack.apm.tutorial.config_otel.description1"
-          defaultMessage="(1) OpenTelemetry agents and SDKs must support the {otelExporterOtlpEndpoint}, {otelExporterOtlpHeaders}, and {otelResourceAttributes}; some unstable components may not yet comply with this requirement."
+          defaultMessage="(1) OpenTelemetry agents and SDKs must support the {otelExporterOtlpEndpoint}, {otelExporterOtlpHeaders}, and {otelResourceAttributes} variables; some unstable components may not yet comply with this requirement."
           values={{
             otelExporterOtlpEndpoint: (
               <EuiLink
