@@ -240,7 +240,7 @@ export class FeatureTable extends Component<Props, State> {
                 }
 
                 this.setState({
-                  expandedPrivilegeControls: this.state.expandedPrivilegeControls,
+                  expandedPrivilegeControls: new Set([...this.state.expandedPrivilegeControls]),
                 });
               }}
             >
