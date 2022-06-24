@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import MetricVis, { MetricVisComponentProps } from './metric_vis';
-import { LayoutDirection, Metric, MetricWProgress } from '@elastic/charts';
+import { LayoutDirection, Metric, MetricWProgress, Settings } from '@elastic/charts';
 
 jest.mock('../services', () => ({
   // getFormatService: () => {
@@ -261,6 +261,7 @@ describe('MetricVisComponent', function () {
         }
       `);
     });
+
     it('should display progress bar if min and max provided', () => {
       const getConfig = (min?: number, max?: number, direction: LayoutDirection = 'vertical') =>
         shallow(
@@ -312,14 +313,385 @@ describe('MetricVisComponent', function () {
         'horizontal'
       );
     });
-    it('should fetch color from palette if provided', () => {});
+    it('should fetch color from palette if provided', () => {
+      // TODO
+    });
   });
 
   describe('metric grid', () => {
-    it('should render a grid if breakdownBy dimension supplied', () => {});
-    it('should display extra text or secondary metric', () => {});
-    it('should respect maxCols and minTiles', () => {});
-    it('should display progress bar if min and max provided', () => {});
-    it('should fetch color from palette if provided', () => {});
+    const config: Props['config'] = {
+      metric: {
+        progressDirection: 'vertical',
+        maxCols: 5,
+      },
+      dimensions: {
+        metric: basePriceColumnId,
+        breakdownBy: dayOfWeekColumnId,
+      },
+    };
+
+    it('should render a grid if breakdownBy dimension supplied', () => {
+      const component = shallow(
+        <MetricVis config={config} data={table} renderComplete={() => {}} />
+      );
+
+      const { data } = component.find(Metric).props();
+
+      expect(data).toBeDefined();
+      expect(data?.flat().length).toBe(table.rows.length);
+
+      const visConfig = data![0];
+
+      expect(visConfig).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "color": "#5e5e5e",
+            "extra": <span />,
+            "subtitle": "Median products.base_price",
+            "title": "Friday",
+            "value": 28.984375,
+            "valueFormatter": [Function],
+          },
+          Object {
+            "color": "#5e5e5e",
+            "extra": <span />,
+            "subtitle": "Median products.base_price",
+            "title": "Wednesday",
+            "value": 28.984375,
+            "valueFormatter": [Function],
+          },
+          Object {
+            "color": "#5e5e5e",
+            "extra": <span />,
+            "subtitle": "Median products.base_price",
+            "title": "Saturday",
+            "value": 25.984375,
+            "valueFormatter": [Function],
+          },
+          Object {
+            "color": "#5e5e5e",
+            "extra": <span />,
+            "subtitle": "Median products.base_price",
+            "title": "Sunday",
+            "value": 25.784375,
+            "valueFormatter": [Function],
+          },
+          Object {
+            "color": "#5e5e5e",
+            "extra": <span />,
+            "subtitle": "Median products.base_price",
+            "title": "Thursday",
+            "value": 25.348011363636363,
+            "valueFormatter": [Function],
+          },
+        ]
+      `);
+    });
+
+    it('should display extra text or secondary metric', () => {
+      const componentWithSecondaryDimension = shallow(
+        <MetricVis
+          config={{
+            ...config,
+            dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
+            // extra text included to make sure it's overridden
+            metric: { ...config.metric, extraText: 'howdy' },
+          }}
+          data={table}
+          renderComplete={() => {}}
+        />
+      );
+
+      expect(
+        componentWithSecondaryDimension
+          .find(Metric)
+          .props()
+          .data?.[0].map((datum) => datum?.extra)
+      ).toMatchInlineSnapshot(`
+        Array [
+          <span>
+            13.633
+          </span>,
+          <span>
+            13.640
+          </span>,
+          <span>
+            13.344
+          </span>,
+          <span>
+            13.492
+          </span>,
+          <span>
+            13.344
+          </span>,
+        ]
+      `);
+
+      const componentWithExtraText = shallow(
+        <MetricVis
+          config={{
+            ...config,
+            metric: { ...config.metric, extraText: 'howdy' },
+          }}
+          data={table}
+          renderComplete={() => {}}
+        />
+      );
+
+      expect(
+        componentWithExtraText
+          .find(Metric)
+          .props()
+          .data?.[0].map((datum) => datum?.extra)
+      ).toMatchInlineSnapshot(`
+        Array [
+          <span>
+            howdy
+          </span>,
+          <span>
+            howdy
+          </span>,
+          <span>
+            howdy
+          </span>,
+          <span>
+            howdy
+          </span>,
+          <span>
+            howdy
+          </span>,
+        ]
+      `);
+    });
+
+    it('should respect maxCols and minTiles', () => {
+      const getConfigs = (maxCols?: number, minTiles?: number) =>
+        shallow(
+          <MetricVis
+            config={{
+              ...config,
+              metric: {
+                ...config.metric,
+                ...(maxCols ? { maxCols } : {}),
+                minTiles,
+              },
+            }}
+            data={table}
+            renderComplete={() => {}}
+          />
+        )
+          .find(Metric)
+          .props().data!;
+
+      const configsWithDefaults = getConfigs(undefined, undefined);
+      expect(configsWithDefaults.length).toBe(2);
+      expect(configsWithDefaults[0].length).toBe(5);
+
+      const configsWithCustomCols = getConfigs(2, undefined);
+      expect(configsWithCustomCols.length).toBe(3);
+      expect(configsWithCustomCols[0].length).toBe(2);
+      expect(configsWithCustomCols[1].length).toBe(2);
+      expect(configsWithCustomCols[2].length).toBe(2);
+
+      const configsWithMinTiles = getConfigs(5, 10);
+      expect(configsWithMinTiles.length).toBe(2);
+      expect(configsWithMinTiles[1].length).toBe(5);
+      expect(configsWithMinTiles).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "color": "#5e5e5e",
+              "extra": <span />,
+              "subtitle": "Median products.base_price",
+              "title": "Friday",
+              "value": 28.984375,
+              "valueFormatter": [Function],
+            },
+            Object {
+              "color": "#5e5e5e",
+              "extra": <span />,
+              "subtitle": "Median products.base_price",
+              "title": "Wednesday",
+              "value": 28.984375,
+              "valueFormatter": [Function],
+            },
+            Object {
+              "color": "#5e5e5e",
+              "extra": <span />,
+              "subtitle": "Median products.base_price",
+              "title": "Saturday",
+              "value": 25.984375,
+              "valueFormatter": [Function],
+            },
+            Object {
+              "color": "#5e5e5e",
+              "extra": <span />,
+              "subtitle": "Median products.base_price",
+              "title": "Sunday",
+              "value": 25.784375,
+              "valueFormatter": [Function],
+            },
+            Object {
+              "color": "#5e5e5e",
+              "extra": <span />,
+              "subtitle": "Median products.base_price",
+              "title": "Thursday",
+              "value": 25.348011363636363,
+              "valueFormatter": [Function],
+            },
+          ],
+          Array [
+            Object {
+              "color": "#5e5e5e",
+              "extra": <span />,
+              "subtitle": "Median products.base_price",
+              "title": "Monday",
+              "value": 24.984375,
+              "valueFormatter": [Function],
+            },
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+          ],
+        ]
+      `);
+    });
+
+    it('should display progress bar if min and max provided', () => {
+      expect(
+        shallow(
+          <MetricVis
+            config={{
+              ...config,
+              metric: {
+                ...config.metric,
+                progressMin: 0,
+                progressMax: 30,
+              },
+            }}
+            data={table}
+            renderComplete={() => {}}
+          />
+        )
+          .find(Metric)
+          .props().data
+      ).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "color": "#5e5e5e",
+              "domain": Object {
+                "max": 30,
+                "min": 0,
+              },
+              "extra": <span />,
+              "progressBarDirection": "vertical",
+              "subtitle": "Median products.base_price",
+              "title": "Friday",
+              "value": 28.984375,
+              "valueFormatter": [Function],
+            },
+            Object {
+              "color": "#5e5e5e",
+              "domain": Object {
+                "max": 30,
+                "min": 0,
+              },
+              "extra": <span />,
+              "progressBarDirection": "vertical",
+              "subtitle": "Median products.base_price",
+              "title": "Wednesday",
+              "value": 28.984375,
+              "valueFormatter": [Function],
+            },
+            Object {
+              "color": "#5e5e5e",
+              "domain": Object {
+                "max": 30,
+                "min": 0,
+              },
+              "extra": <span />,
+              "progressBarDirection": "vertical",
+              "subtitle": "Median products.base_price",
+              "title": "Saturday",
+              "value": 25.984375,
+              "valueFormatter": [Function],
+            },
+            Object {
+              "color": "#5e5e5e",
+              "domain": Object {
+                "max": 30,
+                "min": 0,
+              },
+              "extra": <span />,
+              "progressBarDirection": "vertical",
+              "subtitle": "Median products.base_price",
+              "title": "Sunday",
+              "value": 25.784375,
+              "valueFormatter": [Function],
+            },
+            Object {
+              "color": "#5e5e5e",
+              "domain": Object {
+                "max": 30,
+                "min": 0,
+              },
+              "extra": <span />,
+              "progressBarDirection": "vertical",
+              "subtitle": "Median products.base_price",
+              "title": "Thursday",
+              "value": 25.348011363636363,
+              "valueFormatter": [Function],
+            },
+          ],
+          Array [
+            Object {
+              "color": "#5e5e5e",
+              "domain": Object {
+                "max": 30,
+                "min": 0,
+              },
+              "extra": <span />,
+              "progressBarDirection": "vertical",
+              "subtitle": "Median products.base_price",
+              "title": "Monday",
+              "value": 24.984375,
+              "valueFormatter": [Function],
+            },
+          ],
+        ]
+      `);
+    });
+
+    it('should fetch color from palette if provided', () => {
+      // TODO
+    });
+  });
+
+  it('should report render complete', () => {
+    const renderCompleteSpy = jest.fn();
+    const component = shallow(
+      <MetricVis
+        config={{
+          metric: {
+            progressDirection: 'vertical',
+            maxCols: 5,
+          },
+          dimensions: {
+            metric: basePriceColumnId,
+          },
+        }}
+        data={table}
+        renderComplete={renderCompleteSpy}
+      />
+    );
+    component.find(Settings).props().onRenderChange!(false);
+
+    expect(renderCompleteSpy).not.toHaveBeenCalled();
+
+    component.find(Settings).props().onRenderChange!(true);
+
+    expect(renderCompleteSpy).toHaveBeenCalledTimes(1);
   });
 });
