@@ -8,9 +8,15 @@
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { LensEmbeddableInput, LensPublicStart, XYState } from '@kbn/lens-plugin/public';
+import {
+  FormulaPublicApi,
+  LensEmbeddableInput,
+  LensPublicStart,
+  XYState,
+} from '@kbn/lens-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
-import { AllSeries, useTheme } from '../../../..';
+import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
+import { AllSeries, ReportTypes, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { AppDataType, ReportViewType } from '../types';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
@@ -47,6 +53,7 @@ export interface ExploratoryEmbeddableProps {
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
   lens: LensPublicStart;
   indexPatterns: DataViewState;
+  lensFormulaHelper: FormulaPublicApi;
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -70,6 +77,7 @@ export default function Embeddable({
   singleMetricOptions,
   title,
   withActions = true,
+  lensFormulaHelper,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
@@ -92,7 +100,11 @@ export default function Embeddable({
 
   let lensAttributes;
   try {
-    lensAttributes = new LensAttributes(layerConfigs, reportType);
+    if (reportType === ReportTypes.SINGLE_METRIC) {
+      lensAttributes = new SingleMetricLensAttributes(layerConfigs, reportType, lensFormulaHelper);
+    } else {
+      lensAttributes = new LensAttributes(layerConfigs, reportType, lensFormulaHelper);
+    }
     // eslint-disable-next-line no-empty
   } catch (error) {}
 

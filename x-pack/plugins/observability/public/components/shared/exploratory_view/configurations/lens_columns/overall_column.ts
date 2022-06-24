@@ -13,19 +13,22 @@ export function getDistributionInPercentageColumn({
   dataView,
   columnFilter,
   lensFormulaHelper,
+  formula,
 }: {
   label?: string;
   columnFilter?: string;
   layerId: string;
   lensFormulaHelper: FormulaPublicApi;
   dataView: DataView;
+  formula?: string;
 }) {
   const yAxisColId = `y-axis-column-${layerId}`;
 
-  let lensFormula = 'count() / overall_sum(count())';
+  let lensFormula = formula ?? 'count() / overall_sum(count())';
 
   if (columnFilter) {
-    lensFormula = `count(kql='${columnFilter}') / overall_sum(count(kql='${columnFilter}'))`;
+    lensFormula =
+      formula ?? `count(kql='${columnFilter}') / overall_sum(count(kql='${columnFilter}'))`;
   }
 
   const { columns } = lensFormulaHelper?.insertOrReplaceFormulaColumn(

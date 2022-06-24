@@ -12,6 +12,7 @@ import {
   REPORT_METRIC_FIELD,
   PERCENTILE,
   ReportTypes,
+  FORMULA_COLUMN,
 } from '../constants';
 import {
   CLS_LABEL,
@@ -86,6 +87,12 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         field: MONITOR_DURATION_US,
         id: MONITOR_DURATION_US,
         columnType: OPERATION_COLUMN,
+      },
+      {
+        label: 'Monitor availability',
+        id: 'monitor_availability',
+        columnType: FORMULA_COLUMN,
+        formula: "1- (count(kql='summary.down > 0') / count())",
       },
       {
         field: SUMMARY_UP,

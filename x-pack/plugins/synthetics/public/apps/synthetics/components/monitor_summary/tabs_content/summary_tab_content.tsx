@@ -6,19 +6,39 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiPanel } from '@elastic/eui';
+import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { DurationPanel } from './duration_panel';
+import { AvailabilityPanel } from './availability_panel';
 import { MonitorDetailsPanel } from './monitor_details_panel';
 
 export const SummaryTabContent = () => {
   return (
-    <EuiPanel>
-      <EuiTitle size="s">
-        <h3>{MONITOR_DETAILS_LABEL}</h3>
-      </EuiTitle>
-      <MonitorDetailsPanel />
-    </EuiPanel>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={1}>
+        <EuiPanel>
+          <EuiTitle size="s">
+            <h3>{MONITOR_DETAILS_LABEL}</h3>
+          </EuiTitle>
+          <MonitorDetailsPanel />
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem grow={2}>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiPanel>
+              <AvailabilityPanel />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel>
+              <DurationPanel />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

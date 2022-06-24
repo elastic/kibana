@@ -26,6 +26,8 @@ import {
 
 export class SingleMetricLensAttributes extends LensAttributes {
   columnId: string;
+  colorMode?: MetricState['colorMode'];
+  palette?: MetricState['palette'];
 
   constructor(
     layerConfigs: LayerConfig[],
@@ -48,10 +50,13 @@ export class SingleMetricLensAttributes extends LensAttributes {
   getSingleMetricLayer() {
     const { seriesConfig, selectedMetricField, operationType, indexPattern } = this.layerConfigs[0];
 
-    const { columnFilter, columnField, columnLabel, columnType, formula } = parseCustomFieldName(
-      seriesConfig,
-      selectedMetricField
-    );
+    const { columnFilter, columnField, columnLabel, columnType, formula, stateOptions } =
+      parseCustomFieldName(seriesConfig, selectedMetricField);
+
+    if (stateOptions) {
+      this.colorMode = stateOptions.colorMode;
+      this.palette = stateOptions.palette;
+    }
 
     if (columnType === FORMULA_COLUMN && formula) {
       return this.getFormulaLayer({ formula, label: columnLabel, dataView: indexPattern });
@@ -157,32 +162,9 @@ export class SingleMetricLensAttributes extends LensAttributes {
       accessor: this.columnId,
       layerId: 'layer0',
       layerType: 'data',
-      colorMode: 'Labels',
-      palette: {
-        name: 'custom',
-        type: 'palette',
-        params: {
-          steps: 3,
-          name: 'custom',
-          reverse: false,
-          rangeType: 'number',
-          rangeMin: 0.8,
-          rangeMax: 1,
-          progression: 'fixed',
-          stops: [
-            { color: '#cc5642', stop: 0.9 },
-            { color: '#d6bf57', stop: 0.95 },
-            { color: '#209280', stop: 1.9903347477604902 },
-          ],
-          colorStops: [
-            { color: '#cc5642', stop: 0.8 },
-            { color: '#d6bf57', stop: 0.9 },
-            { color: '#209280', stop: 0.95 },
-          ],
-          continuity: 'above',
-          maxSteps: 5,
-        },
-      },
+      colorMode: this.colorMode,
+      titlePosition: 'bottom',
+      palette: this.palette,
     };
   }
 

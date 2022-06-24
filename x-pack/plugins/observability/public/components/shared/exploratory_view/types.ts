@@ -14,6 +14,7 @@ import type {
   SeriesType,
   OperationType,
   YConfig,
+  MetricState,
 } from '@kbn/lens-plugin/public';
 
 import type { PersistableFilter } from '@kbn/lens-plugin/common';
@@ -66,6 +67,7 @@ export interface MetricOption {
   timeScale?: string;
   showPercentileAnnotations?: boolean;
   formula?: string;
+  stateOptions?: Pick<MetricState, 'colorMode' | 'palette'>;
 }
 
 export interface SeriesConfig {

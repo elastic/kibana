@@ -45,6 +45,7 @@ import {
   PERCENTILE,
   PERCENTILE_RANKS,
   ReportTypes,
+  FORMULA_COLUMN,
 } from './constants';
 import {
   ColumnFilter,
@@ -507,6 +508,7 @@ export class LensAttributes {
   }) {
     const { breakdown, seriesConfig } = layerConfig;
     const {
+      formula,
       fieldMeta,
       columnType,
       fieldName,
@@ -515,6 +517,16 @@ export class LensAttributes {
       columnFilters,
       showPercentileAnnotations,
     } = this.getFieldMeta(sourceField, layerConfig);
+
+    if (columnType === FORMULA_COLUMN) {
+      return getDistributionInPercentageColumn({
+        label,
+        layerId,
+        formula,
+        dataView: layerConfig.indexPattern,
+        lensFormulaHelper: this.lensFormulaHelper!,
+      }).main;
+    }
 
     if (showPercentileAnnotations) {
       this.addThresholdLayer(fieldName, layerId, layerConfig);
@@ -591,9 +603,11 @@ export class LensAttributes {
         timeScale,
         paramFilters,
         showPercentileAnnotations,
+        formula,
       } = parseCustomFieldName(layerConfig.seriesConfig, layerConfig.selectedMetricField);
       const fieldMeta = layerConfig.indexPattern.getFieldByName(fieldName!);
       return {
+        formula,
         fieldMeta,
         fieldName,
         columnType,
@@ -659,6 +673,20 @@ export class LensAttributes {
         dataView: layerConfig.indexPattern,
         lensFormulaHelper: this.lensFormulaHelper!,
       }).supportingColumns;
+    }
+
+    if (mainSourceField && !forAccessorsKeys) {
+      const { columnLabel, formula, columnType } = this.getFieldMeta(mainSourceField, layerConfig);
+
+      if (columnType === FORMULA_COLUMN) {
+        return getDistributionInPercentageColumn({
+          label: columnLabel,
+          layerId,
+          formula,
+          dataView: layerConfig.indexPattern,
+          lensFormulaHelper: this.lensFormulaHelper!,
+        }).supportingColumns;
+      }
     }
 
     if (yAxisColumns.length === 1 && breakdown === PERCENTILE) {
