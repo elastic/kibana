@@ -114,6 +114,7 @@ Osquery Manager integration to add the following Advanced *Osquery config*:
       "enable_tables":"curl"
    }
 }
+```
 
 [float]
 === Upgrade Osquery versions
