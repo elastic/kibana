@@ -38,10 +38,7 @@ export const synchronizeMovement = {
     registry[embeddableId] = mapPanel;
   },
   setLocation(triggeringEmbedableId: string, lat: number, lon: number, zoom: number) {
-    if (
-      (primaryPanelId && primaryPanelId !== triggeringEmbedableId) ||
-      (location && location.lat === lat && location.lon === lon && location.zoom === zoom)
-    ) {
+    if (primaryPanelId && primaryPanelId !== triggeringEmbedableId) {
       // to avoid callstack overflow and bouncing between locations,
       // do not propagate location changes from "follower" panels
       return;
@@ -69,5 +66,9 @@ export const synchronizeMovement = {
   },
   unregister(embeddableId: string) {
     delete registry[embeddableId];
+    if (Object.keys(registry).length === 0) {
+      // clear location to not pollute location between embeddable containers
+      location = undefined;
+    }
   },
 };

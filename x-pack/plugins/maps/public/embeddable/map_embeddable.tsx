@@ -53,6 +53,7 @@ import {
   getMapBuffer,
   getMapExtent,
   getMapReady,
+  getMapSettings,
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
@@ -432,6 +433,9 @@ export class MapEmbeddable
         this.updateInput({ isMovementSynchronized });
         if (isMovementSynchronized) {
           this._gotoSynchronizedLocation();
+        } else if (!isMovementSynchronized && this._savedMap.getAutoFitToBounds()) {
+          // restore autoFitToBounds when isMovementSynchronized disabled
+          this._savedMap.getStore().dispatch(setMapSettings({ autoFitToDataBounds: true }));
         }
       },
     });
@@ -634,6 +638,11 @@ export class MapEmbeddable
   }
 
   _mapSyncHandler = (lat: number, lon: number, zoom: number) => {
+    // auto fit to bounds is not compatable with map synchronization
+    // auto fit to bounds may cause map location to never stablize and bound back and forth between bounds on different maps
+    if (getMapSettings(this._savedMap.getStore().getState()).autoFitToDataBounds) {
+      this._savedMap.getStore().dispatch(setMapSettings({ autoFitToDataBounds: false }));
+    }
     this._savedMap.getStore().dispatch(setGotoWithCenter({ lat, lon, zoom }));
   };
 
