@@ -7,40 +7,12 @@
 
 import { journey, step, before } from '@elastic/synthetics';
 import { UXDashboardDatePicker } from '../page_objects/date_picker';
-import {
-  byLensDataLayerId,
-  byLensTestId,
-  loginToKibana,
-  waitForLoadingToFinish,
-} from './utils';
+import { byLensTestId, loginToKibana, waitForLoadingToFinish } from './utils';
 
 const osNameMetric = 'ux-visitor-breakdown-user_agent-os-name';
 const uaNameMetric = 'ux-visitor-breakdown-user_agent-name';
 
 const chartIds = [osNameMetric, uaNameMetric];
-
-const osNames = [
-  'Windows',
-  'Mac OS X',
-  'Linux',
-  'Android',
-  'iOS',
-  'Ubuntu',
-  'Chrome OS',
-];
-
-const uaNames = [
-  'Chrome',
-  'Edge',
-  'Firefox',
-  'Safari',
-  'Chrome Mobile',
-  'HeadlessChrome',
-  'Opera',
-  'Other',
-  'Chrome Mobile WebView',
-  'Mobile Safari',
-];
 
 journey('UX Visitor Breakdown', async ({ page, params }) => {
   before(async () => {
@@ -80,36 +52,6 @@ journey('UX Visitor Breakdown', async ({ page, params }) => {
         async (dataTestId) =>
           // lens embeddable injects its own test attribute
           await page.waitForSelector(byLensTestId(dataTestId))
-      )
-    );
-  });
-
-  step('Check user_agent.name data layers', async () => {
-    // Wait until chart data is loaded
-    await page.waitForLoadState('networkidle');
-
-    await Promise.all(
-      uaNames.map(
-        async (dataTestId) =>
-          // lens embeddable injects its own test attribute
-          await page.waitForSelector(byLensDataLayerId(dataTestId), {
-            state: 'attached',
-          })
-      )
-    );
-  });
-
-  step('Check user_agent.os.name data layers', async () => {
-    // Wait until chart data is loaded
-    await page.waitForLoadState('networkidle');
-
-    await Promise.all(
-      osNames.map(
-        async (dataTestId) =>
-          // lens embeddable injects its own test attribute
-          await page.waitForSelector(byLensDataLayerId(dataTestId), {
-            state: 'attached',
-          })
       )
     );
   });
