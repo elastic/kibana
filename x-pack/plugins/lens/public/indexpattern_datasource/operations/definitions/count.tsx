@@ -112,7 +112,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     layer,
     columnId,
     currentColumn,
-    updateLayer,
+    paramEditorUpdater,
   }: ParamEditorProps<CountIndexPatternColumn>) => {
     return [
       {
@@ -130,7 +130,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
               }}
               checked={Boolean(currentColumn.params?.emptyAsNull)}
               onChange={() => {
-                updateLayer(
+                paramEditorUpdater(
                   updateColumnParam({
                     layer,
                     columnId,

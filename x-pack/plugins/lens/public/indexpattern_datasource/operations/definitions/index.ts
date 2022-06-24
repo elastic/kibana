@@ -163,8 +163,11 @@ export { staticValueOperation } from './static_value';
 export interface ParamEditorProps<C> {
   currentColumn: C;
   layer: IndexPatternLayer;
-  updateLayer: (
-    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+  paramEditorUpdater: (
+    setter:
+      | IndexPatternLayer
+      | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+      | GenericIndexPatternColumn
   ) => void;
   toggleFullscreen: () => void;
   setIsCloseable: (isCloseable: boolean) => void;
@@ -183,6 +186,8 @@ export interface ParamEditorProps<C> {
   activeData?: IndexPatternDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   paramEditorCustomProps?: ParamEditorCustomProps;
+  existingFields: Record<string, Record<string, boolean>>;
+  isReferenced?: boolean;
 }
 
 export interface FieldInputProps<C> {

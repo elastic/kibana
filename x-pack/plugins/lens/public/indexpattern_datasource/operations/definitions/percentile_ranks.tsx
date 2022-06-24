@@ -142,41 +142,29 @@ export const percentileRanksOperation: OperationDefinition<
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
     ]),
-  paramEditor: function PercentileParamEditor({
-    layer,
-    updateLayer,
-    currentColumn,
-    columnId,
-    indexPattern,
-  }) {
+  paramEditor: function PercentileParamEditor({ paramEditorUpdater, currentColumn, indexPattern }) {
     const onChange = useCallback(
       (value) => {
         if (!isValidNumber(value) || Number(value) === currentColumn.params.value) {
           return;
         }
-        updateLayer({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            [columnId]: {
-              ...currentColumn,
-              label: currentColumn.customLabel
-                ? currentColumn.label
-                : ofName(
-                    indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
-                      currentColumn.sourceField,
-                    Number(value),
-                    currentColumn.timeShift
-                  ),
-              params: {
-                ...currentColumn.params,
-                value: Number(value),
-              },
-            } as PercentileRanksIndexPatternColumn,
+        paramEditorUpdater({
+          ...currentColumn,
+          label: currentColumn.customLabel
+            ? currentColumn.label
+            : ofName(
+                indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
+                  currentColumn.sourceField,
+                Number(value),
+                currentColumn.timeShift
+              ),
+          params: {
+            ...currentColumn.params,
+            value: Number(value),
           },
-        });
+        } as PercentileRanksIndexPatternColumn);
       },
-      [updateLayer, layer, columnId, currentColumn, indexPattern]
+      [paramEditorUpdater, currentColumn, indexPattern]
     );
     const { inputValue, handleInputChange: handleInputChangeWithoutValidation } = useDebouncedValue<
       string | undefined

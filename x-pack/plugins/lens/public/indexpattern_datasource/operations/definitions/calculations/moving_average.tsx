@@ -171,9 +171,10 @@ Example: Smooth a line of measurements:
   shiftable: true,
 };
 
+// todo : allow passing only updateColumn
 function MovingAverageParamEditor({
   layer,
-  updateLayer,
+  paramEditorUpdater,
   currentColumn,
   columnId,
 }: ParamEditorProps<MovingAverageIndexPatternColumn>) {
@@ -183,7 +184,7 @@ function MovingAverageParamEditor({
     () => {
       if (!isValidNumber(inputValue, true, undefined, 1)) return;
       const inputNumber = parseInt(inputValue, 10);
-      updateLayer(
+      paramEditorUpdater(
         updateColumnParam({
           layer,
           columnId,

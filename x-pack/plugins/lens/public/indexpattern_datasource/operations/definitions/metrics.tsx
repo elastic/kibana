@@ -142,7 +142,12 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
-    getAdvancedOptions: ({ layer, columnId, currentColumn, updateLayer }: ParamEditorProps<T>) => {
+    getAdvancedOptions: ({
+      layer,
+      columnId,
+      currentColumn,
+      paramEditorUpdater,
+    }: ParamEditorProps<T>) => {
       if (!hideZeroOption) return [];
       return [
         {
@@ -160,7 +165,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
                 }}
                 checked={Boolean(currentColumn.params?.emptyAsNull)}
                 onChange={() => {
-                  updateLayer(
+                  paramEditorUpdater(
                     updateColumnParam({
                       layer,
                       columnId,

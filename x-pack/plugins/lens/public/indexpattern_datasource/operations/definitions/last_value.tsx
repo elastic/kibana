@@ -258,7 +258,7 @@ export const lastValueOperation: OperationDefinition<
     );
   },
 
-  paramEditor: ({ layer, updateLayer, columnId, currentColumn, indexPattern }) => {
+  paramEditor: ({ layer, paramEditorUpdater, currentColumn, indexPattern, isReferenced }) => {
     const dateFields = getDateFields(indexPattern);
     const isSortFieldInvalid = !!getInvalidSortFieldMessage(
       currentColumn.params.sortField,
@@ -270,19 +270,13 @@ export const lastValueOperation: OperationDefinition<
     );
 
     const setShowArrayValues = (use: boolean) => {
-      let updatedLayer = updateColumnParam({
-        layer,
-        columnId,
-        paramName: 'showArrayValues',
-        value: use,
-      });
-
-      updatedLayer = {
-        ...updatedLayer,
-        columns: adjustColumnReferencesForChangedColumn(updatedLayer, columnId),
-      };
-
-      updateLayer(updatedLayer);
+      return paramEditorUpdater({
+        ...currentColumn,
+        params: {
+          ...currentColumn.params,
+          showArrayValues: use,
+        },
+      } as LastValueIndexPatternColumn);
     };
 
     return (
@@ -320,14 +314,13 @@ export const lastValueOperation: OperationDefinition<
               if (choices.length === 0) {
                 return;
               }
-              updateLayer(
-                updateColumnParam({
-                  layer,
-                  columnId,
-                  paramName: 'sortField',
-                  value: choices[0].value,
-                })
-              );
+              return paramEditorUpdater({
+                ...currentColumn,
+                params: {
+                  ...currentColumn.params,
+                  sortField: choices[0].value,
+                },
+              } as LastValueIndexPatternColumn);
             }}
             selectedOptions={
               (currentColumn.params?.sortField
@@ -343,40 +336,42 @@ export const lastValueOperation: OperationDefinition<
             }
           />
         </EuiFormRow>
-        <EuiFormRow
-          error={i18n.translate(
-            'xpack.lens.indexPattern.lastValue.showArrayValuesWithTopValuesWarning',
-            {
-              defaultMessage:
-                'When you show array values, you are unable to use this field to rank Top values.',
-            }
-          )}
-          isInvalid={currentColumn.params.showArrayValues && usingTopValues}
-          display="rowCompressed"
-          fullWidth
-          data-test-subj="lns-indexPattern-lastValue-showArrayValues"
-        >
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.lens.indexPattern.lastValue.showArrayValuesExplanation',
+        {!isReferenced && (
+          <EuiFormRow
+            error={i18n.translate(
+              'xpack.lens.indexPattern.lastValue.showArrayValuesWithTopValuesWarning',
               {
                 defaultMessage:
-                  'Displays all values associated with this field in each last document.',
+                  'When you show array values, you are unable to use this field to rank Top values.',
               }
             )}
-            position="left"
+            isInvalid={currentColumn.params.showArrayValues && usingTopValues}
+            display="rowCompressed"
+            fullWidth
+            data-test-subj="lns-indexPattern-lastValue-showArrayValues"
           >
-            <EuiSwitch
-              label={i18n.translate('xpack.lens.indexPattern.lastValue.showArrayValues', {
-                defaultMessage: 'Show array values',
-              })}
-              compressed={true}
-              checked={Boolean(currentColumn.params.showArrayValues)}
-              disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
-              onChange={() => setShowArrayValues(!currentColumn.params.showArrayValues)}
-            />
-          </EuiToolTip>
-        </EuiFormRow>
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.lens.indexPattern.lastValue.showArrayValuesExplanation',
+                {
+                  defaultMessage:
+                    'Displays all values associated with this field in each last document.',
+                }
+              )}
+              position="left"
+            >
+              <EuiSwitch
+                label={i18n.translate('xpack.lens.indexPattern.lastValue.showArrayValues', {
+                  defaultMessage: 'Show array values',
+                })}
+                compressed={true}
+                checked={Boolean(currentColumn.params.showArrayValues)}
+                disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
+                onChange={() => setShowArrayValues(!currentColumn.params.showArrayValues)}
+              />
+            </EuiToolTip>
+          </EuiFormRow>
+        )}
       </>
     );
   },

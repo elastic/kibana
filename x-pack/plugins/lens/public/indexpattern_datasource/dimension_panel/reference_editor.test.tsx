@@ -24,22 +24,37 @@ import {
   TermsIndexPatternColumn,
 } from '../operations';
 import { FieldSelect } from './field_select';
+import { IndexPatternLayer } from '../types';
 
 jest.mock('../operations');
 
 describe('reference editor', () => {
   let wrapper: ReactWrapper | ShallowWrapper;
-  let updateLayer: jest.Mock<ReferenceEditorProps['updateLayer']>;
+  let paramEditorUpdater: jest.Mock<ReferenceEditorProps['paramEditorUpdater']>;
 
+  const layer = {
+    indexPatternId: '1',
+    columnOrder: ['ref'],
+    columns: {
+      ref: {
+        label: 'Top values of dest',
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        sourceField: 'dest',
+        params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'desc' },
+      } as TermsIndexPatternColumn,
+    },
+  };
   function getDefaultArgs() {
     return {
-      layer: {
-        indexPatternId: '1',
-        columns: {},
-        columnOrder: [],
-      },
+      layer,
+      column: layer.columns.ref,
+      onChooseField: jest.fn(),
+      onChooseFunction: jest.fn(),
+      onDeleteColumn: jest.fn(),
       columnId: 'ref',
-      updateLayer,
+      paramEditorUpdater,
       selectionStyle: 'full' as const,
       currentIndexPattern: createMockedIndexPattern(),
       existingFields: {
@@ -67,7 +82,7 @@ describe('reference editor', () => {
   }
 
   beforeEach(() => {
-    updateLayer = jest.fn().mockImplementation((newLayer) => {
+    paramEditorUpdater = jest.fn().mockImplementation((newLayer) => {
       if (wrapper instanceof ReactWrapper) {
         wrapper.setProps({ layer: newLayer });
       }
@@ -90,6 +105,7 @@ describe('reference editor', () => {
           input: ['field'],
           validateMetadata: (meta: OperationMetadata) => meta.dataType === 'number',
         }}
+        column={undefined}
       />
     );
 
@@ -116,23 +132,25 @@ describe('reference editor', () => {
   });
 
   it('should indicate functions and fields that are incompatible with the current', () => {
+    const newLayer = {
+      indexPatternId: '1',
+      columnOrder: ['ref'],
+      columns: {
+        ref: {
+          label: 'Top values of dest',
+          dataType: 'string',
+          isBucketed: true,
+          operationType: 'terms',
+          sourceField: 'dest',
+          params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'desc' },
+        } as TermsIndexPatternColumn,
+      },
+    } as IndexPatternLayer;
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}
-        layer={{
-          indexPatternId: '1',
-          columnOrder: ['ref'],
-          columns: {
-            ref: {
-              label: 'Top values of dest',
-              dataType: 'string',
-              isBucketed: true,
-              operationType: 'terms',
-              sourceField: 'dest',
-              params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'desc' },
-            } as TermsIndexPatternColumn,
-          },
-        }}
+        layer={newLayer}
+        column={newLayer.columns.ref}
         validation={{
           input: ['field'],
           validateMetadata: (meta: OperationMetadata) => meta.isBucketed,
@@ -158,22 +176,24 @@ describe('reference editor', () => {
   });
 
   it('should not update when selecting the same operation', () => {
+    const newLayer = {
+      indexPatternId: '1',
+      columnOrder: ['ref'],
+      columns: {
+        ref: {
+          label: 'Average of bytes',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'average',
+          sourceField: 'bytes',
+        },
+      },
+    } as IndexPatternLayer;
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}
-        layer={{
-          indexPatternId: '1',
-          columnOrder: ['ref'],
-          columns: {
-            ref: {
-              label: 'Average of bytes',
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'average',
-              sourceField: 'bytes',
-            },
-          },
-        }}
+        layer={newLayer}
+        column={newLayer.columns.ref}
         validation={{
           input: ['field'],
           validateMetadata: (meta: OperationMetadata) => meta.dataType === 'number',
@@ -193,26 +213,30 @@ describe('reference editor', () => {
   });
 
   it('should keep the field when replacing an existing reference with a compatible function', () => {
+    const onChooseFunction = jest.fn();
+    const newLayer = {
+      indexPatternId: '1',
+      columnOrder: ['ref'],
+      columns: {
+        ref: {
+          label: 'Average of bytes',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'average',
+          sourceField: 'bytes',
+        },
+      },
+    } as IndexPatternLayer;
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}
-        layer={{
-          indexPatternId: '1',
-          columnOrder: ['ref'],
-          columns: {
-            ref: {
-              label: 'Average of bytes',
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'average',
-              sourceField: 'bytes',
-            },
-          },
-        }}
+        layer={newLayer}
+        column={newLayer.columns.ref}
         validation={{
           input: ['field'],
           validateMetadata: (meta: OperationMetadata) => meta.dataType === 'number',
         }}
+        onChooseFunction={onChooseFunction}
       />
     );
 
@@ -225,31 +249,35 @@ describe('reference editor', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(insertOrReplaceColumn).toHaveBeenCalledWith(
+    expect(onChooseFunction).toHaveBeenCalledWith(
+      'max',
       expect.objectContaining({
-        op: 'max',
-        field: expect.objectContaining({ name: 'bytes' }),
+        name: 'bytes',
       })
     );
   });
 
   it('should transition to another function with incompatible field', () => {
+    const newLayer = {
+      indexPatternId: '1',
+      columnOrder: ['ref'],
+      columns: {
+        ref: {
+          label: 'Average of bytes',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'average',
+          sourceField: 'bytes',
+        },
+      },
+    } as IndexPatternLayer;
+    const onChooseFunction = jest.fn();
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}
-        layer={{
-          indexPatternId: '1',
-          columnOrder: ['ref'],
-          columns: {
-            ref: {
-              label: 'Average of bytes',
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'average',
-              sourceField: 'bytes',
-            },
-          },
-        }}
+        onChooseFunction={onChooseFunction}
+        column={newLayer.columns.ref}
+        layer={newLayer}
         validation={{
           input: ['field'],
           validateMetadata: (meta: OperationMetadata) => true,
@@ -266,33 +294,30 @@ describe('reference editor', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(insertOrReplaceColumn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        op: 'date_histogram',
-        field: undefined,
-      })
-    );
+    expect(onChooseFunction).toHaveBeenCalledWith('date_histogram', undefined);
   });
 
   it("should show the sub-function as invalid if there's no field compatible with it", () => {
     // This may happen for saved objects after changing the type of a field
+    const newLayer = {
+      indexPatternId: '1',
+      columnOrder: ['ref'],
+      columns: {
+        ref: {
+          label: 'Average of bytes',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'average',
+          sourceField: 'bytes',
+        },
+      },
+    } as IndexPatternLayer;
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}
         currentIndexPattern={createMockedIndexPatternWithoutType('number')}
-        layer={{
-          indexPatternId: '1',
-          columnOrder: ['ref'],
-          columns: {
-            ref: {
-              label: 'Average of bytes',
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'average',
-              sourceField: 'bytes',
-            },
-          },
-        }}
+        column={newLayer.columns.ref}
+        layer={newLayer}
         validation={{
           input: ['field'],
           validateMetadata: (meta: OperationMetadata) => true,
@@ -321,6 +346,8 @@ describe('reference editor', () => {
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}
+        column={undefined}
+        currentIndexPattern={createMockedIndexPatternWithoutType('number')}
         validation={{
           input: ['field', 'fullReference', 'managedReference'],
           validateMetadata: (meta: OperationMetadata) => true,
@@ -331,8 +358,8 @@ describe('reference editor', () => {
     const subFunctionSelect = wrapper
       .find('[data-test-subj="indexPattern-reference-function"]')
       .first();
-
     expect(subFunctionSelect.prop('isInvalid')).toEqual(true);
+
     expect(subFunctionSelect.prop('selectedOptions')).not.toEqual(
       expect.arrayContaining([expect.objectContaining({ value: 'math' })])
     );
@@ -345,6 +372,7 @@ describe('reference editor', () => {
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}
+        column={undefined}
         selectionStyle={'field' as const}
         validation={{
           input: ['field'],
@@ -360,25 +388,28 @@ describe('reference editor', () => {
   });
 
   it('should pass the incomplete operation info to FieldSelect', () => {
+    const newLayer = {
+      indexPatternId: '1',
+      columnOrder: ['ref'],
+      columns: {
+        ref: {
+          label: 'Average of bytes',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'average',
+          sourceField: 'bytes',
+        },
+      },
+      incompleteColumns: {
+        ref: { operationType: 'max' },
+      },
+    } as IndexPatternLayer;
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}
-        layer={{
-          indexPatternId: '1',
-          columnOrder: ['ref'],
-          columns: {
-            ref: {
-              label: 'Average of bytes',
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'average',
-              sourceField: 'bytes',
-            },
-          },
-          incompleteColumns: {
-            ref: { operationType: 'max' },
-          },
-        }}
+        incompleteColumn={newLayer.incompleteColumns?.ref}
+        column={newLayer.columns.ref}
+        layer={newLayer}
         validation={{
           input: ['field'],
           validateMetadata: (meta: OperationMetadata) => true,
@@ -395,25 +426,28 @@ describe('reference editor', () => {
   });
 
   it('should pass the incomplete field info to FieldSelect', () => {
+    const newLayer = {
+      indexPatternId: '1',
+      columnOrder: ['ref'],
+      columns: {
+        ref: {
+          label: 'Average of bytes',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'average',
+          sourceField: 'bytes',
+        },
+      },
+      incompleteColumns: {
+        ref: { sourceField: 'timestamp' },
+      },
+    } as IndexPatternLayer;
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}
-        layer={{
-          indexPatternId: '1',
-          columnOrder: ['ref'],
-          columns: {
-            ref: {
-              label: 'Average of bytes',
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'average',
-              sourceField: 'bytes',
-            },
-          },
-          incompleteColumns: {
-            ref: { sourceField: 'timestamp' },
-          },
-        }}
+        layer={newLayer}
+        incompleteColumn={newLayer.incompleteColumns?.ref}
+        column={newLayer.columns.ref}
         validation={{
           input: ['field'],
           validateMetadata: (meta: OperationMetadata) => true,
@@ -432,6 +466,7 @@ describe('reference editor', () => {
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}
+        column={undefined}
         selectionStyle="field"
         validation={{
           input: ['field'],
@@ -449,22 +484,24 @@ describe('reference editor', () => {
   });
 
   it('should show the FieldSelect as invalid if the selected field is missing', () => {
+    const newLayer = {
+      indexPatternId: '1',
+      columnOrder: ['ref'],
+      columns: {
+        ref: {
+          label: 'Average of missing',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'average',
+          sourceField: 'missing',
+        },
+      },
+    } as IndexPatternLayer;
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}
-        layer={{
-          indexPatternId: '1',
-          columnOrder: ['ref'],
-          columns: {
-            ref: {
-              label: 'Average of missing',
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'average',
-              sourceField: 'missing',
-            },
-          },
-        }}
+        layer={newLayer}
+        column={newLayer.columns.ref}
         validation={{
           input: ['field'],
           validateMetadata: (meta: OperationMetadata) => true,
@@ -481,25 +518,27 @@ describe('reference editor', () => {
   });
 
   it('should show the ParamEditor for functions that offer one', () => {
+    const lastValueLayer = {
+      indexPatternId: '1',
+      columnOrder: ['ref'],
+      columns: {
+        ref: {
+          label: 'Last value of bytes',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'last_value',
+          sourceField: 'bytes',
+          params: {
+            sortField: 'timestamp',
+          },
+        } as LastValueIndexPatternColumn,
+      },
+    };
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}
-        layer={{
-          indexPatternId: '1',
-          columnOrder: ['ref'],
-          columns: {
-            ref: {
-              label: 'Last value of bytes',
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'last_value',
-              sourceField: 'bytes',
-              params: {
-                sortField: 'timestamp',
-              },
-            } as LastValueIndexPatternColumn,
-          },
-        }}
+        column={lastValueLayer.columns.ref}
+        layer={lastValueLayer}
         validation={{
           input: ['field'],
           validateMetadata: (meta: OperationMetadata) => true,
@@ -513,28 +552,31 @@ describe('reference editor', () => {
   });
 
   it('should hide the ParamEditor for incomplete functions', () => {
+    const lastValueLayer = {
+      indexPatternId: '1',
+      columnOrder: ['ref'],
+      columns: {
+        ref: {
+          label: 'Last value of bytes',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'last_value',
+          sourceField: 'bytes',
+          params: {
+            sortField: 'timestamp',
+          },
+        } as LastValueIndexPatternColumn,
+      },
+      incompleteColumns: {
+        ref: { operationType: 'max' },
+      },
+    };
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}
-        layer={{
-          indexPatternId: '1',
-          columnOrder: ['ref'],
-          columns: {
-            ref: {
-              label: 'Last value of bytes',
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'last_value',
-              sourceField: 'bytes',
-              params: {
-                sortField: 'timestamp',
-              },
-            } as LastValueIndexPatternColumn,
-          },
-          incompleteColumns: {
-            ref: { operationType: 'max' },
-          },
-        }}
+        incompleteColumn={lastValueLayer.incompleteColumns.ref}
+        column={lastValueLayer.columns.ref}
+        layer={lastValueLayer}
         validation={{
           input: ['field'],
           validateMetadata: (meta: OperationMetadata) => true,

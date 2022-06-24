@@ -145,11 +145,11 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
     }).toAst();
   },
 
-  paramEditor: ({ layer, columnId, currentColumn, indexPattern, updateLayer, data }) => {
+  paramEditor: ({ layer, columnId, currentColumn, indexPattern, paramEditorUpdater }) => {
     const filters = currentColumn.params.filters;
 
     const setFilters = (newFilters: Filter[]) =>
-      updateLayer(
+      paramEditorUpdater(
         updateColumnParam({
           layer,
           columnId,

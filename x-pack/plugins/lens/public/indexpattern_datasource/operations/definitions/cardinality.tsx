@@ -123,7 +123,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     layer,
     columnId,
     currentColumn,
-    updateLayer,
+    paramEditorUpdater,
   }: ParamEditorProps<CardinalityIndexPatternColumn>) => {
     return [
       {
@@ -141,7 +141,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
               }}
               checked={Boolean(currentColumn.params?.emptyAsNull)}
               onChange={() => {
-                updateLayer(
+                paramEditorUpdater(
                   updateColumnParam({
                     layer,
                     columnId,

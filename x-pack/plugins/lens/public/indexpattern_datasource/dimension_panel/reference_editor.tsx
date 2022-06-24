@@ -22,24 +22,54 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DateRange } from '../../../common';
 import type { OperationSupportMatrix } from './operation_support';
-import type { OperationType } from '../indexpattern';
+import type { GenericIndexPatternColumn, OperationType } from '../indexpattern';
 import {
   operationDefinitionMap,
   getOperationDisplay,
-  insertOrReplaceColumn,
-  deleteColumn,
   isOperationAllowedAsReference,
   FieldBasedIndexPatternColumn,
   RequiredReference,
+  IncompleteColumn,
 } from '../operations';
-import { FieldSelect } from './field_select';
+import { FieldChoice, FieldSelect } from './field_select';
 import { hasField } from '../pure_utils';
-import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
+import type {
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternLayer,
+  IndexPatternPrivateState,
+} from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import type { ParamEditorCustomProps, VisualizationDimensionGroupConfig } from '../../types';
+import type { ParamEditorCustomProps } from '../../types';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 
-const operationPanels = getOperationDisplay();
+const getFunctionOptions = (
+  operationSupportMatrix: OperationSupportMatrix & {
+    operationTypes: Set<OperationType>;
+  },
+  column?: GenericIndexPatternColumn
+): Array<EuiComboBoxOptionOption<OperationType>> => {
+  return Array.from(operationSupportMatrix.operationTypes).map((operationType) => {
+    const def = operationDefinitionMap[operationType];
+    const label = getOperationDisplay()[operationType].displayName;
+    const isCompatible =
+      !column ||
+      (column &&
+        hasField(column) &&
+        def.input === 'field' &&
+        operationSupportMatrix.fieldByOperation[operationType]?.has(column.sourceField)) ||
+      (column && !hasField(column) && def.input !== 'field');
+
+    return {
+      label,
+      value: operationType,
+      className: 'lnsIndexPatternDimensionEditor__operation',
+      'data-test-subj': `lns-indexPatternDimension-${operationType}${
+        isCompatible ? '' : ' incompatible'
+      }`,
+    };
+  });
+};
 
 export interface ReferenceEditorProps {
   layer: IndexPatternLayer;
@@ -48,18 +78,26 @@ export interface ReferenceEditorProps {
   selectionStyle: 'full' | 'field' | 'hidden';
   validation: RequiredReference;
   columnId: string;
-  updateLayer: (
-    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
-  ) => void;
+  column?: GenericIndexPatternColumn;
+  incompleteColumn?: IncompleteColumn;
   currentIndexPattern: IndexPattern;
 
   existingFields: IndexPatternPrivateState['existingFields'];
   dateRange: DateRange;
   labelAppend?: EuiFormRowProps['labelAppend'];
-  dimensionGroups: VisualizationDimensionGroupConfig[];
   isFullscreen: boolean;
   toggleFullscreen: () => void;
   setIsCloseable: (isCloseable: boolean) => void;
+  paramEditorCustomProps?: ParamEditorCustomProps;
+  paramEditorUpdater: (
+    setter:
+      | IndexPatternLayer
+      | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+      | GenericIndexPatternColumn
+  ) => void;
+  onChooseField: (choice: FieldChoice) => void;
+  onDeleteColumn: () => void;
+  onChooseFunction: (operationType: string, field?: IndexPatternField) => void;
 
   // Services
   uiSettings: IUiSettingsClient;
@@ -69,38 +107,23 @@ export interface ReferenceEditorProps {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  paramEditorCustomProps?: ParamEditorCustomProps;
 }
 
-export function ReferenceEditor(props: ReferenceEditorProps) {
+export const ReferenceEditor = (props: ReferenceEditorProps) => {
   const {
-    layer,
-    layerId,
-    activeData,
-    columnId,
-    updateLayer,
     currentIndexPattern,
     existingFields,
     validation,
     selectionStyle,
-    dateRange,
     labelAppend,
-    dimensionGroups,
-    isFullscreen,
-    toggleFullscreen,
-    setIsCloseable,
-    paramEditorCustomProps,
-    ...services
+    column,
+    incompleteColumn,
+    onChooseField,
+    onDeleteColumn,
+    onChooseFunction,
   } = props;
 
-  const column = layer.columns[columnId];
   const selectedOperationDefinition = column && operationDefinitionMap[column.operationType];
-
-  const ParamEditor = selectedOperationDefinition?.paramEditor;
-
-  const incompleteInfo = layer.incompleteColumns ? layer.incompleteColumns[columnId] : undefined;
-  const incompleteOperation = incompleteInfo?.operationType;
-  const incompleteField = incompleteInfo?.sourceField ?? null;
 
   // Basically the operation support matrix, but different validation
   const operationSupportMatrix: OperationSupportMatrix & {
@@ -154,78 +177,37 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     };
   }, [currentIndexPattern, validation]);
 
-  const functionOptions: Array<EuiComboBoxOptionOption<OperationType>> = Array.from(
-    operationSupportMatrix.operationTypes
-  ).map((operationType) => {
-    const def = operationDefinitionMap[operationType];
-    const label = operationPanels[operationType].displayName;
-    const isCompatible =
-      !column ||
-      (column &&
-        hasField(column) &&
-        def.input === 'field' &&
-        operationSupportMatrix.fieldByOperation[operationType]?.has(column.sourceField)) ||
-      (column && !hasField(column) && def.input !== 'field');
-
-    return {
-      label,
-      value: operationType,
-      className: 'lnsIndexPatternDimensionEditor__operation',
-      'data-test-subj': `lns-indexPatternDimension-${operationType}${
-        isCompatible ? '' : ' incompatible'
-      }`,
-    };
-  });
-
-  function onChooseFunction(operationType: OperationType) {
-    if (column?.operationType === operationType) {
-      return;
-    }
-    const possibleFieldNames = operationSupportMatrix.fieldByOperation[operationType];
-    if (column && 'sourceField' in column && possibleFieldNames?.has(column.sourceField)) {
-      // Reuse the current field if possible
-      updateLayer(
-        insertOrReplaceColumn({
-          layer,
-          columnId,
-          op: operationType,
-          indexPattern: currentIndexPattern,
-          field: currentIndexPattern.getFieldByName(column.sourceField),
-          visualizationGroups: dimensionGroups,
-        })
-      );
-    } else {
-      // If reusing the field is impossible, we generally can't choose for the user.
-      // The one exception is if the field is the only possible field, like Count of Records.
-      const possibleField =
-        possibleFieldNames?.size === 1
-          ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value)
-          : undefined;
-
-      updateLayer(
-        insertOrReplaceColumn({
-          layer,
-          columnId,
-          op: operationType,
-          indexPattern: currentIndexPattern,
-          field: possibleField,
-          visualizationGroups: dimensionGroups,
-        })
-      );
-    }
-    trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
-    return;
-  }
-
   if (selectionStyle === 'hidden') {
     return null;
   }
 
+  const incompleteOperation = incompleteColumn?.operationType;
+  const incompleteField = incompleteColumn?.sourceField ?? null;
+
+  const functionOptions = getFunctionOptions(operationSupportMatrix, column);
+
   const selectedOption = incompleteOperation
-    ? [functionOptions.find(({ value }) => value === incompleteOperation)!]
+    ? [functionOptions?.find(({ value }) => value === incompleteOperation)!]
     : column
-    ? [functionOptions.find(({ value }) => value === column.operationType)!]
+    ? [functionOptions?.find(({ value }) => value === column.operationType)!]
     : [];
+
+  // what about a field changing type and becoming invalid?
+  // Let's say this change makes the indexpattern without any number field but the operation was set to a numeric operation.
+  // At this point the ComboBox will crash.
+  // Therefore check if the selectedOption is in functionOptions and in case fill it in as disabled option
+  const showSelectionFunctionInvalid = Boolean(selectedOption.length && selectedOption[0] == null);
+  if (showSelectionFunctionInvalid) {
+    const selectedOperationType = incompleteOperation || column?.operationType;
+    const brokenFunctionOption = {
+      label: selectedOperationType && getOperationDisplay()[selectedOperationType].displayName,
+      value: selectedOperationType,
+      className: 'lnsIndexPatternDimensionEditor__operation',
+      'data-test-subj': `lns-indexPatternDimension-${selectedOperationType} incompatible`,
+    } as EuiComboBoxOptionOption<string>;
+    functionOptions?.push(brokenFunctionOption);
+    selectedOption[0] = brokenFunctionOption;
+  }
 
   // If the operationType is incomplete, the user needs to select a field- so
   // the function is marked as valid.
@@ -238,144 +220,102 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     incompleteField ?? (column as FieldBasedIndexPatternColumn)?.sourceField
   );
 
-  // what about a field changing type and becoming invalid?
-  // Let's say this change makes the indexpattern without any number field but the operation was set to a numeric operation.
-  // At this point the ComboBox will crash.
-  // Therefore check if the selectedOption is in functionOptions and in case fill it in as disabled option
-  const showSelectionFunctionInvalid = Boolean(selectedOption.length && selectedOption[0] == null);
-  if (showSelectionFunctionInvalid) {
-    const selectedOperationType = incompleteOperation || column.operationType;
-    const brokenFunctionOption = {
-      label: operationPanels[selectedOperationType].displayName,
-      value: selectedOperationType,
-      className: 'lnsIndexPatternDimensionEditor__operation',
-      'data-test-subj': `lns-indexPatternDimension-${selectedOperationType} incompatible`,
-    };
-    functionOptions.push(brokenFunctionOption);
-    selectedOption[0] = brokenFunctionOption;
-  }
+  const ParamEditor = selectedOperationDefinition?.paramEditor;
 
   return (
-    <div id={columnId}>
-      <div>
-        {selectionStyle !== 'field' ? (
-          <>
-            <EuiFormRow
-              data-test-subj="indexPattern-subFunction-selection-row"
-              label={i18n.translate('xpack.lens.indexPattern.chooseSubFunction', {
-                defaultMessage: 'Choose a sub-function',
-              })}
-              fullWidth
-              isInvalid={showOperationInvalid || showSelectionFunctionInvalid}
-            >
-              <EuiComboBox
-                fullWidth
-                compressed
-                isClearable={false}
-                data-test-subj="indexPattern-reference-function"
-                placeholder={i18n.translate(
-                  'xpack.lens.indexPattern.referenceFunctionPlaceholder',
-                  {
-                    defaultMessage: 'Sub-function',
-                  }
-                )}
-                options={functionOptions}
-                isInvalid={showOperationInvalid || showSelectionFunctionInvalid}
-                selectedOptions={selectedOption}
-                singleSelection={{ asPlainText: true }}
-                onChange={(choices) => {
-                  if (choices.length === 0) {
-                    updateLayer(
-                      deleteColumn({
-                        layer,
-                        columnId,
-                        indexPattern: currentIndexPattern,
-                      })
-                    );
-                    return;
-                  }
-
-                  trackUiEvent('indexpattern_dimension_field_changed');
-
-                  onChooseFunction(choices[0].value!);
-                }}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-          </>
-        ) : null}
-
-        {!column || selectedOperationDefinition.input === 'field' ? (
+    <div>
+      {selectionStyle !== 'field' ? (
+        <>
           <EuiFormRow
-            data-test-subj="indexPattern-reference-field-selection-row"
-            label={i18n.translate('xpack.lens.indexPattern.chooseField', {
-              defaultMessage: 'Field',
+            data-test-subj="indexPattern-subFunction-selection-row"
+            label={i18n.translate('xpack.lens.indexPattern.chooseSubFunction', {
+              defaultMessage: 'Choose a sub-function',
             })}
             fullWidth
-            isInvalid={showFieldInvalid || showFieldMissingInvalid}
-            labelAppend={labelAppend}
+            isInvalid={showOperationInvalid || showSelectionFunctionInvalid}
           >
-            <FieldSelect
-              fieldIsInvalid={showFieldInvalid || showFieldMissingInvalid}
-              currentIndexPattern={currentIndexPattern}
-              existingFields={existingFields}
-              operationByField={operationSupportMatrix.operationByField}
-              selectedOperationType={
-                // Allows operation to be selected before creating a valid column
-                column ? column.operationType : incompleteOperation
-              }
-              selectedField={
-                // Allows field to be selected
-                incompleteField ?? (column as FieldBasedIndexPatternColumn)?.sourceField
-              }
-              incompleteOperation={incompleteOperation}
-              markAllFieldsCompatible={selectionStyle === 'field'}
-              onDeleteColumn={() => {
-                updateLayer(
-                  deleteColumn({
-                    layer,
-                    columnId,
-                    indexPattern: currentIndexPattern,
-                  })
-                );
-              }}
-              onChoose={(choice) => {
-                updateLayer(
-                  insertOrReplaceColumn({
-                    layer,
-                    columnId,
-                    indexPattern: currentIndexPattern,
-                    op: choice.operationType,
-                    field: currentIndexPattern.getFieldByName(choice.field),
-                    visualizationGroups: dimensionGroups,
-                  })
-                );
+            <EuiComboBox
+              fullWidth
+              compressed
+              isClearable={false}
+              data-test-subj="indexPattern-reference-function"
+              placeholder={i18n.translate('xpack.lens.indexPattern.referenceFunctionPlaceholder', {
+                defaultMessage: 'Sub-function',
+              })}
+              options={functionOptions}
+              isInvalid={showOperationInvalid || showSelectionFunctionInvalid}
+              selectedOptions={selectedOption}
+              singleSelection={{ asPlainText: true }}
+              onChange={(choices: Array<EuiComboBoxOptionOption<string>>) => {
+                if (choices.length === 0) {
+                  return onDeleteColumn();
+                }
+
+                const operationType = choices[0].value!;
+                if (column?.operationType === operationType) {
+                  return;
+                }
+                const possibleFieldNames = operationSupportMatrix.fieldByOperation[operationType];
+
+                const field =
+                  column && 'sourceField' in column && possibleFieldNames?.has(column.sourceField)
+                    ? currentIndexPattern.getFieldByName(column.sourceField)
+                    : possibleFieldNames?.size === 1
+                    ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value)
+                    : undefined;
+
+                onChooseFunction(operationType, field);
+                trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
+                return;
               }}
             />
           </EuiFormRow>
-        ) : null}
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
 
-        {column && !incompleteInfo && ParamEditor && (
-          <>
-            <ParamEditor
-              updateLayer={updateLayer}
-              currentColumn={column}
-              layer={layer}
-              layerId={layerId}
-              activeData={activeData}
-              columnId={columnId}
-              indexPattern={currentIndexPattern}
-              dateRange={dateRange}
-              operationDefinitionMap={operationDefinitionMap}
-              isFullscreen={isFullscreen}
-              toggleFullscreen={toggleFullscreen}
-              setIsCloseable={setIsCloseable}
-              paramEditorCustomProps={paramEditorCustomProps}
-              {...services}
-            />
-          </>
-        )}
-      </div>
+      {!column || selectedOperationDefinition?.input === 'field' ? (
+        <EuiFormRow
+          data-test-subj="indexPattern-reference-field-selection-row"
+          label={i18n.translate('xpack.lens.indexPattern.chooseField', {
+            defaultMessage: 'Field',
+          })}
+          fullWidth
+          isInvalid={showFieldInvalid || showFieldMissingInvalid}
+          labelAppend={labelAppend}
+        >
+          <FieldSelect
+            fieldIsInvalid={showFieldInvalid || showFieldMissingInvalid}
+            currentIndexPattern={currentIndexPattern}
+            existingFields={existingFields}
+            operationByField={operationSupportMatrix.operationByField}
+            selectedOperationType={
+              // Allows operation to be selected before creating a valid column
+              column ? column.operationType : incompleteOperation
+            }
+            selectedField={
+              // Allows field to be selected
+              incompleteField ?? (column as FieldBasedIndexPatternColumn)?.sourceField
+            }
+            incompleteOperation={incompleteOperation}
+            markAllFieldsCompatible={selectionStyle === 'field'}
+            onDeleteColumn={onDeleteColumn}
+            onChoose={onChooseField}
+          />
+        </EuiFormRow>
+      ) : null}
+
+      {column && !incompleteColumn && ParamEditor && (
+        <>
+          <ParamEditor
+            {...props}
+            isReferenced={true}
+            operationDefinitionMap={operationDefinitionMap}
+            currentColumn={column}
+            indexPattern={props.currentIndexPattern}
+          />
+        </>
+      )}
     </div>
   );
-}
+};
