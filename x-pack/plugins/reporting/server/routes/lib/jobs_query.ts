@@ -149,7 +149,11 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       const body = getSearchBody({
         query: {
           constant_score: {
-            filter: { bool: { must: [{ term: { _id: id } }, { term: { created_by: username } }] } },
+            filter: {
+              bool: {
+                must: [{ term: { _id: id } }, { term: { created_by: username } }],
+              },
+            },
           },
         },
         size: 1,
