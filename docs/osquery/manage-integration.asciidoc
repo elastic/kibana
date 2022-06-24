@@ -96,7 +96,7 @@ The query results include the response to the request. As a simple example, if y
 `SELECT * FROM curl WHERE url='https://www.elastic.co/';`, the `result` field contains the 
 webpage content.
 
-This table can be abused in some environments, for example, when used to issue HTTP requests
+This table can be misused in some environments, for example, when used to issue HTTP requests
 to an AWS metadata service or to services on your internal network. 
 
 Out of an abundance of caution, we have opted to disable access to this table by default.
