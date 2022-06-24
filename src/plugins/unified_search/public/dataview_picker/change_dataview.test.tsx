@@ -116,7 +116,7 @@ describe('DataView component', () => {
     await act(async () => {
       const component = mount(wrapDataViewComponentInContext(props, true));
       findTestSubject(component, 'dataview-trigger').simulate('click');
-      expect(component.find('[data-test-subj="idataview-create-new"]').length).toBe(0);
+      expect(component.find('[data-test-subj="dataview-create-new"]').length).toBe(0);
     });
   });
 

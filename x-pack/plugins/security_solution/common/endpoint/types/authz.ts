@@ -24,6 +24,8 @@ export interface EndpointAuthz {
   canKillProcess: boolean;
   /** If user has permissions to suspend process on hosts */
   canSuspendProcess: boolean;
+  /** If user has permissions to get running processes on hosts */
+  canGetRunningProcesses: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;

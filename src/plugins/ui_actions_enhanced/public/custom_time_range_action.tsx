@@ -14,8 +14,8 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
 } from '@kbn/embeddable-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { TimeRange } from '@kbn/data-plugin/public';
 import { OpenModal, CommonlyUsedRange } from './types';
 
 export const CUSTOM_TIME_RANGE = 'CUSTOM_TIME_RANGE';
