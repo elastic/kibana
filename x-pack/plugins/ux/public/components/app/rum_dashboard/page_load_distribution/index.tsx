@@ -14,8 +14,21 @@ import { ResetPercentileZoom } from './reset_percentile_zoom';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { PercentileRange } from './types';
 import { usePageLoadDistribution } from '../../../../services/data/page_load_distribution_query';
+import { useDataView } from '../local_uifilters/use_data_view';
 
 export function PageLoadDistribution() {
+<<<<<<< HEAD
+=======
+  const { http } = useKibanaServices();
+
+  const { dataViewTitle } = useDataView();
+  const { rangeId, urlParams, uxUiFilters } = useLegacyUrlParams();
+
+  const { start, end, rangeFrom, rangeTo } = urlParams;
+
+  const { serviceName } = uxUiFilters;
+
+>>>>>>> Migrate breakdowns to use data plugin.
   const [percentileRange, setPercentileRange] = useState<PercentileRange>({
     min: null,
     max: null,
@@ -48,6 +61,15 @@ export function PageLoadDistribution() {
         </EuiFlexItem>
       </EuiFlexGroup>
       <PageLoadDistChart
+<<<<<<< HEAD
+=======
+        data={
+          loading
+            ? null
+            : { pageLoadDistribution, percentiles, minDuration, maxDuration }
+        }
+        dataViewTitle={dataViewTitle}
+>>>>>>> Migrate breakdowns to use data plugin.
         onPercentileChange={onPercentileChange}
         breakdown={breakdown}
       />
