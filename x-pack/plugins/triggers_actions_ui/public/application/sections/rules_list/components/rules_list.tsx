@@ -98,9 +98,9 @@ export interface RulesListProps {
   ruleDetailsLink?: string | undefined;
   showCreateRuleButton?: boolean;
   statusFilter?: RuleStatus[];
-  setStatusFilter?: (status: RuleStatus[]) => any;
+  setStatusFilter?: (status: RuleStatus[]) => any; // TODO update any
   executionStatusesFilter?: string[];
-  setExecutionStatusesFilter?: (lastResponse: string[]) => any;
+  setExecutionStatusesFilter?: (lastResponse: string[]) => any; // TODO update any
   refresh?: Date;
 }
 
@@ -154,7 +154,9 @@ export const RulesList = ({
   const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
-  const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>([]);
+  const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>(
+    executionStatusesFilter || []
+  );
   const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>(statusFilter || []);
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
@@ -210,9 +212,7 @@ export const RulesList = ({
     searchText,
     typesFilter,
     actionTypesFilter,
-    ruleExecutionStatusesFilter: executionStatusesFilter
-      ? executionStatusesFilter
-      : ruleExecutionStatusesFilter,
+    ruleExecutionStatusesFilter,
     ruleStatusesFilter,
     tagsFilter,
     sort,
@@ -229,9 +229,7 @@ export const RulesList = ({
     searchText,
     typesFilter,
     actionTypesFilter,
-    ruleExecutionStatusesFilter: executionStatusesFilter
-      ? executionStatusesFilter
-      : ruleExecutionStatusesFilter,
+    ruleExecutionStatusesFilter,
     ruleStatusesFilter,
     tagsFilter,
     onError,
@@ -330,6 +328,12 @@ export const RulesList = ({
       setStatusFilter(ruleStatusesFilter);
     }
   }, [ruleStatusesFilter, setStatusFilter]);
+
+  useEffect(() => {
+    if (setExecutionStatusesFilter) {
+      setExecutionStatusesFilter(ruleExecutionStatusesFilter);
+    }
+  }, [ruleExecutionStatusesFilter]);
 
   const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
@@ -434,17 +438,6 @@ export const RulesList = ({
     return [];
   };
 
-  const setInternalRuleExecutionStatusesFilter = useCallback(
-    (ids: string[]) => {
-      if (setExecutionStatusesFilter) {
-        setExecutionStatusesFilter(ids);
-      } else {
-        setRuleExecutionStatusesFilter(ids);
-      }
-    },
-    [setExecutionStatusesFilter]
-  );
-
   const renderRuleStatusFilter = () => {
     if (isRuleStatusFilterEnabled) {
       return (
@@ -490,10 +483,8 @@ export const RulesList = ({
     ),
     <RuleExecutionStatusFilter
       key="rule-status-filter"
-      selectedStatuses={
-        executionStatusesFilter ? executionStatusesFilter : ruleExecutionStatusesFilter
-      }
-      onChange={setInternalRuleExecutionStatusesFilter}
+      selectedStatuses={ruleExecutionStatusesFilter}
+      onChange={setRuleExecutionStatusesFilter}
     />,
     ...getRuleTagFilter(),
   ];
