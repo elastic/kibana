@@ -26,7 +26,7 @@ function RulesPage() {
 
   const documentationLink = docLinks.links.observability.createAlerts;
 
-  const { status, setStatus } = useRulesPageStateContainer();
+  const { status, setStatus, lastResponse, setLastResponse } = useRulesPageStateContainer();
   const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
   const [refresh, setRefresh] = useState(new Date());
   const { ruleTypes } = useLoadRuleTypes({
@@ -80,13 +80,23 @@ function RulesPage() {
               showCreateRuleButton: false,
               statusFilter: status,
               setStatusFilter: setStatus,
+              executionStatusesFilter: lastResponse,
+              setExecutionStatusesFilter: setLastResponse,
               refresh,
             })}
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
     );
-  }, [observabilityRuleTypeRegistry, setStatus, status, triggersActionsUi, refresh]);
+  }, [
+    observabilityRuleTypeRegistry,
+    setStatus,
+    status,
+    lastResponse,
+    setLastResponse,
+    triggersActionsUi,
+    refresh,
+  ]);
   return (
     <ObservabilityPageTemplate
       pageHeader={{

@@ -68,12 +68,6 @@ jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
-jest.mock('../state_container', () => ({
-  useRulesPageStateContainer: jest
-    .fn()
-    .mockReturnValue({ lastResponse: [], setLastResponse: jest.fn() }),
-}));
-
 const ruleTags = ['a', 'b', 'c', 'd'];
 
 const { loadRules, loadRuleTypes, loadRuleAggregations, updateAPIKey, loadRuleTags } =

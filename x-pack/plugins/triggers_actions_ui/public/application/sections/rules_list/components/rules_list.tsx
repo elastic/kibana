@@ -88,7 +88,6 @@ import { useLoadRuleAggregations } from '../../../hooks/use_load_rule_aggregatio
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from '../state_container';
 
 const ENTER_KEY = 13;
 
@@ -100,7 +99,9 @@ export interface RulesListProps {
   showCreateRuleButton?: boolean;
   statusFilter?: RuleStatus[] | undefined;
   setStatusFilter?: (status: RuleStatus[]) => any;
-  refresh: Date;
+  executionStatusesFilter?: string[];
+  setExecutionStatusesFilter?: (lastResponse: string[]) => any;
+  refresh?: Date;
 }
 
 interface RuleTypeState {
@@ -129,6 +130,8 @@ export const RulesList = ({
   showCreateRuleButton = true,
   statusFilter,
   setStatusFilter,
+  executionStatusesFilter,
+  setExecutionStatusesFilter,
   refresh,
 }: RulesListProps) => {
   const history = useHistory();
@@ -140,7 +143,6 @@ export const RulesList = ({
     actionTypeRegistry,
     kibanaFeatures,
   } = useKibana().services;
-  const { lastResponse, setLastResponse } = useRulesPageStateContainer();
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
@@ -151,6 +153,7 @@ export const RulesList = ({
   const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
+  const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>([]);
   const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
@@ -165,13 +168,6 @@ export const RulesList = ({
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
-  // if (statusFilter) {
-  //   ruleStatusesFilter = statusFilter;
-  // }
-
-  // if (setStatusFilter) {
-  //   setRuleStatusesFilter = setStatusFilter;
-  // }
   useEffect(() => {
     (async () => {
       setConfig(await triggersActionsUiConfig({ http }));
@@ -213,7 +209,9 @@ export const RulesList = ({
     searchText,
     typesFilter,
     actionTypesFilter,
-    ruleExecutionStatusesFilter: lastResponse,
+    ruleExecutionStatusesFilter: executionStatusesFilter
+      ? executionStatusesFilter
+      : ruleExecutionStatusesFilter,
     ruleStatusesFilter: statusFilter ? statusFilter : ruleStatusesFilter,
     tagsFilter,
     sort,
@@ -222,16 +220,12 @@ export const RulesList = ({
     filteredRuleTypes,
   });
 
-  const setExecutionStatusFilter = useCallback(
-    (ids: string[]) => {
-      setLastResponse(ids);
-    },
-    [setLastResponse]
-  );
-
-  // const setRuleStatusFilter = (ids: RuleStatus[]) => {
-  //   setStatus(ids);
-  // };
+  // const setExecutionStatusFilter = useCallback(
+  //   (ids: string[]) => {
+  //     setLastResponse(ids);
+  //   },
+  //   [setLastResponse]
+  // );
 
   const { tags, loadTags } = useLoadTags({
     onError,
@@ -241,7 +235,9 @@ export const RulesList = ({
     searchText,
     typesFilter,
     actionTypesFilter,
-    ruleExecutionStatusesFilter: lastResponse,
+    ruleExecutionStatusesFilter: executionStatusesFilter
+      ? executionStatusesFilter
+      : ruleExecutionStatusesFilter,
     ruleStatusesFilter: statusFilter ? statusFilter : ruleStatusesFilter,
     tagsFilter,
     onError,
@@ -449,6 +445,17 @@ export const RulesList = ({
     [setStatusFilter]
   );
 
+  const setInternalRuleExecutionStatusesFilter = useCallback(
+    (ids: string[]) => {
+      if (setExecutionStatusesFilter) {
+        setExecutionStatusesFilter(ids);
+      } else {
+        setRuleExecutionStatusesFilter(ids);
+      }
+    },
+    [setExecutionStatusesFilter]
+  );
+
   const renderRuleStatusFilter = () => {
     if (isRuleStatusFilterEnabled) {
       return (
@@ -497,8 +504,10 @@ export const RulesList = ({
     ),
     <RuleExecutionStatusFilter
       key="rule-status-filter"
-      selectedStatuses={lastResponse}
-      onChange={setExecutionStatusFilter}
+      selectedStatuses={
+        executionStatusesFilter ? executionStatusesFilter : ruleExecutionStatusesFilter
+      }
+      onChange={setInternalRuleExecutionStatusesFilter}
     />,
     ...getRuleTagFilter(),
   ];
@@ -525,7 +534,7 @@ export const RulesList = ({
                 }}
               />
               &nbsp;
-              <EuiLink color="primary" onClick={() => setLastResponse(['error'])}>
+              <EuiLink color="primary" onClick={() => setRuleExecutionStatusesFilter(['error'])}>
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.rulesList.viewBannerButtonLabel"
                   defaultMessage="Show {totalStatusesError, plural, one {rule} other {rules}} with error"
@@ -829,7 +838,6 @@ export const RulesList = ({
   };
 
   return (
-    // <Provider value={rulesPageStateContainer}>
     <section data-test-subj="rulesList">
       <DeleteModalConfirmation
         onDeleted={async () => {
@@ -900,20 +908,11 @@ export const RulesList = ({
         />
       )}
     </section>
-    // </Provider>
   );
 };
 
-function WrappedRulesPage(props: RulesListProps) {
-  return (
-    <Provider value={rulesPageStateContainer}>
-      <RulesList {...props} />
-    </Provider>
-  );
-}
-
 // eslint-disable-next-line import/no-default-export
-export { WrappedRulesPage as default };
+export { RulesList as default };
 
 const noPermissionPrompt = (
   <EuiEmptyPrompt
