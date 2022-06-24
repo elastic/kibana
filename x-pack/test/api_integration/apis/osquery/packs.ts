@@ -45,8 +45,7 @@ limit 1000;`;
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  // eslint-disable-next-line ban/ban
-  describe.only('Packs', () => {
+  describe('Packs', () => {
     let packId: string = '';
     let hostedPolicy: Record<string, any>;
     let packagePolicyId: string;
@@ -105,8 +104,6 @@ export default function ({ getService }: FtrProviderContext) {
         // eslint-disable-next-line no-console
         console.error({ MISSING: packagePolicyResponse });
       }
-      // eslint-disable-next-line no-console
-      console.log({ packagePolicyResponse });
 
       expect(packagePolicyResponse.status).to.be(200);
 
