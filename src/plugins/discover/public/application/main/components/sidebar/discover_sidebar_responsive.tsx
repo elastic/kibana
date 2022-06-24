@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -89,7 +89,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Read from the Fields API
    */
-  useNewFieldsApi?: boolean;
+  useNewFieldsApi: boolean;
   /**
    * callback to execute on edit runtime field
    */
@@ -115,7 +115,7 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
-  const { selectedIndexPattern, onEditRuntimeField, useNewFieldsApi, onDataViewCreated } = props;
+  const { selectedIndexPattern, onEditRuntimeField, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   /**
@@ -123,7 +123,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
    */
   const fieldCounts = useRef<Record<string, number> | null>(null);
   if (fieldCounts.current === null) {
-    fieldCounts.current = calcFieldCounts(props.documents$.getValue().result, selectedIndexPattern);
+    fieldCounts.current = calcFieldCounts(
+      props.documents$.getValue().result!,
+      selectedIndexPattern
+    );
   }
 
   const [documentState, setDocumentState] = useState(props.documents$.getValue());
@@ -178,6 +181,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { dataViewFieldEditor, dataViewEditor } = services;
   const { availableFields$ } = props;
 
+  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+
   useEffect(
     () => {
       // For an external embeddable like the Field stats
@@ -203,57 +208,56 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     ]
   );
 
-  const editField = useCallback(
-    (fieldName?: string) => {
-      const indexPatternFieldEditPermission =
-        dataViewFieldEditor?.userPermissions.editIndexPattern();
-      const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
-      if (!canEditIndexPatternField || !selectedIndexPattern) {
-        return;
-      }
-      const ref = dataViewFieldEditor.openEditor({
-        ctx: {
-          dataView: selectedIndexPattern,
-        },
-        fieldName,
-        onSave: async () => {
-          onEditRuntimeField();
-        },
-      });
-      if (setFieldEditorRef) {
-        setFieldEditorRef(ref);
-      }
-      if (closeFlyout) {
-        closeFlyout();
-      }
-    },
+  const editField = useMemo(
+    () =>
+      canEditDataView && selectedIndexPattern
+        ? (fieldName?: string) => {
+            const ref = dataViewFieldEditor.openEditor({
+              ctx: {
+                dataView: selectedIndexPattern,
+              },
+              fieldName,
+              onSave: async () => {
+                onEditRuntimeField();
+              },
+            });
+            if (setFieldEditorRef) {
+              setFieldEditorRef(ref);
+            }
+            if (closeFlyout) {
+              closeFlyout();
+            }
+          }
+        : undefined,
     [
+      canEditDataView,
       closeFlyout,
       dataViewFieldEditor,
       selectedIndexPattern,
       setFieldEditorRef,
       onEditRuntimeField,
-      useNewFieldsApi,
     ]
   );
 
-  const createNewDataView = useCallback(() => {
-    const indexPatternFieldEditPermission = dataViewEditor.userPermissions.editDataView;
-    if (!indexPatternFieldEditPermission) {
-      return;
-    }
-    const ref = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        onDataViewCreated(dataView);
-      },
-    });
-    if (setDataViewEditorRef) {
-      setDataViewEditorRef(ref);
-    }
-    if (closeFlyout) {
-      closeFlyout();
-    }
-  }, [dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]);
+  const createNewDataView = useMemo(
+    () =>
+      canEditDataView
+        ? () => {
+            const ref = dataViewEditor.openEditor({
+              onSave: async (dataView) => {
+                onDataViewCreated(dataView);
+              },
+            });
+            if (setDataViewEditorRef) {
+              setDataViewEditorRef(ref);
+            }
+            if (closeFlyout) {
+              closeFlyout();
+            }
+          }
+        : undefined,
+    [canEditDataView, dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]
+  );
 
   if (!selectedIndexPattern) {
     return null;
@@ -265,7 +269,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         <EuiHideFor sizes={['xs', 's']}>
           <DiscoverSidebar
             {...props}
-            documents={documentState.result}
+            documents={documentState.result!}
             fieldFilter={fieldFilter}
             fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}

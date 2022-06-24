@@ -15,19 +15,23 @@ import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { CommentType } from '@kbn/cases-plugin/common';
 
 import {
-  HostIsolationRequestSchema,
+  NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
   ResponseActionBodySchema,
 } from '../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../common/constants';
 import {
   ISOLATE_HOST_ROUTE_V2,
-  RELEASE_HOST_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
   ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTION_RESPONSES_DS,
   failedFleetActionErrorCode,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
+  GET_RUNNING_PROCESSES_ROUTE,
+  ISOLATE_HOST_ROUTE,
+  UNISOLATE_HOST_ROUTE,
+  ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -55,10 +59,38 @@ export function registerResponseActionRoutes(
 ) {
   const logger = endpointContext.logFactory.get('hostIsolation');
 
+  /**
+   * @deprecated use ISOLATE_HOST_ROUTE_V2 instead
+   */
+  router.post(
+    {
+      path: ISOLATE_HOST_ROUTE,
+      validate: NoParametersRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz({ all: ['canIsolateHost'] }, logger, redirectHandler(ISOLATE_HOST_ROUTE_V2))
+  );
+
+  /**
+   * @deprecated use RELEASE_HOST_ROUTE instead
+   */
+  router.post(
+    {
+      path: UNISOLATE_HOST_ROUTE,
+      validate: NoParametersRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canUnIsolateHost'] },
+      logger,
+      redirectHandler(UNISOLATE_HOST_ROUTE_V2)
+    )
+  );
+
   router.post(
     {
       path: ISOLATE_HOST_ROUTE_V2,
-      validate: HostIsolationRequestSchema,
+      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
@@ -70,8 +102,8 @@ export function registerResponseActionRoutes(
 
   router.post(
     {
-      path: RELEASE_HOST_ROUTE,
-      validate: HostIsolationRequestSchema,
+      path: UNISOLATE_HOST_ROUTE_V2,
+      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
@@ -112,6 +144,19 @@ export function registerResponseActionRoutes(
       )
     )
   );
+
+  router.post(
+    {
+      path: GET_RUNNING_PROCESSES_ROUTE,
+      validate: NoParametersRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canGetRunningProcesses'] },
+      logger,
+      responseActionRequestHandler(endpointContext, 'running-processes')
+    )
+  );
 }
 
 const commandToFeatureKeyMap = new Map<ResponseActions, FeatureKeys>([
@@ -119,6 +164,7 @@ const commandToFeatureKeyMap = new Map<ResponseActions, FeatureKeys>([
   ['unisolate', 'HOST_ISOLATION'],
   ['kill-process', 'KILL_PROCESS'],
   ['suspend-process', 'SUSPEND_PROCESS'],
+  ['running-processes', 'RUNNING_PROCESSES'],
 ]);
 
 const returnActionIdCommands: ResponseActions[] = ['isolate', 'unisolate'];
@@ -212,7 +258,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       try {
         logsEndpointActionsResult = await esClient.index<LogsEndpointAction>(
           {
-            index: `${ENDPOINT_ACTIONS_DS}-default`,
+            index: ENDPOINT_ACTIONS_INDEX,
             body: {
               ...doc,
             },
@@ -349,3 +395,19 @@ const createFailedActionResponseEntry = async ({
     logger.error(e);
   }
 };
+
+function redirectHandler(
+  location: string
+): RequestHandler<
+  unknown,
+  unknown,
+  TypeOf<typeof NoParametersRequestSchema.body>,
+  SecuritySolutionRequestHandlerContext
+> {
+  return async (_context, _req, res) => {
+    return res.custom({
+      statusCode: 308,
+      headers: { location },
+    });
+  };
+}
