@@ -182,7 +182,7 @@ https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP[Content Security Policy].
 Specifically, we removed the need for script-src ‘unsafe-eval’,
 which provides an additional level of protection against Cross-Site Scripting (“XSS”) attacks.
 
-To enable this feature, configure` csp.disableUnsafeEval: true` in your kibana.yml.
+To enable this feature, configure `csp.disableUnsafeEval: true` in your `kibana.yml`.
 
 [role="screenshot"]
 image::images/highlights-security.png[Setting for a more restrictive Content Security Policy]
