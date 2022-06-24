@@ -16,7 +16,7 @@ If you use log rotation, be careful when mixing deprecated and current configura
 
 [float]
 ==== Service scripts
-If you are using the service scripts (`kibana.service`), be aware that the deprecated `logging.dest` configuration might be set via CLI options in the `kibana.service` declaration. When `logging.dest` is set in the service scripts, {kib} will ignore any other log rotation configuration. To switch over to the current logging system, remove the `logging.dest` CLI argument from `/etc/systemd/system/kibana.service` and run `systemctl daemon-reload`.
+If you are using the service scripts (`kibana.service`), be aware that the deprecated `logging.dest` configuration might be set via CLI options in the `kibana.service` declaration. When `logging.dest` is set in the service scripts, {kib} will continue to write log messages to the "old" file. To switch over to the current logging system, remove the `logging.dest` CLI argument from `/etc/systemd/system/kibana.service` and run `systemctl daemon-reload`.
 
 [float]
 ==== Compatibility
