@@ -189,7 +189,7 @@ image::images/highlights-security.png[Setting for a more restrictive Content Sec
 
 [float]
 [[highlights-8.3-ml]]
-=== Trained models test in Machine Learning
+=== Test trained models in Machine Learning
 
 You can now visualize machine learning trained model output.
 A new Test model action in *Machine Learning > Trained Models* opens up a
