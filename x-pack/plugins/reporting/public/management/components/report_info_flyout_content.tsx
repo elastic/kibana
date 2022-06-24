@@ -187,6 +187,18 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description: info.completed_at ? formatDate(info.completed_at) : NA,
     },
+    {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.queueTime', {
+        defaultMessage: 'Queue time',
+      }),
+      description: info.queue_time_ms ?? NA,
+    },
+    {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.executionTime', {
+        defaultMessage: 'Execution time',
+      }),
+      description: info.execution_time_ms ?? NA,
+    },
   ];
 
   const warnings = info.getWarnings();
