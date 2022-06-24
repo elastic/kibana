@@ -9,6 +9,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import 'brace';
 import React from 'react';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -48,6 +49,8 @@ const defaultSearchSourceRuleParams: EsQueryAlertParams<SearchType.searchSource>
 const dataViewPluginMock = dataViewPluginMocks.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
+const httpMock = httpServiceMock.createStartContract();
+const docLinksMock = docLinksServiceMock.createStartContract();
 export const uiSettingsMock = {
   get: jest.fn(),
 } as unknown as IUiSettingsClient;
@@ -109,6 +112,7 @@ dataMock.dataViews.getDefaultDataView = jest.fn(() => Promise.resolve(null));
 dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
   Promise.resolve({ total: 0, queries: [] })
 );
+(httpMock.post as jest.Mock).mockImplementation(() => Promise.resolve({ fields: [] }));
 
 const setup = (
   ruleParams: EsQueryAlertParams<SearchType.searchSource> | EsQueryAlertParams<SearchType.esQuery>
@@ -124,7 +128,12 @@ const setup = (
 
   return mountWithIntl(
     <KibanaContextProvider
-      services={{ data: dataMock, uiSettings: uiSettingsMock, docLinks: docLinksServiceMock }}
+      services={{
+        data: dataMock,
+        uiSettings: uiSettingsMock,
+        docLinks: docLinksMock,
+        http: httpMock,
+      }}
     >
       <EsQueryAlertTypeExpression
         ruleInterval="1m"
@@ -190,21 +199,26 @@ describe('EsQueryAlertTypeExpression', () => {
     expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
   });
 
-  test('should render QueryDSL form type chooser even if default rule params were passed', async () => {
-    const wrapper = setup(defaultEsQueryRuleParams);
-    expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
-    expect(findTestSubject(wrapper, 'queryFormTypeChooserCancel').exists()).toBeFalsy();
-    expect(findTestSubject(wrapper, 'selectIndexExpression').exists()).toBeFalsy();
+  test('should render QueryDSL view without the form type chooser if some rule params were passed', async () => {
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = setup(defaultEsQueryRuleParams);
+      wrapper = await wrapper.update();
+    });
+    expect(findTestSubject(wrapper!, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
+    expect(findTestSubject(wrapper!, 'queryFormTypeChooserCancel').exists()).toBeFalsy();
+    expect(findTestSubject(wrapper!, 'selectIndexExpression').exists()).toBeTruthy();
   });
 
-  test('should render KQL and Lucene view without the form type chooser when default rule params were passed', async () => {
+  test('should render KQL and Lucene view without the form type chooser if some rule params were passed', async () => {
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = setup(defaultSearchSourceRuleParams);
       wrapper = await wrapper.update();
     });
+    wrapper = await wrapper!.update();
     expect(findTestSubject(wrapper!, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
     expect(findTestSubject(wrapper!, 'queryFormTypeChooserCancel').exists()).toBeFalsy();
-    expect(findTestSubject(wrapper!, 'selectDataViewExpression').exists()).toBeFalsy();
+    expect(findTestSubject(wrapper!, 'selectDataViewExpression').exists()).toBeTruthy();
   });
 });

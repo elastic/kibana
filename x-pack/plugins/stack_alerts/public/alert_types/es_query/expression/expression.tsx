@@ -79,30 +79,34 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     </>
   );
 
+  // Creating a rule from Stack Management page
+  if ((!ruleParams || !Object.keys(ruleParams).length) && !activeQueryFormType) {
+    // Showing the type chooser
+    return (
+      <QueryFormTypeChooser
+        activeFormType={activeQueryFormType}
+        onFormTypeSelect={formTypeSelected}
+      />
+    );
+  }
+
   return (
     <>
       {expressionError}
 
+      {/* Showing the selected type */}
+      {activeQueryFormType && (
+        <QueryFormTypeChooser
+          activeFormType={activeQueryFormType}
+          onFormTypeSelect={formTypeSelected}
+        />
+      )}
+
       {isSearchSource ? (
-        <>
-          {activeQueryFormType === QueryFormType.KQL_OR_LUCENE && (
-            <QueryFormTypeChooser
-              activeFormType={activeQueryFormType}
-              onFormTypeSelect={formTypeSelected}
-            />
-          )}
-          <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
-        </>
+        <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
       ) : (
         <>
-          <QueryFormTypeChooser
-            activeFormType={activeQueryFormType}
-            onFormTypeSelect={formTypeSelected}
-          />
-          {activeQueryFormType === QueryFormType.QUERY_DSL && (
-            <EsQueryExpression {...props} ruleParams={ruleParams} />
-          )}
-          {activeQueryFormType === QueryFormType.KQL_OR_LUCENE && (
+          {activeQueryFormType === QueryFormType.KQL_OR_LUCENE ? (
             <SearchSourceExpressionMemoized
               {...props}
               ruleParams={{
@@ -112,6 +116,8 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
               }}
               shouldResetSearchConfiguration
             />
+          ) : (
+            <EsQueryExpression {...props} ruleParams={ruleParams} />
           )}
         </>
       )}
