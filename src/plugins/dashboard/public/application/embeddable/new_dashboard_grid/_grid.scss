@@ -27,8 +27,18 @@ h1 {
   }
 }
 
-.grid-stack-placeholder > .placeholder-content {
-  background-color: rgba(189, 39, 30, .2);
-  border: 1px dashed rgba(189, 39, 30, .4) !important;
-  border-radius: 5px;
+.grid-stack-placeholder {
+  > .placeholder-content {
+    background-color: rgba(189, 39, 30, .2);
+    border: 1px dashed rgba(189, 39, 30, .4) !important;
+    border-radius: 5px;
+  }
+}
+
+.grid-stack .grid-stack-nested {
+  background: #e4e4c1;
+}
+
+.dshPanelGroup {
+  background-color: red;
 }

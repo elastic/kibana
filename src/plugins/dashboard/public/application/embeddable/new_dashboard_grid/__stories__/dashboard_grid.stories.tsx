@@ -27,6 +27,7 @@ import REQUEST_MAP from '../images/total_requests_map.png';
 import BYTES_BAR_GRAPH from '../images/bytes_bar_graph.png';
 import { TestReactGrid } from '../components/new_grid';
 import { ControlledStack } from '../components/test_react_grid_demo';
+import { SubgridDemo } from '../components/test_subgrid_demo';
 
 export default {
   component: EuiPanel,
@@ -39,8 +40,12 @@ export const DefaultReactExample = () => {
   return <ControlledStack />;
 };
 
+export const SubgridExample = () => {
+  return <SubgridDemo />;
+};
+
 export const EmptyExample = () => {
-  return <TestReactGrid columns={12} />;
+  return <TestReactGrid columns={24} />;
 };
 
 export const SmallGridExample = () => {

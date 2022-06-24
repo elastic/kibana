@@ -7,11 +7,19 @@
  */
 
 import { EuiAccordion, EuiButton, htmlIdGenerator } from '@elastic/eui';
-import { GridItemHTMLElement, GridStack, GridStackNode, GridStackWidget } from 'gridstack';
+import {
+  GridItemHTMLElement,
+  GridStack,
+  GridStackEventHandlerCallback,
+  GridStackNode,
+  GridStackOptions,
+  GridStackWidget,
+} from 'gridstack';
 import React, {
   createRef,
   FC,
   MutableRefObject,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -19,13 +27,18 @@ import React, {
 } from 'react';
 import {
   ColumnOptions,
+  // CustomType,
+  DEFAULT_GROUP_HEIGHT,
   DEFAULT_GUTTERSIZE,
   GRID_CLASS,
   GRID_CONFIG,
   HANDLE_CLASS,
   NUM_COLUMNS,
+  // PanelTypes,
   PANEL_CLASS,
 } from '../constants';
+import { TestGridGroup } from './new_grid_group';
+// import { TestGridGroup } from './new_grid_group';
 import { TestGridItem } from './new_grid_item';
 
 interface Props {
@@ -85,6 +98,8 @@ export const TestReactGrid: FC<Props> = ({
       return;
     }
 
+    // debugger;
+
     grid.batchUpdate();
     grid.removeAll(false);
     panels.forEach((panel) => {
@@ -97,8 +112,6 @@ export const TestReactGrid: FC<Props> = ({
   const addNewPanel = () => {
     const id = htmlIdGenerator('panel')();
     const panelNode = {
-      x: 0,
-      y: 0,
       w: Math.ceil((Math.random() * columns) / 2 + 1),
       h: Math.ceil((Math.random() * columns) / 3 + 1),
       id,
@@ -107,20 +120,77 @@ export const TestReactGrid: FC<Props> = ({
     setPanels([...panels, panelNode]);
   };
 
+  const addNewPanelGroup = useCallback(() => {
+    const grid = gridRef.current;
+    if (!grid) {
+      // TODO: error handling bc grid isn't instantiated
+      return;
+    }
+    const id = htmlIdGenerator('panel-group')();
+    const groupNode = {
+      id,
+      w: columns,
+      h: DEFAULT_GROUP_HEIGHT,
+      noResize: true,
+      class: 'dshPanelGroup',
+      subGrid: {
+        ...sharedGridParams,
+        column: 'auto',
+        children: [
+          {
+            w: 2,
+            h: 2,
+            id: id + '_test',
+            content: id + '_test',
+          },
+        ],
+      },
+    };
+
+    // console.log(groupNode);
+
+    setPanels([...panels, groupNode]);
+
+    // const newGroup = grid.addWidget(groupNode);
+    // const subGrid = newGroup.gridstackNode?.subGrid as GridStack;
+
+    // const updateHeight = () => {
+    //   if (subGrid && gridRef?.current) {
+    //     // the +2 here accounts for the height of the title and extra space for dragging at the bottom
+    //     gridRef?.current.update(newGroup, { h: subGrid.getRow() + 2 });
+    //   }
+    // };
+    // const resizeWrapper: GridStackEventHandlerCallback = (event, el) => {
+    //   if (el) {
+    //     updateHeight();
+    //   }
+    // };
+
+    // subGrid.on('drag', resizeWrapper);
+  }, [columns, panels, sharedGridParams]);
+
   return (
     <div>
       <EuiButton onClick={addNewPanel}>Add Panel</EuiButton>{' '}
-      <EuiButton onClick={addNewPanel}>Add Group</EuiButton>
+      <EuiButton onClick={addNewPanelGroup}>Add Group</EuiButton>
       <div>Count:{panels.length}</div>
       <EuiAccordion id={`accordion`} buttonContent="Panel data">
         <div>{JSON.stringify(panels)}</div>
       </EuiAccordion>
-      <EuiAccordion id={`accordion`} buttonContent="Serialized grid data">
+      {/* <EuiAccordion id={`accordion`} buttonContent="Serialized grid data">
         <div>{JSON.stringify(gridRef.current?.save(true, true))}</div>
-      </EuiAccordion>
+      </EuiAccordion> */}
       <div className={`grid-stack ${GRID_CLASS} dshLayout--editing ${GRID_CONFIG[columns].class}`}>
-        {panels.map((panel, i) => {
-          return <TestGridItem panel={panel} ref={panelRefs.current[panel.id!]} />;
+        {panels.map((panel) => {
+          return panel.subGrid ? (
+            <TestGridGroup
+              group={panel}
+              parent={gridRef.current}
+              ref={panelRefs.current[panel.id!]}
+            />
+          ) : (
+            <TestGridItem panel={panel} ref={panelRefs.current[panel.id!]} />
+          );
         })}
       </div>
     </div>

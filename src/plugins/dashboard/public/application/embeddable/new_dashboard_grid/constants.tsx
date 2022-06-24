@@ -15,19 +15,20 @@ import {
   EuiSelect,
   EuiText,
 } from '@elastic/eui';
+import { GridStackWidget } from 'gridstack/dist/types';
 
 import GAUGE_GRAPH from './images/unique_visitors_gauge.svg';
 import RESPONSE_CODE_GRAPH from './images/response_codes_graph.png';
-import { number } from 'joi';
 
 export type ColumnOptions = 12 | 24 | 48;
-
+export type PanelTypes = 'panel' | 'group';
+export type CustomType = GridStackWidget & { type: PanelTypes };
 export const GRID_CLASS = 'dshGrid';
 export const HANDLE_CLASS = 'dshPanel__wrapper';
 export const PANEL_CLASS = 'embPanel';
 export const NUM_COLUMNS = 48;
 export const DEFAULT_CELL_HEIGHT = 24;
-export const DEFAULT_GROUP_HEIGHT = NUM_COLUMNS / 3;
+export const DEFAULT_GROUP_HEIGHT = NUM_COLUMNS / 6;
 export const DEFAULT_GUTTERSIZE = 4;
 
 type GridConfig = {

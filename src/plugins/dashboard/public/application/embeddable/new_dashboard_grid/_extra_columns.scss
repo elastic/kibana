@@ -10,36 +10,22 @@ $gridstack-columns-s: 12;
 $gridstack-columns-m: 24;
 $gridstack-columns-l: 48;
 
-.grid-stack-12 > .grid-stack-item {
-  min-width: (100% / $gridstack-columns-s);
+@mixin grid-stack-items($columns) {
+  .grid-stack.grid-stack-#{$columns} {
 
-  @for $i from 0 through $gridstack-columns-s {
-    &[gs-w='#{$i}'] { width: (100% / $gridstack-columns-s) * $i; }
-    &[gs-x='#{$i}'] { left: (100% / $gridstack-columns-s) * $i; }
-    &[gs-min-w='#{$i}'] { min-width: (100% / $gridstack-columns-s) * $i; }
-    &[gs-max-w='#{$i}'] { max-width: (100% / $gridstack-columns-s) * $i; }
+    > .grid-stack-item {
+      min-width: (100% / $columns);
+
+      @for $i from 1 through $columns {
+        &[gs-w='#{$i}'] { width: (100% / $columns) * $i; }
+        &[gs-x='#{$i}'] { left: (100% / $columns) * $i; }
+        &[gs-min-w='#{$i}'] { min-width: (100% / $columns) * $i; }
+        &[gs-max-w='#{$i}'] { max-width:  (100% / $columns) * $i; }
+      }
+    }
   }
 }
 
-.grid-stack-24 > .grid-stack-item {
-   min-width: (100% / $gridstack-columns-m);
-
-  @for $i from 0 through $gridstack-columns-m {
-    &[gs-w='#{$i}'] { width: (100% / $gridstack-columns-m) * $i; }
-    &[gs-x='#{$i}'] { left: (100% / $gridstack-columns-m) * $i; }
-    &[gs-min-w='#{$i}'] { min-width: (100% / $gridstack-columns-m) * $i; }
-    &[gs-max-w='#{$i}'] { max-width: (100% / $gridstack-columns-m) * $i; }
-  }
-}
-
-.grid-stack-48 > .grid-stack-item {
-  $gridstack-columns: 48;
-  min-width: (100% / $gridstack-columns-l);
-
-  @for $i from 0 through $gridstack-columns-l {
-    &[gs-w='#{$i}'] { width: (100% / $gridstack-columns-l) * $i; }
-    &[gs-x='#{$i}'] { left: (100% / $gridstack-columns-l) * $i; }
-    &[gs-min-w='#{$i}'] { min-width: (100% / $gridstack-columns-l) * $i; }
-    &[gs-max-w='#{$i}'] { max-width: (100% / $gridstack-columns-l) * $i; }
-  }
-}
+@include grid-stack-items($gridstack-columns-s);
+@include grid-stack-items($gridstack-columns-m);
+@include grid-stack-items($gridstack-columns-l);
