@@ -506,17 +506,17 @@ Task Manager's _push_ mechanism is driven by the following operations:
 
 1. A polling interval has been reached.
 2. A new Task is scheduled.
-3. A Task is run using `runSoon`.
 
 The polling interval is straight forward: TaskPoller is configured to emit an event at a fixed interval.
 That said, if there are no workers available, we want to ignore these events, so we'll throttle the interval on worker availability.
 
 Whenever a user uses the `schedule` api to schedule a new Task, we want to trigger an early polling in order to respond to the newly scheduled task as soon as possible, but this too we only wish to do if there are available workers, so we can throttle this too.
 
-When a `runSoon` call is made we need to force a poll as the user will now be waiting on the result of the `runSoon` call, but
-there is a complexity here- we don't want to force polling (as there might not be any worker capacity and it's possible that a polling cycle is already running), but we also can't throttle, as we can't afford to "drop" these requests, so we'll have to buffer these.
+However, besides above operations `runSoon` can be used to run a task.
+`runSoon` updates a tasks `runAt` and `scheduledAt` properties with current date-time stamp.
+So the task would be picked up at the next TaskManager polling cycle by one of the Kibana instances that has capacity.
 
-We now want to respond to all three of these push events, but we still need to balance against our worker capacity, so if there are too many requests buffered, we only want to `take` as many requests as we have capacity to handle.
+We now want to respond to all three of these events, but we still need to balance against our worker capacity, so if there are too many requests buffered, we only want to `take` as many requests as we have capacity to handle.
 Luckily, `Polling Interval` and `Task Scheduled` simply denote a request to "poll for work as soon as possible", unlike `Run Task Now` which also means "poll for these specific tasks", so our worker capacity only needs to be applied to `Run Task Now`.
 
 We achieve this model by buffering requests into a queue using a Set (which removes duplicated). As we don't want an unbounded queue in our system, we have limited the size of this queue (configurable by the `xpack.task_manager.request_capacity` config, defaulting to 1,000 requests) which forces us to throw an error once this cap is reachedand to all subsequent calls to `runSoon` until the queue drain bellow the cap.

@@ -471,7 +471,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(task.state.count).to.eql(1);
 
-        // ensure this task shouldnt run for another half hour
+        // ensure this task shouldn't run for another half hour
         expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
       });
 
@@ -503,7 +503,7 @@ export default function ({ getService }: FtrProviderContext) {
       await delay(DEFAULT_POLL_INTERVAL);
 
       // call runSoon for our task
-      const runSoonResult = runTaskSoon({
+      await runTaskSoon({
         id: originalTask.id,
       });
 
@@ -513,8 +513,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       // and release only one slot in our worker queue
       await releaseTasksWaitingForEventToComplete('releaseSingleTask');
-
-      expect(await runSoonResult).to.eql({ id: originalTask.id });
 
       await retry.try(async () => {
         const task = await currentTask<{ count: number }>(originalTask.id);
