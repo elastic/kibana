@@ -44,13 +44,13 @@ const StickyFlexItem = styled(EuiFlexItem)`
 
 export const ActionListDateRangePicker = memo(
   ({
-    dateRangePickerStorage,
+    dateRangePickerState,
     isDataLoading,
     onRefresh,
     onRefreshChange,
     onTimeChange,
   }: {
-    dateRangePickerStorage: DateRangePickerValues;
+    dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
@@ -78,19 +78,19 @@ export const ActionListDateRangePicker = memo(
                 dateFormat={dateFormat}
                 commonlyUsedRanges={commonlyUsedRanges}
                 end={
-                  dateRangePickerStorage.endDate
-                    ? dateMath.parse(dateRangePickerStorage.endDate)?.toISOString()
+                  dateRangePickerState.endDate
+                    ? dateMath.parse(dateRangePickerState.endDate)?.toISOString()
                     : undefined
                 }
-                isPaused={!dateRangePickerStorage.autoRefreshOptions.enabled}
+                isPaused={!dateRangePickerState.autoRefreshOptions.enabled}
                 onTimeChange={onTimeChange}
                 onRefreshChange={onRefreshChange}
-                refreshInterval={dateRangePickerStorage.autoRefreshOptions.duration}
+                refreshInterval={dateRangePickerState.autoRefreshOptions.duration}
                 onRefresh={onRefresh}
-                recentlyUsedRanges={dateRangePickerStorage.recentlyUsedDateRanges}
+                recentlyUsedRanges={dateRangePickerState.recentlyUsedDateRanges}
                 start={
-                  dateRangePickerStorage.startDate
-                    ? dateMath.parse(dateRangePickerStorage.startDate)?.toISOString()
+                  dateRangePickerState.startDate
+                    ? dateMath.parse(dateRangePickerState.startDate)?.toISOString()
                     : undefined
                 }
               />
