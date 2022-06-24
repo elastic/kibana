@@ -72,7 +72,7 @@ const manageDefaultIndexPatternRoutesFactory =
       },
       handleErrors(async (ctx, req, res) => {
         const [core, , { dataViewsServiceFactory }] = await getStartServices();
-        const provideDefault = Object.keys(req.params).includes('provideDefault');
+        const provideDefault = !!req.url.searchParams.get('provideDefault');
         const savedObjectsClient =
           core.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
         const elasticsearchClient = core.elasticsearch.client.asInternalUser;
