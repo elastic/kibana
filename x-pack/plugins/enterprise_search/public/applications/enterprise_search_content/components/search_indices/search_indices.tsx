@@ -56,7 +56,7 @@ export const baseBreadcrumbs = [
 
 export const SearchIndices: React.FC = () => {
   const { makeRequest, onPaginate } = useActions(IndicesLogic);
-  const { meta, indices } = useValues(IndicesLogic);
+  const { meta, indices, isLoading } = useValues(IndicesLogic);
 
   const [calloutDismissed, setCalloutDismissed] = useLocalStorage<boolean>(
     'enterprise-search-indices-callout-dismissed',
@@ -260,6 +260,7 @@ export const SearchIndices: React.FC = () => {
               onChange={handlePageChange(onPaginate)}
               pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
               tableLayout="auto"
+              loading={isLoading}
             />
           </>
         ) : (

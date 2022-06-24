@@ -12,7 +12,7 @@ import { HttpError } from '../../../../../common/types/api';
 import { DEFAULT_META } from '../../../shared/constants';
 import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
-import { IndicesAPILogic } from '../../logic/indices_api';
+import { IndicesAPILogic } from '../../logic/indices_api/indices_api_logic';
 import { SearchIndex } from '../../types';
 
 export interface IndicesActions {
@@ -27,6 +27,7 @@ export interface IndicesActions {
 export interface IndicesValues {
   indices: SearchIndex[];
   meta: Meta;
+  isLoading: boolean;
 }
 
 export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
@@ -38,6 +39,14 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
     onPaginate: (newPageIndex) => ({ newPageIndex }),
   },
   reducers: () => ({
+    isLoading: [
+      true,
+      {
+        apiSuccess: () => false,
+        apiError: () => false,
+        makeRequest: () => true,
+      },
+    ],
     indices: [
       [],
       {

@@ -7,8 +7,6 @@
 
 import { generatePath } from 'react-router-dom';
 
-import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
-
 import { ElasticsearchIndex } from '../../../../../common/types';
 import { ENGINE_CRAWLER_PATH, ENGINE_PATH } from '../../routes';
 
@@ -40,7 +38,7 @@ export const formatIndicesToSelectable = (
   return indices.map((index) => ({
     ...(selectedIndexName === index.name ? { checked: 'on' } : {}),
     label: index.name,
-    health: (index.health as HealthStatus) ?? 'unavailable',
+    health: index.health,
     status: index.status,
     total: index.total,
   }));

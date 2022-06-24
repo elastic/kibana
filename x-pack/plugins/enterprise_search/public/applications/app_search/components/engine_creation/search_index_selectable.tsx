@@ -29,7 +29,7 @@ import './search_index_selectable.scss';
 
 export interface SearchIndexSelectableOption {
   label: string;
-  health: HealthStatus | 'unavailable';
+  health?: HealthStatus;
   status?: string;
   total: {
     docs: {
@@ -50,7 +50,6 @@ const healthColorsMap = {
   GREEN: 'success',
   yellow: 'warning',
   YELLOW: 'warning',
-  unavailable: '',
 };
 
 const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: string) => {
@@ -61,7 +60,7 @@ const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: str
       <EuiTextColor color="subdued">
         <small>
           <span className="selectableSecondaryContentLabel">
-            <EuiIcon type="dot" color={healthColorsMap[option.health] ?? ''} />
+            <EuiIcon type="dot" color={option.health ? healthColorsMap[option.health] : ''} />
             &nbsp;{option.health ?? '-'}
           </span>
           <span className="selectableSecondaryContentLabel" data-test-subj="optionStatus">

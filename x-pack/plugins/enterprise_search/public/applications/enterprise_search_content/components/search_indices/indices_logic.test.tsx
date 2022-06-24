@@ -12,11 +12,12 @@ import { HttpError } from '../../../../../common/types/api';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
-import { IndicesAPILogic } from '../../logic/indices_api';
+import { IndicesAPILogic } from '../../logic/indices_api/indices_api_logic';
 
 import { IndicesLogic } from './indices_logic';
 
 const DEFAULT_VALUES = {
+  isLoading: true,
   indices: [],
   meta: DEFAULT_META,
 };
@@ -56,7 +57,11 @@ describe('IndicesLogic', () => {
       it('updates when apiSuccess listener triggered', () => {
         expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
         IndicesLogic.actions.apiSuccess({ indices: searchIndices, meta: DEFAULT_META });
-        expect(IndicesLogic.values).toEqual({ indices: searchIndices, meta: DEFAULT_META });
+        expect(IndicesLogic.values).toEqual({
+          isLoading: false,
+          indices: searchIndices,
+          meta: DEFAULT_META,
+        });
       });
     });
 
@@ -72,7 +77,11 @@ describe('IndicesLogic', () => {
         };
         expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
         IndicesLogic.actions.apiSuccess({ indices: searchIndices, meta: newMeta });
-        expect(IndicesLogic.values).toEqual({ indices: searchIndices, meta: newMeta });
+        expect(IndicesLogic.values).toEqual({
+          isLoading: false,
+          indices: searchIndices,
+          meta: newMeta,
+        });
       });
     });
   });
