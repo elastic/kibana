@@ -9,34 +9,47 @@ import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
 
-export function getCategorizedAlerts<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  ActionGroupIds extends string
+interface GetAlertsResult<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+}
+
+export function getAlerts<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 >(
-  alerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>>,
+  alerts: Record<string, Alert<State, Context>>,
   originalAlertIds: Set<string>
-): {
-  newAlerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>>;
-  activeAlerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>>;
-  recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>>;
-} {
+): GetAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const currentTime = new Date().toISOString();
-  const newAlerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>> = {};
-  const activeAlerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>> = {};
-  const recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>> = {};
+  const newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
+  const activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
+  const recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {};
+
   for (const id in alerts) {
     if (alerts.hasOwnProperty(id)) {
+      // alerts with scheduled actions are considered "active"
       if (alerts[id].hasScheduledActions()) {
         activeAlerts[id] = alerts[id];
+
+        // if this alert did not exist in previous run, it is considered "new"
         if (!originalAlertIds.has(id)) {
           newAlerts[id] = alerts[id];
 
           // Inject start time into alert state for new alerts
-          const state = activeAlerts[id].getState();
-          activeAlerts[id].replaceState({ ...state, start: currentTime });
+          const state = newAlerts[id].getState();
+          newAlerts[id].replaceState({ ...state, start: currentTime });
         } else {
-          // Calculate duration to date for active alerts
+          // this alert did exist in previous run
+          // calculate duration to date for active alerts
           const state = originalAlertIds.has(id)
             ? alerts[id].getState()
             : activeAlerts[id].getState();

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getCategorizedAlerts } from './get_categorized_alerts';
+import { getAlerts } from './get_alerts';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../types';
 
-describe('getCategorizedAlerts', () => {
+describe('getAlerts', () => {
   test('considers alert recovered if it has no scheduled actions', () => {
     const alert1 = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
     alert1.scheduleActions('default', { foo: '1' });
@@ -21,7 +21,7 @@ describe('getCategorizedAlerts', () => {
       '2': alert2,
     };
 
-    expect(getCategorizedAlerts(alerts, new Set(['1', '2']))).toEqual({
+    expect(getAlerts(alerts, new Set(['1', '2']))).toEqual({
       recoveredAlerts: {
         '2': alert2,
       },
@@ -37,6 +37,6 @@ describe('getCategorizedAlerts', () => {
       '2': alert2,
     };
 
-    expect(getCategorizedAlerts(alerts, new Set(['1']))).toEqual({ recoveredAlerts: {} });
+    expect(getAlerts(alerts, new Set(['1']))).toEqual({ recoveredAlerts: {} });
   });
 });

@@ -75,7 +75,7 @@ export interface PublicAlertFactory<
   ActionGroupIds extends string = never
 > {
   create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
-  done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext>;
+  done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>;
 }
 export interface RuleExecutorServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,

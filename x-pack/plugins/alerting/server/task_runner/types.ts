@@ -58,13 +58,15 @@ export interface TrackAlertDurationsParams<
 }
 
 export interface GenerateNewAndRecoveredAlertEventsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 > {
   alertingEventLogger: AlertingEventLogger;
-  newAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
-  activeAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
+  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   ruleLabel: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
 }
@@ -76,7 +78,7 @@ export interface ScheduleActionsForRecoveredAlertsParams<
 > {
   logger: Logger;
   recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
-  recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
+  recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
   executionHandler: ExecutionHandler<RecoveryActionGroupId>;
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
@@ -84,12 +86,14 @@ export interface ScheduleActionsForRecoveredAlertsParams<
 }
 
 export interface LogActiveAndRecoveredAlertsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 > {
   logger: Logger;
-  activeAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   ruleLabel: string;
   canSetRecoveryContext: boolean;
 }

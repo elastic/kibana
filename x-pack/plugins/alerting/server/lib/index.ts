@@ -25,7 +25,7 @@ export {
   ruleExecutionStatusToRaw,
   ruleExecutionStatusFromRaw,
 } from './rule_execution_status';
-export { getCategorizedAlerts } from './get_categorized_alerts';
+export { getAlerts } from './get_alerts';
 export { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
 export { isRuleSnoozed, getRuleSnoozeEndTime } from './is_rule_snoozed';
 export { convertRuleIdsToKueryNode } from './convert_rule_ids_to_kuery_node';

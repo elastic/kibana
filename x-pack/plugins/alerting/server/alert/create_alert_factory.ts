@@ -8,13 +8,14 @@
 import { Logger } from '@kbn/core/server';
 import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert } from './alert';
-import { getCategorizedAlerts } from '../lib';
+import { getAlerts } from '../lib';
 
 export interface AlertFactoryDoneUtils<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string
 > {
-  getRecoveredAlerts: () => Array<Alert<InstanceState, InstanceContext>>;
+  getRecoveredAlerts: () => Array<Alert<InstanceState, InstanceContext, ActionGroupIds>>;
 }
 
 export interface CreateAlertFactoryOpts<
@@ -28,7 +29,8 @@ export interface CreateAlertFactoryOpts<
 
 export function createAlertFactory<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string
 >({
   alerts,
   logger,
@@ -36,20 +38,9 @@ export function createAlertFactory<
 }: CreateAlertFactoryOpts<InstanceState, InstanceContext>) {
   // Keep track of which alerts we started with so we can determine which have recovered
   const initialAlertIds = new Set(Object.keys(alerts));
-
-  let newAlerts: Record<string, Alert<InstanceState, InstanceContext>> | null = null;
-  let activeAlerts: Record<string, Alert<InstanceState, InstanceContext>> | null = null;
-  let recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext>> | null = null;
-
-  function populateAlerts() {
-    const categorizedAlerts = getCategorizedAlerts(alerts, initialAlertIds);
-    newAlerts = categorizedAlerts.newAlerts;
-    activeAlerts = categorizedAlerts.activeAlerts;
-    recoveredAlerts = categorizedAlerts.recoveredAlerts;
-  }
   let isDone = false;
   return {
-    create: (id: string): Alert<InstanceState, InstanceContext> => {
+    create: (id: string): Alert<InstanceState, InstanceContext, ActionGroupIds> => {
       if (isDone) {
         throw new Error(`Can't create new alerts after calling done() in AlertsFactory.`);
       }
@@ -59,17 +50,7 @@ export function createAlertFactory<
 
       return alerts[id];
     },
-    getAlerts: () => {
-      if (!newAlerts || !activeAlerts || !recoveredAlerts) {
-        populateAlerts();
-      }
-      return {
-        newAlerts: newAlerts!,
-        activeAlerts: activeAlerts!,
-        recoveredAlerts: recoveredAlerts!,
-      };
-    },
-    done: (): AlertFactoryDoneUtils<InstanceState, InstanceContext> => {
+    done: (): AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds> => {
       isDone = true;
       return {
         getRecoveredAlerts: () => {
@@ -80,12 +61,14 @@ export function createAlertFactory<
             return [];
           }
 
-          if (!recoveredAlerts) {
-            populateAlerts();
-          }
-
-          return Object.keys(recoveredAlerts ?? {}).map(
-            (alertId: string) => recoveredAlerts![alertId]
+          const { recoveredAlerts } = getAlerts<
+            InstanceState,
+            InstanceContext,
+            ActionGroupIds,
+            ActionGroupIds
+          >(alerts, initialAlertIds);
+          return Object.keys(recoveredAlerts ?? []).map(
+            (alertId: string) => recoveredAlerts[alertId]
           );
         },
       };
