@@ -60,6 +60,7 @@ export class FleetUnauthorizedError extends IngestManagerError {}
 export class OutputUnauthorizedError extends IngestManagerError {}
 export class OutputInvalidError extends IngestManagerError {}
 export class OutputLicenceError extends IngestManagerError {}
+export class DownloadSourceError extends IngestManagerError {}
 
 export class ArtifactsClientError extends IngestManagerError {}
 export class ArtifactsClientAccessDeniedError extends IngestManagerError {
