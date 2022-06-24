@@ -133,6 +133,12 @@ export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Pro
               onBlur(ConfigKey.SOURCE_INLINE);
             }}
             value={config.script}
+            placeholder={i18n.translate(
+              'xpack.synthetics.addEditMonitor.scriptEditor.placeholder',
+              {
+                defaultMessage: '// Paste your Playwright script here...',
+              }
+            )}
           />
         </EuiFormRow>
       ),
