@@ -55,7 +55,7 @@ export class DataViewsServicePublic extends DataViewsService {
       '/api/data_views/default',
       {
         query: {
-          provideDefault: undefined,
+          provideDefault: true,
         },
       }
     );

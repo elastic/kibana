@@ -65,7 +65,7 @@ const manageDefaultIndexPatternRoutesFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.get<{ provideDefault: string }, {}, {}>(
+    router.get<{ provideDefault?: string }, {}, {}>(
       {
         path,
         validate: {},
