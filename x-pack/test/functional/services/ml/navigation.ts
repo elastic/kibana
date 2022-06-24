@@ -208,7 +208,7 @@ export function MachineLearningNavigationProvider({
 
     async navigateToStackManagementJobsListPageAnomalyDetectionTab() {
       // clicks the `Analytics` tab and loads the analytics list page
-      await testSubjects.click('mlStackManagementJobsListAnomalyDetectionTab');
+      await testSubjects.click('mlStackManagementAnomalyDetectionTab');
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the empty prompt for analytics jobs list got loaded
         await testSubjects.existOrFail('mlSpacesManagementTable-anomaly-detector loaded');
@@ -217,7 +217,7 @@ export function MachineLearningNavigationProvider({
 
     async navigateToStackManagementJobsListPageAnalyticsTab() {
       // clicks the `Analytics` tab and loads the analytics list page
-      await testSubjects.click('mlStackManagementJobsListAnalyticsTab');
+      await testSubjects.click('mlStackManagementAnalyticsTab');
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the empty prompt for analytics jobs list got loaded
         await testSubjects.existOrFail('mlSpacesManagementTable-data-frame-analytics loaded');

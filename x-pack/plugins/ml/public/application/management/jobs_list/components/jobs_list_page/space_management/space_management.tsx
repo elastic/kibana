@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState, FC, useCallback } from 'react';
+import React, { useEffect, useState, FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -136,45 +136,46 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
     );
   }, [jobs, columns, isLoading, filters]);
 
-  const tabs = [
-    {
-      'data-test-subj': 'mlStackManagementJobsListAnomalyDetectionTab',
-      id: 'anomaly-detector',
-      name: i18n.translate('xpack.ml.management.jobsList.anomalyDetectionTab', {
-        defaultMessage: 'Anomaly detection',
-      }),
-      content: getTable(),
-    },
-    {
-      'data-test-subj': 'mlStackManagementJobsListAnalyticsTab',
-      id: 'data-frame-analytics',
-      name: i18n.translate('xpack.ml.management.jobsList.analyticsTab', {
-        defaultMessage: 'Analytics',
-      }),
-      content: getTable(),
-    },
-    {
-      'data-test-subj': 'mlStackManagementJobsListAnalyticsTab',
-      id: 'trained-model',
-      name: i18n.translate('xpack.ml.management.jobsList.trainedModelsTab', {
-        defaultMessage: 'Trained models',
-      }),
-      content: getTable(),
-    },
-  ];
+  const tabs = useMemo(
+    () => [
+      {
+        'data-test-subj': 'mlStackManagementAnomalyDetectionTab',
+        id: 'anomaly-detector',
+        name: i18n.translate('xpack.ml.management.list.anomalyDetectionTab', {
+          defaultMessage: 'Anomaly detection',
+        }),
+        content: getTable(),
+      },
+      {
+        'data-test-subj': 'mlStackManagementAnalyticsTab',
+        id: 'data-frame-analytics',
+        name: i18n.translate('xpack.ml.management.list.analyticsTab', {
+          defaultMessage: 'Analytics',
+        }),
+        content: getTable(),
+      },
+      {
+        'data-test-subj': 'mlStackManagementTrainedModelsTab',
+        id: 'trained-model',
+        name: i18n.translate('xpack.ml.management.list.trainedModelsTab', {
+          defaultMessage: 'Trained models',
+        }),
+        content: getTable(),
+      },
+    ],
+    [getTable]
+  );
 
   return (
-    <>
-      <EuiTabbedContent
-        data-test-subj="mlSpacesManagementTable"
-        onTabClick={({ id }: { id: string }) => {
-          setCurrentTabId(id as JobType);
-        }}
-        size="s"
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-      />
-    </>
+    <EuiTabbedContent
+      data-test-subj="mlSpacesManagementTable"
+      onTabClick={({ id }: { id: string }) => {
+        setCurrentTabId(id as JobType);
+      }}
+      size="s"
+      tabs={tabs}
+      initialSelectedTab={tabs[0]}
+    />
   );
 };
 
@@ -187,6 +188,6 @@ export const RefreshButton: FC<{ onRefreshClick: () => void; isRefreshing: boole
     onClick={onRefreshClick}
     isLoading={isRefreshing}
   >
-    <FormattedMessage id="xpack.ml.jobsList.refreshButtonLabel" defaultMessage="Refresh" />
+    <FormattedMessage id="xpack.ml.management.list.refreshButtonLabel" defaultMessage="Refresh" />
   </EuiButtonEmpty>
 );
