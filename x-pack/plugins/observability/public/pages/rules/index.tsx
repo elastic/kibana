@@ -28,7 +28,7 @@ function RulesPage() {
 
   const { status, setStatus } = useRulesPageStateContainer();
   const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
-
+  const [refresh, setRefresh] = useState(new Date());
   const { ruleTypes } = useLoadRuleTypes({
     filteredSolutions: OBSERVABILITY_SOLUTIONS,
   });
@@ -57,13 +57,17 @@ function RulesPage() {
         onClose: () => {
           setCreateRuleFlyoutVisibility(false);
         },
+        onSave: () => {
+          setRefresh(new Date());
+          return Promise.resolve();
+        },
         filteredSolutions: OBSERVABILITY_SOLUTIONS,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  const getRulesTable = () => {
+  const getRulesTable = useMemo(() => {
     return (
       <>
         <EuiFlexGroup direction="column" gutterSize="s">
@@ -76,12 +80,13 @@ function RulesPage() {
               showCreateRuleButton: false,
               statusFilter: status,
               setStatusFilter: setStatus,
+              refresh,
             })}
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
     );
-  };
+  }, [observabilityRuleTypeRegistry, setStatus, status, triggersActionsUi, refresh]);
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -115,7 +120,7 @@ function RulesPage() {
         ],
       }}
     >
-      {getRulesTable()}
+      {getRulesTable}
       {createRuleFlyoutVisibility && CreateRuleFlyout}
     </ObservabilityPageTemplate>
   );

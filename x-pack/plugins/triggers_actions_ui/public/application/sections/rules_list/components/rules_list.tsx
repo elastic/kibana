@@ -100,6 +100,7 @@ export interface RulesListProps {
   showCreateRuleButton?: boolean;
   statusFilter?: RuleStatus[] | undefined;
   setStatusFilter?: (status: RuleStatus[]) => any;
+  refresh: Date;
 }
 
 interface RuleTypeState {
@@ -128,6 +129,7 @@ export const RulesList = ({
   showCreateRuleButton = true,
   statusFilter,
   setStatusFilter,
+  refresh,
 }: RulesListProps) => {
   const history = useHistory();
   const {
@@ -273,6 +275,10 @@ export const RulesList = ({
     hasAnyAuthorizedRuleType,
     ruleTypesState,
   ]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData, refresh]);
 
   useEffect(() => {
     loadData();
