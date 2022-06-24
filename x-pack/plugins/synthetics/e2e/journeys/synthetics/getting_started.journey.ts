@@ -49,6 +49,6 @@ journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: a
 
   step('it navigates to details page after saving', async () => {
     await page.click('text=Dismiss');
-    expect(await page.isVisible('text=My first monitor')).toBeTruthy();
+    expect(await page.isVisible('text=My first monitor', { timeout: 60 * 1000 })).toBeTruthy();
   });
 });
