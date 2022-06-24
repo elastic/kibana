@@ -9,7 +9,7 @@
 import { EuiCallOut } from '@elastic/eui';
 import testSubjSelector from '@kbn/test-subj-selector';
 import React from 'react';
-import * as Rx from 'rxjs';
+import { of, ReplaySubject } from 'rxjs';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { FatalErrorsScreen } from './fatal_errors_screen';
@@ -27,7 +27,7 @@ describe('FatalErrorsScreen', () => {
   const defaultProps = {
     buildNumber: 123,
     kibanaVersion: 'bar',
-    errorInfo$: Rx.of(errorInfoFoo, errorInfoBar),
+    errorInfo$: of(errorInfoFoo, errorInfoBar),
   };
 
   const noop = () => {
@@ -67,7 +67,7 @@ describe('FatalErrorsScreen', () => {
     });
 
     it('rerenders when errorInfo$ emits more errors', () => {
-      const errorInfo$ = new Rx.ReplaySubject<typeof errorInfoFoo>();
+      const errorInfo$ = new ReplaySubject<typeof errorInfoFoo>();
 
       const el = shallowWithIntl(<FatalErrorsScreen {...defaultProps} errorInfo$={errorInfo$} />);
 
