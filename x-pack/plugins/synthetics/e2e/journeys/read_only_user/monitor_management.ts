@@ -23,7 +23,7 @@ journey(
     });
 
     step('login to Kibana', async () => {
-      await uptime.loginToKibana('viewer', 'changeme');
+      await uptime.loginToKibana('obs_read_user', 'changeme');
     });
 
     step('Adding monitor is disabled', async () => {
