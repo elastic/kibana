@@ -74,9 +74,9 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
       <>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
-            <EuiText color="subdued" size="s" data-test-subj="selectedRuleFormTypeDescription">
-              {activeFormTypeItem?.description}
-            </EuiText>
+            <EuiTitle size="xs" data-test-subj="selectedRuleFormTypeTitle">
+              <h5>{activeFormTypeItem?.label}</h5>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
@@ -93,6 +93,9 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiText color="subdued" size="s" data-test-subj="selectedRuleFormTypeDescription">
+          {activeFormTypeItem?.description}
+        </EuiText>
         <EuiSpacer />
       </>
     );
