@@ -9,11 +9,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
 
-import {
-  getActions,
-  getActionResponses,
-  getTimeSortedActionListLogEntries,
-} from '../../utils/action_list_helpers';
+import { getActions, getActionResponses } from '../../utils/action_list_helpers';
 
 import {
   formatEndpointActionResults,
@@ -157,10 +153,6 @@ const getActionDetailsList = async ({
 
   // compute action details list for each action id
   const actionDetails: ActionDetails[] = normalizedActionRequests.map((action) => {
-    // pick only those actions that match the current action id
-    const matchedActions = formattedActionRequests.filter(
-      (categorizedAction) => categorizedAction.item.data.EndpointActions.action_id === action.id
-    );
     // pick only those responses that match the current action id
     const matchedResponses = categorizedResponses.filter((categorizedResponse) =>
       categorizedResponse.type === 'response'
@@ -179,13 +171,14 @@ const getActionDetailsList = async ({
       agents: action.agents,
       command: action.command,
       startedAt: action.createdAt,
-      // sort the list by @timestamp in desc order, newest first
-      logEntries: getTimeSortedActionListLogEntries([...matchedActions, ...matchedResponses]),
       isCompleted,
       completedAt,
       wasSuccessful,
       errors,
       isExpired: !isCompleted && action.expiration < new Date().toISOString(),
+      createdBy: action.createdBy,
+      comment: action.comment,
+      parameters: action.parameters,
     };
   });
 
