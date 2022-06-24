@@ -8,6 +8,10 @@
 import React, { useMemo, memo } from 'react';
 import { EuiForm } from '@elastic/eui';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import {
+  UPDATE_FILTER_REFERENCES_ACTION,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/unified-search-plugin/public';
 import { Visualization } from '../../../types';
 import { IndexPatternPrivateState } from '../../../indexpattern_datasource/types';
 import { LayerPanel } from './layer_panel';
@@ -182,16 +186,16 @@ export function LayerPanels(
               );
             }
           }}
-          onRemoveLayer={async () => {
+          onRemoveLayer={() => {
             const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
             const datasourceId = datasourcePublicAPI?.datasourceId;
             const layerDatasourceState = datasourceStates?.[datasourceId]
               ?.state as IndexPatternPrivateState;
 
-            const trigger = props.uiActions.getTrigger('UPDATE_FILTER_REFERENCES_TRIGGER');
-            const action = props.uiActions.getAction('UPDATE_FILTER_REFERENCES_ACTION');
+            const trigger = props.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+            const action = props.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
-            action.execute({
+            action?.execute({
               trigger,
               toDataView: null,
               fromDataView: layerDatasourceState.layers[layerId].indexPatternId,

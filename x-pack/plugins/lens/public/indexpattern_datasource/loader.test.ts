@@ -28,14 +28,7 @@ import {
 import { createMockedRestrictedIndexPattern, createMockedIndexPattern } from './mocks';
 import { documentField } from './document_field';
 import { DateHistogramIndexPatternColumn } from './operations';
-import { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  updateFilterReferencesTrigger,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public/triggers';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { createUpdateFilterReferencesAction } from '@kbn/unified-search-plugin/public/actions/update_filter_references_action';
-import { coreMock } from '@kbn/core/public/mocks';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {
@@ -896,16 +889,10 @@ describe('loader', () => {
   });
 
   describe('changeLayerIndexPattern', () => {
-    let action: Action<object>;
-    let filterManager: FilterManager;
-    let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
+    let uiActions: UiActionsStart;
+
     beforeEach(() => {
-      filterManager = new FilterManager(coreMock.createStart().uiSettings);
-      uiActions = uiActionsPluginMock.createPlugin();
-      action = createUpdateFilterReferencesAction(filterManager);
-      uiActions.setup.registerAction(action);
-      uiActions.setup.registerTrigger(updateFilterReferencesTrigger);
-      uiActions.setup.addTriggerAction(UPDATE_FILTER_REFERENCES_TRIGGER, action);
+      uiActions = uiActionsPluginMock.createStartContract();
     });
 
     it('loads the index pattern and then changes the specified layer', async () => {
@@ -953,7 +940,7 @@ describe('loader', () => {
         indexPatternsService: mockIndexPatternsService(),
         onError: jest.fn(),
         storage,
-        uiActions: uiActions.setup as UiActionsStart,
+        uiActions,
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
@@ -1028,7 +1015,7 @@ describe('loader', () => {
         },
         onError,
         storage,
-        uiActions: uiActions.setup as UiActionsStart,
+        uiActions,
       });
 
       expect(setState).not.toHaveBeenCalled();

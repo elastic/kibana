@@ -11,6 +11,10 @@ import type { HttpSetup, SavedObjectReference } from '@kbn/core/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import { isNestedField } from '@kbn/data-views-plugin/common';
 import {
+  UPDATE_FILTER_REFERENCES_ACTION,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/unified-search-plugin/public';
+import {
   ActionExecutionContext,
   UiActionsStart,
   VisualizeFieldContext,
@@ -357,10 +361,10 @@ export async function changeLayerIndexPattern({
   const fromDataView = state.layers[layerId].indexPatternId;
   const toDataView = indexPatternId;
 
-  const trigger = uiActions.getTrigger('UPDATE_FILTER_REFERENCES_TRIGGER');
-  const action = uiActions.getAction('UPDATE_FILTER_REFERENCES_ACTION');
+  const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+  const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
-  action.execute({
+  action?.execute({
     trigger,
     fromDataView,
     toDataView,

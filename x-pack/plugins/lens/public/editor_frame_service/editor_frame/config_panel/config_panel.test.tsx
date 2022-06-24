@@ -18,19 +18,13 @@ import { Visualization } from '../../../types';
 import { LayerPanels } from './config_panel';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { generateId } from '../../../id_generator';
 import { mountWithProvider } from '../../../mocks';
 import { LayerType, layerTypes } from '../../../../common';
-import { addLayer } from '../../../state_management';
 import { ReactWrapper } from 'enzyme';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { createUpdateFilterReferencesAction } from '@kbn/unified-search-plugin/public/actions/update_filter_references_action';
-import {
-  updateFilterReferencesTrigger,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public/triggers';
+import { addLayer } from '../../../state_management';
 
 jest.mock('../../../id_generator');
 
@@ -54,17 +48,13 @@ afterEach(() => {
 
 describe('ConfigPanel', () => {
   const frame = createMockFramePublicAPI();
-  let action: Action<object>;
-  let filterManager: FilterManager;
-  let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
+
+  let uiActions: UiActionsStart;
+
   beforeEach(() => {
-    filterManager = new FilterManager(coreMock.createStart().uiSettings);
-    uiActions = uiActionsPluginMock.createPlugin();
-    action = createUpdateFilterReferencesAction(filterManager);
-    uiActions.setup.registerAction(action);
-    uiActions.setup.registerTrigger(updateFilterReferencesTrigger);
-    uiActions.setup.addTriggerAction(UPDATE_FILTER_REFERENCES_TRIGGER, action);
+    uiActions = uiActionsPluginMock.createStartContract();
   });
+
   function prepareAndMountComponent(
     props: ReturnType<typeof getDefaultProps>,
     customStoreProps?: Partial<MountStoreProps>
@@ -77,16 +67,7 @@ describe('ConfigPanel', () => {
           datasourceStates: {
             testDatasource: {
               isLoading: false,
-              state: {
-                layers: {
-                  first: {
-                    indexPatternId: 'indexPattern',
-                  },
-                  second: {
-                    indexPatternId: 'indexPattern',
-                  },
-                },
-              },
+              state: 'state',
             },
           },
           activeDatasourceId: 'testDatasource',
@@ -123,7 +104,7 @@ describe('ConfigPanel', () => {
       datasourceStates: {
         testDatasource: {
           isLoading: false,
-          state: { layers: ['first', 'second'] },
+          state: 'state',
         },
       },
       visualizationState: 'state',
@@ -135,7 +116,7 @@ describe('ConfigPanel', () => {
       core: coreMock.createStart(),
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
-      uiActions: uiActions.setup as UiActionsStart,
+      uiActions,
     };
   }
 
