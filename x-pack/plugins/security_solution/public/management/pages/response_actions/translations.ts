@@ -121,4 +121,11 @@ export const UX_MESSAGES = Object.freeze({
       defaultMessage: 'Expand rows',
     }
   ),
+  recordsLabel: (totalItemCount: number) =>
+    i18n.translate('xpack.securitySolution.responseActionsList.list.recordRangeLabel', {
+      defaultMessage: '{records, plural, one {response action} other {response actions}}',
+      values: {
+        records: totalItemCount,
+      },
+    }),
 });

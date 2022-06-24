@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiScreenReaderOnly,
+  EuiI18nNumber,
   EuiText,
   EuiCodeBlock,
   EuiToolTip,
@@ -490,6 +491,45 @@ export const ResponseActionsList = memo<
     [reFetchEndpointActionList, setQueryParams]
   );
 
+  // compute record ranges
+  const pagedResultsCount = useMemo(() => {
+    const page = queryParams.page ?? 1;
+    const perPage = queryParams?.pageSize ?? 10;
+
+    const totalPages = Math.ceil(totalItemCount / perPage);
+    const remainder = totalItemCount % 10;
+    const lastPageCount = (page - 1) * perPage + remainder;
+
+    const fromCount = perPage * page - perPage + 1;
+    const toCount =
+      page === totalPages || totalPages === 1 ? lastPageCount : fromCount + perPage - 1;
+    return { fromCount, toCount };
+  }, [queryParams.page, queryParams.pageSize, totalItemCount]);
+
+  // crete range label to display
+  const recordRangeLabel = useMemo(
+    () => (
+      <EuiText color="subdued" size="xs" data-test-subj={getTestId('endpointListTableTotal')}>
+        <FormattedMessage
+          id="xpack.securitySolution.responseActionsList.list.recordRange"
+          defaultMessage="Showing {range} of {total} {recordsLabel}"
+          values={{
+            range: (
+              <strong>
+                <EuiI18nNumber value={pagedResultsCount.fromCount} />
+                {'-'}
+                <EuiI18nNumber value={pagedResultsCount.toCount} />
+              </strong>
+            ),
+            total: <EuiI18nNumber value={totalItemCount} />,
+            recordsLabel: <strong>{UX_MESSAGES.recordsLabel(totalItemCount)}</strong>,
+          }}
+        />
+      </EuiText>
+    ),
+    [getTestId, pagedResultsCount.fromCount, pagedResultsCount.toCount, totalItemCount]
+  );
+
   return (
     <AdministrationListPage
       data-test-subj="responseActionsPage"
@@ -530,13 +570,7 @@ export const ResponseActionsList = memo<
         </ManagementEmptyStateWrapper>
       ) : (
         <>
-          <EuiText color="subdued" size="xs" data-test-subj={getTestId('endpointListTableTotal')}>
-            <FormattedMessage
-              id="xpack.securitySolution.responseActionsList.list.totalCount"
-              defaultMessage="Showing {totalItemCount, plural, one {# response action} other {# response actions}}"
-              values={{ totalItemCount }}
-            />
-          </EuiText>
+          {recordRangeLabel}
           <EuiHorizontalRule margin="xs" />
           <EuiBasicTable
             data-test-subj={getTestId('table-view')}
