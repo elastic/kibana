@@ -14,7 +14,8 @@ expect.addSnapshotSerializer({
 });
 
 import { mockRender } from './fatal_errors_service.test.mocks';
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 
 import { FatalErrorsService } from './fatal_errors_service';
 
@@ -22,6 +23,7 @@ function setupService() {
   const rootDomElement = document.createElement('div');
 
   const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+  const theme = themeServiceMock.createSetupContract();
 
   const stopCoreSystem = jest.fn();
 
@@ -37,7 +39,7 @@ function setupService() {
     rootDomElement,
     injectedMetadata,
     stopCoreSystem,
-    fatalErrors: fatalErrorsService.setup({ injectedMetadata, i18n }),
+    fatalErrors: fatalErrorsService.setup({ injectedMetadata, i18n, theme }),
   };
 }
 

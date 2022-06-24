@@ -78,6 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.save();
       await fieldEditor.confirmSave();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitForDocTableLoadingComplete();
 
       await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
         const fieldNames = await PageObjects.discover.getAllFieldNames();

@@ -9,7 +9,9 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import { run, CiStatsReporter, createFlagError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/utils';
 import { Project } from 'ts-morph';
 
@@ -64,11 +66,16 @@ export function runBuildApiDocsCli() {
         // Delete all files except the README that warns about the auto-generated nature of
         // the folder.
         const files = Fs.readdirSync(outputFolder);
-        files.forEach((file) => {
-          if (file.indexOf('README.md') < 0) {
-            Fs.rmSync(Path.resolve(outputFolder, file));
-          }
-        });
+        await Promise.all(
+          files
+            .filter((file) => file.indexOf('README.md') < 0)
+            .map(
+              (file) =>
+                new Promise<void>((resolve, reject) =>
+                  Fs.rm(Path.resolve(outputFolder, file), (err) => (err ? reject(err) : resolve()))
+                )
+            )
+        );
       }
       const collectReferences = flags.references as boolean;
 
@@ -283,10 +290,12 @@ function getTsProject(repoPath: string) {
   const xpackTsConfig = `${repoPath}/tsconfig.json`;
   const project = new Project({
     tsConfigFilePath: xpackTsConfig,
+    // We'll use the files added below instead.
+    skipAddingFilesFromTsConfig: true,
   });
-  project.addSourceFilesAtPaths(`${repoPath}/x-pack/plugins/**/*{.d.ts,.ts}`);
-  project.addSourceFilesAtPaths(`${repoPath}/src/plugins/**/*{.d.ts,.ts}`);
-  project.addSourceFilesAtPaths(`${repoPath}/packages/**/*{.d.ts,.ts}`);
+  project.addSourceFilesAtPaths([`${repoPath}/x-pack/plugins/**/*.ts`, '!**/*.d.ts']);
+  project.addSourceFilesAtPaths([`${repoPath}/src/plugins/**/*.ts`, '!**/*.d.ts']);
+  project.addSourceFilesAtPaths([`${repoPath}/packages/**/*.ts`, '!**/*.d.ts']);
   project.resolveSourceFileDependencies();
   return project;
 }

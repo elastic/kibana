@@ -8,9 +8,8 @@
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import { maxSuggestions } from '../../../../../observability/common';
+import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { setupRequest } from '../../../lib/helpers/setup_request';
-import { getServiceNames } from './get_service_names';
 import { createOrUpdateConfiguration } from './create_or_update_configuration';
 import { searchConfigurations } from './search_configurations';
 import { findExactConfiguration } from './find_exact_configuration';
@@ -39,7 +38,9 @@ const agentConfigurationRoute = createApmServerRoute({
     >;
   }> => {
     const setup = await setupRequest(resources);
+
     const configurations = await listConfigurations({ setup });
+
     return { configurations };
   },
 });
@@ -72,7 +73,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
       throw Boom.notFound();
     }
 
-    return config._source;
+    return config;
   },
 });
 
@@ -103,11 +104,11 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
     }
 
     logger.info(
-      `Deleting config ${service.name}/${service.environment} (${config._id})`
+      `Deleting config ${service.name}/${service.environment} (${config.id})`
     );
 
     const deleteConfigurationResult = await deleteConfiguration({
-      configurationId: config._id,
+      configurationId: config.id,
       setup,
     });
 
@@ -163,7 +164,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
     );
 
     await createOrUpdateConfiguration({
-      configurationId: config?._id,
+      configurationId: config?.id,
       configurationIntake: body,
       setup,
     });
@@ -256,33 +257,6 @@ const agentConfigurationSearchRoute = createApmServerRoute({
  * Utility endpoints (not documented as part of the public API)
  */
 
-// get list of services
-const listAgentConfigurationServicesRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration/services',
-  options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<{ serviceNames: string[] }> => {
-    const setup = await setupRequest(resources);
-    const { start, end } = resources.params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
-      config: setup.config,
-      kuery: '',
-      start,
-      end,
-    });
-    const size = await resources.context.core.uiSettings.client.get<number>(
-      maxSuggestions
-    );
-    const serviceNames = await getServiceNames({
-      searchAggregatedTransactions,
-      setup,
-      size,
-    });
-
-    return { serviceNames };
-  },
-});
-
 // get environments for service
 const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/settings/agent-configuration/environments',
@@ -297,6 +271,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { context, params } = resources;
+    const coreContext = await context.core;
 
     const { serviceName, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -306,7 +281,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
       start,
       end,
     });
-    const size = await context.core.uiSettings.client.get<number>(
+    const size = await coreContext.uiSettings.client.get<number>(
       maxSuggestions
     );
     const environments = await getEnvironments({
@@ -342,7 +317,6 @@ export const agentConfigurationRouteRepository = {
   ...deleteAgentConfigurationRoute,
   ...createOrUpdateAgentConfigurationRoute,
   ...agentConfigurationSearchRoute,
-  ...listAgentConfigurationServicesRoute,
   ...listAgentConfigurationEnvironmentsRoute,
   ...agentConfigurationAgentNameRoute,
 };

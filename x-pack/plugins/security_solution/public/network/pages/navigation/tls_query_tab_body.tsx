@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { useNetworkTls } from '../../../network/containers/tls';
+import { useNetworkTls, ID } from '../../containers/tls';
 import { TlsTable } from '../../components/tls_table';
-import { TlsQueryTabBodyProps } from './types';
+import { FTQueryTabBodyProps } from './types';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const TlsTableManage = manageQuery(TlsTable);
 
-const TlsQueryTabBodyComponent: React.FC<TlsQueryTabBodyProps> = ({
+const TlsQueryTabBodyComponent: React.FC<FTQueryTabBodyProps> = ({
   endDate,
   filterQuery,
   flowTarget,
@@ -25,14 +26,21 @@ const TlsQueryTabBodyComponent: React.FC<TlsQueryTabBodyProps> = ({
   startDate,
   type,
 }) => {
+  const queryId = `${ID}-${type}`;
+  const { toggleStatus } = useQueryToggle(queryId);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [loading, { id, inspect, isInspected, tls, totalCount, pageInfo, loadPage, refetch }] =
     useNetworkTls({
       endDate,
       filterQuery,
       flowTarget,
+      id: queryId,
       indexNames,
       ip,
-      skip,
+      skip: querySkip,
       startDate,
       type,
     });
@@ -49,6 +57,7 @@ const TlsQueryTabBodyComponent: React.FC<TlsQueryTabBodyProps> = ({
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
       totalCount={totalCount}
       type={type}
     />

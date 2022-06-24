@@ -22,7 +22,7 @@ import {
   OS_MAC,
   OS_WINDOWS,
   CONDITION_AND,
-  CONDITION_OPERATOR_TYPE_WILDCARD,
+  CONDITION_OPERATOR_TYPE_WILDCARD_MATCHES,
   CONDITION_OPERATOR_TYPE_NESTED,
   CONDITION_OPERATOR_TYPE_MATCH,
   CONDITION_OPERATOR_TYPE_MATCH_ANY,
@@ -32,7 +32,7 @@ import {
   CONDITION_OPERATOR_TYPE_NOT_MATCH,
 } from './translations';
 import { ArtifactInfo, ArtifactInfoEntry } from '../types';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 const OS_LABELS = Object.freeze({
   linux: OS_LINUX,
@@ -45,7 +45,7 @@ const OPERATOR_TYPE_LABELS_INCLUDED = Object.freeze({
   [ListOperatorTypeEnum.NESTED]: CONDITION_OPERATOR_TYPE_NESTED,
   [ListOperatorTypeEnum.MATCH_ANY]: CONDITION_OPERATOR_TYPE_MATCH_ANY,
   [ListOperatorTypeEnum.MATCH]: CONDITION_OPERATOR_TYPE_MATCH,
-  [ListOperatorTypeEnum.WILDCARD]: CONDITION_OPERATOR_TYPE_WILDCARD,
+  [ListOperatorTypeEnum.WILDCARD]: CONDITION_OPERATOR_TYPE_WILDCARD_MATCHES,
   [ListOperatorTypeEnum.EXISTS]: CONDITION_OPERATOR_TYPE_EXISTS,
   [ListOperatorTypeEnum.LIST]: CONDITION_OPERATOR_TYPE_LIST,
 });
@@ -56,7 +56,7 @@ const OPERATOR_TYPE_LABELS_EXCLUDED = Object.freeze({
 });
 
 const EuiFlexGroupNested = styled(EuiFlexGroup)`
-  margin-left: ${({ theme }) => theme.eui.spacerSizes.xl};
+  margin-left: ${({ theme }) => theme.eui.euiSizeXL};
 `;
 
 const EuiFlexItemNested = styled(EuiFlexItem)`

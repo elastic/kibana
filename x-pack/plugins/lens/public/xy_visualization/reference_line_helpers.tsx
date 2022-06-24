@@ -7,21 +7,24 @@
 
 import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { YAxisMode, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import { layerTypes } from '../../common';
-import type { XYLayerConfig, YConfig } from '../../common/expressions';
-import { Datatable } from '../../../../../src/plugins/expressions/public';
-import type { AccessorConfig, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../types';
+import type { DatasourceLayers, FramePublicAPI, Visualization } from '../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
-import type { XYState } from './types';
+import type { XYState, XYDataLayerConfig, XYReferenceLineLayerConfig } from './types';
 import {
   checkScaleOperation,
   getAxisName,
-  isDataLayer,
+  getDataLayers,
+  getReferenceLayers,
   isNumericMetric,
+  isReferenceLayer,
 } from './visualization_helpers';
 import { generateId } from '../id_generator';
 import { LensIconChartBarReferenceLine } from '../assets/chart_bar_reference_line';
+import { defaultReferenceLineColor } from './color_assignment';
 
 export interface ReferenceLineBase {
   label: 'x' | 'yRight' | 'yLeft';
@@ -32,19 +35,18 @@ export interface ReferenceLineBase {
  * * what groups are current defined in data layers
  * * what existing reference line are currently defined in reference layers
  */
-export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig[] }>(
+export function getGroupsToShow<T extends ReferenceLineBase & { config?: ExtendedYConfig[] }>(
   referenceLayers: T[],
   state: XYState | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   tables: Record<string, Datatable> | undefined
 ): Array<T & { valid: boolean }> {
   if (!state) {
     return [];
   }
-  const dataLayers = state.layers.filter(({ layerType = layerTypes.DATA }) =>
-    isDataLayer({ layerType })
-  );
+  const dataLayers = getDataLayers(state.layers);
   const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers, tables);
+
   return referenceLayers
     .filter(({ label, config }: T) => groupsAvailable[label] || config?.length)
     .map((layer) => ({ ...layer, valid: groupsAvailable[layer.label] }));
@@ -56,15 +58,13 @@ export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig
 export function getGroupsRelatedToData<T extends ReferenceLineBase>(
   referenceLayers: T[],
   state: XYState | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   tables: Record<string, Datatable> | undefined
 ): T[] {
   if (!state) {
     return [];
   }
-  const dataLayers = state.layers.filter(({ layerType = layerTypes.DATA }) =>
-    isDataLayer({ layerType })
-  );
+  const dataLayers = getDataLayers(state.layers);
   const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers, tables);
   return referenceLayers.filter(({ label }: T) => groupsAvailable[label]);
 }
@@ -72,8 +72,8 @@ export function getGroupsRelatedToData<T extends ReferenceLineBase>(
  * Returns a dictionary with the groups filled in all the data layers
  */
 export function getGroupsAvailableInData(
-  dataLayers: XYState['layers'],
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  dataLayers: XYDataLayerConfig[],
+  datasourceLayers: DatasourceLayers,
   tables: Record<string, Datatable> | undefined
 ) {
   const hasNumberHistogram = dataLayers.some(
@@ -88,10 +88,10 @@ export function getGroupsAvailableInData(
 }
 
 export function getStaticValue(
-  dataLayers: XYState['layers'],
+  dataLayers: XYDataLayerConfig[],
   groupId: 'x' | 'yLeft' | 'yRight',
   { activeData }: Pick<FramePublicAPI, 'activeData'>,
-  layerHasNumberHistogram: (layer: XYLayerConfig) => boolean
+  layerHasNumberHistogram: (layer: XYDataLayerConfig) => boolean
 ) {
   const fallbackValue = 100;
   if (!activeData) {
@@ -105,6 +105,7 @@ export function getStaticValue(
     untouchedDataLayers,
     accessors,
   } = getAccessorCriteriaForGroup(groupId, dataLayers, activeData);
+
   if (
     groupId === 'x' &&
     filteredLayers.length &&
@@ -112,6 +113,7 @@ export function getStaticValue(
   ) {
     return fallbackValue;
   }
+
   const computedValue = computeStaticValueForGroup(
     filteredLayers,
     accessors,
@@ -119,12 +121,13 @@ export function getStaticValue(
     groupId !== 'x', // histogram axis should compute the min based on the current data
     groupId !== 'x'
   );
+
   return computedValue ?? fallbackValue;
 }
 
 function getAccessorCriteriaForGroup(
   groupId: 'x' | 'yLeft' | 'yRight',
-  dataLayers: XYState['layers'],
+  dataLayers: XYDataLayerConfig[],
   activeData: FramePublicAPI['activeData']
 ) {
   switch (groupId) {
@@ -158,7 +161,7 @@ function getAccessorCriteriaForGroup(
 }
 
 export function computeOverallDataDomain(
-  dataLayers: Array<Pick<XYLayerConfig, 'seriesType' | 'accessors' | 'xAccessor' | 'layerId'>>,
+  dataLayers: XYDataLayerConfig[],
   accessorIds: string[],
   activeData: NonNullable<FramePublicAPI['activeData']>,
   allowStacking: boolean = true
@@ -166,6 +169,7 @@ export function computeOverallDataDomain(
   const accessorMap = new Set(accessorIds);
   let min: number | undefined;
   let max: number | undefined;
+
   const [stacked, unstacked] = partition(
     dataLayers,
     ({ seriesType }) => isStackedChart(seriesType) && allowStacking
@@ -222,7 +226,7 @@ export function computeOverallDataDomain(
 }
 
 function computeStaticValueForGroup(
-  dataLayers: Array<Pick<XYLayerConfig, 'seriesType' | 'accessors' | 'xAccessor' | 'layerId'>>,
+  dataLayers: XYDataLayerConfig[],
   accessorIds: string[],
   activeData: NonNullable<FramePublicAPI['activeData']>,
   minZeroOrNegativeBase: boolean = true,
@@ -269,14 +273,17 @@ export const getReferenceSupportedLayer = (
       label: 'x' as const,
     },
   ];
+
   const referenceLineGroups = getGroupsRelatedToData(
     referenceLineGroupIds,
     state,
     frame?.datasourceLayers || {},
     frame?.activeData
   );
-  const dataLayers =
-    state?.layers.filter(({ layerType = layerTypes.DATA }) => isDataLayer({ layerType })) || [];
+
+  const layers = state?.layers || [];
+  const dataLayers = getDataLayers(layers);
+
   const filledDataLayers = dataLayers.filter(
     ({ accessors, xAccessor }) => accessors.length || xAccessor
   );
@@ -291,7 +298,7 @@ export const getReferenceSupportedLayer = (
         groupId: id,
         columnId: generateId(),
         dataType: 'number',
-        label: getAxisName(label, { isHorizontal: isHorizontalChart(state?.layers || []) }),
+        label: getAxisName(label, { isHorizontal: isHorizontalChart(layers) }),
         staticValue: getStaticValue(
           dataLayers,
           label,
@@ -319,6 +326,7 @@ export const getReferenceSupportedLayer = (
     initialDimensions,
   };
 };
+
 export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
   prevState,
   layerId,
@@ -327,7 +335,7 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
   previousColumn,
 }) => {
   const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
-  if (!foundLayer) {
+  if (!foundLayer || !isReferenceLayer(foundLayer)) {
     return prevState;
   }
   const newLayer = { ...foundLayer };
@@ -335,9 +343,19 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
   newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
   const hasYConfig = newLayer.yConfig?.some(({ forAccessor }) => forAccessor === columnId);
   const previousYConfig = previousColumn
-    ? newLayer.yConfig?.find(({ forAccessor }) => forAccessor === previousColumn)
+    ? getReferenceLayers(prevState.layers)
+        .map(({ yConfig }) => yConfig)
+        .flat()
+        ?.find((yConfig) => yConfig?.forAccessor === previousColumn)
     : false;
   if (!hasYConfig) {
+    const axisMode: YAxisMode =
+      groupId === 'xReferenceLine'
+        ? 'bottom'
+        : groupId === 'yReferenceLineRight'
+        ? 'right'
+        : 'left';
+
     newLayer.yConfig = [
       ...(newLayer.yConfig || []),
       {
@@ -345,19 +363,28 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
         ...previousYConfig,
         // but keep the new group & id config
         forAccessor: columnId,
-        axisMode:
-          groupId === 'xReferenceLine'
-            ? 'bottom'
-            : groupId === 'yReferenceLineRight'
-            ? 'right'
-            : 'left',
+        axisMode,
       },
     ];
   }
+
   return {
     ...prevState,
     layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
   };
+};
+
+export const getSingleColorConfig = (id: string, color = defaultReferenceLineColor) => ({
+  columnId: id,
+  triggerIcon: 'color' as const,
+  color,
+});
+
+export const getReferenceLineAccessorColorConfig = (layer: XYReferenceLineLayerConfig) => {
+  return layer.accessors.map((accessor) => {
+    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
+    return getSingleColorConfig(accessor, currentYConfig?.color);
+  });
 };
 
 export const getReferenceConfiguration = ({
@@ -365,13 +392,11 @@ export const getReferenceConfiguration = ({
   frame,
   layer,
   sortedAccessors,
-  mappedAccessors,
 }: {
   state: XYState;
-  frame: FramePublicAPI;
-  layer: XYLayerConfig;
+  frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
+  layer: XYReferenceLineLayerConfig;
   sortedAccessors: string[];
-  mappedAccessors: AccessorConfig[];
 }) => {
   const idToIndex = sortedAccessors.reduce<Record<string, number>>((memo, id, index) => {
     memo[id] = index;
@@ -385,6 +410,7 @@ export const getReferenceConfiguration = ({
       return axisMode;
     }
   );
+
   const groupsToShow = getGroupsToShow(
     [
       // When a reference layer panel is added, a static reference line should automatically be included by default
@@ -410,7 +436,7 @@ export const getReferenceConfiguration = ({
     ],
     state,
     frame.datasourceLayers,
-    frame?.activeData
+    frame.activeData
   );
   const isHorizontal = isHorizontalChart(state.layers);
   return {
@@ -420,11 +446,7 @@ export const getReferenceConfiguration = ({
     groups: groupsToShow.map(({ config = [], id, label, dataTestSubj, valid }) => ({
       groupId: id,
       groupLabel: getAxisName(label, { isHorizontal }),
-      accessors: config.map(({ forAccessor, color }) => ({
-        columnId: forAccessor,
-        color: color || mappedAccessors.find(({ columnId }) => columnId === forAccessor)?.color,
-        triggerIcon: 'color' as const,
-      })),
+      accessors: config.map(({ forAccessor, color }) => getSingleColorConfig(forAccessor, color)),
       filterOperations: isNumericMetric,
       supportsMoreColumns: true,
       required: false,

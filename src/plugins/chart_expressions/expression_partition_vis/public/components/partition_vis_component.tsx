@@ -18,16 +18,23 @@ import {
   TooltipProps,
   TooltipType,
   SeriesIdentifier,
+  PartitionElementEvent,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import { LegendToggle, ChartsPluginSetup, PaletteRegistry } from '../../../../charts/public';
-import type { PersistedState } from '../../../../visualizations/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { LegendToggle, ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+} from '@kbn/visualizations-plugin/common/constants';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import {
   Datatable,
   DatatableColumn,
   IInterpreterRenderHandlers,
-} from '../../../../expressions/public';
-import type { FieldFormat } from '../../../../field_formats/common';
+} from '@kbn/expressions-plugin/public';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
   PartitionVisParams,
@@ -46,7 +53,6 @@ import {
   getPartitionTheme,
   getColumns,
   getSplitDimensionAccessor,
-  getColumnByAccessor,
   isLegendFlat,
   shouldShowLegend,
   generateFormatters,
@@ -127,8 +133,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   useEffect(() => {
     const legendShow = showLegendDefault();
     setShowLegend(legendShow);
-    props.uiState?.set('vis.legendOpen', legendShow);
-  }, [showLegendDefault, props.uiState]);
+  }, [showLegendDefault]);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -224,9 +229,21 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const { splitColumn, splitRow } = visParams.dimensions;
 
   const splitChartFormatter = splitColumn
-    ? getFormatter(splitColumn[0], formatters, defaultFormatter)
+    ? getFormatter(
+        typeof splitColumn[0] === 'string'
+          ? getColumnByAccessor(splitColumn[0], visData.columns)!
+          : splitColumn[0],
+        formatters,
+        defaultFormatter
+      )
     : splitRow
-    ? getFormatter(splitRow[0], formatters, defaultFormatter)
+    ? getFormatter(
+        typeof splitRow[0] === 'string'
+          ? getColumnByAccessor(splitRow[0], visData.columns)!
+          : splitRow[0],
+        formatters,
+        defaultFormatter
+      )
     : undefined;
 
   const percentFormatter = services.fieldFormats.deserialize({
@@ -298,9 +315,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     : undefined;
 
   const splitChartDimension = splitColumn
-    ? getColumnByAccessor(splitColumn[0].accessor, visData.columns)
+    ? getColumnByAccessor(splitColumn[0], visData.columns)
     : splitRow
-    ? getColumnByAccessor(splitRow[0].accessor, visData.columns)
+    ? getColumnByAccessor(splitRow[0], visData.columns)
     : undefined;
 
   /**
@@ -375,14 +392,17 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   showLegend ?? shouldShowLegend(visType, visParams.legendDisplay, bucketColumns)
                 }
                 legendPosition={legendPosition}
+                legendSize={LegendSizeToPixels[visParams.legendSize ?? DEFAULT_LEGEND_SIZE]}
                 legendMaxDepth={visParams.nestedLegend ? undefined : 1}
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}
                 tooltip={tooltip}
                 showLegendExtra={visParams.showValuesInLegend}
-                onElementClick={(args) => {
+                onElementClick={([elementEvent]) => {
+                  // this cast is safe because we are rendering a partition chart
+                  const [layerValues] = elementEvent as PartitionElementEvent;
                   handleSliceClick(
-                    args[0][0] as LayerValue[],
+                    layerValues,
                     bucketColumns,
                     visData,
                     splitChartDimension,
@@ -394,6 +414,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   getLegendActionEventData(visData),
                   handleLegendAction,
                   visParams,
+                  visData,
                   services.data.actions,
                   services.fieldFormats
                 )}

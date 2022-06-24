@@ -5,32 +5,37 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { CoreId } from '../server';
-import { PackageInfo, EnvironmentMode } from '../server/types';
+
+import type { CoreContext } from '@kbn/core-base-browser-internal';
+import {
+  InjectedMetadataService,
+  InjectedMetadataParams,
+  InternalInjectedMetadataSetup,
+  InternalInjectedMetadataStart,
+} from '@kbn/core-injected-metadata-browser-internal';
+import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
+import { ThemeService } from '@kbn/core-theme-browser-internal';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
+import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
-import { I18nService } from './i18n';
-import {
-  InjectedMetadataParams,
-  InjectedMetadataService,
-  InjectedMetadataSetup,
-  InjectedMetadataStart,
-} from './injected_metadata';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
-import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { IntegrationsService } from './integrations';
 import { DeprecationsService } from './deprecations';
-import { ThemeService } from './theme';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+import { ExecutionContextService } from './execution_context';
+import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
+import { KBN_LOAD_MARKS } from './utils';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -39,24 +44,15 @@ interface Params {
 }
 
 /** @internal */
-export interface CoreContext {
-  coreId: CoreId;
-  env: {
-    mode: Readonly<EnvironmentMode>;
-    packageInfo: Readonly<PackageInfo>;
-  };
-}
-
-/** @internal */
 export interface InternalCoreSetup extends Omit<CoreSetup, 'application' | 'getStartServices'> {
   application: InternalApplicationSetup;
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
 }
 
 /** @internal */
 export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
   application: InternalApplicationStart;
-  injectedMetadata: InjectedMetadataStart;
+  injectedMetadata: InternalInjectedMetadataStart;
 }
 
 /**
@@ -68,6 +64,7 @@ export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
  * @internal
  */
 export class CoreSystem {
+  private readonly analytics: AnalyticsService;
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
   private readonly notifications: NotificationsService;
@@ -87,6 +84,7 @@ export class CoreSystem {
   private readonly theme: ThemeService;
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
+  private readonly executionContext: ExecutionContextService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -100,6 +98,8 @@ export class CoreSystem {
       injectedMetadata,
     });
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
+
+    this.analytics = new AnalyticsService(this.coreContext);
 
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
@@ -121,9 +121,34 @@ export class CoreSystem {
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
+    this.executionContext = new ExecutionContextService();
 
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
+
+    performance.mark(KBN_LOAD_MARKS, {
+      detail: 'core_created',
+    });
+  }
+
+  private getLoadMarksInfo() {
+    if (!performance) return [];
+    const reportData: Record<string, number> = {};
+    const marks = performance.getEntriesByName(KBN_LOAD_MARKS);
+    for (const mark of marks) {
+      reportData[(mark as PerformanceMark).detail] = mark.startTime;
+    }
+
+    return reportData;
+  }
+
+  private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart) {
+    analytics.reportEvent('Loaded Kibana', {
+      kibana_version: this.coreContext.env.packageInfo.version,
+      ...fetchOptionalMemoryInfo(),
+      ...this.getLoadMarksInfo(),
+    });
+    performance.clearMarks(KBN_LOAD_MARKS);
   }
 
   public async setup() {
@@ -131,21 +156,33 @@ export class CoreSystem {
       // Setup FatalErrorsService and it's dependencies first so that we're
       // able to render any errors.
       const injectedMetadata = this.injectedMetadata.setup();
+      const theme = this.theme.setup({ injectedMetadata });
+
       this.fatalErrorsSetup = this.fatalErrors.setup({
         injectedMetadata,
+        theme,
         i18n: this.i18n.getContext(),
       });
       await this.integrations.setup();
       this.docLinks.setup();
-      const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+
+      const analytics = this.analytics.setup({ injectedMetadata });
+      this.registerLoadedKibanaEventType(analytics);
+
+      const executionContext = this.executionContext.setup({ analytics });
+      const http = this.http.setup({
+        injectedMetadata,
+        fatalErrors: this.fatalErrorsSetup,
+        executionContext,
+      });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
-      const theme = this.theme.setup({ injectedMetadata });
 
       const application = this.application.setup({ http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
+        analytics,
         application,
         fatalErrors: this.fatalErrorsSetup,
         http,
@@ -153,10 +190,15 @@ export class CoreSystem {
         notifications,
         theme,
         uiSettings,
+        executionContext,
       };
 
       // Services that do not expose contracts at setup
       await this.plugins.setup(core);
+
+      performance.mark(KBN_LOAD_MARKS, {
+        detail: 'setup_done',
+      });
 
       return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
@@ -172,6 +214,7 @@ export class CoreSystem {
 
   public async start() {
     try {
+      const analytics = this.analytics.start();
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
@@ -201,6 +244,11 @@ export class CoreSystem {
         targetDomElement: notificationsTargetDomElement,
       });
       const application = await this.application.start({ http, theme, overlays });
+
+      const executionContext = this.executionContext.start({
+        curApp$: application.currentAppId$,
+      });
+
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -213,9 +261,11 @@ export class CoreSystem {
       this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
 
       const core: InternalCoreStart = {
+        analytics,
         application,
         chrome,
         docLinks,
+        executionContext,
         http,
         theme,
         savedObjects,
@@ -246,8 +296,24 @@ export class CoreSystem {
         targetDomElement: coreUiTargetDomElement,
       });
 
+      performance.mark(KBN_LOAD_MARKS, {
+        detail: 'start_done',
+      });
+
+      // Wait for the first app navigation to report Kibana Loaded
+      const appSub = application.currentAppId$.subscribe((appId) => {
+        if (appId === undefined) return;
+
+        performance.mark(KBN_LOAD_MARKS, {
+          detail: 'first_app_nav',
+        });
+        this.reportKibanaLoadedEvent(analytics);
+        appSub.unsubscribe();
+      });
+
       return {
         application,
+        executionContext,
       };
     } catch (error) {
       if (this.fatalErrorsSetup) {
@@ -272,6 +338,58 @@ export class CoreSystem {
     this.application.stop();
     this.deprecations.stop();
     this.theme.stop();
+    this.analytics.stop();
     this.rootDomElement.textContent = '';
+  }
+
+  private registerLoadedKibanaEventType(analytics: AnalyticsServiceSetup) {
+    analytics.registerEventType({
+      eventType: 'Loaded Kibana',
+      schema: {
+        kibana_version: {
+          type: 'keyword',
+          _meta: { description: 'The version of Kibana' },
+        },
+        memory_js_heap_size_limit: {
+          type: 'long',
+          _meta: { description: 'The maximum size of the heap', optional: true },
+        },
+        memory_js_heap_size_total: {
+          type: 'long',
+          _meta: { description: 'The total size of the heap', optional: true },
+        },
+        memory_js_heap_size_used: {
+          type: 'long',
+          _meta: { description: 'The used size of the heap', optional: true },
+        },
+        load_started: {
+          type: 'long',
+          _meta: { description: 'When the render template starts loading assets', optional: true },
+        },
+        bootstrap_started: {
+          type: 'long',
+          _meta: { description: 'When kbnBootstrap callback is called', optional: true },
+        },
+        core_created: {
+          type: 'long',
+          _meta: { description: 'When core system is created', optional: true },
+        },
+        setup_done: {
+          type: 'long',
+          _meta: { description: 'When core system setup is complete', optional: true },
+        },
+        start_done: {
+          type: 'long',
+          _meta: { description: 'When core system start is complete', optional: true },
+        },
+        first_app_nav: {
+          type: 'long',
+          _meta: {
+            description: 'When the application emits the first app navigation',
+            optional: true,
+          },
+        },
+      },
+    });
   }
 }

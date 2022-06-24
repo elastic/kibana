@@ -13,7 +13,7 @@ import {
   getPrepackagedRulesStatusRequest,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig } from '../__mocks__';
-import { SecurityPluginSetup } from '../../../../../../security/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { checkTimelinesStatus } from '../../../timeline/utils/check_timelines_status';
 import {
   mockCheckTimelinesStatusBeforeInstallResult,
@@ -51,10 +51,7 @@ jest.mock('../../../timeline/utils/check_timelines_status', () => {
   };
 });
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('get_prepackaged_rule_status_route - %s', (_, isRuleRegistryEnabled) => {
+describe('get_prepackaged_rule_status_route', () => {
   const mockGetCurrentUser = {
     user: {
       username: 'mockUser',
@@ -85,17 +82,15 @@ describe.each([
       prepackagedTimelines: [],
     });
 
-    getPrepackagedRulesStatusRoute(
-      server.router,
-      createMockConfig(),
-      securitySetup,
-      isRuleRegistryEnabled
-    );
+    getPrepackagedRulesStatusRoute(server.router, createMockConfig(), securitySetup);
   });
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
+      const response = await server.inject(
+        getPrepackagedRulesStatusRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
@@ -103,7 +98,10 @@ describe.each([
       clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
+      const response = await server.inject(
+        getPrepackagedRulesStatusRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -116,7 +114,7 @@ describe.each([
     test('0 rules installed, 0 custom rules, 1 rules not installed, and 1 rule not updated', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const request = getPrepackagedRulesStatusRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -131,9 +129,9 @@ describe.each([
     });
 
     test('1 rule installed, 1 custom rules, 0 rules not installed, and 1 rule to not updated', async () => {
-      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const request = getPrepackagedRulesStatusRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -153,7 +151,7 @@ describe.each([
         mockCheckTimelinesStatusBeforeInstallResult
       );
       const request = getPrepackagedRulesStatusRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -173,7 +171,7 @@ describe.each([
         mockCheckTimelinesStatusAfterInstallResult
       );
       const request = getPrepackagedRulesStatusRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({

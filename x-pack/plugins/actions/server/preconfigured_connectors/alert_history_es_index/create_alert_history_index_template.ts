@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from 'src/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALERT_HISTORY_PREFIX } from '../../../common';
 import mappings from './mappings.json';
 
@@ -53,7 +53,6 @@ async function createIndexTemplate({
     await client.indices.putIndexTemplate({
       name: templateName,
       body: template,
-      // @ts-expect-error doesn't exist in @elastic/elasticsearch
       create: true,
     });
   } catch (err) {

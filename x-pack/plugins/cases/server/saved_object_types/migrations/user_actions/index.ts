@@ -7,16 +7,14 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
 import { addOwnerToSO, SanitizedCaseOwner } from '..';
-import {
-  SavedObjectUnsanitizedDoc,
-  SavedObjectSanitizedDoc,
-} from '../../../../../../../src/core/server';
 
 import { ConnectorTypes } from '../../../../common/api';
 import { removeRuleInformation } from './alerts';
 import { userActionsConnectorIdMigration } from './connector_id';
 import { payloadMigration } from './payload';
+import { addSeverityToCreateUserAction } from './severity';
 import { UserActions } from './types';
 
 export const userActionsMigrations = {
@@ -66,4 +64,5 @@ export const userActionsMigrations = {
   '7.16.0': userActionsConnectorIdMigration,
   '8.0.0': removeRuleInformation,
   '8.1.0': payloadMigration,
+  '8.3.0': addSeverityToCreateUserAction,
 };

@@ -6,19 +6,21 @@
  * Side Public License, v 1.
  */
 
+import type { CoreService } from '@kbn/core-base-browser-internal';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import { HttpSetup, HttpStart } from './types';
-import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
 import { BasePath } from './base_path';
 import { AnonymousPathsService } from './anonymous_paths_service';
 import { LoadingCountService } from './loading_count_service';
 import { Fetch } from './fetch';
-import { CoreService } from '../../types';
 import { ExternalUrlService } from './external_url_service';
+import { ExecutionContextSetup } from '../execution_context';
 
 interface HttpDeps {
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
   fatalErrors: FatalErrorsSetup;
+  executionContext: ExecutionContextSetup;
 }
 
 /** @internal */
@@ -27,14 +29,15 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
   private readonly loadingCount = new LoadingCountService();
   private service?: HttpSetup;
 
-  public setup({ injectedMetadata, fatalErrors }: HttpDeps): HttpSetup {
+  public setup({ injectedMetadata, fatalErrors, executionContext }: HttpDeps): HttpSetup {
     const kibanaVersion = injectedMetadata.getKibanaVersion();
     const basePath = new BasePath(
       injectedMetadata.getBasePath(),
       injectedMetadata.getServerBasePath(),
       injectedMetadata.getPublicBaseUrl()
     );
-    const fetchService = new Fetch({ basePath, kibanaVersion });
+
+    const fetchService = new Fetch({ basePath, kibanaVersion, executionContext });
     const loadingCount = this.loadingCount.setup({ fatalErrors });
     loadingCount.addLoadingCountSource(fetchService.getRequestCount$());
 

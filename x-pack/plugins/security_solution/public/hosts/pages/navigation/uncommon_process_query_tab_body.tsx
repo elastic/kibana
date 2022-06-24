@@ -6,17 +6,17 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React from 'react';
-import { useUncommonProcesses } from '../../containers/uncommon_processes';
+import React, { useEffect, useState } from 'react';
+import { useUncommonProcesses, ID } from '../../containers/uncommon_processes';
 import { HostsComponentsQueryProps } from './types';
 import { UncommonProcessTable } from '../../components/uncommon_process_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 
 export const UncommonProcessQueryTabBody = ({
   deleteQuery,
-  docValueFields,
   endDate,
   filterQuery,
   indexNames,
@@ -25,15 +25,19 @@ export const UncommonProcessQueryTabBody = ({
   startDate,
   type,
 }: HostsComponentsQueryProps) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [
     loading,
     { uncommonProcesses, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
   ] = useUncommonProcesses({
-    docValueFields,
     endDate,
     filterQuery,
     indexNames,
-    skip,
+    skip: querySkip,
     startDate,
     type,
   });
@@ -49,6 +53,7 @@ export const UncommonProcessQueryTabBody = ({
       loadPage={loadPage}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={type}

@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { VisualizeEditorLayersContext } from '../../../../visualizations/public';
+import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type { Metric } from '../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
+import { getSeriesAgg } from './get_series_agg';
 import {
   getPercentilesSeries,
+  getPercentileRankSeries,
   getFormulaSeries,
   getParentPipelineSeries,
   getSiblingPipelineSeriesFormula,
@@ -21,7 +23,11 @@ import {
   getTimeScale,
 } from './metrics_helpers';
 
-export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metrics'] | null => {
+export const getSeries = (
+  initialMetrics: Metric[],
+  totalSeriesNum: number
+): { metrics: VisualizeEditorLayersContext['metrics']; seriesAgg?: string } | null => {
+  const { metrics, seriesAgg } = getSeriesAgg(initialMetrics);
   const metricIdx = metrics.length - 1;
   const aggregation = metrics[metricIdx].type;
   const fieldName = metrics[metricIdx].field;
@@ -42,6 +48,19 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       }
       break;
     }
+    case 'percentile_rank': {
+      const values = metrics[metricIdx].values;
+      const colors = metrics[metricIdx].colors;
+      if (values?.length) {
+        const percentileRanksSeries = getPercentileRankSeries(
+          values,
+          colors,
+          fieldName
+        ) as VisualizeEditorLayersContext['metrics'];
+        metricsArray = [...metricsArray, ...percentileRanksSeries];
+      }
+      break;
+    }
     case 'math': {
       // find the metric idx that has math expression
       const mathMetricIdx = metrics.findIndex((metric) => metric.type === 'math');
@@ -50,12 +69,10 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       const variables = metrics[mathMetricIdx].variables;
       const layerMetricsArray = metrics;
       if (!finalScript || !variables) return null;
+      const metricsWithoutMath = layerMetricsArray.filter((metric) => metric.type !== 'math');
 
       // create the script
-      for (let layerMetricIdx = 0; layerMetricIdx < layerMetricsArray.length; layerMetricIdx++) {
-        if (layerMetricsArray[layerMetricIdx].type === 'math') {
-          continue;
-        }
+      for (let layerMetricIdx = 0; layerMetricIdx < metricsWithoutMath.length; layerMetricIdx++) {
         const currentMetric = metrics[layerMetricIdx];
         // We can only support top_hit with size 1
         if (
@@ -68,7 +85,7 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
         }
 
         // should treat percentiles differently
-        if (currentMetric.type === 'percentile') {
+        if (currentMetric.type === 'percentile' || currentMetric.type === 'percentile_rank') {
           variables.forEach((variable) => {
             const [_, meta] = variable?.field?.split('[') ?? [];
             const metaValue = Number(meta?.replace(']', ''));
@@ -99,10 +116,10 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       break;
     }
     case 'cumulative_sum': {
-      //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
+      //  percentile and percentile_rank value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
       const [fieldId, meta] = metrics[metricIdx]?.field?.split('[') ?? [];
       const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
-      if (!subFunctionMetric) {
+      if (!subFunctionMetric || subFunctionMetric.type === 'static') {
         return null;
       }
       const pipelineAgg = getPipelineAgg(subFunctionMetric);
@@ -184,6 +201,24 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       ];
       break;
     }
+    case 'static': {
+      // Lens support reference lines only when at least one layer data exists
+      if (totalSeriesNum === 1) {
+        return null;
+      }
+      const staticValue = metrics[metricIdx].value;
+      metricsArray = [
+        {
+          agg: aggregationMap.name,
+          isFullReference: aggregationMap.isFullReference,
+          fieldName: 'document',
+          params: {
+            ...(staticValue && { value: staticValue }),
+          },
+        },
+      ];
+      break;
+    }
     default: {
       const timeScale = getTimeScale(metrics[metricIdx]);
       metricsArray = [
@@ -198,5 +233,5 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       ];
     }
   }
-  return metricsArray;
+  return { metrics: metricsArray, seriesAgg };
 };

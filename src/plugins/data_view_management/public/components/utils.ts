@@ -11,7 +11,7 @@ import {
   DataView,
   DataViewField,
   DataViewListItem,
-} from 'src/plugins/data_views/public';
+} from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 const defaultIndexPatternListName = i18n.translate(
@@ -32,25 +32,25 @@ const isRollup = (indexPatternType: string = '') => {
   return indexPatternType === 'rollup';
 };
 
-export async function getIndexPatterns(
-  defaultIndex: string,
-  indexPatternsService: DataViewsContract
-) {
-  const existingIndexPatterns = await indexPatternsService.getIdsWithTitle(true);
+export async function getIndexPatterns(defaultIndex: string, dataViewsService: DataViewsContract) {
+  const existingIndexPatterns = await dataViewsService.getIdsWithTitle(true);
   const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
-    const { id, title } = idxPattern;
+    const { id, title, namespaces, name } = idxPattern;
     const isDefault = defaultIndex === id;
     const tags = getTags(idxPattern, isDefault);
 
     return {
       id,
+      namespaces,
       title,
+      name,
       default: isDefault,
       tags,
       // the prepending of 0 at the default pattern takes care of prioritization
       // so the sorting will but the default index on top
       // or on bottom of a the table
       sort: `${isDefault ? '0' : '1'}${title}`,
+      getName: () => (name ? name : title),
     };
   });
 

@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { omit, partition } from 'lodash';
+import { omit, partition, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectsClientContract,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import uuid from 'uuid';
 import { safeLoad } from 'js-yaml';
 
-import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import type { AuthenticatedUser } from '../../../security/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+
 import {
   packageToPackagePolicy,
   packageToPackagePolicyInputs,
@@ -28,6 +29,9 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
+  SO_SEARCH_LIMIT,
+  FLEET_APM_PACKAGE,
+  outputType,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
@@ -50,17 +54,21 @@ import {
   PackagePolicyIneligibleForUpgradeError,
   PackagePolicyValidationError,
 } from '../errors';
-import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../types';
+import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   PackagePolicy,
   PackagePolicySOAttributes,
   DryRunPackagePolicy,
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyPostCreateCallback,
 } from '../types';
 import type { ExternalCallback } from '..';
 
+import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
+import { getDataOutputForAgentPolicy } from './agent_policies';
 import { outputService } from './output';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
 import { getAssetsData } from './epm/packages/assets';
@@ -102,6 +110,15 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       overwrite?: boolean;
     }
   ): Promise<PackagePolicy> {
+    const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
+
+    if (agentPolicy && packagePolicy.package?.name === FLEET_APM_PACKAGE) {
+      const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy);
+      if (dataOutput.type === outputType.Logstash) {
+        throw new IngestManagerError('You cannot add APM to a policy using a logstash output');
+      }
+    }
+
     // trailing whitespace causes issues creating API keys
     packagePolicy.name = packagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
@@ -153,7 +170,6 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
       if (isPackageLimited(pkgInfo)) {
-        const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
         if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
           throw new IngestManagerError(
             `Unable to create package policy. Package '${pkgInfo.name}' already exists on this agent policy.`
@@ -357,7 +373,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser },
+    options?: { user?: AuthenticatedUser; force?: boolean },
     currentVersion?: string
   ): Promise<PackagePolicy> {
     const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
@@ -369,9 +385,10 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     }
     // Check that the name does not exist already but exclude the current package policy
     const existingPoliciesWithName = await this.list(soClient, {
-      perPage: 1,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
     });
+
     const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
     if (filtered.length > 0) {
@@ -384,7 +401,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       assignStreamIdToInput(oldPackagePolicy.id, input)
     );
 
-    inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs);
+    inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
     let elasticsearch: PackagePolicy['elasticsearch'];
     if (packagePolicy.package?.name) {
       const pkgInfo = await getPackageInfo({
@@ -675,7 +692,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         pkgVersion
       ));
 
-      return this.calculateDiff(packagePolicy, packageInfo);
+      return this.calculateDiff(soClient, packagePolicy, packageInfo);
     } catch (error) {
       return {
         hasErrors: true,
@@ -685,6 +702,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   }
 
   private async calculateDiff(
+    soClient: SavedObjectsClientContract,
     packagePolicy: PackagePolicy,
     packageInfo: PackageInfo
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
@@ -720,6 +738,9 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     return {
       name: updatedPackagePolicy.name,
       diff: [packagePolicy, updatedPackagePolicy],
+      // TODO: Currently only returns the agent inputs for current package policy, not the upgraded one
+      // as we only show this version in the UI
+      agent_diff: [storedPackagePolicyToAgentInputs(packagePolicy, packageInfo)],
       hasErrors,
     };
   }
@@ -851,16 +872,24 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     externalCallbackType: A,
     packagePolicy: A extends 'postPackagePolicyDelete'
       ? DeletePackagePoliciesResponse
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
       : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
+  ): Promise<
+    A extends 'postPackagePolicyDelete'
+      ? void
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
+      : NewPackagePolicy
+  >;
   public async runExternalCallbacks(
     externalCallbackType: ExternalCallback[0],
-    packagePolicy: NewPackagePolicy | DeletePackagePoliciesResponse,
+    packagePolicy: PackagePolicy | NewPackagePolicy | DeletePackagePoliciesResponse,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<NewPackagePolicy | void> {
+  ): Promise<PackagePolicy | NewPackagePolicy | void> {
     if (externalCallbackType === 'postPackagePolicyDelete') {
       return await this.runDeleteExternalCallbacks(packagePolicy as DeletePackagePoliciesResponse);
     } else {
@@ -870,7 +899,21 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         if (externalCallbacks && externalCallbacks.size > 0) {
           let updatedNewData = newData;
           for (const callback of externalCallbacks) {
-            const result = await callback(updatedNewData, context, request);
+            let result;
+            if (externalCallbackType === 'packagePolicyPostCreate') {
+              result = await (callback as PostPackagePolicyPostCreateCallback)(
+                updatedNewData as PackagePolicy,
+                context,
+                request
+              );
+              updatedNewData = PackagePolicySchema.validate(result);
+            } else {
+              result = await (callback as PostPackagePolicyCreateCallback)(
+                updatedNewData as NewPackagePolicy,
+                context,
+                request
+              );
+            }
             if (externalCallbackType === 'packagePolicyCreate') {
               updatedNewData = NewPackagePolicySchema.validate(result);
             } else if (externalCallbackType === 'packagePolicyUpdate') {
@@ -1117,21 +1160,25 @@ async function _compilePackageStream(
   return { ...stream };
 }
 
-function enforceFrozenInputs(oldInputs: PackagePolicyInput[], newInputs: PackagePolicyInput[]) {
+function enforceFrozenInputs(
+  oldInputs: PackagePolicyInput[],
+  newInputs: PackagePolicyInput[],
+  force = false
+) {
   const resultInputs = [...newInputs];
 
   for (const input of resultInputs) {
     const oldInput = oldInputs.find((i) => i.type === input.type);
     if (oldInput?.keep_enabled) input.enabled = oldInput.enabled;
     if (input.vars && oldInput?.vars) {
-      input.vars = _enforceFrozenVars(oldInput.vars, input.vars);
+      input.vars = _enforceFrozenVars(oldInput.vars, input.vars, force);
     }
     if (input.streams && oldInput?.streams) {
       for (const stream of input.streams) {
         const oldStream = oldInput.streams.find((s) => s.id === stream.id);
         if (oldStream?.keep_enabled) stream.enabled = oldStream.enabled;
         if (stream.vars && oldStream?.vars) {
-          stream.vars = _enforceFrozenVars(oldStream.vars, stream.vars);
+          stream.vars = _enforceFrozenVars(oldStream.vars, stream.vars, force);
         }
       }
     }
@@ -1142,12 +1189,21 @@ function enforceFrozenInputs(oldInputs: PackagePolicyInput[], newInputs: Package
 
 function _enforceFrozenVars(
   oldVars: Record<string, PackagePolicyConfigRecordEntry>,
-  newVars: Record<string, PackagePolicyConfigRecordEntry>
+  newVars: Record<string, PackagePolicyConfigRecordEntry>,
+  force = false
 ) {
   const resultVars: Record<string, PackagePolicyConfigRecordEntry> = {};
   for (const [key, val] of Object.entries(newVars)) {
     if (oldVars[key]?.frozen) {
-      resultVars[key] = oldVars[key];
+      if (force) {
+        resultVars[key] = val;
+      } else if (!isEqual(oldVars[key].value, val.value) || oldVars[key].type !== val.type) {
+        throw new PackagePolicyValidationError(
+          `${key} is a frozen variable and cannot be modified`
+        );
+      } else {
+        resultVars[key] = oldVars[key];
+      }
     } else {
       resultVars[key] = val;
     }
@@ -1204,7 +1260,7 @@ export interface PackagePolicyServiceInterface {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser },
+    options?: { user?: AuthenticatedUser; force?: boolean },
     currentVersion?: string
   ): Promise<PackagePolicy>;
 
@@ -1245,10 +1301,18 @@ export interface PackagePolicyServiceInterface {
     externalCallbackType: A,
     packagePolicy: A extends 'postPackagePolicyDelete'
       ? DeletePackagePoliciesResponse
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
       : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
+  ): Promise<
+    A extends 'postPackagePolicyDelete'
+      ? void
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
+      : NewPackagePolicy
+  >;
 
   runDeleteExternalCallbacks(deletedPackagePolicies: DeletePackagePoliciesResponse): Promise<void>;
 

@@ -22,10 +22,39 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.over
   defaultMessage: 'Overview',
 });
 
-export const HIGHLIGHTES_FIELDS = i18n.translate(
+export const HIGHLIGHTED_FIELDS = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.highlightedFields',
   {
     defaultMessage: 'Highlighted fields',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_FIELD = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.field',
+  {
+    defaultMessage: 'Field',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_VALUE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.value',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalence',
+  {
+    defaultMessage: 'Alert prevalence',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalenceTooltip',
+  {
+    defaultMessage:
+      'The total count of alerts with the same value within the currently selected timerange. This value is not affected by additional filters.',
   }
 );
 
@@ -88,6 +117,13 @@ export const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alert
   defaultMessage: 'Rule type',
 });
 
+export const SOURCE_EVENT_ID = i18n.translate(
+  'xpack.securitySolution.detections.alerts.sourceEventId',
+  {
+    defaultMessage: 'Source event id',
+  }
+);
+
 export const MULTI_FIELD_TOOLTIP = i18n.translate(
   'xpack.securitySolution.eventDetails.multiFieldTooltipContent',
   {
@@ -119,4 +155,8 @@ export const VIEW_RULE_DETAIL_PAGE = i18n.translate(
 
 export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
   defaultMessage: 'View all fields in table',
+});
+
+export const SESSION_ID = i18n.translate('xpack.securitySolution.eventDetails.sessionId', {
+  defaultMessage: 'Session ID',
 });

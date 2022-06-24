@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-const {
-  ToolingLog,
-  ToolingLogCollectingWriter,
-  ES_NOPASSWORD_P12_PATH,
-  createAnyInstanceSerializer,
-  createStripAnsiSerializer,
-} = require('@kbn/dev-utils');
+const { ES_NOPASSWORD_P12_PATH } = require('@kbn/dev-utils');
+const { ToolingLog, ToolingLogCollectingWriter } = require('@kbn/tooling-log');
+const { createAnyInstanceSerializer, createStripAnsiSerializer } = require('@kbn/jest-serializers');
 const execa = require('execa');
 const { Cluster } = require('../cluster');
 const { installSource, installSnapshot, installArchive } = require('../install');
@@ -308,7 +304,41 @@ describe('#start(installPath)', () => {
         Array [
           Array [
             "action.destructive_requires_name=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
             "ingest.geoip.downloader.enabled=false",
+            "search.check_ccs_compatibility=true",
+          ],
+          undefined,
+          Object {
+            "log": <ToolingLog>,
+          },
+        ],
+      ]
+    `);
+  });
+
+  it(`allows overriding search.check_ccs_compatibility`, async () => {
+    mockEsBin({ start: true });
+
+    extractConfigFiles.mockReturnValueOnce([]);
+
+    const cluster = new Cluster({
+      log,
+      ssl: false,
+    });
+
+    await cluster.start(undefined, {
+      esArgs: ['search.check_ccs_compatibility=false'],
+    });
+
+    expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Array [
+            "action.destructive_requires_name=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
+            "ingest.geoip.downloader.enabled=false",
+            "search.check_ccs_compatibility=false",
           ],
           undefined,
           Object {
@@ -386,7 +416,9 @@ describe('#run()', () => {
         Array [
           Array [
             "action.destructive_requires_name=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
             "ingest.geoip.downloader.enabled=false",
+            "search.check_ccs_compatibility=true",
           ],
           undefined,
           Object {

@@ -8,15 +8,14 @@
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
-import { MlCustomUrls } from './custom_urls';
-
 import {
   TimeRangeType,
   TIME_RANGE_TYPE,
   URL_TYPE,
-} from '../../../../plugins/ml/public/application/jobs/components/custom_url_editor/constants';
+} from '@kbn/ml-plugin/public/application/jobs/components/custom_url_editor/constants';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommonUI } from './common_ui';
+import { MlCustomUrls } from './custom_urls';
 
 export type MlADJobTable = ProvidedType<typeof MachineLearningJobTableProvider>;
 
@@ -277,6 +276,15 @@ export function MachineLearningJobTableProvider(
             jobRow
           )}')`
         );
+      });
+    }
+
+    public async assertJobRowJobId(jobId: string) {
+      await retry.tryForTime(5000, async () => {
+        await this.refreshJobList();
+        const rows = await this.parseJobTable();
+        const jobRowMatch = rows.find((row) => row.id === jobId);
+        expect(jobRowMatch).to.not.eql(undefined, `Expected row with job ID ${jobId} to exist`);
       });
     }
 
@@ -602,11 +610,19 @@ export function MachineLearningJobTableProvider(
       return existingCustomUrls.length;
     }
 
-    public async saveCustomUrl(expectedLabel: string, expectedIndex: number) {
+    public async saveCustomUrl(
+      expectedLabel: string,
+      expectedIndex: number,
+      expectedValue?: string
+    ) {
       await retry.tryForTime(5000, async () => {
         await testSubjects.click('mlJobAddCustomUrl');
         await customUrls.assertCustomUrlLabel(expectedIndex, expectedLabel);
       });
+
+      if (expectedValue !== undefined) {
+        await customUrls.assertCustomUrlUrlValue(expectedIndex, expectedValue);
+      }
     }
 
     public async fillInDiscoverUrlForm(customUrl: DiscoverUrlConfig) {
@@ -672,14 +688,16 @@ export function MachineLearningJobTableProvider(
       await this.saveEditJobFlyoutChanges();
     }
 
-    public async addDashboardCustomUrl(jobId: string, customUrl: DashboardUrlConfig) {
+    public async addDashboardCustomUrl(
+      jobId: string,
+      customUrl: DashboardUrlConfig,
+      expectedResult: { index: number; url: string }
+    ) {
       await retry.tryForTime(30 * 1000, async () => {
         await this.closeEditJobFlyout();
         await this.openEditCustomUrlsForJobTab(jobId);
-        const existingCustomUrlCount = await this.getExistingCustomUrlCount();
-
         await this.fillInDashboardUrlForm(customUrl);
-        await this.saveCustomUrl(customUrl.label, existingCustomUrlCount);
+        await this.saveCustomUrl(customUrl.label, expectedResult.index, expectedResult.url);
       });
 
       // Save the job

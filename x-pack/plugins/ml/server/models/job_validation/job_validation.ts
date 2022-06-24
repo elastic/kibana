@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { fieldsServiceProvider } from '../fields_service';
 import { getMessages, MessageId, JobValidationMessage } from '../../../common/constants/messages';
@@ -112,7 +112,13 @@ export async function validateJob(
       }
 
       validationMessages.push(
-        ...(await validateDatafeedPreviewWithMessages(mlClient, authHeader, job))
+        ...(await validateDatafeedPreviewWithMessages(
+          mlClient,
+          authHeader,
+          job,
+          duration?.start,
+          duration?.end
+        ))
       );
     } else {
       validationMessages = basicValidation.messages;

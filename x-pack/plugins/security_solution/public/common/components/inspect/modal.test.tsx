@@ -12,7 +12,6 @@ import { TestProviders } from '../../mock';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { EXCLUDE_ELASTIC_CLOUD_INDEX } from '../../containers/sourcerer';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -58,7 +57,7 @@ describe('Modal Inspect', () => {
 
       expect(
         wrapper.find('.euiDescriptionList__title span[data-test-subj="index-pattern-title"]').text()
-      ).toBe('Index pattern ');
+      ).toContain('Index pattern ');
       expect(
         wrapper
           .find('.euiDescriptionList__description span[data-test-subj="index-pattern-description"]')
@@ -66,7 +65,7 @@ describe('Modal Inspect', () => {
       ).toBe('auditbeat-*, filebeat-*, packetbeat-*, winlogbeat-*');
       expect(
         wrapper.find('.euiDescriptionList__title span[data-test-subj="query-time-title"]').text()
-      ).toBe('Query time ');
+      ).toContain('Query time ');
       expect(
         wrapper
           .find('.euiDescriptionList__description span[data-test-subj="query-time-description"]')
@@ -76,7 +75,7 @@ describe('Modal Inspect', () => {
         wrapper
           .find('.euiDescriptionList__title span[data-test-subj="request-timestamp-title"]')
           .text()
-      ).toBe('Request timestamp ');
+      ).toContain('Request timestamp ');
     });
 
     test('Click on request Tab', () => {
@@ -218,7 +217,6 @@ describe('Modal Inspect', () => {
         </TestProviders>
       );
       expect(wrapper.find('i[data-test-subj="not-sourcerer-msg"]').first().exists()).toEqual(false);
-      expect(wrapper.find('i[data-test-subj="exclude-logs-msg"]').first().exists()).toEqual(false);
     });
     test('not-sourcerer-msg when not all patterns are in sourcerer selection', () => {
       const wrapper = mount(
@@ -227,19 +225,6 @@ describe('Modal Inspect', () => {
         </TestProviders>
       );
       expect(wrapper.find('i[data-test-subj="not-sourcerer-msg"]').first().exists()).toEqual(true);
-      expect(wrapper.find('i[data-test-subj="exclude-logs-msg"]').first().exists()).toEqual(false);
-    });
-    test('exclude-logs-msg when EXCLUDE_ELASTIC_CLOUD_INDEX is present in patterns', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ModalInspectQuery
-            {...defaultProps}
-            request={getRequest([EXCLUDE_ELASTIC_CLOUD_INDEX, 'logs-*'])}
-          />
-        </TestProviders>
-      );
-      expect(wrapper.find('i[data-test-subj="not-sourcerer-msg"]').first().exists()).toEqual(false);
-      expect(wrapper.find('i[data-test-subj="exclude-logs-msg"]').first().exists()).toEqual(true);
     });
   });
 });

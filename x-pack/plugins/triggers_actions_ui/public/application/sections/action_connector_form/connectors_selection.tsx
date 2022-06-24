@@ -9,7 +9,7 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ActionConnector, ActionTypeIndex, ActionTypeModel, AlertAction } from '../../../types';
+import { ActionConnector, ActionTypeIndex, ActionTypeModel, RuleAction } from '../../../types';
 import { getValidConnectors } from '../common/connectors';
 
 interface ConnectorOption {
@@ -19,7 +19,7 @@ interface ConnectorOption {
 }
 
 interface SelectionProps {
-  actionItem: AlertAction;
+  actionItem: RuleAction;
   accordionIndex: number;
   actionTypesIndex: ActionTypeIndex;
   actionTypeRegistered: ActionTypeModel;

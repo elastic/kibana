@@ -9,16 +9,19 @@ import box from './box.svg';
 import confluence from './confluence.svg';
 import custom from './custom.svg';
 import dropbox from './dropbox.svg';
+import external from './external.svg';
 import github from './github.svg';
 import gmail from './gmail.svg';
 import googleDrive from './google_drive.svg';
 import jira from './jira.svg';
 import jiraServer from './jira_server.svg';
 import loadingSmall from './loading_small.svg';
+import networkDrive from './network_drive.svg';
 import oneDrive from './onedrive.svg';
 import salesforce from './salesforce.svg';
 import serviceNow from './servicenow.svg';
 import sharePoint from './sharepoint.svg';
+import sharePointServer from './sharepoint_server.svg';
 import slack from './slack.svg';
 import zendesk from './zendesk.svg';
 
@@ -29,6 +32,7 @@ export const images = {
   confluenceServer: confluence,
   custom,
   dropbox,
+  external,
   github,
   githubEnterpriseServer: github,
   githubViaApp: github,
@@ -39,11 +43,13 @@ export const images = {
   jiraServer,
   jiraCloud: jira,
   loadingSmall,
+  networkDrive,
   oneDrive,
   salesforce,
   salesforceSandbox: salesforce,
   serviceNow,
   sharePoint,
+  sharePointServer,
   slack,
   zendesk,
 } as { [key: string]: string };

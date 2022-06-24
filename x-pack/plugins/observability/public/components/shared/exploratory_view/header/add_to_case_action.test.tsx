@@ -102,8 +102,8 @@ describe('AddToCaseAction', function () {
     );
     fireEvent.click(await findByText('Add to case'));
 
-    expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledTimes(1);
-    expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledWith(
+    expect(core?.cases?.ui.getAllCasesSelectorModal).toHaveBeenCalledTimes(1);
+    expect(core?.cases?.ui.getAllCasesSelectorModal).toHaveBeenCalledWith(
       expect.objectContaining({
         owner: ['observability'],
         userCanCrud: true,

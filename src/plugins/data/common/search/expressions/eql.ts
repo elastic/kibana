@@ -8,10 +8,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/es-query';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 import { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
+import { lastValueFrom } from 'rxjs';
+import { RequestStatistics, RequestAdapter } from '@kbn/inspector-plugin/common';
 import {
   ISearchGeneric,
   KibanaContext,
@@ -143,15 +144,17 @@ export const getEqlFn = ({
       });
 
       try {
-        const response = await search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
-          {
-            params: {
-              index: args.index,
-              body: dsl,
+        const response = await lastValueFrom(
+          search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
+            {
+              params: {
+                index: args.index,
+                body: dsl,
+              },
             },
-          },
-          { abortSignal, strategy: EQL_SEARCH_STRATEGY }
-        ).toPromise();
+            { abortSignal, strategy: EQL_SEARCH_STRATEGY }
+          )
+        );
 
         const stats: RequestStatistics = {};
 

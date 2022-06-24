@@ -1,40 +1,60 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`HeaderPage it renders 1`] = `
-<Header
-  border={true}
->
-  <EuiFlexGroup
-    alignItems="center"
-  >
-    <FlexItem>
-      <Memo(Title)
-        badgeOptions={
-          Object {
-            "beta": true,
-            "text": "Beta",
-            "tooltip": "Test tooltip",
+<I18nProvider>
+  <Component>
+    <ThemeProvider
+      theme={[Function]}
+    >
+      <QueryClientProvider
+        client={
+          QueryClient {
+            "defaultOptions": Object {
+              "queries": Object {
+                "retry": false,
+              },
+            },
+            "mutationCache": MutationCache {
+              "config": Object {},
+              "listeners": Array [],
+              "mutationId": 0,
+              "mutations": Array [],
+            },
+            "mutationDefaults": Array [],
+            "queryCache": QueryCache {
+              "config": Object {},
+              "listeners": Array [],
+              "queries": Array [],
+              "queriesMap": Object {},
+            },
+            "queryDefaults": Array [],
           }
         }
-        title="Test title"
-      />
-      <Subtitle
-        data-test-subj="header-page-subtitle"
-        items="Test subtitle"
-      />
-      <Subtitle
-        data-test-subj="header-page-subtitle-2"
-        items="Test subtitle 2"
-      />
-    </FlexItem>
-    <FlexItem
-      data-test-subj="header-page-supplements"
-      grow={false}
-    >
-      <p>
-        Test supplement
-      </p>
-    </FlexItem>
-  </EuiFlexGroup>
-</Header>
+      >
+        <CasesProvider
+          value={
+            Object {
+              "features": undefined,
+              "owner": Array [
+                "securitySolution",
+              ],
+              "userCanCrud": true,
+            }
+          }
+        >
+          <Memo(HeaderPage)
+            border={true}
+            subtitle="Test subtitle"
+            subtitle2="Test subtitle 2"
+            title="Test title"
+          >
+            <p>
+              Test supplement
+            </p>
+          </Memo(HeaderPage)>
+        </CasesProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
+  </Component>
+</I18nProvider>
 `;

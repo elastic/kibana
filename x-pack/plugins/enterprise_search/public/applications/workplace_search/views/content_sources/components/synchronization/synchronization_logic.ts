@@ -254,7 +254,7 @@ export const SynchronizationLogic = kea<
 
           return schedule;
         },
-        addBlockedWindow: (state, _) => {
+        addBlockedWindow: (state) => {
           const schedule = cloneDeep(state);
           const blockedWindows = schedule.blockedWindows || [];
           blockedWindows.push(emptyBlockedWindow);

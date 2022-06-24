@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { checkAAD, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -23,7 +23,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -32,13 +32,15 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         tags: ['bar'],
         params: {
           foo: true,
+          risk_score: 40,
+          severity: 'medium',
         },
         schedule: { interval: '12s' },
         actions: [],
         throttle: '1m',
         notify_when: 'onThrottleInterval',
       };
-      const response = await supertest
+      let response = await supertest
         .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send(updatedData)
@@ -58,6 +60,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         muted_alert_ids: [],
         notify_when: 'onThrottleInterval',
         scheduled_task_id: createdAlert.scheduled_task_id,
+        snooze_schedule: createdAlert.snooze_schedule,
         created_at: response.body.created_at,
         updated_at: response.body.updated_at,
         execution_status: response.body.execution_status,
@@ -67,6 +70,17 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
         Date.parse(response.body.created_at)
       );
+
+      response = await supertest.get(
+        `${getUrlPrefix(
+          Spaces.space1.id
+        )}/internal/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
+      );
+
+      expect(response.body.data[0].mapped_params).to.eql({
+        risk_score: 40,
+        severity: '40-medium',
+      });
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -81,7 +95,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -111,7 +125,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestAlertData())
+          .send(getTestRuleData())
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -126,6 +140,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           throttle: '1m',
           notifyWhen: 'onThrottleInterval',
         };
+
         const response = await supertest
           .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`)
           .set('kbn-xsrf', 'foo')
@@ -146,6 +161,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           mutedInstanceIds: [],
           notifyWhen: 'onThrottleInterval',
           scheduledTaskId: createdAlert.scheduled_task_id,
+          snoozeSchedule: createdAlert.snooze_schedule,
           createdAt: response.body.createdAt,
           updatedAt: response.body.updatedAt,
           executionStatus: response.body.executionStatus,

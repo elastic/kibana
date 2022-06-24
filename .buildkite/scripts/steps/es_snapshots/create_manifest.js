@@ -8,7 +8,7 @@
 
 const fs = require('fs');
 const { execSync } = require('child_process');
-const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
+const { BASE_BUCKET_DAILY } = require('./bucket_config');
 
 (async () => {
   console.log('--- Create ES Snapshot Manifest');
@@ -16,6 +16,8 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
   const destination = process.argv[2] || __dirname + '/test';
 
   const ES_BRANCH = process.env.ELASTICSEARCH_BRANCH;
+  const ES_CLOUD_IMAGE = process.env.ELASTICSEARCH_CLOUD_IMAGE;
+  const ES_CLOUD_IMAGE_CHECKSUM = process.env.ELASTICSEARCH_CLOUD_IMAGE_CHECKSUM;
   const GIT_COMMIT = process.env.ELASTICSEARCH_GIT_COMMIT;
   const GIT_COMMIT_SHORT = process.env.ELASTICSEARCH_GIT_COMMIT_SHORT;
 
@@ -59,6 +61,17 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
         };
       });
 
+    if (ES_CLOUD_IMAGE && ES_CLOUD_IMAGE_CHECKSUM) {
+      manifestEntries.push({
+        checksum: ES_CLOUD_IMAGE_CHECKSUM,
+        url: ES_CLOUD_IMAGE,
+        version: VERSION,
+        platform: 'docker',
+        architecture: 'image',
+        license: 'default',
+      });
+    }
+
     const manifest = {
       id: SNAPSHOT_ID,
       bucket: `${BASE_BUCKET_DAILY}/${DESTINATION}`.toString(),
@@ -83,7 +96,7 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
       cd "${destination}"
       gsutil -m cp -r *.* gs://${BASE_BUCKET_DAILY}/${DESTINATION}
       cp manifest.json manifest-latest.json
-      gsutil cp manifest-latest.json gs://${BASE_BUCKET_DAILY}/${VERSION}
+      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest-latest.json gs://${BASE_BUCKET_DAILY}/${VERSION}
 
       buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST 'https://storage.googleapis.com/${BASE_BUCKET_DAILY}/${DESTINATION}/manifest.json'
       buildkite-agent meta-data set ES_SNAPSHOT_VERSION '${VERSION}'

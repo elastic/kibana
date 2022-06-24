@@ -13,9 +13,10 @@ import {
   EuiSpacer,
   EuiFlexGroup,
 } from '@elastic/eui';
-import React, { useCallback, useRef, useState, useMemo } from 'react';
+import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { useCreateRule } from '../../../../containers/detection_engine/rules';
 import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
@@ -70,9 +71,15 @@ const MyEuiPanel = styled(EuiPanel)<{
       display: none;
     }
   }
+  .euiAccordion__childWrapper {
+    transform: none; /* To circumvent an issue in Eui causing the fullscreen datagrid to break */
+  }
 `;
 
 MyEuiPanel.displayName = 'MyEuiPanel';
+
+const isShouldRerenderStep = (step: RuleStep, activeStep: RuleStep) =>
+  activeStep !== step ? '0' : '1';
 
 const CreateRulePageComponent: React.FC = () => {
   const [
@@ -87,14 +94,19 @@ const CreateRulePageComponent: React.FC = () => {
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { navigateToApp } = useKibana().services.application;
+  const { data: dataServices } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
   const [, dispatchToaster] = useStateToaster();
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
     ruleStepsOrder[ruleStepsOrder.indexOf(step) + 1];
+  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const defineRuleRef = useRef<EuiAccordion | null>(null);
+  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
+  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const scheduleRuleRef = useRef<EuiAccordion | null>(null);
+  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const ruleActionsRef = useRef<EuiAccordion | null>(null);
   const formHooks = useRef<RuleStepsFormHooks>({
     [RuleStep.defineRule]: formHookNoop,
@@ -130,6 +142,22 @@ const CreateRulePageComponent: React.FC = () => {
   const ruleType = stepsData.current[RuleStep.defineRule].data?.ruleType;
   const ruleName = stepsData.current[RuleStep.aboutRule].data?.name;
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
+  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+
+  useEffect(() => {
+    const fetchDataViews = async () => {
+      const dataViewsRefs = await dataServices.dataViews.getIdsWithTitle();
+      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.id]: item,
+        }),
+        {}
+      );
+      setDataViewOptions(dataViewIdIndexPatternMap);
+    };
+    fetchDataViews();
+  }, [dataServices.dataViews]);
 
   const handleAccordionToggle = useCallback(
     (step: RuleStep, isOpen: boolean) =>
@@ -283,6 +311,7 @@ const CreateRulePageComponent: React.FC = () => {
     });
     return null;
   }
+
   return (
     <>
       <SecuritySolutionPageWrapper>
@@ -326,7 +355,11 @@ const CreateRulePageComponent: React.FC = () => {
                   isLoading={isLoading || loading}
                   setForm={setFormHook}
                   onSubmit={submitStepDefineRule}
+                  kibanaDataViews={dataViewOptions}
                   descriptionColumns="singleSplit"
+                  // We need a key to make this component remount when edit/view mode is toggled
+                  // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
+                  key={isShouldRerenderStep(RuleStep.defineRule, activeStep)}
                 />
               </EuiAccordion>
             </MyEuiPanel>
@@ -362,6 +395,9 @@ const CreateRulePageComponent: React.FC = () => {
                   isLoading={isLoading || loading}
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.aboutRule)}
+                  // We need a key to make this component remount when edit/view mode is toggled
+                  // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
+                  key={isShouldRerenderStep(RuleStep.aboutRule, activeStep)}
                 />
               </EuiAccordion>
             </MyEuiPanel>
@@ -396,6 +432,9 @@ const CreateRulePageComponent: React.FC = () => {
                   isLoading={isLoading || loading}
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.scheduleRule)}
+                  // We need a key to make this component remount when edit/view mode is toggled
+                  // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
+                  key={isShouldRerenderStep(RuleStep.scheduleRule, activeStep)}
                 />
               </EuiAccordion>
             </MyEuiPanel>
@@ -429,6 +468,9 @@ const CreateRulePageComponent: React.FC = () => {
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.ruleActions)}
                   actionMessageParams={actionMessageParams}
+                  // We need a key to make this component remount when edit/view mode is toggled
+                  // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
+                  key={isShouldRerenderStep(RuleStep.ruleActions, activeStep)}
                 />
               </EuiAccordion>
             </MyEuiPanel>
@@ -436,7 +478,7 @@ const CreateRulePageComponent: React.FC = () => {
         </EuiFlexGroup>
       </SecuritySolutionPageWrapper>
 
-      <SpyRoute pageName={SecurityPageName.rules} />
+      <SpyRoute pageName={SecurityPageName.rulesCreate} />
     </>
   );
 };

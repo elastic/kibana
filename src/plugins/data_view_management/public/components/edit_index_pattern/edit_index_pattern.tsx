@@ -6,37 +6,44 @@
  * Side Public License, v 1.
  */
 
-import { filter } from 'lodash';
 import React, { useEffect, useState, useCallback } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { withRouter, RouteComponentProps, useLocation } from 'react-router-dom';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiBadge,
-  EuiText,
-  EuiLink,
   EuiCallOut,
+  EuiCode,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView, DataViewField } from '../../../../../plugins/data_views/public';
-import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  SavedObjectRelation,
+  SavedObjectManagementTypeInfo,
+} from '@kbn/saved-objects-management-plugin/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
+import { removeDataView, RemoveDataViewProps } from './remove_data_view';
+
+const codeStyle = {
+  marginLeft: '8px',
+};
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: DataView;
 }
 
-const mappingAPILink = i18n.translate(
-  'indexPatternManagement.editIndexPattern.timeFilterLabel.mappingAPILink',
-  {
-    defaultMessage: 'field mappings',
-  }
-);
+export interface SavedObjectRelationWithTitle extends SavedObjectRelation {
+  title: string;
+}
 
 const mappingConflictHeader = i18n.translate(
   'indexPatternManagement.editIndexPattern.mappingConflictHeader',
@@ -44,15 +51,6 @@ const mappingConflictHeader = i18n.translate(
     defaultMessage: 'Mapping conflict',
   }
 );
-
-const confirmModalOptionsDelete = {
-  confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.deleteButton', {
-    defaultMessage: 'Delete',
-  }),
-  title: i18n.translate('indexPatternManagement.editDataView.deleteHeader', {
-    defaultMessage: 'Delete data view?',
-  }),
-};
 
 const securityDataView = i18n.translate(
   'indexPatternManagement.editIndexPattern.badge.securityDataViewTitle',
@@ -65,7 +63,7 @@ const securitySolution = 'security-solution';
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { uiSettings, overlays, chrome, dataViews } =
+    const { uiSettings, overlays, chrome, dataViews, IndexPatternEditor, savedObjectsManagement } =
       useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<DataViewField[]>(
@@ -73,6 +71,27 @@ export const EditIndexPattern = withRouter(
     );
     const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get('defaultIndex'));
     const [tags, setTags] = useState<any[]>([]);
+    const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
+    const [relationships, setRelationships] = useState<SavedObjectRelationWithTitle[]>([]);
+    const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
+
+    useEffect(() => {
+      savedObjectsManagement.getAllowedTypes().then((resp) => {
+        setAllowedTypes(resp);
+      });
+    }, [savedObjectsManagement]);
+
+    useEffect(() => {
+      if (allowedTypes.length === 0) {
+        return;
+      }
+      const allowedAsString = allowedTypes.map((item) => item.name);
+      savedObjectsManagement
+        .getRelationships(DATA_VIEW_SAVED_OBJECT_TYPE, indexPattern.id!, allowedAsString)
+        .then((resp) => {
+          setRelationships(resp.relations.map((r) => ({ ...r, title: r.meta.title! })));
+        });
+    }, [savedObjectsManagement, indexPattern, allowedTypes]);
 
     useEffect(() => {
       setFields(indexPattern.getNonScriptedFields());
@@ -90,38 +109,41 @@ export const EditIndexPattern = withRouter(
       setDefaultIndex(indexPattern.id || '');
     }, [uiSettings, indexPattern.id]);
 
-    const removePattern = () => {
-      async function doRemove() {
-        if (indexPattern.id === defaultIndex) {
-          const indexPatterns = await dataViews.getIdsWithTitle();
-          uiSettings.remove('defaultIndex');
-          const otherPatterns = filter(indexPatterns, (pattern) => {
-            return pattern.id !== indexPattern.id;
-          });
+    const removeHandler = removeDataView({
+      dataViews,
+      uiSettings,
+      overlays,
+      onDelete: () => {
+        history.push('');
+      },
+    });
 
-          if (otherPatterns.length) {
-            uiSettings.set('defaultIndex', otherPatterns[0].id);
-          }
-        }
-        if (indexPattern.id) {
-          Promise.resolve(dataViews.delete(indexPattern.id)).then(function () {
-            history.push('');
-          });
-        }
-      }
-
-      overlays.openConfirm('', confirmModalOptionsDelete).then((isConfirmed) => {
-        if (isConfirmed) {
-          doRemove();
-        }
-      });
+    const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
+    const displayIndexPatternEditor = showEditDialog ? (
+      <IndexPatternEditor
+        onSave={() => setShowEditDialog(false)}
+        onCancel={() => setShowEditDialog(false)}
+        defaultTypeIsRollup={isRollup}
+        editData={indexPattern}
+      />
+    ) : (
+      <></>
+    );
+    const editPattern = () => {
+      setShowEditDialog(true);
     };
 
-    const timeFilterHeader = i18n.translate(
-      'indexPatternManagement.editIndexPattern.timeFilterHeader',
+    const indexPatternHeading = i18n.translate(
+      'indexPatternManagement.editIndexPattern.indexPatternHeading',
       {
-        defaultMessage: "Time field: '{timeFieldName}'",
-        values: { timeFieldName: indexPattern.timeFieldName },
+        defaultMessage: 'Index pattern:',
+      }
+    );
+
+    const timeFilterHeading = i18n.translate(
+      'indexPatternManagement.editIndexPattern.timeFilterHeading',
+      {
+        defaultMessage: 'Time field:',
       }
     );
 
@@ -138,58 +160,78 @@ export const EditIndexPattern = withRouter(
       defaultMessage: 'Data view details',
     });
 
-    chrome.docTitle.change(indexPattern.title);
+    chrome.docTitle.change(indexPattern.getName());
 
-    const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
-    const kibana = useKibana();
-    const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
     const userEditPermission = dataViews.getCanSaveSync();
+
+    const warning =
+      (indexPattern.namespaces && indexPattern.namespaces.length > 1) ||
+      indexPattern.namespaces.includes('*') ? (
+        <FormattedMessage
+          id="indexPatternManagement.editDataView.deleteWarningWithNamespaces"
+          defaultMessage="Delete the data view {dataViewName} from every space it is shared in. You can't undo this action."
+          values={{
+            dataViewName: <EuiCode>{indexPattern.getName()}</EuiCode>,
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="indexPatternManagement.editDataView.deleteWarning"
+          defaultMessage="The data view {dataViewName} will be deleted. You can't undo this action."
+          values={{
+            dataViewName: <EuiCode>{indexPattern.getName()}</EuiCode>,
+          }}
+        />
+      );
 
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         <IndexHeader
           indexPattern={indexPattern}
           setDefault={setDefaultPattern}
-          deleteIndexPatternClick={removePattern}
+          editIndexPatternClick={editPattern}
+          deleteIndexPatternClick={() =>
+            removeHandler([indexPattern as RemoveDataViewProps], <div>{warning}</div>)
+          }
           defaultIndex={defaultIndex}
           canSave={userEditPermission}
         >
-          {showTagsSection && (
-            <EuiFlexGroup wrap gutterSize="s">
-              {Boolean(indexPattern.timeFieldName) && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="warning">{timeFilterHeader}</EuiBadge>
-                </EuiFlexItem>
-              )}
-              {indexPattern.id && indexPattern.id.indexOf(securitySolution) === 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge>{securityDataView}</EuiBadge>
-                </EuiFlexItem>
-              )}
-              {tags.map((tag: any) => (
-                <EuiFlexItem grow={false} key={tag.key}>
+          <EuiHorizontalRule margin="none" />
+          <EuiSpacer size="l" />
+          <EuiFlexGroup wrap gutterSize="l" alignItems="center">
+            {Boolean(indexPattern.title) && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="none" alignItems="center">
+                  <EuiText size="s">{indexPatternHeading}</EuiText>
+                  <EuiCode style={codeStyle}>{indexPattern.title}</EuiCode>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+            {Boolean(indexPattern.timeFieldName) && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="none" alignItems="center">
+                  <EuiText size="s">{timeFilterHeading}</EuiText>
+                  <EuiCode style={codeStyle}>{indexPattern.timeFieldName}</EuiCode>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+            {indexPattern.id && indexPattern.id.indexOf(securitySolution) === 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge>{securityDataView}</EuiBadge>
+              </EuiFlexItem>
+            )}
+            {tags.map((tag: any) => (
+              <EuiFlexItem grow={false} key={tag.key}>
+                {tag.key === 'default' ? (
+                  <EuiBadge iconType="starFilled" color="default">
+                    {tag.name}
+                  </EuiBadge>
+                ) : (
                   <EuiBadge color="hollow">{tag.name}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          )}
-          <EuiSpacer size="m" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
-                defaultMessage="View and edit fields in {indexPatternTitle}. Field attributes, such as type and searchability, are based on {mappingAPILink} in Elasticsearch."
-                values={{
-                  indexPatternTitle: <strong>{indexPattern.title}</strong>,
-                  mappingAPILink: (
-                    <EuiLink href={docsUrl} target="_blank" external>
-                      {mappingAPILink}
-                    </EuiLink>
-                  ),
-                }}
-              />{' '}
-            </p>
-          </EuiText>
+                )}
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
           {conflictedFields.length > 0 && (
             <>
               <EuiSpacer />
@@ -199,17 +241,20 @@ export const EditIndexPattern = withRouter(
             </>
           )}
         </IndexHeader>
-        <EuiSpacer />
+        <EuiSpacer size="xl" />
         <Tabs
           indexPattern={indexPattern}
           saveIndexPattern={dataViews.updateSavedObject.bind(dataViews)}
           fields={fields}
+          relationships={relationships}
+          allowedTypes={allowedTypes}
           history={history}
           location={location}
           refreshFields={() => {
             setFields(indexPattern.getNonScriptedFields());
           }}
         />
+        {displayIndexPatternEditor}
       </div>
     );
   }

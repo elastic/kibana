@@ -7,7 +7,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { install, paths } from '../../../../x-pack/plugins/screenshotting/server/utils';
+import { install, paths } from '@kbn/screenshotting-plugin/server/utils';
 
 export const InstallChromium = {
   description: 'Installing Chromium',

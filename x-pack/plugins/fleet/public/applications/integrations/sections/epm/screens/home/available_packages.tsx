@@ -22,8 +22,11 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+
+import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
+
 import { useStartServices } from '../../../../hooks';
-import { TrackApplicationView } from '../../../../../../../../../../src/plugins/usage_collection/public';
 
 import { pagePathGetters } from '../../../../constants';
 import {
@@ -37,8 +40,6 @@ import {
 import { doesPackageHaveIntegrations } from '../../../../services';
 import type { PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
-
-import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import type { PackageListItem } from '../../../../types';
 
@@ -213,6 +214,7 @@ export const AvailablePackages: React.FC = memo(() => {
     error: eprPackageLoadingError,
   } = useGetPackages({
     category: '',
+    excludeInstallStatus: true,
   });
   const eprIntegrationList = useMemo(
     () => packageListToIntegrationsList(eprPackages?.items || []),
@@ -349,11 +351,11 @@ export const AvailablePackages: React.FC = memo(() => {
               icon={<EuiIcon type="logoSecurity" size="xxl" />}
               href={addBasePath('/app/integrations/detail/endpoint/')}
               title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
-                defaultMessage: 'Endpoint Security',
+                defaultMessage: 'Endpoint and Cloud Security',
               })}
               description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
                 defaultMessage:
-                  'Protect your hosts with threat prevention, detection, and deep security data visibility.',
+                  'Protect your hosts and cloud workloads with threat prevention, detection, and deep security data visibility.',
               })}
             />
           </TrackApplicationView>

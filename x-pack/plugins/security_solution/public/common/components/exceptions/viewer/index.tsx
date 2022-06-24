@@ -18,10 +18,10 @@ import type {
 import { useApi, useExceptionListItems } from '@kbn/securitysolution-list-hooks';
 import * as i18n from '../translations';
 import { useStateToaster } from '../../toasters';
-import { useUserData } from '../../../../../public/detections/components/user_info';
-import { useKibana } from '../../../../common/lib/kibana';
-import { Panel } from '../../../../common/components/panel';
-import { Loader } from '../../../../common/components/loader';
+import { useUserData } from '../../../../detections/components/user_info';
+import { useKibana } from '../../../lib/kibana';
+import { Panel } from '../../panel';
+import { Loader } from '../../loader';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
 import { ExceptionListItemIdentifiers, Filter } from '../types';
 import { allExceptionItemsReducer, State, ViewerFlyoutName } from './reducer';
@@ -56,6 +56,7 @@ interface ExceptionsViewerProps {
   ruleId: string;
   ruleName: string;
   ruleIndices: string[];
+  dataViewId?: string;
   exceptionListsMeta: ExceptionListIdentifiers[];
   availableListTypes: ExceptionListTypeEnum[];
   commentsAccordionId: string;
@@ -66,6 +67,7 @@ const ExceptionsViewerComponent = ({
   ruleId,
   ruleName,
   ruleIndices,
+  dataViewId,
   exceptionListsMeta,
   availableListTypes,
   commentsAccordionId,
@@ -341,6 +343,7 @@ const ExceptionsViewerComponent = ({
             ruleName={ruleName}
             ruleId={ruleId}
             ruleIndices={ruleIndices}
+            dataViewId={dataViewId}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
             onCancel={handleOnCancelExceptionModal}
@@ -353,6 +356,7 @@ const ExceptionsViewerComponent = ({
         <AddExceptionFlyout
           ruleName={ruleName}
           ruleIndices={ruleIndices}
+          dataViewId={dataViewId}
           ruleId={ruleId}
           exceptionListType={exceptionListTypeToEdit}
           onCancel={handleOnCancelExceptionModal}

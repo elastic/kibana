@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 
 export const featureCatalogueEntry = {
   id: 'apm',
@@ -19,5 +19,5 @@ export const featureCatalogueEntry = {
   icon: 'apmApp',
   path: '/app/apm',
   showOnHomePage: false,
-  category: FeatureCatalogueCategory.DATA,
+  category: 'data' as FeatureCatalogueCategory,
 };

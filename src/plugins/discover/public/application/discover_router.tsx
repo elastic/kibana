@@ -10,14 +10,15 @@ import { Redirect, Route, Router, Switch } from 'react-router-dom';
 import React from 'react';
 import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
+import { ViewAlertRoute } from './view_alert';
 
-export const discoverRouter = (services: DiscoverServices, history: History) => (
+export const discoverRouter = (services: DiscoverServices, history: History, isDev: boolean) => (
   <KibanaContextProvider services={services}>
     <EuiErrorBoundary>
       <Router history={history} data-test-subj="discover-react-router">
@@ -36,11 +37,14 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
           <Route path="/doc/:indexPatternId/:index">
             <SingleDocRoute />
           </Route>
+          <Route path="/viewAlert/:id">
+            <ViewAlertRoute />
+          </Route>
           <Route path="/view/:id">
-            <DiscoverMainRoute />
+            <DiscoverMainRoute isDev={isDev} />
           </Route>
           <Route path="/" exact>
-            <DiscoverMainRoute />
+            <DiscoverMainRoute isDev={isDev} />
           </Route>
           <NotFoundRoute />
         </Switch>

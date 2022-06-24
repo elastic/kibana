@@ -10,7 +10,7 @@ const apmIndicesSaveURL = '/internal/apm/settings/apm-indices/save';
 describe('No data screen', () => {
   describe('bypass no data screen on settings pages', () => {
     beforeEach(() => {
-      cy.loginAsPowerUser();
+      cy.loginAsEditorUser();
     });
 
     before(() => {
@@ -29,7 +29,7 @@ describe('No data screen', () => {
         headers: {
           'kbn-xsrf': true,
         },
-        auth: { user: 'apm_power_user', pass: 'changeme' },
+        auth: { user: 'editor', pass: 'changeme' },
       });
     });
 
@@ -57,7 +57,7 @@ describe('No data screen', () => {
           metric: '',
         },
         headers: { 'kbn-xsrf': true },
-        auth: { user: 'apm_power_user', pass: 'changeme' },
+        auth: { user: 'editor', pass: 'changeme' },
       });
     });
   });

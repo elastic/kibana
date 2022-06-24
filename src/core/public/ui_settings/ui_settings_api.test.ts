@@ -169,7 +169,7 @@ describe('#getLoadingCount$()', () => {
     });
 
     const { uiSettingsApi } = setup();
-    const done$ = new Rx.Subject();
+    const done$ = new Rx.Subject<void>();
     const promise = uiSettingsApi.getLoadingCount$().pipe(takeUntil(done$), toArray()).toPromise();
 
     await uiSettingsApi.batchSet('foo', 'bar');
@@ -194,7 +194,7 @@ describe('#getLoadingCount$()', () => {
     );
 
     const { uiSettingsApi } = setup();
-    const done$ = new Rx.Subject();
+    const done$ = new Rx.Subject<void>();
     const promise = uiSettingsApi.getLoadingCount$().pipe(takeUntil(done$), toArray()).toPromise();
 
     await uiSettingsApi.batchSet('foo', 'bar');

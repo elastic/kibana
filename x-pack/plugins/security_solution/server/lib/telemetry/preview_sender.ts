@@ -6,15 +6,14 @@
  */
 
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-
-import { Logger } from 'src/core/server';
-import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { Logger } from '@kbn/core/server';
+import { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { ITelemetryEventsSender } from './sender';
 import { TelemetryEvent } from './types';
 import { ITelemetryReceiver } from './receiver';
@@ -118,6 +117,10 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
 
   public isTelemetryOptedIn(): Promise<boolean> {
     return this.composite.isTelemetryOptedIn();
+  }
+
+  public isTelemetryServicesReachable(): Promise<boolean> {
+    return this.composite.isTelemetryServicesReachable();
   }
 
   public sendIfDue(axiosInstance?: AxiosInstance): Promise<void> {

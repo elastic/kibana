@@ -6,36 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { Subscription } from 'rxjs';
+import { lastValueFrom, Subscription } from 'rxjs';
+import {
+  onlyDisabledFiltersChanged,
+  Filter,
+  Query,
+  TimeRange,
+  FilterStateStore,
+} from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { KibanaExecutionContext } from 'kibana/public';
-import { Container, Embeddable } from '../../../embeddable/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { Container, Embeddable } from '@kbn/embeddable-plugin/public';
+import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
+import { APPLY_FILTER_TRIGGER, FilterManager, generateFilters } from '@kbn/data-plugin/public';
+import { ISearchSource } from '@kbn/data-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '../utils/build_data_record';
+import { DataTableRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../services/saved_searches';
-import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import {
-  APPLY_FILTER_TRIGGER,
-  esFilters,
-  FilterManager,
-  generateFilters,
-} from '../../../data/public';
 import { DiscoverServices } from '../build_services';
-import {
-  Filter,
-  DataView,
-  DataViewField,
-  ISearchSource,
-  Query,
-  TimeRange,
-  FilterStateStore,
-} from '../../../data/common';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
-import { UiActionsStart } from '../../../ui_actions/public';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -54,8 +52,6 @@ import { SortOrder } from '../components/doc_table/components/table_header/helpe
 import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
-import { ElasticSearchHit } from '../types';
-import { KibanaContextProvider, KibanaThemeProvider } from '../../../kibana_react/public';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -64,9 +60,8 @@ export type SearchProps = Partial<DiscoverGridProps> &
     sharedItemTitle?: string;
     inspectorAdapters?: Adapters;
     services: DiscoverServices;
-
     filter?: (field: DataViewField, value: string[], operator: string) => void;
-    hits?: ElasticSearchHit[];
+    hits?: DataTableRecord[];
     totalHitCount?: number;
     onMoveColumn?: (column: string, index: number) => void;
     onUpdateRowHeight?: (rowHeight?: number) => void;
@@ -136,12 +131,15 @@ export class SavedSearchEmbeddable
     this.inspectorAdapters = {
       requests: new RequestAdapter(),
     };
+    this.panelTitle = savedSearch.title ?? '';
     this.initializeSearchEmbeddableProps();
 
     this.subscription = this.getUpdated$().subscribe(() => {
-      this.panelTitle = this.output.title || '';
-
-      if (this.searchProps) {
+      const titleChanged = this.output.title && this.panelTitle !== this.output.title;
+      if (titleChanged) {
+        this.panelTitle = this.output.title || '';
+      }
+      if (this.searchProps && (titleChanged || this.isFetchRequired(this.searchProps))) {
         this.pushContainerStateParamsToProps(this.searchProps);
       }
     });
@@ -193,8 +191,8 @@ export class SavedSearchEmbeddable
 
     try {
       // Make the request
-      const { rawResponse: resp } = await searchSource
-        .fetch$({
+      const { rawResponse: resp } = await lastValueFrom(
+        searchSource.fetch$({
           abortSignal: this.abortController.signal,
           sessionId: searchSessionId,
           inspector: {
@@ -209,10 +207,12 @@ export class SavedSearchEmbeddable
           },
           executionContext,
         })
-        .toPromise();
+      );
       this.updateOutput({ loading: false, error: undefined });
 
-      this.searchProps!.rows = resp.hits.hits;
+      this.searchProps!.rows = resp.hits.hits.map((hit) =>
+        buildDataTableRecord(hit, this.searchProps!.indexPattern)
+      );
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {
@@ -224,6 +224,12 @@ export class SavedSearchEmbeddable
     }
   };
 
+  private getDefaultSort(dataView?: DataView) {
+    const defaultSortOrder = this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc');
+    const hidingTimeColumn = this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
+    return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn);
+  }
+
   private initializeSearchEmbeddableProps() {
     const { searchSource } = this.savedSearch;
 
@@ -234,20 +240,14 @@ export class SavedSearchEmbeddable
     }
 
     if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
-      this.savedSearch.sort = getDefaultSort(
-        indexPattern,
-        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
-      );
+      this.savedSearch.sort = this.getDefaultSort(indexPattern);
     }
 
     const props: SearchProps = {
       columns: this.savedSearch.columns,
       indexPattern,
       isLoading: false,
-      sort: getDefaultSort(
-        indexPattern,
-        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
-      ),
+      sort: this.getDefaultSort(indexPattern),
       rows: [],
       searchDescription: this.savedSearch.description,
       description: this.savedSearch.description,
@@ -293,7 +293,7 @@ export class SavedSearchEmbeddable
           field,
           value,
           operator,
-          indexPattern.id!
+          indexPattern
         );
         filters = filters.map((filter) => ({
           ...filter,
@@ -334,16 +334,24 @@ export class SavedSearchEmbeddable
     }
   }
 
+  private isFetchRequired(searchProps?: SearchProps) {
+    if (!searchProps) {
+      return false;
+    }
+    return (
+      !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
+      !isEqual(this.prevQuery, this.input.query) ||
+      !isEqual(this.prevTimeRange, this.input.timeRange) ||
+      !isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort) ||
+      this.prevSearchSessionId !== this.input.searchSessionId
+    );
+  }
+
   private async pushContainerStateParamsToProps(
     searchProps: SearchProps,
     { forceFetch = false }: { forceFetch: boolean } = { forceFetch: false }
   ) {
-    const isFetchRequired =
-      !esFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
-      !isEqual(this.prevQuery, this.input.query) ||
-      !isEqual(this.prevTimeRange, this.input.timeRange) ||
-      !isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort) ||
-      this.prevSearchSessionId !== this.input.searchSessionId;
+    const isFetchRequired = this.isFetchRequired(searchProps);
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
@@ -355,10 +363,7 @@ export class SavedSearchEmbeddable
     const savedSearchSort =
       this.savedSearch.sort && this.savedSearch.sort.length
         ? this.savedSearch.sort
-        : getDefaultSort(
-            this.searchProps?.indexPattern,
-            this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
-          );
+        : this.getDefaultSort(this.searchProps?.indexPattern);
     searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
@@ -401,7 +406,7 @@ export class SavedSearchEmbeddable
   }
 
   private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
-    if (!this.searchProps) {
+    if (!searchProps) {
       return;
     }
 

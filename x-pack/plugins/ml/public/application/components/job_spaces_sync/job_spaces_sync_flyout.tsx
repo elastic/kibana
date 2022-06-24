@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { ml } from '../../services/ml_api_service';
-import { SyncSavedObjectResponse, SavedObjectResult } from '../../../../common/types/saved_objects';
+import { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
 import { SyncList } from './sync_list';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
@@ -74,7 +74,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
       const { successCount, errorCount } = getResponseCounts(resp);
       if (errorCount > 0) {
         const title = i18n.translate('xpack.ml.management.syncSavedObjectsFlyout.sync.error', {
-          defaultMessage: 'Some jobs cannot be synchronized.',
+          defaultMessage: 'Some jobs or trained models cannot be synchronized.',
         });
         displayErrorToast(resp as any, title);
         return;
@@ -83,7 +83,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
       displaySuccessToast(
         i18n.translate('xpack.ml.management.syncSavedObjectsFlyout.sync.success', {
           defaultMessage:
-            '{successCount} {successCount, plural, one {job} other {jobs}} synchronized',
+            '{successCount} {successCount, plural, one {item} other {items}} synchronized',
           values: { successCount },
         })
       );
@@ -153,13 +153,15 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
 function getResponseCounts(resp: SyncSavedObjectResponse) {
   let successCount = 0;
   let errorCount = 0;
-  Object.values(resp).forEach((result: SavedObjectResult) => {
-    Object.values(result).forEach(({ success, error }) => {
-      if (success === true) {
-        successCount++;
-      } else if (error !== undefined) {
-        errorCount++;
-      }
+  Object.values(resp).forEach((result: SyncResult) => {
+    Object.values(result).forEach((type) => {
+      Object.values(type).forEach(({ success, error }) => {
+        if (success === true) {
+          successCount++;
+        } else if (error !== undefined) {
+          errorCount++;
+        }
+      });
     });
   });
   return { successCount, errorCount };

@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const DEFAULT_REQUEST = `
@@ -24,11 +25,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'console']);
+  const PageObjects = getPageObjects(['common', 'console', 'header']);
   const toasts = getService('toasts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/124104
-  describe.skip('console app', function describeIndexTests() {
+  describe('console app', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('default request response should include `"timed_out" : false`', async () => {
-      const expectedResponseContains = '"timed_out" : false,';
+      const expectedResponseContains = `"timed_out": false`;
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
         const actualResponse = await PageObjects.console.getResponse();
@@ -82,37 +82,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(initialSize.width).to.be.greaterThan(afterSize.width);
     });
 
-    it('should provide basic auto-complete functionality', async () => {
-      // Ensure that the text area can be interacted with
-      await PageObjects.console.dismissTutorial();
-      expect(await PageObjects.console.hasAutocompleter()).to.be(false);
-      await PageObjects.console.enterRequest();
-      await PageObjects.console.promptAutocomplete();
-      await retry.waitFor('autocomplete to be visible', () =>
-        PageObjects.console.hasAutocompleter()
-      );
-    });
-
-    it('should add comma after previous non empty line on autocomplete', async () => {
-      const LINE_NUMBER = 4;
-
-      await PageObjects.console.dismissTutorial();
-      await PageObjects.console.clearTextArea();
-      await PageObjects.console.enterRequest();
-
-      await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"match": {}`);
-      await PageObjects.console.pressEnter();
-      await PageObjects.console.pressEnter();
-      await PageObjects.console.pressEnter();
-      await PageObjects.console.promptAutocomplete();
-      await PageObjects.console.pressEnter();
-
-      const textOfPreviousNonEmptyLine = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
-      log.debug(textOfPreviousNonEmptyLine);
-      const lastChar = textOfPreviousNonEmptyLine.charAt(textOfPreviousNonEmptyLine.length - 1);
-      expect(lastChar).to.be.equal(',');
-    });
-
     describe('with a data URI in the load_from query', () => {
       it('loads the data from the URI', async () => {
         await PageObjects.common.navigateToApp('console', {
@@ -136,6 +105,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(await toasts.getToastCount()).to.equal(1);
           });
         });
+      });
+    });
+
+    describe('with kbn: prefix in request', () => {
+      before(async () => {
+        await PageObjects.console.clearTextArea();
+      });
+      it('it should send successful request to Kibana API', async () => {
+        const expectedResponseContains = 'default space';
+        await PageObjects.console.enterRequest('\n GET kbn:/api/spaces/space');
+        await PageObjects.console.clickPlay();
+        await retry.try(async () => {
+          const actualResponse = await PageObjects.console.getResponse();
+          log.debug(actualResponse);
+          expect(actualResponse).to.contain(expectedResponseContains);
+        });
+      });
+    });
+
+    describe('multiple requests output', () => {
+      const sendMultipleRequests = async (requests: string[]) => {
+        await asyncForEach(requests, async (request) => {
+          await PageObjects.console.enterRequest(request);
+        });
+        await PageObjects.console.selectAllRequests();
+        await PageObjects.console.clickPlay();
+      };
+
+      beforeEach(async () => {
+        await PageObjects.console.clearTextArea();
+      });
+
+      it('should contain comments starting with # symbol', async () => {
+        await sendMultipleRequests(['\n PUT test-index', '\n DELETE test-index']);
+        await retry.try(async () => {
+          const response = await PageObjects.console.getResponse();
+          log.debug(response);
+          expect(response).to.contain('# PUT test-index 200 OK');
+          expect(response).to.contain('# DELETE test-index 200 OK');
+        });
+      });
+
+      it('should display status badges', async () => {
+        await sendMultipleRequests(['\n GET _search/test', '\n GET _search']);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await PageObjects.console.hasWarningBadge()).to.be(true);
+        expect(await PageObjects.console.hasSuccessBadge()).to.be(true);
       });
     });
   });

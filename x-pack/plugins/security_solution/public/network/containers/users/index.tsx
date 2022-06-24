@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
@@ -19,19 +20,18 @@ import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkSelectors } from '../../store';
 import {
-  FlowTarget,
+  FlowTargetSourceDest,
   NetworkQueries,
   NetworkUsersRequestOptions,
   NetworkUsersStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/network';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import { PageInfoPaginated } from '../../../../common/search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'networkUsersQuery';
+export const ID = 'networkUsersQuery';
 
 export interface NetworkUsersArgs {
   id: string;
@@ -46,12 +46,12 @@ export interface NetworkUsersArgs {
 }
 
 interface UseNetworkUsers {
-  id?: string;
+  id: string;
   filterQuery?: ESTermQuery | string;
   endDate: string;
   startDate: string;
   skip: boolean;
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
   ip: string;
 }
 
@@ -59,7 +59,7 @@ export const useNetworkUsers = ({
   endDate,
   filterQuery,
   flowTarget,
-  id = ID,
+  id,
   ip,
   skip,
   startDate,
@@ -194,6 +194,14 @@ export const useNetworkUsers = ({
       abortCtrl.current.abort();
     };
   }, [networkUsersRequest, networkUsersSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkUsersResponse];
 };

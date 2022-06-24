@@ -17,11 +17,11 @@ import {
   EuiPanel,
   EuiCallOut,
 } from '@elastic/eui';
-import type { CoreStart } from 'kibana/public';
+import type { CoreStart } from '@kbn/core/public';
 import useDebounce from 'react-use/lib/useDebounce';
-import { DOCUMENT_FIELD_NAME } from '../../../plugins/lens/common/constants';
-import type { DataView } from '../../../../src/plugins/data_views/public';
-import { ViewMode } from '../../../../src/plugins/embeddable/public';
+import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
@@ -36,14 +36,10 @@ import type {
   RangeIndexPatternColumn,
   PieVisualizationState,
   MedianIndexPatternColumn,
-} from '../../../plugins/lens/public';
+} from '@kbn/lens-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { CodeEditor, HJsonLang, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { StartDependencies } from './plugin';
-import type { ActionExecutionContext } from '../../../../src/plugins/ui_actions/public';
-import {
-  CodeEditor,
-  HJsonLang,
-  KibanaContextProvider,
-} from '../../../../src/plugins/kibana_react/public';
 
 type RequiredType = 'date' | 'string' | 'number';
 type FieldsMap = Record<RequiredType, string>;
@@ -372,6 +368,7 @@ export const App = (props: {
   plugins: StartDependencies;
   defaultDataView: DataView;
   stateHelpers: Awaited<ReturnType<LensPublicStart['stateHelperApi']>>;
+  preloadedVisualization: TypedLensByValueInput['attributes'];
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
@@ -380,7 +377,11 @@ export const App = (props: {
   const [enableTriggers, toggleTriggers] = useState(false);
   const [loadedCharts, addChartConfiguration] = useState<
     Array<{ id: string; attributes: TypedLensByValueInput['attributes'] }>
-  >([]);
+  >(
+    props.preloadedVisualization
+      ? [{ id: 'from_lens', attributes: props.preloadedVisualization }]
+      : []
+  );
   const [hasParsingError, setErrorFlag] = useState(false);
   const [hasParsingErrorDebounced, setErrorDebounced] = useState(hasParsingError);
   const LensComponent = props.plugins.lens.EmbeddableComponent;
@@ -414,8 +415,11 @@ export const App = (props: {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const charts = useMemo(() => [...defaultCharts, ...loadedCharts], [loadedCharts]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const initialAttributes = useMemo(() => JSON.stringify(charts[0].attributes, null, 2), []);
+  const initialAttributes = useMemo(
+    () => JSON.stringify(props.preloadedVisualization ?? charts[0].attributes, null, 2),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const currentSO = useRef<string>(initialAttributes);
   const [currentValid, saveValidSO] = useState(initialAttributes);
@@ -665,6 +669,7 @@ export const App = (props: {
                         value={undefined}
                         onChange={(e) => switchChartPreset(Number(e.target.value))}
                         aria-label="Load from a preset"
+                        prepend={'Load preset'}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

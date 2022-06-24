@@ -10,7 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
@@ -18,7 +18,6 @@ import { generateTablePaginationOptions } from '../../../common/components/pagin
 import { createFilter } from '../../../common/containers/helpers';
 import { hostsModel, hostsSelectors } from '../../store';
 import {
-  DocValueFields,
   SortField,
   PageInfoPaginated,
   HostsUncommonProcessesEdges,
@@ -34,7 +33,7 @@ import { InspectResponse } from '../../../types';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'hostsUncommonProcessesQuery';
+export const ID = 'hostsUncommonProcessesQuery';
 
 export interface UncommonProcessesArgs {
   id: string;
@@ -48,7 +47,6 @@ export interface UncommonProcessesArgs {
 }
 
 interface UseUncommonProcesses {
-  docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
   indexNames: string[];
@@ -58,7 +56,6 @@ interface UseUncommonProcesses {
 }
 
 export const useUncommonProcesses = ({
-  docValueFields,
   filterQuery,
   endDate,
   indexNames,
@@ -176,7 +173,6 @@ export const useUncommonProcesses = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: HostsQueries.uncommonProcesses,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -192,7 +188,7 @@ export const useUncommonProcesses = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, docValueFields, endDate, filterQuery, limit, startDate]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate]);
 
   useEffect(() => {
     uncommonProcessesSearch(uncommonProcessesRequest);
@@ -201,6 +197,14 @@ export const useUncommonProcesses = ({
       abortCtrl.current.abort();
     };
   }, [uncommonProcessesRequest, uncommonProcessesSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, uncommonProcessesResponse];
 };

@@ -8,12 +8,14 @@ import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter, Query } from '@kbn/es-query';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { Direction, EntityType } from '../../../../common/search_strategy';
-import type { CoreStart } from '../../../../../../../src/core/public';
 import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
 
 import type {
@@ -26,8 +28,6 @@ import type {
   BulkActionsProp,
   AlertStatus,
 } from '../../../../common/types/timeline';
-import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { combineQueries, getCombinedFilterQuery } from '../helpers';
@@ -39,7 +39,6 @@ import { LastUpdatedAt } from '../..';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
-import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
@@ -49,7 +48,7 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
 `;
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-const STANDALONE_ID = 'standalone-t-grid';
+export const STANDALONE_ID = 'standalone-t-grid';
 const EMPTY_DATA_PROVIDERS: DataProvider[] = [];
 
 const TitleText = styled.span`
@@ -76,16 +75,7 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow: auto;
 `;
 
-const casesFeatures = { alerts: { sync: false } };
-
 export interface TGridStandaloneProps {
-  appId: string;
-  casesOwner: string;
-  casePermissions: {
-    crud: boolean;
-    read: boolean;
-  } | null;
-  afterCaseSelection?: Function;
   columns: ColumnHeaderOptions[];
   dataViewId?: string | null;
   defaultCellActions?: TGridCellAction[];
@@ -106,6 +96,7 @@ export interface TGridStandaloneProps {
   }) => boolean;
   height?: number;
   indexNames: string[];
+  itemsPerPage?: number;
   itemsPerPageOptions: number[];
   query: Query;
   onRuleChange?: () => void;
@@ -127,10 +118,6 @@ export interface TGridStandaloneProps {
 }
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
-  afterCaseSelection,
-  appId,
-  casesOwner,
-  casePermissions,
   columns,
   dataViewId = null,
   defaultCellActions,
@@ -144,6 +131,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   filterStatus,
   hasAlertsCrudPermissions,
   indexNames,
+  itemsPerPage,
   itemsPerPageOptions,
   onRuleChange,
   query,
@@ -159,6 +147,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   data,
   unit,
   showCheckboxes = true,
+  bulkActions = {},
   queryFields = [],
 }) => {
   const dispatch = useDispatch();
@@ -215,10 +204,11 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 
   const sortField = useMemo(
     () =>
-      sortStore.map(({ columnId, columnType, sortDirection }) => ({
+      sortStore.map(({ columnId, columnType, esTypes, sortDirection }) => ({
         field: columnId,
         type: columnType,
         direction: sortDirection as Direction,
+        esTypes: esTypes ?? [],
       })),
     [sortStore]
   );
@@ -272,26 +262,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   );
   const hasAlerts = totalCountMinusDeleted > 0;
 
-  const activeCaseFlowId = useSelector((state: State) => tGridSelectors.activeCaseFlowId(state));
-  const selectedEvent = useMemo(() => {
-    const matchedEvent = events.find((event) => event.ecs._id === activeCaseFlowId);
-    if (matchedEvent) {
-      return matchedEvent;
-    } else {
-      return undefined;
-    }
-  }, [events, activeCaseFlowId]);
-
-  const addToCaseActionProps = useMemo(() => {
-    return {
-      event: selectedEvent,
-      casePermissions: casePermissions ?? null,
-      appId,
-      owner: casesOwner,
-      onClose: afterCaseSelection,
-    };
-  }, [appId, casePermissions, afterCaseSelection, selectedEvent, casesOwner]);
-
   const nonDeletedEvents = useMemo(
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
     [deletedEventIds, events]
@@ -328,7 +298,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
           end,
         },
         indexNames,
-        itemsPerPage: itemsPerPageStore,
+        itemsPerPage: itemsPerPage || itemsPerPageStore,
         itemsPerPageOptions,
         showCheckboxes,
       })
@@ -418,6 +388,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       filterStatus={filterStatus}
                       trailingControlColumns={trailingControlColumns}
                       showCheckboxes={showCheckboxes}
+                      bulkActions={bulkActions}
                     />
                   </ScrollableFlexItem>
                 </FullWidthFlexGroup>
@@ -425,7 +396,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             </EventsContainerLoading>
           </TimelineContext.Provider>
         ) : null}
-        <AddToCaseAction {...addToCaseActionProps} casesFeatures={casesFeatures} />
       </AlertsTableWrapper>
     </InspectButtonContainer>
   );

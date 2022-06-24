@@ -61,8 +61,8 @@ export type PipelineFormTestSubjects =
   | 'onFailureEditor'
   | 'testPipelineButton'
   | 'showRequestLink'
-  | 'requestFlyout'
-  | 'requestFlyout.title'
+  | 'apiRequestFlyout'
+  | 'apiRequestFlyout.apiRequestFlyoutTitle'
   | 'testPipelineFlyout'
   | 'testPipelineFlyout.title'
   | 'documentationLink';

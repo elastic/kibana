@@ -19,7 +19,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView } from 'src/plugins/data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { SourceFiltersTableFilter } from '../../types';
 
 const filterHeader = i18n.translate(

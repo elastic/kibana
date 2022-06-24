@@ -12,8 +12,8 @@ import { EuiFlyout, EuiFlyoutSize, EuiOverlayMaskProps } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
-import { I18nStart } from '../../i18n';
-import { ThemeServiceStart } from '../../theme';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import { MountPoint } from '../../types';
 import { OverlayRef } from '../types';
 import { MountWrapper, CoreContextProvider } from '../../utils';
@@ -87,6 +87,7 @@ export interface OverlayFlyoutOpenOptions {
   size?: EuiFlyoutSize;
   maxWidth?: boolean | number | string;
   hideCloseButton?: boolean;
+  outsideClickCloses?: boolean;
   maskProps?: EuiOverlayMaskProps;
   /**
    * EuiFlyout onClose handler.

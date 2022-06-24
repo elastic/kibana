@@ -11,6 +11,8 @@ import { EuiProvider } from '@elastic/eui';
 import createCache from '@emotion/cache';
 import type { DecoratorFn } from '@storybook/react';
 
+import 'core_styles';
+
 /**
  * Storybook decorator using the EUI provider. Uses the value from
  * `globals` provided by the Storybook theme switcher.
@@ -21,6 +23,7 @@ const EuiProviderDecorator: DecoratorFn = (storyFn, { globals }) => {
     key: 'eui-styles',
     container: document.querySelector(`meta[name="eui-styles-global"]`) as HTMLElement,
   });
+  emotionCache.compat = true;
 
   return (
     <EuiProvider colorMode={colorMode} cache={emotionCache}>

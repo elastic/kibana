@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { signalsMigrationSOClient } from './saved_objects_client';
 
 export const deleteMigrationSavedObject = async ({

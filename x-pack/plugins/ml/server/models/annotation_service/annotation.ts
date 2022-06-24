@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { each, get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
@@ -78,6 +78,31 @@ export interface AggByJob {
 }
 
 export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
+  // Find the index the annotation is stored in.
+  async function fetchAnnotationIndex(id: string) {
+    const searchParams: estypes.SearchRequest = {
+      index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+      size: 1,
+      body: {
+        query: {
+          ids: {
+            values: [id],
+          },
+        },
+      },
+    };
+
+    const body = await asInternalUser.search(searchParams, { maxRetries: 0 });
+    const totalCount =
+      typeof body.hits.total === 'number' ? body.hits.total : body.hits.total!.value;
+
+    if (totalCount === 0) {
+      throw Boom.notFound(`Cannot find annotation with ID ${id}`);
+    }
+
+    return body.hits.hits[0]._index;
+  }
+
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       // No need to translate, this will not be exposed in the UI.
@@ -101,11 +126,13 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
 
     if (typeof annotation._id !== 'undefined') {
       params.id = annotation._id;
+      params.index = await fetchAnnotationIndex(annotation._id);
+      params.require_alias = false;
       delete params.body._id;
       delete params.body.key;
     }
 
-    return await asInternalUser.index(params);
+    return await asInternalUser.index(params, { maxRetries: 0 });
   }
 
   async function getAnnotations({
@@ -282,7 +309,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     };
 
     try {
-      const body = await asInternalUser.search(params);
+      const body = await asInternalUser.search(params, { maxRetries: 0 });
 
       // @ts-expect-error TODO fix search response types
       if (body.error !== undefined && body.message !== undefined) {
@@ -374,7 +401,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       },
     };
 
-    const body = await asInternalUser.search<Annotation>(params);
+    const body = await asInternalUser.search<Annotation>(params, { maxRetries: 0 });
 
     const annotations = (
       (body.aggregations!.by_job as estypes.AggregationsTermsAggregateBase<AggByJob>)
@@ -387,28 +414,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
   }
 
   async function deleteAnnotation(id: string) {
-    // Find the index the annotation is stored in.
-    const searchParams: estypes.SearchRequest = {
-      index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
-      size: 1,
-      body: {
-        query: {
-          ids: {
-            values: [id],
-          },
-        },
-      },
-    };
-
-    const body = await asInternalUser.search(searchParams);
-    const totalCount =
-      typeof body.hits.total === 'number' ? body.hits.total : body.hits.total!.value;
-
-    if (totalCount === 0) {
-      throw Boom.notFound(`Cannot find annotation with ID ${id}`);
-    }
-
-    const index = body.hits.hits[0]._index;
+    const index = await fetchAnnotationIndex(id);
 
     const deleteParams: DeleteParams = {
       index,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
+import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery, termQuery } from '../../../../observability/server';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -29,7 +29,7 @@ import { getProcessorEventForTransactions } from '../../lib/helpers/transactions
 
 export interface IEnvOptions {
   setup: Setup;
-  serviceName?: string;
+  serviceNames?: string[];
   environment: string;
   searchAggregatedTransactions: boolean;
   logger: Logger;
@@ -39,7 +39,7 @@ export interface IEnvOptions {
 
 async function getConnectionData({
   setup,
-  serviceName,
+  serviceNames,
   environment,
   start,
   end,
@@ -47,7 +47,7 @@ async function getConnectionData({
   return withApmSpan('get_service_map_connections', async () => {
     const { traceIds } = await getTraceSampleIds({
       setup,
-      serviceName,
+      serviceNames,
       environment,
       start,
       end,
@@ -109,7 +109,7 @@ async function getServicesData(options: IEnvOptions) {
           filter: [
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
-            ...termQuery(SERVICE_NAME, options.serviceName),
+            ...termsQuery(SERVICE_NAME, ...(options.serviceNames ?? [])),
           ],
         },
       },

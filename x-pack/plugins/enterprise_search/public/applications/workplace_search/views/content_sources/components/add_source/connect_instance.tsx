@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useEffect, FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -42,17 +42,14 @@ interface ConnectInstanceProps {
 }
 
 export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
-  configuration: { needsSubdomain, hasOauthRedirect },
+  configuration: { needsSubdomain, hasOauthRedirect, needsCredentials },
   features,
   objTypes,
   name,
-  serviceType,
   needsPermissions,
   onFormCreated,
   header,
 }) => {
-  const [formLoading, setFormLoading] = useState(false);
-
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const {
@@ -64,8 +61,14 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue,
   } = useActions(AddSourceLogic);
 
-  const { loginValue, passwordValue, indexPermissionsValue, subdomainValue } =
-    useValues(AddSourceLogic);
+  const {
+    buttonLoading,
+    loginValue,
+    passwordValue,
+    indexPermissionsValue,
+    subdomainValue,
+    sourceConfigData: { connectionRequiresRedirect },
+  } = useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -74,17 +77,16 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue(needsPermissions && isOrganization && hasPlatinumLicense);
   }, []);
 
+  const doRedirect = hasOauthRedirect || connectionRequiresRedirect;
+
   const redirectOauth = (oauthUrl: string) => window.location.replace(oauthUrl);
   const redirectFormCreated = () => onFormCreated(name);
-  const onOauthFormSubmit = () => getSourceConnectData(serviceType, redirectOauth);
-  const handleFormSubmitError = () => setFormLoading(false);
-  const onCredentialsFormSubmit = () =>
-    createContentSource(serviceType, redirectFormCreated, handleFormSubmitError);
+  const onOauthFormSubmit = () => getSourceConnectData(redirectOauth);
+  const onCredentialsFormSubmit = () => createContentSource(redirectFormCreated);
 
   const handleFormSubmit = (e: FormEvent) => {
-    setFormLoading(true);
     e.preventDefault();
-    const onSubmit = hasOauthRedirect ? onOauthFormSubmit : onCredentialsFormSubmit;
+    const onSubmit = doRedirect ? onOauthFormSubmit : onCredentialsFormSubmit;
     onSubmit();
   };
 
@@ -100,6 +102,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
           name="login"
           value={loginValue}
           onChange={(e) => setSourceLoginValue(e.target.value)}
+          data-test-subj="LoginField"
         />
       </EuiFormRow>
       <EuiFormRow label="Password">
@@ -109,6 +112,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
           type="password"
           value={passwordValue}
           onChange={(e) => setSourcePasswordValue(e.target.value)}
+          data-test-subj="PasswordField"
         />
       </EuiFormRow>
       <EuiSpacer size="xxl" />
@@ -140,12 +144,12 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   const formFields = (
     <>
       {isOrganization && hasPlatinumLicense && permissionField}
-      {!hasOauthRedirect && credentialsFields}
+      {needsCredentials && credentialsFields}
       {needsSubdomain && subdomainField}
       {permissionsExcluded && !hasPlatinumLicense && <DocumentPermissionsCallout />}
 
       <EuiFormRow>
-        <EuiButton color="primary" type="submit" fill isLoading={formLoading}>
+        <EuiButton color="primary" type="submit" fill isLoading={buttonLoading}>
           {i18n.translate('xpack.enterpriseSearch.workplaceSearch.contentSource.connect.button', {
             defaultMessage: 'Connect {name}',
             values: { name },

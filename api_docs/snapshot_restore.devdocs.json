@@ -92,14 +92,13 @@
       },
       {
         "parentPluginId": "snapshotRestore",
-        "id": "def-common.DEFAULT_REPOSITORY_TYPES",
-        "type": "Array",
+        "id": "def-common.FEATURE_STATES_NONE_OPTION",
+        "type": "string",
         "tags": [],
-        "label": "DEFAULT_REPOSITORY_TYPES",
+        "label": "FEATURE_STATES_NONE_OPTION",
         "description": [],
         "signature": [
-          "RepositoryType",
-          "[]"
+          "\"none\""
         ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
@@ -114,6 +113,36 @@
         "description": [],
         "signature": [
           "\"8.0.0\""
+        ],
+        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "snapshotRestore",
+        "id": "def-common.MODULE_REPOSITORY_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "MODULE_REPOSITORY_TYPES",
+        "description": [],
+        "signature": [
+          "RepositoryType",
+          "[]"
+        ],
+        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "snapshotRestore",
+        "id": "def-common.ON_PREM_REPOSITORY_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "ON_PREM_REPOSITORY_TYPES",
+        "description": [],
+        "signature": [
+          "RepositoryType",
+          "[]"
         ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,

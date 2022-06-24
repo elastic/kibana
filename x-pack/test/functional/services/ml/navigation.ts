@@ -55,7 +55,7 @@ export function MachineLearningNavigationProvider({
     async navigateToAlertsAndAction() {
       await PageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
-      await testSubjects.existOrFail('alertsList');
+      await testSubjects.existOrFail('rulesList');
     },
 
     async assertTabsExist(tabTypeSubject: string, areaSubjects: string[]) {
@@ -150,6 +150,14 @@ export function MachineLearningNavigationProvider({
 
     async navigateToAnomalyDetection() {
       await this.navigateToArea('~mlMainTab & ~anomalyDetection', 'mlPageJobManagement');
+    },
+
+    async navigateToSingleMetricViewer(jobId: string) {
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'ml',
+        `/timeseriesexplorer`,
+        `?_g=(ml%3A(jobIds%3A!(${jobId}))%2CrefreshInterval%3A(display%3AOff%2Cpause%3A!t%2Cvalue%3A0))`
+      );
     },
 
     async navigateToDataFrameAnalytics() {

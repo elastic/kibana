@@ -12,7 +12,7 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   Logger,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 import type {
   EsAssetReference,
@@ -146,14 +146,15 @@ class PackageClientImpl implements PackageClient {
     return installedAssets;
   }
 
-  #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
-    return installTransform(
+  async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
+    const { installedTransforms } = await installTransform(
       packageInfo,
       paths,
       this.internalEsClient,
       this.internalSoClient,
       this.logger
     );
+    return installedTransforms;
   }
 
   #runPreflight() {

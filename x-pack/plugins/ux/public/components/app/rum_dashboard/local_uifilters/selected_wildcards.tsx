@@ -12,13 +12,13 @@ import {
   FilterValueLabel,
   fromQuery,
   toQuery,
-} from '../../../../../../observability/public';
+} from '@kbn/observability-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TRANSACTION_URL } from '../../../../../common/elasticsearch_fieldnames';
-import { IndexPattern } from '../../../../../../../../src/plugins/data_views/common';
 
 interface Props {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
 }
 export function SelectedWildcards({ indexPattern }: Props) {
   const history = useHistory();
@@ -47,7 +47,7 @@ export function SelectedWildcards({ indexPattern }: Props) {
 
   return searchTerm ? (
     <FilterValueLabel
-      indexPattern={indexPattern}
+      dataView={indexPattern}
       removeFilter={() => {
         updateSearchTerm('');
       }}

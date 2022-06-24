@@ -7,7 +7,7 @@
 
 import { isObjectLike, isEmpty } from 'lodash';
 import { AxiosInstance, Method, AxiosResponse, AxiosBasicCredentials } from 'axios';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
@@ -18,6 +18,7 @@ export const request = async <T = unknown>({
   method = 'get',
   data,
   configurationUtilities,
+  headers,
   ...rest
 }: {
   axios: AxiosInstance;
@@ -37,6 +38,8 @@ export const request = async <T = unknown>({
   return await axios(url, {
     ...rest,
     method,
+    // Axios doesn't support `null` value for `headers` property.
+    headers: headers ?? undefined,
     data: data ?? {},
     // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
     httpAgent,

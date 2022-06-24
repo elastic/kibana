@@ -7,8 +7,9 @@
  */
 
 import { Position } from '@elastic/charts';
+import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { EmptySizeRatios, LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
-import { prepareLogTable } from '../../../../visualizations/common/utils';
 import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -25,22 +26,22 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   help: strings.getPieVisFunctionName(),
   args: {
     metric: {
-      types: ['vis_dimension'],
+      types: ['vis_dimension', 'string'],
       help: strings.getMetricArgHelp(),
       required: true,
     },
     buckets: {
-      types: ['vis_dimension'],
+      types: ['vis_dimension', 'string'],
       help: strings.getBucketsArgHelp(),
       multi: true,
     },
     splitColumn: {
-      types: ['vis_dimension'],
+      types: ['vis_dimension', 'string'],
       help: strings.getSplitColumnArgHelp(),
       multi: true,
     },
     splitRow: {
-      types: ['vis_dimension'],
+      types: ['vis_dimension', 'string'],
       help: strings.getSplitRowArgHelp(),
       multi: true,
     },
@@ -54,12 +55,27 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       help: strings.getLegendDisplayArgHelp(),
       options: [LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT],
       default: LegendDisplay.HIDE,
+      strict: true,
     },
     legendPosition: {
       types: ['string'],
+      default: Position.Right,
       help: strings.getLegendPositionArgHelp(),
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-      default: Position.Right,
+      strict: true,
+    },
+    legendSize: {
+      types: ['string'],
+      default: DEFAULT_LEGEND_SIZE,
+      help: strings.getLegendSizeArgHelp(),
+      options: [
+        LegendSize.AUTO,
+        LegendSize.SMALL,
+        LegendSize.MEDIUM,
+        LegendSize.LARGE,
+        LegendSize.EXTRA_LARGE,
+      ],
+      strict: true,
     },
     nestedLegend: {
       types: ['boolean'],
@@ -121,6 +137,17 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
     }
 
+    validateAccessor(args.metric, context.columns);
+    if (args.buckets) {
+      args.buckets.forEach((bucket) => validateAccessor(bucket, context.columns));
+    }
+    if (args.splitColumn) {
+      args.splitColumn.forEach((splitColumn) => validateAccessor(splitColumn, context.columns));
+    }
+    if (args.splitRow) {
+      args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
+    }
+
     const visConfig: PartitionVisParams = {
       ...args,
       ariaLabel:
@@ -141,12 +168,19 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
     }
 
     if (handlers?.inspectorAdapters?.tables) {
-      const logTable = prepareLogTable(context, [
-        [[args.metric], strings.getSliceSizeHelp()],
-        [args.buckets, strings.getSliceHelp()],
-        [args.splitColumn, strings.getColumnSplitHelp()],
-        [args.splitRow, strings.getRowSplitHelp()],
-      ]);
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
+      const logTable = prepareLogTable(
+        context,
+        [
+          [[args.metric], strings.getSliceSizeHelp()],
+          [args.buckets, strings.getSliceHelp()],
+          [args.splitColumn, strings.getColumnSplitHelp()],
+          [args.splitRow, strings.getRowSplitHelp()],
+        ],
+        true
+      );
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 

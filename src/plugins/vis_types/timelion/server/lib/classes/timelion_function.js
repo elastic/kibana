@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import loadFunctions from '../load_functions.js';
+import loadFunctions from '../load_functions';
 const fitFunctions = loadFunctions('fit_functions');
 
 export default class TimelionFunction {

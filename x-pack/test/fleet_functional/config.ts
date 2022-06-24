@@ -11,7 +11,9 @@ import { pageObjects } from './page_objects';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   return {
     ...xpackFunctionalConfig.getAll(),
@@ -29,7 +31,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [...xpackFunctionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        // Enable debug fleet logs by default
+        `--logging.loggers[0].name=plugins.fleet`,
+        `--logging.loggers[0].level=debug`,
+        `--logging.loggers[0].appenders=${JSON.stringify(['default'])}`,
+      ],
     },
     layout: {
       fixedHeaderHeight: 200,

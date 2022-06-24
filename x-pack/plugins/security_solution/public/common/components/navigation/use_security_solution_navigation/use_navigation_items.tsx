@@ -14,7 +14,8 @@ import { PrimaryNavigationItemsProps } from './types';
 import { useKibana } from '../../../lib/kibana/kibana_react';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useNavigation } from '../../../lib/kibana/hooks';
-import { NavTab } from '../types';
+import { NavTab, SecurityNavGroupKey } from '../types';
+import { SecurityPageName } from '../../../../../common/constants';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
@@ -75,43 +76,61 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
             {
               id: 'main',
               name: '',
-              items: [navTabs.overview],
+              items: [navTabs[SecurityPageName.landing]],
             },
             {
-              ...securityNavGroup.detect,
-              items: [navTabs.alerts, navTabs.rules, navTabs.exceptions],
-            },
-            {
-              ...securityNavGroup.explore,
+              ...securityNavGroup[SecurityNavGroupKey.dashboards],
               items: [
-                navTabs.hosts,
-                navTabs.network,
-                ...(navTabs.users != null ? [navTabs.users] : []),
+                navTabs[SecurityPageName.overview],
+                navTabs[SecurityPageName.detectionAndResponse],
+                ...(navTabs[SecurityPageName.kubernetes] != null
+                  ? [navTabs[SecurityPageName.kubernetes]]
+                  : []),
               ],
             },
             {
-              ...securityNavGroup.investigate,
-              items: hasCasesReadPermissions
-                ? [navTabs.timelines, navTabs.cases]
-                : [navTabs.timelines],
+              ...securityNavGroup[SecurityNavGroupKey.detect],
+              items: [
+                navTabs[SecurityPageName.alerts],
+                navTabs[SecurityPageName.rules],
+                navTabs[SecurityPageName.exceptions],
+              ],
             },
             {
-              ...securityNavGroup.manage,
+              ...securityNavGroup[SecurityNavGroupKey.explore],
               items: [
-                navTabs.endpoints,
-                ...(isPolicyListEnabled ? [navTabs.policies] : []),
-                navTabs.trusted_apps,
-                navTabs.event_filters,
-                ...(canSeeHostIsolationExceptions ? [navTabs.host_isolation_exceptions] : []),
-                navTabs.blocklist,
+                navTabs[SecurityPageName.hosts],
+                navTabs[SecurityPageName.network],
+                ...(navTabs[SecurityPageName.users] != null
+                  ? [navTabs[SecurityPageName.users]]
+                  : []),
+              ],
+            },
+            {
+              ...securityNavGroup[SecurityNavGroupKey.investigate],
+              items: hasCasesReadPermissions
+                ? [navTabs[SecurityPageName.timelines], navTabs[SecurityPageName.case]]
+                : [navTabs[SecurityPageName.timelines]],
+            },
+            {
+              ...securityNavGroup[SecurityNavGroupKey.manage],
+              items: [
+                navTabs[SecurityPageName.endpoints],
+                ...(isPolicyListEnabled ? [navTabs[SecurityPageName.policies]] : []),
+                navTabs[SecurityPageName.trustedApps],
+                navTabs[SecurityPageName.eventFilters],
+                ...(canSeeHostIsolationExceptions
+                  ? [navTabs[SecurityPageName.hostIsolationExceptions]]
+                  : []),
+                navTabs[SecurityPageName.blocklist],
               ],
             },
           ]
         : hasCasesReadPermissions
         ? [
             {
-              ...securityNavGroup.investigate,
-              items: [navTabs.cases],
+              ...securityNavGroup[SecurityNavGroupKey.investigate],
+              items: [navTabs[SecurityPageName.case]],
             },
           ]
         : [],

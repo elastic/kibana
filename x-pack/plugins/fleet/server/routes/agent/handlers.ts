@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
+import { uniq } from 'lodash';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
@@ -21,6 +22,7 @@ import type {
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
   GetAgentStatusRequestSchema,
+  GetAgentDataRequestSchema,
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
 } from '../../types';
@@ -31,8 +33,9 @@ import * as AgentService from '../../services/agents';
 export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
     const body: GetOneAgentResponse = {
@@ -54,7 +57,8 @@ export const getAgentHandler: RequestHandler<
 export const deleteAgentHandler: RequestHandler<
   TypeOf<typeof DeleteAgentRequestSchema.params>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
     await AgentService.deleteAgent(esClient, request.params.agentId);
@@ -81,12 +85,19 @@ export const updateAgentHandler: RequestHandler<
   undefined,
   TypeOf<typeof UpdateAgentRequestSchema.body>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  const partialAgent: any = {};
+  if (request.body.user_provided_metadata) {
+    partialAgent.user_provided_metadata = request.body.user_provided_metadata;
+  }
+  if (request.body.tags) {
+    partialAgent.tags = uniq(request.body.tags);
+  }
 
   try {
-    await AgentService.updateAgent(esClient, request.params.agentId, {
-      user_provided_metadata: request.body.user_provided_metadata,
-    });
+    await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
       item: await AgentService.getAgentById(esClient, request.params.agentId),
     };
@@ -107,7 +118,8 @@ export const getAgentsHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetAgentsRequestSchema.query>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
     const { agents, total, page, perPage } = await AgentService.getAgentsByKuery(esClient, {
@@ -142,8 +154,9 @@ export const putAgentsReassignHandler: RequestHandler<
   undefined,
   TypeOf<typeof PutAgentReassignRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
     await AgentService.reassignAgent(
       soClient,
@@ -171,8 +184,9 @@ export const postBulkAgentsReassignHandler: RequestHandler<
     });
   }
 
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
     : { kuery: request.body.agents };
@@ -203,10 +217,9 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asInternalUser;
-
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
-    // TODO change path
     const results = await AgentService.getAgentStatusForAgentPolicy(
       esClient,
       request.query.policyId,
@@ -220,3 +233,33 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
     return defaultIngestErrorHandler({ error, response });
   }
 };
+
+export const getAgentDataHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetAgentDataRequestSchema.query>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asCurrentUser;
+  try {
+    const returnDataPreview = request.query.previewData;
+    const agentIds = isStringArray(request.query.agentsIds)
+      ? request.query.agentsIds
+      : [request.query.agentsIds];
+
+    const { items, dataPreview } = await AgentService.getIncomingDataByAgentsId(
+      esClient,
+      agentIds,
+      returnDataPreview
+    );
+
+    const body = { items, dataPreview };
+
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+function isStringArray(arr: unknown | string[]): arr is string[] {
+  return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
+}

@@ -1,14 +1,12 @@
 on:
   pull_request_target:
-    branches:
-      - main
-    types:
-      - labeled
-      - closed
+    branches: ["main"]
+    types: ["labeled", "closed"]
 
 jobs:
   backport:
     name: Backport PR
+    runs-on: ubuntu-latest
     if: |
       github.event.pull_request.merged == true
       && contains(github.event.pull_request.labels.*.name, 'auto-backport')
@@ -16,26 +14,16 @@ jobs:
         (github.event.action == 'labeled' && github.event.label.name == 'auto-backport')
         || (github.event.action == 'closed')
       )
-    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Actions
-        uses: actions/checkout@v2
-        with:
-          repository: 'elastic/kibana-github-actions'
-          ref: main
-          path: ./actions
-
-      - name: Install Actions
-        run: npm install --production --prefix ./actions
-
-      - name: Fix Version Label Gaps
-        uses: ./actions/fix-version-gaps
+      - name: Backport Action
+        uses: sqren/backport-github-action@v8.5.2
         with:
           github_token: ${{secrets.KIBANAMACHINE_TOKEN}}
 
-      - name: Run Backport
-        uses: ./actions/backport
-        with:
-          github_token: ${{secrets.KIBANAMACHINE_TOKEN}}
-          commit_user: kibanamachine
-          commit_email: 42973632+kibanamachine@users.noreply.github.com
+      - name: Info log
+        if: ${{ success() }}
+        run: cat /home/runner/.backport/backport.info.log
+        
+      - name: Debug log
+        if: ${{ failure() }}
+        run: cat /home/runner/.backport/backport.debug.log        

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+const dedent = require('dedent');
 const { resolve, basename } = require('path');
 const { createHash } = require('crypto');
 const { promisify } = require('util');
@@ -21,7 +22,16 @@ const pipelineAsync = promisify(pipeline);
 
 exports.description = 'Build and collect ES snapshots';
 
-exports.help = () => ``;
+exports.help = () => dedent`
+    Options:
+
+      --output          Path to create the built elasticsearch snapshots
+      --source-path     Path where the elasticsearch repository is checked out
+
+    Example:
+
+      es build_snapshots --source-path=/path/to/es/checked/repo --output=/tmp/es-built-snapshots
+  `;
 
 exports.run = async (defaults = {}) => {
   const argv = process.argv.slice(2);
@@ -42,32 +52,31 @@ exports.run = async (defaults = {}) => {
   for (const license of ['oss', 'trial']) {
     for (const platform of ['darwin', 'win32', 'linux']) {
       log.info('Building', platform, license === 'trial' ? 'default' : 'oss', 'snapshot');
-      log.indent(4);
+      await log.indent(4, async () => {
+        const snapshotPath = await buildSnapshot({
+          license,
+          sourcePath: options.sourcePath,
+          log,
+          platform,
+        });
 
-      const snapshotPath = await buildSnapshot({
-        license,
-        sourcePath: options.sourcePath,
-        log,
-        platform,
+        const filename = basename(snapshotPath);
+        const outputPath = resolve(outputDir, filename);
+        const hash = createHash('sha512');
+        await pipelineAsync(
+          Fs.createReadStream(snapshotPath),
+          new Transform({
+            transform(chunk, _, cb) {
+              hash.update(chunk);
+              cb(undefined, chunk);
+            },
+          }),
+          Fs.createWriteStream(outputPath)
+        );
+
+        Fs.writeFileSync(`${outputPath}.sha512`, `${hash.digest('hex')}  ${filename}`);
+        log.success('snapshot and shasum written to', outputPath);
       });
-
-      const filename = basename(snapshotPath);
-      const outputPath = resolve(outputDir, filename);
-      const hash = createHash('sha512');
-      await pipelineAsync(
-        Fs.createReadStream(snapshotPath),
-        new Transform({
-          transform(chunk, _, cb) {
-            hash.update(chunk);
-            cb(undefined, chunk);
-          },
-        }),
-        Fs.createWriteStream(outputPath)
-      );
-
-      Fs.writeFileSync(`${outputPath}.sha512`, `${hash.digest('hex')}  ${filename}`);
-      log.success('snapshot and shasum written to', outputPath);
-      log.indent(-4);
     }
   }
 };

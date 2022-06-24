@@ -15,21 +15,16 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { QueryClientProvider } from 'react-query';
 import { Case, CaseStatusWithAllStatus } from '../../../../common/ui/types';
-import { CommentRequestAlertType } from '../../../../common/api';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
-import { CaseAttachments } from '../../../types';
+import { casesQueryClient } from '../../cases_context/query_client';
+
 export interface AllCasesSelectorModalProps {
-  /**
-   * @deprecated Use the attachments prop instead
-   */
-  alertData?: Omit<CommentRequestAlertType, 'type'>;
   hiddenStatuses?: CaseStatusWithAllStatus[];
-  onRowClick: (theCase?: Case) => void;
-  updateCase?: (newCase: Case) => void;
+  onRowClick?: (theCase?: Case) => void;
   onClose?: () => void;
-  attachments?: CaseAttachments;
 }
 
 const Modal = styled(EuiModal)`
@@ -40,7 +35,7 @@ const Modal = styled(EuiModal)`
 `;
 
 export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
-  ({ alertData, attachments, hiddenStatuses, onRowClick, updateCase, onClose }) => {
+  ({ hiddenStatuses, onRowClick, onClose }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
     const closeModal = useCallback(() => {
       if (onClose) {
@@ -52,32 +47,33 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
     const onClick = useCallback(
       (theCase?: Case) => {
         closeModal();
-        onRowClick(theCase);
+        if (onRowClick) {
+          onRowClick(theCase);
+        }
       },
       [closeModal, onRowClick]
     );
 
     return isModalOpen ? (
-      <Modal onClose={closeModal} data-test-subj="all-cases-modal">
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <AllCasesList
-            alertData={alertData}
-            attachments={attachments}
-            hiddenStatuses={hiddenStatuses}
-            isSelectorView={true}
-            onRowClick={onClick}
-            updateCase={updateCase}
-          />
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButton color="text" onClick={closeModal}>
-            {i18n.CANCEL}
-          </EuiButton>
-        </EuiModalFooter>
-      </Modal>
+      <QueryClientProvider client={casesQueryClient}>
+        <Modal onClose={closeModal} data-test-subj="all-cases-modal">
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <AllCasesList
+              hiddenStatuses={hiddenStatuses}
+              isSelectorView={true}
+              onRowClick={onClick}
+            />
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton color="text" onClick={closeModal}>
+              {i18n.CANCEL}
+            </EuiButton>
+          </EuiModalFooter>
+        </Modal>
+      </QueryClientProvider>
     ) : null;
   }
 );

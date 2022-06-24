@@ -12,10 +12,10 @@ import { Router, Switch, Route, Redirect } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { StartServicesAccessor } from 'src/core/public';
+import { StartServicesAccessor } from '@kbn/core/public';
 
-import { KibanaContextProvider, KibanaThemeProvider } from '../../../kibana_react/public';
-import { ManagementAppMountParams } from '../../../management/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import {
   IndexPatternTableWithRouter,
   EditIndexPatternContainer,
@@ -39,8 +39,17 @@ export async function mountManagementSection(
   params: ManagementAppMountParams
 ) {
   const [
-    { chrome, uiSettings, notifications, overlays, http, docLinks, theme },
-    { data, dataViewFieldEditor, dataViewEditor, dataViews, fieldFormats },
+    { application, chrome, uiSettings, notifications, overlays, http, docLinks, theme },
+    {
+      data,
+      dataViewFieldEditor,
+      dataViewEditor,
+      dataViews,
+      fieldFormats,
+      unifiedSearch,
+      spaces,
+      savedObjectsManagement,
+    },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = dataViews.getCanSaveSync();
@@ -50,10 +59,12 @@ export async function mountManagementSection(
   }
 
   const deps: IndexPatternManagmentContext = {
+    application,
     chrome,
     uiSettings,
     notifications,
     overlays,
+    unifiedSearch,
     http,
     docLinks,
     data,
@@ -64,6 +75,9 @@ export async function mountManagementSection(
     fieldFormatEditors: dataViewFieldEditor.fieldFormatEditors,
     IndexPatternEditor: dataViewEditor.IndexPatternEditorComponent,
     fieldFormats,
+    spaces,
+    theme,
+    savedObjectsManagement,
   };
 
   ReactDOM.render(

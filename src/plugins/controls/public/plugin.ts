@@ -6,21 +6,39 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from './services';
-import { registry } from './services/kibana';
 import {
   ControlsPluginSetup,
   ControlsPluginStart,
   ControlsPluginSetupDeps,
   ControlsPluginStartDeps,
   IEditableControlFactory,
-  ControlEditorProps,
-  ControlEmbeddable,
   ControlInput,
 } from './types';
-import { OptionsListEmbeddableFactory } from './control_types/options_list';
-import { ControlGroupContainerFactory, CONTROL_GROUP_TYPE, OPTIONS_LIST_CONTROL } from '.';
+import {
+  OptionsListEmbeddableFactory,
+  OptionsListEmbeddableInput,
+} from './control_types/options_list';
+import {
+  RangeSliderEmbeddableFactory,
+  RangeSliderEmbeddableInput,
+} from './control_types/range_slider';
+import {
+  ControlGroupContainerFactory,
+  CONTROL_GROUP_TYPE,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  // TIME_SLIDER_CONTROL,
+} from '.';
+/*
+import {
+  TimesliderEmbeddableFactory,
+  TimeSliderControlEmbeddableInput,
+} from './control_types/time_slider';
+*/
+import { controlsService } from './services/kibana/controls';
 
 export class ControlsPlugin
   implements
@@ -31,63 +49,93 @@ export class ControlsPlugin
       ControlsPluginStartDeps
     >
 {
-  private inlineEditors: {
-    [key: string]: {
-      controlEditorComponent?: (props: ControlEditorProps) => JSX.Element;
-      presaveTransformFunction?: (
-        newInput: Partial<ControlInput>,
-        embeddable?: ControlEmbeddable
-      ) => Partial<ControlInput>;
-    };
-  } = {};
+  private async startControlsKibanaServices(
+    coreStart: CoreStart,
+    startPlugins: ControlsPluginStartDeps
+  ) {
+    const { registry } = await import('./services/kibana');
+    pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
+  }
+
+  private transferEditorFunctions<I extends ControlInput = ControlInput>(
+    factoryDef: IEditableControlFactory<I>,
+    factory: EmbeddableFactory
+  ) {
+    (factory as IEditableControlFactory<I>).controlEditorOptionsComponent =
+      factoryDef.controlEditorOptionsComponent ?? undefined;
+    (factory as IEditableControlFactory<I>).presaveTransformFunction =
+      factoryDef.presaveTransformFunction;
+    (factory as IEditableControlFactory<I>).isFieldCompatible = factoryDef.isFieldCompatible;
+  }
 
   public setup(
     _coreSetup: CoreSetup<ControlsPluginStartDeps, ControlsPluginStart>,
     _setupPlugins: ControlsPluginSetupDeps
   ): ControlsPluginSetup {
-    _coreSetup.getStartServices().then(([coreStart, deps]) => {
-      // register control group embeddable factory
+    const { registerControlType } = controlsService;
+    const { embeddable } = _setupPlugins;
+
+    // register control group embeddable factory
+    _coreSetup.getStartServices().then(([, deps]) => {
       embeddable.registerEmbeddableFactory(
         CONTROL_GROUP_TYPE,
         new ControlGroupContainerFactory(deps.embeddable)
       );
+
+      // Options List control factory setup
+      const optionsListFactoryDef = new OptionsListEmbeddableFactory();
+      const optionsListFactory = embeddable.registerEmbeddableFactory(
+        OPTIONS_LIST_CONTROL,
+        optionsListFactoryDef
+      )();
+      this.transferEditorFunctions<OptionsListEmbeddableInput>(
+        optionsListFactoryDef,
+        optionsListFactory
+      );
+      registerControlType(optionsListFactory);
+
+      // Register range slider
+      const rangeSliderFactoryDef = new RangeSliderEmbeddableFactory();
+      const rangeSliderFactory = embeddable.registerEmbeddableFactory(
+        RANGE_SLIDER_CONTROL,
+        rangeSliderFactoryDef
+      )();
+      this.transferEditorFunctions<RangeSliderEmbeddableInput>(
+        rangeSliderFactoryDef,
+        rangeSliderFactory
+      );
+      registerControlType(rangeSliderFactory);
+
+      // Time Slider Control Factory Setup
+      /* Temporary disabling Time Slider
+      const timeSliderFactoryDef = new TimesliderEmbeddableFactory();
+      const timeSliderFactory = embeddable.registerEmbeddableFactory(
+        TIME_SLIDER_CONTROL,
+        timeSliderFactoryDef
+      )();
+      this.transferEditorFunctions<TimeSliderControlEmbeddableInput>(
+        timeSliderFactoryDef,
+        timeSliderFactory
+      );
+      
+
+      registerControlType(timeSliderFactory);
+      */
     });
 
-    const { embeddable } = _setupPlugins;
-
-    // create control type embeddable factories.
-    const optionsListFactory = new OptionsListEmbeddableFactory();
-    const editableOptionsListFactory = optionsListFactory as IEditableControlFactory;
-    this.inlineEditors[OPTIONS_LIST_CONTROL] = {
-      controlEditorComponent: editableOptionsListFactory.controlEditorComponent,
-      presaveTransformFunction: editableOptionsListFactory.presaveTransformFunction,
+    return {
+      registerControlType,
     };
-    embeddable.registerEmbeddableFactory(OPTIONS_LIST_CONTROL, optionsListFactory);
-
-    return {};
   }
 
   public start(coreStart: CoreStart, startPlugins: ControlsPluginStartDeps): ControlsPluginStart {
-    pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
-    const { controls: controlsService } = pluginServices.getServices();
-    const { embeddable } = startPlugins;
+    this.startControlsKibanaServices(coreStart, startPlugins);
 
-    // register control types with controls service.
-    const optionsListFactory = embeddable.getEmbeddableFactory(OPTIONS_LIST_CONTROL);
-    // Temporarily pass along inline editors - inline editing should be made a first-class feature of embeddables
-    const editableOptionsListFactory = optionsListFactory as IEditableControlFactory;
-    const {
-      controlEditorComponent: optionsListControlEditor,
-      presaveTransformFunction: optionsListPresaveTransform,
-    } = this.inlineEditors[OPTIONS_LIST_CONTROL];
-    editableOptionsListFactory.controlEditorComponent = optionsListControlEditor;
-    editableOptionsListFactory.presaveTransformFunction = optionsListPresaveTransform;
-
-    if (optionsListFactory) controlsService.registerControlType(optionsListFactory);
+    const { getControlFactory, getControlTypes } = controlsService;
 
     return {
-      ContextProvider: pluginServices.getContextProvider(),
-      controlsService,
+      getControlFactory,
+      getControlTypes,
     };
   }
 

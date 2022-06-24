@@ -45,10 +45,24 @@ export const SERVICE_NAME_LABEL = i18n.translate(
   }
 );
 
+export const SERVICE_TYPE_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.serviceType',
+  {
+    defaultMessage: 'Service type',
+  }
+);
+
 export const ENVIRONMENT_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.environment',
   {
     defaultMessage: 'Environment',
+  }
+);
+
+export const EVENT_DATASET_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.eventDataset',
+  {
+    defaultMessage: 'Dataset',
   }
 );
 
@@ -136,6 +150,17 @@ export const AGENT_HOST_LABEL = i18n.translate(
   }
 );
 
+export const AGENT_TYPE_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.agentType',
+  {
+    defaultMessage: 'Agent type',
+  }
+);
+
+export const MESSAGE_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.message', {
+  defaultMessage: 'Message',
+});
+
 export const HOST_NAME_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.hostName', {
   defaultMessage: 'Host name',
 });
@@ -200,6 +225,13 @@ export const DEVICE_DISTRIBUTION_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.deviceDistribution',
   {
     defaultMessage: 'Device distribution',
+  }
+);
+
+export const SINGLE_METRIC_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.singleMetric',
+  {
+    defaultMessage: 'Single metric',
   }
 );
 
@@ -359,3 +391,7 @@ export const NUMBER_OF_DEVICES = i18n.translate(
     defaultMessage: 'Number of Devices',
   }
 );
+
+export const LOG_RATE = i18n.translate('xpack.observability.expView.fieldLabels.logRate', {
+  defaultMessage: 'Log rate',
+});

@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Datatable } from '../../../../expressions/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import MetricVisComponent, { MetricVisComponentProps } from './metric_component';
 import { LabelPosition } from '../../common/constants';
 
-jest.mock('../../../expression_metric/public/services', () => ({
+jest.mock('../services', () => ({
   getFormatService: () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getFormatService } = require('../__mocks__/services');
@@ -72,6 +72,7 @@ describe('MetricVisComponent', function () {
       visData,
       renderComplete: jest.fn(),
       fireEvent: jest.fn(),
+      filterable: [true],
       ...propOverrides,
     };
 
@@ -88,6 +89,7 @@ describe('MetricVisComponent', function () {
 
   it('should render correct structure for multi-value metrics', function () {
     const component = getComponent({
+      filterable: [true, false],
       visData: {
         type: 'datatable',
         columns: [

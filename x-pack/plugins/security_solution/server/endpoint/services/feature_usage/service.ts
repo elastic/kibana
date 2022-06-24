@@ -6,7 +6,7 @@
  */
 
 import { Values } from '@kbn/utility-types';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../../../../licensing/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 const FEATURES = {
   HOST_ISOLATION: 'Host isolation',
@@ -14,9 +14,13 @@ const FEATURES = {
   HOST_ISOLATION_EXCEPTION_BY_POLICY: 'Host isolation exception by policy',
   TRUSTED_APP_BY_POLICY: 'Trusted app by policy',
   EVENT_FILTERS_BY_POLICY: 'Event filters by policy',
+  BLOCKLIST_BY_POLICY: 'Blocklists by policy',
   RANSOMWARE_PROTECTION: 'Ransomeware protection',
   MEMORY_THREAT_PROTECTION: 'Memory threat protection',
   BEHAVIOR_PROTECTION: 'Behavior protection',
+  KILL_PROCESS: 'Kill process',
+  SUSPEND_PROCESS: 'Suspend process',
+  RUNNING_PROCESSES: 'Get running processes',
 } as const;
 
 export type FeatureKeys = keyof typeof FEATURES;

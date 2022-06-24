@@ -18,38 +18,29 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 
-import type { Toast } from '../../../../../../../../../../src/core/public';
-import { mountReactNode } from '../../../../../../../../../../src/core/public/utils';
+import type { Toast } from '@kbn/core/public';
+import { mountReactNode } from '@kbn/core/public/utils';
 import {
   BulkAction,
   BulkActionEditType,
   BulkActionEditPayload,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import { isMlRule } from '../../../../../../../common/machine_learning/helpers';
-import { displayWarningToast, useStateToaster } from '../../../../../../common/components/toasters';
 import { canEditRuleWithActions } from '../../../../../../common/utils/privileges';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import * as detectionI18n from '../../../translations';
 import * as i18n from '../../translations';
-import {
-  deleteRulesAction,
-  duplicateRulesAction,
-  enableRulesAction,
-  exportRulesAction,
-  initRulesBulkAction,
-} from '../actions';
+import { executeRulesBulkAction } from '../actions';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
 import { getCustomRulesCountFromCache } from './use_custom_rules_count';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
 
-import type {
-  BulkActionResponse,
-  FilterOptions,
-} from '../../../../../containers/detection_engine/rules/types';
-import type { HTTPError } from '../../../../../../../common/detection_engine/types';
+import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
 import { useInvalidateRules } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
+import { BULK_RULE_ACTIONS } from '../../../../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../../../../common/lib/apm/use_start_transaction';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -72,11 +63,11 @@ export const useBulkActions = ({
   const hasMlPermissions = useHasMlPermissions();
   const rulesTableContext = useRulesTableContext();
   const invalidateRules = useInvalidateRules();
-  const [, dispatchToaster] = useStateToaster();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
   const getIsMounted = useIsMounted();
   const filterQuery = convertRulesFilterToKQL(filterOptions);
+  const { startTransaction } = useStartTransaction();
 
   // refetch tags if edit action is related to tags: add_tags/delete_tags/set_tags
   const resolveTagsRefetch = useCallback(
@@ -110,72 +101,55 @@ export const useBulkActions = ({
         !hasActionsPrivileges &&
         selectedRules.some((rule) => !canEditRuleWithActions(rule, hasActionsPrivileges));
 
-      const handleActivateAction = async () => {
+      const handleEnableAction = async () => {
+        startTransaction({ name: BULK_RULE_ACTIONS.ENABLE });
         closePopover();
-        const deactivatedRules = selectedRules.filter(({ enabled }) => !enabled);
-        const deactivatedRulesNoML = deactivatedRules.filter(({ type }) => !isMlRule(type));
+        const disabledRules = selectedRules.filter(({ enabled }) => !enabled);
+        const disabledRulesNoML = disabledRules.filter(({ type }) => !isMlRule(type));
 
-        const mlRuleCount = deactivatedRules.length - deactivatedRulesNoML.length;
+        const mlRuleCount = disabledRules.length - disabledRulesNoML.length;
         if (!hasMlPermissions && mlRuleCount > 0) {
-          displayWarningToast(detectionI18n.ML_RULES_UNAVAILABLE(mlRuleCount), dispatchToaster);
+          toasts.addWarning(detectionI18n.ML_RULES_UNAVAILABLE(mlRuleCount));
         }
 
         const ruleIds = hasMlPermissions
-          ? deactivatedRules.map(({ id }) => id)
-          : deactivatedRulesNoML.map(({ id }) => id);
+          ? disabledRules.map(({ id }) => id)
+          : disabledRulesNoML.map(({ id }) => id);
 
-        if (isAllSelected) {
-          const rulesBulkAction = initRulesBulkAction({
-            visibleRuleIds: ruleIds,
-            action: BulkAction.enable,
-            setLoadingRules,
-            toasts,
-          });
-
-          await rulesBulkAction.byQuery(filterQuery);
-        } else {
-          await enableRulesAction(ruleIds, true, dispatchToaster, setLoadingRules);
-        }
+        await executeRulesBulkAction({
+          visibleRuleIds: ruleIds,
+          action: BulkAction.enable,
+          setLoadingRules,
+          toasts,
+          search: isAllSelected ? { query: filterQuery } : { ids: ruleIds },
+        });
         invalidateRules();
       };
 
-      const handleDeactivateActions = async () => {
+      const handleDisableActions = async () => {
+        startTransaction({ name: BULK_RULE_ACTIONS.DISABLE });
         closePopover();
-        const activatedIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
-        if (isAllSelected) {
-          const rulesBulkAction = initRulesBulkAction({
-            visibleRuleIds: activatedIds,
-            action: BulkAction.disable,
-            setLoadingRules,
-            toasts,
-          });
-
-          await rulesBulkAction.byQuery(filterQuery);
-        } else {
-          await enableRulesAction(activatedIds, false, dispatchToaster, setLoadingRules);
-        }
+        const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
+        await executeRulesBulkAction({
+          visibleRuleIds: enabledIds,
+          action: BulkAction.disable,
+          setLoadingRules,
+          toasts,
+          search: isAllSelected ? { query: filterQuery } : { ids: enabledIds },
+        });
         invalidateRules();
       };
 
       const handleDuplicateAction = async () => {
+        startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
         closePopover();
-        if (isAllSelected) {
-          const rulesBulkAction = initRulesBulkAction({
-            visibleRuleIds: selectedRuleIds,
-            action: BulkAction.duplicate,
-            setLoadingRules,
-            toasts,
-          });
-
-          await rulesBulkAction.byQuery(filterQuery);
-        } else {
-          await duplicateRulesAction(
-            selectedRules,
-            selectedRuleIds,
-            dispatchToaster,
-            setLoadingRules
-          );
-        }
+        await executeRulesBulkAction({
+          visibleRuleIds: selectedRuleIds,
+          action: BulkAction.duplicate,
+          setLoadingRules,
+          toasts,
+          search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
+        });
         invalidateRules();
       };
 
@@ -186,39 +160,30 @@ export const useBulkActions = ({
             // User has cancelled deletion
             return;
           }
-
-          const rulesBulkAction = initRulesBulkAction({
-            visibleRuleIds: selectedRuleIds,
-            action: BulkAction.delete,
-            setLoadingRules,
-            toasts,
-          });
-
-          await rulesBulkAction.byQuery(filterQuery);
-        } else {
-          await deleteRulesAction(selectedRuleIds, dispatchToaster, setLoadingRules);
         }
+
+        startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
+        await executeRulesBulkAction({
+          visibleRuleIds: selectedRuleIds,
+          action: BulkAction.delete,
+          setLoadingRules,
+          toasts,
+          search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
+        });
         invalidateRules();
       };
 
       const handleExportAction = async () => {
         closePopover();
-        if (isAllSelected) {
-          const rulesBulkAction = initRulesBulkAction({
-            visibleRuleIds: selectedRuleIds,
-            action: BulkAction.export,
-            setLoadingRules,
-            toasts,
-          });
 
-          await rulesBulkAction.byQuery(filterQuery);
-        } else {
-          await exportRulesAction(
-            selectedRules.map((r) => r.rule_id),
-            dispatchToaster,
-            setLoadingRules
-          );
-        }
+        startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
+        await executeRulesBulkAction({
+          visibleRuleIds: selectedRuleIds,
+          action: BulkAction.export,
+          setLoadingRules,
+          toasts,
+          search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
+        });
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
@@ -244,6 +209,8 @@ export const useBulkActions = ({
           setIsRefreshOn(true);
           return;
         }
+
+        startTransaction({ name: BULK_RULE_ACTIONS.EDIT });
 
         const hideWarningToast = () => {
           if (longTimeWarningToast) {
@@ -282,49 +249,22 @@ export const useBulkActions = ({
           );
         }, 5 * 1000);
 
-        const rulesBulkAction = initRulesBulkAction({
+        await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.edit,
           setLoadingRules,
           toasts,
           payload: { edit: [editPayload] },
-          onSuccess: ({ rulesCount }) => {
-            hideWarningToast();
-            toasts.addSuccess({
-              title: i18n.BULK_EDIT_SUCCESS_TOAST_TITLE,
-              text: i18n.BULK_EDIT_SUCCESS_TOAST_DESCRIPTION(rulesCount),
-              iconType: undefined,
-            });
-          },
-          onError: (error: HTTPError) => {
-            hideWarningToast();
-            // if response doesn't have number of failed rules, it means the whole bulk action failed
-            // and general error toast will be shown. Otherwise - error toast for partial failure
-            const failedRulesCount = (error?.body as BulkActionResponse)?.attributes?.summary
-              ?.failed;
-
-            if (isNaN(failedRulesCount)) {
-              toasts.addError(error, { title: i18n.BULK_ACTION_FAILED });
-            } else {
-              error.stack = JSON.stringify(error.body, null, 2);
-              toasts.addError(error, {
-                title: i18n.BULK_EDIT_ERROR_TOAST_TITLE,
-                toastMessage: i18n.BULK_EDIT_ERROR_TOAST_DESCRIPTION(failedRulesCount),
-              });
-            }
-          },
+          onFinish: () => hideWarningToast(),
+          search: isAllSelected
+            ? {
+                query: convertRulesFilterToKQL({
+                  ...filterOptions,
+                  showCustomRules: true, // only edit custom rules, as elastic rule are immutable
+                }),
+              }
+            : { ids: customSelectedRuleIds },
         });
-
-        // only edit custom rules, as elastic rule are immutable
-        if (isAllSelected) {
-          const customRulesOnlyFilterQuery = convertRulesFilterToKQL({
-            ...filterOptions,
-            showCustomRules: true,
-          });
-          await rulesBulkAction.byQuery(customRulesOnlyFilterQuery);
-        } else {
-          await rulesBulkAction.byIds(customSelectedRuleIds);
-        }
 
         isBulkEditFinished = true;
         invalidateRules();
@@ -345,10 +285,10 @@ export const useBulkActions = ({
             {
               key: i18n.BULK_ACTION_ENABLE,
               name: i18n.BULK_ACTION_ENABLE,
-              'data-test-subj': 'activateRuleBulk',
+              'data-test-subj': 'enableRuleBulk',
               disabled:
                 missingActionPrivileges || containsLoading || (!containsDisabled && !isAllSelected),
-              onClick: handleActivateAction,
+              onClick: handleEnableAction,
               toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
               toolTipPosition: 'right',
               icon: undefined,
@@ -378,6 +318,16 @@ export const useBulkActions = ({
               panel: 1,
             },
             {
+              key: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
+              name: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
+              'data-test-subj': 'applyTimelineTemplateBulk',
+              disabled: isEditDisabled,
+              onClick: handleBulkEdit(BulkActionEditType.set_timeline),
+              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipPosition: 'right',
+              icon: undefined,
+            },
+            {
               key: i18n.BULK_ACTION_EXPORT,
               name: i18n.BULK_ACTION_EXPORT,
               'data-test-subj': 'exportRuleBulk',
@@ -391,10 +341,10 @@ export const useBulkActions = ({
             {
               key: i18n.BULK_ACTION_DISABLE,
               name: i18n.BULK_ACTION_DISABLE,
-              'data-test-subj': 'deactivateRuleBulk',
+              'data-test-subj': 'disableRuleBulk',
               disabled:
                 missingActionPrivileges || containsLoading || (!containsEnabled && !isAllSelected),
-              onClick: handleDeactivateActions,
+              onClick: handleDisableActions,
               toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
               toolTipPosition: 'right',
               icon: undefined,
@@ -475,19 +425,19 @@ export const useBulkActions = ({
       hasActionsPrivileges,
       isAllSelected,
       loadingRuleIds,
+      startTransaction,
       hasMlPermissions,
-      invalidateRules,
-      dispatchToaster,
       setLoadingRules,
       toasts,
       filterQuery,
+      invalidateRules,
       confirmDeletion,
       setIsRefreshOn,
       confirmBulkEdit,
       completeBulkEditForm,
       queryClient,
-      getIsMounted,
       filterOptions,
+      getIsMounted,
       resolveTagsRefetch,
     ]
   );

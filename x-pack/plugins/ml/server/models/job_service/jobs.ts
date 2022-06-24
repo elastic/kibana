@@ -7,7 +7,9 @@
 
 import { uniq } from 'lodash';
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   getSingleMetricViewerJobErrorMessage,
   parseTimeIntervalForJob,
@@ -46,8 +48,6 @@ import {
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
-import { isPopulatedObject } from '../../../common/util/object_utils';
-import type { RulesClient } from '../../../../alerting/server';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
@@ -499,10 +499,13 @@ export function jobsProvider(
   async function blockingJobTasks() {
     const jobs: Array<Record<string, JobAction>> = [];
     try {
-      const body = await asInternalUser.tasks.list({
-        actions: JOB_ACTION_TASKS,
-        detailed: true,
-      });
+      const body = await asInternalUser.tasks.list(
+        {
+          actions: JOB_ACTION_TASKS,
+          detailed: true,
+        },
+        { maxRetries: 0 }
+      );
 
       if (body.nodes !== undefined) {
         Object.values(body.nodes).forEach(({ tasks }) => {
@@ -590,7 +593,7 @@ export function jobsProvider(
 
     if (body.jobs.length) {
       const statsForJob = body.jobs[0];
-      const time = statsForJob.data_counts.latest_record_timestamp;
+      const time = statsForJob.data_counts.latest_record_timestamp!;
       const progress = (time - start) / (end - start);
       const isJobClosed = statsForJob.state === JOB_STATE.CLOSED;
       return {
@@ -631,6 +634,7 @@ export function jobsProvider(
         results[job.job_id] = { job: { success: false }, datafeed: { success: false } };
 
         try {
+          // @ts-expect-error type mismatch on MlPutJobRequest.body
           await mlClient.putJob({ job_id: job.job_id, body: job });
           results[job.job_id].job = { success: true };
         } catch (error) {

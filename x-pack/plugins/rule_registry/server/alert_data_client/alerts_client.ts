@@ -21,16 +21,16 @@ import {
   InlineScript,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AlertTypeParams, AlertingAuthorizationFilterType } from '../../../alerting/server';
+import { RuleTypeParams } from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
   AlertingAuthorization,
   WriteOperations,
   AlertingAuthorizationEntity,
-} from '../../../alerting/server';
-import { Logger, ElasticsearchClient, EcsEventOutcome } from '../../../../../src/core/server';
+} from '@kbn/alerting-plugin/server';
+import { Logger, ElasticsearchClient, EcsEventOutcome } from '@kbn/core/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
-import { AuditLogger } from '../../../security/server';
 import {
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,
@@ -39,6 +39,7 @@ import {
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
+import { getAuthzFilter, getSpacesFilter } from '../lib';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -68,14 +69,14 @@ export interface ConstructorOptions {
   ruleDataService: IRuleDataService;
 }
 
-export interface UpdateOptions<Params extends AlertTypeParams> {
+export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
   status: string;
   _version: string | undefined;
   index: string;
 }
 
-export interface BulkUpdateOptions<Params extends AlertTypeParams> {
+export interface BulkUpdateOptions<Params extends RuleTypeParams> {
   ids: string[] | undefined | null;
   status: STATUS_VALUES;
   index: string;
@@ -96,6 +97,7 @@ interface SingleSearchAfterAndAudit {
   track_total_hits?: boolean | undefined;
   size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
+  sort?: estypes.SortOptions[] | undefined;
   lastSortIds?: Array<string | number> | undefined;
 }
 
@@ -223,6 +225,7 @@ export class AlertsClient {
     size,
     index,
     operation,
+    sort,
     lastSortIds = [],
   }: SingleSearchAfterAndAudit) {
     try {
@@ -242,7 +245,7 @@ export class AlertsClient {
         _source,
         track_total_hits: trackTotalHits,
         size,
-        sort: [
+        sort: sort || [
           {
             '@timestamp': {
               order: 'asc',
@@ -369,14 +372,8 @@ export class AlertsClient {
     config: EsQueryConfig
   ) {
     try {
-      const { filter: authzFilter } = await this.authorization.getAuthorizationFilter(
-        AlertingAuthorizationEntity.Alert,
-        {
-          type: AlertingAuthorizationFilterType.ESDSL,
-          fieldNames: { consumer: ALERT_RULE_CONSUMER, ruleTypeId: ALERT_RULE_TYPE_ID },
-        },
-        operation
-      );
+      const authzFilter = (await getAuthzFilter(this.authorization, operation)) as Filter;
+      const spacesFilter = getSpacesFilter(alertSpaceId) as unknown as Filter;
       let esQuery;
       if (id != null) {
         esQuery = { query: `_id:${id}`, language: 'kuery' };
@@ -388,10 +385,7 @@ export class AlertsClient {
       const builtQuery = buildEsQuery(
         undefined,
         esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
-        [
-          authzFilter as unknown as Filter,
-          { query: { term: { [SPACE_IDS]: alertSpaceId } } } as unknown as Filter,
-        ],
+        [authzFilter, spacesFilter],
         config
       );
       if (query != null && typeof query === 'object') {
@@ -504,7 +498,7 @@ export class AlertsClient {
     }
   }
 
-  public async update<Params extends AlertTypeParams = never>({
+  public async update<Params extends RuleTypeParams = never>({
     id,
     status,
     _version,
@@ -548,7 +542,7 @@ export class AlertsClient {
     }
   }
 
-  public async bulkUpdate<Params extends AlertTypeParams = never>({
+  public async bulkUpdate<Params extends RuleTypeParams = never>({
     ids,
     query,
     index,
@@ -606,13 +600,15 @@ export class AlertsClient {
     }
   }
 
-  public async find<Params extends AlertTypeParams = never>({
+  public async find<Params extends RuleTypeParams = never>({
     query,
     aggs,
     _source,
     track_total_hits: trackTotalHits,
     size,
     index,
+    sort,
+    search_after: searchAfter,
   }: {
     query?: object | undefined;
     aggs?: object | undefined;
@@ -620,6 +616,8 @@ export class AlertsClient {
     track_total_hits?: boolean | undefined;
     _source?: string[] | undefined;
     size?: number | undefined;
+    sort?: estypes.SortOptions[] | undefined;
+    search_after?: Array<string | number> | undefined;
   }) {
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
@@ -631,6 +629,8 @@ export class AlertsClient {
         size,
         index,
         operation: ReadOperations.Find,
+        sort,
+        lastSortIds: searchAfter,
       });
 
       if (alertsSearchResponse == null) {
@@ -655,7 +655,6 @@ export class AlertsClient {
         [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
         AlertingAuthorizationEntity.Alert
       );
-
       // As long as the user can read a minimum of one type of rule type produced by the provided feature,
       // the user should be provided that features' alerts index.
       // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
@@ -663,24 +662,56 @@ export class AlertsClient {
       for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
         authorizedFeatures.add(ruleType.producer);
       }
-
       const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
         (feature): feature is ValidFeatureId =>
           featureIds.includes(feature) && isValidFeatureId(feature)
       );
-
-      const toReturn = validAuthorizedFeatures.flatMap((feature) => {
-        const indices = this.ruleDataService.findIndicesByFeature(feature, Dataset.alerts);
-        if (feature === 'siem') {
-          return indices.map((i) => `${i.baseName}-${this.spaceId}`);
-        } else {
-          return indices.map((i) => i.baseName);
+      const toReturn = validAuthorizedFeatures.map((feature) => {
+        const index = this.ruleDataService.findIndexByFeature(feature, Dataset.alerts);
+        if (index == null) {
+          throw new Error(`This feature id ${feature} should be associated to an alert index`);
         }
+        return index?.getPrimaryAlias(this.spaceId ?? '*') ?? '';
       });
 
       return toReturn;
     } catch (exc) {
       const errMessage = `getAuthorizedAlertsIndices failed to get authorized rule types: ${exc}`;
+      this.logger.error(errMessage);
+      throw Boom.failedDependency(errMessage);
+    }
+  }
+
+  public async getFeatureIdsByRegistrationContexts(
+    RegistrationContexts: string[]
+  ): Promise<string[]> {
+    try {
+      const featureIds =
+        this.ruleDataService.findFeatureIdsByRegistrationContexts(RegistrationContexts);
+      if (featureIds.length > 0) {
+        // ATTENTION FUTURE DEVELOPER when you are a super user the augmentedRuleTypes.authorizedRuleTypes will
+        // return all of the features that you can access and does not care about your featureIds
+        const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
+          featureIds,
+          [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
+          AlertingAuthorizationEntity.Alert
+        );
+        // As long as the user can read a minimum of one type of rule type produced by the provided feature,
+        // the user should be provided that features' alerts index.
+        // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
+        const authorizedFeatures = new Set<string>();
+        for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
+          authorizedFeatures.add(ruleType.producer);
+        }
+        const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
+          (feature): feature is ValidFeatureId =>
+            featureIds.includes(feature) && isValidFeatureId(feature)
+        );
+        return validAuthorizedFeatures;
+      }
+      return featureIds;
+    } catch (exc) {
+      const errMessage = `getFeatureIdsByRegistrationContexts failed to get feature ids: ${exc}`;
       this.logger.error(errMessage);
       throw Boom.failedDependency(errMessage);
     }

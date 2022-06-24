@@ -21,12 +21,15 @@ import type {
   GetAgentsResponse,
   GetAgentStatusRequest,
   GetAgentStatusResponse,
+  GetAgentIncomingDataRequest,
+  GetAgentIncomingDataResponse,
   PostAgentUpgradeRequest,
   PostBulkAgentUpgradeRequest,
   PostAgentUpgradeResponse,
   PostBulkAgentUpgradeResponse,
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
+  GetCurrentUpgradesResponse,
 } from '../../types';
 
 import { useRequest, sendRequest } from './use_request';
@@ -66,6 +69,13 @@ export function useGetAgentStatus(query: GetAgentStatusRequest['query'], options
     path: agentRouteService.getStatusPath(),
     query,
     ...options,
+  });
+}
+export function sendGetAgentIncomingData(query: GetAgentIncomingDataRequest['query']) {
+  return sendRequest<GetAgentIncomingDataResponse>({
+    method: 'get',
+    path: agentRouteService.getIncomingDataPath(),
+    query,
   });
 }
 
@@ -166,5 +176,19 @@ export function sendPostBulkAgentUpgrade(
     method: 'post',
     body,
     ...options,
+  });
+}
+
+export function sendGetCurrentUpgrades() {
+  return sendRequest<GetCurrentUpgradesResponse>({
+    path: agentRouteService.getCurrentUpgradesPath(),
+    method: 'get',
+  });
+}
+
+export function sendPostCancelAction(actionId: string) {
+  return sendRequest<GetCurrentUpgradesResponse>({
+    path: agentRouteService.getCancelActionPath(actionId),
+    method: 'post',
   });
 }

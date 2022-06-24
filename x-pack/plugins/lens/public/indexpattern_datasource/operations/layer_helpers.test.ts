@@ -16,8 +16,10 @@ import {
   updateLayerIndexPattern,
   getErrorMessages,
   hasTermsWithManyBuckets,
+  isReferenced,
+  getReferenceRoot,
 } from './layer_helpers';
-import { operationDefinitionMap, OperationType } from '../operations';
+import { operationDefinitionMap, OperationType } from '.';
 import { TermsIndexPatternColumn } from './definitions/terms';
 import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 import { AvgIndexPatternColumn } from './definitions/metrics';
@@ -34,10 +36,10 @@ import {
   MovingAverageIndexPatternColumn,
   OperationDefinition,
 } from './definitions';
-import { TinymathAST } from 'packages/kbn-tinymath';
-import { CoreStart } from 'kibana/public';
+import { TinymathAST } from '@kbn/tinymath';
+import { CoreStart } from '@kbn/core/public';
 
-jest.mock('../operations');
+jest.mock('.');
 jest.mock('../../id_generator');
 
 const indexPatternFields = [
@@ -157,24 +159,38 @@ describe('state_helpers', () => {
         params: { window: 5 },
         references: ['formulaX0'],
       };
+
       expect(
         copyColumn({
-          layer: {
-            indexPatternId: '',
-            columnOrder: [],
-            columns: {
-              source,
-              formulaX0: sum,
-              formulaX1: movingAvg,
-              formulaX2: math,
+          layers: {
+            layer: {
+              indexPatternId: '',
+              columnOrder: [],
+              columns: {
+                source,
+                formulaX0: sum,
+                formulaX1: movingAvg,
+                formulaX2: math,
+              },
             },
           },
-          targetId: 'copy',
-          sourceColumn: source,
+          source: {
+            column: source,
+            groupId: 'one',
+            columnId: 'source',
+            layerId: 'layer',
+            dataView: indexPattern,
+            filterOperations: () => true,
+          },
+          target: {
+            columnId: 'copy',
+            groupId: 'one',
+            dataView: indexPattern,
+            layerId: 'layer',
+            filterOperations: () => true,
+          },
           shouldDeleteSource: false,
-          indexPattern,
-          sourceColumnId: 'source',
-        })
+        }).layer
       ).toEqual({
         indexPatternId: '',
         columnOrder: [
@@ -765,7 +781,7 @@ describe('state_helpers', () => {
         }).columns.col2
       ).toEqual(
         expect.objectContaining({
-          label: 'Top values of bytes',
+          label: 'Top 3 values of bytes',
         })
       );
     });
@@ -899,6 +915,39 @@ describe('state_helpers', () => {
           columns: { col1: expect.objectContaining({ operationType: 'date_histogram' }) },
           incompleteColumns: {
             col1: { operationType: 'terms' },
+          },
+        })
+      );
+    });
+
+    it('should set incompleteColumns without crashing when switching to a field-based operation from managed reference column with custom label', () => {
+      expect(
+        replaceColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'My formula',
+                dataType: 'number',
+                isBucketed: false,
+                customLabel: true,
+
+                // Private
+                operationType: 'formula',
+              } as FormulaIndexPatternColumn,
+            },
+          },
+          columnId: 'col1',
+          indexPattern,
+          op: 'median',
+          visualizationGroups: [],
+        })
+      ).toEqual(
+        expect.objectContaining({
+          columns: { col1: expect.objectContaining({ operationType: 'formula' }) },
+          incompleteColumns: {
+            col1: { operationType: 'median' },
           },
         })
       );
@@ -1077,7 +1126,7 @@ describe('state_helpers', () => {
           }).columns.col1
         ).toEqual(
           expect.objectContaining({
-            label: 'Top values of source',
+            label: 'Top 3 values of source',
           })
         );
       });
@@ -1320,8 +1369,7 @@ describe('state_helpers', () => {
           },
           incompleteColumns: {},
         },
-        'col1',
-        'col2'
+        'col1'
       );
     });
 
@@ -1387,8 +1435,7 @@ describe('state_helpers', () => {
           },
           incompleteColumns: {},
         }),
-        'col1',
-        'willBeReference'
+        'col1'
       );
     });
 
@@ -2160,6 +2207,7 @@ describe('state_helpers', () => {
                 id: 'number',
                 params: { decimals: 2 },
               },
+              emptyAsNull: true,
             },
           })
         );
@@ -2248,7 +2296,7 @@ describe('state_helpers', () => {
 
     it('should remove column and any incomplete state', () => {
       const termsColumn: TermsIndexPatternColumn = {
-        label: 'Top values of source',
+        label: 'Top 5 values of source',
         dataType: 'string',
         isBucketed: true,
 
@@ -2338,8 +2386,7 @@ describe('state_helpers', () => {
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
         { indexPatternId: '1', columnOrder: ['col1', 'col2'], columns: { col1: termsColumn } },
-        'col1',
-        'col2'
+        'col1'
       );
     });
 
@@ -3177,6 +3224,164 @@ describe('state_helpers', () => {
       };
 
       expect(hasTermsWithManyBuckets(layer)).toBeTruthy();
+    });
+  });
+
+  describe('isReferenced', () => {
+    it('should return false for top column which has references', () => {
+      const layer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: [],
+        columns: {
+          col1: {
+            operationType: 'managedReference',
+            references: ['col2'],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+          col2: {
+            operationType: 'testReference',
+            references: [],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+        },
+      };
+      expect(isReferenced(layer, 'col1')).toBeFalsy();
+    });
+
+    it('should return true for referenced column', () => {
+      const layer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: [],
+        columns: {
+          col1: {
+            operationType: 'managedReference',
+            references: ['col2'],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+          col2: {
+            operationType: 'testReference',
+            references: [],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+        },
+      };
+      expect(isReferenced(layer, 'col2')).toBeTruthy();
+    });
+  });
+
+  describe('getReferenceRoot', () => {
+    it("should just return the column id itself if it's not a referenced column", () => {
+      const layer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: [],
+        columns: {
+          col1: {
+            operationType: 'managedReference',
+            references: ['col2'],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+          col2: {
+            operationType: 'testReference',
+            references: [],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+        },
+      };
+      expect(getReferenceRoot(layer, 'col1')).toEqual('col1');
+    });
+
+    it('should return the top column if a referenced column is passed', () => {
+      const layer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: [],
+        columns: {
+          col1: {
+            operationType: 'managedReference',
+            references: ['col2'],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+          col2: {
+            operationType: 'testReference',
+            references: [],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+        },
+      };
+      expect(getReferenceRoot(layer, 'col2')).toEqual('col1');
+    });
+
+    it('should work for a formula chain', () => {
+      const math = {
+        customLabel: true,
+        dataType: 'number' as const,
+        isBucketed: false,
+        label: 'math',
+        operationType: 'math' as const,
+      };
+      const layer: IndexPatternLayer = {
+        indexPatternId: '',
+        columnOrder: [],
+        columns: {
+          source: {
+            dataType: 'number' as const,
+            isBucketed: false,
+            label: 'Formula',
+            operationType: 'formula' as const,
+            params: {
+              formula: 'moving_average(sum(bytes), window=5)',
+              isFormulaBroken: false,
+            },
+            references: ['formulaX3'],
+          } as FormulaIndexPatternColumn,
+          formulaX0: {
+            customLabel: true,
+            dataType: 'number' as const,
+            isBucketed: false,
+            label: 'formulaX0',
+            operationType: 'sum' as const,
+            scale: 'ratio' as const,
+            sourceField: 'bytes',
+          },
+          formulaX1: {
+            ...math,
+            label: 'formulaX1',
+            references: ['formulaX0'],
+            params: { tinymathAst: 'formulaX0' },
+          } as MathIndexPatternColumn,
+          formulaX2: {
+            customLabel: true,
+            dataType: 'number' as const,
+            isBucketed: false,
+            label: 'formulaX2',
+            operationType: 'moving_average' as const,
+            params: { window: 5 },
+            references: ['formulaX1'],
+          } as MovingAverageIndexPatternColumn,
+          formulaX3: {
+            ...math,
+            label: 'formulaX3',
+            references: ['formulaX2'],
+            params: { tinymathAst: 'formulaX2' },
+          } as MathIndexPatternColumn,
+        },
+      };
+      expect(getReferenceRoot(layer, 'formulaX0')).toEqual('source');
     });
   });
 });

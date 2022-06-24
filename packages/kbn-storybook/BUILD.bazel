@@ -4,7 +4,6 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 
 PKG_BASE_NAME = "kbn-storybook"
 PKG_REQUIRE_NAME = "@kbn/storybook"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__storybook"
 
 SOURCE_FILES = glob(
   [
@@ -55,6 +54,7 @@ TYPES_DEPS = [
   "//packages/kbn-ui-shared-deps-npm:npm_module_types",
   "//packages/kbn-ui-shared-deps-src:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-ambient-storybook-types:npm_module_types",
   "@npm//@elastic/eui",
   "@npm//@emotion/cache",
   "@npm//@storybook/addons",
@@ -93,11 +93,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
-  source_map = True,
   tsconfig = ":tsconfig",
 )
 
@@ -128,7 +126,7 @@ pkg_npm_types(
   name = "npm_module_types",
   srcs = SRCS,
   deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
+  package_name = PKG_REQUIRE_NAME,
   tsconfig = ":tsconfig",
   visibility = ["//visibility:public"],
 )

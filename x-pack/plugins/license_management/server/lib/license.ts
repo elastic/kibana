@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { LicensingPluginStart } from '../../../licensing/server';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 interface PutLicenseArg {
   acknowledge: boolean;
@@ -18,6 +18,7 @@ interface PutLicenseArg {
 export async function putLicense({ acknowledge, client, licensing, license }: PutLicenseArg) {
   try {
     const response = await client.asCurrentUser.license.post({
+      // @ts-expect-error license is not typed in LM code
       body: license,
       acknowledge,
     });

@@ -5,15 +5,32 @@
  * 2.0.
  */
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { HttpFetchError } from 'kibana/public';
-import { useMutation, UseMutationResult, UseQueryOptions } from 'react-query';
+import { HttpFetchError } from '@kbn/core/public';
+import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+
+const DEFAULT_OPTIONS = Object.freeze({});
 
 export function useDeleteArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  customOptions: UseQueryOptions<ExceptionListItemSchema, HttpFetchError>
-): UseMutationResult<ExceptionListItemSchema, HttpFetchError, string, () => void> {
-  return useMutation<ExceptionListItemSchema, HttpFetchError, string, () => void>((id: string) => {
-    return exceptionListApiClient.delete(id);
+  customOptions: UseMutationOptions<
+    ExceptionListItemSchema,
+    HttpFetchError,
+    { itemId?: string; id?: string },
+    () => void
+  > = DEFAULT_OPTIONS
+): UseMutationResult<
+  ExceptionListItemSchema,
+  HttpFetchError,
+  { itemId?: string; id?: string },
+  () => void
+> {
+  return useMutation<
+    ExceptionListItemSchema,
+    HttpFetchError,
+    { itemId?: string; id?: string },
+    () => void
+  >(({ itemId, id }) => {
+    return exceptionListApiClient.delete(itemId, id);
   }, customOptions);
 }

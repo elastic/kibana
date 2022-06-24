@@ -15,8 +15,10 @@ by cluster-wide privileges. For more information on enabling audit logging in
 [NOTE]
 ============================================================================
 Audit logs are **disabled** by default. To enable this functionality, you must
-set `xpack.security.audit.enabled` to `true` in `kibana.yml`, and optionally configure
-an <<audit-logging-settings, appender>> to write the audit log to a location of your choosing.
+set `xpack.security.audit.enabled` to `true` in `kibana.yml`.
+
+You can optionally configure audit logs location, file/rolling file appenders and 
+ignore filters using <<audit-logging-settings>>.
 ============================================================================
 
 [[xpack-security-ecs-audit-logging]]
@@ -155,6 +157,15 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is updating an alert.
 | `failure` | User is not authorized to update an alert.
 
+.2+| `rule_snooze`
+| `unknown` | User is snoozing a rule.
+| `failure` | User is not authorized to snooze a rule.
+
+.2+| `rule_unsnooze`
+| `unknown` | User is unsnoozing a rule.
+| `failure` | User is not authorized to unsnooze a rule.
+
+
 3+a|
 ====== Type: deletion
 
@@ -212,6 +223,10 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `rule_get`
 | `success` | User has accessed a rule.
 | `failure` | User is not authorized to access a rule.
+
+.2+| `rule_get_execution_log`
+| `success` | User has accessed execution log for a rule.
+| `failure` | User is not authorized to access execution log for a rule.
 
 .2+| `rule_find`
 | `success` | User has accessed a rule as part of a search operation.

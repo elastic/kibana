@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { SnapshotRestoreServerPlugin } from './plugin';
 
 export { config } from './config';

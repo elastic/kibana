@@ -5,28 +5,36 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
 
 import { NetworkTopCountriesTable } from '../../components/network_top_countries_table';
-import { useNetworkTopCountries } from '../../containers/network_top_countries';
-import { networkModel } from '../../store';
+import { useNetworkTopCountries, ID } from '../../containers/network_top_countries';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
 import { IPsQueryTabBodyProps as CountriesQueryTabBodyProps } from './types';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);
 
 export const CountriesQueryTabBody = ({
   endDate,
   filterQuery,
+  flowTarget,
   indexNames,
+  indexPattern,
+  ip,
+  setQuery,
   skip,
   startDate,
-  setQuery,
-  indexPattern,
-  flowTarget,
+  type,
 }: CountriesQueryTabBodyProps) => {
+  const queryId = `${ID}-${flowTarget}-${type}`;
+  const { toggleStatus } = useQueryToggle(queryId);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [
     loading,
     { id, inspect, isInspected, loadPage, networkTopCountries, pageInfo, refetch, totalCount },
@@ -34,10 +42,12 @@ export const CountriesQueryTabBody = ({
     endDate,
     flowTarget,
     filterQuery,
+    id: queryId,
     indexNames,
-    skip,
+    ip,
+    skip: querySkip,
     startDate,
-    type: networkModel.NetworkType.page,
+    type,
   });
 
   return (
@@ -53,9 +63,10 @@ export const CountriesQueryTabBody = ({
       loadPage={loadPage}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
-      type={networkModel.NetworkType.page}
+      type={type}
     />
   );
 };

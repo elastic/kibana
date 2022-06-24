@@ -8,18 +8,25 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { NotificationsSetup, ThemeServiceStart } from 'src/core/public';
+import { NotificationsSetup, ThemeServiceStart, DocLinksStart } from '@kbn/core/public';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUSES } from '../../common/constants';
 import { JobId, JobSummary, JobSummarySet } from '../../common/types';
 import {
   getFailureToast,
-  getGeneralErrorToast,
+  getWarningToast,
   getSuccessToast,
-  getWarningFormulasToast,
+  getGeneralErrorToast,
   getWarningMaxSizeToast,
+  getWarningFormulasToast,
 } from '../notifier';
 import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';
+
+/**
+ * @todo Replace with `Infinity` once elastic/eui#5945 is resolved.
+ * @see https://github.com/elastic/eui/issues/5945
+ */
+const COMPLETED_JOB_TOAST_TIMEOUT = 24 * 60 * 60 * 1000; // 24 hours
 
 function updateStored(jobIds: JobId[]): void {
   sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobIds));
@@ -33,6 +40,7 @@ function getReportStatus(src: Job): JobSummary {
     jobtype: src.prettyJobTypeName ?? src.jobtype,
     maxSizeReached: src.max_size_reached,
     csvContainsFormulas: src.csv_contains_formulas,
+    errorCode: src.error_code,
   };
 }
 
@@ -40,7 +48,8 @@ export class ReportingNotifierStreamHandler {
   constructor(
     private notifications: NotificationsSetup,
     private apiClient: ReportingAPIClient,
-    private theme: ThemeServiceStart
+    private theme: ThemeServiceStart,
+    private docLinks: DocLinksStart
   ) {}
 
   /*
@@ -51,6 +60,8 @@ export class ReportingNotifierStreamHandler {
     failed: failedJobs,
   }: JobSummarySet): Rx.Observable<JobSummarySet> {
     const showNotificationsAsync = async () => {
+      const completedOptions = { toastLifeTimeMs: COMPLETED_JOB_TOAST_TIMEOUT };
+
       // notifications with download link
       for (const job of completedJobs) {
         if (job.csvContainsFormulas) {
@@ -60,7 +71,8 @@ export class ReportingNotifierStreamHandler {
               this.apiClient.getManagementLink,
               this.apiClient.getDownloadLink,
               this.theme
-            )
+            ),
+            completedOptions
           );
         } else if (job.maxSizeReached) {
           this.notifications.toasts.addWarning(
@@ -69,7 +81,18 @@ export class ReportingNotifierStreamHandler {
               this.apiClient.getManagementLink,
               this.apiClient.getDownloadLink,
               this.theme
-            )
+            ),
+            completedOptions
+          );
+        } else if (job.status === JOB_STATUSES.WARNINGS) {
+          this.notifications.toasts.addWarning(
+            getWarningToast(
+              job,
+              this.apiClient.getManagementLink,
+              this.apiClient.getDownloadLink,
+              this.theme
+            ),
+            completedOptions
           );
         } else {
           this.notifications.toasts.addSuccess(
@@ -78,7 +101,8 @@ export class ReportingNotifierStreamHandler {
               this.apiClient.getManagementLink,
               this.apiClient.getDownloadLink,
               this.theme
-            )
+            ),
+            completedOptions
           );
         }
       }
@@ -87,7 +111,13 @@ export class ReportingNotifierStreamHandler {
       for (const job of failedJobs) {
         const errorText = await this.apiClient.getError(job.id);
         this.notifications.toasts.addDanger(
-          getFailureToast(errorText, job, this.apiClient.getManagementLink, this.theme)
+          getFailureToast(
+            errorText,
+            job,
+            this.apiClient.getManagementLink,
+            this.theme,
+            this.docLinks
+          )
         );
       }
       return { completed: completedJobs, failed: failedJobs };

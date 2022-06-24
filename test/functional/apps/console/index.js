@@ -8,15 +8,18 @@
 
 export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
+  const config = getService('config');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/123556
-  describe.skip('console app', function () {
-    this.tags('ciGroup1');
-
+  describe('console app', function () {
     before(async function () {
       await browser.setWindowSize(1300, 1100);
     });
-
-    loadTestFile(require.resolve('./_console'));
+    if (config.get('esTestCluster.ccs')) {
+      loadTestFile(require.resolve('./_console_ccs'));
+    } else {
+      loadTestFile(require.resolve('./_console'));
+      loadTestFile(require.resolve('./_autocomplete'));
+      loadTestFile(require.resolve('./_vector_tile'));
+    }
   });
 }

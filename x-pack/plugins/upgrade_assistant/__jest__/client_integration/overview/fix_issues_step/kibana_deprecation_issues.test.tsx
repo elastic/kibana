@@ -6,8 +6,8 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { deprecationsServiceMock } from 'src/core/public/mocks';
-import type { DomainDeprecationDetails } from 'kibana/public';
+import { deprecationsServiceMock } from '@kbn/core/public/mocks';
+import type { DomainDeprecationDetails } from '@kbn/core/public';
 
 import { setupEnvironment } from '../../helpers';
 import { kibanaDeprecationsServiceHelpers } from '../../kibana_deprecations/service.mock';
@@ -16,12 +16,14 @@ import { esNoDeprecations } from './mock_es_issues';
 
 describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
   let testBed: OverviewTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
   const { mockedKibanaDeprecations, mockedCriticalKibanaDeprecations } =
     kibanaDeprecationsServiceHelpers.defaultMockedResponses;
-
-  afterAll(() => {
-    server.restore();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   describe('When load succeeds', () => {
@@ -33,7 +35,7 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
         const deprecationService = deprecationsServiceMock.createStartContract();
         kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response });
 
-        testBed = await setupOverviewPage({
+        testBed = await setupOverviewPage(httpSetup, {
           services: {
             core: {
               deprecations: deprecationService,
@@ -114,7 +116,7 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
           mockRequestErrorMessage: 'Internal Server Error',
         });
 
-        testBed = await setupOverviewPage({
+        testBed = await setupOverviewPage(httpSetup, {
           services: {
             core: {
               deprecations: deprecationService,

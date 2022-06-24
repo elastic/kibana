@@ -313,14 +313,6 @@ export interface HttpServiceSetup {
   basePath: IBasePath;
 
   /**
-   * Auth status.
-   * See {@link HttpAuth}
-   *
-   * @deprecated use {@link HttpServiceStart.auth | the start contract} instead.
-   */
-  auth: HttpAuth;
-
-  /**
    * The CSP config used for Kibana.
    */
   csp: ICspConfig;
@@ -374,7 +366,7 @@ export interface HttpServiceSetup {
    */
   registerRouteHandlerContext: <
     Context extends RequestHandlerContext,
-    ContextName extends keyof Context
+    ContextName extends keyof Omit<Context, 'resolve'>
   >(
     contextName: ContextName,
     provider: RequestHandlerContextProvider<Context, ContextName>
@@ -401,7 +393,7 @@ export interface InternalHttpServiceSetup
   authRequestHeaders: IAuthHeadersStorage;
   registerRouteHandlerContext: <
     Context extends RequestHandlerContext,
-    ContextName extends keyof Context
+    ContextName extends keyof Omit<Context, 'resolve'>
   >(
     pluginOpaqueId: PluginOpaqueId,
     contextName: ContextName,

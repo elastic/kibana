@@ -8,7 +8,7 @@
 import { requestContextMock } from '../../__mocks__';
 import { importRules } from './import_rules_utils';
 import {
-  getAlertMock,
+  getRuleMock,
   getEmptyFindResult,
   getFindResultWithSingleHit,
 } from '../../__mocks__/request_responses';
@@ -30,7 +30,7 @@ describe('importRules', () => {
 
   beforeEach(() => {
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(true, getQueryRuleParams()));
+    clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.actionsClient.getAll.mockResolvedValue([]);
 
     jest.clearAllMocks();
@@ -42,12 +42,10 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
-      isRuleRegistryEnabled: true,
       savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -60,12 +58,10 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
-      isRuleRegistryEnabled: true,
       savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -93,12 +89,10 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
-      isRuleRegistryEnabled: true,
       savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -108,7 +102,7 @@ describe('importRules', () => {
   });
 
   it('reports error if "overwriteRules" is "false" and matching rule found', async () => {
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(true));
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     const result = await importRules({
       ruleChunks: [
@@ -122,12 +116,10 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
-      isRuleRegistryEnabled: true,
       savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -142,7 +134,7 @@ describe('importRules', () => {
   });
 
   it('patches rule if "overwriteRules" is "true" and matching rule found', async () => {
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(true));
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     const result = await importRules({
       ruleChunks: [
@@ -156,12 +148,10 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: true,
-      isRuleRegistryEnabled: true,
       savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -185,12 +175,10 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: true,
-      isRuleRegistryEnabled: true,
       savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -222,12 +210,10 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
-      isRuleRegistryEnabled: true,
       savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -244,7 +230,7 @@ describe('importRules', () => {
 
   it('reports error if "patchRules" throws', async () => {
     (patchRules as jest.Mock).mockRejectedValue(new Error('error patching rule'));
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(true));
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     const result = await importRules({
       ruleChunks: [
@@ -258,12 +244,10 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: true,
-      isRuleRegistryEnabled: true,
       savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 

@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import { appContextService } from '../../../app_context';
 
@@ -36,6 +36,18 @@ describe('buildDefaultSettings', () => {
           name: 'field2Boolean',
           type: 'boolean',
         },
+        {
+          name: 'field3Text',
+          type: 'text',
+        },
+        {
+          name: 'field4MatchOnlyText',
+          type: 'match_only_text',
+        },
+        {
+          name: 'field5Wildcard',
+          type: 'wildcard',
+        },
       ],
     });
 
@@ -46,14 +58,12 @@ describe('buildDefaultSettings', () => {
           "lifecycle": Object {
             "name": "logs",
           },
-          "mapping": Object {
-            "total_fields": Object {
-              "limit": "10000",
-            },
-          },
           "query": Object {
             "default_field": Array [
               "field1Keyword",
+              "field3Text",
+              "field4MatchOnlyText",
+              "field5Wildcard",
             ],
           },
         },
