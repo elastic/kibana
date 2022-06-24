@@ -420,13 +420,7 @@
             ],
             "signature": [
               "{ calculateAutoTimeExpression: (range: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               ") => string | undefined; createAggConfigs: (indexPattern: ",
               {
                 "pluginId": "dataViews",
@@ -11357,52 +11351,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.checkColumnForPrecisionError",
-        "type": "Function",
-        "tags": [],
-        "label": "checkColumnForPrecisionError",
-        "description": [],
-        "signature": [
-          "(column: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          ") => ",
-          "Serializable"
-        ],
-        "path": "src/plugins/data/common/search/tabify/utils.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.checkColumnForPrecisionError.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "column",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              }
-            ],
-            "path": "src/plugins/data/common/search/tabify/utils.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.cidrToAst",
         "type": "Function",
         "tags": [],
@@ -12328,13 +12276,7 @@
         "description": [],
         "signature": [
           "(getConfig: (key: string) => any) => (range: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           ") => string | undefined"
         ],
         "path": "src/plugins/data/common/search/aggs/utils/calculate_auto_time_expression.ts",
@@ -12508,75 +12450,6 @@
               }
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.getDateHistogramMetaDataByDatatableColumn",
-        "type": "Function",
-        "tags": [],
-        "label": "getDateHistogramMetaDataByDatatableColumn",
-        "description": [
-          "\nHelper function returning the used interval, used time zone and applied time filters for data table column created by the date_histogramm agg type.\n\"auto\" will get expanded to the actually used interval.\nIf the column is not a column created by a date_histogram aggregation of the esaggs data source,\nthis function will return undefined."
-        ],
-        "signature": [
-          "(column: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          ", defaults?: Partial<{ timeZone: string; }>) => { interval: string | undefined; timeZone: string | undefined; timeRange: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; } | undefined"
-        ],
-        "path": "src/plugins/data/common/search/aggs/utils/get_date_histogram_meta.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.getDateHistogramMetaDataByDatatableColumn.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "column",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              }
-            ],
-            "path": "src/plugins/data/common/search/aggs/utils/get_date_histogram_meta.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.getDateHistogramMetaDataByDatatableColumn.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "defaults",
-            "description": [],
-            "signature": [
-              "Partial<{ timeZone: string; }>"
-            ],
-            "path": "src/plugins/data/common/search/aggs/utils/get_date_histogram_meta.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -13480,53 +13353,6 @@
         "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
         "deprecated": false,
         "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.getNumberHistogramIntervalByDatatableColumn",
-        "type": "Function",
-        "tags": [],
-        "label": "getNumberHistogramIntervalByDatatableColumn",
-        "description": [
-          "\nHelper function returning the used interval for data table column created by the histogramm agg type.\n\"auto\" will get expanded to the actually used interval.\nIf the column is not a column created by a histogram aggregation of the esaggs data source,\nthis function will return undefined."
-        ],
-        "signature": [
-          "(column: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          ") => number | undefined"
-        ],
-        "path": "src/plugins/data/common/search/aggs/utils/get_number_histogram_interval.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.getNumberHistogramIntervalByDatatableColumn.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "column",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              }
-            ],
-            "path": "src/plugins/data/common/search/aggs/utils/get_number_histogram_interval.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -15883,13 +15709,7 @@
         "description": [],
         "signature": [
           "(timerange: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           ") => ",
           {
             "pluginId": "expressions",
@@ -15910,13 +15730,7 @@
             "label": "timerange",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              }
+              "TimeRange"
             ],
             "path": "src/plugins/data/common/search/expressions/timerange_to_ast.ts",
             "deprecated": false,
@@ -21071,13 +20885,7 @@
             "description": [],
             "signature": [
               "(range: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               ") => string | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -25400,13 +25208,7 @@
             "description": [],
             "signature": [
               "{ calculateAutoTimeExpression: (range: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               ") => string | undefined; createAggConfigs: (indexPattern: ",
               {
                 "pluginId": "dataViews",
@@ -26845,13 +26647,7 @@
         ],
         "signature": [
           "{ calculateAutoTimeExpression: (range: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           ") => string | undefined; createAggConfigs: (indexPattern: ",
           {
             "pluginId": "dataViews",
@@ -27529,13 +27325,7 @@
           " | ",
           "Query",
           "[] | undefined; timeRange?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
@@ -28135,13 +27925,7 @@
             "text": "ExpressionFunctionDefinition"
           },
           "<\"timerange\", null, ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           ", ",
           {
             "pluginId": "data",
@@ -29647,13 +29431,7 @@
         "description": [],
         "signature": [
           "{ type: \"timerange\"; } & ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          }
+          "TimeRange"
         ],
         "path": "src/plugins/data/common/search/expressions/timerange.ts",
         "deprecated": false,
@@ -33019,13 +32797,7 @@
             "description": [],
             "signature": [
               "(input: null, args: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               ") => { type: \"timerange\"; from: string; to: string; mode: \"absolute\" | \"relative\" | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/timerange.ts",
@@ -33053,13 +32825,7 @@
                 "label": "args",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataQueryPluginApi",
-                    "section": "def-common.TimeRange",
-                    "text": "TimeRange"
-                  }
+                  "TimeRange"
                 ],
                 "path": "src/plugins/data/common/search/expressions/timerange.ts",
                 "deprecated": false,
@@ -35162,13 +34928,7 @@
               " | ",
               "Query",
               "[] | undefined; timeRange?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               " | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
@@ -35465,13 +35225,7 @@
               " | ",
               "Query",
               "[] | undefined; timeRange?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               " | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/select_filter.ts",
