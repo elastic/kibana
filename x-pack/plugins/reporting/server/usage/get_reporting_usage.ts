@@ -104,6 +104,7 @@ function getAggStats(
       key,
       doc_count: count,
       isDeprecated,
+      execution_times: executionTimes,
       output_size: outputSizes,
       layoutTypes,
       objectTypes,
@@ -120,6 +121,7 @@ function getAggStats(
       output_size: get(outputSizes, 'values', {} as SizePercentiles),
       error_codes: getKeyCount(get(errorCodes, 'buckets', [])),
       layout: getKeyCount(get(layoutTypes, 'buckets', [])),
+      execution_times: executionTimes,
     };
     return { ...accum, [key]: jobType };
   }, {} as JobTypes);
@@ -207,6 +209,23 @@ export async function getReportingUsage(
     filter_path: 'aggregations.*.buckets,aggregations.metrics_*',
     body: {
       size: 0,
+      runtime_mappings: {
+        // WIP
+        'meta.queueTime': {
+          type: 'long',
+          script: {
+            source:
+              "if (!doc.containsKey('created_at') || doc['created_at'].empty) { return; } if (!doc.containsKey('started_at') || doc['started_at'].empty) { return; } emit(doc['started_at'].value.millis - doc['created_at'].value.millis);",
+          },
+        },
+        'meta.executionTime': {
+          type: 'long',
+          script: {
+            source:
+              "if (!doc.containsKey('completed_at') || doc['completed_at'].empty) { return; } if (!doc.containsKey('started_at') || doc['started_at'].empty) { return; } emit(doc['completed_at'].value.millis - doc['started_at'].value.millis);",
+          },
+        },
+      },
       aggs: {
         ranges: {
           filters: {
@@ -238,6 +257,13 @@ export async function getReportingUsage(
                 [keys.ERROR_CODE]: {
                   terms: { field: fields.ERROR_CODE, size: DEFAULT_TERMS_SIZE },
                 },
+
+                // WIP
+                execution_times: {
+                  stats: {
+                    field: 'meta.executionTime',
+                  },
+                },
               },
             },
             [keys.STATUS]: { terms: { field: fields.STATUS, size: DEFAULT_TERMS_SIZE } },
@@ -245,6 +271,13 @@ export async function getReportingUsage(
             [keys.OUTPUT_SIZE]: { percentiles: { field: fields.OUTPUT_SIZE } },
             // overall error codes
             [keys.ERROR_CODE]: { terms: { field: fields.ERROR_CODE, size: DEFAULT_TERMS_SIZE } },
+
+            // WIP
+            queue_times: {
+              stats: {
+                field: 'meta.queueTime',
+              },
+            },
           },
         },
         metrics: {

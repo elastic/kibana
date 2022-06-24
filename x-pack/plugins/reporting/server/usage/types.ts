@@ -35,6 +35,10 @@ interface ErrorCodeBuckets {
   errorCodes?: AggregationBuckets;
 }
 
+interface ExecutionTimesMetrics {
+  execution_times?: ExecutionTimes;
+}
+
 /*
  * NOTE: This list needs to be explicit in order for the telemetry schema check script to resolve the types.
  * However, using `keyof JobTypes` is functionally the same thing
@@ -52,9 +56,11 @@ export interface KeyCountBucket
     SizeBuckets,
     ObjectTypeBuckets,
     LayoutTypeBuckets,
-    ErrorCodeBuckets {
+    ErrorCodeBuckets,
+    ExecutionTimesMetrics {
   key: BaseJobTypes;
   isDeprecated?: DocCount;
+  execution_times: ExecutionTimes;
 }
 
 export interface AggregationBuckets {
@@ -92,11 +98,18 @@ export interface SearchResponse {
   };
 }
 
+export interface ExecutionTimes {
+  min: number | null;
+  max: number | null;
+  avg: number | null;
+}
+
 export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
   output_size: SizePercentiles;
+  execution_times?: ExecutionTimes;
   app: {
     search?: number;
     dashboard?: number;

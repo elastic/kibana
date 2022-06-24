@@ -6759,6 +6759,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "long"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "csv_rows": {
@@ -6849,6 +6862,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "long"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "csv_rows": {
@@ -6935,6 +6961,19 @@
                   "type": "long"
                 },
                 "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
                   "type": "long"
                 }
               }
@@ -7060,6 +7099,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "long"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "png_cpu": {
@@ -7177,6 +7229,19 @@
                   "type": "long"
                 },
                 "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
                   "type": "long"
                 }
               }
@@ -7330,6 +7395,19 @@
                   "type": "long"
                 },
                 "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
                   "type": "long"
                 }
               }
@@ -8046,6 +8124,19 @@
                     }
                   }
                 },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
                     "csv_rows": {
@@ -8136,6 +8227,19 @@
                     }
                   }
                 },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
                     "csv_rows": {
@@ -8222,6 +8326,19 @@
                       "type": "long"
                     },
                     "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
                       "type": "long"
                     }
                   }
@@ -8347,6 +8464,19 @@
                     }
                   }
                 },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
                     "png_cpu": {
@@ -8464,6 +8594,19 @@
                       "type": "long"
                     },
                     "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
                       "type": "long"
                     }
                   }
@@ -8617,6 +8760,19 @@
                       "type": "long"
                     },
                     "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
                       "type": "long"
                     }
                   }

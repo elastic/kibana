@@ -117,6 +117,7 @@ test('Model of jobTypes', () => {
       "available": true,
       "deprecated": 0,
       "error_codes": Object {},
+      "execution_times": undefined,
       "layout": undefined,
       "metrics": Object {
         "png_cpu": Object {},
@@ -145,6 +146,7 @@ test('Model of jobTypes', () => {
       "available": true,
       "deprecated": 0,
       "error_codes": Object {},
+      "execution_times": undefined,
       "layout": undefined,
       "metrics": Object {
         "csv_rows": Object {},
@@ -172,6 +174,7 @@ test('Model of jobTypes', () => {
       "available": true,
       "deprecated": 0,
       "error_codes": Object {},
+      "execution_times": undefined,
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 3,
@@ -223,6 +226,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
       "available": true,
       "deprecated": 5,
       "error_codes": Object {},
+      "execution_times": undefined,
       "layout": undefined,
       "metrics": Object {
         "png_cpu": Object {},
