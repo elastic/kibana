@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
 
-export const TotalStats: React.FC = () => {
-  const [{ lastUpdated, documentCount, indexHealth, ingestionType }] = useState({
-    lastUpdated: 'Just now',
-    documentCount: 0,
-    indexHealth: 'Healthy',
-    ingestionType: 'API',
-  });
+interface TotalStatsProps {
+  lastUpdated: string;
+  documentCount: number;
+  indexHealth: string;
+  ingestionType: string;
+}
 
+export const TotalStats: React.FC<TotalStatsProps> = ({
+  lastUpdated,
+  documentCount,
+  indexHealth,
+  ingestionType,
+}) => {
   return (
     <EuiFlexGroup direction="row">
       <EuiFlexItem>

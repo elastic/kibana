@@ -7,7 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { fetchIndices } from '../../lib/fetch_indices';
+import { fetchIndex } from '../../lib/indices/fetch_index';
+import { fetchIndices } from '../../lib/indices/fetch_indices';
+import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { RouteDependencies } from '../../plugin';
 
 export function registerIndexRoutes({ router }: RouteDependencies) {
@@ -66,6 +68,60 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
         return response.customError({
           statusCode: 502,
           body: 'Error fetching index data from Elasticsearch',
+        });
+      }
+    }
+  );
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{encodedIndexName}',
+      validate: {
+        params: schema.object({
+          encodedIndexName: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { encodedIndexName } = request.params;
+      const indexName = decodeURI(encodedIndexName);
+      const { client } = (await context.core).elasticsearch;
+      try {
+        const index = await fetchIndex(client, indexName);
+        return response.ok({
+          body: index,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: 502,
+          body: 'Error fetching data from Enterprise Search',
+        });
+      }
+    }
+  );
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{encodedIndexName}/api_key',
+      validate: {
+        params: schema.object({
+          encodedIndexName: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { encodedIndexName } = request.params;
+      const indexName = decodeURI(encodedIndexName);
+      const { client } = (await context.core).elasticsearch;
+      try {
+        const apiKey = await generateApiKey(client, indexName);
+        return response.ok({
+          body: apiKey,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: 502,
+          body: 'Error fetching data from Enterprise Search',
         });
       }
     }

@@ -13,6 +13,7 @@ import {
   SEARCH_INDEX_DOCUMENTS_PATH,
   SEARCH_INDEX_SCHEMA_PATH,
   SEARCH_INDEX_LOGS_PATH,
+  SEARCH_INDEX_CONFIGURATION_PATH,
 } from '../../routes';
 
 import { SearchIndexDocuments } from './documents';
@@ -34,6 +35,9 @@ export const SearchIndexRouter: React.FC = () => {
       </Route>
       <Route exact path={SEARCH_INDEX_LOGS_PATH}>
         <SearchIndexLogs />
+      </Route>
+      <Route exact path={SEARCH_INDEX_CONFIGURATION_PATH}>
+        <SearchIndexOverview navTabIndex={3} />
       </Route>
     </Switch>
   );

@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCodeBlock, EuiFormLabel } from '@elastic/eui';
 
-import { ApiKey } from './api_key';
+import { ApiKey } from '.';
 
 const key = '123abc';
 const label = 'foo';

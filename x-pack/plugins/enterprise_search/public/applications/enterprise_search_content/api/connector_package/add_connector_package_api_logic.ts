@@ -11,9 +11,10 @@ import { HttpLogic } from '../../../shared/http';
 interface AddConnectorValue {
   id: string;
   apiKey: string;
+  indexName: string;
 }
 
-const addConnectorPackage = async ({ indexName }: { indexName: string }) => {
+export const addConnectorPackage = async ({ indexName }: { indexName: string }) => {
   const route = '/internal/enterprise_search/connectors';
 
   const params = {

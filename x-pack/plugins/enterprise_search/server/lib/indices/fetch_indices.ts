@@ -5,10 +5,40 @@
  * 2.0.
  */
 
+import { IndicesIndexState, IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { ElasticsearchIndex } from '../../common/types';
+import { ElasticsearchIndex } from '../../../common/types';
+
+export const mapIndexStats = (
+  indexData: IndicesIndexState,
+  indexStats: IndicesStatsIndicesStats,
+  indexName: string
+) => {
+  const aliases = Object.keys(indexData.aliases!);
+  const sizeInBytes = new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString();
+
+  const docCount = indexStats?.total?.docs?.count ?? 0;
+  const docDeleted = indexStats?.total?.docs?.deleted ?? 0;
+  const total = {
+    docs: {
+      count: docCount,
+      deleted: docDeleted,
+    },
+    store: {
+      size_in_bytes: sizeInBytes,
+    },
+  };
+  return {
+    health: indexStats?.health,
+    status: indexStats?.status,
+    name: indexName,
+    uuid: indexStats?.uuid,
+    total,
+    aliases,
+  };
+};
 
 export const fetchIndices = async (
   client: IScopedClusterClient,
@@ -40,31 +70,7 @@ export const fetchIndices = async (
     .map((indexName: string) => {
       const indexData = indices[indexName];
       const indexStats = indicesStats[indexName];
-      const aliases = Object.keys(indexData.aliases!);
-      const sizeInBytes = new ByteSizeValue(
-        indexStats?.total?.store?.size_in_bytes ?? 0
-      ).toString();
-
-      const docCount = indexStats?.total?.docs?.count ?? 0;
-      const docDeleted = indexStats?.total?.docs?.deleted ?? 0;
-      const total = {
-        docs: {
-          count: docCount,
-          deleted: docDeleted,
-        },
-        store: {
-          size_in_bytes: sizeInBytes,
-        },
-      };
-
-      return {
-        health: indexStats?.health,
-        status: indexStats?.status,
-        name: indexName,
-        uuid: indexStats?.uuid,
-        total,
-        aliases,
-      };
+      return mapIndexStats(indexData, indexStats, indexName);
     })
     .flatMap(({ name, aliases, ...engineData }) => {
       const engines = [];
