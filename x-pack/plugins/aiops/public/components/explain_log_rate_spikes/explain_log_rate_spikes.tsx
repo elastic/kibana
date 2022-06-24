@@ -23,7 +23,7 @@ import type { ApiExplainLogRateSpikes } from '../../../common/api';
 export interface ExplainLogRateSpikesProps {
   /** The data view to analyze. */
   dataView: DataView;
-  /** Window paramaters for the analysis */
+  /** Window parameters for the analysis */
   windowParameters: WindowParameters;
 }
 
