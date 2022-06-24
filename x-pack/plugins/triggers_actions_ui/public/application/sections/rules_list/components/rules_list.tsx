@@ -911,6 +911,7 @@ export { WrappedRulesPage as default };
 
 const noPermissionPrompt = (
   <EuiEmptyPrompt
+    data-test-subj="noPermissionPrompt"
     iconType="securityApp"
     title={
       <h1>
