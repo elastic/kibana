@@ -6,7 +6,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { get } from 'lodash';
+import { get, pick } from 'lodash';
 import type { GetLicense } from '.';
 import { REPORTING_SYSTEM_INDEX } from '../../common/constants';
 import type { ExportTypesRegistry } from '../lib/export_types_registry';
@@ -126,7 +126,7 @@ function getAggStats(
       output_size: get(outputSizes, 'values', {} as SizePercentiles),
       error_codes: getKeyCount(get(errorCodes, 'buckets', [])),
       layout: getKeyCount(get(layoutTypes, 'buckets', [])),
-      execution_times: executionTimes,
+      execution_times: pick(executionTimes ?? {}, ['min', 'max', 'avg']),
     };
     return { ...accum, [key]: jobType };
   }, {} as JobTypes);
