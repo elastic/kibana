@@ -23,6 +23,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
+      log.error('Navigating to kibana_overview...');
+      await PageObjects.common.navigateToApp('kibana_overview');
+      log.error('Waiting until loading has finished...');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      log.error('Done...');
     });
 
     after(async () => {
@@ -50,6 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on a card should lead to the appropriate app', async () => {
+      log.error('Starting a test');
       const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');
       const dashboardCard = kbnOverviewAppsCards.at(0);
       log.debug('kbnOverviewAppsCards ' + kbnOverviewAppsCards.length);
