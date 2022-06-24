@@ -191,13 +191,6 @@ export class DataView implements DataViewBase {
   };
 
   /**
-   * Returns true if data view is  backed by saved object
-   */
-  isPersisted = () => {
-    return this.id && !this.id.startsWith('local');
-  };
-
-  /**
    * Returns field attributes map
    */
   getFieldAttrs = () => {
