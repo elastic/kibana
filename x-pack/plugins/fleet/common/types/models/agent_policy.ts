@@ -28,6 +28,7 @@ export interface NewAgentPolicy {
   // Nullable to allow user to reset to default outputs
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
+  download_source_id?: string | null;
 }
 
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {

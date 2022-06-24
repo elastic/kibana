@@ -17,6 +17,7 @@ import {
   ASSETS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import {
@@ -295,6 +296,22 @@ const getSavedObjectTypes = (
     mappings: {
       properties: {
         id: { type: 'keyword' },
+      },
+    },
+  },
+  [DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE]: {
+    name: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        source_id: { type: 'keyword', index: false },
+        name: { type: 'keyword' },
+        is_default: { type: 'boolean' },
+        host: { type: 'keyword' },
       },
     },
   },

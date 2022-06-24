@@ -59,6 +59,7 @@ const previouslyRegisteredTypes = [
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'ingest-agent-policies',
+  'ingest-download-sources',
   'ingest-outputs',
   'ingest-package-policies',
   'ingest_manager_settings',

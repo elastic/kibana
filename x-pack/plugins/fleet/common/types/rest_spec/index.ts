@@ -16,3 +16,4 @@ export * from './enrollment_api_key';
 export * from './output';
 export * from './settings';
 export * from './app';
+export * from './download_sources';
