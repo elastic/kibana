@@ -121,7 +121,7 @@ Osquery Manager integration to add the following Advanced *Osquery config*:
 The https://github.com/osquery/osquery/releases[Osquery version] available on an Elastic Agent
 is associated to the version of Osquery Beat on the Agent.
 To get the latest version of Osquery Beat,
-https://www.elastic.co/guide/en/fleet/master/upgrade-elastic-agent.html[upgrade your Elastic Agent].
+{fleet-guide}/upgrade-elastic-agent.html[upgrade your Elastic Agent].
 
 [float]
 === Debug issues
