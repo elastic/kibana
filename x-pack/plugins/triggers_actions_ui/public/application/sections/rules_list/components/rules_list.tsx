@@ -97,7 +97,7 @@ export interface RulesListProps {
   showActionFilter?: boolean;
   ruleDetailsLink?: string | undefined;
   showCreateRuleButton?: boolean;
-  statusFilter?: RuleStatus[] | undefined;
+  statusFilter?: RuleStatus[];
   setStatusFilter?: (status: RuleStatus[]) => any;
   executionStatusesFilter?: string[];
   setExecutionStatusesFilter?: (lastResponse: string[]) => any;
@@ -144,6 +144,7 @@ export const RulesList = ({
     kibanaFeatures,
   } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
+
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -154,7 +155,7 @@ export const RulesList = ({
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>([]);
-  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
+  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>(statusFilter || []);
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
@@ -212,20 +213,13 @@ export const RulesList = ({
     ruleExecutionStatusesFilter: executionStatusesFilter
       ? executionStatusesFilter
       : ruleExecutionStatusesFilter,
-    ruleStatusesFilter: statusFilter ? statusFilter : ruleStatusesFilter,
+    ruleStatusesFilter,
     tagsFilter,
     sort,
     onPage: setPage,
     onError,
     filteredRuleTypes,
   });
-
-  // const setExecutionStatusFilter = useCallback(
-  //   (ids: string[]) => {
-  //     setLastResponse(ids);
-  //   },
-  //   [setLastResponse]
-  // );
 
   const { tags, loadTags } = useLoadTags({
     onError,
@@ -238,7 +232,7 @@ export const RulesList = ({
     ruleExecutionStatusesFilter: executionStatusesFilter
       ? executionStatusesFilter
       : ruleExecutionStatusesFilter,
-    ruleStatusesFilter: statusFilter ? statusFilter : ruleStatusesFilter,
+    ruleStatusesFilter,
     tagsFilter,
     onError,
   });
@@ -330,6 +324,12 @@ export const RulesList = ({
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (setStatusFilter) {
+      setStatusFilter(ruleStatusesFilter);
+    }
+  }, [ruleStatusesFilter, setStatusFilter]);
 
   const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
@@ -434,17 +434,6 @@ export const RulesList = ({
     return [];
   };
 
-  const setRuleStatusFilter = useCallback(
-    (ids: RuleStatus[]) => {
-      if (setStatusFilter) {
-        setStatusFilter(ids);
-      } else {
-        setRuleStatusesFilter(ids);
-      }
-    },
-    [setStatusFilter]
-  );
-
   const setInternalRuleExecutionStatusesFilter = useCallback(
     (ids: string[]) => {
       if (setExecutionStatusesFilter) {
@@ -459,10 +448,7 @@ export const RulesList = ({
   const renderRuleStatusFilter = () => {
     if (isRuleStatusFilterEnabled) {
       return (
-        <RuleStatusFilter
-          selectedStatuses={statusFilter ? statusFilter : ruleStatusesFilter}
-          onChange={setRuleStatusFilter}
-        />
+        <RuleStatusFilter selectedStatuses={ruleStatusesFilter} onChange={setRuleStatusesFilter} />
       );
     }
     return null;
