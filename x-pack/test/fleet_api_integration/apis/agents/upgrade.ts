@@ -21,7 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('Agents upgrade', () => {
+  describe('fleet_upgrade_agent', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
@@ -481,6 +481,52 @@ export default function (providerContext: FtrProviderContext) {
         ]);
         expect(typeof agent1data.body.item.upgrade_started_at).to.be('string');
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('undefined');
+      });
+
+      it('should bulk upgrade multiple agents by kuery in batches', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await es.update({
+          id: 'agent2',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: {
+                elastic: {
+                  agent: { upgradeable: false, version: '0.0.0' },
+                },
+              },
+              upgrade_started_at: undefined,
+            },
+          },
+        });
+
+        const { body: unenrolledBody } = await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: 'active:true',
+            version: fleetServerVersion,
+            batchSize: 2,
+          })
+          .expect(200);
+
+        expect(unenrolledBody).to.eql({
+          agent4: { success: false, error: 'agent4 is not upgradeable' },
+          agent3: { success: false, error: 'agent3 is not upgradeable' },
+          agent2: { success: false, error: 'agent2 is not upgradeable' },
+          agent1: { success: true },
+          agentWithFS: { success: false, error: 'agentWithFS is not upgradeable' },
+        });
       });
 
       it('should not upgrade an unenrolling agent during bulk_upgrade', async () => {
