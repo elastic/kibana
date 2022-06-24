@@ -77,11 +77,43 @@ As an example, the following configuration disables two tables.
 +
 ```ts
 {
-   "options":{
-      "disable_tables":"curl,process_envs"
+   "options": {
+      "disable_tables":"file,process_envs"
    }
 }
 ```
+
+[float]
+[[enable-curl-table]]
+==== Enabling the `curl` table
+By default, the https://osquery.io/schema/#curl[curl table] is disabled.
+If preferred, you can enable it using the Advanced *Osquery config*.
+
+*Why is the `curl` table disabled?*
+
+When you query the https://osquery.io/schema/#curl[curl table], this results in an HTTP request.
+The query results include the response to the request. As a simple example, if you run the query
+`SELECT * FROM curl WHERE url='https://www.elastic.co/';`, the `result` field contains the 
+webpage content.
+
+This table can be abused in some environments, for example, when used to issue HTTP requests
+to an AWS metadata service or to services on your internal network. 
+
+Out of an abundance of caution, we have opted to disable access to this table by default.
+However, if you need access to the table for your own monitoring purposes, you can enable it
+as needed.
+
+*How to enable the `curl` table:*
+
+For each agent policy where you want to allow `curl` table queries, edit the 
+Osquery Manager integration to add the following Advanced *Osquery config*:
+
+```ts
+{
+   "options": {
+      "enable_tables":"curl"
+   }
+}
 
 [float]
 === Upgrade Osquery versions
