@@ -33,12 +33,16 @@ export function AlertsPopover({
   searchSource,
   anchorElement,
   savedQueryId,
-  onClose,
+  onClose: originalOnClose,
 }: AlertsPopoverProps) {
   const dataView = searchSource.getField('index')!;
   const services = useDiscoverServices();
   const { triggersActionsUi } = services;
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState(false);
+  const onClose = useCallback(() => {
+    originalOnClose();
+    anchorElement?.focus();
+  }, [anchorElement, originalOnClose]);
 
   /**
    * Provides the default parameters used to initialize the new rule
