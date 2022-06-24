@@ -57,7 +57,7 @@ journey(
     });
 
     step('login to Kibana', async () => {
-      await uptime.loginToKibana('editor', 'changeme');
+      await uptime.loginToKibana('obs_admin_user', 'changeme');
       const invalid = await page.locator(
         `text=Username or password is incorrect. Please try again.`
       );
