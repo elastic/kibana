@@ -98,7 +98,7 @@ export function MachineLearningStackManagementJobsProvider({
 
     async assertADJobRowSpaces(adJobId: string, expectedSpaces: string[]) {
       await this.refreshList();
-      const spaces = await this.getSpacesFromTable();
+      const spaces = await this.getSpacesFromTable(adJobId);
       expect(spaces!.sort()).to.eql(
         expectedSpaces.sort(),
         `Expected spaces for AD job '${adJobId}' to be '${JSON.stringify(
@@ -109,7 +109,7 @@ export function MachineLearningStackManagementJobsProvider({
 
     async assertDFAJobRowSpaces(dfaJobId: string, expectedSpaces: string[]) {
       await this.refreshList();
-      const spaces = await this.getSpacesFromTable();
+      const spaces = await this.getSpacesFromTable(dfaJobId);
       expect(spaces!.sort()).to.eql(
         expectedSpaces.sort(),
         `Expected spaces for DFA job '${dfaJobId}' to be '${JSON.stringify(
@@ -459,20 +459,30 @@ export function MachineLearningStackManagementJobsProvider({
       return ids;
     },
 
-    async getSpacesFromTable() {
+    async getSpacesFromTable(id: string) {
       const tableListContainer = await testSubjects.find('mlSpacesManagementTable');
       const rows = await tableListContainer.findAllByClassName('euiTableRow');
 
       const spaces: string[] = [];
-      for (const row of rows) {
-        const col = await row.findByTestSubject('mlSpaceManagementTableColumnSpaces');
-        const spacesEl = await (
-          await col.findByClassName('euiTableCellContent')
-        ).findAllByClassName('euiAvatar--space');
+      const ids = await Promise.all(
+        rows.map(async (r) =>
+          (await r.findByTestSubject('mlSpaceManagementTableColumnId')).getVisibleText()
+        )
+      );
 
-        for (const el of spacesEl) {
-          spaces.push((await el.getAttribute('data-test-subj')).replace('space-avatar-', ''));
-        }
+      const matchedRowIndex = ids.indexOf(id);
+      if (matchedRowIndex === -1) {
+        return [];
+      }
+
+      const row = rows[matchedRowIndex];
+      const col = await row.findByTestSubject('mlSpaceManagementTableColumnSpaces');
+      const spacesEl = await (
+        await col.findByClassName('euiTableCellContent')
+      ).findAllByClassName('euiAvatar--space');
+
+      for (const el of spacesEl) {
+        spaces.push((await el.getAttribute('data-test-subj')).replace('space-avatar-', ''));
       }
 
       return spaces;

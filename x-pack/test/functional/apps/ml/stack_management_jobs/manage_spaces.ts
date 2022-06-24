@@ -184,7 +184,6 @@ export default function ({ getService }: FtrProviderContext) {
             testData.adJobId
           );
 
-          // await ml.jobTable.filterWithSearchString(testData.adJobId, 1, 'stackMgmtJobList');
           await ml.stackManagementJobs.assertADJobRowSpaces(testData.adJobId, [
             testData.initialSpace,
           ]);
