@@ -34,28 +34,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'similar_index_two']);
       await PageObjects.common.navigateToApp('settings');
 
-      await createIndex('similar-index');
-      await createIndex('similar-index-two');
+      await createIndex('similar_index');
+      await createIndex('similar_index_two');
 
-      await PageObjects.settings.createIndexPattern('similar-index*', '@timestamp', true);
+      await PageObjects.settings.createIndexPattern('similar_index*', '@timestamp', true);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
 
     it('should navigate through rows with the same id but different indices correctly', async () => {
-      await PageObjects.discover.selectIndexPattern('similar-index*');
+      await PageObjects.discover.selectIndexPattern('similar_index*');
 
       await dataGrid.clickRowToggle();
       const indexBeforePaginating = await testSubjects.getVisibleText(
         'tableDocViewRow-_index-value'
       );
-      expect(indexBeforePaginating).to.be('similar-index');
+      expect(indexBeforePaginating).to.be('similar_index');
 
       await testSubjects.click('pagination-button-next');
       const indexAfterPaginating = await testSubjects.getVisibleText(
         'tableDocViewRow-_index-value'
       );
-      expect(indexAfterPaginating).to.be('similar-index-two');
+      expect(indexAfterPaginating).to.be('similar_index_two');
     });
   });
 }
