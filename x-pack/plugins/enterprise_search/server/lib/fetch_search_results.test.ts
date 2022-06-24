@@ -6,6 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
+import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 
 import { fetchSearchResults } from './fetch_search_results';
 
@@ -19,26 +20,64 @@ describe('fetchSearchResults lib function', () => {
   const indexName = 'search-regular-index';
   const query = 'banana';
 
-  const regularSearchResultsResponse = {};
+  const regularSearchResultsResponse = {
+    took: 4,
+    timed_out: false,
+    _shards: {
+      total: 2,
+      successful: 2,
+      skipped: 0,
+      failed: 0
+    },
+    hits: {
+      total: {
+        value: 1,
+        relation: "eq"
+      },
+      max_score: null,
+      hits: [
+        {
+          _index: "search-regular-index",
+          _id: "5a12292a0f5ae10021650d7e",
+          _score: 4.437291,
+          _source: {
+            name: "banana",
+            id: "5a12292a0f5ae10021650d7e"
+          }
+        }
+      ]
+    }
+  };
 
-  const emptyMappingResponse = {};
+  const emptySearchResultsResponse = {
+    took: 4,
+    timed_out: false,
+    _shards: {
+      total: 2,
+      successful: 2,
+      skipped: 0,
+      failed: 0
+    },
+    hits: {
+      total: {
+        value: 0,
+        relation: "eq"
+      },
+      max_score: null,
+      hits: []
+    }
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return regular mapping information', async () => {
-    mockClient.asCurrentUser.search.mockImplementation(() => regularSearchResultsResponse);
+  it('should return search results with hits', async () => {
+    mockClient.asCurrentUser.search.mockImplementation(() => regularSearchResultsResponse as SearchResponseBody);
 
     await expect(
       fetchSearchResults(mockClient as unknown as IScopedClusterClient, indexName, query)
-    ).resolves.toEqual({
-      mappings: {
-        dynamic: true,
-        dynamic_templates: [],
-        properties: {},
-      },
-    });
+    ).resolves.toEqual(regularSearchResultsResponse);
 
     expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
       index: indexName,
@@ -46,12 +85,12 @@ describe('fetchSearchResults lib function', () => {
     });
   });
 
-  it('should return empty object when no mapping is found', async () => {
-    mockClient.asCurrentUser.search.mockImplementationOnce(() => emptyMappingResponse);
+  it('should return empty search results', async () => {
+    mockClient.asCurrentUser.search.mockImplementationOnce(() => emptySearchResultsResponse as SearchResponseBody);
 
     await expect(
       fetchSearchResults(mockClient as unknown as IScopedClusterClient, indexName, query)
-    ).resolves.toEqual({});
+    ).resolves.toEqual(emptySearchResultsResponse);
 
     expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
       index: indexName,
