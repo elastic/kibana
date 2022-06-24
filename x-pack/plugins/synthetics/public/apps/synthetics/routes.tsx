@@ -8,7 +8,13 @@
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
 import { tint } from 'polished';
-import { EuiPageTemplateProps, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiPageTemplateProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  useEuiTheme,
+} from '@elastic/eui';
 import { Route, Switch } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,7 +33,10 @@ import { OverviewPage } from './components/monitors_page/overview/overview_page'
 import { SyntheticsPageTemplateComponent } from './components/common/pages/synthetics_page_template';
 import { NotFoundPage } from './components/common/pages/not_found';
 import { ServiceAllowedWrapper } from './components/common/wrappers/service_allowed_wrapper';
-import { MonitorTypePortalNode } from './components/monitor_add_edit/monitor_type_portal_node';
+import {
+  MonitorTypePortalNode,
+  MonitorDetailsLinkPortalNode,
+} from './components/monitor_add_edit/portals';
 import {
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
@@ -180,6 +189,22 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
             defaultMessage="Add Monitor"
           />
         ),
+        children: (
+          <FormattedMessage
+            id="xpack.synthetics.addMonitor.pageHeader.description"
+            defaultMessage="For more information about available monitor types and other options, see our {docs}."
+            values={{
+              docs: (
+                <EuiLink target="_blank" href="#">
+                  <FormattedMessage
+                    id="xpack.synthetics.addMonitor.pageHeader.docsLink"
+                    defaultMessage="documentation"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        ),
       },
     },
     {
@@ -202,6 +227,11 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
           />
         ),
         rightSideItems: [<OutPortal node={MonitorTypePortalNode} />],
+        breadcrumbs: [
+          {
+            text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
+          },
+        ],
       },
     },
   ];

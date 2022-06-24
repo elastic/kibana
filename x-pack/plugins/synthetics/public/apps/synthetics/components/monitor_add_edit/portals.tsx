@@ -8,3 +8,5 @@
 import { createPortalNode } from 'react-reverse-portal';
 
 export const MonitorTypePortalNode = createPortalNode();
+
+export const MonitorDetailsLinkPortalNode = createPortalNode();

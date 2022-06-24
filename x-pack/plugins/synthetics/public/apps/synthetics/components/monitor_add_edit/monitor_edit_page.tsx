@@ -12,6 +12,7 @@ import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
 import { getServiceLocations } from '../../state';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
+import { MonitorDetailsLinkPortal } from './monitor_details_portal';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 import { getMonitorAPI } from '../../state/monitor_management/api';
 import { EDIT_MONITOR_STEPS } from './form/config';
@@ -34,6 +35,7 @@ export const MonitorEditPage: React.FC = () => {
   return data && !loading && !error ? (
     <MonitorForm defaultValues={data?.attributes}>
       <MonitorSteps stepMap={EDIT_MONITOR_STEPS} isEditFlow={true} />
+      <MonitorDetailsLinkPortal id={data?.id} name={data?.attributes.name} />
     </MonitorForm>
   ) : null;
 };
