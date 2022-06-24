@@ -185,8 +185,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
         'xpack.osquery.actionEnabled (boolean)',
-        'xpack.osquery.packs (boolean)',
-        'xpack.osquery.savedQueries (boolean)',
+        'xpack.osquery.detectionAction (boolean)',
         'xpack.remote_clusters.ui.enabled (boolean)',
         /**
          * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.base.js).
