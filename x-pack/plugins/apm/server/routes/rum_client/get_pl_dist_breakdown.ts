@@ -16,12 +16,6 @@ import {
   USER_AGENT_OS,
   TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
-import {
-  getPLDChartSteps,
-  MICRO_TO_SEC,
-  microToSec,
-  removeZeroesFromTail,
-} from './get_page_load_distribution';
 
 export const getBreakdownField = (breakdown: string) => {
   switch (breakdown) {
@@ -36,7 +30,41 @@ export const getBreakdownField = (breakdown: string) => {
       return USER_AGENT_NAME;
   }
 };
+export function microToSec(val: number) {
+  return Math.round((val / MICRO_TO_SEC + Number.EPSILON) * 100) / 100;
+}
 
+export const MICRO_TO_SEC = 1000000;
+export const getPLDChartSteps = ({
+  maxDuration,
+  minDuration,
+  initStepValue,
+}: {
+  maxDuration: number;
+  minDuration: number;
+  initStepValue?: number;
+}) => {
+  let stepValue = 0.5;
+  // if diff is too low, let's lower
+  // down the steps value to increase steps
+  if (maxDuration - minDuration <= 5 * MICRO_TO_SEC) {
+    stepValue = 0.1;
+  }
+
+  if (initStepValue) {
+    stepValue = initStepValue;
+  }
+
+  let initValue = minDuration;
+  const stepValues = [initValue];
+
+  while (initValue < maxDuration) {
+    initValue += stepValue * MICRO_TO_SEC;
+    stepValues.push(initValue);
+  }
+
+  return stepValues;
+};
 export const getPageLoadDistBreakdown = async ({
   setup,
   minPercentile,
@@ -126,3 +154,14 @@ export const getPageLoadDistBreakdown = async ({
     };
   });
 };
+
+export function removeZeroesFromTail(
+  distData: Array<{ x: number; y: number }>
+) {
+  if (distData.length > 0) {
+    while (distData[distData.length - 1].y === 0) {
+      distData.pop();
+    }
+  }
+  return distData;
+}
