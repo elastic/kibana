@@ -7,15 +7,15 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
 export const fetchMapping = async (
   client: IScopedClusterClient,
   indexName: string
-): Promise<MappingTypeMapping> => {
+): Promise<IndicesGetMappingIndexMappingRecord> => {
   const mapping = await client.asCurrentUser.indices.getMapping({
     index: indexName,
     expand_wildcards: ['open'],
   });
-  return mapping[indexName].mappings;
+  return mapping[indexName];
 };

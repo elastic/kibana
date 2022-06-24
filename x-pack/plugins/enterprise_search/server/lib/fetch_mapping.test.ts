@@ -47,9 +47,11 @@ describe('fetchMapping lib function', () => {
     await expect(
       fetchMapping(mockClient as unknown as IScopedClusterClient, indexName)
     ).resolves.toEqual({
-      dynamic: true,
-      dynamic_templates: [],
-      properties: {},
+      mappings: {
+        dynamic: true,
+        dynamic_templates: [],
+        properties: {},
+      },
     });
 
     expect(mockClient.asCurrentUser.indices.getMapping).toHaveBeenCalledWith({
@@ -63,7 +65,7 @@ describe('fetchMapping lib function', () => {
 
     await expect(
       fetchMapping(mockClient as unknown as IScopedClusterClient, indexName)
-    ).resolves.toEqual({});
+    ).resolves.toEqual({ mappings: {} });
 
     expect(mockClient.asCurrentUser.indices.getMapping).toHaveBeenCalledWith({
       index: indexName,

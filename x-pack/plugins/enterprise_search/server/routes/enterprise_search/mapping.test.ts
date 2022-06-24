@@ -30,11 +30,18 @@ describe('Elasticsearch Index Mapping', () => {
   });
 
   describe('GET /internal/enterprise_search/{index_name}/mapping', () => {
+    it('fails validation without index_name', () => {
+      const request = { params: {} };
+      mockRouter.shouldThrow(request);
+    });
+
     it('returns the mapping for an Elasticsearch index', async () => {
       const mockData = {
-        dynamic: true,
-        dynamic_templates: [],
-        properties: {},
+        mappings: {
+          dynamic: true,
+          dynamic_templates: [],
+          properties: {},
+        },
       };
 
       (fetchMapping as jest.Mock).mockImplementationOnce(() => {
@@ -51,11 +58,6 @@ describe('Elasticsearch Index Mapping', () => {
         body: mockData,
         headers: { 'content-type': 'application/json' },
       });
-    });
-
-    it('fails validation without index_name', () => {
-      const request = { params: {} };
-      mockRouter.shouldThrow(request);
     });
   });
 });
