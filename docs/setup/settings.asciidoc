@@ -147,7 +147,8 @@ logging:
 
 [TIP]
 ============================================================================
-To get the most value from logging {es} queries, we recommend configuring the `http.server.response` logger as well. With both loggers configured, you will be able to see the responses from {es} on each request {kib} makes to {es}.
+To get the most value from logging {es} queries, we recommend configuring the `http.server.response` logger as well. 
+With both loggers configured, {kib} will log the responses from {es} on each request {kib} makes to {es}.
 ============================================================================
 
 [[elasticsearch-pingTimeout]] `elasticsearch.pingTimeout`::
@@ -308,12 +309,18 @@ Maximum number of documents loaded by each shard to generate autocomplete
 suggestions. This value must be a whole number greater than zero.
 *Default: `"100000"`*
 
-NOTE: To reload the <<logging-settings, logging settings>>, send a SIGHUP signal to {kib}.
+[WARNING]
+============================================================================
+{kib} supports both deprecated and current logging systems being enabled at the same time. 
+We strongly suggest not mixing the configurations and rather switch over completely to avoid unforeseen ciscumstances.
+For more information, refer to the <<`logging-configuration-migration`, logging configuration migration guide>>
+============================================================================
 
 // deprecated logging configuration settings
 [[logging-dest]] `logging.dest`::
  deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
  Instead, specify an appender `type`. Options are `console` for stdout or `file` for sending logs to file.
+ Be aware that `logging.dest` might be set via CLI options in the `kibana.service` declaration. To switch over to the current logging system, remove the `logging.dest` CLI argument from `/etc/systemd/system/kibana.service` and run `systemctl daemon-reload`.
  +
  Enables you to specify a file where Kibana stores log output. *Default: `stdout`*
 
@@ -410,10 +417,8 @@ Instead, set the root logger `level` to `debug`
 Set to `true` to log all events, including system usage information and all
 requests. *Default: `false`*
 
-[WARNING]
-============================================================================
-While combining deprecated logging configuration with the current configuration, we strongly recommend switching over completely to avoid unforeseen consequences. If you use log rotation, combining deprecated with current configuration can lead to accidentally overwriting log files.
-============================================================================
+NOTE: To reload the <<logging-settings, logging settings>>, send a SIGHUP signal to {kib}.
+
 // new logging configuration settings
 [[logging-root]] `logging.root`::
 The `root` logger has is a <<dedicated-loggers, dedicated logger>> and is pre-configured. The `root` logger logs at `info` level by default. If any other logging configuration is specified, `root` _must_ also be explicitly configured.
