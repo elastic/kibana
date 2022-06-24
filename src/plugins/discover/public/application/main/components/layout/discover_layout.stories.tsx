@@ -38,13 +38,13 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-} from '../../utils/use_saved_search';
+} from '../../hooks/use_saved_search';
 import { esHits } from '../../../../__mocks__/es_hits';
-import { ElasticSearchHit } from '../../../../types';
 import { Chart } from '../chart/point_series';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
+import { buildDataTableRecordList } from '../../../../utils/build_data_record';
 setHeaderActionMenuMounter(() => void 0);
 
 export const uiSettingsMock = {
@@ -220,7 +220,7 @@ function getProps(indexPattern: DataView) {
 
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: esHits as ElasticSearchHit[],
+    result: buildDataTableRecordList(esHits),
   }) as DataDocuments$;
 
   const availableFields$ = new BehaviorSubject({

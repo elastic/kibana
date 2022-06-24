@@ -5,157 +5,176 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
-import { ActionConnectorFieldsProps } from '../../../../types';
+import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import * as i18n from './translations';
-import { ServiceNowActionConnector } from './types';
+import { ActionConnectorFieldsProps } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DeprecatedCallout } from './deprecated_callout';
 import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { isRESTApiError } from './helpers';
 import { InstallationCallout } from './installation_callout';
-import { UpdateConnector } from './update_connector';
+import { UpdateConnector, UpdateConnectorFormSchema } from './update_connector';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
+import * as i18n from './translations';
+import { ServiceNowActionConnector, ServiceNowConfig, ServiceNowSecrets } from './types';
+import { HiddenField } from '../../hidden_field';
+import { ConnectorFormSchema } from '../../../sections/action_connector_form/types';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };
 
-const ServiceNowConnectorFields: React.FC<
-  ActionConnectorFieldsProps<ServiceNowActionConnector>
-> = ({ action, editActionSecrets, editActionConfig, errors, readOnly, setCallbacks }) => {
+const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
+  readOnly,
+  registerPreSubmitValidator,
+  isEdit,
+}) => {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const { config, secrets } = action;
-  const requiresNewApplication = !action.isDeprecated;
+  const { updateFieldValues } = useFormContext();
+  const [{ id, isDeprecated, actionTypeId, name, config, secrets }] = useFormData<
+    ConnectorFormSchema<ServiceNowConfig, ServiceNowSecrets>
+  >({
+    watch: [
+      'id',
+      'isDeprecated',
+      'actionTypeId',
+      'name',
+      'config.apiUrl',
+      'config.isOAuth',
+      'secrets.username',
+      'secrets.password',
+    ],
+  });
+
+  const requiresNewApplication = isDeprecated != null ? !isDeprecated : true;
+  const { isOAuth = false } = config ?? {};
+
+  const action = useMemo(
+    () => ({
+      name,
+      actionTypeId,
+      config,
+      secrets,
+    }),
+    [name, actionTypeId, config, secrets]
+  ) as ServiceNowActionConnector;
 
   const [showUpdateConnector, setShowUpdateConnector] = useState(false);
-
+  const [updateErrorMessage, setUpdateErrorMessage] = useState<string | null>(null);
   const { fetchAppInfo, isLoading } = useGetAppInfo({
-    actionTypeId: action.actionTypeId,
+    actionTypeId,
     http,
   });
 
-  const [showApplicationRequiredCallout, setShowApplicationRequiredCallout] =
-    useState<boolean>(false);
-  const [applicationInfoErrorMsg, setApplicationInfoErrorMsg] = useState<string | null>(null);
+  const getApplicationInfo = useCallback(
+    async (connector: ServiceNowActionConnector) => {
+      try {
+        const res = await fetchAppInfo(connector);
+        if (isRESTApiError(res)) {
+          throw new Error(res.error?.message ?? i18n.UNKNOWN);
+        }
 
-  const getApplicationInfo = useCallback(async () => {
-    setShowApplicationRequiredCallout(false);
-    setApplicationInfoErrorMsg(null);
-
-    try {
-      const res = await fetchAppInfo(action);
-      if (isRESTApiError(res)) {
-        throw new Error(res.error?.message ?? i18n.UNKNOWN);
+        return res;
+      } catch (e) {
+        throw e;
       }
+    },
+    [fetchAppInfo]
+  );
 
-      return res;
-    } catch (e) {
-      setShowApplicationRequiredCallout(true);
-      setApplicationInfoErrorMsg(e.message);
-      // We need to throw here so the connector will be not be saved.
-      throw e;
-    }
-  }, [action, fetchAppInfo]);
-
-  const beforeActionConnectorSave = useCallback(async () => {
+  const preSubmitValidator = useCallback(async () => {
     if (requiresNewApplication) {
-      await getApplicationInfo();
+      try {
+        await getApplicationInfo(action);
+      } catch (error) {
+        return {
+          message: (
+            <ApplicationRequiredCallout
+              appId={actionTypeId != null ? snExternalServiceConfig[actionTypeId]?.appId : ''}
+              message={error.message}
+            />
+          ),
+        };
+      }
     }
-  }, [getApplicationInfo, requiresNewApplication]);
+  }, [action, actionTypeId, getApplicationInfo, requiresNewApplication]);
 
   useEffect(
-    () => setCallbacks({ beforeActionConnectorSave }),
-    [beforeActionConnectorSave, setCallbacks]
+    () => registerPreSubmitValidator(preSubmitValidator),
+    [preSubmitValidator, registerPreSubmitValidator]
   );
 
   const onMigrateClick = useCallback(() => setShowUpdateConnector(true), []);
   const onModalCancel = useCallback(() => setShowUpdateConnector(false), []);
 
-  const onUpdateConnectorConfirm = useCallback(async () => {
-    try {
-      await getApplicationInfo();
+  const onUpdateConnectorConfirm = useCallback(
+    async (updatedConnector: UpdateConnectorFormSchema['updatedConnector']) => {
+      const connectorToUpdate = {
+        name: name ?? '',
+        config: { ...updatedConnector.config, usesTableApi: false },
+        secrets: { ...updatedConnector.secrets },
+        id: id ?? '',
+      };
 
-      await updateActionConnector({
-        http,
-        connector: {
-          name: action.name,
-          config: { ...config, usesTableApi: false },
-          secrets: { ...secrets },
-        },
-        id: action.id,
-      });
+      try {
+        await getApplicationInfo({
+          ...connectorToUpdate,
+          isDeprecated,
+          isPreconfigured: false,
+          actionTypeId,
+        });
 
-      editActionConfig('usesTableApi', false);
-      setShowUpdateConnector(false);
+        const res = await updateActionConnector({
+          http,
+          connector: connectorToUpdate,
+          id: id ?? '',
+        });
 
-      toasts.addSuccess({
-        title: i18n.UPDATE_SUCCESS_TOAST_TITLE(action.name),
-        text: i18n.UPDATE_SUCCESS_TOAST_TEXT,
-      });
-    } catch (err) {
-      /**
-       * getApplicationInfo may throw an error if the request
-       * fails or if there is a REST api error.
-       *
-       * We silent the errors as a callout will show and inform the user
-       */
-    }
-  }, [getApplicationInfo, http, action.name, action.id, secrets, config, editActionConfig, toasts]);
+        toasts.addSuccess({
+          title: i18n.UPDATE_SUCCESS_TOAST_TITLE(name ?? ''),
+          text: i18n.UPDATE_SUCCESS_TOAST_TEXT,
+        });
 
-  /**
-   * Defaults the usesTableApi attribute to false
-   * if it is not defined. The usesTableApi attribute
-   * will be undefined only at the creation of
-   * the connector.
-   */
-  useEffect(() => {
-    if (config.usesTableApi == null) {
-      editActionConfig('usesTableApi', false);
-    }
-  });
+        setShowUpdateConnector(false);
+
+        updateFieldValues({
+          isDeprecated: res.isDeprecated,
+          config: updatedConnector.config,
+        });
+      } catch (err) {
+        setUpdateErrorMessage(err.message);
+      }
+    },
+    [name, id, getApplicationInfo, isDeprecated, actionTypeId, http, updateFieldValues, toasts]
+  );
 
   return (
     <>
-      {showUpdateConnector && (
+      {actionTypeId && showUpdateConnector && (
         <UpdateConnector
-          action={action}
-          applicationInfoErrorMsg={applicationInfoErrorMsg}
-          errors={errors}
+          actionTypeId={actionTypeId}
           readOnly={readOnly}
           isLoading={isLoading}
-          editActionSecrets={editActionSecrets}
-          editActionConfig={editActionConfig}
+          updateErrorMessage={updateErrorMessage}
           onConfirm={onUpdateConnectorConfirm}
           onCancel={onModalCancel}
+          isOAuth={isOAuth}
         />
       )}
       {requiresNewApplication && (
-        <InstallationCallout appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''} />
+        <InstallationCallout appId={snExternalServiceConfig[action.actionTypeId]?.appId ?? ''} />
       )}
       {!requiresNewApplication && <SpacedDeprecatedCallout onMigrate={onMigrateClick} />}
-      <Credentials
-        action={action}
-        errors={errors}
-        readOnly={readOnly}
-        isLoading={isLoading}
-        editActionSecrets={editActionSecrets}
-        editActionConfig={editActionConfig}
-      />
-      {showApplicationRequiredCallout && requiresNewApplication && (
-        <ApplicationRequiredCallout
-          message={applicationInfoErrorMsg}
-          appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''}
-        />
-      )}
+      <HiddenField path={'config.usesTableApi'} config={{ defaultValue: false }} />
+      <Credentials readOnly={readOnly} isLoading={isLoading} isOAuth={isOAuth} />
     </>
   );
 };
