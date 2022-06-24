@@ -37,7 +37,7 @@ describe('useGlobalTime', () => {
     expect(result1.to).toBe(0);
   });
 
-  test('clear all queries at unmount', () => {
+  test('clear all queries at unmount when clearAllQuery is set to true', () => {
     const { unmount } = renderHook(() => useGlobalTime());
     unmount();
     expect(mockDispatch.mock.calls[0][0].type).toEqual(
@@ -45,13 +45,13 @@ describe('useGlobalTime', () => {
     );
   });
 
-  test('do NOT clear all queries at unmount', () => {
+  test('do NOT clear all queries at unmount when clearAllQuery is set to false.', () => {
     const { unmount } = renderHook(() => useGlobalTime(false));
     unmount();
     expect(mockDispatch.mock.calls.length).toBe(0);
   });
 
-  test('do NOT clear all queries when setting state', () => {
+  test('do NOT clear all queries when setting state and clearAllQuery is set to true', () => {
     const { rerender } = renderHook(() => useGlobalTime());
     act(() => rerender());
     expect(mockDispatch.mock.calls.length).toBe(0);
