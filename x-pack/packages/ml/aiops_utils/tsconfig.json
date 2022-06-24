@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.bazel.json",
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
