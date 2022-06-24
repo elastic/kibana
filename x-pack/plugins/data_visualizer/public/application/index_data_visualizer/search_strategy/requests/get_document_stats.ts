@@ -7,8 +7,8 @@
 
 import { each, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type {
   DocumentCountStats,
   OverallStatsSearchStrategyParams,

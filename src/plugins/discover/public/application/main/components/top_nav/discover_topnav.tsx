@@ -7,7 +7,7 @@
  */
 import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Query, TimeRange } from '@kbn/data-plugin/public';
+import type { Query, TimeRange } from '@kbn/es-query';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
@@ -27,7 +27,6 @@ export type DiscoverTopNavProps = Pick<
   resetSavedSearch: () => void;
   onChangeIndexPattern: (indexPattern: string) => void;
   onEditRuntimeField: () => void;
-  useNewFieldsApi?: boolean;
 };
 
 export const DiscoverTopNav = ({
@@ -43,7 +42,6 @@ export const DiscoverTopNav = ({
   resetSavedSearch,
   onChangeIndexPattern,
   onEditRuntimeField,
-  useNewFieldsApi = false,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
   const showDatePicker = useMemo(
@@ -52,11 +50,9 @@ export const DiscoverTopNav = ({
   );
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
-  const editPermission = useMemo(
-    () => dataViewFieldEditor.userPermissions.editIndexPattern(),
-    [dataViewFieldEditor]
-  );
-  const canEditDataViewField = !!editPermission && useNewFieldsApi;
+
+  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
@@ -87,7 +83,7 @@ export const DiscoverTopNav = ({
 
   const editField = useMemo(
     () =>
-      canEditDataViewField
+      canEditDataView
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             if (indexPattern?.id) {
               const indexPatternInstance = await data.dataViews.get(indexPattern.id);
@@ -103,33 +99,29 @@ export const DiscoverTopNav = ({
             }
           }
         : undefined,
-    [
-      canEditDataViewField,
-      indexPattern?.id,
-      data.dataViews,
-      dataViewFieldEditor,
-      onEditRuntimeField,
-    ]
+    [canEditDataView, indexPattern?.id, data.dataViews, dataViewFieldEditor, onEditRuntimeField]
   );
 
   const addField = useMemo(
-    () => (canEditDataViewField && editField ? () => editField(undefined, 'add') : undefined),
-    [editField, canEditDataViewField]
+    () => (canEditDataView && editField ? () => editField(undefined, 'add') : undefined),
+    [editField, canEditDataView]
   );
 
-  const createNewDataView = useCallback(() => {
-    const indexPatternFieldEditPermission = dataViewEditor.userPermissions.editDataView;
-    if (!indexPatternFieldEditPermission) {
-      return;
-    }
-    closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          onChangeIndexPattern(dataView.id);
-        }
-      },
-    });
-  }, [dataViewEditor, onChangeIndexPattern]);
+  const createNewDataView = useMemo(
+    () =>
+      canEditDataView
+        ? () => {
+            closeDataViewEditor.current = dataViewEditor.openEditor({
+              onSave: async (dataView) => {
+                if (dataView.id) {
+                  onChangeIndexPattern(dataView.id);
+                }
+              },
+            });
+          }
+        : undefined,
+    [canEditDataView, dataViewEditor, onChangeIndexPattern]
+  );
 
   const topNavMenu = useMemo(
     () =>
