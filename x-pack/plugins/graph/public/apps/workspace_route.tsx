@@ -120,13 +120,14 @@ export const WorkspaceRoute = ({
     savedObjectsClient,
     spaces,
     coreStart,
+    data,
   });
 
   if (!loaded) {
     return null;
   }
 
-  const { savedWorkspace, indexPatterns, sharingSavedObjectProps } = loaded;
+  const { savedWorkspace, sharingSavedObjectProps } = loaded;
 
   return (
     <I18nProvider>
@@ -145,7 +146,6 @@ export const WorkspaceRoute = ({
             coreStart={coreStart}
             canEditDrillDownUrls={canEditDrillDownUrls}
             overlays={overlays}
-            indexPatterns={indexPatterns}
             savedWorkspace={savedWorkspace}
             indexPatternProvider={indexPatternProvider}
           />
