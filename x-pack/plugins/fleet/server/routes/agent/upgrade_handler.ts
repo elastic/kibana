@@ -97,6 +97,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
     force,
     rollout_duration_seconds: upgradeDurationSeconds,
     start_time: startTime,
+    batchSize,
   } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
@@ -122,6 +123,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
       force,
       upgradeDurationSeconds,
       startTime,
+      batchSize,
     };
     const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
     const body = results.items.reduce<PostBulkAgentUpgradeResponse>((acc, so) => {

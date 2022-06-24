@@ -87,6 +87,7 @@ export interface Agent extends AgentBase {
   access_api_key?: string;
   status?: AgentStatus;
   packages: string[];
+  sort?: Array<number | string | null>;
 }
 
 export interface AgentSOAttributes extends AgentBase {

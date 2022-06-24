@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 
-import { getAgentsByKuery } from './crud';
+import { errorsToResults, getAgentsByKuery, processAgentsInBatches } from './crud';
 
 jest.mock('../../../common', () => ({
   ...jest.requireActual('../../../common'),
@@ -19,26 +19,28 @@ jest.mock('../../../common', () => ({
 describe('Agents CRUD test', () => {
   let esClientMock: ElasticsearchClient;
   let searchMock: jest.Mock;
+
+  beforeEach(() => {
+    searchMock = jest.fn();
+    esClientMock = {
+      search: searchMock,
+      openPointInTime: jest.fn().mockResolvedValue({ id: '1' }),
+      closePointInTime: jest.fn(),
+    } as unknown as ElasticsearchClient;
+  });
+
+  function getEsResponse(ids: string[], total: number) {
+    return {
+      hits: {
+        total,
+        hits: ids.map((id: string) => ({
+          _id: id,
+          _source: {},
+        })),
+      },
+    };
+  }
   describe('getAgentsByKuery', () => {
-    beforeEach(() => {
-      searchMock = jest.fn();
-      esClientMock = {
-        search: searchMock,
-      } as unknown as ElasticsearchClient;
-    });
-
-    function getEsResponse(ids: string[], total: number) {
-      return {
-        hits: {
-          total,
-          hits: ids.map((id: string) => ({
-            _id: id,
-            _source: {},
-          })),
-        },
-      };
-    }
-
     it('should return upgradeable on first page', async () => {
       searchMock
         .mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2', '3', '4', '5'], 7)))
@@ -190,6 +192,87 @@ describe('Agents CRUD test', () => {
         perPage: 5,
         total: 7,
       });
+    });
+  });
+
+  describe('processAgentsInBatches', () => {
+    const mockProcessAgents = (agents: Agent[]) =>
+      Promise.resolve({ items: agents.map((agent) => ({ id: agent.id, success: true })) });
+    it('should return results for multiple batches', async () => {
+      searchMock
+        .mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 3)))
+        .mockImplementationOnce(() => Promise.resolve(getEsResponse(['3'], 3)));
+
+      const response = await processAgentsInBatches(
+        esClientMock,
+        {
+          kuery: 'active:true',
+          batchSize: 2,
+          showInactive: false,
+        },
+        mockProcessAgents
+      );
+      expect(response).toEqual({
+        items: [
+          { id: '1', success: true },
+          { id: '2', success: true },
+          { id: '3', success: true },
+        ],
+      });
+    });
+
+    it('should return results for one batch', async () => {
+      searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2', '3'], 3)));
+
+      const response = await processAgentsInBatches(
+        esClientMock,
+        {
+          kuery: 'active:true',
+          showInactive: false,
+        },
+        mockProcessAgents
+      );
+      expect(response).toEqual({
+        items: [
+          { id: '1', success: true },
+          { id: '2', success: true },
+          { id: '3', success: true },
+        ],
+      });
+    });
+  });
+
+  describe('errorsToResults', () => {
+    it('should transform errors to results', () => {
+      const results = errorsToResults([{ id: '1' } as Agent, { id: '2' } as Agent], {
+        '1': new Error('error'),
+      });
+      expect(results).toEqual([
+        { id: '1', success: false, error: new Error('error') },
+        { id: '2', success: true },
+      ]);
+    });
+
+    it('should transform errors to results with skip success', () => {
+      const results = errorsToResults(
+        [{ id: '1' } as Agent, { id: '2' } as Agent],
+        { '1': new Error('error') },
+        undefined,
+        true
+      );
+      expect(results).toEqual([{ id: '1', success: false, error: new Error('error') }]);
+    });
+
+    it('should transform errors to results preserve order', () => {
+      const results = errorsToResults(
+        [{ id: '1' } as Agent, { id: '2' } as Agent],
+        { '1': new Error('error') },
+        ['2', '1']
+      );
+      expect(results).toEqual([
+        { id: '2', success: true },
+        { id: '1', success: false, error: new Error('error') },
+      ]);
     });
   });
 });

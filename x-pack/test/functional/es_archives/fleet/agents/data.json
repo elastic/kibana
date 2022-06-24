@@ -9,7 +9,8 @@
       "policy_id": "policy1",
       "type": "PERMANENT",
       "local_metadata": {},
-      "user_provided_metadata": {}
+      "user_provided_metadata": {},
+      "enrolled_at": "2022-06-21T12:14:25Z"
     }
   }
 }
@@ -25,7 +26,8 @@
       "policy_id": "policy1",
       "type": "PERMANENT",
       "local_metadata": {},
-      "user_provided_metadata": {}
+      "user_provided_metadata": {},
+      "enrolled_at": "2022-06-21T12:15:25Z"
     }
   }
 }
@@ -41,7 +43,8 @@
       "policy_id": "policy1",
       "type": "PERMANENT",
       "local_metadata": {},
-      "user_provided_metadata": {}
+      "user_provided_metadata": {},
+      "enrolled_at": "2022-06-21T12:16:25Z"
     }
   }
 }
@@ -57,7 +60,8 @@
       "policy_id": "policy1",
       "type": "PERMANENT",
       "local_metadata": {},
-      "user_provided_metadata": {}
+      "user_provided_metadata": {},
+      "enrolled_at": "2022-06-21T12:17:25Z"
     }
   }
 }
