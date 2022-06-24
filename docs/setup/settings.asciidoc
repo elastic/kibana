@@ -430,10 +430,10 @@ The following example shows a full, valid `root` logging configuration that will
 --------------------------------------------------------------------------------
 logging:
   appenders:
-    console_appender: <1>
-      type: console <2>
+    console_appender:
+      type: console
       layout:
-        type: pattern <3>
+        type: pattern
         highlight: true
   root:
     appenders: [default, console_appender]

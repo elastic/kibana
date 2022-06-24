@@ -124,10 +124,10 @@ all, the full logs from Reporting will be the first place to look. In `kibana.ym
 --------------------------------------------------------------------------------
 logging:
   appenders:
-    console_appender: <1>
-      type: console <2>
+    console_appender:
+      type: console
       layout:
-        type: pattern <3>
+        type: pattern
         highlight: true
   root:
     appenders: [default, console_appender]
