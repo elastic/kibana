@@ -6,28 +6,18 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiTableSortingType,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleTableItem, useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from './state_container';
 
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
-import { useFetchRules } from '../../hooks/use_fetch_rules';
-import { NoDataPrompt } from './components/prompts/no_data_prompt';
-import { NoPermissionPrompt } from './components/prompts/no_permission_prompt';
-import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import { Pagination } from './types';
-import { DEFAULT_SEARCH_PAGE_SIZE, OBSERVABILITY_SOLUTIONS } from './config';
+import { OBSERVABILITY_SOLUTIONS } from './config';
 import { RULES_PAGE_TITLE, RULES_BREADCRUMB_TEXT } from './translations';
 
 function RulesPage() {
@@ -35,28 +25,9 @@ function RulesPage() {
   const { http, docLinks, triggersActionsUi } = useKibana().services;
 
   const documentationLink = docLinks.links.observability.createAlerts;
-  const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [sort] = useState<EuiTableSortingType<RuleTableItem>['sort']>({
-    field: 'name',
-    direction: 'asc',
-  });
-  const [searchText] = useState<string | undefined>();
-  const [tagsFilter] = useState<string[]>([]);
-  const [typesFilter] = useState<string[]>([]);
-  const { lastResponse } = useRulesPageStateContainer();
+
   const { status, setStatus } = useRulesPageStateContainer();
   const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
-
-  const { rulesState, reload, noData, initialLoad } = useFetchRules({
-    searchText,
-    ruleLastResponseFilter: lastResponse,
-    ruleStatusesFilter: status,
-    typesFilter,
-    tagsFilter,
-    page,
-    setPage,
-    sort,
-  });
 
   const { ruleTypes } = useLoadRuleTypes({
     filteredSolutions: OBSERVABILITY_SOLUTIONS,
@@ -85,7 +56,6 @@ function RulesPage() {
         consumer: ALERTS_FEATURE_ID,
         onClose: () => {
           setCreateRuleFlyoutVisibility(false);
-          reload();
         },
         filteredSolutions: OBSERVABILITY_SOLUTIONS,
       }),
@@ -94,25 +64,12 @@ function RulesPage() {
   );
 
   const getRulesTable = () => {
-    if (noData && !rulesState.isLoading) {
-      return authorizedToCreateAnyRules ? (
-        <NoDataPrompt
-          documentationLink={documentationLink}
-          onCTAClicked={() => setCreateRuleFlyoutVisibility(true)}
-        />
-      ) : (
-        <NoPermissionPrompt />
-      );
-    }
-    if (initialLoad) {
-      return <CenterJustifiedSpinner />;
-    }
     return (
       <>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             {triggersActionsUi.getRulesList({
-              filteredRulesTypes: observabilityRuleTypeRegistry.list(),
+              filteredRuleTypes: observabilityRuleTypeRegistry.list(),
               filteredSolutions: OBSERVABILITY_SOLUTIONS,
               showActionFilter: false,
               ruleDetailsLink: 'alerts/rules/:ruleId',

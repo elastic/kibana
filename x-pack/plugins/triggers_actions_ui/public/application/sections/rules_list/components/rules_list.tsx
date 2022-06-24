@@ -93,7 +93,7 @@ import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from '.
 const ENTER_KEY = 13;
 
 export interface RulesListProps {
-  filteredRulesTypes?: string[] | undefined;
+  filteredRuleTypes?: string[] | undefined;
   filteredSolutions?: string[] | undefined;
   showActionFilter?: boolean;
   ruleDetailsLink?: string | undefined;
@@ -121,7 +121,7 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
 }));
 
 export const RulesList = ({
-  filteredRulesTypes,
+  filteredRuleTypes,
   filteredSolutions,
   showActionFilter = true,
   ruleDetailsLink,
@@ -209,7 +209,7 @@ export const RulesList = ({
   const { rulesState, setRulesState, loadRules, noData, initialLoad } = useLoadRules({
     page,
     searchText,
-    typesFilter: typesFilter.length > 0 ? typesFilter : filteredRulesTypes,
+    typesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter: lastResponse,
     ruleStatusesFilter: statusFilter ? statusFilter : ruleStatusesFilter,
@@ -217,6 +217,7 @@ export const RulesList = ({
     sort,
     onPage: setPage,
     onError,
+    filteredRuleTypes,
   });
 
   const setExecutionStatusFilter = useCallback(
@@ -801,7 +802,6 @@ export const RulesList = ({
       )}
     </>
   );
-
   // if initial load, show spinner
   const getRulesList = () => {
     if (noData && !rulesState.isLoading && !ruleTypesState.isLoading) {

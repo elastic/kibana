@@ -20,6 +20,7 @@ interface RuleState {
 type UseLoadRulesProps = Omit<LoadRulesProps, 'http'> & {
   onPage: (pagination: Pagination) => void;
   onError: (message: string) => void;
+  filteredRuleTypes?: string[];
 };
 
 interface UseLoadRulesState {
@@ -92,6 +93,7 @@ export function useLoadRules({
   sort,
   onPage,
   onError,
+  filteredRuleTypes,
 }: UseLoadRulesProps) {
   const { http } = useKibana().services;
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -114,7 +116,7 @@ export function useLoadRules({
         http,
         page,
         searchText,
-        typesFilter,
+        typesFilter: typesFilter && typesFilter.length > 0 ? typesFilter : filteredRuleTypes,
         actionTypesFilter,
         ruleExecutionStatusesFilter,
         ruleStatusesFilter,
@@ -170,6 +172,7 @@ export function useLoadRules({
     dispatch,
     onPage,
     onError,
+    filteredRuleTypes,
   ]);
 
   return useMemo(
