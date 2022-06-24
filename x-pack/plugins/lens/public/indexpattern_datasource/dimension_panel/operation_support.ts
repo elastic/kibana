@@ -18,9 +18,9 @@ export interface OperationSupportMatrix {
 }
 
 type Props = Pick<
-  DatasourceDimensionDropProps<IndexPatternPrivateState>,
-  'layerId' | 'columnId' | 'state' | 'filterOperations'
->;
+  DatasourceDimensionDropProps<IndexPatternPrivateState>['target'],
+  'layerId' | 'columnId' | 'filterOperations'
+> & { state: IndexPatternPrivateState };
 
 function computeOperationMatrix(
   operationsByMetadata: Array<{
