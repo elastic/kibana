@@ -317,7 +317,16 @@ function reparentSpans(waterfallItems: IWaterfallSpanOrTransaction[]) {
       waterfallItems.map((waterfallItem) => {
         if (waterfallItem.docType === 'span') {
           const childIds = waterfallItem.doc.child?.id ?? [];
-          return childIds.map((id) => [id, waterfallItem.id]);
+          const childIdsMapping = childIds.map((id) => [id, waterfallItem.id]);
+          // if there is a cyclic dependency (e.g. inferred span with child.id = parent.id)
+          // then we need to update the parent of the waterfallItem to its current grandparent 
+          if(waterfallItem.parentId && childIds.includes(waterfallItem.parentId)){
+            const parent = waterfallItems.find(item => item.id === waterfallItem.parentId);
+            if(parent?.parentId){
+              return {...childIdsMapping, ...{[waterfallItem.id]: parent.parentId}}
+            }
+          }
+          return childIdsMapping;
         }
         return [];
       })
