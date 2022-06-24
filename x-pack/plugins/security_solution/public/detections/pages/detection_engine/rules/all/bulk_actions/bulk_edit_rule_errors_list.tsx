@@ -56,7 +56,7 @@ const BulkEditRuleErrorsListComponent = ({ ruleErrors = [] }: BulkEditRuleErrors
               return (
                 <li key={message}>
                   <FormattedMessage
-                    id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.machineLearningRulesIndexEditDescription"
+                    id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.machineLearningRulesAuthDescription"
                     defaultMessage="{rulesCount, plural, =1 {# Machine Learning rule} other {# Machine Learning rules}} can't be edited ({message})"
                     values={{ rulesCount, message }}
                   />
