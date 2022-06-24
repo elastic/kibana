@@ -211,7 +211,7 @@ export function MachineLearningNavigationProvider({
       await testSubjects.click('mlStackManagementJobsListAnomalyDetectionTab');
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the empty prompt for analytics jobs list got loaded
-        await testSubjects.existOrFail('mlSpacesManagementTable-anomaly-detection loaded');
+        await testSubjects.existOrFail('mlSpacesManagementTable-anomaly-detector loaded');
       });
     },
 

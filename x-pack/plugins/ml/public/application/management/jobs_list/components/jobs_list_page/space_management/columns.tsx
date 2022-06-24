@@ -38,7 +38,7 @@ const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
     }),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorTableColumnId',
+    'data-test-subj': 'mlSpaceManagementTableColumnId',
     scope: 'row',
     render: (id: string) => <AnomalyDetectionJobIdLink id={id} />,
   },
@@ -52,7 +52,7 @@ const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
     ),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorColumnJobDescription',
+    'data-test-subj': 'mlSpaceManagementTableColumnDescription',
   },
   {
     field: 'jobState',
@@ -64,7 +64,7 @@ const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
     ),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorColumnSourceIndex',
+    'data-test-subj': 'mlSpaceManagementTableColumnJobState',
   },
   {
     field: 'datafeedState',
@@ -73,7 +73,7 @@ const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
     }),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorColumnSourceIndex',
+    'data-test-subj': 'mlSpaceManagementTableColumnDatafeedState',
   },
 ];
 
@@ -85,7 +85,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
     }),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorTableColumnId',
+    'data-test-subj': 'mlSpaceManagementTableColumnId',
     scope: 'row',
     render: (id: string) => <DFAnalyticsJobIdLink jobId={id} />,
   },
@@ -96,7 +96,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
     }),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorColumnJobDescription',
+    'data-test-subj': 'mlSpaceManagementTableColumnDescription',
   },
   {
     field: 'source_index',
@@ -105,7 +105,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
     }),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorColumnSourceIndex',
+    'data-test-subj': 'mlSpaceManagementTableColumnSourceIndex',
   },
   {
     field: 'dest_index',
@@ -114,7 +114,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
     }),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorColumnSourceIndex',
+    'data-test-subj': 'mlSpaceManagementTableColumnDestIndex',
   },
   {
     field: 'job_type',
@@ -123,7 +123,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
     }),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorColumnSourceIndex',
+    'data-test-subj': 'mlSpaceManagementTableColumnJobType',
   },
   {
     field: 'state',
@@ -132,7 +132,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
     }),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorColumnSourceIndex',
+    'data-test-subj': 'mlSpaceManagementTableColumnState',
   },
 ];
 
@@ -144,7 +144,7 @@ const trainedModelColumns: Array<EuiBasicTableColumn<TrainedModelsManagementItem
     }),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorTableColumnId',
+    'data-test-subj': 'mlSpaceManagementTableColumnId',
     scope: 'row',
   },
   {
@@ -157,7 +157,7 @@ const trainedModelColumns: Array<EuiBasicTableColumn<TrainedModelsManagementItem
     ),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorColumnJobDescription',
+    'data-test-subj': 'mlSpaceManagementTableColumnDescription',
   },
   {
     field: 'type',
@@ -166,7 +166,7 @@ const trainedModelColumns: Array<EuiBasicTableColumn<TrainedModelsManagementItem
     }),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorColumnSourceIndex',
+    'data-test-subj': 'mlSpaceManagementTableColumnType',
   },
   {
     field: 'state',
@@ -175,6 +175,6 @@ const trainedModelColumns: Array<EuiBasicTableColumn<TrainedModelsManagementItem
     }),
     sortable: true,
     truncateText: true,
-    'data-test-subj': 'mlAnalyticsSelectorColumnSourceIndex',
+    'data-test-subj': 'mlSpaceManagementTableColumnState',
   },
 ];

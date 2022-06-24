@@ -15,8 +15,6 @@ import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detectio
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { MlADJobTable } from './job_table';
-import type { MlDFAJobTable } from './data_frame_analytics_table';
 
 type SyncFlyoutObjectType =
   | 'MissingObjects'
@@ -24,11 +22,10 @@ type SyncFlyoutObjectType =
   | 'ObjectsMissingDatafeed'
   | 'ObjectsUnmatchedDatafeed';
 
-export function MachineLearningStackManagementJobsProvider(
-  { getService, getPageObjects }: FtrProviderContext,
-  mlADJobTable: MlADJobTable,
-  mlDFAJobTable: MlDFAJobTable
-) {
+export function MachineLearningStackManagementJobsProvider({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -100,45 +97,38 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async assertADJobRowSpaces(adJobId: string, expectedSpaces: string[]) {
-      await mlADJobTable.refreshJobList('stackMgmtJobList');
-      const rows = await mlADJobTable.parseJobTable('stackMgmtJobList');
-      const jobRow = rows.filter((row) => row.id === adJobId)[0];
-      expect(jobRow).to.have.property('spaces');
-      expect(jobRow.spaces!.sort()).to.eql(
+      await this.refreshList();
+      const spaces = await this.getSpacesFromTable();
+      expect(spaces!.sort()).to.eql(
         expectedSpaces.sort(),
         `Expected spaces for AD job '${adJobId}' to be '${JSON.stringify(
           expectedSpaces
-        )}' (got '${JSON.stringify(jobRow.spaces)}')`
+        )}' (got '${JSON.stringify(spaces)}')`
       );
     },
 
     async assertDFAJobRowSpaces(dfaJobId: string, expectedSpaces: string[]) {
-      await mlDFAJobTable.refreshAnalyticsTable('stackMgmtJobList');
-      const rows = await mlDFAJobTable.parseAnalyticsTable('stackMgmtJobList');
-      const jobRow = rows.filter((row) => row.id === dfaJobId)[0];
-      expect(jobRow).to.have.property('spaces');
-      expect(jobRow.spaces!.sort()).to.eql(
+      await this.refreshList();
+      const spaces = await this.getSpacesFromTable();
+      expect(spaces!.sort()).to.eql(
         expectedSpaces.sort(),
         `Expected spaces for DFA job '${dfaJobId}' to be '${JSON.stringify(
           expectedSpaces
-        )}' (got '${JSON.stringify(jobRow.spaces)}')`
+        )}' (got '${JSON.stringify(spaces)}')`
       );
     },
 
-    async openADJobSpacesFlyout(adJobId: string) {
+    async refreshList() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.click(
-          mlADJobTable.rowSelector(adJobId, 'mlJobListRowManageSpacesButton'),
-          1000
-        );
-        await testSubjects.existOrFail('share-to-space-flyout', { timeout: 2000 });
+        await testSubjects.click(`mlRefreshJobListButton loaded`, 1000);
+        await testSubjects.existOrFail('mlRefreshJobListButton loaded', { timeout: 2000 });
       });
     },
 
-    async openDFAJobSpacesFlyout(dfaJobId: string) {
+    async openJobSpacesFlyout(mlSavedObjectType: MlSavedObjectType, jobId: string) {
       await retry.tryForTime(5000, async () => {
         await testSubjects.click(
-          mlDFAJobTable.rowSelector(dfaJobId, 'mlJobListRowManageSpacesButton'),
+          `mlSpacesManagementTable-${mlSavedObjectType} row-${jobId} > mlJobListRowManageSpacesButton`,
           1000
         );
         await testSubjects.existOrFail('share-to-space-flyout', { timeout: 2000 });
@@ -462,9 +452,30 @@ export function MachineLearningStackManagementJobsProvider(
       const ids: string[] = [];
       for (const row of rows) {
         const cols = await row.findAllByClassName('euiTableRowCell euiTableRowCell--middle');
-        ids.push(await cols[0].getVisibleText());
+        if (cols.length) {
+          ids.push(await cols[0].getVisibleText());
+        }
       }
       return ids;
+    },
+
+    async getSpacesFromTable() {
+      const tableListContainer = await testSubjects.find('mlSpacesManagementTable');
+      const rows = await tableListContainer.findAllByClassName('euiTableRow');
+
+      const spaces: string[] = [];
+      for (const row of rows) {
+        const col = await row.findByTestSubject('mlSpaceManagementTableColumnSpaces');
+        const spacesEl = await (
+          await col.findByClassName('euiTableCellContent')
+        ).findAllByClassName('euiAvatar--space');
+
+        for (const el of spacesEl) {
+          spaces.push((await el.getAttribute('data-test-subj')).replace('space-avatar-', ''));
+        }
+      }
+
+      return spaces;
     },
 
     async filterTableWithSearchString(

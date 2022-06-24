@@ -73,6 +73,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
               name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.spaces', {
                 defaultMessage: 'spaces',
               }),
+              'data-test-subj': 'mlSpaceManagementTableColumnSpaces',
               sortable: true,
               truncateText: true,
               render: (item: ManagementItems) => {
@@ -125,6 +126,9 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
                   direction: 'asc',
                 },
               }}
+              rowProps={(item) => ({
+                'data-test-subj': `mlSpacesManagementTable-${currentTabId} row-${item.id}`,
+              })}
             />
           </>
         )}
