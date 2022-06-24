@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RequestHandlerContext } from '@kbn/core/server';
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
 jest.mock('../../lib/fetch_mapping', () => ({
@@ -16,9 +17,15 @@ import { registerMappingRoute } from './mapping';
 
 describe('Elasticsearch Index Mapping', () => {
   let mockRouter: MockRouter;
+  const mockClient = {};
 
   beforeEach(() => {
+    const context = {
+      core: Promise.resolve({ elasticsearch: { client: mockClient } })
+    } as jest.Mocked<RequestHandlerContext>;
+
     mockRouter = new MockRouter({
+      context,
       method: 'get',
       path: '/internal/enterprise_search/{index_name}/mapping',
     });
@@ -48,11 +55,11 @@ describe('Elasticsearch Index Mapping', () => {
         return Promise.resolve(mockData);
       });
 
-      // TODO: need to mock const { client } = (await context.core).elasticsearch;
-
       await mockRouter.callRoute({
-        params: { indexName: 'search-index-name' },
+        params: { index_name: 'search-index-name' },
       });
+
+      expect(fetchMapping).toHaveBeenCalledWith(mockClient, 'search-index-name')
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: mockData,
