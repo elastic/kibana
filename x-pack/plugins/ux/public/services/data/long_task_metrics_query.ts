@@ -5,27 +5,23 @@
  * 2.0.
  */
 
-import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
-import { mergeProjection } from '../../projections/util/merge_projection';
-import { SetupUX } from './route';
+import { mergeProjection } from '../../../common/utils/merge_projection';
+import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
+import { PERCENTILE_DEFAULT } from './core_web_vitals_query';
+import { getRumPageLoadTransactionsProjection } from './projections';
 
 const LONG_TASK_SUM_FIELD = 'transaction.experience.longtask.sum';
 const LONG_TASK_COUNT_FIELD = 'transaction.experience.longtask.count';
 const LONG_TASK_MAX_FIELD = 'transaction.experience.longtask.max';
 
-export async function getLongTaskMetrics({
-  setup,
-  urlQuery,
-  percentile = 50,
-  start,
-  end,
-}: {
-  setup: SetupUX;
-  urlQuery?: string;
-  percentile?: number;
-  start: number;
-  end: number;
-}) {
+export function longTaskMetricsQuery(
+  start: number,
+  end: number,
+  percentile: number = PERCENTILE_DEFAULT,
+  urlQuery?: string,
+  uiFilters?: UxUIFilters
+) {
+  const setup: SetupUX = { uiFilters: uiFilters ? uiFilters : {} };
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
@@ -68,18 +64,5 @@ export async function getLongTaskMetrics({
     },
   });
 
-  const { apmEventClient } = setup;
-
-  const response = await apmEventClient.search('get_long_task_metrics', params);
-
-  const pkey = percentile.toFixed(1);
-
-  const { longTaskSum, longTaskCount, longTaskMax } =
-    response.aggregations ?? {};
-
-  return {
-    noOfLongTasks: longTaskCount?.values[pkey] ?? 0,
-    sumOfLongTasks: longTaskSum?.values[pkey] ?? 0,
-    longestLongTask: longTaskMax?.values[pkey] ?? 0,
-  };
+  return params;
 }
