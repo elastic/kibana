@@ -24,8 +24,9 @@ import {
   EuiCodeBlock,
   EuiToolTip,
   RIGHT_ALIGNMENT,
+  EuiFlexGrid,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
 
 import type {
   DurationRange,
@@ -71,16 +72,39 @@ const StyledFacetButton = euiStyled(EuiFacetButton)`
   }
 `;
 
-const StyledDescriptionList = euiStyled(EuiDescriptionList).attrs({ compressed: true })`
-  dt, dd {
+const customDescriptionListCss = css`
+  dt,
+  dd {
     color: ${(props) => props.theme.eui.euiColorDarkShade} !important;
     font-size: ${(props) => props.theme.eui.euiFontSizeXS} !important;
   }
   dt {
-    font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold}
+    font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold};
   }
 `;
 
+const StyledDescriptionList = euiStyled(EuiDescriptionList).attrs({ compressed: true })`
+  ${customDescriptionListCss}
+`;
+
+// output section styles
+const topSpacingCss = css`
+  ${(props) => `${props.theme.eui.euiCodeBlockPaddingModifiers.paddingMedium} 0`}
+`;
+const dashedBorderCss = css`
+  ${(props) => `1px dashed ${props.theme.eui.euiColorDisabled}`};
+`;
+const StyledDescriptionListOutput = euiStyled(EuiDescriptionList).attrs({ compressed: true })`
+  ${customDescriptionListCss}
+  dd {
+    margin: ${topSpacingCss};
+    padding: ${topSpacingCss};
+    border-top: ${dashedBorderCss};
+    border-bottom: ${dashedBorderCss};
+  }
+`;
+
+// code block styles
 const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
   transparentBackground: true,
   paddingSize: 'none',
@@ -219,16 +243,6 @@ export const ResponseActionsList = memo<
             title: OUTPUT_MESSAGES.expandSection.input,
             description: `${command}`,
           },
-          {
-            title: OUTPUT_MESSAGES.expandSection.output,
-            description: isExpired
-              ? OUTPUT_MESSAGES.hasExpired(command)
-              : isCompleted
-              ? wasSuccessful
-                ? OUTPUT_MESSAGES.wasSuccessful(command)
-                : OUTPUT_MESSAGES.hasFailed(command)
-              : OUTPUT_MESSAGES.isPending(command),
-          },
         ];
 
         const descriptionListCenter = [
@@ -249,31 +263,62 @@ export const ResponseActionsList = memo<
           },
         ];
 
-        itemIdToExpandedRowMapValues[item.id] = (
-          <EuiFlexGroup>
-            {[descriptionListLeft, descriptionListCenter, descriptionListRight].map((_list) => {
-              const list = _list.map((l) => {
-                const isParameters = l.title === OUTPUT_MESSAGES.expandSection.parameters;
-                const isOutput = l.title === OUTPUT_MESSAGES.expandSection.output;
-                return {
-                  title: l.title,
-                  description:
-                    isParameters || isOutput ? (
-                      // codeblock for parameters
-                      <StyledEuiCodeBlock>{l.description}</StyledEuiCodeBlock>
-                    ) : (
-                      l.description
-                    ),
-                };
-              });
+        const outputList = [
+          {
+            title: OUTPUT_MESSAGES.expandSection.output,
+            description: (
+              // codeblock for output
+              <StyledEuiCodeBlock>
+                {isExpired
+                  ? OUTPUT_MESSAGES.hasExpired(command)
+                  : isCompleted
+                  ? wasSuccessful
+                    ? OUTPUT_MESSAGES.wasSuccessful(command)
+                    : OUTPUT_MESSAGES.hasFailed(command)
+                  : OUTPUT_MESSAGES.isPending(command)}
+              </StyledEuiCodeBlock>
+            ),
+          },
+        ];
 
-              return (
-                <EuiFlexItem>
-                  <StyledDescriptionList listItems={list} />
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
+        itemIdToExpandedRowMapValues[item.id] = (
+          <>
+            <EuiFlexGroup
+              direction="column"
+              style={{ maxHeight: 270, overflowY: 'auto' }}
+              className="eui-yScrollWithShadows"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiFlexGrid columns={3}>
+                  {[descriptionListLeft, descriptionListCenter, descriptionListRight].map(
+                    (_list) => {
+                      const list = _list.map((l) => {
+                        const isParameters = l.title === OUTPUT_MESSAGES.expandSection.parameters;
+                        return {
+                          title: l.title,
+                          description: isParameters ? (
+                            // codeblock for parameters
+                            <StyledEuiCodeBlock>{l.description}</StyledEuiCodeBlock>
+                          ) : (
+                            l.description
+                          ),
+                        };
+                      });
+
+                      return (
+                        <EuiFlexItem>
+                          <StyledDescriptionList listItems={list} />
+                        </EuiFlexItem>
+                      );
+                    }
+                  )}
+                </EuiFlexGrid>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <StyledDescriptionListOutput listItems={outputList} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
         );
       }
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
