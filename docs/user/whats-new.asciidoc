@@ -47,8 +47,6 @@ image::images/highlights-controls.png[A dashboard view showing the new Controls 
 
 This release brings a modern and responsive query and search experience to Kibana, which
 makes more room for your data and content.
-For more information, check {kibana-ref}/kibana-concepts-analysts.html[Kibana concepts].
-
 
 [float]
 ==== Data view menu
@@ -179,7 +177,7 @@ image::images/highlights-maps-vector-tiles.png[Joins for vector tiles in Maps]
 
 {kib} now has experimental support for a more restrictive
 https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP[Content Security Policy](CSP).
-Specifically, we removed the need for script-src `unsafe-eval`,
+Specifically, we removed the need for `script-src 'unsafe-eval'`,
 which provides an additional level of protection against cross-site scripting (XSS) attacks.
 
 To enable this feature, configure `csp.disableUnsafeEval: true` in your `kibana.yml`.
@@ -197,8 +195,8 @@ flyout, where you can enter input text for testing. View the output
 using text highlighting or as JSON output.
 
 Trained models are available for the following tasks:
-language identification, named entity recognition (NER), text classification, question answering, 
-zero-shot text classification, text embedding and fill task.
+language identification, named entity recognition (NER), text classification, question answering,
+zero-shot text classification, text embedding, and fill task.
 
 [role="screenshot"]
 image::images/highlights-test-trained-model.png["Trained models test in Machine Learning", width=75%]
