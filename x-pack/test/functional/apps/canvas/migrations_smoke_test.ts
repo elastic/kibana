@@ -31,5 +31,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.savedObjects.checkImportSucceeded();
       await PageObjects.savedObjects.clickImportDone();
     });
+
+    it('migrates a workpad from 8.1', async function () {
+      /*
+        This is a smoke test to make sure migrations don't fail. 
+        This workpad from 8.1 has both by-val and by-ref embeddables
+      */
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.savedObjects.waitTableIsLoaded();
+      await PageObjects.savedObjects.importFile(
+        path.join(__dirname, 'exports', '8.1.embeddable_test.ndjson')
+      );
+      await PageObjects.savedObjects.checkImportSucceeded();
+      await PageObjects.savedObjects.clickImportDone();
+    });
   });
 }
