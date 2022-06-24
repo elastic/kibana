@@ -37,7 +37,7 @@ class FileKindsRegistryImpl implements FileKindsRegistry {
 
     if (fileKind.id !== encodeURIComponent(fileKind.id)) {
       throw new Error(
-        `File kind id "${fileKind.id}" is not a valid URI component. Choose an ID that does not need to be encoded.`
+        `File kind id "${fileKind.id}" is not a valid file kind ID. Choose an ID that does not need to be URI encoded.`
       );
     }
 
