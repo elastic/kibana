@@ -38,6 +38,7 @@ export function showSaveModal(
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
+    saveModal.props.onClose?.();
   };
 
   const onSave = saveModal.props.onSave;
