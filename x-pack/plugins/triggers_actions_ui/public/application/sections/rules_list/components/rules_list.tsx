@@ -806,7 +806,10 @@ export const RulesList = ({
   const getRulesList = () => {
     if (noData && !rulesState.isLoading && !ruleTypesState.isLoading) {
       return authorizedToCreateAnyRules ? (
-        <EmptyPrompt onCTAClicked={() => setRuleFlyoutVisibility(true)} />
+        <EmptyPrompt
+          showCreateRuleButton={showCreateRuleButton}
+          onCTAClicked={() => setRuleFlyoutVisibility(true)}
+        />
       ) : (
         noPermissionPrompt
       );
