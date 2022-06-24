@@ -6,11 +6,11 @@
  */
 
 import moment from 'moment';
-import { random, times } from 'lodash';
+import { random } from 'lodash';
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import TaskManagerMapping from '@kbn/task-manager-plugin/server/saved_objects/mappings.json';
-import { DEFAULT_MAX_WORKERS, DEFAULT_POLL_INTERVAL } from '@kbn/task-manager-plugin/server/config';
+import { DEFAULT_POLL_INTERVAL } from '@kbn/task-manager-plugin/server/config';
 import { ConcreteTaskInstance, BulkUpdateSchedulesResult } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -453,79 +453,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         // ensure this task shouldnt run for another half hour
         expectReschedule(now, task, 30 * 60000);
-      });
-    });
-
-    it('should prioritize tasks which are called using runSoon', async () => {
-      const originalTask = await scheduleTask({
-        taskType: 'sampleTask',
-        schedule: { interval: `30m` },
-        params: {},
-      });
-
-      await retry.try(async () => {
-        const docs = await historyDocs(originalTask.id);
-        expect(docs.length).to.eql(1);
-
-        const task = await currentTask<{ count: number }>(originalTask.id);
-
-        expect(task.state.count).to.eql(1);
-
-        // ensure this task shouldn't run for another half hour
-        expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
-      });
-
-      const taskToBeReleased = await scheduleTask({
-        taskType: 'sampleTask',
-        params: { waitForEvent: 'releaseSingleTask' },
-      });
-
-      await retry.try(async () => {
-        // wait for taskToBeReleased to stall
-        expect((await historyDocs(taskToBeReleased.id)).length).to.eql(1);
-      });
-
-      // schedule multiple tasks that should force
-      // Task Manager to use up its worker capacity
-      // causing tasks to pile up
-      await Promise.all(
-        times(DEFAULT_MAX_WORKERS + random(1, DEFAULT_MAX_WORKERS), () =>
-          scheduleTask({
-            taskType: 'sampleTask',
-            params: {
-              waitForEvent: 'releaseTheOthers',
-            },
-          })
-        )
-      );
-
-      // we need to ensure that TM has a chance to fill its queue with the stalling tasks
-      await delay(DEFAULT_POLL_INTERVAL);
-
-      // call runSoon for our task
-      await runTaskSoon({
-        id: originalTask.id,
-      });
-
-      // we need to ensure that TM has a chance to push the runSoon task into the queue
-      // before we release the stalled task, so lets give it a chance
-      await delay(DEFAULT_POLL_INTERVAL);
-
-      // and release only one slot in our worker queue
-      await releaseTasksWaitingForEventToComplete('releaseSingleTask');
-
-      await retry.try(async () => {
-        const task = await currentTask<{ count: number }>(originalTask.id);
-        expect(task.state.count).to.eql(2);
-      });
-
-      // drain tasks, otherwise they'll keep Task Manager stalled
-      await retry.try(async () => {
-        await releaseTasksWaitingForEventToComplete('releaseTheOthers');
-        const tasks = (
-          await currentTasks<{}, { originalParams: { waitForEvent: string } }>()
-        ).docs.filter((task) => task.params.originalParams.waitForEvent === 'releaseTheOthers');
-        expect(tasks.length).to.eql(0);
       });
     });
 
