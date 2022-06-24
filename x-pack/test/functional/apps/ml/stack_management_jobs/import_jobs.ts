@@ -73,28 +73,21 @@ export default function ({ getService }: FtrProviderContext) {
       it('ensures jobs have been imported', async () => {
         if (testData.expected.jobType === 'anomaly-detector') {
           await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
+          await ml.stackManagementJobs.refreshList();
           for (const id of testData.expected.jobIds) {
-            await ml.jobTable.filterWithSearchString(id, 1, 'stackMgmtJobList');
+            await ml.stackManagementJobs.filterTableWithSearchString('anomaly-detector', id);
           }
           for (const id of testData.expected.skippedJobIds) {
-            await ml.jobTable.filterWithSearchString(id, 0, 'stackMgmtJobList');
+            await ml.stackManagementJobs.filterTableWithSearchString('anomaly-detector', id, 0);
           }
         } else {
           await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
-          await ml.dataFrameAnalyticsTable.refreshAnalyticsTable('stackMgmtJobList');
+          await ml.stackManagementJobs.refreshList();
           for (const id of testData.expected.jobIds) {
-            await ml.dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(
-              id,
-              true,
-              'mlAnalyticsRefreshListButton'
-            );
+            await ml.stackManagementJobs.filterTableWithSearchString('data-frame-analytics', id);
           }
           for (const id of testData.expected.skippedJobIds) {
-            await ml.dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(
-              id,
-              false,
-              'mlAnalyticsRefreshListButton'
-            );
+            await ml.stackManagementJobs.filterTableWithSearchString('data-frame-analytics', id, 0);
           }
         }
       });
