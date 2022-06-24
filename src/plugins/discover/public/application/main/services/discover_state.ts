@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isEqual, cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
@@ -34,12 +34,12 @@ import {
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { SavedSearch } from '../../../services/saved_searches';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
 import { VIEW_MODE } from '../../../components/view_mode_toggle';
+import { cleanupUrlState } from '../utils/cleanup_url_state';
 
 export interface AppState {
   /**
@@ -90,6 +90,13 @@ export interface AppState {
    * Document explorer row height option
    */
   rowHeight?: number;
+}
+
+export interface AppStateUrl extends Omit<AppState, 'sort'> {
+  /**
+   * Necessary to take care of legacy links [fieldName,direction]
+   */
+  sort?: string[][] | [string, string];
 }
 
 interface GetStateParams {
@@ -193,17 +200,7 @@ export function getState({
     ...(toasts && withNotifyOnErrors(toasts)),
   });
 
-  const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
-
-  if (appStateFromUrl && appStateFromUrl.query && !appStateFromUrl.query.language) {
-    appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
-  }
-
-  if (appStateFromUrl?.sort && !appStateFromUrl.sort.length) {
-    // If there's an empty array given in the URL, the sort prop should be removed
-    // This allows the sort prop to be overwritten with the default sorting
-    delete appStateFromUrl.sort;
-  }
+  const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
 
   let initialAppState = handleSourceColumnState(
     {
