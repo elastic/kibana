@@ -288,9 +288,15 @@ export const home = {
 
               '/backends/operation': {
                 params: t.type({
-                  query: t.type({
-                    spanName: t.string,
-                  }),
+                  query: t.intersection([
+                    t.type({
+                      spanName: t.string,
+                    }),
+                    t.partial({
+                      sampleRangeFrom: toNumberRt,
+                      sampleRangeTo: toNumberRt,
+                    }),
+                  ]),
                 }),
                 element: <BackendOperationDetailView />,
               },

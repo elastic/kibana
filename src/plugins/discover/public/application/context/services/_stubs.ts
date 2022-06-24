@@ -11,7 +11,7 @@ import moment from 'moment';
 import { of } from 'rxjs';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import { EsHitRecordList } from '../../types';
+import { EsHitRecord } from '../../../types';
 
 type SortHit = {
   [key in string]: number; // timeField name
@@ -22,7 +22,7 @@ type SortHit = {
 /**
  * A stubbed search source with a `fetch` method that returns all of `_stubHits`.
  */
-export function createSearchSourceStub(hits: EsHitRecordList, timeField?: string) {
+export function createSearchSourceStub(hits: EsHitRecord[], timeField?: string) {
   const requestResult = {
     id: 'Fjk5bndxTHJWU2FldVRVQ0tYR0VqOFEcRWtWNDhOdG5SUzJYcFhONVVZVTBJQToxMDMwOQ==',
     rawResponse: {
