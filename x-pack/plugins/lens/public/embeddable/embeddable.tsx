@@ -344,6 +344,10 @@ export class Embeddable
     );
   }
 
+  public getVisualizationType() {
+    return this.savedVis?.visualizationType;
+  }
+
   public supportedTriggers() {
     if (!this.savedVis || !this.savedVis.visualizationType) {
       return [];

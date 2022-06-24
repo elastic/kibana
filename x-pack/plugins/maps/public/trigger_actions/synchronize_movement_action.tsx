@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
 import { Embeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { getCore } from '../kibana_services';
 
@@ -38,7 +39,23 @@ export const synchronizeMovementAction = createAction<SynchronizeMovementActionC
   },
   isCompatible: async ({ embeddable }: SynchronizeMovementActionContext) => {
     const { synchronizeMovement } = await import('../embeddable/synchronize_movement');
-    return synchronizeMovement.hasMultipleMaps() && embeddable.type === MAP_SAVED_OBJECT_TYPE;
+    if (!synchronizeMovement.hasMultipleMaps()) {
+      return false;
+    }
+
+    if (embeddable.type === MAP_SAVED_OBJECT_TYPE) {
+      return true;
+    }
+
+    if (
+      embeddable.type === 'lens' &&
+      typeof (embeddable as LensEmbeddable).getVisualizationType === 'function' &&
+      (embeddable as LensEmbeddable).getVisualizationType() === 'lnsChoropleth'
+    ) {
+      return true;
+    }
+
+    return false;
   },
   execute: async ({ embeddable }: SynchronizeMovementActionContext) => {
     const { SynchronizeMovementModal } = await import('./synchronize_movement_modal');
