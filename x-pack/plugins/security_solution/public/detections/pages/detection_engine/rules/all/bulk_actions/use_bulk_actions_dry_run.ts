@@ -25,8 +25,17 @@ export const getBulkActionsDryRunFromCache = (queryClient: QueryClient) =>
   processDryRunResult(queryClient.getQueryData<BulkActionResponse>(BULK_ACTIONS_DRY_RUN_QUERY_KEY));
 
 export interface DryRunResult {
+  /**
+   * total number of rules that succeeded validation in dry run
+   */
   succeededRulesCount?: number;
+  /**
+   * total number of rules that failed validation in dry run
+   */
   failedRulesCount?: number;
+  /**
+   * rule failures errors(message and error code) and ids of rules, that failed
+   */
   ruleErrors: Array<{
     message: string;
     errorCode?: BULK_ACTIONS_DRY_RUN_ERR_CODE;
@@ -35,7 +44,7 @@ export interface DryRunResult {
 }
 
 /**
- * helper utility that transforms raw BulkActionResponse response into more usable format
+ * helper utility that transforms raw BulkActionResponse response to DryRunResult format
  * @param response - raw bulk_actions API response ({@link BulkActionResponse})
  * @returns dry run result ({@link DryRunResult})
  */
