@@ -16,14 +16,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  // FLAKY https://github.com/elastic/kibana/issues/135089
-  describe.skip('overview page - Analytics apps', function describeIndexTests() {
+  describe('overview page - Analytics apps', function describeIndexTests() {
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
-      await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
+      await PageObjects.common.navigateToApp('kibana_overview');
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
