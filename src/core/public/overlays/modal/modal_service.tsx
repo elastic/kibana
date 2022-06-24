@@ -14,10 +14,11 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { I18nStart } from '../../i18n';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
 import { MountPoint } from '../../types';
 import { OverlayRef } from '../types';
-import { MountWrapper, CoreContextProvider } from '../../utils';
+import { MountWrapper } from '../../utils';
 
 /**
  * A ModalRef is a reference to an opened modal. It offers methods to

@@ -102,7 +102,7 @@ export const getSeverityOptions = () =>
         </EuiHealth>
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">
-          <p className="euiTextColor--subdued">
+          <p>
             <FormattedMessage
               id="xpack.ml.controls.selectSeverity.scoreDetailsDescription"
               defaultMessage="score {value} and above"
