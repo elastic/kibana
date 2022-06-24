@@ -101,8 +101,7 @@ describe('Alerts detection rules', () => {
       .should('have.class', 'euiPaginationButton-isActive');
   });
 
-  // Refer to https://github.com/elastic/kibana/issues/135057 for the skipped test
-  it.skip('Auto refreshes rules', () => {
+  it('Auto refreshes rules', () => {
     /**
      * Ran into the error: timer created with setInterval() but cleared with cancelAnimationFrame()
      * There are no cancelAnimationFrames in the codebase that are used to clear a setInterval so
@@ -111,7 +110,7 @@ describe('Alerts detection rules', () => {
 
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
 
-    cy.clock(Date.now(), ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date']);
+    cy.clock(Date.now(), ['setInterval', 'clearInterval', 'Date']);
 
     waitForRulesTableToBeLoaded();
 
