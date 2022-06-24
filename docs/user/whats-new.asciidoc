@@ -197,7 +197,7 @@ flyout, where you can enter input text for testing. View the output
 using text highlighting or as JSON output.
 
 Trained models are available for the following tasks:
-language identification, named entity recognition (NER), text classification,
+language identification, named entity recognition (NER), text classification, question answering, 
 zero-shot text classification, text embedding and fill task.
 
 [role="screenshot"]
