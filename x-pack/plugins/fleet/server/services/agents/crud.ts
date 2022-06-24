@@ -190,7 +190,13 @@ export async function openAgentsPointInTime(esClient: ElasticsearchClient): Prom
 }
 
 export async function closeAgentsPointInTime(esClient: ElasticsearchClient, pitId: string) {
-  await esClient.closePointInTime({ id: pitId });
+  try {
+    await esClient.closePointInTime({ id: pitId });
+  } catch (error) {
+    appContextService
+      .getLogger()
+      .warn(`Error closing point in time with id: ${pitId}. Error: ${error.message}`);
+  }
 }
 
 export async function getAgentsByKuery(
