@@ -192,7 +192,7 @@ image::images/highlights-security.png[Setting for a more restrictive Content Sec
 === Test trained models in Machine Learning
 
 You can now visualize machine learning trained model output.
-A new Test model action in *Machine Learning > Trained Models* opens up a
+A new test model action in *Machine Learning > Trained Models* opens up a
 flyout, where you can enter input text for testing. View the output
 using text highlighting or as JSON output.
 
