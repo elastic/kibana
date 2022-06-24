@@ -15,6 +15,21 @@ node scripts/es snapshot&
 
 esPid=$!
 
+# unset env vars defined in other parts of CI for automatic APM collection of
+# Kibana. We manage APM config in our FTR config and performance service, and
+# APM treats config in the ENV with a very high precedence.
+unset ELASTIC_APM_ENVIRONMENT
+unset ELASTIC_APM_TRANSACTION_SAMPLE_RATE
+unset ELASTIC_APM_SERVER_URL
+unset ELASTIC_APM_SECRET_TOKEN
+unset ELASTIC_APM_ACTIVE
+unset ELASTIC_APM_CONTEXT_PROPAGATION_ONLY
+unset ELASTIC_APM_ACTIVE
+unset ELASTIC_APM_SERVER_URL
+unset ELASTIC_APM_SECRET_TOKEN
+unset ELASTIC_APM_GLOBAL_LABELS
+
+
 export TEST_ES_URL=http://elastic:changeme@localhost:9200
 export TEST_ES_DISABLE_STARTUP=true
 
@@ -30,19 +45,19 @@ for i in "${journeys[@]}"; do
 
     checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: WARMUP)" \
       node scripts/functional_tests \
-      --config "x-pack/test/performance/journeys/${i}/config.ts" \
-      --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-      --debug \
-      --bail
+        --config "x-pack/test/performance/journeys/${i}/config.ts" \
+        --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+        --debug \
+        --bail
 
     export TEST_PERFORMANCE_PHASE=TEST
 
     checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: TEST)" \
       node scripts/functional_tests \
-      --config "x-pack/test/performance/journeys/${i}/config.ts" \
-      --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-      --debug \
-      --bail
+        --config "x-pack/test/performance/journeys/${i}/config.ts" \
+        --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+        --debug \
+        --bail
 done
 
 kill "$esPid"
