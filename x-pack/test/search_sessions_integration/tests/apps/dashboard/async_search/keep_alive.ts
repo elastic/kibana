@@ -1,0 +1,104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const es = getService('es');
+  const testSubjects = getService('testSubjects');
+  const log = getService('log');
+  const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const browser = getService('browser');
+  const searchSessions = getService('searchSessions');
+  const queryBar = getService('queryBar');
+  const elasticChart = getService('elasticChart');
+  const retry = getService('retry');
+
+  const enableNewChartLibraryDebug = async () => {
+    await elasticChart.setNewChartUiDebugFlag();
+    await queryBar.submitQuery();
+  };
+
+  describe('keep_alive', () => {
+    before(async function () {
+      const body = await es.info();
+      if (!body.version.number.includes('SNAPSHOT')) {
+        log.debug('Skipping because this build does not have the required shard_delay agg');
+        this.skip();
+      }
+      await PageObjects.common.navigateToApp('dashboard');
+    });
+
+    after(async function () {
+      await searchSessions.deleteAllSearchSessions();
+    });
+
+    it('until session is saved search keep_alive is short, when it is saved, keepAlive is extended', async () => {
+      await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
+      await PageObjects.dashboard.waitForRenderComplete();
+      await searchSessions.expectState('completed');
+
+      const searchResponse = await dashboardPanelActions.getSearchResponseByTitle(
+        'Sum of Bytes by Extension'
+      );
+
+      const asyncSearchId = searchResponse.id;
+      expect(typeof asyncSearchId).to.be('string');
+
+      const asyncExpirationTimeBeforeSessionWasSaved =
+        await searchSessions.getAsyncSearchExpirationTime(asyncSearchId);
+      expect(asyncExpirationTimeBeforeSessionWasSaved).to.be.lessThan(
+        Date.now() + 1000 * 60,
+        'expiration time should be less then a minute from now'
+      );
+
+      await searchSessions.save();
+      await searchSessions.expectState('backgroundCompleted');
+
+      await retry.waitFor('async search keepAlive is extended', async () => {
+        const asyncExpirationTimeAfterSessionWasSaved =
+          await searchSessions.getAsyncSearchExpirationTime(asyncSearchId);
+
+        return (
+          asyncExpirationTimeAfterSessionWasSaved > asyncExpirationTimeBeforeSessionWasSaved &&
+          asyncExpirationTimeAfterSessionWasSaved > Date.now() + 1000 * 60
+        );
+      });
+
+      // const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
+      //   'Sum of Bytes by Extension'
+      // );
+      //
+      // // load URL to restore a saved session
+      // const url = await browser.getCurrentUrl();
+      // const savedSessionURL = `${url}&searchSessionId=${savedSessionId}`;
+      // await browser.get(savedSessionURL);
+      // await PageObjects.header.waitUntilLoadingHasFinished();
+      // await PageObjects.dashboard.waitForRenderComplete();
+      //
+      // // Check that session is restored
+      // await searchSessions.expectState('restored');
+      // await testSubjects.missingOrFail('embeddableErrorLabel');
+      //
+      // // switching dashboard to edit mode (or any other non-fetch required) state change
+      // // should leave session state untouched
+      // await PageObjects.dashboard.switchToEditMode();
+      // await searchSessions.expectState('restored');
+      //
+      // const xyChartSelector = 'visTypeXyChart';
+      // await enableNewChartLibraryDebug();
+      // const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
+      // expect(data.length).to.be(5);
+      //
+      // // navigating to a listing page clears the session
+      // await PageObjects.dashboard.gotoDashboardLandingPage();
+      // await searchSessions.missingOrFail();
+    });
+  });
+}

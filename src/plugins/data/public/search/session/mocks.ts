@@ -40,7 +40,9 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     trackSearch: jest.fn((searchDescriptor) => ({
       complete: jest.fn(),
       error: jest.fn(),
-      polled: jest.fn(),
+      beforePoll: jest.fn(() => {
+        return [{ isSearchStored: false }, () => {}];
+      }),
     })),
     destroy: jest.fn(),
     cancel: jest.fn(),

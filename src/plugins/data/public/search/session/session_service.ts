@@ -93,8 +93,8 @@ interface TrackSearchHandler {
   error(): void;
 
   /**
-   * Call to notify when search is about to be polled
-   * Returns a tuple with a current tracked search state and a callback to "confirm" when polling was completed and if search was successfully extended
+   * Call to notify when search is about to be polled to get current search state to build `searchOptions` from (mainly isSearchStored),
+   * When poll completes or errors, call `afterPoll` callback and confirm is search was successfully stored
    */
   beforePoll(): [
     currentSearchState: { isSearchStored: boolean },

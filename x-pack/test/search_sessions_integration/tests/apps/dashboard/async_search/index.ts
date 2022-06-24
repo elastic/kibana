@@ -31,6 +31,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     });
 
     loadTestFile(require.resolve('./async_search'));
+    loadTestFile(require.resolve('./keep_alive'));
     loadTestFile(require.resolve('./save_search_session'));
     loadTestFile(require.resolve('./save_search_session_relative_time'));
     loadTestFile(require.resolve('./search_sessions_tour'));
