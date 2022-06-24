@@ -9,7 +9,7 @@
 import uuid from 'uuid';
 import { isEqual, xor } from 'lodash';
 import { merge, Subscription } from 'rxjs';
-import { pairwise, startWith } from 'rxjs/operators';
+import { combineLatestWith, mergeMap, pairwise, take } from 'rxjs/operators';
 
 import {
   Embeddable,
@@ -58,7 +58,30 @@ export abstract class Container<
     super(input, output, parent);
     this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
 
-    this.initializeChildEmbeddables(input, settings);
+    // if there is no special initialization logic, we can immediately start updating children on input updates.
+    const awaitingInitialize = Boolean(
+      settings?.initializeSequentially || settings?.childIdInitializeOrder
+    );
+
+    // initialize all children on the first input change.
+    const init$ = this.getInput$().pipe(
+      take(1),
+      mergeMap(async () => {
+        const initPromise = this.initializeChildEmbeddables(input, settings);
+        if (awaitingInitialize) await initPromise;
+      })
+    );
+
+    // on all subsequent input changes, diff and update children on changes.
+    const update$ = this.getInput$()
+      // At each update event, get both the previous and current state.
+      .pipe(pairwise());
+
+    this.subscription = init$
+      .pipe(combineLatestWith(update$))
+      .subscribe(([_, [{ panels: prevPanels }, { panels: currentPanels }]]) => {
+        this.maybeUpdateChildren(currentPanels, prevPanels);
+      });
   }
 
   public setChildLoaded(embeddable: IEmbeddable) {
@@ -313,58 +336,31 @@ export abstract class Container<
     initialInput: TContainerInput,
     initializeSettings?: EmbeddableContainerSettings
   ) {
-    // if there is no special initialization logic, we can immediately start updating children on input updates.
-    let awaitingInitialize = Boolean(
-      initializeSettings?.initializeSequentially || initializeSettings?.childIdInitializeOrder
-    );
+    let initializeOrder = Object.keys(initialInput.panels);
 
-    const initializationPromise = awaitingInitialize
-      ? new Promise<void>(async (resolveInitialization, reject) => {
-          try {
-            if (!awaitingInitialize) resolveInitialization();
-            let initializeOrder = Object.keys(initialInput.panels);
+    if (initializeSettings?.childIdInitializeOrder) {
+      const initializeOrderSet = new Set<string>();
 
-            if (initializeSettings?.childIdInitializeOrder) {
-              const initializeOrderSet = new Set<string>();
-
-              for (const id of [...initializeSettings.childIdInitializeOrder, ...initializeOrder]) {
-                if (!initializeOrderSet.has(id) && Boolean(this.getInput().panels[id])) {
-                  initializeOrderSet.add(id);
-                }
-              }
-
-              initializeOrder = Array.from(initializeOrderSet);
-            }
-
-            for (const id of initializeOrder) {
-              if (initializeSettings?.initializeSequentially) {
-                const embeddable = await this.onPanelAdded(initialInput.panels[id]);
-
-                if (embeddable && !isErrorEmbeddable(embeddable)) {
-                  await this.untilEmbeddableLoaded(id);
-                }
-              } else {
-                this.onPanelAdded(initialInput.panels[id]);
-              }
-            }
-            awaitingInitialize = false;
-            resolveInitialization();
-          } catch (error) {
-            reject(error);
-            this.onFatalError(error);
-          }
-        })
-      : undefined;
-
-    this.subscription = this.getInput$()
-      // At each update event, get both the previous and current state.
-      .pipe(startWith(initialInput), pairwise())
-      .subscribe(async ([{ panels: prevPanels }, { panels: currentPanels }]) => {
-        if (awaitingInitialize) {
-          await initializationPromise;
+      for (const id of [...initializeSettings.childIdInitializeOrder, ...initializeOrder]) {
+        if (!initializeOrderSet.has(id) && Boolean(this.getInput().panels[id])) {
+          initializeOrderSet.add(id);
         }
-        this.maybeUpdateChildren(currentPanels, prevPanels);
-      });
+      }
+
+      initializeOrder = Array.from(initializeOrderSet);
+    }
+
+    for (const id of initializeOrder) {
+      if (initializeSettings?.initializeSequentially) {
+        const embeddable = await this.onPanelAdded(initialInput.panels[id]);
+
+        if (embeddable && !isErrorEmbeddable(embeddable)) {
+          await this.untilEmbeddableLoaded(id);
+        }
+      } else {
+        this.onPanelAdded(initialInput.panels[id]);
+      }
+    }
   }
 
   private async createAndSaveEmbeddable<
