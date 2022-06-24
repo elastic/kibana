@@ -184,10 +184,6 @@ function isOfAggregateQueryType(query: AggregateQuery | Query): query is Aggrega
   return Boolean(query && 'sql' in query);
 }
 
-function getAggregateQueryMode(query: AggregateQuery): string {
-  return Object.keys(query)[0];
-}
-
 /**
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
@@ -209,10 +205,7 @@ export function getState({
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
 
   if (appStateFromUrl && appStateFromUrl.query && !appStateFromUrl.query.language) {
-    if (isOfAggregateQueryType(appStateFromUrl.query)) {
-      const aggregatedQuery = appStateFromUrl.query as AggregateQuery;
-      appStateFromUrl.textBasedLanguageMode = getAggregateQueryMode(aggregatedQuery);
-    } else {
+    if (!isOfAggregateQueryType(appStateFromUrl.query)) {
       appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
     }
   }
