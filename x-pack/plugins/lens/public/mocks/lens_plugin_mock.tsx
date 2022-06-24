@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { createFormulaPublicApi } from '../async_services';
 import { LensPublicStart } from '..';
 import { visualizationTypes } from '../xy_visualization/types';
 
@@ -27,9 +28,7 @@ export const lensPluginMock = {
         .mockReturnValue(new Promise((resolve) => resolve(visualizationTypes))),
 
       stateHelperApi: jest.fn().mockResolvedValue({
-        formula: {
-          insertOrReplaceFormulaColumn: jest.fn(),
-        },
+        formula: createFormulaPublicApi(),
       }),
     };
     return startContract;
