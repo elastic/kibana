@@ -101,7 +101,6 @@ describe('Alerts detection rules', () => {
       .should('have.class', 'euiPaginationButton-isActive');
   });
 
-  // Refer to https://github.com/elastic/kibana/issues/135057 for the skipped test
   it('Auto refreshes rules', () => {
     /**
      * Ran into the error: timer created with setInterval() but cleared with cancelAnimationFrame()
