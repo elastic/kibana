@@ -537,12 +537,9 @@ export const ResponseActionsList = memo<
     const perPage = queryParams?.pageSize ?? 10;
 
     const totalPages = Math.ceil(totalItemCount / perPage);
-    const remainder = totalItemCount % 10;
-    const lastPageCount = (page - 1) * perPage + remainder;
-
     const fromCount = perPage * page - perPage + 1;
     const toCount =
-      page === totalPages || totalPages === 1 ? lastPageCount : fromCount + perPage - 1;
+      page === totalPages || totalPages === 1 ? totalItemCount : fromCount + perPage - 1;
     return { fromCount, toCount };
   }, [queryParams.page, queryParams.pageSize, totalItemCount]);
 
