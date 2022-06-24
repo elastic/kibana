@@ -3099,6 +3099,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-fatal-errors-browser-internal@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-fatal-errors-browser-mocks@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-fatal-errors-browser@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal":
   version "0.0.0"
   uid ""
@@ -3272,6 +3284,18 @@
   uid ""
 
 "@kbn/mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-agg-utils@link:bazel-bin/x-pack/packages/ml/agg_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-is-populated-object@link:bazel-bin/x-pack/packages/ml/is_populated_object":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-string-hash@link:bazel-bin/x-pack/packages/ml/string_hash":
   version "0.0.0"
   uid ""
 
@@ -6530,6 +6554,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-fatal-errors-browser-internal@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-fatal-errors-browser-mocks@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-fatal-errors-browser@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6691,6 +6727,18 @@
   uid ""
 
 "@types/kbn__mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ml-agg-utils@link:bazel-bin/x-pack/packages/ml/agg_utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ml-is-populated-object@link:bazel-bin/x-pack/packages/ml/is_populated_object/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ml-string-hash@link:bazel-bin/x-pack/packages/ml/string_hash/npm_module_types":
   version "0.0.0"
   uid ""
 
