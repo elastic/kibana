@@ -7,13 +7,27 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiText, EuiIcon } from '@elastic/eui';
+import classNames from 'classnames';
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiText,
+  EuiSplitPanel,
+  EuiButtonIcon,
+  EuiSpacer,
+} from '@elastic/eui';
+
+import './button_group.scss';
 
 export interface ButtonGroupOption {
   id: string;
   icon: string;
   label: string;
   description: string;
+  footer: string;
+  badge?: React.ReactNode;
 }
 
 interface Props {
@@ -23,42 +37,57 @@ interface Props {
 }
 
 export const ButtonGroup: React.FC<Props> = ({ options, selected, onChange }) => (
-  <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+  <EuiFlexGroup direction="column" gutterSize="m" className="buttonGroup">
     {options.map((option) => (
-      <EuiFlexItem style={{ width: 'calc(100% - .5rem)' }}>
-        <EuiPanel
-          className={
-            selected === option
-              ? 'entSearchNewIndexButtonGroupButton--selected'
-              : 'entSearchNewIndexButtonGroupButton'
-          }
+      <EuiFlexItem
+        grow={false}
+        onClick={() => {
+          onChange(option);
+        }}
+      >
+        <EuiSplitPanel.Outer
+          grow
+          hasBorder
+          borderRadius="m"
           hasShadow={false}
-          onClick={() => {
-            onChange(option);
-          }}
+          className={classNames('buttonGroupOption', {
+            'buttonGroupOption-selected': option === selected,
+          })}
         >
-          <EuiFlexGroup alignItems="center" responsive={false}>
-            <EuiFlexItem grow>
-              <EuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h4>{option.label}</h4>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow>
-                  <EuiText size="xs">
-                    <p>{option.description}</p>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <div className="rightArrow">
-                <EuiIcon type="arrowRight" color="primary" />
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+          <EuiSplitPanel.Inner color="plain" paddingSize="s">
+            <EuiFlexGroup alignItems="center" responsive={false}>
+              <EuiFlexItem>
+                {option.badge && (
+                  <>
+                    <div>{option.badge}</div>
+                    <EuiSpacer size="xs" />
+                  </>
+                )}
+                <EuiTitle size="xs">
+                  <h4>{option.label}</h4>
+                </EuiTitle>
+                <EuiSpacer size="xs" />
+                <EuiText size="xs" color="subdued">
+                  <p>{option.description}</p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon display="base" iconType="arrowRight" aria-label={option.label} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner
+            color={selected === option ? 'primary' : 'subdued'}
+            paddingSize="s"
+            className="buttonGroupOption--footer"
+          >
+            <EuiText size="xs" color={option === selected ? undefined : 'subdued'}>
+              <p>
+                <strong>{option.footer}</strong>
+              </p>
+            </EuiText>
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
       </EuiFlexItem>
     ))}
   </EuiFlexGroup>

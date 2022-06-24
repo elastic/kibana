@@ -1,0 +1,11 @@
+.buttonGroup {
+  .buttonGroupOption {
+    &-selected {
+      border-color: $euiColorPrimary;
+
+      .buttonGroupOption--footer {
+        color: $euiColorPrimaryText;
+      }
+    }
+  }
+}

@@ -16,7 +16,15 @@ import React, { useState, useEffect } from 'react';
 
 import { useActions } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -44,6 +52,9 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
         defaultMessage: 'Index content from your websites',
       }
     ),
+    footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.footer', {
+      defaultMessage: 'No development required',
+    }),
   },
   {
     id: 'api',
@@ -57,6 +68,9 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
         defaultMessage: 'Use a variety of client libraries to add documents to your search index',
       }
     ),
+    footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.footer', {
+      defaultMessage: 'Some development required',
+    }),
   },
   {
     id: 'connector',
@@ -70,11 +84,19 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
         defaultMessage: 'Clone the connector package repo and build a custom connector',
       }
     ),
+    footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.footer', {
+      defaultMessage: 'Development required',
+    }),
+    badge: (
+      <EuiBadge iconType="beaker">
+        <EuiText size="xs">Technical Preview</EuiText>
+      </EuiBadge>
+    ),
   },
 ];
 
 export const NewIndex: React.FC = () => {
-  const [selectedMethod, setSelectedMethod] = useState<ButtonGroupOption | undefined>();
+  const [selectedMethod, setSelectedMethod] = useState<ButtonGroupOption>();
 
   const { loadSearchEngines } = useActions(SearchIndicesLogic);
   useEffect(() => {
