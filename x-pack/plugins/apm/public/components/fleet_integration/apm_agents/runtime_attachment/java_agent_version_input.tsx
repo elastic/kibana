@@ -33,15 +33,14 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
 
   useEffect(() => {
     // When version is not available on the fleet package sets it to "latest"
-    if (
-      status === FETCH_STATUS.SUCCESS &&
-      data &&
-      (version === null || version === undefined)
-    ) {
-      const latestVersion = data?.versions?.[0] || 'latest';
-      onChange(latestVersion);
+    if (version === null) {
+      // This is necessary due to a possible bug in Fleet where even thought the form is valid
+      // the save button is still disabled: https://github.com/elastic/kibana/issues/135131
+      setTimeout(() => {
+        onChange('latest');
+      }, 1);
     }
-  }, [data, status, version, onChange]);
+  }, [version, onChange]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
   const options =

@@ -19,10 +19,8 @@ export async function getJavaAgentVersionsFromRegistry() {
   if (!matchedVersions.length) {
     return undefined;
   }
-  const versions = matchedVersions
+  return matchedVersions
     .map((aMatch) => aMatch[1])
     .concat(['latest'])
     .reverse();
-
-  return versions;
 }
