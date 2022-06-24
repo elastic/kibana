@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import {
-  EuiTitle,
-  EuiHideFor,
-  EuiShowFor,
-  EuiButton,
   EuiBadge,
-  EuiFlyoutHeader,
+  EuiButton,
   EuiFlyout,
+  EuiFlyoutHeader,
+  EuiHideFor,
   EuiIcon,
   EuiLink,
   EuiPortal,
+  EuiShowFor,
+  EuiTitle,
 } from '@elastic/eui';
-import type { DataViewField, DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewAttributes, DataViewField } from '@kbn/data-views-plugin/public';
 import { SavedObject } from '@kbn/core/types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { AppState } from '../../services/discover_state';
-import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
+import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
@@ -210,7 +210,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const editField = useMemo(
     () =>
-      documentState.language !== 'sql' && canEditDataView && selectedIndexPattern
+      documentState.recordRawType !== RecordRawType.PLAIN && canEditDataView && selectedIndexPattern
         ? (fieldName?: string) => {
             const ref = dataViewFieldEditor.openEditor({
               ctx: {
@@ -236,7 +236,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       selectedIndexPattern,
       setFieldEditorRef,
       onEditRuntimeField,
-      documentState.language,
+      documentState.recordRawType,
     ]
   );
 

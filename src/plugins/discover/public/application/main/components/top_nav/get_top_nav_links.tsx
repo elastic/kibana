@@ -11,6 +11,7 @@ import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
@@ -19,6 +20,7 @@ import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../services/discover_state';
 import { openOptionsPopover } from './open_options_popover';
 import { openAlertsPopover } from './open_alerts_popover';
+import { RecordRawType } from '../../hooks/use_saved_search';
 
 /**
  * Helper function to build the top nav links
@@ -42,7 +44,7 @@ export const getTopNavLinks = ({
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
 }): TopNavMenuData[] => {
-  const language = state.appStateContainer.getState().query?.language;
+  const rawRecordType = getRawRecordType(state.appStateContainer.getState().query);
   const options = {
     id: 'options',
     label: i18n.translate('discover.localMenu.localMenu.optionsTitle', {
@@ -184,8 +186,8 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
-    ...(services.triggersActionsUi && language !== 'sql' ? [alerts] : []),
-    ...(language !== 'sql' ? [shareSearch] : []),
+    ...(services.triggersActionsUi && rawRecordType !== RecordRawType.PLAIN ? [alerts] : []),
+    ...(rawRecordType !== RecordRawType.PLAIN ? [shareSearch] : []),
     inspectSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),
   ];

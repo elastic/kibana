@@ -9,6 +9,7 @@ import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
+import { getRawRecordType } from './get_raw_record_type';
 import { fetchSql } from './fetch_sql';
 import {
   sendCompleteMsg,
@@ -30,6 +31,7 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
+  RecordRawType,
   SavedSearchData,
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
@@ -86,9 +88,10 @@ export function fetchAll(
       sendResetMsg(dataSubjects, initialFetchStatus);
     }
     const { hideChart, sort, query } = appStateContainer.getState();
-    const language = query?.language || 'kql';
+    const recordRawType = getRawRecordType(query);
+    const useSql = recordRawType === RecordRawType.PLAIN;
 
-    if (language !== 'sql') {
+    if (recordRawType === RecordRawType.DOCUMENT) {
       // Update the base searchSource, base for all child fetches
       updateSearchSource(searchSource, false, {
         indexPattern: dataView,
@@ -99,27 +102,22 @@ export function fetchAll(
     }
 
     // Mark all subjects as loading
-    sendLoadingMsg(dataSubjects.main$, language);
-    sendLoadingMsg(dataSubjects.documents$, language);
-    sendLoadingMsg(dataSubjects.totalHits$, language);
-    sendLoadingMsg(dataSubjects.charts$, language);
+    sendLoadingMsg(dataSubjects.main$, recordRawType);
+    sendLoadingMsg(dataSubjects.documents$, recordRawType);
+    sendLoadingMsg(dataSubjects.totalHits$, recordRawType);
+    sendLoadingMsg(dataSubjects.charts$, recordRawType);
 
     const isChartVisible =
       !hideChart && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
 
     // Start fetching all required requests
-    const documents =
-      language === 'sql'
-        ? fetchSql(String(query?.query), fetchDeps.data)
-        : fetchDocuments(searchSource.createCopy(), fetchDeps);
+    const documents = useSql
+      ? fetchSql(String(query?.query), fetchDeps.data)
+      : fetchDocuments(searchSource.createCopy(), fetchDeps);
     const charts =
-      isChartVisible && language !== 'sql'
-        ? fetchChart(searchSource.createCopy(), fetchDeps)
-        : undefined;
+      isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;
     const totalHits =
-      !isChartVisible && language !== 'sql'
-        ? fetchTotalHits(searchSource.createCopy(), fetchDeps)
-        : undefined;
+      !isChartVisible && !useSql ? fetchTotalHits(searchSource.createCopy(), fetchDeps) : undefined;
 
     /**
      * This method checks the passed in hit count and will send a PARTIAL message to main$
@@ -146,13 +144,14 @@ export function fetchAll(
           dataSubjects.totalHits$.next({
             fetchStatus: FetchStatus.PARTIAL,
             result: docs.length,
+            recordRawType,
           });
         }
 
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,
           result: docs,
-          language,
+          recordRawType,
         });
 
         checkHitCount(docs.length);
@@ -167,12 +166,14 @@ export function fetchAll(
         dataSubjects.totalHits$.next({
           fetchStatus: FetchStatus.COMPLETE,
           result: chart.totalHits,
+          recordRawType,
         });
 
         dataSubjects.charts$.next({
           fetchStatus: FetchStatus.COMPLETE,
           chartData: chart.chartData,
           bucketInterval: chart.bucketInterval,
+          recordRawType,
         });
 
         checkHitCount(chart.totalHits);
@@ -181,7 +182,11 @@ export function fetchAll(
 
     totalHits
       ?.then((hitCount) => {
-        dataSubjects.totalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: hitCount });
+        dataSubjects.totalHits$.next({
+          fetchStatus: FetchStatus.COMPLETE,
+          result: hitCount,
+          recordRawType,
+        });
         checkHitCount(hitCount);
       })
       .catch(sendErrorTo(dataSubjects.totalHits$));

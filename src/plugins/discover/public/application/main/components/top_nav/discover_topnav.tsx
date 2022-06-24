@@ -5,15 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { DataViewType } from '@kbn/data-views-plugin/public';
+import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
+import { RecordRawType } from '../../hooks/use_saved_search';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
@@ -44,14 +46,16 @@ export const DiscoverTopNav = ({
   onEditRuntimeField,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
-  const language = useMemo(
-    () => stateContainer.appStateContainer.getState().query?.language,
+  const rawRecordType = useMemo(
+    () => getRawRecordType(stateContainer.appStateContainer.getState().query),
     [stateContainer.appStateContainer]
   );
   const showDatePicker = useMemo(
     () =>
-      language !== 'sql' && indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
-    [indexPattern, language]
+      rawRecordType === RecordRawType.DOCUMENT &&
+      indexPattern.isTimeBased() &&
+      indexPattern.type !== DataViewType.ROLLUP,
+    [indexPattern, rawRecordType]
   );
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
@@ -193,7 +197,10 @@ export const DiscoverTopNav = ({
       savedQueryId={savedQuery}
       screenTitle={savedSearch.title}
       showDatePicker={showDatePicker}
-      showSaveQuery={language !== 'sql' && Boolean(services.capabilities.discover.saveQuery)}
+      showSaveQuery={
+        rawRecordType === RecordRawType.DOCUMENT &&
+        Boolean(services.capabilities.discover.saveQuery)
+      }
       showSearchBar={true}
       useDefaultBehaviors={true}
       dataViewPickerComponentProps={dataViewPickerProps}

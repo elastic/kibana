@@ -36,7 +36,7 @@ import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types'
 import { DiscoverChart } from '../chart';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg } from '../../hooks/use_saved_search';
+import { DataMainMsg, RecordRawType } from '../../hooks/use_saved_search';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../types';
@@ -139,6 +139,7 @@ export function DiscoverLayout({
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments!),
     [dataState.fetchStatus, dataState.foundDocuments]
   );
+  const isPlainRecord = dataState.recordRawType === RecordRawType.PLAIN;
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
@@ -259,9 +260,7 @@ export function DiscoverLayout({
               documents$={savedSearchData$.documents$}
               indexPatternList={indexPatternList}
               onAddField={onAddColumn}
-              onAddFilter={
-                dataState.language !== 'sql' ? (onAddFilter as DocViewFilterFn) : undefined
-              }
+              onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
               onRemoveField={onRemoveColumn}
               onChangeIndexPattern={onChangeIndexPattern}
               selectedIndexPattern={indexPattern}
@@ -327,7 +326,7 @@ export function DiscoverLayout({
                   gutterSize="none"
                   responsive={false}
                 >
-                  {dataState.language !== 'sql' && (
+                  {!isPlainRecord && (
                     <>
                       <EuiFlexItem grow={false}>
                         <DiscoverChartMemoized
@@ -353,9 +352,7 @@ export function DiscoverLayout({
                       expandedDoc={expandedDoc}
                       indexPattern={indexPattern}
                       navigateTo={navigateTo}
-                      onAddFilter={
-                        dataState.language !== 'sql' ? (onAddFilter as DocViewFilterFn) : undefined
-                      }
+                      onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
                       savedSearch={savedSearch}
                       setExpandedDoc={setExpandedDoc}
                       state={state}
@@ -370,9 +367,7 @@ export function DiscoverLayout({
                       filters={state.filters}
                       columns={columns}
                       stateContainer={stateContainer}
-                      onAddFilter={
-                        dataState.language !== 'sql' ? (onAddFilter as DocViewFilterFn) : undefined
-                      }
+                      onAddFilter={!isPlainRecord ? (onAddFilter as DocViewFilterFn) : undefined}
                       trackUiMetric={trackUiMetric}
                       savedSearchRefetch$={savedSearchRefetch$}
                     />

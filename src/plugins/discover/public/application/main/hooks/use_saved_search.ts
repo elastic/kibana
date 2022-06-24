@@ -10,6 +10,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import { GetStateReturn } from '../services/discover_state';
@@ -53,12 +54,23 @@ export interface UseSavedSearch {
   inspectorAdapters: { requests: RequestAdapter };
 }
 
+export enum RecordRawType {
+  /**
+   * Documents returned Elasticsearch, nested structure
+   */
+  DOCUMENT = 'document',
+  /**
+   * Data returned e.g. SQL queries, flat structure
+   * */
+  PLAIN = 'plain',
+}
+
 export type DataRefetchMsg = 'reset' | undefined;
 
 export interface DataMsg {
   fetchStatus: FetchStatus;
   error?: Error;
-  language?: string;
+  recordRawType?: RecordRawType;
 }
 
 export interface DataMainMsg extends DataMsg {
@@ -108,7 +120,8 @@ export const useSavedSearch = ({
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
   const { query } = stateContainer.appStateContainer.getState();
-  const language = String(query?.language) || 'kql';
+
+  const recordRawType = getRawRecordType(query);
 
   const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
 
@@ -116,7 +129,7 @@ export const useSavedSearch = ({
    * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
-  const initialState = { fetchStatus: initialFetchStatus, language };
+  const initialState = { fetchStatus: initialFetchStatus, recordRawType };
   const main$: DataMain$ = useBehaviorSubject(initialState) as DataMain$;
   const documents$: DataDocuments$ = useBehaviorSubject(initialState) as DataDocuments$;
   const totalHits$: DataTotalHits$ = useBehaviorSubject(initialState) as DataTotalHits$;
