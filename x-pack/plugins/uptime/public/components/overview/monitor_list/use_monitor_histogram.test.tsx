@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { MemoryRouter } from 'react-router-dom';
 import { useMonitorHistogram } from './use_monitor_histogram';
 import * as searchHooks from '../../../../../observability/public/hooks/use_es_search';
 import * as reduxHooks from 'react-redux';
@@ -23,7 +24,12 @@ describe('useMonitorHistogram', () => {
   });
 
   it('calls dynamic heartbeat index', () => {
-    renderHook(() => useMonitorHistogram({ items: [] }));
+    renderHook((props) => useMonitorHistogram(props), {
+      initialProps: {
+        items: [],
+      },
+      wrapper: MemoryRouter,
+    });
     expect(useEsSearch).toBeCalledWith(
       expect.objectContaining({ index: dynamicIndexPattern }),
       ['[]', 0],
