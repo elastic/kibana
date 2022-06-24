@@ -16,6 +16,7 @@ export * from './output';
 export * from './enrollment_api_key';
 export * from './settings';
 export * from './preconfiguration';
+export * from './download_source';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates
 // the maximum amount of results allowed to be returned from a search. It's possible
