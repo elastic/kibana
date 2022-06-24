@@ -5,7 +5,7 @@
  * 2.0.
  */
 import uuid from 'uuid';
-import { journey, step, expect, before, after, Page } from '@elastic/synthetics';
+import { journey, step, expect, before, Page } from '@elastic/synthetics';
 import { FormMonitorType } from '../../../common/runtime_types/monitor_management';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 
