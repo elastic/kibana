@@ -8,14 +8,12 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../../services/lib/web_element_wrapper';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const screenshot = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('overview page - Analytics apps', function describeIndexTests() {
@@ -43,22 +41,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');
       expect(kbnOverviewAppsCards.length).to.be(apps.length);
 
-      const verifyImageUrl = async (el: WebElementWrapper, imgName: string) => {
-        const image = await el.findByCssSelector('img');
-        const imageUrl = await image.getAttribute('src');
-        expect(imageUrl.includes(imgName)).to.be(true);
+      const verifyImageUrl = async (imgName: string) => {
+        let found = false;
+        for (let i = 0; i < kbnOverviewAppsCards.length; i++) {
+          const el = kbnOverviewAppsCards[i];
+          const image = await el.findByCssSelector('img');
+          const imageUrl = await image.getAttribute('src');
+          found = imageUrl.includes(imgName);
+          if (found) {
+            break;
+          }
+        }
+        expect(found).to.be(true);
       };
 
       for (let i = 0; i < apps.length; i++) {
-        await verifyImageUrl(kbnOverviewAppsCards[i], `kibana_${apps[i]}_light.svg`);
+        await verifyImageUrl(`kibana_${apps[i]}_light.svg`);
       }
     });
 
     it('click on a card should lead to the appropriate app', async () => {
-      await screenshot.take('screenshot1');
-      await log.error('Starting test...');
       const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');
-      await log.error(kbnOverviewAppsCards.length + '');
       const dashboardCard = kbnOverviewAppsCards.at(0);
       expect(dashboardCard).not.to.be(undefined);
       if (dashboardCard) {
