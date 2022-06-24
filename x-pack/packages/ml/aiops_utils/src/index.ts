@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export { getWindowParameters } from './lib/get_window_parameters';
+export type { WindowParameters } from './lib/get_window_parameters';
 export { streamFactory } from './lib/stream_factory';
 export { useFetchStream } from './lib/use_fetch_stream';
 export type {

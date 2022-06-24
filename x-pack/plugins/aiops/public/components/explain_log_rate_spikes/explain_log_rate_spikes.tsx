@@ -11,6 +11,7 @@ import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useFetchStream } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
@@ -22,9 +23,14 @@ import type { ApiExplainLogRateSpikes } from '../../../common/api';
 export interface ExplainLogRateSpikesProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** Window paramaters for the analysis */
+  windowParameters: WindowParameters;
 }
 
-export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }) => {
+export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
+  dataView,
+  windowParameters,
+}) => {
   const kibana = useKibana();
   const basePath = kibana.services.http?.basePath.get() ?? '';
 
@@ -34,16 +40,12 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
       // TODO Consider time ranges.
       start: 0,
       end: 2147483647000,
-      // TODO identify dynamically or via UI
-      baselineMin: 10,
-      baselineMax: 20,
-      deviationMin: 30,
-      deviationMax: 40,
       // TODO Consider an optional Kuery.
       kuery: '',
       // TODO Handle data view without time fields.
       timeFieldName: dataView.timeFieldName ?? '',
       index: dataView.title,
+      ...windowParameters,
     },
     { reducer: streamReducer, initialState }
   );
