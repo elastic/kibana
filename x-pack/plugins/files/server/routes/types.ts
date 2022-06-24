@@ -12,6 +12,7 @@ import type {
   RouteMethod,
   KibanaResponseFactory,
   IKibanaResponse,
+  Logger,
 } from '@kbn/core/server';
 import type { FileServiceStart } from '../file_service';
 
@@ -20,6 +21,7 @@ export interface FilesRequestHandlerContext extends RequestHandlerContext {
     fileService: {
       asCurrentUser: () => FileServiceStart;
       asInternalUser: () => FileServiceStart;
+      logger: Logger;
     };
   }>;
 }

@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import mimeType from 'mime';
 import { Readable } from 'stream';
 import {
   File as IFile,
@@ -146,6 +147,7 @@ export class File<M = unknown> implements IFile {
       alt,
       meta,
       mime,
+      extension: (mime && mimeType.getExtension(mime)) ?? undefined,
     });
 
     const file = internalFileService.toFile(fileSO, fileKind);
@@ -193,5 +195,13 @@ export class File<M = unknown> implements IFile {
 
   public get alt(): undefined | string {
     return this.attributes.alt;
+  }
+
+  public get mime(): undefined | string {
+    return this.attributes.mime;
+  }
+
+  public get extension(): undefined | string {
+    return this.attributes.extension;
   }
 }

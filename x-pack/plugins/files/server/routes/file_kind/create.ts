@@ -8,13 +8,14 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { FileJSON } from '../../../common';
 import type { FileKindsRequestHandler } from './types';
+import * as commonSchemas from './common_schemas';
 
 export const method = 'post' as const;
 
 export const bodySchema = schema.object({
-  name: schema.string(),
-  alt: schema.maybe(schema.string()),
-  meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  name: commonSchemas.fileName,
+  alt: commonSchemas.fileAlt,
+  meta: commonSchemas.fileMeta,
   mime: schema.maybe(schema.string()),
 });
 

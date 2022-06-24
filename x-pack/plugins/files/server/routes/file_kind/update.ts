@@ -10,12 +10,14 @@ import type { FileJSON } from '../../../common/types';
 import type { FileKindsRequestHandler } from './types';
 import { getById } from './helpers';
 
+import * as commonSchemas from './common_schemas';
+
 export const method = 'patch' as const;
 
 export const bodySchema = schema.object({
-  name: schema.maybe(schema.string()),
-  alt: schema.maybe(schema.string()),
-  meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  name: schema.maybe(commonSchemas.fileName),
+  alt: schema.maybe(commonSchemas.fileAlt),
+  meta: schema.maybe(commonSchemas.fileMeta),
 });
 
 type Body = TypeOf<typeof bodySchema>;
@@ -44,6 +46,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   try {
     await file.update(attrs);
   } catch (e) {
+    fileService.logger.error(e);
     return res.customError({
       statusCode: 500,
       body: {

@@ -44,6 +44,7 @@ export class FilesPlugin
           fileService: {
             asCurrentUser: () => this.fileServiceFactory!.asScoped(req),
             asInternalUser: () => this.fileServiceFactory!.asInternal(),
+            logger: this.logger.get('files-routes'),
           },
         };
       }

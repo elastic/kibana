@@ -82,7 +82,7 @@ describe('File kind HTTP API', () => {
     fileAttrs: Partial<{ name: string; alt: string; meta: Record<string, any>; mime: string }> = {}
   ): Promise<FileJSON> => {
     const result = await request
-      .post(root, `/api/files/${fileKind}/create`)
+      .post(root, `/api/files/files/${fileKind}`)
       .send(
         defaults(fileAttrs, {
           name: 'myFile',
@@ -94,7 +94,7 @@ describe('File kind HTTP API', () => {
       .expect(200);
     disposables.push(async () => {
       await request
-        .delete(root, `/api/files/${fileKind}/${result.body.file.id}/delete`)
+        .delete(root, `/api/files/files/${fileKind}/${result.body.file.id}`)
         .send()
         .expect(200);
     });
@@ -110,6 +110,7 @@ describe('File kind HTTP API', () => {
       file_kind: fileKind,
       status: 'AWAITING_UPLOAD',
       mime: 'image/png',
+      extension: 'png',
       meta: {},
       alt: 'a picture of my dog',
     });
@@ -118,7 +119,7 @@ describe('File kind HTTP API', () => {
   test('upload', async () => {
     const { id } = await createFile();
     const result = await request
-      .put(root, `/api/files/${fileKind}/${id}/upload`)
+      .put(root, `/api/files/files/${fileKind}/${id}/blob`)
       .set('Content-Type', 'application/octet-stream')
       .send('what have you')
       .expect(200);
@@ -126,17 +127,21 @@ describe('File kind HTTP API', () => {
   });
 
   test('download', async () => {
-    const { id } = await createFile();
+    const { id } = await createFile({ name: 'test' });
     await request
-      .put(root, `/api/files/${fileKind}/${id}/upload`)
+      .put(root, `/api/files/files/${fileKind}/${id}/blob`)
       .set('content-type', 'application/octet-stream')
       .send('what have you')
       .expect(200);
-    const { body: buffer } = await request
-      .get(root, `/api/files/${fileKind}/${id}/download`)
+
+    const { body: buffer, header } = await request
+      .get(root, `/api/files/files/${fileKind}/${id}/blob`)
       .set('accept', 'application/octet-stream')
       .buffer()
       .expect(200);
+
+    expect(header['content-type']).toEqual('image/png');
+    expect(header['content-disposition']).toEqual('attachment; filename="test.png"');
     expect(buffer.toString('utf8')).toEqual('what have you');
   });
 
@@ -145,7 +150,7 @@ describe('File kind HTTP API', () => {
 
     const {
       body: { file },
-    } = await request.get(root, `/api/files/${fileKind}/${id}`).expect(200);
+    } = await request.get(root, `/api/files/files/${fileKind}/${id}`).expect(200);
     expect(file.name).toBe('acoolfilename');
 
     const updatedFileAttrs: UpdatableFileAttributes = {
@@ -159,7 +164,7 @@ describe('File kind HTTP API', () => {
     const {
       body: { file: updatedFile },
     } = await request
-      .patch(root, `/api/files/${fileKind}/${id}/update`)
+      .patch(root, `/api/files/files/${fileKind}/${id}`)
       .send(updatedFileAttrs)
       .expect(200);
 
@@ -167,7 +172,7 @@ describe('File kind HTTP API', () => {
 
     const {
       body: { file: file2 },
-    } = await request.get(root, `/api/files/${fileKind}/${id}`).expect(200);
+    } = await request.get(root, `/api/files/files/${fileKind}/${id}`).expect(200);
 
     expect(file2).toEqual(expect.objectContaining(updatedFileAttrs));
   });
@@ -178,14 +183,14 @@ describe('File kind HTTP API', () => {
 
     const {
       body: { files },
-    } = await request.get(root, `/api/files/${fileKind}/list`).expect(200);
+    } = await request.get(root, `/api/files/files/${fileKind}/list`).expect(200);
 
     expect(files).toHaveLength(nrOfFiles);
     expect(files[0]).toEqual(expect.objectContaining({ name: 'test' }));
 
     const {
       body: { files: files2 },
-    } = await request.get(root, `/api/files/${fileKind}/list?page=1&perPage=5`).expect(200);
+    } = await request.get(root, `/api/files/files/${fileKind}/list?page=1&perPage=5`).expect(200);
     expect(files2).toHaveLength(5);
   });
 });

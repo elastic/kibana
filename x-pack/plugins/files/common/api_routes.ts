@@ -13,8 +13,9 @@ const FILES_API_BASE_PATH = `${API_BASE_PATH}/files`;
 
 export const FILE_KIND_API_ROUTES = {
   getCreateFileRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}`,
-  getUploadRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}/upload`,
-  getDownloadRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}/download`,
+  getUploadRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}/blob`,
+  getDownloadRoute: (fileKind: string) =>
+    `${FILES_API_BASE_PATH}/${fileKind}/{fileId}/blob/{fileName?}`,
   getUpdateRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}`,
   getDeleteRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}`,
   getListRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/list`,

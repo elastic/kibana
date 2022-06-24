@@ -50,6 +50,11 @@ export type FileSavedObjectAttributes<Meta = unknown> = {
   mime?: string;
 
   /**
+   * Extension that should match the full mime type
+   */
+  extension?: string;
+
+  /**
    * Size of the contents in bytes.
    */
   size?: number;
@@ -69,6 +74,10 @@ export type UpdatableFileAttributes<Meta = unknown> = Pick<
   'meta' | 'alt' | 'name'
 >;
 
+/**
+ * The set of properties and behaviors of the "smart" file object. This is built
+ * directly from the set of saved object attributes
+ */
 export interface File<Meta = unknown> {
   id: string;
 
@@ -87,7 +96,15 @@ export interface File<Meta = unknown> {
    * User provided metadata
    */
   meta: Meta;
+
   alt: undefined | string;
+
+  /**
+   * MIME type of the file content, e.g.: image/png.
+   */
+  mime: undefined | string;
+
+  extension: undefined | string;
 
   update(attr: Partial<UpdatableFileAttributes<Meta>>): Promise<File<Meta>>;
 
