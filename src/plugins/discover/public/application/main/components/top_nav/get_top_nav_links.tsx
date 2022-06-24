@@ -104,7 +104,16 @@ export const getTopNavLinks = ({
     iconType: 'save',
     emphasize: true,
     run: (anchorElement: HTMLElement) =>
-      onSaveSearch({ savedSearch, services, indexPattern, navigateTo, state, anchorElement }),
+      onSaveSearch({
+        savedSearch,
+        services,
+        indexPattern,
+        navigateTo,
+        state,
+        onClose: () => {
+          anchorElement?.focus();
+        },
+      }),
   };
 
   const openSearch = {
