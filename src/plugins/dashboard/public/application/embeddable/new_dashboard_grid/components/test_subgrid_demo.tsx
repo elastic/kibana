@@ -23,7 +23,7 @@ const subOptions = {
   cellHeight: 50, // should be 50 - top/bottom
   column: 'auto', // size to match container. make sure to include gridstack-extra.min.css
   acceptWidgets: true, // will accept .grid-stack-item by default
-  margin: 5,
+  // margin: 5,
   minRow: 2,
 };
 
@@ -44,23 +44,24 @@ export const SubgridDemo = () => {
   const gridRef = useRef<GridStack>();
   const [items, setItems] = useState<GridStackWidget[]>([
     { id: '0', x: 0, y: 0 },
-    { id: '1', x: 0, y: 1 },
+    { id: '1', x: 1, y: 0 },
+    {
+      x: 0,
+      y: 1,
+      w: 12,
+      h: 4,
+      subGrid: { children: sub, ...subOptions } as GridStackOptions,
+    },
     {
       id: '2',
-      x: 1,
-      y: 0,
-      w: 4,
-      h: 5,
+      x: 0,
+      y: 5,
+      w: 12,
+      h: 4,
       subGrid: {
         children: [],
         ...subOptions,
       } as GridStackOptions,
-    },
-    {
-      x: 5,
-      w: 3,
-      h: 4,
-      subGrid: { children: sub, class: 'sub2', ...subOptions } as GridStackOptions,
     },
   ]);
 
@@ -105,7 +106,7 @@ export const SubgridDemo = () => {
       const widget = grid.makeWidget(refs.current[item.id!].current);
       grid.update(widget, item);
       if (item.subGrid) {
-        const newGrid = GridStack.addGrid(widget, {
+        const newGrid = GridStack.addGrid(widget.children[0], {
           ...item.subGrid,
           children: [],
         } as GridStackOptions);
