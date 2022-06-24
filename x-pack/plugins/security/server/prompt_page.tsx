@@ -55,13 +55,11 @@ export function PromptPage({
     `${basePath.serverBasePath}/ui/legacy_light_theme.css`,
   ];
 
-  // The only concern for style tag order is that EUI global styles precede compiled Sass.
-  // The following will have Emotion styles prepend the <head> and load first.
+  // Emotion SSR styles will be prepended to the <body> and emit a console log warning about :first-child selectors
   const emotionCache = createCache({
     key: 'css',
     prepend: true,
   });
-  emotionCache.compat = true;
 
   return (
     <html lang={i18n.getLocale()}>
