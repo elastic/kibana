@@ -256,6 +256,7 @@ describe('useLoadRules', () => {
         ...params,
         onPage,
         onError,
+        filteredRuleTypes: [],
       })
     );
 
