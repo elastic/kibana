@@ -80,8 +80,8 @@ function RulesPage() {
               showCreateRuleButton: false,
               statusFilter: status,
               setStatusFilter: setStatus,
-              executionStatusesFilter: lastResponse,
-              setExecutionStatusesFilter: setLastResponse,
+              lastResponseFilter: lastResponse,
+              setLastResponseFilter: setLastResponse,
               refresh,
             })}
           </EuiFlexItem>

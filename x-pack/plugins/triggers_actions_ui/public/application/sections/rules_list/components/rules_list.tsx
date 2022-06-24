@@ -99,8 +99,8 @@ export interface RulesListProps {
   showCreateRuleButton?: boolean;
   statusFilter?: RuleStatus[];
   setStatusFilter?: (status: RuleStatus[]) => any; // TODO update any
-  executionStatusesFilter?: string[];
-  setExecutionStatusesFilter?: (lastResponse: string[]) => any; // TODO update any
+  lastResponseFilter?: string[];
+  setLastResponseFilter?: (lastResponse: string[]) => any; // TODO update any
   refresh?: Date;
 }
 
@@ -130,8 +130,8 @@ export const RulesList = ({
   showCreateRuleButton = true,
   statusFilter,
   setStatusFilter,
-  executionStatusesFilter,
-  setExecutionStatusesFilter,
+  lastResponseFilter,
+  setLastResponseFilter,
   refresh,
 }: RulesListProps) => {
   const history = useHistory();
@@ -155,7 +155,7 @@ export const RulesList = ({
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>(
-    executionStatusesFilter || []
+    lastResponseFilter || []
   );
   const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>(statusFilter || []);
 
@@ -337,14 +337,14 @@ export const RulesList = ({
   }, [statusFilter]);
 
   useEffect(() => {
-    if (executionStatusesFilter) {
-      setRuleExecutionStatusesFilter(executionStatusesFilter);
+    if (lastResponseFilter) {
+      setRuleExecutionStatusesFilter(lastResponseFilter);
     }
-  }, [executionStatusesFilter]);
+  }, [lastResponseFilter]);
 
   useEffect(() => {
-    if (setExecutionStatusesFilter) {
-      setExecutionStatusesFilter(ruleExecutionStatusesFilter);
+    if (setLastResponseFilter) {
+      setLastResponseFilter(ruleExecutionStatusesFilter);
     }
   }, [ruleExecutionStatusesFilter]);
 
