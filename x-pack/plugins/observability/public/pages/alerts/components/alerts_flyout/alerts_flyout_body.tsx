@@ -13,6 +13,7 @@ import {
   EuiLink,
   EuiHorizontalRule,
   EuiDescriptionList,
+  EuiFlyoutBody,
 } from '@elastic/eui';
 import {
   ALERT_DURATION,
@@ -27,16 +28,11 @@ import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { asDuration } from '../../../../../common/utils/formatters';
 import { translations, paths } from '../../../../config';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
-import { parseAlert } from '../parse_alert';
 import { FlyoutProps } from './types';
 
 // eslint-disable-next-line import/no-default-export
 export default function AlertsFlyoutBody(props: FlyoutProps) {
-  const { observabilityRuleTypeRegistry } = usePluginContext();
-  const alert = props.alert.start
-    ? props.alert
-    : parseAlert(observabilityRuleTypeRegistry)(props.alert as unknown as Record<string, unknown>);
+  const alert = props.alert;
   const { services } = useKibana();
   const { http } = services;
   const dateFormat = useUiSetting<string>('dateFormat');
@@ -77,7 +73,7 @@ export default function AlertsFlyoutBody(props: FlyoutProps) {
   ];
 
   return (
-    <>
+    <EuiFlyoutBody>
       <EuiTitle size="xs">
         <h4>{translations.alertsFlyout.reasonTitle}</h4>
       </EuiTitle>
@@ -105,6 +101,6 @@ export default function AlertsFlyoutBody(props: FlyoutProps) {
           'data-test-subj': 'alertsFlyoutDescriptionListDescription',
         }}
       />
-    </>
+    </EuiFlyoutBody>
   );
 }
