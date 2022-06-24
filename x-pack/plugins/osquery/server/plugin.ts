@@ -24,7 +24,7 @@ import { osquerySearchStrategyProvider } from './search_strategy/osquery';
 import { initSavedObjects } from './saved_objects';
 import { initUsageCollectors } from './usage';
 import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
-import { ConfigType } from './config';
+import { ConfigType } from '../common/config';
 import {
   packSavedObjectType,
   packAssetSavedObjectType,

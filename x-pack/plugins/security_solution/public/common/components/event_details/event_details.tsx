@@ -405,7 +405,7 @@ const EventDetailsComponent: React.FC<Props> = ({
           ),
         }
       : undefined;
-  }, [OsqueryResults, handleAddToTimeline, id, rawEventData]);
+  }, [OsqueryResults, handleAddToTimeline, id, isOsqueryDetectionActionEnabled, rawEventData]);
 
   const tabs = useMemo(() => {
     return [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(
