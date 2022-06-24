@@ -11,7 +11,6 @@ export default function spaceSelectorFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  // const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
   const PageObjects = getPageObjects([
     'common',
@@ -24,79 +23,16 @@ export default function spaceSelectorFunctionalTests({
   const spacesService = getService('spaces');
 
   describe('Spaces', function () {
+    const testSpacesIds = ['another-space', ...Array.from('123456789', (idx) => `space-${idx}`)];
     before(async () => {
-      // await esArchiver.load('x-pack/test/functional/es_archives/spaces/selector');
-      await spacesService.create({
-        id: 'another-space',
-        name: 'Another Space',
-        disabledFeatures: [],
-      });
-      await spacesService.create({
-        id: 'space-1',
-        name: 'Space 1',
-        disabledFeatures: [],
-      });
-
-      await spacesService.create({
-        id: 'space-2',
-        name: 'Space 2',
-        disabledFeatures: [],
-      });
-
-      await spacesService.create({
-        id: 'space-3',
-        name: 'Space 3',
-        disabledFeatures: [],
-      });
-
-      await spacesService.create({
-        id: 'space-4',
-        name: 'Space 4',
-        disabledFeatures: [],
-      });
-
-      await spacesService.create({
-        id: 'space-5',
-        name: 'Space 5',
-        disabledFeatures: [],
-      });
-
-      await spacesService.create({
-        id: 'space-6',
-        name: 'Space 6',
-        disabledFeatures: [],
-      });
-
-      await spacesService.create({
-        id: 'space-7',
-        name: 'Space 7',
-        disabledFeatures: [],
-      });
-
-      await spacesService.create({
-        id: 'space-8',
-        name: 'Space 8',
-        disabledFeatures: [],
-      });
-
-      await spacesService.create({
-        id: 'space-9',
-        name: 'Space 9',
-        disabledFeatures: [],
-      });
+      for (const testSpaceId of testSpacesIds) {
+        await spacesService.create({ id: testSpaceId, name: `${testSpaceId} name` });
+      }
     });
     after(async () => {
-      // await esArchiver.unload('x-pack/test/functional/es_archives/spaces/selector')
-      await spacesService.delete('another-space');
-      await spacesService.delete('space-1');
-      await spacesService.delete('space-2');
-      await spacesService.delete('space-3');
-      await spacesService.delete('space-4');
-      await spacesService.delete('space-5');
-      await spacesService.delete('space-6');
-      await spacesService.delete('space-7');
-      await spacesService.delete('space-8');
-      await spacesService.delete('space-9');
+      for (const testSpaceId of testSpacesIds) {
+        await spacesService.delete(testSpaceId);
+      }
     });
 
     this.tags('includeFirefox');
