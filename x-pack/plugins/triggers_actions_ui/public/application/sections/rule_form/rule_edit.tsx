@@ -207,9 +207,12 @@ export const RuleEdit = ({
                 canChangeTrigger={false}
                 setHasActionsDisabled={setHasActionsDisabled}
                 setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-                operation="i18n.translate('xpack.triggersActionsUI.sections.ruleEdit.operationName', {
-                  defaultMessage: 'edit',
-                })"
+                operation={i18n.translate(
+                  'xpack.triggersActionsUI.sections.ruleEdit.operationName',
+                  {
+                    defaultMessage: 'edit',
+                  }
+                )}
                 metadata={metadata}
               />
             </EuiFlyoutBody>
