@@ -17,6 +17,7 @@ import type {
 } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
+import { downloadSourceService } from '../download_source';
 import { dataTypes, outputType } from '../../../common';
 import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { getSettings } from '../settings';
@@ -55,11 +56,18 @@ export async function getFullAgentPolicy(
     throw new Error('Default output is not setup');
   }
 
+  const defaultDownloadSourceId = await downloadSourceService.getDefaultDownloadSourceId(soClient);
+
+  if (!defaultDownloadSourceId) {
+    throw new Error('Default download source host is not setup');
+  }
+
   const dataOutputId: string = agentPolicy.data_output_id || defaultDataOutputId;
   const monitoringOutputId: string =
     agentPolicy.monitoring_output_id ||
     (await outputService.getDefaultMonitoringOutputId(soClient)) ||
     dataOutputId;
+  const downloadSourceId: string = agentPolicy.download_source_id || defaultDownloadSourceId;
 
   const outputs = await Promise.all(
     Array.from(new Set([dataOutputId, monitoringOutputId])).map((outputId) =>
@@ -75,6 +83,12 @@ export async function getFullAgentPolicy(
   if (!monitoringOutput) {
     throw new Error(`Monitoring output not found ${monitoringOutputId}`);
   }
+
+  const downloadSource = await downloadSourceService.get(soClient, downloadSourceId);
+  if (!downloadSource) {
+    throw new Error(`Download source host not found ${downloadSourceId}`);
+  }
+
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
@@ -110,6 +124,9 @@ export async function getFullAgentPolicy(
             monitoring: { enabled: false, logs: false, metrics: false },
           },
         }),
+    download: {
+      source_uri: downloadSource.host,
+    },
   };
 
   const dataPermissions =

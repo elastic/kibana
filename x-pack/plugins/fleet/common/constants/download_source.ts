@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const DEFAULT_DOWNLOAD_SOURCE = 'artifactory.elastic.co';
+export const DEFAULT_DOWNLOAD_SOURCE = 'https://artifactory.elastic.co';
 
 export const DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE = 'ingest-download-sources';
 

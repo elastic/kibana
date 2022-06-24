@@ -107,6 +107,9 @@ export interface FullAgentPolicy {
       logs: boolean;
     };
   };
+  download: {
+    source_uri: string;
+  };
 }
 
 export interface FullAgentPolicyKibanaConfig {

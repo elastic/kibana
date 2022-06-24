@@ -23,6 +23,7 @@ const POLICY_KEYS_ORDER = [
   'use_output',
   'meta',
   'input',
+  'download',
 ];
 
 export const fullAgentPolicyToYaml = (policy: FullAgentPolicy, toYaml: typeof safeDump): string => {
