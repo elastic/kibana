@@ -179,7 +179,7 @@ image::images/highlights-maps-vector-tiles.png[Joins for vector tiles in Maps]
 
 {kib} now has experimental support for a more restrictive
 https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP[Content Security Policy].
-Specifically, we removed the need for script-src ‘unsafe-eval’,
+Specifically, we removed the need for script-src `unsafe-eval`,
 which provides an additional level of protection against cross-site scripting (XSS) attacks.
 
 To enable this feature, configure `csp.disableUnsafeEval: true` in your `kibana.yml`.
