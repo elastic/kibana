@@ -71,7 +71,7 @@ const StyledFacetButton = euiStyled(EuiFacetButton)`
   }
 `;
 
-const StyledDescriptionList = euiStyled(EuiDescriptionList)`
+const StyledDescriptionList = euiStyled(EuiDescriptionList).attrs({ compressed: true })`
   dt, dd {
     color: ${(props) => props.theme.eui.euiColorDarkShade} !important;
     font-size: ${(props) => props.theme.eui.euiFontSizeXS} !important;
@@ -238,7 +238,7 @@ export const ResponseActionsList = memo<
           },
           {
             title: OUTPUT_MESSAGES.expandSection.parameters,
-            description: parameters ? parameters : "entity_id: 'id240722'",
+            description: parameters ? parameters : emptyValue,
           },
         ];
 
@@ -260,9 +260,7 @@ export const ResponseActionsList = memo<
                   description:
                     isParameters || isOutput ? (
                       // codeblock for parameters
-                      <StyledEuiCodeBlock lang={isOutput ? 'markup' : 'shell'}>
-                        {l.description}
-                      </StyledEuiCodeBlock>
+                      <StyledEuiCodeBlock>{l.description}</StyledEuiCodeBlock>
                     ) : (
                       l.description
                     ),
@@ -271,7 +269,7 @@ export const ResponseActionsList = memo<
 
               return (
                 <EuiFlexItem>
-                  <StyledDescriptionList listItems={list} compressed={true} />
+                  <StyledDescriptionList listItems={list} />
                 </EuiFlexItem>
               );
             })}

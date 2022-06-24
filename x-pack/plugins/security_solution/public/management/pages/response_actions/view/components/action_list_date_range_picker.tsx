@@ -6,9 +6,9 @@
  */
 
 import React, { memo, useState } from 'react';
-import styled from 'styled-components';
 import dateMath from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { DurationRange, OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
@@ -30,10 +30,10 @@ interface Range {
   display: string;
 }
 
-const DatePickerWrapper = styled.div`
+const DatePickerWrapper = euiStyled.div`
   width: ${(props) => props.theme.eui.fractions.single.percentage};
 `;
-const StickyFlexItem = styled(EuiFlexItem)`
+const StickyFlexItem = euiStyled(EuiFlexItem).attrs({ grow: false })`
   background: ${(props) => `${props.theme.eui.euiHeaderBackgroundColor}`};
   position: sticky;
   top: 0;
@@ -68,7 +68,7 @@ export const ActionListDateRangePicker = memo(
         }));
 
     return (
-      <StickyFlexItem grow={false}>
+      <StickyFlexItem>
         <EuiFlexGroup justifyContent="flexStart" responsive>
           <DatePickerWrapper data-test-subj="activityLogSuperDatePicker">
             <EuiFlexItem>
