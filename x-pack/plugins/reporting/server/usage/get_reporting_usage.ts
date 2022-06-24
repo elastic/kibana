@@ -7,9 +7,14 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
+import type { GetLicense } from '.';
 import { REPORTING_SYSTEM_INDEX } from '../../common/constants';
 import type { ExportTypesRegistry } from '../lib/export_types_registry';
-import type { GetLicense } from '.';
+import {
+  FIELD_EXECUTION_TIME_MS,
+  FIELD_QUEUE_TIME_MS,
+  runtimeFields,
+} from '../lib/store/runtime_fields';
 import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import type {
@@ -209,23 +214,7 @@ export async function getReportingUsage(
     filter_path: 'aggregations.*.buckets,aggregations.metrics_*',
     body: {
       size: 0,
-      runtime_mappings: {
-        // WIP
-        'meta.queueTime': {
-          type: 'long',
-          script: {
-            source:
-              "if (!doc.containsKey('created_at') || doc['created_at'].empty) { return; } if (!doc.containsKey('started_at') || doc['started_at'].empty) { return; } emit(doc['started_at'].value.millis - doc['created_at'].value.millis);",
-          },
-        },
-        'meta.executionTime': {
-          type: 'long',
-          script: {
-            source:
-              "if (!doc.containsKey('completed_at') || doc['completed_at'].empty) { return; } if (!doc.containsKey('started_at') || doc['started_at'].empty) { return; } emit(doc['completed_at'].value.millis - doc['started_at'].value.millis);",
-          },
-        },
-      },
+      runtime_mappings: runtimeFields, // queue_time_ms, execution_time_ms
       aggs: {
         ranges: {
           filters: {
@@ -258,12 +247,7 @@ export async function getReportingUsage(
                   terms: { field: fields.ERROR_CODE, size: DEFAULT_TERMS_SIZE },
                 },
 
-                // WIP
-                execution_times: {
-                  stats: {
-                    field: 'meta.executionTime',
-                  },
-                },
+                execution_times: { stats: { field: FIELD_EXECUTION_TIME_MS } },
               },
             },
             [keys.STATUS]: { terms: { field: fields.STATUS, size: DEFAULT_TERMS_SIZE } },
@@ -272,12 +256,7 @@ export async function getReportingUsage(
             // overall error codes
             [keys.ERROR_CODE]: { terms: { field: fields.ERROR_CODE, size: DEFAULT_TERMS_SIZE } },
 
-            // WIP
-            queue_times: {
-              stats: {
-                field: 'meta.queueTime',
-              },
-            },
+            queue_times: { stats: { field: FIELD_QUEUE_TIME_MS } },
           },
         },
         metrics: {
