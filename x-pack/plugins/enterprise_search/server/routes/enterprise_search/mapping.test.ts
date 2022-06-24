@@ -51,7 +51,7 @@ describe('Elasticsearch Index Mapping', () => {
       // TODO: need to mock const { client } = (await context.core).elasticsearch;
 
       await mockRouter.callRoute({
-        params: { indexName: 'search-index-name' }
+        params: { indexName: 'search-index-name' },
       });
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({

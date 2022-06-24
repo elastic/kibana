@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { fetchMapping } from './fetch_mapping';
