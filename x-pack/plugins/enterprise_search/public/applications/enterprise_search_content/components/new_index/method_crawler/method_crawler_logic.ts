@@ -7,6 +7,9 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { HttpError } from '../../../../../../common/types/api';
+import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
+
 import { KibanaLogic } from '../../../../shared/kibana';
 import {
   CreateCrawlerIndexApiLogic,
@@ -14,18 +17,16 @@ import {
 } from '../../../api/crawler/create_crawler_index_api_logic';
 import { SEARCH_INDEX_PATH } from '../../../routes';
 
-interface MethodCrawlerActions {
-  apiSuccess(response: CreateCrawlerIndexResponse): CreateCrawlerIndexResponse;
-}
-
-export const MethodCrawlerLogic = kea<MakeLogicType<{}, MethodCrawlerActions>>({
+export const MethodCrawlerLogic = kea<MakeLogicType<{}, {}>>({
   path: ['enterprise_search', 'method_crawler'],
   connect: {
-    actions: [CreateCrawlerIndexApiLogic, ['apiSuccess']],
+    actions: [CreateCrawlerIndexApiLogic, ['apiError', 'apiSuccess', 'makeRequest']],
   },
   listeners: {
-    apiSuccess: ({ created }) => {
+    apiError: (error: HttpError) => flashAPIErrors(error),
+    apiSuccess: ({ created }: CreateCrawlerIndexResponse) => {
       KibanaLogic.values.navigateToUrl(SEARCH_INDEX_PATH.replace(':indexSlug', encodeURI(created)));
     },
+    makeRequest: () => clearFlashMessages(),
   },
 });
