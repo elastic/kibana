@@ -596,7 +596,7 @@ const addReferenceIdToPayload = (
     if (
       userActionAttributes.payload.comment.type === CommentType.externalReference &&
       userActionAttributes.payload.comment.externalReferenceStorage.type ===
-        ExternalReferenceStorageType.so
+        ExternalReferenceStorageType.savedObject
     ) {
       const externalReferenceId = findReferenceId(
         EXTERNAL_REFERENCE_REF_NAME,

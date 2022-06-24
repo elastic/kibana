@@ -32,7 +32,8 @@ export class SOReferenceExtractor {
   }: {
     data: unknown;
     existingReferences?: SavedObjectReference[];
-  }): { transformedFields: T; references: SavedObjectReference[] } {
+  }): { transformedFields: T; references: SavedObjectReference[]; didDeleteOperation: boolean } {
+    let didDeleteOperation = false;
     const copyOfData = _.cloneDeep(data);
 
     const references = createReferenceMap(existingReferences);
@@ -44,6 +45,7 @@ export class SOReferenceExtractor {
       // why we need to distinguish if it is a valid path)
       if (fieldValue === null || (fieldValue === undefined && _.has(copyOfData, field.path))) {
         references.delete(field.name);
+        didDeleteOperation = true;
       } else if (fieldValue !== undefined) {
         references.set(field.name, { id: fieldValue, name: field.name, type: field.type });
       }
@@ -52,7 +54,11 @@ export class SOReferenceExtractor {
       _.unset(copyOfData, field.path);
     }
 
-    return { transformedFields: copyOfData as T, references: Array.from(references.values()) };
+    return {
+      transformedFields: copyOfData as T,
+      references: Array.from(references.values()),
+      didDeleteOperation,
+    };
   }
 
   public populateFieldsFromReferences<T extends object>(data: SavedObject<object>): SavedObject<T> {

@@ -8,7 +8,7 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
-import { CommentRequest, ExternalReferenceStorageType } from '@kbn/cases-plugin/common/api';
+import { CommentRequest } from '@kbn/cases-plugin/common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -21,7 +21,8 @@ import {
   defaultUser,
   postCaseReq,
   postCommentUserReq,
-  postExternalReferenceReq,
+  postExternalReferenceNoSOReq,
+  postExternalReferenceSOReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -44,17 +45,36 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    it('should create an external reference attachment type', async () => {
+    it('should create an external so reference attachment type', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       const patchedCase = await createComment({
         supertest,
         caseId: postedCase.id,
-        params: postExternalReferenceReq,
+        params: postExternalReferenceSOReq,
       });
       const comment = removeServerGeneratedPropertiesFromSavedObject(patchedCase.comments![0]);
 
       expect(comment).to.eql({
-        ...postExternalReferenceReq,
+        ...postExternalReferenceSOReq,
+        created_by: defaultUser,
+        pushed_at: null,
+        pushed_by: null,
+        updated_by: null,
+        owner: 'securitySolutionFixture',
+      });
+    });
+
+    it('should create an external es reference attachment type', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postExternalReferenceNoSOReq,
+      });
+      const comment = removeServerGeneratedPropertiesFromSavedObject(patchedCase.comments![0]);
+
+      expect(comment).to.eql({
+        ...postExternalReferenceNoSOReq,
         created_by: defaultUser,
         pushed_at: null,
         pushed_by: null,
@@ -65,7 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should create an external reference attachment type with metadata', async () => {
       const req = {
-        ...postExternalReferenceReq,
+        ...postExternalReferenceSOReq,
         externalReferenceMetadata: {
           foo: 'foo',
           bar: { a: 'a' },
@@ -98,7 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createComment({
         supertest,
         caseId: postedCase.id,
-        params: postExternalReferenceReq,
+        params: postExternalReferenceSOReq,
       });
 
       const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
@@ -106,7 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(commentUserAction.type).to.eql('comment');
       expect(commentUserAction.action).to.eql('create');
-      expect(commentUserAction.payload).to.eql({ comment: postExternalReferenceReq });
+      expect(commentUserAction.payload).to.eql({ comment: postExternalReferenceSOReq });
     });
 
     it('should create references and attributes correctly if externalReferenceType===so', async () => {
@@ -114,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const patchedCase = await createComment({
         supertest,
         caseId: postedCase.id,
-        params: postExternalReferenceReq,
+        params: postExternalReferenceSOReq,
       });
 
       const esResponse = await getSOFromKibanaIndex({
@@ -124,10 +144,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
-      const ref = getReference(esResponse, postExternalReferenceReq.externalReferenceId);
+      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-      const { externalReferenceId, ...withoutId } = postExternalReferenceReq;
+      const { externalReferenceId, ...withoutId } = postExternalReferenceSOReq;
 
       expect(ref).to.eql({
         id: 'my-id',
@@ -149,7 +169,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createComment({
         supertest,
         caseId: postedCase.id,
-        params: postExternalReferenceReq,
+        params: postExternalReferenceSOReq,
       });
 
       const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
@@ -162,9 +182,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const commentOnES = esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
-      const ref = getReference(esResponse, postExternalReferenceReq.externalReferenceId);
+      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
 
-      const { externalReferenceId, ...withoutId } = postExternalReferenceReq;
+      const { externalReferenceId, ...withoutId } = postExternalReferenceSOReq;
       expect(ref).to.eql({
         id: 'my-id',
         name: 'externalReferenceId',
@@ -175,16 +195,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should create references and attributes correctly if externalReferenceType===doc', async () => {
-      const docAttachment: CommentRequest = {
-        ...postExternalReferenceReq,
-        externalReferenceStorage: { type: ExternalReferenceStorageType.doc },
-      };
-
       const postedCase = await createCase(supertest, postCaseReq);
       const patchedCase = await createComment({
         supertest,
         caseId: postedCase.id,
-        params: docAttachment,
+        params: postExternalReferenceNoSOReq,
       });
 
       const esResponse = await getSOFromKibanaIndex({
@@ -195,11 +210,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-      const ref = getReference(esResponse, postExternalReferenceReq.externalReferenceId);
+      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
 
       expect(ref).to.be(undefined);
       expect(comment).to.eql({
-        ...docAttachment,
+        ...postExternalReferenceNoSOReq,
         created_by: defaultUser,
         pushed_at: null,
         pushed_by: null,
@@ -208,16 +223,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should create references and attributes correctly if externalReferenceType===doc on user actions', async () => {
-      const docAttachment: CommentRequest = {
-        ...postExternalReferenceReq,
-        externalReferenceStorage: { type: ExternalReferenceStorageType.doc },
-      };
-
       const postedCase = await createCase(supertest, postCaseReq);
       await createComment({
         supertest,
         caseId: postedCase.id,
-        params: docAttachment,
+        params: postExternalReferenceNoSOReq,
       });
 
       const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
@@ -230,10 +240,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const commentOnES = esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
-      const ref = getReference(esResponse, postExternalReferenceReq.externalReferenceId);
+      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
 
       expect(ref).to.be(undefined);
-      expect(commentOnES).to.eql(docAttachment);
+      expect(commentOnES).to.eql(postExternalReferenceNoSOReq);
     });
 
     it('should create references and attributes correctly if externalReferenceType===so when bulk create', async () => {
@@ -241,7 +251,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const patchedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [postCommentUserReq, postExternalReferenceReq],
+        params: [postCommentUserReq, postExternalReferenceSOReq],
       });
 
       const esResponse = await getSOFromKibanaIndex({
@@ -252,10 +262,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
 
-      const ref = getReference(esResponse, postExternalReferenceReq.externalReferenceId);
+      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-      const { externalReferenceId, ...withoutId } = postExternalReferenceReq;
+      const { externalReferenceId, ...withoutId } = postExternalReferenceSOReq;
 
       expect(ref).to.eql({
         id: 'my-id',
@@ -273,16 +283,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should create references and attributes correctly if externalReferenceType===doc when bulk create', async () => {
-      const docAttachment: CommentRequest = {
-        ...postExternalReferenceReq,
-        externalReferenceStorage: { type: ExternalReferenceStorageType.doc },
-      };
-
       const postedCase = await createCase(supertest, postCaseReq);
       const patchedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [postCommentUserReq, docAttachment],
+        params: [postCommentUserReq, postExternalReferenceNoSOReq],
       });
 
       const esResponse = await getSOFromKibanaIndex({
@@ -293,11 +298,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-      const ref = getReference(esResponse, postExternalReferenceReq.externalReferenceId);
+      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
 
       expect(ref).to.be(undefined);
       expect(comment).to.eql({
-        ...docAttachment,
+        ...postExternalReferenceNoSOReq,
         created_by: defaultUser,
         pushed_at: null,
         pushed_by: null,
@@ -310,7 +315,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const patchedCase = await createComment({
         supertest,
         caseId: postedCase.id,
-        params: postExternalReferenceReq,
+        params: postExternalReferenceSOReq,
       });
 
       await updateComment({
@@ -319,7 +324,7 @@ export default ({ getService }: FtrProviderContext): void => {
         req: {
           id: patchedCase.comments![0].id,
           version: patchedCase.comments![0].version,
-          ...postExternalReferenceReq,
+          ...postExternalReferenceSOReq,
           externalReferenceId: 'my-new-id',
         },
       });
@@ -333,7 +338,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
       const ref = getReference(esResponse, 'my-new-id');
-      const { externalReferenceId, ...withoutId } = postExternalReferenceReq;
+      const { externalReferenceId, ...withoutId } = postExternalReferenceSOReq;
 
       expect(ref).to.eql({
         id: 'my-new-id',
@@ -352,8 +357,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return 400 when updating from so to doc', async () => {
       const docAttachment: CommentRequest = {
-        ...postExternalReferenceReq,
-        externalReferenceStorage: { type: ExternalReferenceStorageType.doc },
+        ...postExternalReferenceNoSOReq,
         externalReferenceId: 'my-doc-id',
       };
 
@@ -361,7 +365,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const patchedCase = await createComment({
         supertest,
         caseId: postedCase.id,
-        params: postExternalReferenceReq,
+        params: postExternalReferenceSOReq,
       });
 
       await updateComment({
@@ -378,8 +382,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return 400 when updating from doc to so', async () => {
       const docAttachment: CommentRequest = {
-        ...postExternalReferenceReq,
-        externalReferenceStorage: { type: ExternalReferenceStorageType.doc },
+        ...postExternalReferenceNoSOReq,
         externalReferenceId: 'my-doc-id',
       };
 
@@ -396,7 +399,7 @@ export default ({ getService }: FtrProviderContext): void => {
         req: {
           id: patchedCase.comments![0].id,
           version: patchedCase.comments![0].version,
-          ...postExternalReferenceReq,
+          ...postExternalReferenceSOReq,
         },
         expectedHttpCode: 400,
       });
@@ -404,13 +407,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return 400 when missing attributes for external reference type', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
-      const reqKeys = Object.keys(postExternalReferenceReq);
+      const reqKeys = Object.keys(postExternalReferenceSOReq);
       for (const key of reqKeys) {
         await createComment({
           supertest,
           caseId: postedCase.id,
           // @ts-expect-error
-          params: omit(key, postExternalReferenceReq),
+          params: omit(key, postExternalReferenceSOReq),
           expectedHttpCode: 400,
         });
       }
@@ -422,7 +425,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         caseId: postedCase.id,
         // @ts-expect-error
-        params: { ...postExternalReferenceReq, notValid: 'test' },
+        params: { ...postExternalReferenceSOReq, notValid: 'test' },
         expectedHttpCode: 400,
       });
     });

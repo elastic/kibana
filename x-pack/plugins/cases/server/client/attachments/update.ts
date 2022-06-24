@@ -9,8 +9,9 @@ import Boom from '@hapi/boom';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { CaseResponse, CommentPatchRequest, CommentType } from '../../../common/api';
+import { CaseResponse, CommentPatchRequest } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { isCommentRequestTypeExternalReference } from '../../common/utils';
 import { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
@@ -74,8 +75,8 @@ export async function update(
     }
 
     if (
-      myComment.attributes.type === CommentType.externalReference &&
-      queryRestAttributes.type === CommentType.externalReference &&
+      isCommentRequestTypeExternalReference(myComment.attributes) &&
+      isCommentRequestTypeExternalReference(queryRestAttributes) &&
       myComment.attributes.externalReferenceStorage.type !==
         queryRestAttributes.externalReferenceStorage.type
     ) {

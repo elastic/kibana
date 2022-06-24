@@ -5,65 +5,46 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
+import { isCommentRequestTypeExternalReferenceSO } from '../../../common/utils';
 import { EXTERNAL_REFERENCE_REF_NAME } from '../../../common/constants';
-import {
-  ActionTypes,
-  Actions,
-  CommentUserAction,
-  CommentType,
-  ExternalReferenceStorageType,
-} from '../../../../common/api';
+import { ActionTypes, Actions, CommentUserAction } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
 import { UserActionParameters, BuilderReturnValue } from '../types';
+import { SOReferenceExtractor } from '../../so_reference_extractor';
 
 export class CommentUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'comment'>): BuilderReturnValue {
+    const soExtractor = getSOExtractor(args.payload.attachment);
+    const { transformedFields, references: refsWithExternalRefId } =
+      soExtractor.extractFieldsToReferences<CommentUserAction['payload']['comment']>({
+        data: args.payload.attachment,
+      });
+
     const commentUserAction = this.buildCommonUserAction({
       ...args,
       action: args.action ?? Actions.update,
       valueKey: 'comment',
-      value: extractAttachmentFrameworkIds(args.payload.attachment),
+      value: transformedFields,
       type: ActionTypes.comment,
     });
 
     return {
       ...commentUserAction,
-      references: [
-        ...commentUserAction.references,
-        ...createAttachmentFrameworkSOReference(args.payload.attachment),
-      ],
+      references: [...commentUserAction.references, ...refsWithExternalRefId],
     };
   }
 }
 
-const extractAttachmentFrameworkIds = (attachment: CommentUserAction['payload']['comment']) => {
-  if (
-    attachment.type === CommentType.externalReference &&
-    attachment.externalReferenceStorage.type === ExternalReferenceStorageType.so
-  ) {
-    const { externalReferenceId, ...restAttachment } = attachment;
-    return restAttachment;
+const getSOExtractor = (attachment: CommentUserAction['payload']['comment']) => {
+  const fieldsToExtract = [];
+
+  if (isCommentRequestTypeExternalReferenceSO(attachment)) {
+    fieldsToExtract.push({
+      path: 'externalReferenceId',
+      type: attachment.externalReferenceStorage.soType,
+      name: EXTERNAL_REFERENCE_REF_NAME,
+    });
   }
 
-  return attachment;
-};
-
-const createAttachmentFrameworkSOReference = (
-  attachment: CommentUserAction['payload']['comment']
-): SavedObjectReference[] => {
-  if (
-    attachment.type === CommentType.externalReference &&
-    attachment.externalReferenceStorage.type === ExternalReferenceStorageType.so
-  ) {
-    return [
-      {
-        id: attachment.externalReferenceId,
-        name: EXTERNAL_REFERENCE_REF_NAME,
-        type: attachment.externalReferenceStorage.soType,
-      },
-    ];
-  }
-
-  return [];
+  return new SOReferenceExtractor(fieldsToExtract);
 };

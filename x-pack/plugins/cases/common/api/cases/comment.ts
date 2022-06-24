@@ -71,31 +71,35 @@ export const ActionsCommentRequestRt = rt.type({
 });
 
 export enum ExternalReferenceStorageType {
-  so = 'so',
-  doc = 'doc',
+  savedObject = 'savedObject',
+  elasticSearchDoc = 'elasticSearchDoc',
 }
 
-const ExternalReferenceStorageRt = rt.union([
-  rt.type({ type: rt.literal(ExternalReferenceStorageType.so), soType: rt.string }),
-  rt.type({ type: rt.literal(ExternalReferenceStorageType.doc) }),
-]);
+const ExternalReferenceStorageNoSORt = rt.type({
+  type: rt.literal(ExternalReferenceStorageType.elasticSearchDoc),
+});
 
-export const ExternalReferenceRt = rt.type({
+const ExternalReferenceStorageSORt = rt.type({
+  type: rt.literal(ExternalReferenceStorageType.savedObject),
+  soType: rt.string,
+});
+
+export const ExternalReferenceNoSORt = rt.type({
   externalReferenceId: rt.string,
-  externalReferenceStorage: ExternalReferenceStorageRt,
+  externalReferenceStorage: ExternalReferenceStorageNoSORt,
   externalReferenceAttachmentTypeId: rt.string,
   externalReferenceMetadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
   type: rt.literal(CommentType.externalReference),
   owner: rt.string,
 });
 
-export const ExternalReferenceWithoutSORefsRt = rt.type({
-  externalReferenceStorage: ExternalReferenceStorageRt,
-  externalReferenceAttachmentTypeId: rt.string,
-  externalReferenceMetadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
-  type: rt.literal(CommentType.externalReference),
-  owner: rt.string,
+export const ExternalReferenceSORt = rt.type({
+  ...ExternalReferenceNoSORt.props,
+  externalReferenceStorage: ExternalReferenceStorageSORt,
 });
+
+export const ExternalReferenceRt = rt.union([ExternalReferenceNoSORt, ExternalReferenceSORt]);
+export const ExternalReferenceWithoutSORefsRt = ExternalReferenceNoSORt;
 
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);
 const AttributesTypeAlertsRt = rt.intersection([AlertCommentRequestRt, CommentAttributesBasicRt]);
@@ -132,7 +136,8 @@ export const CommentRequestRt = rt.union([
   ContextTypeUserRt,
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
-  ExternalReferenceRt,
+  ExternalReferenceNoSORt,
+  ExternalReferenceSORt,
 ]);
 
 export const CommentResponseRt = rt.intersection([
@@ -197,7 +202,8 @@ export const CommentPatchAttributesRt = rt.intersection([
     rt.partial(ContextTypeUserRt.props),
     rt.partial(AlertCommentRequestRt.props),
     rt.partial(ActionsCommentRequestRt.props),
-    rt.partial(ExternalReferenceRt.props),
+    rt.partial(ExternalReferenceNoSORt.props),
+    rt.partial(ExternalReferenceSORt.props),
   ]),
   rt.partial(CommentAttributesBasicRt.props),
 ]);
@@ -240,3 +246,5 @@ export type CommentRequestUserType = rt.TypeOf<typeof ContextTypeUserRt>;
 export type CommentRequestAlertType = rt.TypeOf<typeof AlertCommentRequestRt>;
 export type CommentRequestActionsType = rt.TypeOf<typeof ActionsCommentRequestRt>;
 export type CommentRequestExternalReferenceType = rt.TypeOf<typeof ExternalReferenceRt>;
+export type CommentRequestExternalReferenceSOType = rt.TypeOf<typeof ExternalReferenceSORt>;
+export type CommentRequestExternalReferenceNoSOType = rt.TypeOf<typeof ExternalReferenceNoSORt>;

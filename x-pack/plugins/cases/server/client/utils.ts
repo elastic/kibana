@@ -24,6 +24,10 @@ import {
   excess,
   throwErrors,
   CaseSeverity,
+  ExternalReferenceStorageType,
+  ExternalReferenceSORt,
+  CommentRequestExternalReferenceType,
+  ExternalReferenceWithoutSORefsRt,
 } from '../../common/api';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
@@ -31,6 +35,7 @@ import {
   isCommentRequestTypeAlert,
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
+  isCommentRequestTypeExternalReference,
 } from '../common/utils';
 import { SavedObjectFindOptionsKueryNode } from '../common/types';
 
@@ -83,6 +88,19 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
         )} indices: ${JSON.stringify(indices)}`
       );
     }
+  } else if (isCommentRequestTypeExternalReference(comment)) {
+    decodeExternalReferenceAttachment(comment);
+  }
+};
+
+const decodeExternalReferenceAttachment = (attachment: CommentRequestExternalReferenceType) => {
+  if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
+    pipe(excess(ExternalReferenceSORt).decode(attachment), fold(throwErrors(badRequest), identity));
+  } else {
+    pipe(
+      excess(ExternalReferenceWithoutSORefsRt).decode(attachment),
+      fold(throwErrors(badRequest), identity)
+    );
   }
 };
 

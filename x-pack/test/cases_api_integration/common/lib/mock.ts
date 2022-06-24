@@ -18,8 +18,9 @@ import {
   CommentRequest,
   CommentRequestActionsType,
   CaseSeverity,
-  CommentRequestExternalReferenceType,
   ExternalReferenceStorageType,
+  CommentRequestExternalReferenceSOType,
+  CommentRequestExternalReferenceNoSOType,
 } from '@kbn/cases-plugin/common/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
@@ -82,10 +83,24 @@ export const postCommentActionsReq: CommentRequestActionsType = {
   owner: 'securitySolutionFixture',
 };
 
-export const postExternalReferenceReq: CommentRequestExternalReferenceType = {
+export const postExternalReferenceNoSOReq: CommentRequestExternalReferenceNoSOType = {
+  type: CommentType.externalReference,
+  externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+  externalReferenceId: 'my-id',
+  externalReferenceAttachmentTypeId: '.test',
+  externalReferenceMetadata: null,
+  owner: 'securitySolutionFixture',
+};
+
+export const postExternalReferenceSOReq: CommentRequestExternalReferenceSOType = {
+  ...postExternalReferenceNoSOReq,
+  externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-type' },
+};
+
+export const postExternalReferenceReq: CommentRequestExternalReferenceSOType = {
   type: CommentType.externalReference,
   externalReferenceId: 'my-id',
-  externalReferenceStorage: { type: ExternalReferenceStorageType.so, soType: 'test-type' },
+  externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-type' },
   externalReferenceAttachmentTypeId: '.test',
   externalReferenceMetadata: null,
   owner: 'securitySolutionFixture',

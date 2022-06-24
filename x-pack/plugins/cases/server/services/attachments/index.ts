@@ -78,7 +78,7 @@ interface BulkCreateAttachments extends ClientArgs {
 interface UpdateArgs {
   attachmentId: string;
   updatedAttributes: AttachmentPatchAttributes;
-  options?: SavedObjectsUpdateOptions<AttachmentAttributes>;
+  options?: Omit<SavedObjectsUpdateOptions<AttachmentAttributes>, 'upsert'>;
 }
 
 export type UpdateAttachmentArgs = UpdateArgs & ClientArgs;
@@ -274,7 +274,7 @@ export class AttachmentService {
       const soExtractor = this.getSOExtractor(attributes);
 
       const { transformedFields: migratedAttributes, references: refsWithExternalRefId } =
-        soExtractor.extractFieldsToReferences<AttachmentAttributes>({
+        soExtractor.extractFieldsToReferences<AttachmentAttributesWithoutSORefs>({
           data: attributes,
           existingReferences: references,
         });
@@ -307,7 +307,7 @@ export class AttachmentService {
           const soExtractor = this.getSOExtractor(attachment.attributes);
 
           const { transformedFields: migratedAttributes, references: refsWithExternalRefId } =
-            soExtractor.extractFieldsToReferences<AttachmentAttributes>({
+            soExtractor.extractFieldsToReferences<AttachmentAttributesWithoutSORefs>({
               data: attachment.attributes,
               existingReferences: attachment.references,
             });
@@ -343,11 +343,14 @@ export class AttachmentService {
       this.log.debug(`Attempting to UPDATE comment ${attachmentId}`);
       const soExtractor = this.getSOExtractor(updatedAttributes);
 
-      const { transformedFields: migratedAttributes, references: refsWithExternalRefId } =
-        soExtractor.extractFieldsToReferences<AttachmentAttributes>({
-          data: updatedAttributes,
-          existingReferences: options?.references,
-        });
+      const {
+        transformedFields: migratedAttributes,
+        references: refsWithExternalRefId,
+        didDeleteOperation,
+      } = soExtractor.extractFieldsToReferences<AttachmentAttributesWithoutSORefs>({
+        data: updatedAttributes,
+        existingReferences: options?.references,
+      });
 
       const res = await unsecuredSavedObjectsClient.update<AttachmentAttributesWithoutSORefs>(
         CASE_COMMENT_SAVED_OBJECT,
@@ -361,7 +364,10 @@ export class AttachmentService {
            * on the update then all previously refs will be removed. The check below is needed
            * to prevent this.
            */
-          references: refsWithExternalRefId.length > 0 ? refsWithExternalRefId : undefined,
+          references:
+            refsWithExternalRefId.length > 0 || didDeleteOperation
+              ? refsWithExternalRefId
+              : undefined,
         }
       );
 
@@ -387,11 +393,14 @@ export class AttachmentService {
       const res = await unsecuredSavedObjectsClient.bulkUpdate<AttachmentAttributesWithoutSORefs>(
         comments.map((c) => {
           const soExtractor = this.getSOExtractor(c.updatedAttributes);
-          const { transformedFields: migratedAttributes, references: refsWithExternalRefId } =
-            soExtractor.extractFieldsToReferences<AttachmentAttributes>({
-              data: c.updatedAttributes,
-              existingReferences: c.options?.references,
-            });
+          const {
+            transformedFields: migratedAttributes,
+            references: refsWithExternalRefId,
+            didDeleteOperation,
+          } = soExtractor.extractFieldsToReferences<AttachmentAttributesWithoutSORefs>({
+            data: c.updatedAttributes,
+            existingReferences: c.options?.references,
+          });
 
           return {
             ...c.options,
@@ -403,7 +412,10 @@ export class AttachmentService {
              * on the update then all previously refs will be removed. The check below is needed
              * to prevent this.
              */
-            references: refsWithExternalRefId.length > 0 ? refsWithExternalRefId : undefined,
+            references:
+              refsWithExternalRefId.length > 0 || didDeleteOperation
+                ? refsWithExternalRefId
+                : undefined,
           };
         })
       );
@@ -483,7 +495,7 @@ export class AttachmentService {
   }): Promise<SavedObjectsFindResponse<AttachmentAttributes>> {
     try {
       this.log.debug(`Attempting to find comments`);
-      const res = await unsecuredSavedObjectsClient.find<AttachmentAttributes>({
+      const res = await unsecuredSavedObjectsClient.find<AttachmentAttributesWithoutSORefs>({
         sortField: defaultSortField,
         ...options,
         type: CASE_COMMENT_SAVED_OBJECT,
@@ -547,7 +559,7 @@ export class AttachmentService {
     const fieldsToExtract = [];
     if (
       attributes.type === CommentType.externalReference &&
-      attributes.externalReferenceStorage?.type === ExternalReferenceStorageType.so
+      attributes.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
     ) {
       fieldsToExtract.push({
         path: 'externalReferenceId',

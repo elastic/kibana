@@ -25,11 +25,14 @@ import {
   CommentAttributes,
   CommentRequest,
   CommentRequestAlertType,
+  CommentRequestExternalReferenceSOType,
+  CommentRequestExternalReferenceType,
   CommentRequestUserType,
   CommentResponse,
   CommentsResponse,
   CommentType,
   ConnectorTypes,
+  ExternalReferenceStorageType,
   User,
 } from '../../common/api';
 import { UpdateAlertRequest } from '../client/alerts/types';
@@ -230,6 +233,27 @@ export const isCommentRequestTypeAlert = (
   context: CommentRequest
 ): context is CommentRequestAlertType => {
   return context.type === CommentType.alert;
+};
+
+/**
+ * A type narrowing function for external reference attachments. Exporting so integration tests can use it.
+ */
+export const isCommentRequestTypeExternalReference = (
+  context: CommentRequest
+): context is CommentRequestExternalReferenceType => {
+  return context.type === CommentType.externalReference;
+};
+
+/**
+ * A type narrowing function for external reference so attachments. Exporting so integration tests can use it.
+ */
+export const isCommentRequestTypeExternalReferenceSO = (
+  context: CommentRequest
+): context is CommentRequestExternalReferenceSOType => {
+  return (
+    context.type === CommentType.externalReference &&
+    context.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject
+  );
 };
 
 /**
