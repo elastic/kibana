@@ -14071,10 +14071,10 @@ escodegen@~1.2.0:
   optionalDependencies:
     source-map "~0.1.30"
 
-eslint-config-prettier@^7.2.0:
-  version "7.2.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-7.2.0.tgz#f4a4bd2832e810e8cc7c1411ec85b3e85c0c53f9"
-  integrity sha512-rV4Qu0C3nfJKPOAhFujFxB7RMP+URFyQqqOZW9DMRD7ZDTFyjaIlETU3xzHELt++4ugC0+Jm084HQYkkJe+Ivg==
+eslint-config-prettier@^8.5.0:
+  version "8.5.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-8.5.0.tgz#5a81680ec934beca02c7b1a61cf8ca34b66feab1"
+  integrity sha512-obmWKLUNCnhtQRKc+tmnYuQl0pFU1ibYJQ5BGhTVB08bHe9wC8qUeG7c08dj9XX+AuPj1YSGSQIHl1pnDHZR0Q==
 
 eslint-formatter-pretty@^4.1.0:
   version "4.1.0"

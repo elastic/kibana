@@ -947,7 +947,7 @@
     "enzyme-adapter-utils": "^1.14.0",
     "enzyme-to-json": "^3.6.1",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^7.2.0",
+    "eslint-config-prettier": "^8.5.0",
     "eslint-module-utils": "^2.6.2",
     "eslint-plugin-ban": "^1.5.2",
     "eslint-plugin-cypress": "^2.12.1",
