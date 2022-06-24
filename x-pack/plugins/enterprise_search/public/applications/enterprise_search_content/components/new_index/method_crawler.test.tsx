@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiSteps } from '@elastic/eui';
 
-import { MethodApi } from './method_api';
+import { MethodCrawler } from './method_crawler';
 import { NewSearchIndexTemplate } from './new_search_index_template';
 
 describe('MethodApi', () => {
@@ -20,10 +20,10 @@ describe('MethodApi', () => {
   });
 
   it('renders API ingestion method tab', () => {
-    const wrapper = shallow(<MethodApi />);
+    const wrapper = shallow(<MethodCrawler />);
     const template = wrapper.find(NewSearchIndexTemplate);
 
-    expect(template.prop('type')).toEqual('api');
+    expect(template.prop('type')).toEqual('crawler');
     expect(template.find(EuiSteps)).toHaveLength(1);
   });
 });
