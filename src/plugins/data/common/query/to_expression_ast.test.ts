@@ -5,18 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { queryStateToExpressionAst } from './to_expression_ast';
 
 describe('queryStateToExpressionAst', () => {
-  it('returns an object with the correct structure', () => {
-    const actual = queryStateToExpressionAst({
+  it('returns an object with the correct structure', async () => {
+    const dataViewsService = {} as unknown as DataViewsContract;
+    const actual = await queryStateToExpressionAst({
       filters: [],
       query: { language: 'lucene', query: '' },
       time: {
         from: 'now',
         to: 'now+7d',
       },
+      dataViewsService,
     });
 
     expect(actual).toMatchInlineSnapshot(`
