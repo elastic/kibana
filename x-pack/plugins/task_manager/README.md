@@ -517,9 +517,9 @@ However, besides above operations `runSoon` can be used to run a task.
 So the task would be picked up at the next TaskManager polling cycle by one of the Kibana instances that has capacity.
 
 We now want to respond to all three of these events, but we still need to balance against our worker capacity, so if there are too many requests buffered, we only want to `take` as many requests as we have capacity to handle.
-Luckily, `Polling Interval` and `Task Scheduled` simply denote a request to "poll for work as soon as possible", unlike `Run Task Now` which also means "poll for these specific tasks", so our worker capacity only needs to be applied to `Run Task Now`.
+Luckily, `Polling Interval` and `Task Scheduled` simply denote a request to "poll for work as soon as possible", and `Run Task Soon` simply adds the task to the current buffer.
 
-We achieve this model by buffering requests into a queue using a Set (which removes duplicated). As we don't want an unbounded queue in our system, we have limited the size of this queue (configurable by the `xpack.task_manager.request_capacity` config, defaulting to 1,000 requests) which forces us to throw an error once this cap is reachedand to all subsequent calls to `runSoon` until the queue drain bellow the cap.
+We achieve this model by buffering requests into a queue using a Set (which removes duplicated). As we don't want an unbounded queue in our system, we have limited the size of this queue (configurable by the `xpack.task_manager.request_capacity` config, defaulting to 1,000 requests) which forces us to throw an error once this cap is reached until the queue drain bellow the cap.
 
 Our current model, then, is this:
 ```
