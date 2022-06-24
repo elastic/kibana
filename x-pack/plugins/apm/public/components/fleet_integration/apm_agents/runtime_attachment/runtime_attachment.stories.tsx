@@ -32,12 +32,11 @@ const excludeOptions = [
 ];
 const includeOptions = [{ value: 'all', label: 'All' }, ...excludeOptions];
 
-const versions = ['1.27.1', '1.27.0', '1.26.0', '1.25.0'];
-
 export const RuntimeAttachmentExample: Story = () => {
   const [runtimeAttachmentSettings, setRuntimeAttachmentSettings] = useState(
     {}
   );
+  const [isEnabled, setIsEnabled] = useState(true);
   return (
     <>
       <RuntimeAttachment
@@ -57,7 +56,7 @@ export const RuntimeAttachmentExample: Story = () => {
         toggleDescription="Attach the Java agent to running and starting Java applications."
         discoveryRulesDescription="For every running JVM, the discovery rules are evaluated in the order they are provided. The first matching rule determines the outcome. Learn more in the docs"
         showUnsavedWarning={true}
-        initialIsEnabled={true}
+        initialIsEnabled={isEnabled}
         initialDiscoveryRules={[
           {
             operation: 'include',
@@ -70,8 +69,10 @@ export const RuntimeAttachmentExample: Story = () => {
             probe: '10948653898867',
           },
         ]}
-        versions={versions}
-        selectedVersion={versions[0]}
+        version={null}
+        invalidatePackagePolicy={() => {
+          setIsEnabled(false);
+        }}
       />
       <hr />
       <pre>{JSON.stringify(runtimeAttachmentSettings, null, 4)}</pre>
@@ -206,6 +207,10 @@ const policy = {
           type: 'yaml',
         },
         expvar_enabled: {
+          value: false,
+          type: 'bool',
+        },
+        pprof_enabled: {
           value: false,
           type: 'bool',
         },
@@ -434,6 +439,10 @@ const newPolicy = {
           type: 'yaml',
         },
         expvar_enabled: {
+          value: false,
+          type: 'bool',
+        },
+        pprof_enabled: {
           value: false,
           type: 'bool',
         },

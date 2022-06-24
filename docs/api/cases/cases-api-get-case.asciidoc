@@ -6,20 +6,20 @@
 
 Returns a specified case.
 
-=== Request
+=== {api-request-title}
 
 `GET <kibana host>:<port>/api/cases/<case ID>`
 
 `GET <kibana host>:<port>/s/<space_id>/api/cases/<case ID>`
 
-=== Prerequisite
+=== {api-prereq-title}
 
 You must have `read` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
 `owner` of the cases you're seeking.
 
-=== Path parameters
+=== {api-path-parms-title}
 
 `<case_id>`::
 (Required, string) An identifier for the case to retrieve. Use 
@@ -29,19 +29,18 @@ You must have `read` privileges for the *Cases* feature in the *Management*,
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
-=== Query parameters
+=== {api-query-parms-title}
 
 `includeComments`::
 (Optional, boolean) Determines whether case comments are returned. Defaults to 
 `true`. deprecated:[8.1.0, "The `includeComments` query parameter is deprecated and will be removed in a future release."]
 
-
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
    Indicates a successful call.
 
-==== Example
+=== {api-examples-title}
 
 Returns case ID `a18b38a0-71b0-11ea-a0b2-c51ea50a58e2` without comments:
 
@@ -60,6 +59,7 @@ The API returns a JSON object with the retrieved case. For example:
   "version": "Wzk4LDFd",
   "comments": [],
   "totalComment": 0,
+  "totalAlerts": 0,
   "closed_at": null,
   "closed_by": null,
   "created_at": "2020-03-29T11:30:02.658Z",
@@ -91,6 +91,8 @@ The API returns a JSON object with the retrieved case. For example:
     "syncAlerts": true
   },
   "owner": "securitySolution",
+  "severity": "low",
+  "duration": null, <1>
   "tags": [
     "phishing",
     "social engineering",
@@ -98,3 +100,7 @@ The API returns a JSON object with the retrieved case. For example:
   ]
 }
 --------------------------------------------------
+<1> Duration represents the elapsed time from the creation of the case to its
+closure (in seconds). If the case has not been closed, the duration is set to
+`null`. If the case was closed after less than half a second, the duration is
+rounded down to zero.

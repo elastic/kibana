@@ -19,19 +19,25 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
-import { getDisplayValueFromFilter, mapAndFlattenFilters } from '../../../data/public';
+import {
+  getDisplayValueFromFilter,
+  mapAndFlattenFilters,
+  getFieldDisplayValueFromFilter,
+} from '@kbn/data-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterLabel } from '../filter_bar';
-import { Filter, IIndexPattern } from '../../../data/common';
 
 interface Props {
   filters: Filter[];
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
   onCancel: () => void;
   onSubmit: (filters: Filter[]) => void;
 }
 
 interface State {
   isFilterSelected: boolean[];
+  fieldLabel?: string;
 }
 
 // Needed for React.lazy
@@ -45,12 +51,15 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
     super(props);
     this.state = {
       isFilterSelected: props.filters.map(() => true),
+      fieldLabel: undefined,
     };
   }
-  private getLabel(filter: Filter) {
+
+  private getLabel = (filter: Filter) => {
     const valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
-    return <FilterLabel filter={filter} valueLabel={valueLabel} />;
-  }
+    const fieldLabel = getFieldDisplayValueFromFilter(filter, this.props.indexPatterns);
+    return <FilterLabel filter={filter} valueLabel={valueLabel} fieldLabel={fieldLabel} />;
+  };
 
   public render() {
     if (this.props.filters.length === 0) {

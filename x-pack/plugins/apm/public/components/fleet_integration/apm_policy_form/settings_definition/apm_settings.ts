@@ -31,7 +31,7 @@ export function getApmSettings(): SettingsRow[] {
             'Host defines the host and port the server is listening on. URL is the unchangeable, publicly reachable server URL for deployments on Elastic Cloud or ECK.',
         }
       ),
-
+      dataTestSubj: 'packagePolicyHostInput',
       required: true,
     },
     {
@@ -44,6 +44,7 @@ export function getApmSettings(): SettingsRow[] {
           defaultMessage: 'URL',
         }
       ),
+      dataTestSubj: 'packagePolicyUrlInput',
       required: true,
     },
     {
@@ -191,19 +192,6 @@ export function getApmSettings(): SettingsRow[] {
               defaultMessage:
                 'Default service environment to record in events which have no service environment defined.',
             }
-          ),
-        },
-        {
-          key: 'expvar_enabled',
-          type: 'boolean',
-          labelAppend: OPTIONAL_LABEL,
-          rowTitle: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.expvarEnabledTitle',
-            { defaultMessage: 'Enable APM Server Golang expvar support' }
-          ),
-          rowDescription: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.expvarEnabledDescription',
-            { defaultMessage: 'Exposed under /debug/vars' }
           ),
         },
       ],

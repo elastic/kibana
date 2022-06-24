@@ -5,27 +5,27 @@
  * 2.0.
  */
 import { buildRangeFilter, Filter } from '@kbn/es-query';
-import { Logger } from 'kibana/server';
-import { OnlySearchSourceAlertParams } from '../types';
+import { Logger } from '@kbn/core/server';
 import {
   getTime,
   ISearchSource,
   ISearchStartSearchSource,
   SortDirection,
-} from '../../../../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/common';
+import { OnlySearchSourceRuleParams } from '../types';
 
 export async function fetchSearchSourceQuery(
-  alertId: string,
-  params: OnlySearchSourceAlertParams,
+  ruleId: string,
+  params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined,
   services: {
     logger: Logger;
-    searchSourceClient: Promise<ISearchStartSearchSource>;
+    searchSourceClient: ISearchStartSearchSource;
   }
 ) {
   const { logger, searchSourceClient } = services;
-  const client = await searchSourceClient;
-  const initialSearchSource = await client.create(params.searchConfiguration);
+
+  const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
   const { searchSource, dateStart, dateEnd } = updateSearchSource(
     initialSearchSource,
@@ -34,7 +34,7 @@ export async function fetchSearchSourceQuery(
   );
 
   logger.debug(
-    `search source query alert (${alertId}) query: ${JSON.stringify(
+    `search source query rule (${ruleId}) query: ${JSON.stringify(
       searchSource.getSearchRequestBody()
     )}`
   );
@@ -51,7 +51,7 @@ export async function fetchSearchSourceQuery(
 
 export function updateSearchSource(
   searchSource: ISearchSource,
-  params: OnlySearchSourceAlertParams,
+  params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined
 ) {
   const index = searchSource.getField('index');

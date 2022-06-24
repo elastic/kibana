@@ -22,17 +22,15 @@ export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatter
   const layer = state.layers[layerId];
 
   const indexPattern = state.indexPatterns[layer.indexPatternId];
-
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',
   });
-
   return (
     <I18nProvider>
       <ChangeIndexPattern
         data-test-subj="indexPattern-switcher"
         trigger={{
-          label: indexPattern?.title || notFoundTitleLabel,
+          label: indexPattern?.name || notFoundTitleLabel,
           title: indexPattern?.title || notFoundTitleLabel,
           'data-test-subj': 'lns_layerIndexPatternLabel',
           size: 's',

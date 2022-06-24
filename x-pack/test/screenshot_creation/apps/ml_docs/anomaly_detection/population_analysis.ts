@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
-import { LOGS_INDEX_PATTERN } from '../index';
+import { LOGS_INDEX_PATTERN } from '..';
 
 export default function ({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
@@ -109,8 +109,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.anomalyExplorer.scrollChartsContainerIntoView();
       await ml.anomaliesTable.ensureDetailsOpen(0);
+      await ml.anomaliesTable.scrollRowIntoView(0);
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.takeScreenshot('ml-population-anomaly', screenshotDirectories);
+      await mlScreenshots.takeScreenshot(
+        'ml-population-anomaly',
+        screenshotDirectories,
+        1500,
+        1300
+      );
     });
   });
 }

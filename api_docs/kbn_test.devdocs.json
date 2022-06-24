@@ -518,44 +518,6 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.FunctionalTestRunner.lifecycle",
-            "type": "Object",
-            "tags": [],
-            "label": "lifecycle",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Lifecycle",
-                "text": "Lifecycle"
-              }
-            ],
-            "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-server.FunctionalTestRunner.testMetadata",
-            "type": "Object",
-            "tags": [],
-            "label": "testMetadata",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.TestMetadata",
-                "text": "TestMetadata"
-              }
-            ],
-            "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/test",
             "id": "def-server.FunctionalTestRunner.Unnamed",
             "type": "Function",
             "tags": [],
@@ -642,11 +604,26 @@
             "label": "run",
             "description": [],
             "signature": [
-              "() => Promise<any>"
+              "(abortSignal?: AbortSignal | undefined) => Promise<any>"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.FunctionalTestRunner.run.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "abortSignal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -657,7 +634,7 @@
             "label": "getTestStats",
             "description": [],
             "signature": [
-              "() => Promise<{ testCount: number; testsExcludedByTag: any; }>"
+              "() => Promise<{ testCount: number; nonSkippedTestCount: number; testsExcludedByTag: any; } | undefined>"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
             "deprecated": false,
@@ -666,13 +643,13 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.FunctionalTestRunner._run",
+            "id": "def-server.FunctionalTestRunner.readConfigFile",
             "type": "Function",
             "tags": [],
-            "label": "_run",
+            "label": "readConfigFile",
             "description": [],
             "signature": [
-              "<T = any>(handler: (config: ",
+              "() => Promise<",
               {
                 "pluginId": "@kbn/test",
                 "scope": "server",
@@ -680,45 +657,7 @@
                 "section": "def-server.Config",
                 "text": "Config"
               },
-              ", coreProvider: { type: string; name: string; fn: (...args: any[]) => any; }[]) => Promise<T>) => Promise<T>"
-            ],
-            "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-server.FunctionalTestRunner._run.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "handler",
-                "description": [],
-                "signature": [
-                  "(config: ",
-                  {
-                    "pluginId": "@kbn/test",
-                    "scope": "server",
-                    "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.Config",
-                    "text": "Config"
-                  },
-                  ", coreProvider: { type: string; name: string; fn: (...args: any[]) => any; }[]) => Promise<T>"
-                ],
-                "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-server.FunctionalTestRunner.close",
-            "type": "Function",
-            "tags": [],
-            "label": "close",
-            "description": [],
-            "signature": [
-              "() => Promise<void>"
+              ">"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
             "deprecated": false,
@@ -964,7 +903,7 @@
               "ReqOptions",
               ") => Promise<",
               "AxiosResponse",
-              "<T>>"
+              "<T, any>>"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
@@ -1010,6 +949,87 @@
                   "string"
                 ],
                 "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-server.KbnClientRequesterError",
+        "type": "Class",
+        "tags": [],
+        "label": "KbnClientRequesterError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/test",
+            "scope": "server",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-server.KbnClientRequesterError",
+            "text": "KbnClientRequesterError"
+          },
+          " extends Error"
+        ],
+        "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.KbnClientRequesterError.axiosError",
+            "type": "Object",
+            "tags": [],
+            "label": "axiosError",
+            "description": [],
+            "signature": [
+              "AxiosError",
+              "<unknown, any> | undefined"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.KbnClientRequesterError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.KbnClientRequesterError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.KbnClientRequesterError.Unnamed.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -1260,6 +1280,36 @@
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.Lifecycle.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.Lifecycle.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  "ToolingLog"
+                ],
+                "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1340,6 +1390,20 @@
                 "id": "def-server.LifecyclePhase.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
+                "label": "sub",
+                "description": [],
+                "signature": [
+                  "Subscription"
+                ],
+                "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.LifecyclePhase.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
                 "label": "options",
                 "description": [],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
@@ -1347,7 +1411,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/test",
-                    "id": "def-server.LifecyclePhase.Unnamed.$1.singular",
+                    "id": "def-server.LifecyclePhase.Unnamed.$2.singular",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "singular",
@@ -1449,137 +1513,6 @@
                   "Args"
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle_phase.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/test",
-        "id": "def-server.TestMetadata",
-        "type": "Class",
-        "tags": [],
-        "label": "TestMetadata",
-        "description": [],
-        "path": "packages/kbn-test/src/functional_test_runner/lib/test_metadata.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-server.TestMetadata.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "packages/kbn-test/src/functional_test_runner/lib/test_metadata.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-server.TestMetadata.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "lifecycle",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/test",
-                    "scope": "server",
-                    "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.Lifecycle",
-                    "text": "Lifecycle"
-                  }
-                ],
-                "path": "packages/kbn-test/src/functional_test_runner/lib/test_metadata.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-server.TestMetadata.addScreenshot",
-            "type": "Function",
-            "tags": [],
-            "label": "addScreenshot",
-            "description": [],
-            "signature": [
-              "(screenshot: ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.ScreenshotRecord",
-                "text": "ScreenshotRecord"
-              },
-              ") => void"
-            ],
-            "path": "packages/kbn-test/src/functional_test_runner/lib/test_metadata.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-server.TestMetadata.addScreenshot.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "screenshot",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/test",
-                    "scope": "server",
-                    "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.ScreenshotRecord",
-                    "text": "ScreenshotRecord"
-                  }
-                ],
-                "path": "packages/kbn-test/src/functional_test_runner/lib/test_metadata.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-server.TestMetadata.getScreenshots",
-            "type": "Function",
-            "tags": [],
-            "label": "getScreenshots",
-            "description": [],
-            "signature": [
-              "(test: any) => ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.ScreenshotRecord",
-                "text": "ScreenshotRecord"
-              },
-              "[]"
-            ],
-            "path": "packages/kbn-test/src/functional_test_runner/lib/test_metadata.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-server.TestMetadata.getScreenshots.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "test",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "packages/kbn-test/src/functional_test_runner/lib/test_metadata.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2127,6 +2060,22 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-server.runCheckFtrConfigsCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runCheckFtrConfigsCli",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-server.runCheckJestConfigsCli",
         "type": "Function",
         "tags": [],
@@ -2563,6 +2512,38 @@
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.CreateTestEsClusterOptions.onEarlyExit",
+            "type": "Function",
+            "tags": [],
+            "label": "onEarlyExit",
+            "description": [
+              "\nReport to the creator of the es-test-cluster that the es node has exitted before stop() was called, allowing\nthis caller to react appropriately. If this is not passed then an uncatchable exception will be thrown"
+            ],
+            "signature": [
+              "((msg: string) => void) | undefined"
+            ],
+            "path": "packages/kbn-test/src/es/test_es_cluster.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.CreateTestEsClusterOptions.onEarlyExit.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/es/test_es_cluster.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2943,7 +2924,7 @@
               "\nDetermine if a service is avaliable"
             ],
             "signature": [
-              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"testMetadata\" | \"esVersion\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -2956,7 +2937,7 @@
                 "label": "serviceName",
                 "description": [],
                 "signature": [
-                  "\"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"testMetadata\" | \"esVersion\""
+                  "\"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\""
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
@@ -2973,7 +2954,7 @@
             "label": "hasService",
             "description": [],
             "signature": [
-              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"testMetadata\" | \"esVersion\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -3003,7 +2984,7 @@
             "label": "hasService",
             "description": [],
             "signature": [
-              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"testMetadata\" | \"esVersion\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -3060,14 +3041,6 @@
                 "docId": "kibKbnTestPluginApi",
                 "section": "def-server.DockerServersService",
                 "text": "DockerServersService"
-              },
-              "; (serviceName: \"testMetadata\"): ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.TestMetadata",
-                "text": "TestMetadata"
               },
               "; (serviceName: \"esVersion\"): ",
               {
@@ -3133,14 +3106,6 @@
                 "section": "def-server.DockerServersService",
                 "text": "DockerServersService"
               },
-              "; (serviceName: \"testMetadata\"): ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.TestMetadata",
-                "text": "TestMetadata"
-              },
               "; (serviceName: \"esVersion\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -3204,14 +3169,6 @@
                 "docId": "kibKbnTestPluginApi",
                 "section": "def-server.DockerServersService",
                 "text": "DockerServersService"
-              },
-              "; (serviceName: \"testMetadata\"): ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.TestMetadata",
-                "text": "TestMetadata"
               },
               "; (serviceName: \"esVersion\"): ",
               {
@@ -3277,14 +3234,6 @@
                 "section": "def-server.DockerServersService",
                 "text": "DockerServersService"
               },
-              "; (serviceName: \"testMetadata\"): ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.TestMetadata",
-                "text": "TestMetadata"
-              },
               "; (serviceName: \"esVersion\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -3349,86 +3298,6 @@
                 "section": "def-server.DockerServersService",
                 "text": "DockerServersService"
               },
-              "; (serviceName: \"testMetadata\"): ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.TestMetadata",
-                "text": "TestMetadata"
-              },
-              "; (serviceName: \"esVersion\"): ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsVersion",
-                "text": "EsVersion"
-              },
-              "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
-            ],
-            "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.getService.$1",
-                "type": "string",
-                "tags": [],
-                "label": "serviceName",
-                "description": [],
-                "signature": [
-                  "\"testMetadata\""
-                ],
-                "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.getService",
-            "type": "Function",
-            "tags": [],
-            "label": "getService",
-            "description": [],
-            "signature": [
-              "{ (serviceName: \"config\"): ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Config",
-                "text": "Config"
-              },
-              "; (serviceName: \"log\"): ",
-              "ToolingLog",
-              "; (serviceName: \"lifecycle\"): ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Lifecycle",
-                "text": "Lifecycle"
-              },
-              "; (serviceName: \"dockerServers\"): ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.DockerServersService",
-                "text": "DockerServersService"
-              },
-              "; (serviceName: \"testMetadata\"): ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.TestMetadata",
-                "text": "TestMetadata"
-              },
               "; (serviceName: \"esVersion\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -3492,14 +3361,6 @@
                 "docId": "kibKbnTestPluginApi",
                 "section": "def-server.DockerServersService",
                 "text": "DockerServersService"
-              },
-              "; (serviceName: \"testMetadata\"): ",
-              {
-                "pluginId": "@kbn/test",
-                "scope": "server",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-server.TestMetadata",
-                "text": "TestMetadata"
               },
               "; (serviceName: \"esVersion\"): ",
               {
@@ -3831,65 +3692,6 @@
               "string | undefined"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/test",
-        "id": "def-server.ScreenshotRecord",
-        "type": "Interface",
-        "tags": [],
-        "label": "ScreenshotRecord",
-        "description": [],
-        "path": "packages/kbn-test/src/functional_test_runner/lib/test_metadata.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-server.ScreenshotRecord.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "packages/kbn-test/src/functional_test_runner/lib/test_metadata.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-server.ScreenshotRecord.base64Png",
-            "type": "string",
-            "tags": [],
-            "label": "base64Png",
-            "description": [],
-            "path": "packages/kbn-test/src/functional_test_runner/lib/test_metadata.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-server.ScreenshotRecord.baselinePath",
-            "type": "string",
-            "tags": [],
-            "label": "baselinePath",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-test/src/functional_test_runner/lib/test_metadata.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-server.ScreenshotRecord.failurePath",
-            "type": "string",
-            "tags": [],
-            "label": "failurePath",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-test/src/functional_test_runner/lib/test_metadata.ts",
             "deprecated": false
           }
         ],

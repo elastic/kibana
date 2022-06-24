@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import moment from 'moment-timezone';
-import { calcAutoIntervalNear } from '../../../../data/common';
-import { ValidatedDualRange } from '../../../../kibana_react/public';
+import { calcAutoIntervalNear } from '@kbn/data-plugin/common';
+import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { TimeSliderStrings } from './time_slider_strings';
 import './time_slider.component.scss';
 
@@ -70,6 +70,7 @@ export function getInterval(min: number, max: number, steps = 6): number {
 }
 
 export interface TimeSliderProps {
+  id: string;
   range?: [number | undefined, number | undefined];
   value: [number | null, number | null];
   onChange: (range: [number | null, number | null]) => void;
@@ -167,10 +168,15 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
   }
 
   const button = (
-    <button className="timeSlider__anchor eui-textTruncate" color="text" onClick={togglePopover}>
+    <button
+      className="timeSlider__anchor eui-textTruncate"
+      color="text"
+      onClick={togglePopover}
+      data-test-subj={`timeSlider-${props.id}`}
+    >
       {valueText}
       {!hasRange ? (
-        <div className="timeSliderAnchor__spinner">
+        <div data-test-subj="timeSlider-loading-spinner" className="timeSliderAnchor__spinner">
           <EuiLoadingSpinner />
         </div>
       ) : undefined}
@@ -192,6 +198,7 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
     >
       {isValidRange(range) ? (
         <TimeSliderComponentPopover
+          id={props.id}
           range={range}
           value={value}
           onChange={props.onChange}

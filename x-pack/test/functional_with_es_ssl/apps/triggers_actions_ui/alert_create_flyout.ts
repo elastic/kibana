@@ -105,7 +105,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/126873
+  async function discardNewRuleCreation() {
+    await testSubjects.click('cancelSaveRuleButton');
+    await testSubjects.existOrFail('confirmRuleCloseModal');
+    await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
+    await testSubjects.missingOrFail('confirmRuleCloseModal');
+  }
+
+  // Failing: See https://github.com/elastic/kibana/issues/126873
   describe.skip('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
@@ -131,7 +138,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
@@ -185,7 +192,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
@@ -268,6 +275,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
+
+      await discardNewRuleCreation();
     });
 
     it('should successfully test valid es_query alert', async () => {
@@ -282,22 +291,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
 
-      await testSubjects.click('cancelSaveRuleButton');
-      await testSubjects.existOrFail('confirmRuleCloseModal');
-      await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
+      await discardNewRuleCreation();
     });
 
     it('should show error when es_query is invalid', async () => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
 
+      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
+      await queryJsonEditor.clearValue();
       // Invalid query
-      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
+      await testSubjects.setValue('queryJsonEditor', JSON.stringify({ query: { foo: {} } }), {
         clearWithKeyboard: true,
       });
       await testSubjects.click('testQuery');
       await testSubjects.missingOrFail('testQuerySuccess');
       await testSubjects.existOrFail('testQueryError');
+
+      await discardNewRuleCreation();
     });
 
     it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
@@ -317,6 +328,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '.triggersActionsUI__ruleTypeNodeHeading'
       );
       expect(ruleTypesClearFilter.length).to.above(0);
+
+      await discardNewRuleCreation();
     });
   });
 };

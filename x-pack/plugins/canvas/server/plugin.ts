@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { CoreSetup, PluginInitializerContext, Plugin, Logger, CoreStart } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext, Plugin, Logger, CoreStart } from '@kbn/core/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from 'src/plugins/data/server';
-import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { BfetchServerSetup } from 'src/plugins/bfetch/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import { EmbeddableSetup } from 'src/plugins/embeddable/server';
+} from '@kbn/data-plugin/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { ReportingSetup } from '@kbn/reporting-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { ESSQL_SEARCH_STRATEGY } from '../common/lib/constants';
-import { ReportingSetup } from '../../reporting/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { getCanvasFeature } from './feature';
 import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';

@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 
-import { SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -39,9 +39,11 @@ import type {
   ThrottleOrNull,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
-import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { RulesClient, PartialRule, BulkEditOperation } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import {
@@ -89,12 +91,16 @@ import {
   TimestampOverrideOrUndefined,
   BuildingBlockTypeOrUndefined,
   RuleNameOverrideOrUndefined,
+  TimestampFieldOrUndefined,
   EventCategoryOverrideOrUndefined,
+  TiebreakerFieldOrUndefined,
   NamespaceOrUndefined,
+  DataViewIdOrUndefined,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
 } from '../../../../common/detection_engine/schemas/common';
 
-import { RulesClient, PartialRule } from '../../../../../alerting/server';
-import { SanitizedRule } from '../../../../../alerting/common';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogForRoutes } from '../rule_execution_log';
@@ -125,20 +131,16 @@ export interface Clients {
 }
 
 export const isAlertTypes = (
-  isRuleRegistryEnabled: boolean,
   partialAlert: Array<PartialRule<RuleParams>>
 ): partialAlert is RuleAlertType[] => {
-  return partialAlert.every((rule) => isAlertType(isRuleRegistryEnabled, rule));
+  return partialAlert.every((rule) => isAlertType(rule));
 };
 
 export const isAlertType = (
-  isRuleRegistryEnabled: boolean,
   partialAlert: PartialRule<RuleParams>
 ): partialAlert is RuleAlertType => {
   const ruleTypeValues = Object.values(ruleTypeMappings) as unknown as string[];
-  return isRuleRegistryEnabled
-    ? ruleTypeValues.includes(partialAlert.alertTypeId as string)
-    : partialAlert.alertTypeId === SIGNALS_ID;
+  return ruleTypeValues.includes(partialAlert.alertTypeId as string);
 };
 
 export interface CreateRulesOptions {
@@ -148,7 +150,9 @@ export interface CreateRulesOptions {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   enabled: Enabled;
+  timestampField: TimestampFieldOrUndefined;
   eventCategoryOverride: EventCategoryOverrideOrUndefined;
+  tiebreakerField: TiebreakerFieldOrUndefined;
   falsePositives: FalsePositives;
   from: From;
   query: QueryOrUndefined;
@@ -162,14 +166,18 @@ export interface CreateRulesOptions {
   ruleId: RuleId;
   immutable: Immutable;
   index: IndexOrUndefined;
+  dataViewId: DataViewIdOrUndefined;
   interval: Interval;
   license: LicenseOrUndefined;
   maxSignals: MaxSignals;
+  relatedIntegrations: RelatedIntegrationArray | undefined;
+  requiredFields: RequiredFieldArray | undefined;
   riskScore: RiskScore;
   riskScoreMapping: RiskScoreMapping;
   ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndex;
   name: Name;
+  setup: SetupGuide | undefined;
   severity: Severity;
   severityMapping: SeverityMapping;
   tags: Tags;
@@ -192,7 +200,6 @@ export interface CreateRulesOptions {
   version: Version;
   exceptionsList: ListArray;
   actions: RuleAlertAction[];
-  isRuleRegistryEnabled: boolean;
   namespace?: NamespaceOrUndefined;
   id?: string;
 }
@@ -215,7 +222,9 @@ interface PatchRulesFieldsOptions {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
   enabled: EnabledOrUndefined;
+  timestampField: TimestampFieldOrUndefined;
   eventCategoryOverride: EventCategoryOverrideOrUndefined;
+  tiebreakerField: TiebreakerFieldOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
   from: FromOrUndefined;
   query: QueryOrUndefined;
@@ -227,14 +236,18 @@ interface PatchRulesFieldsOptions {
   machineLearningJobId: MachineLearningJobIdOrUndefined;
   filters: PartialFilter[];
   index: IndexOrUndefined;
+  dataViewId: DataViewIdOrUndefined;
   interval: IntervalOrUndefined;
   license: LicenseOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
+  relatedIntegrations: RelatedIntegrationArray | undefined;
+  requiredFields: RequiredFieldArray | undefined;
   riskScore: RiskScoreOrUndefined;
   riskScoreMapping: RiskScoreMappingOrUndefined;
   ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndexOrUndefined;
   name: NameOrUndefined;
+  setup: SetupGuide | undefined;
   severity: SeverityOrUndefined;
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
@@ -261,7 +274,6 @@ interface PatchRulesFieldsOptions {
 }
 
 export interface ReadRuleOptions {
-  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   id: IdOrUndefined;
   ruleId: RuleIdOrUndefined;
@@ -274,7 +286,6 @@ export interface DeleteRuleOptions {
 }
 
 export interface FindRuleOptions {
-  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
@@ -282,6 +293,15 @@ export interface FindRuleOptions {
   filter: QueryFilterOrUndefined;
   fields: FieldsOrUndefined;
   sortOrder: SortOrderOrUndefined;
+}
+
+export interface BulkEditRulesOptions {
+  isRuleRegistryEnabled: boolean;
+  rulesClient: RulesClient;
+  operations: BulkEditOperation[];
+  filter?: QueryFilterOrUndefined;
+  ids?: string[];
+  paramsModifier?: (params: RuleParams) => Promise<RuleParams>;
 }
 
 export interface LegacyMigrateParams {

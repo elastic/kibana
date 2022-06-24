@@ -19,13 +19,13 @@ import styled from 'styled-components';
 
 import { CasesTableUtilityBar } from './utility_bar';
 import { LinkButton } from '../links';
-import { AllCases, Case, FilterOptions } from '../../../common/ui/types';
+import { Cases, Case, FilterOptions } from '../../../common/ui/types';
 import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';
 
 interface CasesTableProps {
   columns: EuiBasicTableProps<Case>['columns'];
-  data: AllCases;
+  data: Cases;
   filterOptions: FilterOptions;
   goToCreateCase?: () => void;
   handleIsLoading: (a: boolean) => void;
@@ -46,7 +46,7 @@ interface CasesTableProps {
 }
 
 const Div = styled.div`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 export const CasesTable: FunctionComponent<CasesTableProps> = ({

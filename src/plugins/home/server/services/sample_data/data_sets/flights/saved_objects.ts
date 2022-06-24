@@ -9,7 +9,7 @@
 /* eslint max-len: 0 */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 
 export const getSavedObjects = (): SavedObject[] => [
   {
@@ -208,6 +208,7 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: {},
     attributes: {
       title: 'kibana_sample_data_flights',
+      name: 'Kibana Sample Data Flights',
       timeFieldName: 'timestamp',
       fieldFormatMap:
         '{"hour_of_day":{"id":"number","params":{"pattern":"00"}},"AvgTicketPrice":{"id":"number","params":{"pattern":"$0,0.[00]"}}}',

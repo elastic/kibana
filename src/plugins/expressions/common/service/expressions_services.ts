@@ -7,24 +7,25 @@
  */
 
 import { Observable } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { KibanaRequest } from 'src/core/server';
-import type { KibanaExecutionContext } from 'src/core/public';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 
+import { SavedObjectReference } from '@kbn/core/types';
+import {
+  MigrateFunctionsObject,
+  PersistableStateService,
+  VersionedState,
+} from '@kbn/kibana-utils-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract, ExecutionResult } from '../execution';
 import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
-import { SavedObjectReference } from '../../../../core/types';
-import {
-  MigrateFunctionsObject,
-  PersistableStateService,
-  VersionedState,
-} from '../../../kibana_utils/common';
-import { Adapters } from '../../../inspector/common/adapters';
 import {
   clog,
   createTable,
@@ -152,6 +153,8 @@ export interface ExpressionExecutionParams {
 
   syncColors?: boolean;
 
+  syncTooltips?: boolean;
+
   inspectorAdapters?: Adapters;
 
   executionContext?: KibanaExecutionContext;
@@ -268,6 +271,7 @@ export interface ExpressionsServiceStart {
 
 export interface ExpressionServiceParams {
   executor?: Executor;
+  logger?: Logger;
   renderers?: ExpressionRendererRegistry;
 }
 
@@ -304,7 +308,8 @@ export class ExpressionsService
   public readonly renderers: ExpressionRendererRegistry;
 
   constructor({
-    executor = Executor.createWithDefaults(),
+    logger,
+    executor = Executor.createWithDefaults(logger),
     renderers = new ExpressionRendererRegistry(),
   }: ExpressionServiceParams = {}) {
     this.executor = executor;

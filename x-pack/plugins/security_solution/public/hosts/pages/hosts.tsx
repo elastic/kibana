@@ -12,7 +12,8 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Filter } from '@kbn/es-query';
-import { isTab } from '../../../../timelines/public';
+import { isTab } from '@kbn/timelines-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { FiltersGlobal } from '../../common/components/filters_global';
@@ -33,7 +34,6 @@ import { inputsSelectors, State } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { Display } from './display';
 import { HostsTabs } from './hosts_tabs';
@@ -152,7 +152,6 @@ const HostsComponent = () => {
   );
 
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
-  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
 
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
@@ -223,7 +222,6 @@ const HostsComponent = () => {
                 navTabs={navTabsHosts({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
                   isRiskyHostsEnabled: riskyHostsFeatureEnabled,
-                  isUsersEnabled: usersEnabled,
                 })}
               />
 
@@ -232,7 +230,6 @@ const HostsComponent = () => {
 
             <HostsTabs
               deleteQuery={deleteQuery}
-              docValueFields={docValueFields}
               to={to}
               filterQuery={tabsFilterQuery || ''}
               isInitializing={isInitializing}

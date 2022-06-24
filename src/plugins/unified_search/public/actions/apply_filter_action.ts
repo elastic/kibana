@@ -7,12 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ThemeServiceSetup } from 'kibana/public';
-import { toMountPoint } from '../../../kibana_react/public';
-import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
+import { ThemeServiceSetup } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { Action, createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+// for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
+import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
+import type { Filter, RangeFilter } from '@kbn/es-query';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../apply_filters';
-import { Filter, FilterManager, TimefilterContract, esFilters } from '../../../data/public';
 
 export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
 
@@ -101,17 +103,23 @@ export function createFilterAction(
       }
 
       if (timeFieldName) {
-        const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
+        const { extractTimeFilter } = await import('@kbn/es-query');
+        const { timeRangeFilter, restOfFilters } = extractTimeFilter(
           timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);
         if (timeRangeFilter) {
-          esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
+          changeTimeFilter(timeFilter, timeRangeFilter);
         }
       } else {
         filterManager.addFilters(selectedFilters);
       }
     },
   });
+}
+
+async function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {
+  const { convertRangeFilterToTimeRange } = await import('@kbn/es-query');
+  timeFilter.setTime(convertRangeFilterToTimeRange(filter));
 }

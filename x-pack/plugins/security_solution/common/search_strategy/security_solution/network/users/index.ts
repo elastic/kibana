@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { CursorType, Inspect, Maybe, PageInfoPaginated, SortField } from '../../../common';
-import { FlowTarget } from '../common';
+import { FlowTargetSourceDest } from '../common';
 import { RequestOptionsPaginated } from '../..';
 
 export enum NetworkUsersFields {
@@ -18,7 +18,7 @@ export enum NetworkUsersFields {
 export interface NetworkUsersRequestOptions extends RequestOptionsPaginated {
   ip: string;
   sort: SortField<NetworkUsersFields>;
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
 }
 
 export interface NetworkUsersStrategyResponse extends IEsSearchResponse {

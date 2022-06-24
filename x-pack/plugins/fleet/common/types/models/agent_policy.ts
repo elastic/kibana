@@ -6,7 +6,7 @@
  */
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { MonitoringType, ValueOf } from '../../types';
+import type { MonitoringType, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
@@ -28,6 +28,7 @@ export interface NewAgentPolicy {
   // Nullable to allow user to reset to default outputs
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
+  download_source_id?: string | null;
 }
 
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {

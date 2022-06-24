@@ -6,24 +6,23 @@
  */
 
 import React, { FC } from 'react';
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
   HttpStart,
   IBasePath,
-  ExecutionContextStart,
-} from 'src/core/public';
+  AnalyticsServiceSetup,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { compact, isUndefined, omitBy } from 'lodash';
-import type {
-  AuthenticatedUser,
-  SecurityPluginSetup,
-  SecurityPluginStart,
-} from '../../security/public';
+import { BehaviorSubject, catchError, from, map, of } from 'rxjs';
+
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { Sha256 } from '@kbn/core/public/utils';
+import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import {
   ELASTIC_SUPPORT_LINK,
@@ -31,7 +30,6 @@ import {
   GET_CHAT_USER_DATA_ROUTE_PATH,
 } from '../common/constants';
 import type { GetChatUserDataResponseBody } from '../common/types';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
 import { ChatConfig, ServicesProvider } from './services';
@@ -46,6 +44,7 @@ export interface CloudConfigType {
   full_story: {
     enabled: boolean;
     org_id?: string;
+    eventTypesAllowlist?: string[];
   };
   /** Configuration to enable live chat in Cloud-enabled instances of Kibana. */
   chat: {
@@ -83,10 +82,9 @@ export interface CloudSetup {
   isCloudEnabled: boolean;
 }
 
-interface SetupFullstoryDeps extends CloudSetupDependencies {
-  executionContextPromise?: Promise<ExecutionContextStart>;
+interface SetupFullStoryDeps {
+  analytics: AnalyticsServiceSetup;
   basePath: IBasePath;
-  esOrgId?: string;
 }
 
 interface SetupChatDeps extends Pick<CloudSetupDependencies, 'security'> {
@@ -94,9 +92,8 @@ interface SetupChatDeps extends Pick<CloudSetupDependencies, 'security'> {
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {
-  private config!: CloudConfigType;
+  private readonly config: CloudConfigType;
   private isCloudEnabled: boolean;
-  private appSubscription?: Subscription;
   private chatConfig$ = new BehaviorSubject<ChatConfig>({ enabled: false });
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -105,16 +102,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public setup(core: CoreSetup, { home, security }: CloudSetupDependencies) {
-    const executionContextPromise = core.getStartServices().then(([coreStart]) => {
-      return coreStart.executionContext;
-    });
+    this.setupTelemetryContext(core.analytics, security, this.config.id);
 
-    this.setupFullstory({
-      basePath: core.http.basePath,
-      security,
-      executionContextPromise,
-      esOrgId: this.config.id,
-    }).catch((e) =>
+    this.setupFullStory({ analytics: core.analytics, basePath: core.http.basePath }).catch((e) =>
       // eslint-disable-next-line no-console
       console.debug(`Error setting up FullStory: ${e.toString()}`)
     );
@@ -200,9 +190,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     };
   }
 
-  public stop() {
-    this.appSubscription?.unsubscribe();
-  }
+  public stop() {}
 
   /**
    * Determines if the current user should see links back to Cloud.
@@ -230,111 +218,83 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     return user?.roles.includes('superuser') ?? true;
   }
 
-  private async setupFullstory({
-    basePath,
-    security,
-    executionContextPromise,
-    esOrgId,
-  }: SetupFullstoryDeps) {
-    const { enabled, org_id: fsOrgId } = this.config.full_story;
-    if (!enabled || !fsOrgId) {
-      return; // do not load any fullstory code in the browser if not enabled
+  /**
+   * If the right config is provided, register the FullStory shipper to the analytics client.
+   * @param analytics Core's Analytics service's setup contract.
+   * @param basePath Core's http.basePath helper.
+   * @private
+   */
+  private async setupFullStory({ analytics, basePath }: SetupFullStoryDeps) {
+    const { enabled, org_id: fullStoryOrgId, eventTypesAllowlist } = this.config.full_story;
+    if (!enabled || !fullStoryOrgId) {
+      return; // do not load any FullStory code in the browser if not enabled
     }
 
     // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
-    const fullStoryChunkPromise = import('./fullstory');
-    const userIdPromise: Promise<string | undefined> = security
-      ? loadFullStoryUserId({ getCurrentUser: security.authc.getCurrentUser })
-      : Promise.resolve(undefined);
-
-    // We need to call FS.identify synchronously after FullStory is initialized, so we must load the user upfront
-    const [{ initializeFullStory }, userId] = await Promise.all([
-      fullStoryChunkPromise,
-      userIdPromise,
-    ]);
-
-    const { fullStory, sha256 } = initializeFullStory({
-      basePath,
-      orgId: fsOrgId,
-      packageInfo: this.initializerContext.env.packageInfo,
+    const { FullStoryShipper } = await import('@kbn/analytics-shippers-fullstory');
+    analytics.registerShipper(FullStoryShipper, {
+      eventTypesAllowlist,
+      fullStoryOrgId,
+      // Load an Elastic-internally audited script. Ideally, it should be hosted on a CDN.
+      scriptUrl: basePath.prepend(
+        `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/fullstory.js`
+      ),
+      namespace: 'FSKibana',
     });
+  }
 
-    // Very defensive try/catch to avoid any UnhandledPromiseRejections
-    try {
-      // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
-      // across domains work
-      if (userId) {
-        // Join the cloud org id and the user to create a truly unique user id.
-        // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
-        const hashedId = sha256(esOrgId ? `${esOrgId}:${userId}` : `${userId}`);
+  /**
+   * Set up the Analytics context providers.
+   * @param analytics Core's Analytics service. The Setup contract.
+   * @param security The security plugin.
+   * @param cloudId The Cloud Org ID.
+   * @private
+   */
+  private setupTelemetryContext(
+    analytics: AnalyticsServiceSetup,
+    security?: Pick<SecurityPluginSetup, 'authc'>,
+    cloudId?: string
+  ) {
+    registerCloudDeploymentIdAnalyticsContext(analytics, cloudId);
 
-        executionContextPromise
-          ?.then(async (executionContext) => {
-            this.appSubscription = executionContext.context$.subscribe((context) => {
-              const { name, page, id } = context;
-              // Update the current context every time it changes
-              fullStory.setVars(
-                'page',
-                omitBy(
-                  {
-                    // Read about the special pageName property
-                    // https://help.fullstory.com/hc/en-us/articles/1500004101581-FS-setVars-API-Sending-custom-page-data-to-FullStory
-                    pageName: `${compact([name, page]).join(':')}`,
-                    app_id_str: name ?? 'unknown',
-                    page_str: page,
-                    ent_id_str: id,
-                  },
-                  isUndefined
-                )
-              );
-            });
-          })
-          .catch((e) => {
-            // eslint-disable-next-line no-console
-            console.error(
-              `[cloud.full_story] Could not retrieve application service due to error: ${e.toString()}`,
-              e
-            );
-          });
-        const kibanaVer = this.initializerContext.env.packageInfo.version;
-        // TODO: use semver instead
-        const parsedVer = (kibanaVer.indexOf('.') > -1 ? kibanaVer.split('.') : []).map((s) =>
-          parseInt(s, 10)
-        );
-        // `str` suffix is required for evn vars, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
-        fullStory.identify(hashedId, {
-          version_str: kibanaVer,
-          version_major_int: parsedVer[0] ?? -1,
-          version_minor_int: parsedVer[1] ?? -1,
-          version_patch_int: parsedVer[2] ?? -1,
-          org_id_str: esOrgId,
-        });
-      }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error(
-        `[cloud.full_story] Could not call FS.identify due to error: ${e.toString()}`,
-        e
-      );
+    if (security) {
+      analytics.registerContextProvider({
+        name: 'cloud_user_id',
+        context$: from(security.authc.getCurrentUser()).pipe(
+          map((user) => {
+            if (user.elastic_cloud_user) {
+              // If the user is managed by ESS, use the plain username as the user ID:
+              // The username is expected to be unique for these users,
+              // and it matches how users are identified in the Cloud UI, so it allows us to correlate them.
+              return { userId: user.username, isElasticCloudUser: true };
+            }
+
+            return {
+              // For the rest of the authentication providers, we want to add the cloud deployment ID to make it unique.
+              // Especially in the case of Elasticsearch-backed authentication, where users are commonly repeated
+              // across multiple deployments (i.e.: `elastic` superuser).
+              userId: cloudId ? `${cloudId}:${user.username}` : user.username,
+              isElasticCloudUser: false,
+            };
+          }),
+          // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
+          map(({ userId, isElasticCloudUser }) => ({ userId: sha256(userId), isElasticCloudUser })),
+          catchError(() => of({ userId: undefined, isElasticCloudUser: false }))
+        ),
+        schema: {
+          userId: {
+            type: 'keyword',
+            _meta: { description: 'The user id scoped as seen by Cloud (hashed)' },
+          },
+          isElasticCloudUser: {
+            type: 'boolean',
+            _meta: {
+              description: '`true` if the user is managed by ESS.',
+            },
+          },
+        },
+      });
     }
-
-    // Get performance information from the browser (non standard property
-    // @ts-expect-error 2339
-    const memory = window.performance.memory;
-    let memoryInfo = {};
-    if (memory) {
-      memoryInfo = {
-        memory_js_heap_size_limit_int: memory.jsHeapSizeLimit,
-        memory_js_heap_size_total_int: memory.totalJSHeapSize,
-        memory_js_heap_size_used_int: memory.usedJSHeapSize,
-      };
-    }
-    // Record an event that Kibana was opened so we can easily search for sessions that use Kibana
-    fullStory.event('Loaded Kibana', {
-      // `str` suffix is required, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
-      kibana_version_str: this.initializerContext.env.packageInfo.version,
-      ...memoryInfo,
-    });
   }
 
   private async setupChat({ http, security }: SetupChatDeps) {
@@ -375,32 +335,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 }
 
-/** @internal exported for testing */
-export const loadFullStoryUserId = async ({
-  getCurrentUser,
-}: {
-  getCurrentUser: () => Promise<AuthenticatedUser>;
-}) => {
-  try {
-    const currentUser = await getCurrentUser().catch(() => undefined);
-    if (!currentUser) {
-      return undefined;
-    }
-
-    // Log very defensively here so we can debug this easily if it breaks
-    if (!currentUser.username) {
-      // eslint-disable-next-line no-console
-      console.debug(
-        `[cloud.full_story] username not specified. User metadata: ${JSON.stringify(
-          currentUser.metadata
-        )}`
-      );
-    }
-
-    return currentUser.username;
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(`[cloud.full_story] Error loading the current user: ${e.toString()}`, e);
-    return undefined;
-  }
-};
+function sha256(str: string) {
+  return new Sha256().update(str, 'utf8').digest('hex');
+}

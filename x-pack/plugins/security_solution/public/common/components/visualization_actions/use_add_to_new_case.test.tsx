@@ -5,21 +5,19 @@
  * 2.0.
  */
 import { renderHook } from '@testing-library/react-hooks';
-import { mockCasesContract } from '../../../../../cases/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useKibana } from '../../lib/kibana';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useAddToNewCase } from './use_add_to_new_case';
 
 jest.mock('../../lib/kibana/kibana_react');
 
-describe('', () => {
+describe('useAddToNewCase', () => {
   const mockCases = mockCasesContract();
   const timeRange = {
     from: '2022-03-06T16:00:00.000Z',
     to: '2022-03-07T15:59:59.999Z',
   };
-  const owner = 'securitySolution';
-  const type = 'user';
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -37,16 +35,6 @@ describe('', () => {
       })
     );
     expect(mockCases.hooks.getUseCasesAddToNewCaseFlyout).toHaveBeenCalledWith({
-      attachments: [
-        {
-          comment: `!{lens${JSON.stringify({
-            timeRange,
-            attributes: kpiHostMetricLensAttributes,
-          })}}`,
-          owner,
-          type,
-        },
-      ],
       toastContent: 'Successfully added visualization to the case',
     });
     expect(result.current.disabled).toEqual(false);

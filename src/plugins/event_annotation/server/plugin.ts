@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
-import { manualEventAnnotation, eventAnnotationGroup } from '../common';
-import { ExpressionsServerSetup } from '../../expressions/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import {
+  manualPointEventAnnotation,
+  eventAnnotationGroup,
+  manualRangeEventAnnotation,
+} from '../common';
 
 interface SetupDependencies {
   expressions: ExpressionsServerSetup;
@@ -16,7 +20,8 @@ interface SetupDependencies {
 
 export class EventAnnotationServerPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup, dependencies: SetupDependencies) {
-    dependencies.expressions.registerFunction(manualEventAnnotation);
+    dependencies.expressions.registerFunction(manualPointEventAnnotation);
+    dependencies.expressions.registerFunction(manualRangeEventAnnotation);
     dependencies.expressions.registerFunction(eventAnnotationGroup);
 
     return {};

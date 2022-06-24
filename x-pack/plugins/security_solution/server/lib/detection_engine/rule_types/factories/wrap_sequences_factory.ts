@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 
 import { WrapSequences } from '../../signals/types';
 import { buildAlertGroupFromSequence } from './utils/build_alert_group_from_sequence';
@@ -23,12 +23,14 @@ export const wrapSequencesFactory =
     ignoreFields,
     mergeStrategy,
     spaceId,
+    indicesToQuery,
   }: {
     logger: Logger;
     completeRule: CompleteRule<RuleParams>;
     ignoreFields: ConfigType['alertIgnoreFields'];
     mergeStrategy: ConfigType['alertMergeStrategy'];
     spaceId: string | null | undefined;
+    indicesToQuery: string[];
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
     sequences.reduce(
@@ -40,7 +42,8 @@ export const wrapSequencesFactory =
           completeRule,
           mergeStrategy,
           spaceId,
-          buildReasonMessage
+          buildReasonMessage,
+          indicesToQuery
         ),
       ],
       []

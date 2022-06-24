@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
+import type { Logger } from '@kbn/logging';
+import type { IConfigService } from '@kbn/config';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import { DeprecationsFactory } from './deprecations_factory';
 import { DomainDeprecationDetails, RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
-import { CoreContext } from '../core_context';
-import { IConfigService } from '../config';
-import { CoreService } from '../../types';
 import { InternalHttpServiceSetup } from '../http';
-import { Logger } from '../logging';
 import { IScopedClusterClient } from '../elasticsearch/client';
 import { SavedObjectsClientContract } from '../saved_objects/types';
 
@@ -144,10 +143,9 @@ export class DeprecationsService
   public async setup({ http }: DeprecationsSetupDeps): Promise<InternalDeprecationsServiceSetup> {
     this.logger.debug('Setting up Deprecations service');
 
-    const config = await this.configService
-      .atPath<DeprecationConfigType>(deprecationConfig.path)
-      .pipe(take(1))
-      .toPromise();
+    const config = await firstValueFrom(
+      this.configService.atPath<DeprecationConfigType>(deprecationConfig.path)
+    );
 
     this.deprecationsFactory = new DeprecationsFactory({
       logger: this.logger,

@@ -14,11 +14,15 @@ import {
   sessionViewAlertProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessDeps, ProcessTreeNode } from './index';
+import { ProcessDeps, ProcessTreeNode } from '.';
 import { Cancelable } from 'lodash';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
+import { useDateFormat } from '../../hooks';
 
 jest.useFakeTimers('modern');
+
+jest.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as jest.Mock;
 
 describe('ProcessTreeNode component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -39,10 +43,13 @@ describe('ProcessTreeNode component', () => {
     } as unknown as RefObject<HTMLDivElement>,
     onChangeJumpToEventVisibility: jest.fn(),
     onShowAlertDetails: jest.fn(),
+    showTimestamp: true,
+    verboseMode: false,
   };
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   });
 
   describe('When ProcessTreeNode is mounted', () => {
@@ -55,7 +62,9 @@ describe('ProcessTreeNode component', () => {
     it('should have an alternate rendering for a session leader', async () => {
       renderResult = mockedContext.render(<ProcessTreeNode {...props} isSessionLeader />);
 
-      expect(renderResult.container.textContent).toEqual(' bash started by  vagrant');
+      expect(renderResult.container.textContent?.replace(/\s+/g, ' ')).toEqual(
+        ' bash started by vagrant'
+      );
     });
 
     // commented out until we get new UX for orphans treatment aka disjointed tree
@@ -64,7 +73,7 @@ describe('ProcessTreeNode component', () => {
     //   expect(renderResult.queryByText(/orphaned/i)).toBeTruthy();
     // });
 
-    it('renders Exec icon and exit code for executed process', async () => {
+    it('renders Exec icon', async () => {
       const executedProcessMock: typeof processMock = {
         ...processMock,
         hasExec: () => true,
@@ -75,26 +84,6 @@ describe('ProcessTreeNode component', () => {
       );
 
       expect(renderResult.queryByTestId('sessionView:processTreeNodeExecIcon')).toBeTruthy();
-      expect(renderResult.queryByTestId('sessionView:processTreeNodeExitCode')).toBeTruthy();
-    });
-
-    it('does not render exit code if it does not exist', async () => {
-      const processWithoutExitCode: typeof processMock = {
-        ...processMock,
-        hasExec: () => true,
-        getDetails: () => ({
-          ...processMock.getDetails(),
-          process: {
-            ...processMock.getDetails().process,
-            exit_code: undefined,
-          },
-        }),
-      };
-
-      renderResult = mockedContext.render(
-        <ProcessTreeNode {...props} process={processWithoutExitCode} />
-      );
-      expect(renderResult.queryByTestId('sessionView:processTreeNodeExitCode')).toBeFalsy();
     });
 
     it('calls onChangeJumpToEventVisibility with isVisible false if jumpToEvent is not visible', async () => {
@@ -143,6 +132,10 @@ describe('ProcessTreeNode component', () => {
           },
           process: {
             ...processMock.getDetails().process,
+            user: {
+              id: '-1',
+              name: 'root',
+            },
             parent: {
               ...processMock.getDetails().process!.parent,
               user: {
@@ -196,7 +189,7 @@ describe('ProcessTreeNode component', () => {
     it('When Timestamp is ON, it shows Timestamp', async () => {
       // set a mock where Timestamp is turned ON
       renderResult = mockedContext.render(
-        <ProcessTreeNode {...props} timeStampOn={true} process={processMock} />
+        <ProcessTreeNode {...props} showTimestamp={true} process={processMock} />
       );
 
       expect(renderResult.getByTestId('sessionView:processTreeNodeTimestamp')).toBeTruthy();
@@ -205,7 +198,7 @@ describe('ProcessTreeNode component', () => {
     it('When Timestamp is OFF, it doesnt show Timestamp', async () => {
       // set a mock where Timestamp is turned OFF
       renderResult = mockedContext.render(
-        <ProcessTreeNode {...props} timeStampOn={false} process={processMock} />
+        <ProcessTreeNode {...props} showTimestamp={false} process={processMock} />
       );
 
       expect(renderResult.queryByTestId('sessionView:processTreeNodeTimestamp')).toBeFalsy();
@@ -230,7 +223,7 @@ describe('ProcessTreeNode component', () => {
 
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
-          `Alerts(${sessionViewAlertProcessMock.getAlerts().length})`
+          `Alerts (${sessionViewAlertProcessMock.getAlerts().length})`
         );
       });
       it('renders Alerts button with 99+ when process has more than 99 alerts', async () => {
@@ -248,7 +241,7 @@ describe('ProcessTreeNode component', () => {
 
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
-          'Alerts(99+)'
+          'Alerts (99+)'
         );
       });
       it('toggle Alert Details button when Alert button is clicked', async () => {
@@ -302,13 +295,19 @@ describe('ProcessTreeNode component', () => {
     describe('Search', () => {
       it('highlights text within the process node line item if it matches the searchQuery', () => {
         // set a mock search matched indicator for the process (typically done by ProcessTree/helpers.ts)
-        processMock.searchMatched = '/vagrant';
+        processMock.searchMatched = '/vagr';
 
         renderResult = mockedContext.render(<ProcessTreeNode {...props} />);
 
         expect(
           renderResult.getByTestId('sessionView:processNodeSearchHighlight').textContent
-        ).toEqual('/vagrant');
+        ).toEqual('/vagr');
+
+        // ensures we are showing the rest of the info, and not replacing it with just the match.
+        const { process } = props.process.getDetails();
+        expect(renderResult.container.textContent).toContain(
+          process?.working_directory + '\xA0' + (process?.args && process.args.join(' '))
+        );
       });
     });
   });

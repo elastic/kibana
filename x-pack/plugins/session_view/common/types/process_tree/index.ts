@@ -35,6 +35,7 @@ export interface Group {
 }
 
 export interface ProcessEventResults {
+  total?: number;
   events?: any[];
 }
 
@@ -75,6 +76,11 @@ export interface ProcessFields {
   end?: string;
   user?: User;
   group?: Group;
+  real_user?: User;
+  real_group?: Group;
+  saved_user?: User;
+  saved_group?: Group;
+  supplemental_groups?: Group[];
   exit_code?: number;
   entry_meta?: EntryMeta;
   tty?: Teletype;
@@ -91,8 +97,8 @@ export interface ProcessEventHost {
   architecture?: string;
   hostname?: string;
   id?: string;
-  ip?: string;
-  mac?: string;
+  ip?: string[];
+  mac?: string[];
   name?: string;
   os?: {
     family?: string;
@@ -134,6 +140,7 @@ export interface ProcessEvent {
     kind?: EventKind;
     category?: string;
     action?: EventAction;
+    id?: string;
   };
   user?: User;
   group?: Group;
@@ -142,11 +149,14 @@ export interface ProcessEvent {
   kibana?: {
     alert?: ProcessEventAlert;
   };
+  container?: ProcessEventContainer;
+  orchestrator?: ProcessEventOrchestrator;
 }
 
 export interface ProcessEventsPage {
   events?: ProcessEvent[];
   cursor?: string;
+  total?: number; // total count of all items across all pages (as reported by ES client)
 }
 
 export interface Process {
@@ -160,6 +170,7 @@ export interface Process {
   searchMatched: string | null; // either false, or set to searchQuery
   addEvent(event: ProcessEvent): void;
   addAlert(alert: ProcessEvent): void;
+  addChild(child: Process): void;
   clearSearch(): void;
   hasOutput(): boolean;
   hasAlerts(): boolean;
@@ -171,8 +182,39 @@ export interface Process {
   isUserEntered(): boolean;
   getMaxAlertLevel(): number | null;
   getChildren(verboseMode: boolean): Process[];
+  isVerbose(): boolean;
+  getEndTime(): string;
+  isDescendantOf(process: Process): boolean;
 }
 
 export type ProcessMap = {
   [key: string]: Process;
 };
+
+export interface ProcessEventContainer {
+  id?: string;
+  name?: string;
+  image?: {
+    name?: string;
+    tag?: string;
+    hash?: {
+      all?: string;
+    };
+  };
+}
+
+export interface ProcessEventOrchestrator {
+  resource?: {
+    name?: string;
+    type?: string;
+    ip?: string;
+  };
+  namespace?: string;
+  cluster?: {
+    name?: string;
+    id?: string;
+  };
+  parent?: {
+    type?: string;
+  };
+}

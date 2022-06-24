@@ -9,7 +9,7 @@
 import React from 'react';
 import FilterLabel from './filter_label';
 import { render } from '@testing-library/react';
-import { phraseFilter } from '../../../../../data/common/stubs';
+import { phraseFilter } from '@kbn/data-plugin/common/stubs';
 
 test('alias', () => {
   const filter = {
@@ -20,6 +20,18 @@ test('alias', () => {
     },
   };
   const { container } = render(<FilterLabel filter={filter} />);
+  expect(container).toMatchSnapshot();
+});
+
+test('field custom label', () => {
+  const filter = {
+    ...phraseFilter,
+    meta: {
+      ...phraseFilter.meta,
+      alias: 'geo.coordinates in US',
+    },
+  };
+  const { container } = render(<FilterLabel filter={filter} fieldLabel="test label" />);
   expect(container).toMatchSnapshot();
 });
 

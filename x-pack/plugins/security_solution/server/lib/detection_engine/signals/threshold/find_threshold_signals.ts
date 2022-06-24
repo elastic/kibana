@@ -7,17 +7,18 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import {
-  ThresholdNormalized,
-  TimestampOverrideOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
-} from '../../../../../../alerting/server';
-import { Logger } from '../../../../../../../../src/core/server';
+} from '@kbn/alerting-plugin/server';
+import { Logger } from '@kbn/core/server';
+import {
+  ThresholdNormalized,
+  TimestampOverrideOrUndefined,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
 import { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
 import type { SignalSearchResponse } from '../types';
@@ -32,6 +33,7 @@ interface FindThresholdSignalsParams {
   threshold: ThresholdNormalized;
   buildRuleMessage: BuildRuleMessage;
   timestampOverride: TimestampOverrideOrUndefined;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export const findThresholdSignals = async ({
@@ -44,6 +46,7 @@ export const findThresholdSignals = async ({
   threshold,
   buildRuleMessage,
   timestampOverride,
+  runtimeMappings,
 }: FindThresholdSignalsParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -143,5 +146,6 @@ export const findThresholdSignals = async ({
     pageSize: 0,
     sortOrder: 'desc',
     buildRuleMessage,
+    runtimeMappings,
   });
 };

@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { canUserChangePassword } from '../../../common/model';
 import {
   BasicHTTPAuthorizationHeaderCredentials,
@@ -59,7 +59,8 @@ export function defineChangeUserPasswordRoutes({
         : undefined;
 
       try {
-        await context.core.elasticsearch.client.asCurrentUser.security.changePassword(
+        const esClient = (await context.core).elasticsearch.client;
+        await esClient.asCurrentUser.security.changePassword(
           { username, body: { password: newPassword } },
           options
         );

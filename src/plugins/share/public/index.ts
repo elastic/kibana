@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PluginInitializerContext } from 'src/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
 

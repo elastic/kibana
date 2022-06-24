@@ -7,8 +7,8 @@
  */
 
 import { Subject } from 'rxjs';
-import { TelemetryCounterType } from '@elastic/analytics';
-import type { Event, EventContext, IShipper, TelemetryCounter } from 'src/core/public';
+import { TelemetryCounterType } from '@kbn/analytics-client';
+import type { Event, EventContext, IShipper, TelemetryCounter } from '@kbn/core/public';
 
 export interface Action {
   action: string;
@@ -40,4 +40,5 @@ export class CustomShipper implements IShipper {
   extendContext(newContext: EventContext) {
     this.actions$.next({ action: 'extendContext', meta: newContext });
   }
+  shutdown() {}
 }

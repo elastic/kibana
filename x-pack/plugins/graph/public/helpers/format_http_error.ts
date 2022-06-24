@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 
 export function formatHttpError(
   error: IHttpFetchError<ResponseErrorBody & { status: number; statusText: string }>

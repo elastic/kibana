@@ -8,19 +8,21 @@
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ThemeServiceStart } from 'kibana/public';
+import { ThemeServiceStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { ChartsPluginStart, PaletteRegistry } from '../../../../charts/public';
-import { EventAnnotationServiceType } from '../../../../event_annotation/public';
-import { ExpressionRenderDefinition } from '../../../../expressions';
-import { FormatFactory } from '../../../../field_formats/common';
-import { KibanaThemeProvider } from '../../../../kibana_react/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
+import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { XYChartProps } from '../../common';
-import { calculateMinInterval } from '../helpers/interval';
 import type { BrushEvent, FilterEvent } from '../types';
 
 export type GetStartDepsFn = () => Promise<{
+  data: DataPublicPluginStart;
   formatFactory: FormatFactory;
   theme: ChartsPluginStart['theme'];
   activeCursor: ChartsPluginStart['activeCursor'];
@@ -55,7 +57,10 @@ export const getXyChartRenderer = ({
     };
     const deps = await getStartDeps();
 
-    const { XYChartReportable } = await import('../components/xy_chart');
+    const [{ XYChartReportable }, { calculateMinInterval }] = await Promise.all([
+      import('../components/xy_chart'),
+      import('../helpers/interval'),
+    ]);
 
     ReactDOM.render(
       <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
@@ -66,6 +71,7 @@ export const getXyChartRenderer = ({
           >
             <XYChartReportable
               {...config}
+              data={deps.data}
               formatFactory={deps.formatFactory}
               chartsActiveCursorService={deps.activeCursor}
               chartsThemeService={deps.theme}
@@ -73,12 +79,13 @@ export const getXyChartRenderer = ({
               timeZone={deps.timeZone}
               eventAnnotationService={deps.eventAnnotationService}
               useLegacyTimeAxis={deps.useLegacyTimeAxis}
-              minInterval={calculateMinInterval(config)}
+              minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
               interactive={handlers.isInteractive()}
               onClickValue={onClickValue}
               onSelectRange={onSelectRange}
               renderMode={handlers.getRenderMode()}
               syncColors={handlers.isSyncColorsEnabled()}
+              syncTooltips={handlers.isSyncTooltipsEnabled()}
             />
           </div>{' '}
         </I18nProvider>

@@ -6,11 +6,16 @@
  */
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
-import { from, of, Subscription, Observable } from 'rxjs';
+import { from, Subscription, Observable } from 'rxjs';
 import { mergeMap, last, map, toArray } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import type { ToastsStart } from 'kibana/public';
+import type { ToastsStart } from '@kbn/core/public';
 import { chunk } from 'lodash';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/data-plugin/common';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   AggregatableFieldOverallStats,
@@ -20,11 +25,6 @@ import {
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-} from '../../../../../../../src/plugins/data/common';
 import type { OverallStats } from '../types/overall_stats';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { extractErrorProperties } from '../utils/error_utils';
@@ -132,10 +132,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       timeFieldName,
       earliest,
       latest,
-      intervalMs,
       runtimeFieldMap,
       samplerShardSize,
-      fieldsToFetch,
     } = searchStrategyParams;
 
     const searchOptions: ISearchOptions = {
@@ -199,16 +197,12 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           })
         )
     );
-    const documentCountStats$ =
-      !fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
-        ? data.search.search(
-            {
-              params: getDocumentCountStatsRequest(searchStrategyParams),
-            },
-            searchOptions
-          )
-        : of(undefined);
-
+    const documentCountStats$ = data.search.search(
+      {
+        params: getDocumentCountStatsRequest(searchStrategyParams),
+      },
+      searchOptions
+    );
     const sub = rateLimitingForkJoin<
       AggregatableFieldOverallStats | IKibanaSearchResponse | undefined
     >(
@@ -232,10 +226,18 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
             }
           });
 
+          const documentCountStats = processDocumentCountStats(
+            documentCountStatsResp?.rawResponse,
+            searchStrategyParams
+          );
+
+          const totalCount = documentCountStats?.totalCount ?? 0;
+
           const aggregatableOverallStats = processAggregatableFieldsExistResponse(
             aggregatableOverallStatsResp,
             aggregatableFields,
-            samplerShardSize
+            samplerShardSize,
+            totalCount
           );
 
           const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
@@ -244,12 +246,10 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           );
 
           setOverallStats({
-            documentCountStats: processDocumentCountStats(
-              documentCountStatsResp?.rawResponse,
-              searchStrategyParams
-            ),
+            documentCountStats,
             ...nonAggregatableOverallStats,
             ...aggregatableOverallStats,
+            totalCount,
           });
         }
       },

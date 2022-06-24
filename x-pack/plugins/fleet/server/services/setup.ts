@@ -7,7 +7,9 @@
 
 import { compact } from 'lodash';
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { AUTO_UPDATE_PACKAGES } from '../../common';
 import type {
@@ -18,13 +20,13 @@ import type {
 } from '../../common';
 
 import { SO_SEARCH_LIMIT } from '../constants';
-import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
 
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
-import { ensurePreconfiguredOutputs } from './preconfiguration/index';
+import { ensurePreconfiguredOutputs } from './preconfiguration/outputs';
 import { outputService } from './output';
+import { downloadSourceService } from './download_source';
 
 import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
 import { settingsService } from '.';
@@ -75,6 +77,8 @@ async function createSetupSideEffects(
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
 
+  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
+
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
     logger.debug('Setting up Fleet Elasticsearch assets');
     await ensureFleetGlobalEsAssets(soClient, esClient);
@@ -108,6 +112,7 @@ async function createSetupSideEffects(
       policies,
       packages,
       defaultOutput,
+      defaultDownloadSource,
       DEFAULT_SPACE_ID
     );
 

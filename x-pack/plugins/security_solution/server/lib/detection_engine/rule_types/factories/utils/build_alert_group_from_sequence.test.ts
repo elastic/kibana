@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 
 import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 
@@ -58,7 +58,8 @@ describe('buildAlert', () => {
       completeRule,
       'allFields',
       SPACE_ID,
-      jest.fn()
+      jest.fn(),
+      completeRule.ruleParams.index as string[]
     );
     expect(alertGroup.length).toEqual(3);
     expect(alertGroup[0]).toEqual(

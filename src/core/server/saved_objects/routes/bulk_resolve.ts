@@ -32,7 +32,8 @@ export const registerBulkResolveRoute = (router: IRouter, { coreUsageData }: Rou
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsBulkResolve({ request: req }).catch(() => {});
 
-      const result = await context.core.savedObjects.client.bulkResolve(req.body);
+      const { savedObjects } = await context.core;
+      const result = await savedObjects.client.bulkResolve(req.body);
       return res.ok({ body: result });
     })
   );

@@ -222,7 +222,7 @@ It also provides a stateful version of it on the start contract.
 
 |{kib-repo}blob/{branch}/src/plugins/newsfeed/README.md[newsfeed]
 |The newsfeed plugin adds a NewsfeedNavButton to the top navigation bar and renders the content in the flyout.
-Content is fetched from the remote (https://feeds.elastic.co and https://feeds-staging.elastic.co in dev mode) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely.
+Content is fetched from the remote (https://feeds.elastic.co) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely.
 
 
 |{kib-repo}blob/{branch}/src/plugins/presentation_util/README.mdx[presentationUtil]
@@ -289,6 +289,10 @@ In general this plugin provides:
 - Emitting trigger events.
 - Executing actions attached to a given trigger.
 - Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
+
+
+|{kib-repo}blob/{branch}/src/plugins/ui_actions_enhanced/README.md[uiActionsEnhanced]
+|Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
 
 
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
@@ -376,6 +380,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The Kibana actions plugin provides a framework to create executable actions. You can:
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/aiops/README.md[aiops]
+|The plugin provides APIs and components for AIOps features, including the “Explain log rate spikes” UI, maintained by the ML team.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]
 |The Kibana Alerting plugin provides a common place to set up rules. You can:
 
@@ -410,10 +418,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 |<<dashboard-enhanced-plugin>>
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced/README.md[dataEnhanced]
-|The data_enhanced plugin is the x-pack counterpart to the src/plguins/data plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/data_visualizer/README.md[dataVisualizer]
@@ -495,6 +499,10 @@ the infrastructure monitoring use-case within Kibana.
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/kubernetes_security/README.md[kubernetesSecurity]
+|(under construction)
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]
 |Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
 
@@ -522,12 +530,6 @@ using the CURL scripts in the scripts folder.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/maps/README.md[maps]
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/metrics_entities/README.md[metricsEntities]
-|This is the metrics and entities plugin where you add can add transforms for your project
-and group those transforms into modules. You can also re-use existing transforms in your
-newly created modules as well.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
@@ -619,6 +621,11 @@ the alertTypes by the Stack in the alerting plugin, register associated HTTP
 routes, etc.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/synthetics/README.md[synthetics]
+|The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
+in their infrastructure.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/task_manager/README.md[taskManager]
 |The task manager is a generic system for running background tasks.
 Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-production-considerations.html
@@ -646,17 +653,8 @@ For adding localizations and instrument a ui to support translated content, see 
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ui_actions_enhanced/README.md[uiActionsEnhanced]
-|Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
 |Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. It will only be enabled on the last minor before the next major release. This is controlled via the config: xpack.upgrade_assistant.readonly (#101296).
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/uptime/README.md[uptime]
-|The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
-in their infrastructure.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]

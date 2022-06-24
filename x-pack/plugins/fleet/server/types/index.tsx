@@ -12,10 +12,7 @@ export type {
   AgentStatus,
   AgentType,
   AgentAction,
-  AgentPolicyAction,
-  BaseAgentActionSOAttributes,
-  AgentActionSOAttributes,
-  AgentPolicyActionSOAttributes,
+  CurrentUpgrade,
   PackagePolicy,
   PackagePolicyInput,
   PackagePolicyInputStream,
@@ -77,6 +74,9 @@ export type {
   FleetServerAgentAction,
   FleetServerPolicy,
   FullAgentPolicyInputStream,
+  DownloadSourceBase,
+  DownloadSource,
+  DownloadSourceAttributes,
 } from '../../common';
 export {
   ElasticsearchAssetType,

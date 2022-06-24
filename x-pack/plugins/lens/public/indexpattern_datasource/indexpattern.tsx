@@ -8,13 +8,20 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { CoreStart, SavedObjectReference } from 'kibana/public';
+import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { TimeRange } from '@kbn/es-query';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { isEqual } from 'lodash';
-import type { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
-import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -31,6 +38,7 @@ import {
   changeLayerIndexPattern,
   extractReferences,
   injectReferences,
+  loadIndexPatterns,
 } from './loader';
 import { toExpression } from './to_expression';
 import {
@@ -64,17 +72,9 @@ import {
   IndexPatternPersistedState,
   IndexPattern,
 } from './types';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../src/plugins/kibana_react/public';
-import { DataPublicPluginStart, ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
-import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter, VisualizeEditorContext } from '../types';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
@@ -118,6 +118,7 @@ export function getIndexPatternDatasource({
   core,
   storage,
   data,
+  unifiedSearch,
   dataViews,
   fieldFormats,
   charts,
@@ -127,6 +128,7 @@ export function getIndexPatternDatasource({
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
@@ -183,6 +185,10 @@ export function getIndexPatternDatasource({
       return extractReferences(state);
     },
 
+    getCurrentIndexPatternId(state: IndexPatternPrivateState) {
+      return state.currentIndexPatternId;
+    },
+
     insertLayer(state: IndexPatternPrivateState, newLayerId: string) {
       return {
         ...state,
@@ -235,6 +241,7 @@ export function getIndexPatternDatasource({
       if (staticValue == null) {
         return state;
       }
+
       return mergeLayer({
         state,
         layerId,
@@ -373,6 +380,8 @@ export function getIndexPatternDatasource({
                 savedObjectsClient={core.savedObjects.client}
                 http={core.http}
                 data={data}
+                unifiedSearch={unifiedSearch}
+                dataViews={dataViews}
                 uniqueLabel={columnLabelMap[props.columnId]}
                 {...props}
               />
@@ -444,6 +453,30 @@ export function getIndexPatternDatasource({
         : undefined;
     },
 
+    updateCurrentIndexPatternId: ({ state, indexPatternId, setState }) => {
+      handleChangeIndexPattern(indexPatternId, state, setState);
+    },
+
+    refreshIndexPatternsList: async ({ indexPatternId, setState }) => {
+      const newlyMappedIndexPattern = await loadIndexPatterns({
+        indexPatternsService: dataViews,
+        cache: {},
+        patterns: [indexPatternId],
+      });
+      const indexPatternRefs = await dataViews.getIdsWithTitle();
+      const indexPattern = newlyMappedIndexPattern[indexPatternId];
+      setState((s) => {
+        return {
+          ...s,
+          indexPatterns: {
+            ...s.indexPatterns,
+            [indexPattern.id]: indexPattern,
+          },
+          indexPatternRefs,
+        };
+      });
+    },
+
     // Reset the temporary invalid state when closing the editor, but don't
     // update the state if it's not needed
     updateStateOnCloseDimension: ({ state, layerId }) => {
@@ -501,8 +534,14 @@ export function getIndexPatternDatasource({
           return null;
         },
         getSourceId: () => layer.indexPatternId,
-        getFilters: (activeData: FramePublicAPI['activeData']) =>
-          getFiltersInLayer(layer, visibleColumnIds, activeData?.[layerId]),
+        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) =>
+          getFiltersInLayer(
+            layer,
+            visibleColumnIds,
+            activeData?.[layerId],
+            state.indexPatterns[layer.indexPatternId],
+            timeRange
+          ),
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
       };
     },
@@ -579,8 +618,14 @@ export function getIndexPatternDatasource({
     },
     getWarningMessages: (state, frame, setState) => {
       return [
-        ...(getStateTimeShiftWarningMessages(state, frame) || []),
-        ...getPrecisionErrorWarningMessages(state, frame, core.docLinks, setState),
+        ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frame) || []),
+        ...getPrecisionErrorWarningMessages(
+          data.datatableUtilities,
+          state,
+          frame,
+          core.docLinks,
+          setState
+        ),
       ];
     },
     checkIntegrity: (state) => {

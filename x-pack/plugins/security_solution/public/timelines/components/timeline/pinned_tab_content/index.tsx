@@ -17,7 +17,7 @@ import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { HeaderActions } from '../body/actions/header_actions';
 import { CellValueElementProps } from '../cell_rendering';
 import { Direction } from '../../../../../common/search_strategy';
-import { useTimelineEvents } from '../../../containers/index';
+import { useTimelineEvents } from '../../../containers';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
@@ -174,10 +174,11 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
 
   const timelineQuerySortField = useMemo(
     () =>
-      sort.map(({ columnId, columnType, sortDirection }) => ({
+      sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
         field: columnId,
         type: columnType,
         direction: sortDirection as Direction,
+        esTypes: esTypes ?? [],
       })),
     [sort]
   );

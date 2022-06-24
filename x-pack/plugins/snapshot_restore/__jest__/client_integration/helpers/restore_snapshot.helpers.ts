@@ -6,11 +6,11 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { RestoreSnapshot } from '../../../public/application/sections/restore_snapshot';
 import { WithAppDependencies } from './setup_environment';
-import { REPOSITORY_NAME, SNAPSHOT_NAME } from '../helpers/constant';
+import { REPOSITORY_NAME, SNAPSHOT_NAME } from './constant';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
@@ -46,6 +46,14 @@ const setupActions = (testBed: TestBed<RestoreSnapshotFormTestSubject>) => {
     toggleGlobalState() {
       act(() => {
         form.toggleEuiSwitch('includeGlobalStateSwitch');
+      });
+
+      component.update();
+    },
+
+    async toggleFeatureState() {
+      await act(async () => {
+        form.toggleEuiSwitch('includeFeatureStatesSwitch');
       });
 
       component.update();
@@ -99,9 +107,13 @@ export type RestoreSnapshotFormTestSubject =
   | 'snapshotRestoreStepLogistics'
   | 'includeGlobalStateSwitch'
   | 'includeAliasesSwitch'
+  | 'featureStatesDropdown'
+  | 'includeFeatureStatesSwitch'
+  | 'toggleIncludeNone'
   | 'nextButton'
   | 'restoreButton'
   | 'systemIndicesInfoCallOut'
+  | 'noFeatureStatesCallout'
   | 'dataStreamWarningCallOut'
   | 'restoreSnapshotsForm.backButton'
   | 'restoreSnapshotsForm.nextButton'

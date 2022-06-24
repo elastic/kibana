@@ -14,8 +14,8 @@ import {
   Logger,
   SavedObjectsClient,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
-import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
+} from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
@@ -45,7 +45,6 @@ const registerFeatures = (features: SetupPlugins['features']) => {
     app: [PLUGIN_ID, 'kibana'],
     catalogue: [PLUGIN_ID],
     order: 2300,
-    excludeFromBasePrivileges: true,
     privileges: {
       all: {
         api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-write`],

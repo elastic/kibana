@@ -366,7 +366,7 @@ export interface HttpServiceSetup {
    */
   registerRouteHandlerContext: <
     Context extends RequestHandlerContext,
-    ContextName extends keyof Context
+    ContextName extends keyof Omit<Context, 'resolve'>
   >(
     contextName: ContextName,
     provider: RequestHandlerContextProvider<Context, ContextName>
@@ -393,7 +393,7 @@ export interface InternalHttpServiceSetup
   authRequestHeaders: IAuthHeadersStorage;
   registerRouteHandlerContext: <
     Context extends RequestHandlerContext,
-    ContextName extends keyof Context
+    ContextName extends keyof Omit<Context, 'resolve'>
   >(
     pluginOpaqueId: PluginOpaqueId,
     contextName: ContextName,

@@ -9,7 +9,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '../../../../../../data_views/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { DocViewFilterFn } from '../../doc_views_types';
 
 interface TableActionsProps {
@@ -131,6 +131,7 @@ export const TableActions = ({
           toolTipContent: filtersPairToolTip,
           icon: 'plusInCircle',
           disabled: filtersPairDisabled,
+          'data-test-subj': `addFilterForValueButton-${field}`,
           onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '+')),
         },
         {
@@ -147,7 +148,8 @@ export const TableActions = ({
           toolTipContent: filtersExistsToolTip,
           icon: 'filter',
           disabled: filtersExistsDisabled,
-          onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '-')),
+          'data-test-subj': `addExistsFilterButton-${field}`,
+          onClick: onClickAction(onFilter.bind({}, '_exists_', field, '+')),
         },
         {
           name: toggleColumnsLabel,

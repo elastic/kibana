@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import { IIndexPattern, Filter } from '../../../data/common';
+import type { Filter } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 type CancelFnType = () => void;
 type SubmitFnType = (filters: Filter[]) => void;
@@ -18,7 +19,7 @@ const LazyApplyFiltersPopoverContent = React.lazy(() => import('./apply_filter_p
 
 export const applyFiltersPopover = (
   filters: Filter[],
-  indexPatterns: IIndexPattern[],
+  indexPatterns: DataView[],
   onCancel: CancelFnType,
   onSubmit: SubmitFnType
 ) => {

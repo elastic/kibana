@@ -12,7 +12,7 @@ import {
   DataProvider,
   DataProviderType,
   QueryOperator,
-} from '../../../timelines/components/timeline/data_providers/data_provider';
+} from '../../components/timeline/data_providers/data_provider';
 
 import { KqlMode, TimelineModel } from './model';
 import { InsertTimeline } from './types';
@@ -44,7 +44,7 @@ export {
   updateItemsPerPageOptions,
   updateSort,
   upsertColumn,
-} from '../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 import { ResolveTimelineConfig } from '../../components/open_timeline/types';
 import { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 
@@ -225,5 +225,5 @@ export const toggleModalSaveTimeline = actionCreator<{
 export const updateEqlOptions = actionCreator<{
   id: string;
   field: FieldsEqlOptions;
-  value: string | null;
+  value: string | undefined;
 }>('UPDATE_EQL_OPTIONS_TIMELINE');

@@ -11,7 +11,7 @@ import { EuiToolTip, EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { memo, useState, useCallback, useContext, useMemo } from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useColors } from '../use_colors';
 import { StyledPanel } from '../styles';
 import { SideEffectContext } from '../side_effect_context';

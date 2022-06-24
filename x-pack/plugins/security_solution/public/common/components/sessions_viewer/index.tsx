@@ -10,7 +10,7 @@ import type { Filter } from '@kbn/es-query';
 import { SessionsComponentsProps } from './types';
 import { ESBoolQuery } from '../../../../common/typed_json';
 import { StatefulEventsViewer } from '../events_viewer';
-import { sessionsDefaultModel } from './default_headers';
+import { getSessionsDefaultModel, sessionsHeaders } from './default_headers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import * as i18n from './translations';
@@ -24,16 +24,8 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
     bool: {
       filter: [
         {
-          bool: {
-            should: [
-              {
-                match: {
-                  // TODO: update to process.entry_leader.same_as_process once ECS is updated to support same_as_process
-                  'process.is_entry_leader': true,
-                },
-              },
-            ],
-            minimum_should_match: 1,
+          exists: {
+            field: 'process.entry_leader.entity_id', // to exclude any records which have no entry_leader.entity_id
           },
         },
       ],
@@ -42,10 +34,10 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
   meta: {
     alias: null,
     disabled: false,
-    key: 'process.is_entry_leader',
+    key: 'process.entry_leader.entity_id',
     negate: false,
     params: {},
-    type: 'boolean',
+    type: 'string',
   },
 };
 
@@ -56,6 +48,8 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   pageFilters,
   startDate,
   filterQuery,
+  columns = sessionsHeaders,
+  defaultColumns = sessionsHeaders,
 }) => {
   const parsedFilterQuery: ESBoolQuery = useMemo(() => {
     if (filterQuery && filterQuery !== '') {
@@ -91,7 +85,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     <div data-test-subj={TEST_ID}>
       <StatefulEventsViewer
         pageFilters={sessionsFilter}
-        defaultModel={sessionsDefaultModel}
+        defaultModel={getSessionsDefaultModel(columns, defaultColumns)}
         end={endDate}
         entityType={entityType}
         id={timelineId}

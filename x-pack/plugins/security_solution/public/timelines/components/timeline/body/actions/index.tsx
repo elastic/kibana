@@ -11,6 +11,7 @@ import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elas
 import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
@@ -19,7 +20,6 @@ import { AddEventNoteAction } from './add_note_icon_item';
 import { PinEventAction } from './pin_event_action';
 import { EventsTdContent } from '../../styles';
 import * as i18n from '../translations';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../../timelines/public';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
   setActiveTabTimeline,
@@ -35,10 +35,14 @@ import {
   ActionProps,
   OnPinEvent,
   TimelineTabs,
+  TimelineEventsType,
 } from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { isInvestigateInResolverActionEnabled } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+
+export const isAlert = (eventType: TimelineEventsType | Omit<TimelineEventsType, 'all'>): boolean =>
+  eventType === 'signal';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -221,6 +225,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             />
             <PinEventAction
               ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
+              isAlert={isAlert(eventType)}
               key="pin-event"
               onPinClicked={handlePinClicked}
               noteIds={eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes}

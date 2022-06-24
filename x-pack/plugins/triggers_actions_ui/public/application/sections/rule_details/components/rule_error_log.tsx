@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -20,12 +20,12 @@ import {
   EuiTableSortingType,
   EuiBasicTableColumn,
 } from '@elastic/eui';
+import { IExecutionErrors } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { Rule } from '../../../../types';
-import { IExecutionErrors } from '../../../../../../alerting/common';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -50,6 +50,8 @@ const updateButtonProps = {
   iconOnly: true,
   fill: false,
 };
+
+const MAX_RESULTS = 1000;
 
 const sortErrorLog = (
   a: IExecutionErrors,
@@ -100,7 +102,14 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     );
   });
 
+  const [actualTotalItemCount, setActualTotalItemCount] = useState<number>(0);
+
   const isInitialized = useRef(false);
+
+  const isOnLastPage = useMemo(() => {
+    const { pageIndex, pageSize } = pagination;
+    return (pageIndex + 1) * pageSize >= MAX_RESULTS;
+  }, [pagination]);
 
   const loadEventLogs = async () => {
     setIsLoading(true);
@@ -118,8 +127,9 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
       setLogs(result.errors);
       setPagination({
         ...pagination,
-        totalItemCount: result.totalErrors,
+        totalItemCount: Math.min(result.totalErrors, MAX_RESULTS),
       });
+      setActualTotalItemCount(result.totalErrors);
     } catch (e) {
       notifications.toasts.addDanger({
         title: API_FAILED_MESSAGE,
@@ -257,10 +267,13 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
           }
         }}
       />
-      <RefineSearchPrompt
-        documentSize={pagination.totalItemCount}
-        backToTopAnchor="rule_error_log_list"
-      />
+      {isOnLastPage && (
+        <RefineSearchPrompt
+          documentSize={actualTotalItemCount}
+          visibleDocumentSize={MAX_RESULTS}
+          backToTopAnchor="rule_error_log_list"
+        />
+      )}
     </div>
   );
 };

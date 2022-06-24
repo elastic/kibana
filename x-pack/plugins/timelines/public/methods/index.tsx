@@ -8,8 +8,8 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Store } from 'redux';
-import type { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TGridProps } from '../types';
 import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from '../components';
 import { initialTGridState } from '../store/t_grid/reducer';
@@ -73,11 +73,11 @@ export const getLoadingPanelLazy = (props: LoadingPanelProps) => {
   );
 };
 
-const FieldsBrowserLazy = lazy(() => import('../components/fields_browser'));
-export const getFieldsBrowserLazy = (props: FieldBrowserProps, { store }: { store: Store }) => {
+const FieldBrowserLazy = lazy(() => import('../components/field_browser'));
+export const getFieldBrowserLazy = (props: FieldBrowserProps) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <FieldsBrowserLazy {...props} store={store} />
+      <FieldBrowserLazy {...props} />
     </Suspense>
   );
 };

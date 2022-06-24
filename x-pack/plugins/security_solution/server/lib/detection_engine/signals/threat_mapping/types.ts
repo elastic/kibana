@@ -19,13 +19,13 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ListClient } from '../../../../../../lists/server';
+import { ListClient } from '@kbn/lists-plugin/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
-} from '../../../../../../alerting/server';
-import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
+} from '@kbn/alerting-plugin/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import {
@@ -67,6 +67,7 @@ export interface CreateThreatSignalsOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface CreateThreatSignalOptions {
@@ -93,6 +94,7 @@ export interface CreateThreatSignalOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface CreateEventSignalOptions {
@@ -127,6 +129,7 @@ export interface CreateEventSignalOptions {
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 type EntryKey = 'field' | 'value';
@@ -190,6 +193,7 @@ export interface GetThreatListOptions {
   threatListConfig: ThreatListConfig;
   pitId: OpenPointInTimeResponse['id'];
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface ThreatListCountOptions {
@@ -257,6 +261,7 @@ export interface EventsOptions {
   filters: unknown[];
   timestampOverride?: string;
   tuple: RuleRangeTuple;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface EventDoc {

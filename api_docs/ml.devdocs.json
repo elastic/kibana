@@ -587,6 +587,21 @@
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.isGeoRecord",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isGeoRecord",
+            "description": [
+              "\nReturns true if the anomaly record represented by the table row can be shown in the maps plugin"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -804,7 +819,7 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; }"
+              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; canTestTrainedModels: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; }"
             ],
             "path": "x-pack/plugins/ml/common/types/capabilities.ts",
             "deprecated": false
@@ -926,11 +941,16 @@
           {
             "parentPluginId": "ml",
             "id": "def-public.MlSummaryJob.jobState",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "jobState",
             "description": [
               "\nThe status of the job."
+            ],
+            "signature": [
+              "MlJobState",
+              " | ",
+              "JobActionState"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
@@ -1478,7 +1498,7 @@
         "label": "ML_PAGES",
         "description": [],
         "signature": [
-          "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_SOURCE_SELECTION: \"data_frame_analytics/source_selection\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly TRAINED_MODELS_MANAGE: \"trained_models\"; readonly TRAINED_MODELS_NODES: \"trained_models/nodes\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly ACCESS_DENIED: \"access-denied\"; readonly OVERVIEW: \"overview\"; }"
+          "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_SOURCE_SELECTION: \"data_frame_analytics/source_selection\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly TRAINED_MODELS_MANAGE: \"trained_models\"; readonly TRAINED_MODELS_NODES: \"trained_models/nodes\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER: \"jobs/new_job/recognize\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: \"jobs/new_job/from_lens\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly ACCESS_DENIED: \"access-denied\"; readonly OVERVIEW: \"overview\"; readonly AIOPS: \"aiops\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES: \"aiops/explain_log_rate_spikes\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT: \"aiops/explain_log_rate_spikes_index_select\"; }"
         ],
         "path": "x-pack/plugins/ml/common/constants/locator.ts",
         "deprecated": false,
@@ -2026,6 +2046,21 @@
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.isGeoRecord",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isGeoRecord",
+            "description": [
+              "\nReturns true if the anomaly record represented by the table row can be shown in the maps plugin"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2372,6 +2407,394 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.MlSummaryJob",
+        "type": "Interface",
+        "tags": [],
+        "label": "MlSummaryJob",
+        "description": [
+          "\nA summary of an anomaly detection job."
+        ],
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe identifier for the anomaly detection job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nA description of the job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.groups",
+            "type": "Array",
+            "tags": [],
+            "label": "groups",
+            "description": [
+              "\nA list of job groups. A job can belong to no groups, one or many."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.processed_record_count",
+            "type": "number",
+            "tags": [],
+            "label": "processed_record_count",
+            "description": [
+              "\nThe number of input documents that have been processed by the anomaly detection job.\nThis value includes documents with missing fields, since they are nonetheless analyzed."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.memory_status",
+            "type": "string",
+            "tags": [],
+            "label": "memory_status",
+            "description": [
+              "\nThe status of the mathematical models, which can take the values ok, soft_limit or hard_limit."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.jobState",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "jobState",
+            "description": [
+              "\nThe status of the job."
+            ],
+            "signature": [
+              "MlJobState",
+              " | ",
+              "JobActionState"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.datafeedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "datafeedIndices",
+            "description": [
+              "\nAn array of index names used by the datafeed. Wildcards are supported."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.hasDatafeed",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasDatafeed",
+            "description": [
+              "\nFlag indicating whether a datafeed exists for the job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.datafeedId",
+            "type": "string",
+            "tags": [],
+            "label": "datafeedId",
+            "description": [
+              "\nThe identifier for the datafeed."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.datafeedState",
+            "type": "string",
+            "tags": [],
+            "label": "datafeedState",
+            "description": [
+              "\nThe status of the datafeed."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.latestTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "latestTimestampMs",
+            "description": [
+              "\nThe timestamp of the latest chronologically input document."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.earliestTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "earliestTimestampMs",
+            "description": [
+              "\nThe timestamp of the earliest chronologically input document."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.latestResultsTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "latestResultsTimestampMs",
+            "description": [
+              "\nThe latest of the timestamp of the latest chronologically input document or the latest bucket that was processed."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.fullJob",
+            "type": "Object",
+            "tags": [],
+            "label": "fullJob",
+            "description": [
+              "\nUsed in older implementations of the job config, where the datafeed was placed inside the job for convenience.\nThis will be populated if the job's id has been passed to the /api/ml/jobs/jobs_summary endpoint."
+            ],
+            "signature": [
+              "CombinedJob",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.nodeName",
+            "type": "string",
+            "tags": [],
+            "label": "nodeName",
+            "description": [
+              "\nThe name of the node that runs the job."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.auditMessage",
+            "type": "Object",
+            "tags": [],
+            "label": "auditMessage",
+            "description": [
+              "\nAudit message for the job."
+            ],
+            "signature": [
+              "Partial<",
+              "AuditMessage",
+              "> | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.isSingleMetricViewerJob",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSingleMetricViewerJob",
+            "description": [
+              "\nFlag indicating whether results of the job can be viewed in the Single Metric Viewer."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.isNotSingleMetricViewerJobMessage",
+            "type": "string",
+            "tags": [],
+            "label": "isNotSingleMetricViewerJobMessage",
+            "description": [
+              "\nFor jobs which cannot be viewed in the Single Metric Viewer, a message indicating the reason why\nresults for the job cannot be viewed in the Single Metric Viewer."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.blocked",
+            "type": "Object",
+            "tags": [],
+            "label": "blocked",
+            "description": [
+              "\nWhen present, it explains that a task is currently running on the job, which is stopping\nany other actions from being performed on the job."
+            ],
+            "signature": [
+              "MlJobBlocked",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.latestTimestampSortValue",
+            "type": "number",
+            "tags": [],
+            "label": "latestTimestampSortValue",
+            "description": [
+              "\nValue of the latest timestamp for the job used for sorting."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.earliestStartTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "earliestStartTimestampMs",
+            "description": [
+              "\nThe earlist of the timestamp of the earliest chronologically input document or the earliest bucket that was processed."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.awaitingNodeAssignment",
+            "type": "boolean",
+            "tags": [],
+            "label": "awaitingNodeAssignment",
+            "description": [
+              "\nIndicates whether the job is currently awaiting assignment to a node before opening."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.alertingRules",
+            "type": "Array",
+            "tags": [],
+            "label": "alertingRules",
+            "description": [
+              "\nList of anomaly detection alerting rules configured for the job."
+            ],
+            "signature": [
+              "MlAnomalyDetectionAlertRule",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.jobTags",
+            "type": "Object",
+            "tags": [],
+            "label": "jobTags",
+            "description": [
+              "\nList of tags that have been added to the job."
+            ],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.bucketSpanSeconds",
+            "type": "number",
+            "tags": [],
+            "label": "bucketSpanSeconds",
+            "description": [
+              "\nThe size of the interval that the analysis is aggregated into, typically between 5m and 1h."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.customSettings",
+            "type": "Any",
+            "tags": [],
+            "label": "customSettings",
+            "description": [
+              "\nAdvanced configuration option. Contains custom meta data about the job. For example, it can contain custom URL information."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -2419,6 +2842,22 @@
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.SummaryJobState",
+        "type": "Type",
+        "tags": [],
+        "label": "SummaryJobState",
+        "description": [],
+        "signature": [
+          "MlJobState",
+          " | ",
+          "JobActionState"
+        ],
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -2455,9 +2894,9 @@
           "section": "def-server.KibanaRequest",
           "text": "KibanaRequest"
         },
-        "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, startedAt: Date, previousStartedAt: Date | null) => Promise<",
+        "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>) => Promise<{ context: ",
         "AnomalyDetectionAlertContext",
-        " | undefined>; }; }"
+        "; name: string; isHealthy: boolean; } | undefined>; }; }"
       ],
       "path": "x-pack/plugins/ml/server/plugin.ts",
       "deprecated": false,
@@ -2645,51 +3084,6 @@
       },
       {
         "parentPluginId": "ml",
-        "id": "def-common.isPopulatedObject",
-        "type": "Function",
-        "tags": [],
-        "label": "isPopulatedObject",
-        "description": [],
-        "signature": [
-          "<U extends string = string>(arg: unknown, requiredAttributes?: U[]) => arg is Record<U, unknown>"
-        ],
-        "path": "x-pack/plugins/ml/common/util/object_utils.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "ml",
-            "id": "def-common.isPopulatedObject.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "arg",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "x-pack/plugins/ml/common/util/object_utils.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-common.isPopulatedObject.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "requiredAttributes",
-            "description": [],
-            "signature": [
-              "U[]"
-            ],
-            "path": "x-pack/plugins/ml/common/util/object_utils.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
         "id": "def-common.isRuntimeField",
         "type": "Function",
         "tags": [],
@@ -2784,7 +3178,396 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.MlSummaryJob",
+        "type": "Interface",
+        "tags": [],
+        "label": "MlSummaryJob",
+        "description": [
+          "\nA summary of an anomaly detection job."
+        ],
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe identifier for the anomaly detection job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nA description of the job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.groups",
+            "type": "Array",
+            "tags": [],
+            "label": "groups",
+            "description": [
+              "\nA list of job groups. A job can belong to no groups, one or many."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.processed_record_count",
+            "type": "number",
+            "tags": [],
+            "label": "processed_record_count",
+            "description": [
+              "\nThe number of input documents that have been processed by the anomaly detection job.\nThis value includes documents with missing fields, since they are nonetheless analyzed."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.memory_status",
+            "type": "string",
+            "tags": [],
+            "label": "memory_status",
+            "description": [
+              "\nThe status of the mathematical models, which can take the values ok, soft_limit or hard_limit."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.jobState",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "jobState",
+            "description": [
+              "\nThe status of the job."
+            ],
+            "signature": [
+              "MlJobState",
+              " | ",
+              "JobActionState"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.datafeedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "datafeedIndices",
+            "description": [
+              "\nAn array of index names used by the datafeed. Wildcards are supported."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.hasDatafeed",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasDatafeed",
+            "description": [
+              "\nFlag indicating whether a datafeed exists for the job."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.datafeedId",
+            "type": "string",
+            "tags": [],
+            "label": "datafeedId",
+            "description": [
+              "\nThe identifier for the datafeed."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.datafeedState",
+            "type": "string",
+            "tags": [],
+            "label": "datafeedState",
+            "description": [
+              "\nThe status of the datafeed."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.latestTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "latestTimestampMs",
+            "description": [
+              "\nThe timestamp of the latest chronologically input document."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.earliestTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "earliestTimestampMs",
+            "description": [
+              "\nThe timestamp of the earliest chronologically input document."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.latestResultsTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "latestResultsTimestampMs",
+            "description": [
+              "\nThe latest of the timestamp of the latest chronologically input document or the latest bucket that was processed."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.fullJob",
+            "type": "Object",
+            "tags": [],
+            "label": "fullJob",
+            "description": [
+              "\nUsed in older implementations of the job config, where the datafeed was placed inside the job for convenience.\nThis will be populated if the job's id has been passed to the /api/ml/jobs/jobs_summary endpoint."
+            ],
+            "signature": [
+              "CombinedJob",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.nodeName",
+            "type": "string",
+            "tags": [],
+            "label": "nodeName",
+            "description": [
+              "\nThe name of the node that runs the job."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.auditMessage",
+            "type": "Object",
+            "tags": [],
+            "label": "auditMessage",
+            "description": [
+              "\nAudit message for the job."
+            ],
+            "signature": [
+              "Partial<",
+              "AuditMessage",
+              "> | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.isSingleMetricViewerJob",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSingleMetricViewerJob",
+            "description": [
+              "\nFlag indicating whether results of the job can be viewed in the Single Metric Viewer."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.isNotSingleMetricViewerJobMessage",
+            "type": "string",
+            "tags": [],
+            "label": "isNotSingleMetricViewerJobMessage",
+            "description": [
+              "\nFor jobs which cannot be viewed in the Single Metric Viewer, a message indicating the reason why\nresults for the job cannot be viewed in the Single Metric Viewer."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.blocked",
+            "type": "Object",
+            "tags": [],
+            "label": "blocked",
+            "description": [
+              "\nWhen present, it explains that a task is currently running on the job, which is stopping\nany other actions from being performed on the job."
+            ],
+            "signature": [
+              "MlJobBlocked",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.latestTimestampSortValue",
+            "type": "number",
+            "tags": [],
+            "label": "latestTimestampSortValue",
+            "description": [
+              "\nValue of the latest timestamp for the job used for sorting."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.earliestStartTimestampMs",
+            "type": "number",
+            "tags": [],
+            "label": "earliestStartTimestampMs",
+            "description": [
+              "\nThe earlist of the timestamp of the earliest chronologically input document or the earliest bucket that was processed."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.awaitingNodeAssignment",
+            "type": "boolean",
+            "tags": [],
+            "label": "awaitingNodeAssignment",
+            "description": [
+              "\nIndicates whether the job is currently awaiting assignment to a node before opening."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.alertingRules",
+            "type": "Array",
+            "tags": [],
+            "label": "alertingRules",
+            "description": [
+              "\nList of anomaly detection alerting rules configured for the job."
+            ],
+            "signature": [
+              "MlAnomalyDetectionAlertRule",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.jobTags",
+            "type": "Object",
+            "tags": [],
+            "label": "jobTags",
+            "description": [
+              "\nList of tags that have been added to the job."
+            ],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.bucketSpanSeconds",
+            "type": "number",
+            "tags": [],
+            "label": "bucketSpanSeconds",
+            "description": [
+              "\nThe size of the interval that the analysis is aggregated into, typically between 5m and 1h."
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-common.MlSummaryJob.customSettings",
+            "type": "Any",
+            "tags": [],
+            "label": "customSettings",
+            "description": [
+              "\nAdvanced configuration option. Contains custom meta data about the job. For example, it can contain custom URL information."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [
       {
         "parentPluginId": "ml",
@@ -2895,6 +3678,22 @@
           "; color: string; }[]"
         ],
         "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.SummaryJobState",
+        "type": "Type",
+        "tags": [],
+        "label": "SummaryJobState",
+        "description": [],
+        "signature": [
+          "MlJobState",
+          " | ",
+          "JobActionState"
+        ],
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

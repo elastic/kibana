@@ -8,51 +8,56 @@
 
 import type {
   Map,
+  LayerSpecification,
+  Source,
   GeoJSONSource,
-  VectorSource,
-  Layer,
-  AnyLayer,
-  FeatureIdentifier,
-  Style,
-  MapboxOptions,
+  VectorTileSource,
+  StyleSpecification,
+  MapEvent,
+  MapOptions,
   MapMouseEvent,
   MapSourceDataEvent,
   LngLat,
   LngLatBounds,
+  Point2D,
   PointLike,
-  MapboxGeoJSONFeature,
-  Point,
+  MapGeoJSONFeature,
   CustomLayerInterface,
+  FilterSpecification,
+  FeatureIdentifier,
 } from 'maplibre-gl';
+
 // @ts-expect-error
-import mapboxglDist from 'maplibre-gl/dist/maplibre-gl-csp';
+import maplibreglDist from 'maplibre-gl/dist/maplibre-gl-csp';
 // @ts-expect-error
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
 // @ts-expect-error
 import mbWorkerUrl from '!!file-loader!maplibre-gl/dist/maplibre-gl-csp-worker';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const mapboxgl: any = mapboxglDist;
-mapboxgl.workerUrl = mbWorkerUrl;
-mapboxgl.setRTLTextPlugin(mbRtlPlugin);
+const maplibregl: any = maplibreglDist;
+maplibregl.workerUrl = mbWorkerUrl;
+maplibregl.setRTLTextPlugin(mbRtlPlugin);
 
-export { mapboxgl };
+export { maplibregl };
 
 export type {
   Map,
+  LayerSpecification,
+  StyleSpecification,
+  Source,
   GeoJSONSource,
-  VectorSource,
-  Layer,
-  AnyLayer,
-  FeatureIdentifier,
-  Style,
-  MapboxOptions,
+  VectorTileSource,
+  MapEvent,
+  MapOptions,
   MapMouseEvent,
   MapSourceDataEvent,
   LngLat,
   LngLatBounds,
+  Point2D,
   PointLike,
-  MapboxGeoJSONFeature,
-  Point,
+  MapGeoJSONFeature,
   CustomLayerInterface,
+  FilterSpecification,
+  FeatureIdentifier,
 };

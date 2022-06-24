@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { mockCoreContext } from '../../core_context.mock';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { elasticsearchServiceMock } from '../../elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { pluginServiceMock } from '../../plugins/plugins_service.mock';
 import { statusServiceMock } from '../../status/status_service.mock';
@@ -15,6 +16,7 @@ const context = mockCoreContext.create();
 const httpPreboot = httpServiceMock.createInternalPrebootContract();
 const httpSetup = httpServiceMock.createInternalSetupContract();
 const status = statusServiceMock.createInternalSetupContract();
+const elasticsearch = elasticsearchServiceMock.createInternalSetup();
 
 export const mockRenderingServiceParams = context;
 export const mockRenderingPrebootDeps = {
@@ -22,6 +24,7 @@ export const mockRenderingPrebootDeps = {
   uiPlugins: pluginServiceMock.createUiPlugins(),
 };
 export const mockRenderingSetupDeps = {
+  elasticsearch,
   http: httpSetup,
   uiPlugins: pluginServiceMock.createUiPlugins(),
   status,

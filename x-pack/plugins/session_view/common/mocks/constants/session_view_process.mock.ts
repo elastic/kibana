@@ -160,6 +160,7 @@ export const mockEvents: ProcessEvent[] = [
       action: EventAction.fork,
       category: 'process',
       kind: EventKind.event,
+      id: '1',
     },
     host: {
       architecture: 'x86_64',
@@ -317,6 +318,7 @@ export const mockEvents: ProcessEvent[] = [
       action: EventAction.exec,
       category: 'process',
       kind: EventKind.event,
+      id: '2',
     },
   },
   {
@@ -459,6 +461,7 @@ export const mockEvents: ProcessEvent[] = [
       action: EventAction.end,
       category: 'process',
       kind: EventKind.event,
+      id: '3',
     },
     host: {
       architecture: 'x86_64',
@@ -621,6 +624,7 @@ export const mockEvents: ProcessEvent[] = [
       action: EventAction.end,
       category: 'process',
       kind: EventKind.event,
+      id: '4',
     },
     host: {
       architecture: 'x86_64',
@@ -809,13 +813,14 @@ export const mockAlerts: ProcessEvent[] = [
       action: EventAction.exec,
       category: 'process',
       kind: EventKind.signal,
+      id: '5',
     },
     host: {
       architecture: 'x86_64',
       hostname: 'james-fleet-714-2',
       id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
-      ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
-      mac: '42:01:0a:84:00:32',
+      ip: ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'],
+      mac: ['42:01:0a:84:00:32'],
       name: 'james-fleet-714-2',
       os: {
         family: 'centos',
@@ -995,13 +1000,14 @@ export const mockAlerts: ProcessEvent[] = [
       action: EventAction.end,
       category: 'process',
       kind: EventKind.signal,
+      id: '6',
     },
     host: {
       architecture: 'x86_64',
       hostname: 'james-fleet-714-2',
       id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
-      ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
-      mac: '42:01:0a:84:00:32',
+      ip: ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'],
+      mac: ['42:01:0a:84:00:32'],
       name: 'james-fleet-714-2',
       os: {
         family: 'centos',
@@ -1257,6 +1263,7 @@ export const childProcessMock: Process = {
   orphans: [],
   addEvent: (_) => undefined,
   addAlert: (_) => undefined,
+  addChild: (_) => undefined,
   clearSearch: () => undefined,
   getChildren: () => [],
   hasOutput: () => false,
@@ -1264,6 +1271,7 @@ export const childProcessMock: Process = {
   getAlerts: () => [],
   updateAlertsStatus: (_) => undefined,
   hasExec: () => false,
+  isVerbose: () => true,
   getOutput: () => '',
   getDetails: () =>
     ({
@@ -1272,13 +1280,14 @@ export const childProcessMock: Process = {
         kind: EventKind.event,
         category: 'process',
         action: EventAction.exec,
+        id: '1',
       },
       host: {
         architecture: 'x86_64',
         hostname: 'james-fleet-714-2',
         id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
-        ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
-        mac: '42:01:0a:84:00:32',
+        ip: ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'],
+        mac: ['42:01:0a:84:00:32'],
         name: 'james-fleet-714-2',
         os: {
           family: 'centos',
@@ -1325,6 +1334,8 @@ export const childProcessMock: Process = {
     } as ProcessEvent),
   isUserEntered: () => false,
   getMaxAlertLevel: () => null,
+  getEndTime: () => '',
+  isDescendantOf: () => false,
 };
 
 export const processMock: Process = {
@@ -1338,6 +1349,7 @@ export const processMock: Process = {
   orphans: [],
   addEvent: (_) => undefined,
   addAlert: (_) => undefined,
+  addChild: (_) => undefined,
   clearSearch: () => undefined,
   getChildren: () => [],
   hasOutput: () => false,
@@ -1345,6 +1357,7 @@ export const processMock: Process = {
   getAlerts: () => [],
   updateAlertsStatus: (_) => undefined,
   hasExec: () => false,
+  isVerbose: () => true,
   getOutput: () => '',
   getDetails: () =>
     ({
@@ -1353,13 +1366,14 @@ export const processMock: Process = {
         kind: EventKind.event,
         category: 'process',
         action: EventAction.exec,
+        id: '2',
       },
       host: {
         architecture: 'x86_64',
         hostname: 'james-fleet-714-2',
         id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
-        ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
-        mac: '42:01:0a:84:00:32',
+        ip: ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'],
+        mac: ['42:01:0a:84:00:32'],
         name: 'james-fleet-714-2',
         os: {
           family: 'centos',
@@ -1389,6 +1403,14 @@ export const processMock: Process = {
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:04.210Z',
         pid: 1,
+        user: {
+          id: '1000',
+          name: 'vagrant',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
+        },
         parent: {
           pid: 2442,
           user: {
@@ -1497,6 +1519,8 @@ export const processMock: Process = {
     } as ProcessEvent),
   isUserEntered: () => false,
   getMaxAlertLevel: () => null,
+  getEndTime: () => '',
+  isDescendantOf: () => false,
 };
 
 export const sessionViewBasicProcessMock: Process = {
@@ -1504,6 +1528,7 @@ export const sessionViewBasicProcessMock: Process = {
   events: mockEvents,
   hasExec: () => true,
   isUserEntered: () => true,
+  getEndTime: () => '',
 };
 
 export const sessionViewAlertProcessMock: Process = {
@@ -1514,6 +1539,7 @@ export const sessionViewAlertProcessMock: Process = {
   getAlerts: () => mockAlerts,
   hasExec: () => true,
   isUserEntered: () => true,
+  getEndTime: () => '',
 };
 
 export const mockProcessMap = mockEvents.reduce(
@@ -1529,6 +1555,7 @@ export const mockProcessMap = mockEvents.reduce(
       orphans: [],
       addEvent: (_) => undefined,
       addAlert: (_) => undefined,
+      addChild: (_) => undefined,
       clearSearch: () => undefined,
       getChildren: () => [],
       hasOutput: () => false,
@@ -1540,6 +1567,9 @@ export const mockProcessMap = mockEvents.reduce(
       getDetails: () => event,
       isUserEntered: () => false,
       getMaxAlertLevel: () => null,
+      isVerbose: () => true,
+      getEndTime: () => '',
+      isDescendantOf: () => false,
     };
     return processMap;
   },

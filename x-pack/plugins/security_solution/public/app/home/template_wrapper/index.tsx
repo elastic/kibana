@@ -9,11 +9,8 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiPanel } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { AppLeaveHandler } from '../../../../../../../src/core/public';
-import {
-  KibanaPageTemplate,
-  NO_DATA_PAGE_TEMPLATE_PROPS,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { AppLeaveHandler } from '@kbn/core/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
@@ -26,8 +23,20 @@ import {
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { gutterTimeline } from '../../../common/lib/helpers';
-import { useKibana } from '../../../common/lib/kibana';
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
+import { useIsPolicySettingsBarVisible } from '../../../management/pages/policy/view/policy_hooks';
+import { useIsGroupedNavigationEnabled } from '../../../common/components/navigation/helpers';
+
+const NO_DATA_PAGE_MAX_WIDTH = 950;
+
+const NO_DATA_PAGE_TEMPLATE_PROPS = {
+  restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
+  template: 'centeredBody',
+  pageContentProps: {
+    hasShadow: false,
+    color: 'transparent',
+  },
+};
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
@@ -35,7 +44,7 @@ import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_
  */
 const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   $isShowingTimelineOverlay?: boolean;
-  $isTimelineBottomBarVisible?: boolean;
+  $addBottomPadding?: boolean;
 }>`
   .${BOTTOM_BAR_CLASSNAME} {
     animation: 'none !important'; // disable the default bottom bar slide animation
@@ -53,8 +62,8 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   }
 
   // If the bottom bar is visible add padding to the navigation
-  ${({ $isTimelineBottomBarVisible }) =>
-    $isTimelineBottomBarVisible &&
+  ${({ $addBottomPadding }) =>
+    $addBottomPadding &&
     `
     @media (min-width: 768px) {
       .kbnPageTemplateSolutionNav {
@@ -71,16 +80,23 @@ interface SecuritySolutionPageWrapperProps {
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> =
   React.memo(({ children, onAppLeave }) => {
     const solutionNav = useSecuritySolutionNavigation();
+    const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
+    const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
+    const addBottomPadding =
+      isTimelineBottomBarVisible || isPolicySettingsVisible || isGroupedNavEnabled;
 
-    const userHasSecuritySolutionVisible = useKibana().services.application.capabilities.siem.show;
     const showEmptyState = useShowPagesWithEmptyView();
     const emptyStateProps = showEmptyState
-      ? { ...NO_DATA_PAGE_TEMPLATE_PROPS, template: 'centeredContent' }
+      ? {
+          ...NO_DATA_PAGE_TEMPLATE_PROPS,
+          template: 'centeredContent',
+          pageContentProps: { verticalPosition: 'top' },
+        }
       : {};
 
     /*
@@ -91,11 +107,11 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
      */
     return (
       <StyledKibanaPageTemplate
-        $isTimelineBottomBarVisible={isTimelineBottomBarVisible}
+        $addBottomPadding={addBottomPadding}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
         bottomBarProps={SecuritySolutionBottomBarProps}
         bottomBar={
-          userHasSecuritySolutionVisible && <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
+          isTimelineBottomBarVisible && <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
         }
         paddingSize="none"
         solutionNav={solutionNav}

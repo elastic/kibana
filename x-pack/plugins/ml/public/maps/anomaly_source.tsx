@@ -11,23 +11,24 @@ import {
   FieldFormatter,
   MAX_ZOOM,
   MIN_ZOOM,
+  TooltipFeatureAction,
   VECTOR_SHAPE_TYPE,
   VectorSourceRequestMeta,
-} from '../../../maps/common';
-import { AbstractSourceDescriptor, MapExtent } from '../../../maps/common/descriptor_types';
-import { ITooltipProperty, GEOJSON_FEATURE_ID_PROPERTY_NAME } from '../../../maps/public';
+} from '@kbn/maps-plugin/common';
+import { AbstractSourceDescriptor, MapExtent } from '@kbn/maps-plugin/common/descriptor_types';
+import { ITooltipProperty, GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { GeoJsonWithMeta } from '@kbn/maps-plugin/public';
+import type { IField } from '@kbn/maps-plugin/public';
+import type { Attribution, ImmutableSourceProperty } from '@kbn/maps-plugin/public';
+import type { SourceEditorArgs } from '@kbn/maps-plugin/public';
+import type { DataRequest } from '@kbn/maps-plugin/public';
+import type { GetFeatureActionsArgs, IVectorSource, SourceStatus } from '@kbn/maps-plugin/public';
 import {
   AnomalySourceField,
   AnomalySourceTooltipProperty,
   ANOMALY_SOURCE_FIELDS,
 } from './anomaly_source_field';
-import type { Adapters } from '../../../../../src/plugins/inspector/common/adapters';
-import type { GeoJsonWithMeta } from '../../../maps/public';
-import type { IField } from '../../../maps/public';
-import type { Attribution, ImmutableSourceProperty, PreIndexedShape } from '../../../maps/public';
-import type { SourceEditorArgs } from '../../../maps/public';
-import type { DataRequest } from '../../../maps/public';
-import type { IVectorSource, SourceStatus } from '../../../maps/public';
 import { ML_ANOMALY } from './anomaly_source_factory';
 import { getResultsForJobId, ML_ANOMALY_LAYERS, MlAnomalyLayersType } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
@@ -310,11 +311,8 @@ export class AnomalySource implements IVectorSource {
     return [];
   }
 
-  async getPreIndexedShape(
-    properties: { [p: string]: any } | null
-  ): Promise<PreIndexedShape | null> {
-    // IGNORE: This is only relevant if your source is backed by an index-pattern
-    return null;
+  getFeatureActions(args: GetFeatureActionsArgs): TooltipFeatureAction[] {
+    return [];
   }
 
   getQueryableIndexPatternIds(): string[] {

@@ -6,9 +6,12 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger, KibanaRequest } from 'src/core/server';
+import { Logger, KibanaRequest } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import {
   validateParams,
   validateConfig,
@@ -16,20 +19,20 @@ import {
   validateConnector,
 } from './validate_with_schema';
 import {
+  ActionType,
   ActionTypeExecutorResult,
+  ActionTypeExecutorRawResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
   PreConfiguredAction,
   RawAction,
 } from '../types';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { SpacesServiceStart } from '../../../spaces/server';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
+import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -157,24 +160,6 @@ export class ActionExecutor {
         }
         const actionType = actionTypeRegistry.get(actionTypeId);
 
-        let validatedParams: Record<string, unknown>;
-        let validatedConfig: Record<string, unknown>;
-        let validatedSecrets: Record<string, unknown>;
-        try {
-          validatedParams = validateParams(actionType, params);
-          validatedConfig = validateConfig(actionType, config);
-          validatedSecrets = validateSecrets(actionType, secrets);
-          if (actionType.validate?.connector) {
-            validateConnector(actionType, {
-              config,
-              secrets,
-            });
-          }
-        } catch (err) {
-          span?.setOutcome('failure');
-          return { status: 'error', actionId, message: err.message, retry: false };
-        }
-
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
         logger.debug(`executing action ${actionLabel}`);
 
@@ -219,8 +204,16 @@ export class ActionExecutor {
 
         eventLogger.logEvent(startEvent);
 
-        let rawResult: ActionTypeExecutorResult<unknown>;
+        let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
+          const { validatedParams, validatedConfig, validatedSecrets } = validateAction({
+            actionId,
+            actionType,
+            params,
+            config,
+            secrets,
+          });
+
           rawResult = await actionType.executor({
             actionId,
             services,
@@ -231,14 +224,20 @@ export class ActionExecutor {
             taskInfo,
           });
         } catch (err) {
-          rawResult = {
-            actionId,
-            status: 'error',
-            message: 'an error occurred while running the action executor',
-            serviceMessage: err.message,
-            retry: false,
-          };
+          if (err.reason === ActionExecutionErrorReason.Validation) {
+            rawResult = err.result;
+          } else {
+            rawResult = {
+              actionId,
+              status: 'error',
+              message: 'an error occurred while running the action',
+              serviceMessage: err.message,
+              error: err,
+              retry: false,
+            };
+          }
         }
+
         eventLogger.stopTiming(event);
 
         // allow null-ish return to indicate success
@@ -259,6 +258,12 @@ export class ActionExecutor {
           event.message = `action execution failure: ${actionLabel}`;
           event.error = event.error || {};
           event.error.message = actionErrorToMessage(result);
+          if (result.error) {
+            logger.error(result.error, {
+              tags: [actionTypeId, actionId, 'action-run-failed'],
+              error: { stack_trace: result.error.stack },
+            });
+          }
           logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
         } else {
           span?.setOutcome('failure');
@@ -272,7 +277,8 @@ export class ActionExecutor {
         }
 
         eventLogger.logEvent(event);
-        return result;
+        const { error, ...resultWithoutError } = result;
+        return resultWithoutError;
       }
     );
   }
@@ -396,7 +402,7 @@ async function getActionInfoInternal(
   };
 }
 
-function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string {
+function actionErrorToMessage(result: ActionTypeExecutorRawResult<unknown>): string {
   let message = result.message || 'unknown error running action';
 
   if (result.serviceMessage) {
@@ -410,4 +416,39 @@ function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string
   }
 
   return message;
+}
+
+interface ValidateActionOpts {
+  actionId: string;
+  actionType: ActionType;
+  params: Record<string, unknown>;
+  config: unknown;
+  secrets: unknown;
+}
+
+function validateAction({ actionId, actionType, params, config, secrets }: ValidateActionOpts) {
+  let validatedParams: Record<string, unknown>;
+  let validatedConfig: Record<string, unknown>;
+  let validatedSecrets: Record<string, unknown>;
+
+  try {
+    validatedParams = validateParams(actionType, params);
+    validatedConfig = validateConfig(actionType, config);
+    validatedSecrets = validateSecrets(actionType, secrets);
+    if (actionType.validate?.connector) {
+      validateConnector(actionType, {
+        config,
+        secrets,
+      });
+    }
+
+    return { validatedParams, validatedConfig, validatedSecrets };
+  } catch (err) {
+    throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {
+      actionId,
+      status: 'error',
+      message: err.message,
+      retry: false,
+    });
+  }
 }

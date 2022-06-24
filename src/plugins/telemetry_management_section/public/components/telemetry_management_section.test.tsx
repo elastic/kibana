@@ -9,10 +9,10 @@
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import TelemetryManagementSection from './telemetry_management_section';
-import { TelemetryService } from '../../../telemetry/public/services';
-import { coreMock } from '../../../../core/public/mocks';
+import { TelemetryService } from '@kbn/telemetry-plugin/public/services';
+import { coreMock } from '@kbn/core/public/mocks';
 import { render } from '@testing-library/react';
-import type { DocLinksStart } from 'src/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
 describe('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();
@@ -217,7 +217,10 @@ describe('TelemetryManagementSectionComponent', () => {
       />
     );
     try {
-      const toggleExampleComponent = component.find('FormattedMessage > EuiLink[onClick]').at(0);
+      const toggleExampleComponent = component
+        .find('FormattedMessage > EuiLink')
+        .find('button')
+        .at(0);
       const updatedView = toggleExampleComponent.simulate('click');
       updatedView.find('OptInExampleFlyout');
       updatedView.simulate('close');

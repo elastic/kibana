@@ -7,18 +7,18 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Adapters } from 'src/plugins/inspector/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
-
-import { mapboxgl } from '@kbn/mapbox-gl';
-import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { maplibregl } from '@kbn/mapbox-gl';
+import type { Map as MapboxMap, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
+import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
-import { getPreserveDrawingBuffer } from '../../kibana_services';
+import { getPreserveDrawingBuffer, isScreenshotMode } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { IVectorSource } from '../../classes/sources/vector_source';
 import { MapSettings } from '../../reducers/map';
@@ -40,7 +40,6 @@ import { getGlyphUrl } from '../../util';
 import { syncLayerOrder } from './sort_layers';
 
 import { getTileMetaFeatures, removeOrphanedSourcesAndLayers } from './utils';
-import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
@@ -76,6 +75,8 @@ export interface Props {
   updateMetaFromTiles: (layerId: string, features: TileMetaFeature[]) => void;
   featureModeActive: boolean;
   filterModeActive: boolean;
+  setTileLoadError(layerId: string, errorMessage: string): void;
+  clearTileLoadError(layerId: string): void;
 }
 
 interface State {
@@ -90,7 +91,7 @@ export class MbMap extends Component<Props, State> {
   private _prevDisableInteractive?: boolean;
   private _prevLayerList?: ILayer[];
   private _prevTimeslice?: Timeslice;
-  private _navigationControl = new mapboxgl.NavigationControl({ showCompass: false });
+  private _navigationControl = new maplibregl.NavigationControl({ showCompass: false });
   private _tileStatusTracker?: TileStatusTracker;
 
   state: State = {
@@ -174,13 +175,13 @@ export class MbMap extends Component<Props, State> {
   async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapboxMap> {
     return new Promise((resolve) => {
       const mbStyle = {
-        version: 8,
+        version: 8 as 8,
         sources: {},
         layers: [],
         glyphs: getGlyphUrl(),
       };
 
-      const options: MapboxOptions = {
+      const options: MapOptions = {
         attributionControl: false,
         container: this._containerRef!,
         style: mbStyle,
@@ -198,15 +199,22 @@ export class MbMap extends Component<Props, State> {
       } else {
         options.bounds = [-170, -60, 170, 75];
       }
-      const mbMap = new mapboxgl.Map(options);
+      const mbMap = new maplibregl.Map(options);
       mbMap.dragRotate.disable();
       mbMap.touchZoomRotate.disableRotation();
 
       this._tileStatusTracker = new TileStatusTracker({
         mbMap,
         getCurrentLayerList: () => this.props.layerList,
-        updateTileStatus: (layer: ILayer, areTilesLoaded: boolean) => {
+        updateTileStatus: (layer: ILayer, areTilesLoaded: boolean, errorMessage?: string) => {
           this.props.setAreTilesLoaded(layer.getId(), areTilesLoaded);
+
+          if (errorMessage) {
+            this.props.setTileLoadError(layer.getId(), errorMessage);
+          } else {
+            this.props.clearTileLoadError(layer.getId());
+          }
+
           this._queryForMeta(layer);
         },
       });
@@ -263,7 +271,9 @@ export class MbMap extends Component<Props, State> {
     mbMap.on(
       'moveend',
       _.debounce(() => {
-        this.props.extentChanged(this._getMapExtentState());
+        if (this._isMounted) {
+          this.props.extentChanged(this._getMapExtentState());
+        }
       }, 100)
     );
 
@@ -294,7 +304,9 @@ export class MbMap extends Component<Props, State> {
 
   async _loadMakiSprites(mbMap: MapboxMap) {
     if (this._isMounted) {
-      const pixelRatio = Math.floor(window.devicePixelRatio);
+      // Math.floor rounds values < 1 to 0. This occurs when browser is zoomed out
+      // Math.max wrapper ensures value is always at least 1 in these cases
+      const pixelRatio = Math.max(Math.floor(window.devicePixelRatio), 1);
       for (const [symbolId, { svg }] of Object.entries(MAKI_ICONS)) {
         if (!mbMap.hasImage(symbolId)) {
           const imageData = await createSdfIcon({ renderSize: MAKI_ICON_SIZE, svg });
@@ -318,12 +330,12 @@ export class MbMap extends Component<Props, State> {
 
     if (goto.bounds) {
       // clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
-      const lnLatBounds = new mapboxgl.LngLatBounds(
-        new mapboxgl.LngLat(
+      const lnLatBounds = new maplibregl.LngLatBounds(
+        new maplibregl.LngLat(
           clampToLonBounds(goto.bounds.minLon),
           clampToLatBounds(goto.bounds.minLat)
         ),
-        new mapboxgl.LngLat(
+        new maplibregl.LngLat(
           clampToLonBounds(goto.bounds.maxLon),
           clampToLatBounds(goto.bounds.maxLat)
         )
@@ -377,8 +389,9 @@ export class MbMap extends Component<Props, State> {
     }
 
     if (
-      this._prevDisableInteractive === undefined ||
-      this._prevDisableInteractive !== this.props.settings.disableInteractive
+      !isScreenshotMode() &&
+      (this._prevDisableInteractive === undefined ||
+        this._prevDisableInteractive !== this.props.settings.disableInteractive)
     ) {
       this._prevDisableInteractive = this.props.settings.disableInteractive;
       if (this.props.settings.disableInteractive) {
@@ -407,7 +420,6 @@ export class MbMap extends Component<Props, State> {
       for (const { symbolId, svg, cutoff, radius } of this.props.customIcons) {
         createSdfIcon({ svg, renderSize: CUSTOM_ICON_SIZE, cutoff, radius }).then(
           (imageData: ImageData) => {
-            // @ts-expect-error MapboxMap type is missing updateImage method
             if (mbMap.hasImage(symbolId)) mbMap.updateImage(symbolId, imageData);
             else
               mbMap.addImage(symbolId, imageData, {
@@ -434,7 +446,9 @@ export class MbMap extends Component<Props, State> {
     // hack to update extent after zoom update finishes moving map.
     if (zoomRangeChanged) {
       setTimeout(() => {
-        this.props.extentChanged(this._getMapExtentState());
+        if (this._isMounted) {
+          this.props.extentChanged(this._getMapExtentState());
+        }
       }, 300);
     }
   }

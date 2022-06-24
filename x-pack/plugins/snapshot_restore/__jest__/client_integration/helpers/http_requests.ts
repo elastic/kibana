@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { API_BASE_PATH } from '../../../common';
 
 type HttpMethod = 'GET' | 'PUT' | 'POST';
@@ -90,6 +90,11 @@ const registerHttpRequestMockHelpers = (
     error?: ResponseError
   ) => mockResponse('GET', `${API_BASE_PATH}policies/indices`, response, error);
 
+  const setLoadPoliciesResponse = (
+    response: HttpResponse = { indices: [] },
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}policies`, response, error);
+
   const setAddPolicyResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}policies`, response, error);
 
@@ -119,6 +124,9 @@ const registerHttpRequestMockHelpers = (
       error
     );
 
+  const setLoadFeaturesResponse = (response: HttpResponse = [], error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}policies/features`, response, error);
+
   return {
     setLoadRepositoriesResponse,
     setLoadRepositoryTypesResponse,
@@ -131,6 +139,8 @@ const registerHttpRequestMockHelpers = (
     setGetPolicyResponse,
     setCleanupRepositoryResponse,
     setRestoreSnapshotResponse,
+    setLoadFeaturesResponse,
+    setLoadPoliciesResponse,
   };
 };
 

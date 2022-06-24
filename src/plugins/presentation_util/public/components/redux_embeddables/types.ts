@@ -20,7 +20,7 @@ import {
   EmbeddableOutput,
   IContainer,
   IEmbeddable,
-} from '../../../../embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 
 export interface GenericEmbeddableReducers<InputType> {
   /**
@@ -63,6 +63,10 @@ export type ReduxContainerContextServices<
 > = ReduxEmbeddableContextServices<InputType, ReducerType> & {
   containerActions: Pick<
     IContainer,
-    'untilEmbeddableLoaded' | 'removeEmbeddable' | 'addNewEmbeddable' | 'updateInputForChild'
+    | 'untilEmbeddableLoaded'
+    | 'removeEmbeddable'
+    | 'addNewEmbeddable'
+    | 'updateInputForChild'
+    | 'replaceEmbeddable'
   >;
 };

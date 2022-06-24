@@ -7,18 +7,18 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '../../../../actions/server';
-import { eventLogClientMock } from '../../../../event_log/server/mocks';
-import { SavedObject } from 'kibana/server';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
+import { SavedObject } from '@kbn/core/server';
 import { RawRule } from '../../types';
-import { auditLoggerMock } from '../../../../security/server/audit/mocks';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 import { getExecutionLogAggregation } from '../../lib/get_execution_log_aggregation';
 
@@ -111,28 +111,23 @@ const aggregateResults = {
               meta: {},
               doc_count: 0,
             },
-            alertCounts: {
-              meta: {},
-              buckets: {
-                activeAlerts: {
-                  doc_count: 5,
-                },
-                newAlerts: {
-                  doc_count: 5,
-                },
-                recoveredAlerts: {
-                  doc_count: 0,
-                },
-              },
-            },
             ruleExecution: {
               meta: {},
               doc_count: 1,
               numTriggeredActions: {
                 value: 5.0,
               },
-              numScheduledActions: {
+              numGeneratedActions: {
                 value: 5.0,
+              },
+              numActiveAlerts: {
+                value: 5.0,
+              },
+              numNewAlerts: {
+                value: 5.0,
+              },
+              numRecoveredAlerts: {
+                value: 0.0,
               },
               outcomeAndMessage: {
                 hits: {
@@ -149,6 +144,9 @@ const aggregateResults = {
                       _source: {
                         event: {
                           outcome: 'success',
+                        },
+                        kibana: {
+                          version: '8.2.0',
                         },
                         message:
                           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -196,27 +194,22 @@ const aggregateResults = {
               meta: {},
               doc_count: 0,
             },
-            alertCounts: {
-              meta: {},
-              buckets: {
-                activeAlerts: {
-                  doc_count: 5,
-                },
-                newAlerts: {
-                  doc_count: 5,
-                },
-                recoveredAlerts: {
-                  doc_count: 5,
-                },
-              },
-            },
             ruleExecution: {
               meta: {},
               doc_count: 1,
               numTriggeredActions: {
                 value: 5.0,
               },
-              numScheduledActions: {
+              numGeneratedActions: {
+                value: 5.0,
+              },
+              numActiveAlerts: {
+                value: 5.0,
+              },
+              numNewAlerts: {
+                value: 5.0,
+              },
+              numRecoveredAlerts: {
                 value: 5.0,
               },
               outcomeAndMessage: {
@@ -234,6 +227,9 @@ const aggregateResults = {
                       _source: {
                         event: {
                           outcome: 'success',
+                        },
+                        kibana: {
+                          version: '8.2.0',
                         },
                         message:
                           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -296,7 +292,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.105Z',
         end: '2022-03-23T17:37:07.105Z',
-        duration: 0,
+        duration: '0',
         outcome: 'failure',
       },
       kibana: {
@@ -345,7 +341,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.101Z',
         end: '2022-03-23T17:37:07.102Z',
-        duration: 1000000,
+        duration: '1000000',
         outcome: 'failure',
       },
       kibana: {
@@ -394,7 +390,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.098Z',
         end: '2022-03-23T17:37:07.098Z',
-        duration: 0,
+        duration: '0',
         outcome: 'failure',
       },
       kibana: {
@@ -443,7 +439,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.095Z',
         end: '2022-03-23T17:37:07.096Z',
-        duration: 1000000,
+        duration: '1000000',
         outcome: 'failure',
       },
       kibana: {
@@ -492,7 +488,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.084Z',
         end: '2022-03-23T17:37:07.086Z',
-        duration: 2000000,
+        duration: '2000000',
         outcome: 'failure',
       },
       kibana: {
@@ -543,7 +539,7 @@ const findResults = {
         start: '2022-03-23T17:23:05.131Z',
         outcome: 'failure',
         end: '2022-03-23T17:23:05.248Z',
-        duration: 117000000,
+        duration: '117000000',
         reason: 'execute',
       },
       kibana: {
@@ -631,11 +627,12 @@ describe('getExecutionLogForRule()', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 0,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -650,11 +647,12 @@ describe('getExecutionLogForRule()', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -929,7 +927,7 @@ describe('getExecutionLogForRule()', () => {
         getExecutionLogByIdParams({ sort: [{ foo: { order: 'desc' } }] })
       )
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Invalid sort field "foo" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_scheduled_actions]]`
+      `[Error: Invalid sort field "foo" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions,num_active_alerts,num_recovered_alerts,num_new_alerts]]`
     );
   });
 

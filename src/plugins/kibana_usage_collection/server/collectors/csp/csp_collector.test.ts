@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { CspConfig, ICspConfig } from '../../../../../core/server';
+import { CspConfig, ICspConfig } from '@kbn/core/server';
 import { createCspCollector } from './csp_collector';
-import { httpServiceMock, loggingSystemMock } from '../../../../../core/server/mocks';
+import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   Collector,
   createCollectorFetchContextMock,
-} from 'src/plugins/usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -24,6 +24,7 @@ describe('csp collector', () => {
   function updateCsp(config: Partial<ICspConfig>) {
     httpMock.csp = new CspConfig({
       ...CspConfig.DEFAULT,
+      disableUnsafeEval: false,
       style_src: [],
       worker_src: [],
       script_src: [],

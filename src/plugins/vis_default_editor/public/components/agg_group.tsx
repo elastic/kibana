@@ -19,8 +19,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggGroupNames, AggGroupLabels, IAggConfig, TimeRange } from '../../../data/public';
-import type { Schema } from '../../../visualizations/public';
+import type { TimeRange } from '@kbn/es-query';
+import { AggGroupNames, AggGroupLabels, IAggConfig } from '@kbn/data-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { TelemetryCounter } from 'src/core/public';
+import type { TelemetryCounter } from '@kbn/core/public';
 import type { Action } from './custom_shipper';
 
 declare global {
   interface Window {
     __analyticsPluginA__: {
-      getLastActions: (takeNumberOfActions: number) => Promise<Action[]>;
+      getActionsUntilReportTestPluginLifecycleEvent: () => Promise<Action[]>;
       stats: TelemetryCounter[];
       setOptIn: (optIn: boolean) => void;
     };

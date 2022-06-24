@@ -85,8 +85,7 @@ const aliasNamesWithComparison = apiRequestsToInterceptWithComparison.map(
 
 const aliasNames = [...aliasNamesNoComparison, ...aliasNamesWithComparison];
 
-// flaky test
-describe.skip('Service Overview', () => {
+describe('Service Overview', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({
@@ -102,7 +101,7 @@ describe.skip('Service Overview', () => {
 
   describe('renders', () => {
     before(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(baseUrl);
     });
 
@@ -122,11 +121,17 @@ describe.skip('Service Overview', () => {
 
   describe('transactions', () => {
     beforeEach(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(baseUrl);
     });
 
     it('persists transaction type selected when clicking on Transactions tab', () => {
+      cy.intercept(
+        'GET',
+        '/internal/apm/services/opbeans-node/transaction_types?*'
+      ).as('transactionTypesRequest');
+      cy.wait('@transactionTypesRequest');
+
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'request'
@@ -144,6 +149,11 @@ describe.skip('Service Overview', () => {
     });
 
     it('persists transaction type selected when clicking on View Transactions link', () => {
+      cy.intercept(
+        'GET',
+        '/internal/apm/services/opbeans-node/transaction_types?*'
+      ).as('transactionTypesRequest');
+      cy.wait('@transactionTypesRequest');
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'request'
@@ -164,7 +174,7 @@ describe.skip('Service Overview', () => {
 
   describe('when RUM service', () => {
     before(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(
         url.format({
           pathname: '/app/apm/services/opbeans-rum/overview',
@@ -193,7 +203,7 @@ describe.skip('Service Overview', () => {
 
   describe('Calls APIs', () => {
     beforeEach(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(baseUrl);
       apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
         cy.intercept('GET', endpoint).as(aliasName);
@@ -206,7 +216,22 @@ describe.skip('Service Overview', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(aliasNames, { requestTimeout: 10000 });
 
-      cy.get('[data-test-subj="environmentFilter"]').select('production');
+      cy.intercept('GET', 'internal/apm/suggestions?*').as(
+        'suggestionsRequest'
+      );
+
+      cy.get('[data-test-subj="environmentFilter"]').type('production');
+
+      cy.expectAPIsToHaveBeenCalledWith({
+        apisIntercepted: ['@suggestionsRequest'],
+        value: 'fieldValue=production',
+      });
+
+      cy.get(
+        '[data-test-subj="comboBoxOptionsList environmentFilter-optionsList"]'
+      )
+        .contains('production')
+        .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNames,
@@ -238,14 +263,11 @@ describe.skip('Service Overview', () => {
     });
 
     it('when selecting a different comparison window', () => {
-      cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'day');
+      cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
 
       // selects another comparison type
-      cy.get('[data-test-subj="comparisonSelect"]').select('week');
-      cy.get('[data-test-subj="comparisonSelect"]').should(
-        'have.value',
-        'week'
-      );
+      cy.get('[data-test-subj="comparisonSelect"]').select('1w');
+      cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1w');
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNamesWithComparison,
         value: 'offset',

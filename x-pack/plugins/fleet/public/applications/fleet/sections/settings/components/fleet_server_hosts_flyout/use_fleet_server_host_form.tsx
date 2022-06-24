@@ -15,7 +15,7 @@ import { isDiffPathProtocol } from '../../../../../../../common';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import { getAgentAndPolicyCount } from '../../services/agent_and_policies_count';
 
-const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
+const URL_REGEX = /^(https):\/\/[^\s$.?#].[^\s]*$/gm;
 
 const ConfirmTitle = () => (
   <FormattedMessage
@@ -77,7 +77,14 @@ function validateFleetServerHosts(value: string[]) {
   const res: Array<{ message: string; index: number }> = [];
   const hostIndexes: { [key: string]: number[] } = {};
   value.forEach((val, idx) => {
-    if (!val.match(URL_REGEX)) {
+    if (!val) {
+      res.push({
+        message: i18n.translate('xpack.fleet.settings.fleetServerHostsRequiredError', {
+          defaultMessage: 'Host URL is required',
+        }),
+        index: idx,
+      });
+    } else if (!val.match(URL_REGEX)) {
       res.push({
         message: i18n.translate('xpack.fleet.settings.fleetServerHostsError', {
           defaultMessage: 'Invalid URL',

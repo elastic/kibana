@@ -22,20 +22,24 @@ import {
   ESCalendarIntervalUnit,
   PartialTheme,
 } from '@elastic/charts';
-import type { CustomPaletteState } from '../../../../charts/public';
-import { search } from '../../../../data/public';
-import { LegendToggle, EmptyPlaceholder } from '../../../../charts/public';
+import type { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { search } from '@kbn/data-plugin/public';
+import { LegendToggle, EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import {
   getAccessorByDimension,
   getFormatByAccessor,
-} from '../../../../visualizations/common/utils';
+} from '@kbn/visualizations-plugin/common/utils';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+} from '@kbn/visualizations-plugin/common/constants';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
 import {
   LegendColorPickerWrapperContext,
   LegendColorPickerWrapper,
 } from '../utils/get_color_picker';
-import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from '../constants';
+import { defaultPaletteParams } from '../constants';
 import { HeatmapIcon } from './heatmap_icon';
 import './index.scss';
 
@@ -96,9 +100,11 @@ function computeColorRanges(
 ) {
   const paletteColors =
     paletteParams?.colors ||
-    applyPaletteParams(paletteService, { type: 'palette', name: DEFAULT_PALETTE_NAME }, minMax).map(
-      ({ color }) => color
-    );
+    applyPaletteParams(
+      paletteService,
+      { type: 'palette', name: defaultPaletteParams.name },
+      minMax
+    ).map(({ color }) => color);
   // Repeat the first color at the beginning to cover below and above the defined palette
   const colors = [paletteColors[0], ...paletteColors];
 
@@ -125,6 +131,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     timeZone,
     formatFactory,
     chartsThemeService,
+    datatableUtilities,
     onClickValue,
     onSelectRange,
     paletteService,
@@ -309,7 +316,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const xValuesFormatter = formatFactory(xAxisMeta?.params);
     const metricFormatter = formatFactory(getFormatByAccessor(args.valueAccessor!, table.columns));
     const dateHistogramMeta = xAxisColumn
-      ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
+      ? datatableUtilities.getDateHistogramMeta(xAxisColumn)
       : undefined;
 
     // Fallback to the ordinal scale type when a single row of data is provided.
@@ -483,7 +490,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
               showLegend={showLegend ?? args.legend.isVisible}
               legendPosition={args.legend.position}
-              legendSize={args.legend.legendSize}
+              legendSize={LegendSizeToPixels[args.legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
               tooltip={tooltip}

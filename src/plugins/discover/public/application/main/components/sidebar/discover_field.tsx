@@ -25,10 +25,11 @@ import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
-import type { DataViewField, DataView } from '../../../../../../data_views/public';
-import { getFieldTypeName } from './lib/get_field_type_name';
+import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { DiscoverFieldVisualize } from './discover_field_visualize';
 
 function wrapOnDot(str?: string) {
@@ -59,9 +60,10 @@ const FieldInfoIcon: React.FC = memo(() => (
 ));
 
 const DiscoverFieldTypeIcon: React.FC<{ field: DataViewField }> = memo(({ field }) => {
-  // If it's a string type, we want to distinguish between keyword and text
-  const tempType = field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type;
-  return <FieldIcon type={tempType} label={getFieldTypeName(tempType)} scripted={field.scripted} />;
+  const typeForIcon = getTypeForFieldIcon(field);
+  return (
+    <FieldIcon type={typeForIcon} label={getFieldTypeName(typeForIcon)} scripted={field.scripted} />
+  );
 });
 
 const FieldName: React.FC<{ field: DataViewField }> = memo(({ field }) => {
@@ -244,13 +246,13 @@ export interface DiscoverFieldProps {
   multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
 
   /**
-   * Callback to edit a runtime field from index pattern
+   * Callback to edit a field from data view
    * @param fieldName name of the field to edit
    */
   onEditField?: (fieldName: string) => void;
 
   /**
-   * Callback to delete a runtime field from index pattern
+   * Callback to delete a runtime field from data view
    * @param fieldName name of the field to delete
    */
   onDeleteField?: (fieldName: string) => void;

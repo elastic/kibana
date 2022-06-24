@@ -15,7 +15,7 @@ import {
   createMockFramePublicAPI,
 } from '../../mocks';
 import { act } from 'react-dom/test-utils';
-import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
 import { getSuggestions } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
@@ -386,9 +386,7 @@ describe('suggestion_panel', () => {
     const passedExpression = (expressionRendererMock as jest.Mock).mock.calls[0][0].expression;
 
     expect(passedExpression).toMatchInlineSnapshot(`
-      "kibana
-      | lens_merge_tables layerIds=\\"first\\" tables={datasource_expression}
-      | test
+      "test
       | expression"
     `);
   });

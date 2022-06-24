@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { validateDurationSchema } from '../../lib';
-import { handleDisabledApiKeysError } from './../lib/error_handler';
+import { handleDisabledApiKeysError } from '../lib/error_handler';
 import {
   SanitizedRule,
   RuleNotifyWhenType,
@@ -64,7 +64,7 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         if (!context.alerting) {
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const alert = req.body;
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as RuleNotifyWhenType) : null;

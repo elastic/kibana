@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 
 import { EnterpriseSearchPlugin } from './plugin';
 
@@ -27,6 +27,7 @@ export const configSchema = schema.object({
       { defaultValue: 'full' }
     ),
   }),
+  customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
 export type ConfigType = TypeOf<typeof configSchema>;
@@ -37,3 +38,5 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     host: true,
   },
 };
+
+export const CONNECTORS_INDEX = '.ent-search-connectors';

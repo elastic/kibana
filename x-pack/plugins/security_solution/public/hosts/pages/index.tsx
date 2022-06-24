@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 import { HOSTS_PATH } from '../../../common/constants';
 import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
@@ -18,7 +19,6 @@ import { hostDetailsPagePath } from './types';
 const getHostsTabPath = () =>
   `${HOSTS_PATH}/:tabName(` +
   `${HostsTableType.hosts}|` +
-  `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +

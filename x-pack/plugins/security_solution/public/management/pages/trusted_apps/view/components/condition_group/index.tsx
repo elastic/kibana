@@ -13,7 +13,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 import { AndOrBadge } from '../../../../../../common/components/and_or_badge';
 import { ConditionEntryInput, ConditionEntryInputProps } from '../condition_entry_input';
-import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
   // The positioning of the 'and-badge' is done by using the EuiButton's height and adding on to it
@@ -22,15 +22,15 @@ const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
   .and-badge {
     padding-top: 20px;
     padding-bottom: ${({ theme }) => {
-      return `calc(${theme.eui.euiButtonHeightSmall} + (${theme.eui.paddingSizes.s} * 2) + 3px);`;
+      return `calc(${theme.eui.euiButtonHeightSmall} + (${theme.eui.euiSizeS} * 2) + 3px);`;
     }};
   }
 
   .group-entries {
-    margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 
     & > * {
-      margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+      margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 
       &:last-child {
         margin-bottom: 0;

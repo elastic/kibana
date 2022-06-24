@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable } from 'rxjs';
-import type { HttpStart } from 'kibana/public';
+import type { HttpStart } from '@kbn/core/public';
 import { HttpService } from '../http_service';
 
 import { annotations } from './annotations';
@@ -214,7 +214,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    validateDatafeedPreview(payload: { job: CombinedJob }) {
+    validateDatafeedPreview(payload: { job: CombinedJob; start?: number; end?: number }) {
       const body = JSON.stringify(payload);
       return httpService.http<DatafeedValidationResponse>({
         path: `${basePath()}/validate/datafeed_preview`,

@@ -17,7 +17,7 @@ export function registerCloudBackupStatusRoutes({
   router.get(
     { path: `${API_BASE_PATH}/cloud_backup_status`, validate: false },
     versionCheckHandlerWrapper(async (context, request, response) => {
-      const { client: clusterClient } = context.core.elasticsearch;
+      const { client: clusterClient } = (await context.core).elasticsearch;
 
       try {
         const { snapshots } = await clusterClient.asCurrentUser.snapshot.get({

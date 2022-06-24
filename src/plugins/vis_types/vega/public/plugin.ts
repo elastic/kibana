@@ -6,27 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../data/public';
-import type { DataViewsPublicPluginStart } from '../../../data_views/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
-import { Setup as InspectorSetup } from '../../../inspector/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
 
+import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import {
   setNotifications,
   setData,
   setDataViews,
   setInjectedVars,
   setUISettings,
-  setInjectedMetadata,
   setDocLinks,
   setMapsEms,
 } from './services';
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import type { MapsEmsPluginPublicStart } from '../../../maps_ems/public';
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
 import { ConfigSchema } from '../config';
@@ -73,7 +72,6 @@ export class VegaPlugin implements Plugin<void, void> {
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
-      emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
 
     setUISettings(core.uiSettings);
@@ -98,7 +96,6 @@ export class VegaPlugin implements Plugin<void, void> {
     setNotifications(core.notifications);
     setData(data);
     setDataViews(dataViews);
-    setInjectedMetadata(core.injectedMetadata);
     setDocLinks(core.docLinks);
     setMapsEms(mapsEms);
   }

@@ -10,7 +10,7 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import { HeaderSection } from './index';
+import { HeaderSection } from '.';
 
 describe('HeaderSection', () => {
   test('it renders', () => {
@@ -84,7 +84,7 @@ describe('HeaderSection', () => {
     const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
 
     expect(siemHeaderSection).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderSection).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(siemHeaderSection).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -96,7 +96,7 @@ describe('HeaderSection', () => {
     const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
 
     expect(siemHeaderSection).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderSection).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(siemHeaderSection).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 
   test('it splits the title and supplement areas evenly when split is true', () => {
@@ -231,6 +231,28 @@ describe('HeaderSection', () => {
     expect(wrapper.find('[data-test-subj="header-section-filters"]').first().exists()).toBe(true);
     expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(true);
   });
+
+  test('it appends `toggle-expand` class to Header when toggleStatus = true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection
+          id="an id"
+          title="Test title"
+          subtitle="subtitle"
+          headerFilters="headerFilters"
+          toggleQuery={jest.fn()}
+          toggleStatus={true}
+        >
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="header-section"]').first().prop('className')).toBe(
+      'toggle-expand siemHeaderSection'
+    );
+  });
+
   test('it does not render anything but title when toggleStatus = false', () => {
     const wrapper = mount(
       <TestProviders>

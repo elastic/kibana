@@ -11,7 +11,7 @@ import { render } from '@testing-library/react';
 import { StepCreateForm, StepCreateFormProps } from './step_create_form';
 
 jest.mock('../../../../../shared_imports');
-jest.mock('../../../../../app/app_dependencies');
+jest.mock('../../../../app_dependencies');
 
 describe('Transform: <StepCreateForm />', () => {
   test('Minimal initialization', () => {

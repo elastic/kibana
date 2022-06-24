@@ -7,15 +7,15 @@
 
 import { Server } from '@hapi/hapi';
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import { Logger } from '@kbn/logging';
 import {
   CoreStart,
   Plugin,
   PluginConfigDescriptor,
   PluginInitializerContext,
-} from 'src/core/server';
-import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
+} from '@kbn/core/server';
+import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
+import { i18n } from '@kbn/i18n';
+import { Logger } from '@kbn/logging';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
@@ -35,6 +35,7 @@ import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
+import { makeGetMetricIndices } from './lib/metrics/make_get_metric_indices';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
 import { logViewSavedObjectType } from './saved_objects';
@@ -190,12 +191,10 @@ export class InfraServerPlugin
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
-      (context, request) => {
-        const mlSystem = plugins.ml?.mlSystemProvider(request, context.core.savedObjects.client);
-        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
-          request,
-          context.core.savedObjects.client
-        );
+      async (context, request) => {
+        const soClient = (await context.core).savedObjects.client;
+        const mlSystem = plugins.ml?.mlSystemProvider(request, soClient);
+        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(request, soClient);
         const spaceId = plugins.spaces?.spacesService.getSpaceId(request) || 'default';
 
         return {
@@ -238,7 +237,9 @@ export class InfraServerPlugin
 
     return {
       logViews,
+      getMetricIndices: makeGetMetricIndices(this.libs.sources),
     };
   }
+
   stop() {}
 }

@@ -10,7 +10,7 @@ import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import Boom from '@hapi/boom';
 
 import { isConfigSchema } from '@kbn/config-schema';
-import { Logger } from '../../logging';
+import type { Logger } from '@kbn/logging';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
   UnauthorizedError as EsNotAuthorizedError,
@@ -24,7 +24,7 @@ import {
 } from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, validBodyOutput } from './route';
 import { HapiResponseAdapter } from './response_adapter';
-import { RequestHandlerContext } from '../../../server';
+import { RequestHandlerContext } from '../..';
 import { wrapErrors } from './error_wrapper';
 import { RouteValidator } from './validator';
 

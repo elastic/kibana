@@ -8,12 +8,12 @@
 import { filter } from 'lodash/fp';
 import { schema } from '@kbn/config-schema';
 import { asyncForEach } from '@kbn/std';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 
+import { KibanaAssetReference } from '@kbn/fleet-plugin/common';
 import { packAssetSavedObjectType, packSavedObjectType } from '../../../common/types';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { KibanaAssetReference } from '../../../../fleet/common';
 
 export const getAssetsStatusRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
@@ -25,7 +25,7 @@ export const getAssetsStatusRoute = (router: IRouter, osqueryContext: OsqueryApp
       options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const savedObjectsClient = (await context.core).savedObjects.client;
 
       let installation;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import {
   HostOverviewRequestOptions,
@@ -302,6 +302,21 @@ export const formattedSearchStrategyResponse = {
               },
             },
             size: 0,
+            _source: false,
+            fields: [
+              'host.os.*',
+              'event.dataset',
+              'event.module',
+              'event.category',
+              'agent.type',
+              'winlog.channel',
+              'endgame.event_type_full',
+              'network.protocol',
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
           },
         },
         null,
@@ -515,5 +530,20 @@ export const expectedDsl = {
       },
     },
     size: 0,
+    _source: false,
+    fields: [
+      'host.os.*',
+      'event.dataset',
+      'event.module',
+      'event.category',
+      'agent.type',
+      'winlog.channel',
+      'endgame.event_type_full',
+      'network.protocol',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
   },
 };

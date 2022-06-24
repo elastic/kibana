@@ -28,6 +28,7 @@ import { Version } from '@kbn/securitysolution-io-ts-types';
 
 import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import type { Filter } from '@kbn/es-query';
+import { RuleTypeParams as AlertingRuleTypeParams } from '@kbn/alerting-plugin/common';
 import {
   AnomalyThresholdOrUndefined,
   Description,
@@ -50,10 +51,10 @@ import {
   LicenseOrUndefined,
   RuleNameOverrideOrUndefined,
   TimestampOverrideOrUndefined,
+  TimestampFieldOrUndefined,
   EventCategoryOverrideOrUndefined,
+  TiebreakerFieldOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
-
-import { RuleTypeParams as AlertingRuleTypeParams } from '../../../../alerting/common';
 
 export type PartialFilter = Partial<Filter>;
 
@@ -63,7 +64,9 @@ export interface RuleTypeParams extends AlertingRuleTypeParams {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   note: NoteOrUndefined;
+  timestampField?: TimestampFieldOrUndefined;
   eventCategoryOverride?: EventCategoryOverrideOrUndefined;
+  tiebreakerField?: TiebreakerFieldOrUndefined;
   falsePositives: FalsePositives;
   from: From;
   ruleId: RuleId;

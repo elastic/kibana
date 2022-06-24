@@ -5,10 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { NodeType, BackendNode } from '@kbn/apm-plugin/common/connections';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
-import { NodeType, BackendNode } from '../../../../plugins/apm/common/connections';
 import { roundNumber } from '../../utils';
 
 type TopDependencies = APIReturnType<'GET /internal/apm/backends/top_backends'>;
@@ -53,7 +53,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Top dependencies',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
-      describe.skip('when data is generated', () => {
+      describe('when data is generated', () => {
         let topDependencies: TopDependencies;
 
         before(async () => {

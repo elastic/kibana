@@ -83,10 +83,11 @@ export class ConsolePageObject extends FtrService {
     }
   }
 
-  public async promptAutocomplete() {
+  // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
+  public async promptAutocomplete(letter = 'b') {
     const textArea = await this.testSubjects.find('console-textarea');
     await textArea.clickMouseButton();
-    await textArea.type('b');
+    await textArea.type(letter);
     await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
   }
 
@@ -101,7 +102,6 @@ export class ConsolePageObject extends FtrService {
   public async enterRequest(request: string = '\nGET _search') {
     const textArea = await this.getEditorTextArea();
     await textArea.pressKeys(request);
-    await textArea.pressKeys(Key.ENTER);
   }
 
   public async enterText(text: string) {
@@ -119,10 +119,22 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.find('console-textarea');
   }
 
-  public async getVisibleTextAt(lineIndex: number) {
+  public async getAllTextLines() {
     const editor = await this.getEditor();
-    const lines = await editor.findAllByClassName('ace_line_group');
+    return await editor.findAllByClassName('ace_line_group');
+  }
 
+  public async getAllVisibleText() {
+    let textString = '';
+    const textLineElements = await this.getAllTextLines();
+    for (let i = 0; i < textLineElements.length; i++) {
+      textString = textString.concat(await textLineElements[i].getVisibleText());
+    }
+    return textString;
+  }
+
+  public async getVisibleTextAt(lineIndex: number) {
+    const lines = await this.getAllTextLines();
     if (lines.length < lineIndex) {
       throw new Error(`No line with index: ${lineIndex}`);
     }
@@ -150,5 +162,29 @@ export class ConsolePageObject extends FtrService {
       const text = await lines[lines.length - 1].getVisibleText();
       return lines.length === 1 && text.trim() === '';
     });
+  }
+
+  public async selectAllRequests() {
+    const editor = await this.getEditorTextArea();
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await editor.pressKeys([selectionKey, 'a']);
+  }
+
+  public async hasSuccessBadge() {
+    try {
+      const responseEditor = await this.testSubjects.find('response-editor');
+      return Boolean(await responseEditor.findByCssSelector('.ace_badge--success'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async hasWarningBadge() {
+    try {
+      const responseEditor = await this.testSubjects.find('response-editor');
+      return Boolean(await responseEditor.findByCssSelector('.ace_badge--warning'));
+    } catch (e) {
+      return false;
+    }
   }
 }

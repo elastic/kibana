@@ -19,7 +19,7 @@ import {
   isReferenced,
   getReferenceRoot,
 } from './layer_helpers';
-import { operationDefinitionMap, OperationType } from '../operations';
+import { operationDefinitionMap, OperationType } from '.';
 import { TermsIndexPatternColumn } from './definitions/terms';
 import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 import { AvgIndexPatternColumn } from './definitions/metrics';
@@ -37,9 +37,9 @@ import {
   OperationDefinition,
 } from './definitions';
 import { TinymathAST } from '@kbn/tinymath';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 
-jest.mock('../operations');
+jest.mock('.');
 jest.mock('../../id_generator');
 
 const indexPatternFields = [
@@ -159,24 +159,38 @@ describe('state_helpers', () => {
         params: { window: 5 },
         references: ['formulaX0'],
       };
+
       expect(
         copyColumn({
-          layer: {
-            indexPatternId: '',
-            columnOrder: [],
-            columns: {
-              source,
-              formulaX0: sum,
-              formulaX1: movingAvg,
-              formulaX2: math,
+          layers: {
+            layer: {
+              indexPatternId: '',
+              columnOrder: [],
+              columns: {
+                source,
+                formulaX0: sum,
+                formulaX1: movingAvg,
+                formulaX2: math,
+              },
             },
           },
-          targetId: 'copy',
-          sourceColumn: source,
+          source: {
+            column: source,
+            groupId: 'one',
+            columnId: 'source',
+            layerId: 'layer',
+            dataView: indexPattern,
+            filterOperations: () => true,
+          },
+          target: {
+            columnId: 'copy',
+            groupId: 'one',
+            dataView: indexPattern,
+            layerId: 'layer',
+            filterOperations: () => true,
+          },
           shouldDeleteSource: false,
-          indexPattern,
-          sourceColumnId: 'source',
-        })
+        }).layer
       ).toEqual({
         indexPatternId: '',
         columnOrder: [
@@ -906,6 +920,39 @@ describe('state_helpers', () => {
       );
     });
 
+    it('should set incompleteColumns without crashing when switching to a field-based operation from managed reference column with custom label', () => {
+      expect(
+        replaceColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'My formula',
+                dataType: 'number',
+                isBucketed: false,
+                customLabel: true,
+
+                // Private
+                operationType: 'formula',
+              } as FormulaIndexPatternColumn,
+            },
+          },
+          columnId: 'col1',
+          indexPattern,
+          op: 'median',
+          visualizationGroups: [],
+        })
+      ).toEqual(
+        expect.objectContaining({
+          columns: { col1: expect.objectContaining({ operationType: 'formula' }) },
+          incompleteColumns: {
+            col1: { operationType: 'median' },
+          },
+        })
+      );
+    });
+
     it('should carry over params from old column if switching fields', () => {
       expect(
         replaceColumn({
@@ -1322,8 +1369,7 @@ describe('state_helpers', () => {
           },
           incompleteColumns: {},
         },
-        'col1',
-        'col2'
+        'col1'
       );
     });
 
@@ -1389,8 +1435,7 @@ describe('state_helpers', () => {
           },
           incompleteColumns: {},
         }),
-        'col1',
-        'willBeReference'
+        'col1'
       );
     });
 
@@ -2341,8 +2386,7 @@ describe('state_helpers', () => {
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
         { indexPatternId: '1', columnOrder: ['col1', 'col2'], columns: { col1: termsColumn } },
-        'col1',
-        'col2'
+        'col1'
       );
     });
 

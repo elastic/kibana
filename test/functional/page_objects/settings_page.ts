@@ -51,6 +51,19 @@ export class SettingsPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  async clickSnapshotRestore() {
+    await this.testSubjects.click('snapshot_restore');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitFor('snapshot restore header to be visible', async () => {
+      return (await this.testSubjects.getVisibleText('appTitle')) === 'Snapshot and Restore';
+    });
+  }
+
+  async clickIndexManagement() {
+    await this.testSubjects.click('index_management');
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   async getAdvancedSettings(propertyName: string) {
     this.log.debug('in getAdvancedSettings');
     return await this.testSubjects.getAttribute(
@@ -140,7 +153,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getIndexPatternField() {
-    return this.testSubjects.find('createIndexPatternNameInput');
+    return this.testSubjects.find('createIndexPatternTitleInput');
   }
 
   async getTimeFieldNameField() {
@@ -158,6 +171,16 @@ export class SettingsPageObject extends FtrService {
 
   async getTimeFieldOption(selection: string) {
     return await this.find.displayedByCssSelector('option[value="' + selection + '"]');
+  }
+
+  async getNameField() {
+    return this.testSubjects.find('createIndexPatternNameInput');
+  }
+
+  async setNameField(dataViewName: string) {
+    const field = await this.getNameField();
+    await field.clearValue();
+    await field.type(dataViewName);
   }
 
   async getSaveIndexPatternButton() {
@@ -184,6 +207,10 @@ export class SettingsPageObject extends FtrService {
   async clickDefaultIndexButton() {
     await this.testSubjects.click('setDefaultIndexPatternButton');
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  async clickEditIndexButton() {
+    await this.testSubjects.click('editIndexPatternButton');
   }
 
   async clickDeletePattern() {
@@ -244,6 +271,13 @@ export class SettingsPageObject extends FtrService {
     });
   }
 
+  async getRelationshipsTabCount() {
+    return await this.retry.try(async () => {
+      const text = await this.testSubjects.getVisibleText('tab-relationships');
+      return text.split(' ')[1].replace(/\((.*)\)/, '$1');
+    });
+  }
+
   async getFieldNames() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldName');
     return await Promise.all(
@@ -273,8 +307,12 @@ export class SettingsPageObject extends FtrService {
 
   async clearFieldTypeFilter(type: string) {
     await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
-    await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
-    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
+    });
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    });
     await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
@@ -291,10 +329,14 @@ export class SettingsPageObject extends FtrService {
 
   async clearScriptedFieldLanguageFilter(type: string) {
     await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
-    await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
-    await this.testSubjects.existOrFail(
-      `scriptedFieldLanguageFilterDropdown-option-${type}-checked`
-    );
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
+    });
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(
+        `scriptedFieldLanguageFilterDropdown-option-${type}-checked`
+      );
+    });
     await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${type}-checked`);
     await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${type}`);
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
@@ -392,11 +434,21 @@ export class SettingsPageObject extends FtrService {
     }
   }
 
+  async addCustomDataViewId(value: string) {
+    await this.testSubjects.click('toggleAdvancedSetting');
+    const customDataViewIdInput = await (
+      await this.testSubjects.find('savedObjectIdField')
+    ).findByTagName('input');
+    await customDataViewIdInput.type(value);
+  }
+
   async createIndexPattern(
     indexPatternName: string,
     // null to bypass default value
     timefield: string | null = '@timestamp',
-    isStandardIndexPattern = true
+    isStandardIndexPattern = true,
+    customDataViewId?: string,
+    dataViewName?: string
   ) {
     await this.retry.try(async () => {
       await this.header.waitUntilLoadingHasFinished();
@@ -427,6 +479,12 @@ export class SettingsPageObject extends FtrService {
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
+      if (customDataViewId) {
+        await this.addCustomDataViewId(customDataViewId);
+      }
+      if (dataViewName) {
+        await this.setNameField(dataViewName);
+      }
       await (await this.getSaveIndexPatternButton()).click();
     });
     await this.header.waitUntilLoadingHasFinished();
@@ -442,10 +500,50 @@ export class SettingsPageObject extends FtrService {
 
     if (!isStandardIndexPattern) {
       const badges = await this.find.allByCssSelector('.euiBadge__text');
-      const text = await badges[1].getVisibleText();
+      const text = await badges[0].getVisibleText();
       expect(text).to.equal('Rollup');
     }
 
+    return await this.getIndexPatternIdFromUrl();
+  }
+
+  async editIndexPattern(
+    indexPatternName: string,
+    // null to bypass default value
+    timefield: string | null = '@timestamp',
+    dataViewName?: string,
+    errorCheck?: boolean
+  ) {
+    if (!indexPatternName) {
+      throw new Error('No Data View name provided for edit');
+    }
+
+    this.clickEditIndexButton();
+    await this.header.waitUntilLoadingHasFinished();
+
+    await this.retry.try(async () => {
+      await this.setIndexPatternField(indexPatternName);
+    });
+    if (dataViewName) {
+      await this.setNameField(dataViewName);
+    }
+    if (timefield) {
+      await this.selectTimeFieldOption(timefield);
+    }
+    await (await this.getSaveIndexPatternButton()).click();
+
+    if (errorCheck) {
+      await this.retry.try(async () => {
+        this.log.debug('getAlertText');
+        await this.testSubjects.getVisibleText('confirmModalTitleText');
+      });
+      await this.retry.try(async () => {
+        this.log.debug('acceptConfirmation');
+        await this.testSubjects.click('confirmModalConfirmButton');
+      });
+    }
+
+    await this.header.waitUntilLoadingHasFinished();
     return await this.getIndexPatternIdFromUrl();
   }
 
@@ -552,6 +650,11 @@ export class SettingsPageObject extends FtrService {
   async clickSourceFiltersTab() {
     this.log.debug('click Source Filters tab');
     await this.testSubjects.click('tab-sourceFilters');
+  }
+
+  async clickRelationshipsTab() {
+    this.log.debug('click Relationships tab');
+    await this.testSubjects.click('tab-relationships');
   }
 
   async editScriptedField(name: string) {

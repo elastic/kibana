@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RuleExecutionStatus } from '../../../../../alerting/common';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
+import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { Rule, RuleAction, ResolvedRule } from '../../../types';
 
 const transformAction: RewriteRequestCase<RuleAction> = ({
@@ -43,7 +43,8 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus,
   actions: actions,
-  snooze_end_time: snoozeEndTime,
+  snooze_schedule: snoozeSchedule,
+  is_snoozed_until: isSnoozedUntil,
   ...rest
 }: any) => ({
   ruleTypeId,
@@ -55,12 +56,13 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   notifyWhen,
   muteAll,
   mutedInstanceIds,
-  snoozeEndTime,
+  snoozeSchedule,
   executionStatus: executionStatus ? transformExecutionStatus(executionStatus) : undefined,
   actions: actions
     ? actions.map((action: AsApiContract<RuleAction>) => transformAction(action))
     : [],
   scheduledTaskId,
+  isSnoozedUntil,
   ...rest,
 });
 

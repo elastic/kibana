@@ -6,7 +6,7 @@
  */
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { RepositoryType } from '../../../common/types';
 import { RepositoryAdd } from '../../../public/application/sections/repository_add';
 import { WithAppDependencies } from './setup_environment';

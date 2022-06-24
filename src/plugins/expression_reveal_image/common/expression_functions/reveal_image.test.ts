@@ -10,10 +10,10 @@ import {
   functionWrapper,
   getElasticOutline,
   getElasticLogo,
-} from '../../../presentation_util/common/lib';
+} from '@kbn/presentation-util-plugin/common/lib';
 import { revealImageFunction, errors } from './reveal_image_function';
 import { Origin } from '../types';
-import { ExecutionContext } from 'src/plugins/expressions';
+import { ExecutionContext } from '@kbn/expressions-plugin';
 
 describe('revealImageFunction', () => {
   const fn = functionWrapper(revealImageFunction);

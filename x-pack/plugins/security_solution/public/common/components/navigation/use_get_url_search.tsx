@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { makeMapStateToProps } from '../url_state/helpers';
-import { getSearch } from './helpers';
+import { getSearch, getUrlStateSearch } from './helpers';
 import { SearchNavTab } from './types';
 
 export const useGetUrlSearch = (tab?: SearchNavTab) => {
@@ -17,4 +17,11 @@ export const useGetUrlSearch = (tab?: SearchNavTab) => {
   const { urlState } = useDeepEqualSelector(mapState);
   const urlSearch = useMemo(() => (tab ? getSearch(tab, urlState) : ''), [tab, urlState]);
   return urlSearch;
+};
+
+export const useGetUrlStateQueryString = () => {
+  const mapState = makeMapStateToProps();
+  const { urlState } = useDeepEqualSelector(mapState);
+  const getUrlStateQueryString = useCallback(() => getUrlStateSearch(urlState), [urlState]);
+  return getUrlStateQueryString;
 };

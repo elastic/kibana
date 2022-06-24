@@ -7,172 +7,174 @@
  */
 
 import React from 'react';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ComponentType, ReactWrapper } from 'enzyme';
-import type { LensMultiTable } from '../../common';
+import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
-import type { DataLayerArgs } from '../../common';
 import { getLegendAction } from './legend_action';
 import { LegendActionPopover } from './legend_action_popover';
 import { mockPaletteOutput } from '../../common/__mocks__';
 
-const sampleLayer = {
+const table: Datatable = {
+  type: 'datatable',
+  rows: [
+    {
+      xAccessorId: 1585758120000,
+      splitAccessorId: "Men's Clothing",
+      yAccessorId: 1,
+    },
+    {
+      xAccessorId: 1585758360000,
+      splitAccessorId: "Women's Accessories",
+      yAccessorId: 1,
+    },
+    {
+      xAccessorId: 1585758360000,
+      splitAccessorId: "Women's Clothing",
+      yAccessorId: 1,
+    },
+    {
+      xAccessorId: 1585759380000,
+      splitAccessorId: "Men's Clothing",
+      yAccessorId: 1,
+    },
+    {
+      xAccessorId: 1585759380000,
+      splitAccessorId: "Men's Shoes",
+      yAccessorId: 1,
+    },
+    {
+      xAccessorId: 1585759380000,
+      splitAccessorId: "Women's Clothing",
+      yAccessorId: 1,
+    },
+    {
+      xAccessorId: 1585760700000,
+      splitAccessorId: "Men's Clothing",
+      yAccessorId: 1,
+    },
+    {
+      xAccessorId: 1585760760000,
+      splitAccessorId: "Men's Clothing",
+      yAccessorId: 1,
+    },
+    {
+      xAccessorId: 1585760760000,
+      splitAccessorId: "Men's Shoes",
+      yAccessorId: 1,
+    },
+    {
+      xAccessorId: 1585761120000,
+      splitAccessorId: "Men's Shoes",
+      yAccessorId: 1,
+    },
+  ],
+  columns: [
+    {
+      id: 'xAccessorId',
+      name: 'order_date per minute',
+      meta: {
+        type: 'date',
+        field: 'order_date',
+        source: 'esaggs',
+        index: 'indexPatternId',
+        sourceParams: {
+          indexPatternId: 'indexPatternId',
+          type: 'date_histogram',
+          params: {
+            field: 'order_date',
+            timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
+            useNormalizedEsInterval: true,
+            scaleMetricValues: false,
+            interval: '1m',
+            drop_partials: false,
+            min_doc_count: 0,
+            extended_bounds: {},
+          },
+        },
+        params: { id: 'date', params: { pattern: 'HH:mm' } },
+      },
+    },
+    {
+      id: 'splitAccessorId',
+      name: 'Top values of category.keyword',
+      meta: {
+        type: 'string',
+        field: 'category.keyword',
+        source: 'esaggs',
+        index: 'indexPatternId',
+        sourceParams: {
+          indexPatternId: 'indexPatternId',
+          type: 'terms',
+          params: {
+            field: 'category.keyword',
+            orderBy: 'yAccessorId',
+            order: 'desc',
+            size: 3,
+            otherBucket: false,
+            otherBucketLabel: 'Other',
+            missingBucket: false,
+            missingBucketLabel: 'Missing',
+          },
+        },
+        params: {
+          id: 'terms',
+          params: {
+            id: 'string',
+            otherBucketLabel: 'Other',
+            missingBucketLabel: 'Missing',
+            parsedUrl: {
+              origin: 'http://localhost:5601',
+              pathname: '/jiy/app/kibana',
+              basePath: '/jiy',
+            },
+          },
+        },
+      },
+    },
+    {
+      id: 'yAccessorId',
+      name: 'Count of records',
+      meta: {
+        type: 'number',
+        source: 'esaggs',
+        index: 'indexPatternId',
+        sourceParams: {
+          indexPatternId: 'indexPatternId',
+          params: {},
+        },
+        params: { id: 'number' },
+      },
+    },
+  ],
+};
+
+const sampleLayer: DataLayerConfig = {
   layerId: 'first',
+  type: 'dataLayer',
   layerType: LayerTypes.DATA,
   seriesType: 'line',
+  isStacked: false,
+  isPercentage: false,
+  isHorizontal: false,
+  showLines: true,
   xAccessor: 'c',
   accessors: ['a', 'b'],
   splitAccessor: 'splitAccessorId',
   columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
   xScaleType: 'ordinal',
-  yScaleType: 'linear',
   isHistogram: false,
   palette: mockPaletteOutput,
-} as DataLayerArgs;
-
-const tables = {
-  first: {
-    type: 'datatable',
-    rows: [
-      {
-        xAccessorId: 1585758120000,
-        splitAccessorId: "Men's Clothing",
-        yAccessorId: 1,
-      },
-      {
-        xAccessorId: 1585758360000,
-        splitAccessorId: "Women's Accessories",
-        yAccessorId: 1,
-      },
-      {
-        xAccessorId: 1585758360000,
-        splitAccessorId: "Women's Clothing",
-        yAccessorId: 1,
-      },
-      {
-        xAccessorId: 1585759380000,
-        splitAccessorId: "Men's Clothing",
-        yAccessorId: 1,
-      },
-      {
-        xAccessorId: 1585759380000,
-        splitAccessorId: "Men's Shoes",
-        yAccessorId: 1,
-      },
-      {
-        xAccessorId: 1585759380000,
-        splitAccessorId: "Women's Clothing",
-        yAccessorId: 1,
-      },
-      {
-        xAccessorId: 1585760700000,
-        splitAccessorId: "Men's Clothing",
-        yAccessorId: 1,
-      },
-      {
-        xAccessorId: 1585760760000,
-        splitAccessorId: "Men's Clothing",
-        yAccessorId: 1,
-      },
-      {
-        xAccessorId: 1585760760000,
-        splitAccessorId: "Men's Shoes",
-        yAccessorId: 1,
-      },
-      {
-        xAccessorId: 1585761120000,
-        splitAccessorId: "Men's Shoes",
-        yAccessorId: 1,
-      },
-    ],
-    columns: [
-      {
-        id: 'xAccessorId',
-        name: 'order_date per minute',
-        meta: {
-          type: 'date',
-          field: 'order_date',
-          source: 'esaggs',
-          index: 'indexPatternId',
-          sourceParams: {
-            indexPatternId: 'indexPatternId',
-            type: 'date_histogram',
-            params: {
-              field: 'order_date',
-              timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
-              useNormalizedEsInterval: true,
-              scaleMetricValues: false,
-              interval: '1m',
-              drop_partials: false,
-              min_doc_count: 0,
-              extended_bounds: {},
-            },
-          },
-          params: { id: 'date', params: { pattern: 'HH:mm' } },
-        },
-      },
-      {
-        id: 'splitAccessorId',
-        name: 'Top values of category.keyword',
-        meta: {
-          type: 'string',
-          field: 'category.keyword',
-          source: 'esaggs',
-          index: 'indexPatternId',
-          sourceParams: {
-            indexPatternId: 'indexPatternId',
-            type: 'terms',
-            params: {
-              field: 'category.keyword',
-              orderBy: 'yAccessorId',
-              order: 'desc',
-              size: 3,
-              otherBucket: false,
-              otherBucketLabel: 'Other',
-              missingBucket: false,
-              missingBucketLabel: 'Missing',
-            },
-          },
-          params: {
-            id: 'terms',
-            params: {
-              id: 'string',
-              otherBucketLabel: 'Other',
-              missingBucketLabel: 'Missing',
-              parsedUrl: {
-                origin: 'http://localhost:5601',
-                pathname: '/jiy/app/kibana',
-                basePath: '/jiy',
-              },
-            },
-          },
-        },
-      },
-      {
-        id: 'yAccessorId',
-        name: 'Count of records',
-        meta: {
-          type: 'number',
-          source: 'esaggs',
-          index: 'indexPatternId',
-          sourceParams: {
-            indexPatternId: 'indexPatternId',
-            params: {},
-          },
-          params: { id: 'number' },
-        },
-      },
-    ],
-  },
-} as LensMultiTable['tables'];
+  table,
+};
 
 describe('getLegendAction', function () {
   let wrapperProps: LegendActionProps;
   const Component: ComponentType<LegendActionProps> = getLegendAction(
     [sampleLayer],
-    tables,
     jest.fn(),
     jest.fn(),
     {}
@@ -228,7 +230,7 @@ describe('getLegendAction', function () {
         {
           column: 1,
           row: 1,
-          table: tables.first,
+          table,
           value: "Women's Accessories",
         },
       ],

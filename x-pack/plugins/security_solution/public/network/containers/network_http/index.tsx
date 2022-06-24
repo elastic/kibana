@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -25,7 +26,6 @@ import {
   NetworkHttpStrategyResponse,
   SortField,
 } from '../../../../common/search_strategy';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { InspectResponse } from '../../../types';
 import { getInspectResponse } from '../../../helpers';
@@ -46,7 +46,7 @@ export interface NetworkHttpArgs {
 }
 
 interface UseNetworkHttp {
-  id?: string;
+  id: string;
   ip?: string;
   indexNames: string[];
   type: networkModel.NetworkType;
@@ -59,7 +59,7 @@ interface UseNetworkHttp {
 export const useNetworkHttp = ({
   endDate,
   filterQuery,
-  id = ID,
+  id,
   indexNames,
   ip,
   skip,

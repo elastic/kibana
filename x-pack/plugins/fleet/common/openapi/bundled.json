@@ -295,7 +295,17 @@
         },
         "operationId": "list-all-packages"
       },
-      "parameters": []
+      "parameters": [
+        {
+          "in": "query",
+          "name": "excludeInstallStatus",
+          "schema": {
+            "type": "boolean",
+            "default": false
+          },
+          "description": "Whether to exclude the install status of each package. Enabling this option will opt in to caching for the response via `cache-control` headers. If you don't need up-to-date installation info for a package, and are querying for a list of available packages, providing this flag can improve performance substantially."
+        }
+      ]
     },
     "/epm/packages/_bulk": {
       "post": {
@@ -1246,6 +1256,64 @@
         }
       }
     },
+    "/agents/current_upgrades": {
+      "get": {
+        "summary": "Agents - Current Bulk Upgrades",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "actionId": {
+                            "type": "string"
+                          },
+                          "complete": {
+                            "type": "boolean"
+                          },
+                          "nbAgents": {
+                            "type": "number"
+                          },
+                          "nbAgentsAck": {
+                            "type": "number"
+                          },
+                          "version": {
+                            "type": "string"
+                          },
+                          "startTime": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "actionId",
+                          "complete",
+                          "nbAgents",
+                          "nbAgentsAck",
+                          "version",
+                          "startTime"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "agents-current-upgrades"
+      }
+    },
     "/agents/{agentId}": {
       "parameters": [
         {
@@ -1310,7 +1378,28 @@
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_provided_metadata": {
+                    "type": "object"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "delete": {
         "summary": "Agent - Delete",
@@ -2953,6 +3042,213 @@
         ]
       }
     },
+    "/agent_download_sources": {
+      "get": {
+        "summary": "Agent Download Sources",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/download_sources"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-download-sources"
+      },
+      "post": {
+        "summary": "Agent Download Sources",
+        "description": "Create a new agent download source",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/download_sources"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "host",
+                  "is_default"
+                ]
+              }
+            }
+          }
+        },
+        "operationId": "post-download-sources"
+      }
+    },
+    "/agent_download_sources/{sourceId}": {
+      "get": {
+        "summary": "Agent Download Sources - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/download_sources"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-one-download-source"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "sourceId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "delete": {
+        "summary": "Agent Download Sources - Delete",
+        "operationId": "delete-download-source",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      },
+      "put": {
+        "summary": "Agent Download Sources - Update",
+        "operationId": "update-download-source",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "is_default",
+                  "host"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/download_sources"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
     "/logstash_api_keys": {
       "post": {
         "summary": "Generate Logstash API key",
@@ -3563,9 +3859,6 @@
           },
           "path": {
             "type": "string"
-          },
-          "removable": {
-            "type": "boolean"
           }
         },
         "required": [
@@ -3636,7 +3929,15 @@
                 "tls_required",
                 "api_keys",
                 "fleet_admin_user",
-                "fleet_server",
+                "fleet_server"
+              ]
+            }
+          },
+          "missing_optional_features": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
                 "encrypted_saved_object_encryption_key_required"
               ]
             }
@@ -3644,7 +3945,8 @@
         },
         "required": [
           "isReady",
-          "missing_requirements"
+          "missing_requirements",
+          "missing_optional_features"
         ]
       },
       "agent_type": {
@@ -3774,6 +4076,12 @@
             "type": "string"
           },
           "source_uri": {
+            "type": "string"
+          },
+          "rollout_duration_seconds": {
+            "type": "number"
+          },
+          "start_time": {
             "type": "string"
           },
           "agents": {
@@ -4470,6 +4778,30 @@
           "is_default",
           "name",
           "type"
+        ]
+      },
+      "download_sources": {
+        "title": "Download Source",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "is_default",
+          "name",
+          "host"
         ]
       }
     }

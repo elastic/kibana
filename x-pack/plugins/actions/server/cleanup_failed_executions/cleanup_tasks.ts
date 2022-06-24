@@ -10,9 +10,9 @@ import {
   ElasticsearchClient,
   SavedObjectsFindResult,
   SavedObjectsSerializer,
-} from 'kibana/server';
-import { TaskInstance } from '../../../task_manager/server';
-import { SpacesPluginStart } from '../../../spaces/server';
+} from '@kbn/core/server';
+import { TaskInstance } from '@kbn/task-manager-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   bulkDelete,
   extractBulkResponseDeleteFailures,

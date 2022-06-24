@@ -14,8 +14,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { type Filter, compareFilters } from '@kbn/es-query';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { type Filter, compareFilters, type TimeRange, type Query } from '@kbn/es-query';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
   IContainer,
@@ -23,10 +23,10 @@ import {
   genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
   omitGenericEmbeddableInput,
-} from '../../../../../src/plugins/embeddable/public';
-import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
-import { APPLY_FILTER_TRIGGER, TimeRange, Query } from '../../../../../src/plugins/data/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/unified_search/public';
+} from '@kbn/embeddable-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
@@ -384,7 +384,9 @@ export class MapEmbeddable
       ) : (
         <MapContainer
           onSingleValueTrigger={this.onSingleValueTrigger}
-          addFilters={this.input.hideFilterActions ? null : this.addFilters}
+          addFilters={
+            this.input.hideFilterActions || this.input.disableTriggers ? null : this.addFilters
+          }
           getFilterActions={this.getFilterActions}
           getActionContext={this.getActionContext}
           renderTooltipContent={this._renderTooltipContent}

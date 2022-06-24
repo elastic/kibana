@@ -7,7 +7,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
+import type { PaletteRegistry } from '@kbn/coloring';
 import {
   Chart,
   ElementClickListener,
@@ -20,6 +20,7 @@ import {
   AccessorFn,
   Accessor,
   XYBrushEvent,
+  Placement,
 } from '@elastic/charts';
 
 import { compact } from 'lodash';
@@ -29,11 +30,14 @@ import {
   LegendToggle,
   getBrushFromChartBrushEventFn,
   ClickTriggerEvent,
-  PaletteRegistry,
   useActiveCursor,
-} from '../../../charts/public';
-import { Datatable, IInterpreterRenderHandlers } from '../../../expressions/public';
-import type { PersistedState } from '../../../visualizations/public';
+} from '@kbn/charts-plugin/public';
+import { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+  PersistedState,
+} from '@kbn/visualizations-plugin/public';
 import { VisParams } from './types';
 import {
   getAdjustedDomain,
@@ -66,6 +70,7 @@ export interface VisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   syncColors: boolean;
+  syncTooltips: boolean;
   useLegacyTimeAxis: boolean;
 }
 
@@ -211,7 +216,7 @@ const VisComponent = (props: VisComponentProps) => {
     [props.uiState]
   );
 
-  const { visData, visParams, syncColors } = props;
+  const { visData, visParams, syncColors, syncTooltips } = props;
   const isDarkMode = getThemeService().useDarkMode();
 
   const config = getConfig(visData, visParams, props.useLegacyTimeAxis, isDarkMode);
@@ -356,8 +361,11 @@ const VisComponent = (props: VisComponentProps) => {
           maxLegendLines={visParams.maxLegendLines}
           showLegend={showLegend}
           onPointerUpdate={handleCursorUpdate}
+          externalPointerEvents={{
+            tooltip: { visible: syncTooltips, placement: Placement.Right },
+          }}
           legendPosition={legendPosition}
-          legendSize={visParams.legendSize}
+          legendSize={LegendSizeToPixels[visParams.legendSize ?? DEFAULT_LEGEND_SIZE]}
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
           legendColorPicker={legendColorPicker}

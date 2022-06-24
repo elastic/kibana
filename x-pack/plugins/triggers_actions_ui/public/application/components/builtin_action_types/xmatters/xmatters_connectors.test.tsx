@@ -7,68 +7,72 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { XmattersActionConnector } from '../types';
 import XmattersActionConnectorFields from './xmatters_connectors';
+import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../test_utils';
+import userEvent from '@testing-library/user-event';
+import { act } from 'react-dom/test-utils';
+import { render } from '@testing-library/react';
 
 describe('XmattersActionConnectorFields renders', () => {
-  test('all connector fields is rendered', () => {
+  test('all connector fields is rendered', async () => {
     const actionConnector = {
+      actionTypeId: '.xmatters',
+      name: 'xmatters',
+      config: {
+        configUrl: 'https://test.com',
+        usesBasic: true,
+      },
       secrets: {
         user: 'user',
         password: 'pass',
       },
-      id: 'test',
-      actionTypeId: '.xmatters',
-      isPreconfigured: false,
-      name: 'xmatters',
-      config: {
-        configUrl: 'http:\\test',
-        usesBasic: true,
-      },
-    } as XmattersActionConnector;
+      isDeprecated: false,
+    };
+
     const wrapper = mountWithIntl(
-      <XmattersActionConnectorFields
-        action={actionConnector}
-        errors={{ url: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <XmattersActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
     );
-    expect(wrapper.find('[data-test-subj="xmattersUrlText"]').length > 0).toBeTruthy();
+
+    await waitForComponentToUpdate();
+
+    expect(wrapper.find('[data-test-subj="config.configUrl"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="xmattersUserInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="xmattersPasswordInput"]').length > 0).toBeTruthy();
   });
 
   test('should show only basic auth info when basic selected', () => {
     const actionConnector = {
+      id: 'test',
+      actionTypeId: '.xmatters',
+      name: 'xmatters',
+      config: {
+        configUrl: 'https://test.com',
+        usesBasic: true,
+      },
       secrets: {
         user: 'user',
         password: 'pass',
       },
-      id: 'test',
-      actionTypeId: '.xmatters',
-      isPreconfigured: false,
-      name: 'xmatters',
-      config: {
-        configUrl: 'http:\\test',
-        usesBasic: true,
-      },
-    } as XmattersActionConnector;
+      isDeprecated: false,
+    };
+
     const wrapper = mountWithIntl(
-      <XmattersActionConnectorFields
-        action={actionConnector}
-        errors={{ url: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <XmattersActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
     );
-    expect(wrapper.find('[data-test-subj="xmattersUrlText"]').length > 0).toBeTruthy();
+
+    expect(wrapper.find('[data-test-subj="config.configUrl"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="xmattersUserInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="xmattersPasswordInput"]').length > 0).toBeTruthy();
   });
@@ -76,141 +80,185 @@ describe('XmattersActionConnectorFields renders', () => {
   test('should show only url auth info when url selected', () => {
     const actionConnector = {
       secrets: {
-        secretsUrl: 'http:\\test',
+        secretsUrl: 'https://test.com',
       },
       id: 'test',
       actionTypeId: '.xmatters',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'xmatters',
       config: {
         usesBasic: false,
       },
-    } as XmattersActionConnector;
+    };
+
     const wrapper = mountWithIntl(
-      <XmattersActionConnectorFields
-        action={actionConnector}
-        errors={{ url: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <XmattersActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
     );
-    expect(wrapper.find('[data-test-subj="xmattersUrlText"]').length > 0).toBeTruthy();
+
+    expect(wrapper.find('[data-test-subj="secrets.secretsUrl"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="xmattersUserInput"]').length === 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="xmattersPasswordInput"]').length === 0).toBeTruthy();
   });
 
-  test('should display a message on create to remember credentials', () => {
-    const actionConnector = {
-      secrets: {},
+  describe('Validation', () => {
+    const onSubmit = jest.fn();
+    const basicAuthConnector = {
       actionTypeId: '.xmatters',
-      isPreconfigured: false,
+      name: 'xmatters',
       config: {
+        configUrl: 'https://test.com',
         usesBasic: true,
       },
-    } as XmattersActionConnector;
-    const wrapper = mountWithIntl(
-      <XmattersActionConnectorFields
-        action={actionConnector}
-        errors={{ url: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
-  });
-
-  test('should display a message on edit to re-enter credentials, Basic Auth', () => {
-    const actionConnector = {
       secrets: {
         user: 'user',
         password: 'pass',
       },
-      id: 'test',
-      actionTypeId: '.xmatters',
-      isPreconfigured: false,
-      name: 'xmatters',
-      config: {
-        configUrl: 'http:\\test',
-        usesBasic: true,
-      },
-    } as XmattersActionConnector;
-    const wrapper = mountWithIntl(
-      <XmattersActionConnectorFields
-        action={actionConnector}
-        errors={{ url: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
-  });
+      isDeprecated: false,
+    };
 
-  test('should display a message for missing secrets after import', () => {
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.xmatters',
-      isPreconfigured: false,
-      isMissingSecrets: true,
-      name: 'xmatters',
-      config: {
-        configUrl: 'http:\\test',
-        usesBasic: true,
-      },
-    } as XmattersActionConnector;
-    const wrapper = mountWithIntl(
-      <XmattersActionConnectorFields
-        action={actionConnector}
-        errors={{ url: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
-  });
-
-  test('should display a message on edit to re-enter credentials, URL Auth', () => {
-    const actionConnector = {
-      secrets: {
-        secretsUrl: 'http:\\test?apiKey=someKey',
-      },
-      id: 'test',
-      actionTypeId: '.xmatters',
-      isPreconfigured: false,
-      name: 'xmatters',
+    const urlAuthConnector = {
+      ...basicAuthConnector,
       config: {
         usesBasic: false,
       },
-    } as XmattersActionConnector;
-    const wrapper = mountWithIntl(
-      <XmattersActionConnectorFields
-        action={actionConnector}
-        errors={{ url: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
+      secrets: {
+        secretsUrl: 'https://test.com',
+      },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const basicAuthTests: Array<[string, string]> = [
+      ['config.configUrl', 'not-valid'],
+      ['xmattersUserInput', ''],
+      ['xmattersPasswordInput', ''],
+    ];
+
+    const urlAuthTests: Array<[string, string]> = [['secrets.secretsUrl', 'not-valid']];
+
+    it('connector validation succeeds when connector config is valid and uses basic auth', async () => {
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={basicAuthConnector} onSubmit={onSubmit}>
+          <XmattersActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          actionTypeId: '.xmatters',
+          name: 'xmatters',
+          config: {
+            configUrl: 'https://test.com',
+            usesBasic: true,
+          },
+          secrets: {
+            user: 'user',
+            password: 'pass',
+          },
+          __internal__: {
+            auth: 'Basic Authentication',
+          },
+          isDeprecated: false,
+        },
+        isValid: true,
+      });
+    });
+
+    it('connector validation succeeds when connector config is valid and uses url auth', async () => {
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={urlAuthConnector} onSubmit={onSubmit}>
+          <XmattersActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          actionTypeId: '.xmatters',
+          name: 'xmatters',
+          config: {
+            usesBasic: false,
+          },
+          secrets: {
+            secretsUrl: 'https://test.com',
+          },
+          __internal__: { auth: 'URL Authentication' },
+          isDeprecated: false,
+        },
+        isValid: true,
+      });
+    });
+
+    it.each(basicAuthTests)('validates correctly %p', async (field, value) => {
+      const res = render(
+        <ConnectorFormTestProvider connector={basicAuthConnector} onSubmit={onSubmit}>
+          <XmattersActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+          delay: 10,
+        });
+      });
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
+
+    it.each(urlAuthTests)('validates correctly %p', async (field, value) => {
+      const res = render(
+        <ConnectorFormTestProvider connector={urlAuthConnector} onSubmit={onSubmit}>
+          <XmattersActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+          delay: 10,
+        });
+      });
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
   });
 });
