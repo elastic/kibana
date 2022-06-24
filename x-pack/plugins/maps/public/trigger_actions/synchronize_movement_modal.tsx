@@ -41,7 +41,7 @@ export class SynchronizeMovementModal extends Component<Props> {
               ? [
                   i18n.translate('xpack.maps.synchronizeMovementModal.onlyOneMapSelectedError', {
                     defaultMessage:
-                      'Unable to synchronize map movement when single map is selected',
+                      'Select another map to synchronize map movement',
                   }),
                 ]
               : []
