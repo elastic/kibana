@@ -17,17 +17,16 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 import React from 'react';
-import * as Rx from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, Subscription, merge, tap, fromEvent } from 'rxjs';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { FatalErrorInfo } from './get_error_info';
+import { FatalErrorInfo } from '@kbn/core-fatal-errors-browser';
 
 interface Props {
   kibanaVersion: string;
   buildNumber: number;
-  errorInfo$: Rx.Observable<FatalErrorInfo>;
+  errorInfo$: Observable<FatalErrorInfo>;
 }
 
 interface State {
@@ -39,12 +38,12 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
     errors: [],
   };
 
-  private subscription?: Rx.Subscription;
+  private subscription?: Subscription;
 
   public componentDidMount() {
-    this.subscription = Rx.merge(
+    this.subscription = merge(
       // reload the page if hash-based navigation is attempted
-      Rx.fromEvent(window, 'hashchange').pipe(
+      fromEvent(window, 'hashchange').pipe(
         tap(() => {
           window.location.reload();
         })

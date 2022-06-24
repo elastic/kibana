@@ -8,8 +8,8 @@
 
 import React, { FC } from 'react';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { I18nStart } from '@kbn/core-i18n-browser';
+import { CoreThemeProvider } from './core_theme_provider';
 
 interface CoreContextProviderProps {
   theme: ThemeServiceStart;
