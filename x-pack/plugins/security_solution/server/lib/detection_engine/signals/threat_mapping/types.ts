@@ -260,6 +260,7 @@ export interface EventsOptions {
   logger: Logger;
   filters: unknown[];
   timestampOverride?: string;
+  shouldDisableTimestampFallback?: boolean;
   tuple: RuleRangeTuple;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
@@ -278,6 +279,7 @@ export interface EventCountOptions {
   filters: unknown[];
   tuple: RuleRangeTuple;
   timestampOverride?: string;
+  shouldDisableTimestampFallback?: boolean;
 }
 
 export interface SignalMatch {
