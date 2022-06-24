@@ -10,16 +10,16 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-  describe('save', () => {
-    const archive = 'x-pack/test/functional/es_archives/logstash/empty';
+  const kibanaServer = getService('kibanaServer');
 
-    before('load pipelines archive', () => {
-      return esArchiver.load(archive);
+  describe('save', () => {
+
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    after('unload pipelines archive', () => {
-      return esArchiver.unload(archive);
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should create the specified pipeline', async () => {

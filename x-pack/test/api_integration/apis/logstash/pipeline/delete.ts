@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('delete', () => {
 
-    before('load pipelines archive', async () => {
+    before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
 
       await supertest

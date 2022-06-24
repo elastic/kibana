@@ -10,12 +10,12 @@ import { omit } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
   const random = getService('random');
   const pipelineList = getService('pipelineList');
   const pipelineEditor = getService('pipelineEditor');
   const PageObjects = getPageObjects(['logstash']);
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
 
   describe('pipeline create new', () => {
     let originalWindowSize;
@@ -23,11 +23,11 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       originalWindowSize = await browser.getWindowSize();
       await browser.setWindowSize(1600, 1000);
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash/empty');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash/empty');
+      await kibanaServer.savedObjects.cleanStandardList();
       await browser.setWindowSize(originalWindowSize.width, originalWindowSize.height);
     });
 
