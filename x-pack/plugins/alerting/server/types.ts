@@ -68,15 +68,6 @@ export type AlertingRequestHandlerContext = CustomRequestHandlerContext<{
  * @internal
  */
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
-
-export interface PublicAlertFactory<
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = never
-> {
-  create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
-  done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>;
-}
 export interface RuleExecutorServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
@@ -86,7 +77,10 @@ export interface RuleExecutorServices<
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
-  alertFactory: PublicAlertFactory<InstanceState, InstanceContext, ActionGroupIds>;
+  alertFactory: {
+    create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
+    done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>;
+  };
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
 }

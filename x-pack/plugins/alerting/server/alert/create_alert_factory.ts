@@ -7,50 +7,46 @@
 
 import { Logger } from '@kbn/core/server';
 import { AlertInstanceContext, AlertInstanceState } from '../types';
-import { Alert } from './alert';
+import { Alert, PublicAlert } from './alert';
 import { getAlerts } from '../lib';
 
 export interface AlertFactoryDoneUtils<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
   ActionGroupIds extends string
 > {
-  getRecoveredAlerts: () => Array<Alert<InstanceState, InstanceContext, ActionGroupIds>>;
+  getRecoveredAlerts: () => Array<Alert<State, Context, ActionGroupIds>>;
 }
 
 export interface CreateAlertFactoryOpts<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext
 > {
-  alerts: Record<string, Alert<InstanceState, InstanceContext>>;
+  alerts: Record<string, Alert<State, Context>>;
   logger: Logger;
   canSetRecoveryContext?: boolean;
 }
 
 export function createAlertFactory<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
   ActionGroupIds extends string
->({
-  alerts,
-  logger,
-  canSetRecoveryContext = false,
-}: CreateAlertFactoryOpts<InstanceState, InstanceContext>) {
+>({ alerts, logger, canSetRecoveryContext = false }: CreateAlertFactoryOpts<State, Context>) {
   // Keep track of which alerts we started with so we can determine which have recovered
   const initialAlertIds = new Set(Object.keys(alerts));
   let isDone = false;
   return {
-    create: (id: string): Alert<InstanceState, InstanceContext, ActionGroupIds> => {
+    create: (id: string): PublicAlert<State, Context, ActionGroupIds> => {
       if (isDone) {
         throw new Error(`Can't create new alerts after calling done() in AlertsFactory.`);
       }
       if (!alerts[id]) {
-        alerts[id] = new Alert<InstanceState, InstanceContext>(id);
+        alerts[id] = new Alert<State, Context>(id);
       }
 
       return alerts[id];
     },
-    done: (): AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds> => {
+    done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => {
       isDone = true;
       return {
         getRecoveredAlerts: () => {
@@ -61,13 +57,11 @@ export function createAlertFactory<
             return [];
           }
 
-          const { recoveredAlerts } = getAlerts<
-            InstanceState,
-            InstanceContext,
-            ActionGroupIds,
-            ActionGroupIds
-          >(alerts, initialAlertIds);
-          return Object.keys(recoveredAlerts ?? []).map(
+          const { recoveredAlerts } = getAlerts<State, Context, ActionGroupIds, ActionGroupIds>(
+            alerts,
+            initialAlertIds
+          );
+          return Object.keys(recoveredAlerts ?? {}).map(
             (alertId: string) => recoveredAlerts[alertId]
           );
         },
