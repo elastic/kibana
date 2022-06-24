@@ -62,7 +62,7 @@ export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Pro
             ) : (
               <FormattedMessage
                 id="xpack.synthetics.monitorConfig.scriptRecorder.label"
-                defaultMessage="Script recorder"
+                defaultMessage="Upload script"
               />
             )}
           </EuiFlexItem>

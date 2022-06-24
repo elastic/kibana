@@ -15,7 +15,7 @@ interface Props {
 
 export const Step = ({ description, children }: Props) => {
   return (
-    <EuiFlexGroup gutterSize="xs">
+    <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
         <EuiText>{description}</EuiText>
       </EuiFlexItem>

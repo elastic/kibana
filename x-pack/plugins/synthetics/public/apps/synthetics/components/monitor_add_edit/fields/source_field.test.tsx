@@ -69,7 +69,7 @@ describe('<ScriptRecorderFields />', () => {
   it('renders ScriptRecorderFields as the default tab', () => {
     const { getByText } = render(<WrappedComponent />);
 
-    expect(getByText('Select recorder-generated .js file')).toBeInTheDocument();
+    expect(getByText('Select or drag and drop a script.js fil')).toBeInTheDocument();
   });
 
   it('changes to code editor when selected', async () => {

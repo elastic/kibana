@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiPanel,
   EuiText,
@@ -94,7 +95,11 @@ export const MonitorTypeRadioGroup = ({
           </EuiText>
           <EuiText size="s" color="subdued">
             <span>{`${selectedOption.description} `}</span>
-            <EuiLink href={selectedOption.link}>Learn more</EuiLink>
+            <EuiLink href={selectedOption.link} target="_blank">
+              {i18n.translate('xpack.synthetics.monitorConfig.monitorType.learnMoreLink', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiLink>
           </EuiText>
           <EuiSpacer size="xs" />
         </EuiPanel>

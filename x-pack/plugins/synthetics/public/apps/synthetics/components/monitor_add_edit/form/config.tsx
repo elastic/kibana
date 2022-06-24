@@ -731,7 +731,7 @@ export const FIELD: Record<string, FieldMeta> = {
           defaultMessage:
             "Change the default namespace. This setting changes the name of the monitor's data stream. ",
         })}
-        <EuiLink href="#">
+        <EuiLink href="#" target="_blank">
           {i18n.translate('xpack.synthetics.monitorConfig.namespace.learnMore', {
             defaultMessage: 'Learn more',
           })}

@@ -172,7 +172,7 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
     },
     {
       title: i18n.translate('xpack.synthetics.addMonitorRoute.title', {
-        defaultMessage: 'Add Monitor | {baseTitle}',
+        defaultMessage: 'Create Monitor | {baseTitle}',
         values: { baseTitle },
       }),
       path: MONITOR_ADD_ROUTE,
@@ -186,7 +186,7 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
         pageTitle: (
           <FormattedMessage
             id="xpack.synthetics.addMonitor.pageHeader.title"
-            defaultMessage="Add Monitor"
+            defaultMessage="Create Monitor"
           />
         ),
         children: (
