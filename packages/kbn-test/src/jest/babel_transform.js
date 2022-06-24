@@ -20,6 +20,5 @@ module.exports = babelJest.createTransformer({
         },
       },
     ],
-    require.resolve('@emotion/babel-preset-css-prop'),
   ],
 });
