@@ -172,7 +172,6 @@ export const pieVis = () => ({
       name: 'labels',
       displayName: strings.getLabelsDisplayName(),
       help: strings.getLabelsHelp(),
-      type: 'model',
       argType: 'partitionLabels',
     },
   ],
