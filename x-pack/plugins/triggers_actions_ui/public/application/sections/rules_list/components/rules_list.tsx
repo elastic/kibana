@@ -158,6 +158,7 @@ export const RulesList = ({
     executionStatusesFilter || []
   );
   const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>(statusFilter || []);
+
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
@@ -327,7 +328,19 @@ export const RulesList = ({
     if (setStatusFilter) {
       setStatusFilter(ruleStatusesFilter);
     }
-  }, [ruleStatusesFilter, setStatusFilter]);
+  }, [ruleStatusesFilter]);
+
+  useEffect(() => {
+    if (statusFilter) {
+      setRuleStatusesFilter(statusFilter);
+    }
+  }, [statusFilter]);
+
+  useEffect(() => {
+    if (executionStatusesFilter) {
+      setRuleExecutionStatusesFilter(executionStatusesFilter);
+    }
+  }, [executionStatusesFilter]);
 
   useEffect(() => {
     if (setExecutionStatusesFilter) {
