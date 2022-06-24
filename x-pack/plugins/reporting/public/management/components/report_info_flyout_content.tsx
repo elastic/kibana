@@ -98,13 +98,13 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
           })
         : info.attempts,
     },
-    hasCompleted && {
+    {
       title: i18n.translate('xpack.reporting.listing.infoPanel.contentTypeInfo', {
         defaultMessage: 'Content type',
       }),
       description: info.content_type || NA,
     },
-    hasCompleted && {
+    {
       title: i18n.translate('xpack.reporting.listing.infoPanel.sizeInfo', {
         defaultMessage: 'Size in bytes',
       }),
@@ -140,7 +140,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       description: info.metrics?.pdf?.pages,
     },
 
-    hasStarted && {
+    {
       title: i18n.translate('xpack.reporting.listing.infoPanel.processedByInfo', {
         defaultMessage: 'Processed by',
       }),
@@ -182,13 +182,13 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description: info.created_at ? formatDate(info.created_at) : NA,
     },
-    hasStarted && {
+    {
       title: i18n.translate('xpack.reporting.listing.infoPanel.startedAtInfo', {
         defaultMessage: 'Started at',
       }),
       description: info.started_at ? formatDate(info.started_at) : NA,
     },
-    hasCompleted && {
+    {
       title: i18n.translate('xpack.reporting.listing.infoPanel.completedAtInfo', {
         defaultMessage: 'Completed at',
       }),
