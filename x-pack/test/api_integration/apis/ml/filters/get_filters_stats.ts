@@ -72,7 +72,23 @@ export default ({ getService }: FtrProviderContext) => {
           field_name: 'responsetime',
           partition_field_name: 'airline',
           detector_description: 'max(responsetime) partitionfield=airline',
+        },
+        {
+          function: 'min',
+          field_name: 'responsetime',
+          partition_field_name: 'airline',
+          detector_description: 'min(responsetime) partitionfield=airline',
           custom_rules: [
+            {
+              actions: ['skip_result'],
+              conditions: [
+                {
+                  applies_to: 'actual',
+                  operator: 'lt',
+                  value: 100,
+                },
+              ],
+            },
             {
               actions: ['skip_result'],
               scope: {
@@ -105,8 +121,8 @@ export default ({ getService }: FtrProviderContext) => {
         used_by: {
           jobs: [jobConfig1.job_id, jobConfig2.job_id],
           detectors: [
-            jobConfig1.analysis_config.detectors[0].detector_description,
-            jobConfig2.analysis_config.detectors[0].detector_description,
+            `${jobConfig1.analysis_config.detectors[0].detector_description} (${jobConfig1.job_id})`,
+            `${jobConfig2.analysis_config.detectors[1].detector_description} (${jobConfig2.job_id})`,
           ],
         },
       },
@@ -121,7 +137,9 @@ export default ({ getService }: FtrProviderContext) => {
         item_count: 2,
         used_by: {
           jobs: [jobConfig1.job_id],
-          detectors: [jobConfig1.analysis_config.detectors[0].detector_description],
+          detectors: [
+            `${jobConfig1.analysis_config.detectors[0].detector_description} (${jobConfig1.job_id})`,
+          ],
         },
       },
     },
@@ -176,10 +194,12 @@ export default ({ getService }: FtrProviderContext) => {
           expect(actualFilterStats).to.have.property('used_by');
           expect(actualFilterStats.used_by).to.have.property('jobs');
           expect(actualFilterStats.used_by.jobs).to.have.length(expected.used_by.jobs.length);
+          expect(actualFilterStats.used_by.jobs).to.eql(expected.used_by.jobs);
           expect(actualFilterStats.used_by).to.have.property('detectors');
           expect(actualFilterStats.used_by.detectors).to.have.length(
             expected.used_by.detectors.length
           );
+          expect(actualFilterStats.used_by.detectors).to.eql(expected.used_by.detectors);
         } else {
           expect(actualFilterStats).not.to.have.property('used_by');
         }
