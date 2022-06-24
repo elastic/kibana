@@ -18,6 +18,7 @@ import {
   RangeStats,
   ReportingUsageType,
   SizePercentiles,
+  QueueTimes,
 } from './types';
 
 const appCountsSchema: MakeSchemaFrom<AppCounts> = {
@@ -28,6 +29,12 @@ const appCountsSchema: MakeSchemaFrom<AppCounts> = {
 };
 
 const executionTimesSchema: MakeSchemaFrom<ExecutionTimes> = {
+  min: { type: 'long' },
+  max: { type: 'long' },
+  avg: { type: 'float' },
+};
+
+const queueTimesSchema: MakeSchemaFrom<QueueTimes> = {
   min: { type: 'long' },
   max: { type: 'long' },
   avg: { type: 'float' },
@@ -165,6 +172,7 @@ const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
     processing: byAppCountsSchema,
   },
   output_size: sizesSchema,
+  queue_times: queueTimesSchema,
 };
 
 export const reportingSchema: MakeSchemaFrom<ReportingUsageType> = {

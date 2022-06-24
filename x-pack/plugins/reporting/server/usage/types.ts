@@ -39,6 +39,10 @@ interface ExecutionTimesMetrics {
   execution_times?: ExecutionTimes;
 }
 
+interface QueueTimesMetrics {
+  queue_times?: QueueTimes;
+}
+
 /*
  * NOTE: This list needs to be explicit in order for the telemetry schema check script to resolve the types.
  * However, using `keyof JobTypes` is functionally the same thing
@@ -60,7 +64,6 @@ export interface KeyCountBucket
     ExecutionTimesMetrics {
   key: BaseJobTypes;
   isDeprecated?: DocCount;
-  execution_times: ExecutionTimes;
 }
 
 export interface AggregationBuckets {
@@ -79,7 +82,7 @@ export interface StatusByAppBucket extends DocCount {
   };
 }
 
-export interface AggregationResultBuckets extends DocCount, SizeBuckets {
+export interface AggregationResultBuckets extends DocCount, SizeBuckets, QueueTimesMetrics {
   jobTypes?: AggregationBuckets;
   statusTypes: AggregationBuckets;
   statusByApp: {
@@ -99,6 +102,12 @@ export interface SearchResponse {
 }
 
 export interface ExecutionTimes {
+  min: number | null;
+  max: number | null;
+  avg: number | null;
+}
+
+export interface QueueTimes {
   min: number | null;
   max: number | null;
   avg: number | null;
@@ -173,6 +182,7 @@ export type RangeStats = JobTypes & {
   status: StatusCounts;
   statuses?: StatusByAppCounts;
   output_size?: SizePercentiles;
+  queue_times?: QueueTimes;
 };
 
 interface MetricsStatsCsv {

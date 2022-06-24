@@ -6768,7 +6768,7 @@
                   "type": "long"
                 },
                 "avg": {
-                  "type": "long"
+                  "type": "float"
                 }
               }
             },
@@ -6871,7 +6871,7 @@
                   "type": "long"
                 },
                 "avg": {
-                  "type": "long"
+                  "type": "float"
                 }
               }
             },
@@ -6974,7 +6974,7 @@
                   "type": "long"
                 },
                 "avg": {
-                  "type": "long"
+                  "type": "float"
                 }
               }
             },
@@ -7108,7 +7108,7 @@
                   "type": "long"
                 },
                 "avg": {
-                  "type": "long"
+                  "type": "float"
                 }
               }
             },
@@ -7242,7 +7242,7 @@
                   "type": "long"
                 },
                 "avg": {
-                  "type": "long"
+                  "type": "float"
                 }
               }
             },
@@ -7408,7 +7408,7 @@
                   "type": "long"
                 },
                 "avg": {
-                  "type": "long"
+                  "type": "float"
                 }
               }
             },
@@ -8064,6 +8064,19 @@
             }
           }
         },
+        "queue_times": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "max": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            }
+          }
+        },
         "available": {
           "type": "boolean"
         },
@@ -8133,7 +8146,7 @@
                       "type": "long"
                     },
                     "avg": {
-                      "type": "long"
+                      "type": "float"
                     }
                   }
                 },
@@ -8236,7 +8249,7 @@
                       "type": "long"
                     },
                     "avg": {
-                      "type": "long"
+                      "type": "float"
                     }
                   }
                 },
@@ -8339,7 +8352,7 @@
                       "type": "long"
                     },
                     "avg": {
-                      "type": "long"
+                      "type": "float"
                     }
                   }
                 },
@@ -8473,7 +8486,7 @@
                       "type": "long"
                     },
                     "avg": {
-                      "type": "long"
+                      "type": "float"
                     }
                   }
                 },
@@ -8607,7 +8620,7 @@
                       "type": "long"
                     },
                     "avg": {
-                      "type": "long"
+                      "type": "float"
                     }
                   }
                 },
@@ -8773,7 +8786,7 @@
                       "type": "long"
                     },
                     "avg": {
-                      "type": "long"
+                      "type": "float"
                     }
                   }
                 },
@@ -9426,6 +9439,19 @@
                 },
                 "99.0": {
                   "type": "long"
+                }
+              }
+            },
+            "queue_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             }

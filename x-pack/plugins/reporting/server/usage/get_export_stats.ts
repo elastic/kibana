@@ -116,6 +116,7 @@ export const getExportStats = (
     status: rangeStatus,
     statuses: rangeStatusByApp,
     output_size: outputSize,
+    queue_times: queueTimes,
     ...rangeStats
   } = rangeStatsInput;
 
@@ -129,7 +130,7 @@ export const getExportStats = (
         featureAvailability
       ),
     }),
-    {}
+    {} as JobTypes
   );
 
   const resultStats = {
@@ -138,7 +139,8 @@ export const getExportStats = (
     status: { completed: 0, failed: 0, ...rangeStatus },
     statuses: rangeStatusByApp,
     output_size: outputSize,
-  } as RangeStats;
+    queue_times: queueTimes,
+  };
 
   return resultStats;
 };
