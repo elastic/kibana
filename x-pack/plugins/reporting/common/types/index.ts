@@ -67,6 +67,11 @@ export interface TaskRunResult {
   error_code?: string;
 }
 
+export interface ReportFields {
+  queue_time_ms?: number[]; // runtime field: started_at - created_at
+  execution_time_ms?: number[]; // runtime field: completed_at - started_at
+}
+
 export interface ReportSource {
   /*
    * Required fields: populated in RequestHandler.enqueueJob when the request comes in to
@@ -134,6 +139,8 @@ export type JobStatus =
 interface ReportSimple extends Omit<ReportSource, 'payload' | 'output'> {
   payload: Omit<ReportSource['payload'], 'headers'>;
   output?: Omit<ReportOutput, 'content'>; // is undefined for report jobs that are not completed
+  queue_time_ms?: number;
+  execution_time_ms?: number;
 }
 
 /*

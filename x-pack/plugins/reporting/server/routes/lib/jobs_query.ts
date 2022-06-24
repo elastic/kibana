@@ -21,6 +21,7 @@ import { ReportApiJSON, ReportSource } from '../../../common/types';
 import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
 import { ReportingUser } from '../../types';
+import { runtimeFields, runtimeFieldKeys } from '../../lib/store/runtime_fields';
 
 const defaultSize = 10;
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
@@ -28,10 +29,12 @@ const getUsername = (user: ReportingUser) => (user ? user.username : false);
 function getSearchBody(body: SearchRequest['body']): SearchRequest['body'] {
   return {
     _source: {
-      excludes: ['output.content'],
+      excludes: ['output.content', 'payload.headers'],
     },
     sort: [{ created_at: { order: 'desc' } }],
     size: defaultSize,
+    fields: runtimeFieldKeys,
+    runtime_mappings: runtimeFields,
     ...body,
   };
 }
@@ -146,11 +149,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       const body = getSearchBody({
         query: {
           constant_score: {
-            filter: {
-              bool: {
-                must: [{ term: { _id: id } }, { term: { created_by: username } }],
-              },
-            },
+            filter: { bool: { must: [{ term: { _id: id } }, { term: { created_by: username } }] } },
           },
         },
         size: 1,
@@ -166,7 +165,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
         return;
       }
 
-      const report = new Report({ ...result, ...result._source });
+      const report = new Report({ ...result, ...result._source }, result.fields);
       return report.toApiJSON();
     },
 

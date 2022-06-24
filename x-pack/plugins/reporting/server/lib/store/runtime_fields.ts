@@ -28,3 +28,5 @@ export const runtimeFields = {
     },
   },
 } as const;
+
+export const runtimeFieldKeys = [FIELD_QUEUE_TIME_MS, FIELD_EXECUTION_TIME_MS];

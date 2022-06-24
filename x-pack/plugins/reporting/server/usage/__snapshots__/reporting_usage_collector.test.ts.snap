@@ -1161,6 +1161,17 @@ Object {
           "type": "long",
         },
       },
+      "queue_times": Object {
+        "avg": Object {
+          "type": "float",
+        },
+        "max": Object {
+          "type": "long",
+        },
+        "min": Object {
+          "type": "long",
+        },
+      },
       "status": Object {
         "completed": Object {
           "type": "long",
@@ -1926,6 +1937,17 @@ Object {
         "type": "long",
       },
     },
+    "queue_times": Object {
+      "avg": Object {
+        "type": "float",
+      },
+      "max": Object {
+        "type": "long",
+      },
+      "min": Object {
+        "type": "long",
+      },
+    },
     "status": Object {
       "completed": Object {
         "type": "long",
@@ -2468,7 +2490,7 @@ Object {
     "available": true,
     "deprecated": 4,
     "error_codes": Object {},
-    "execution_times": undefined,
+    "execution_times": Object {},
     "layout": undefined,
     "metrics": Object {
       "csv_rows": Object {
@@ -2607,7 +2629,7 @@ Object {
       "available": true,
       "deprecated": 4,
       "error_codes": Object {},
-      "execution_times": undefined,
+      "execution_times": Object {},
       "layout": undefined,
       "metrics": Object {
         "csv_rows": Object {
@@ -2754,6 +2776,7 @@ Object {
       },
       "total": 0,
     },
+    "queue_times": Object {},
     "status": Object {
       "completed": 9,
       "failed": 0,
@@ -2861,6 +2884,7 @@ Object {
     },
     "total": 0,
   },
+  "queue_times": Object {},
   "status": Object {
     "completed": 9,
     "failed": 0,
@@ -3249,6 +3273,7 @@ Object {
       },
       "total": 0,
     },
+    "queue_times": Object {},
     "status": Object {
       "completed": 0,
       "failed": 0,
@@ -3350,6 +3375,7 @@ Object {
     },
     "total": 0,
   },
+  "queue_times": Object {},
   "status": Object {
     "completed": 0,
     "failed": 0,
@@ -3732,6 +3758,7 @@ Object {
       },
       "total": 0,
     },
+    "queue_times": undefined,
     "status": Object {
       "completed": 0,
       "failed": 0,
@@ -3796,7 +3823,7 @@ Object {
     "available": true,
     "deprecated": 0,
     "error_codes": Object {},
-    "execution_times": undefined,
+    "execution_times": Object {},
     "layout": Object {
       "canvas": 0,
       "preserve_layout": 0,
@@ -3863,6 +3890,7 @@ Object {
     },
     "total": 3,
   },
+  "queue_times": Object {},
   "status": Object {
     "completed": 2,
     "failed": 1,
@@ -3883,7 +3911,7 @@ Object {
     "available": true,
     "deprecated": 0,
     "error_codes": Object {},
-    "execution_times": undefined,
+    "execution_times": Object {},
     "layout": undefined,
     "metrics": Object {
       "png_cpu": Object {
@@ -3959,7 +3987,7 @@ Object {
     "available": true,
     "deprecated": 0,
     "error_codes": Object {},
-    "execution_times": undefined,
+    "execution_times": Object {},
     "layout": undefined,
     "metrics": Object {
       "csv_rows": Object {
@@ -4023,7 +4051,7 @@ Object {
       "available": true,
       "deprecated": 0,
       "error_codes": Object {},
-      "execution_times": undefined,
+      "execution_times": Object {},
       "layout": undefined,
       "metrics": Object {
         "png_cpu": Object {
@@ -4098,7 +4126,7 @@ Object {
       "available": true,
       "deprecated": 0,
       "error_codes": Object {},
-      "execution_times": undefined,
+      "execution_times": Object {},
       "layout": undefined,
       "metrics": Object {
         "csv_rows": Object {
@@ -4161,7 +4189,7 @@ Object {
       "available": true,
       "deprecated": 0,
       "error_codes": Object {},
-      "execution_times": undefined,
+      "execution_times": Object {},
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 0,
@@ -4245,6 +4273,7 @@ Object {
       },
       "total": 0,
     },
+    "queue_times": Object {},
     "status": Object {
       "completed": 4,
       "failed": 0,
@@ -4273,7 +4302,7 @@ Object {
     "available": true,
     "deprecated": 0,
     "error_codes": Object {},
-    "execution_times": undefined,
+    "execution_times": Object {},
     "layout": Object {
       "canvas": 0,
       "preserve_layout": 0,
@@ -4357,6 +4386,7 @@ Object {
     },
     "total": 0,
   },
+  "queue_times": Object {},
   "status": Object {
     "completed": 4,
     "failed": 0,
@@ -4388,7 +4418,7 @@ Object {
     "available": true,
     "deprecated": 0,
     "error_codes": Object {},
-    "execution_times": undefined,
+    "execution_times": Object {},
     "layout": undefined,
     "metrics": Object {
       "png_cpu": Object {
@@ -4464,7 +4494,7 @@ Object {
     "available": true,
     "deprecated": 0,
     "error_codes": Object {},
-    "execution_times": undefined,
+    "execution_times": Object {},
     "layout": undefined,
     "metrics": Object {
       "csv_rows": Object {
@@ -4750,6 +4780,7 @@ Object {
       },
       "total": 0,
     },
+    "queue_times": Object {},
     "status": Object {
       "completed": 0,
       "failed": 0,
@@ -4767,7 +4798,7 @@ Object {
     "available": true,
     "deprecated": 0,
     "error_codes": Object {},
-    "execution_times": undefined,
+    "execution_times": Object {},
     "layout": Object {
       "canvas": 0,
       "preserve_layout": 0,
@@ -4851,6 +4882,7 @@ Object {
     },
     "total": 0,
   },
+  "queue_times": Object {},
   "status": Object {
     "completed": 6,
     "completed_with_warnings": 2,
