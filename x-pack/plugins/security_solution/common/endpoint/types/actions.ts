@@ -8,13 +8,21 @@
 import { TypeOf } from '@kbn/config-schema';
 import {
   ActionStatusRequestSchema,
-  HostIsolationRequestSchema,
+  NoParametersRequestSchema,
   ResponseActionBodySchema,
 } from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
-export type ResponseActions = ISOLATION_ACTIONS | 'kill-process' | 'suspend-process';
+export const RESPONSE_ACTION_COMMANDS = [
+  'isolate',
+  'unisolate',
+  'kill-process',
+  'suspend-process',
+  'running-processes',
+] as const;
+
+export type ResponseActions = typeof RESPONSE_ACTION_COMMANDS[number];
 
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
@@ -83,7 +91,7 @@ interface ResponseActionParametersWithPid {
 
 interface ResponseActionParametersWithEntityId {
   pid?: never;
-  entity_id: number;
+  entity_id: string;
 }
 
 export type ResponseActionParametersWithPidOrEntityId =
@@ -189,7 +197,7 @@ export interface ActivityLog {
   data: ActivityLogEntry[];
 }
 
-export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
+export type HostIsolationRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
 
 export type ResponseActionRequestBody = TypeOf<typeof ResponseActionBodySchema>;
 
@@ -228,7 +236,7 @@ export interface ActionDetails {
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
    */
-  command: string;
+  command: ResponseActions;
   /**
    * Will be set to true only if action is not yet completed and elapsed time has exceeded
    * the request's expiration date
@@ -244,10 +252,12 @@ export interface ActionDetails {
   startedAt: string;
   /** The date when the action was completed (a response by the endpoint (not fleet) was received) */
   completedAt: string | undefined;
-  /**
-   * The list of action log items (actions and responses) received thus far for the action.
-   */
-  logEntries: ActivityLogEntry[];
+  /** user that created the action */
+  createdBy: string;
+  /** comment submitted with action */
+  comment?: string;
+  /** parameters submitted with action */
+  parameters?: EndpointActionDataParameterTypes;
 }
 
 export interface ActionDetailsApiResponse {

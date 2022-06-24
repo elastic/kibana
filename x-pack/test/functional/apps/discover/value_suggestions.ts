@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
-  const docTable = getService('docTable');
+  const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects(['common', 'timePicker', 'settings', 'context']);
 
   async function setAutocompleteUseTimeRange(value: boolean) {
@@ -27,16 +27,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('value suggestions', function describeIndexTests() {
     before(async function () {
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/drilldowns');
+
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
+      );
       await kibanaServer.uiSettings.update({
-        'doc_table:legacy': true,
+        'doc_table:legacy': false,
       });
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/drilldowns');
       await kibanaServer.uiSettings.unset('doc_table:legacy');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('useTimeRange enabled', () => {
@@ -86,9 +90,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.timePicker.setDefaultAbsoluteRange();
 
           // navigate to context
-          await docTable.clickRowToggle({ rowIndex: 0 });
-          const rowActions = await docTable.getRowActions({ rowIndex: 0 });
-          await rowActions[0].click();
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+          await rowActions[1].click();
           await PageObjects.context.waitUntilContextLoadingHasFinished();
 
           // Apply filter in context view
