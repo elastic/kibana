@@ -97,14 +97,17 @@ export function InputHighlightRules() {
      */
     comments: [
       {
+        // Capture a line comment, indicated by #
         token: ['comment.punctuation', 'comment.line'],
         regex: /(#)(.*$)/,
       },
       {
+        // Begin capturing a block comment, indicated by /*
         token: 'comment.punctuation',
         regex: /\/\*/,
         push: [
           {
+            // Finish capturing a block comment, indicated by */
             token: 'comment.punctuation',
             regex: /\*\//,
             next: 'pop',
@@ -115,6 +118,7 @@ export function InputHighlightRules() {
         ],
       },
       {
+        // Capture a line comment, indicated by //
         token: ['comment.punctuation', 'comment.line'],
         regex: /(\/\/)(.*$)/,
       },

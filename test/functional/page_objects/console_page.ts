@@ -14,6 +14,7 @@ export class ConsolePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
+  log = this.ctx.getService('log');
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -188,10 +189,10 @@ export class ConsolePageObject extends FtrService {
     }
   }
 
-  public async isInvalidRequest() {
+  public async hasInvalidSyntax() {
     try {
       const requestEditor = await this.getRequestEditor();
-      return Boolean(await requestEditor.findByCssSelector('.ace_invalid.ace_illegal'));
+      return Boolean(await requestEditor.findByCssSelector('.ace_invalid'));
     } catch (e) {
       return false;
     }
@@ -200,7 +201,7 @@ export class ConsolePageObject extends FtrService {
   public async hasErrorMarker() {
     try {
       const requestEditor = await this.getRequestEditor();
-      return Boolean(await requestEditor.findByCssSelector('.ace_gutter-cell.ace_error'));
+      return Boolean(await requestEditor.findByCssSelector('.ace_error'));
     } catch (e) {
       return false;
     }

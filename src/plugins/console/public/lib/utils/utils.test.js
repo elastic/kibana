@@ -116,31 +116,61 @@ describe('Utils class', () => {
   });
 
   describe('hasComments', function () {
-    const tests = [
-      { source: '{\n  "test": {\n    "f": {}\n  }\n}', assert: false },
-      { source: '{\n  "test": {\n   // "f": {}\n   "a": "b"\n  }\n}', assert: true },
-      { source: '{\n /* "test": {\n    "a": "b"\n  } */\n}', assert: true },
-      {
-        source: '{\n  "test": {\n   "a": "b",\n   "f": {\n     # "b": {}\n   }\n  }\n}',
-        assert: true,
-      },
-      { source: '{"test":{"a":"b","f":{"b":{"c":{}}}}}', assert: false },
-      {
-        source: '{\n  "test": {\n    "a": "b",\n    "f": {\n      "b": {}\n    }\n  }\n}',
-        assert: false,
-      },
-      {
-        source:
-          '{\n  "test": {\n    "a": "b",\n   /* "f": {\n      "b": {}\n    } */\n    "c": 1\n  }\n}',
-        assert: true,
-      },
-    ];
-
-    tests.forEach(({ source, assert }, id) => {
-      test(`Test ${id}`, () => {
-        const hasComments = utils.hasComments(source);
-        expect(hasComments).toEqual(assert);
+    const runCommentTests = (tests) => {
+      tests.forEach(({ source, assert }) => {
+        test(`\n${source}`, () => {
+          const hasComments = utils.hasComments(source);
+          expect(hasComments).toEqual(assert);
+        });
       });
+    };
+
+    describe('match single line comments', () => {
+      runCommentTests([
+        { source: '{\n  "test": {\n   // "f": {}\n   "a": "b"\n  }\n}', assert: true },
+        {
+          source: '{\n  "test": {\n   "a": "b",\n   "f": {\n     # "b": {}\n   }\n  }\n}',
+          assert: true,
+        },
+      ]);
+    });
+
+    describe('match multiline comments', () => {
+      runCommentTests([
+        { source: '{\n /* "test": {\n    "a": "b"\n  } */\n}', assert: true },
+        {
+          source:
+            '{\n  "test": {\n    "a": "b",\n   /* "f": {\n      "b": {}\n    } */\n    "c": 1\n  }\n}',
+          assert: true,
+        },
+      ]);
+    });
+
+    describe('ignore non-comment tokens', () => {
+      runCommentTests([
+        { source: '{"test":{"a":"b","f":{"b":{"c":{}}}}}', assert: false },
+        {
+          source: '{\n  "test": {\n    "a": "b",\n    "f": {\n      "b": {}\n    }\n  }\n}',
+          assert: false,
+        },
+        { source: '{\n  "test": {\n    "f": {}\n  }\n}', assert: false },
+      ]);
+    });
+
+    describe.skip('ignore comment tokens as values', () => {
+      runCommentTests([
+        { source: '{\n  "test": {\n    "f": "//"\n  }\n}', assert: false },
+        { source: '{\n  "test": {\n    "f": "/* */"\n  }\n}', assert: false },
+        { source: '{\n  "test": {\n    "f": "#"\n  }\n}', assert: false },
+      ]);
+    });
+
+    describe.skip('ignore comment tokens as field names', () => {
+      runCommentTests([
+        { source: '{\n  "#": {\n    "f": {}\n  }\n}', assert: false },
+        { source: '{\n  "//": {\n    "f": {}\n  }\n}', assert: false },
+        { source: '{\n  "/* */": {\n    "f": {}\n  }\n}', assert: false },
+      ]);
     });
   });
 });

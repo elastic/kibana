@@ -1901,8 +1901,8 @@ ace.define(
         reset(i + upTo.length);
         return text.substring(currentAt, i);
       },
-      peek = function (offs) {
-        return text.charAt(at + offs);
+      peek = function (offset) {
+        return text.charAt(at + offset);
       },
       number = function () {
         let number,
@@ -1949,7 +1949,7 @@ ace.define(
 
         if (ch === '"') {
           let c = '""';
-          if (text.substr(at, c.length) === c) {
+          if (text.substring(at, c.length) === c) {
             // literal
             next('"');
             next('"');
