@@ -12,6 +12,7 @@ import { WebElementWrapper } from '../../services/lib/web_element_wrapper';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
+  const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header']);
@@ -22,8 +23,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
-      await PageObjects.common.navigateToApp('kibana_overview');
-      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -53,6 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('click on a card should lead to the appropriate app', async () => {
       const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');
       const dashboardCard = kbnOverviewAppsCards.at(0);
+      log.debug('kbnOverviewAppsCards ' + kbnOverviewAppsCards.length);
       expect(dashboardCard).not.to.be(undefined);
       if (dashboardCard) {
         await dashboardCard.click();
