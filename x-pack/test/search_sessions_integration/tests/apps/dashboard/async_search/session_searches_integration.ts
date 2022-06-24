@@ -10,22 +10,19 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
-  const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
+  const PageObjects = getPageObjects([
+    'common',
+    'header',
+    'dashboard',
+    'visChart',
+    'searchSessionsManagement',
+  ]);
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const browser = getService('browser');
   const searchSessions = getService('searchSessions');
-  const queryBar = getService('queryBar');
-  const elasticChart = getService('elasticChart');
   const retry = getService('retry');
 
-  const enableNewChartLibraryDebug = async () => {
-    await elasticChart.setNewChartUiDebugFlag();
-    await queryBar.submitQuery();
-  };
-
-  describe('keep_alive', () => {
+  describe('Session and searches integration', () => {
     before(async function () {
       const body = await es.info();
       if (!body.version.number.includes('SNAPSHOT')) {
@@ -39,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.deleteAllSearchSessions();
     });
 
-    it('until session is saved search keep_alive is short, when it is saved, keepAlive is extended', async () => {
+    it('until session is saved search keepAlive is short, when it is saved, keepAlive is extended and search is saved into the session saved object', async () => {
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
       await PageObjects.dashboard.waitForRenderComplete();
       await searchSessions.expectState('completed');
@@ -71,34 +68,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      // const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-      //   'Sum of Bytes by Extension'
-      // );
-      //
-      // // load URL to restore a saved session
-      // const url = await browser.getCurrentUrl();
-      // const savedSessionURL = `${url}&searchSessionId=${savedSessionId}`;
-      // await browser.get(savedSessionURL);
-      // await PageObjects.header.waitUntilLoadingHasFinished();
-      // await PageObjects.dashboard.waitForRenderComplete();
-      //
-      // // Check that session is restored
-      // await searchSessions.expectState('restored');
-      // await testSubjects.missingOrFail('embeddableErrorLabel');
-      //
-      // // switching dashboard to edit mode (or any other non-fetch required) state change
-      // // should leave session state untouched
-      // await PageObjects.dashboard.switchToEditMode();
-      // await searchSessions.expectState('restored');
-      //
-      // const xyChartSelector = 'visTypeXyChart';
-      // await enableNewChartLibraryDebug();
-      // const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
-      // expect(data.length).to.be(5);
-      //
-      // // navigating to a listing page clears the session
-      // await PageObjects.dashboard.gotoDashboardLandingPage();
-      // await searchSessions.missingOrFail();
+      const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
+        'Sum of Bytes by Extension'
+      );
+
+      // check that search saved into the session
+
+      await searchSessions.openPopover();
+      await searchSessions.viewSearchSessions();
+
+      const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+      const searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
+      expect(searchSessionItem.searchesCount).to.be(1);
     });
   });
 }
