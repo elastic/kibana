@@ -35,7 +35,7 @@ export function DocViewer(renderProps: DocViewRenderProps) {
             render={render}
           />
         ),
-        ['data-test-subj']: `docViewerTab-${title}`,
+        ['data-test-subj']: `docViewerTab-${title?.replace(/\s/g, '-')}`,
       };
     });
 
