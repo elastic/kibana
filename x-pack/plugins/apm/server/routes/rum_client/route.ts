@@ -7,7 +7,6 @@
 import * as t from 'io-ts';
 import { Logger } from '@kbn/core/server';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
-import { getLongTaskMetrics } from './get_long_task_metrics';
 import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getPageLoadDistBreakdown } from './get_pl_dist_breakdown';
 import { getVisitorBreakdown } from './get_visitor_breakdown';
@@ -154,35 +153,6 @@ const rumVisitorsBreakdownRoute = createApmServerRoute({
   },
 });
 
-const rumLongTaskMetrics = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/long-task-metrics',
-  params: t.type({
-    query: uxQueryRt,
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    noOfLongTasks: number;
-    sumOfLongTasks: number;
-    longestLongTask: number;
-  }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { urlQuery, percentile, start, end },
-    } = resources.params;
-
-    return getLongTaskMetrics({
-      setup,
-      urlQuery,
-      percentile: percentile ? Number(percentile) : undefined,
-      start,
-      end,
-    });
-  },
-});
-
 function decodeUiFilters(
   logger: Logger,
   uiFiltersEncoded?: string
@@ -216,5 +186,4 @@ export const rumRouteRepository = {
   ...rumPageLoadDistributionRoute,
   ...rumPageLoadDistBreakdownRoute,
   ...rumVisitorsBreakdownRoute,
-  ...rumLongTaskMetrics,
 };

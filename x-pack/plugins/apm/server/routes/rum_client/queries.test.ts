@@ -10,7 +10,6 @@ import {
   inspectSearchParams,
 } from '../../utils/test_helpers';
 import { getPageLoadDistribution } from './get_page_load_distribution';
-import { getLongTaskMetrics } from './get_long_task_metrics';
 
 describe('rum client dashboard queries', () => {
   let mock: SearchParamsMock;
@@ -30,17 +29,6 @@ describe('rum client dashboard queries', () => {
           end: 50000,
         }),
       { uiFilters: { environment: 'staging' } }
-    );
-    expect(mock.params).toMatchSnapshot();
-  });
-
-  it('fetches long task metrics', async () => {
-    mock = await inspectSearchParams((setup) =>
-      getLongTaskMetrics({
-        setup,
-        start: 0,
-        end: 50000,
-      })
     );
     expect(mock.params).toMatchSnapshot();
   });
