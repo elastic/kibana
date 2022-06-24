@@ -30,8 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover data grid row navigation', function () {
     before(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'similar-index']);
-      await security.testUser.setRoles(['kibana_admin', 'similar-index-two']);
+      await security.testUser.setRoles(['kibana_admin', 'similar_index']);
+      await security.testUser.setRoles(['kibana_admin', 'similar_index_two']);
       await PageObjects.common.navigateToApp('settings');
 
       await createIndex('similar-index');
