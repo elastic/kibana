@@ -32,10 +32,11 @@ import { GettingStartedSteps } from '../../../shared/getting_started_steps';
 import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
 import { useLocalStorage } from '../../../shared/use_local_storage';
-import { IndicesLogic } from '../../logic/search_indices';
 import { SEARCH_INDEX_OVERVIEW_PATH, NEW_INDEX_PATH } from '../../routes';
 import { SearchIndex } from '../../types';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
+
+import { IndicesLogic } from './indices_logic';
 
 const healthColorsMap = {
   red: 'danger',
@@ -54,8 +55,8 @@ export const baseBreadcrumbs = [
 ];
 
 export const SearchIndices: React.FC = () => {
-  const { fetchSearchIndices, onPaginate } = useActions(IndicesLogic);
-  const { indices, meta } = useValues(IndicesLogic);
+  const { makeRequest, onPaginate } = useActions(IndicesLogic);
+  const { meta, indices } = useValues(IndicesLogic);
 
   const [calloutDismissed, setCalloutDismissed] = useLocalStorage<boolean>(
     'enterprise-search-indices-callout-dismissed',
@@ -63,7 +64,7 @@ export const SearchIndices: React.FC = () => {
   );
 
   useEffect(() => {
-    fetchSearchIndices();
+    makeRequest({ meta });
   }, [meta.page.current]);
 
   const columns = [
