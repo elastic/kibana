@@ -143,7 +143,7 @@ image::images/highlights-lens-sync.png[Sync tooltip across panels option]
 
 
 [float]
-==== Collapse break down by
+==== Collapse break down
 
 When creating *Lens* tables and XY visualizations, you can now collapse the breakdown dimension,
 allowing you to summarize aggregated data.
