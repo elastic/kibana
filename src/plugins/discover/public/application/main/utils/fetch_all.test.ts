@@ -116,14 +116,15 @@ describe('test fetchAll', () => {
       { _id: '1', _index: 'logs' },
       { _id: '2', _index: 'logs' },
     ];
-    mockFetchDocuments.mockResolvedValue(hits);
+    const documents = hits.map((hit) => buildDataTableRecord(hit, indexPatternMock));
+    mockFetchDocuments.mockResolvedValue(documents);
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING },
       {
         fetchStatus: FetchStatus.COMPLETE,
-        result: hits.map((hit) => buildDataTableRecord(hit, indexPatternMock)),
+        result: documents,
       },
     ]);
   });
@@ -135,7 +136,9 @@ describe('test fetchAll', () => {
       { _id: '2', _index: 'logs' },
     ];
     searchSource.getField('index')!.isTimeBased = () => false;
-    mockFetchDocuments.mockResolvedValue(hits);
+    const documents = hits.map((hit) => buildDataTableRecord(hit, indexPatternMock));
+    mockFetchDocuments.mockResolvedValue(documents);
+
     mockFetchTotalHits.mockResolvedValue(42);
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
@@ -177,7 +180,9 @@ describe('test fetchAll', () => {
     const collectMain = subjectCollector(subjects.main$);
     searchSource.getField('index')!.isTimeBased = () => false;
     mockFetchTotalHits.mockRejectedValue({ msg: 'Oh noes!' });
-    mockFetchDocuments.mockResolvedValue([{ _id: '1', _index: 'logs' }]);
+    const hits = [{ _id: '1', _index: 'logs' }];
+    const documents = hits.map((hit) => buildDataTableRecord(hit, indexPatternMock));
+    mockFetchDocuments.mockResolvedValue(documents);
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collectTotalHits()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
