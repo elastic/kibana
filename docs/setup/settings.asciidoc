@@ -420,7 +420,7 @@ NOTE: To reload the <<logging-settings, logging settings>>, send a SIGHUP signal
 
 // new logging configuration settings
 [[logging-root]] `logging.root`::
-The `root` logger has is a <<dedicated-loggers, dedicated logger>> and is pre-configured. The `root` logger logs at `info` level by default. If any other logging configuration is specified, `root` _must_ also be explicitly configured with an appropriate appender. 
+The `root` logger has is a <<dedicated-loggers, dedicated logger>> and is pre-configured. The `root` logger logs at `info` level by default. If any other logger is configured, the `root` logger _must_ also be explicitly configured with an appropriate appender. 
 
 [[logging-root-level]] `logging.root.level` {ess-icon}::
 Level at which a log record should be logged. Supported levels are: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_. Levels are ordered from _all_ (highest) to _off_ and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Use this value to <<change-overall-log-level,change the overall log level>>. Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs. *Default: `info`*. 
@@ -452,7 +452,6 @@ Specific appender format to apply for a particular logger context. If not config
 
 `logging.appenders`::
 {kibana-ref}/logging-service.html#logging-appenders[Appenders] define how and where log messages are displayed (eg. *stdout* or console) and stored (eg. file on the disk). Appender configuration is required if any other logging configuration is specified.
-// TODO: add link to the advanced logging documentation.
 
 `logging.appenders.console`::
 Appender to use for logging records to *stdout*. By default, uses the `[%date][%level][%logger] %message` **pattern** layout. To use a **json**, set the <<log-in-json-ECS-example,layout type to `json`>>.

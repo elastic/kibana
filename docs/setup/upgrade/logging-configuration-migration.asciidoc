@@ -1,19 +1,33 @@
 [[logging-configuration-migration]]
 == Logging configuration migration
 
-{kib} supports mixed usage of the deprecated and current logging configuration styles, however, we recommend changing them all at once.
- 
-If you use log rotation, be careful when mixing deprecated and current configuration styles as it could lead to unexpected behavior. For example, one system could apply the log file rotation while the other still writes to the original file.
+[float]
+=== Prepare for logging in 8.0
 
-If you are using the service scripts (`kibana.service`), be aware that `logging.dest` might be set via CLI options in the `kibana.service` declaration. To switch over to the current logging system, remove the `logging.dest` CLI argument from `/etc/systemd/system/kibana.service` and run `systemctl daemon-reload`.
+The entire logging system changed to offer a more consistent logging behavior with {es}. The current system differs from the more simplistic, deprecated system and allows you the freedom to customize what, how and where {kib} outputs log messages. While for logging based use cases, we recommend the <<logging-service, logging service guide>>, there are some important considerations:
 
+[float]
+==== Mixing deprecated and current configurations
+{kib} supports mixed usage of the deprecated and current logging configuration styles, however, we recommend changing them all at once to reduce the risk of the systems interfering.
+
+[float]
+==== Rotating log files
+If you use log rotation, be careful when mixing deprecated and current configuration styles as it could lead to unexpected behavior. For example, one system could apply the log file rotation while the other still writes to the original file. Rather switch over to the current system completely.
+
+[float]
+==== Service scripts
+If you are using the service scripts (`kibana.service`), be aware that the deprecated `logging.dest` configuration might be set via CLI options in the `kibana.service` declaration. When `logging.dest` is set in the service scripts, {kib} will ignore any other log rotation configuration. To switch over to the current logging system, remove the `logging.dest` CLI argument from `/etc/systemd/system/kibana.service` and run `systemctl daemon-reload`.
+
+[float]
+==== Compatibility
 Compatibility with the legacy logging system is assured until the end of the `v7` version. 
-All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
-root appenders, make sure that it contains `default` appender to provide backward compatibility.
+All log messages handled by `root` context are forwarded to the legacy logging service. If you configure a custom appender for `root`, make sure to include the `default` appender in the appenders array to provide backward compatibility.
 
-NOTE: When you switch to the new logging configuration, you will start seeing duplicate log entries in both formats. 
-These will be removed when the `default` appender is no longer required. If you define an appender for a logger, 
-the log messages aren't handled by the `root` logger anymore and are not forwarded to the legacy logging service.
+[float]
+==== Duplicate log messages
+NOTE: When you switch to the new logging configuration, you will start seeing duplicate log entries in both legacy and current formats. The legacy format will be removed when the `default` appender is no longer required. 
+
+To override this behavior for specific log messages, configure an appender for the logger.
 
 [[logging-pattern-format-old-and-new-example]]
 [options="header"]
