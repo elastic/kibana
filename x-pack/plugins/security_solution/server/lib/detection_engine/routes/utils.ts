@@ -128,13 +128,13 @@ interface Schema {
 
 export const buildRouteValidation =
   <T>(schema: Schema): RouteValidationFunction<T> =>
-  (payload: T, { ok, badRequest }) => {
-    const { value, error } = schema.validate(payload);
-    if (error) {
-      return badRequest(error.message);
-    }
-    return ok(value);
-  };
+    (payload: T, { ok, badRequest }) => {
+      const { value, error } = schema.validate(payload);
+      if (error) {
+        return badRequest(error.message);
+      }
+      return ok(value);
+    };
 
 const statusToErrorMessage = (statusCode: number) => {
   switch (statusCode) {
@@ -156,9 +156,9 @@ const statusToErrorMessage = (statusCode: number) => {
 };
 
 export class SiemResponseFactory {
-  constructor(private response: KibanaResponseFactory) {}
+  constructor(private response: KibanaResponseFactory) { }
 
-  error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
+  error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>, attributes?: T) {
     const contentType: CustomHttpResponseOptions<T>['headers'] = {
       'content-type': 'application/json',
     };
@@ -166,6 +166,7 @@ export class SiemResponseFactory {
       ...contentType,
       ...(headers ?? {}),
     };
+    const new_attributes: CustomHttpResponseOptions<T>['body'] = body;
 
     return this.response.custom({
       headers: defaultedHeaders,
@@ -174,6 +175,7 @@ export class SiemResponseFactory {
         JSON.stringify({
           message: body ?? statusToErrorMessage(statusCode),
           status_code: statusCode,
+          attributes: new_attributes,
         })
       ),
     });
