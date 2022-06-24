@@ -15,6 +15,7 @@ import {
   putTrainedModelQuerySchema,
   inferTrainedModelQuery,
   inferTrainedModelBody,
+  threadingParamsSchema,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -301,6 +302,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       path: '/api/ml/trained_models/{modelId}/deployment/_start',
       validate: {
         params: modelIdSchema,
+        query: threadingParamsSchema,
       },
       options: {
         tags: ['access:ml:canStartStopTrainedModels'],
@@ -311,6 +313,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const { modelId } = request.params;
         const body = await mlClient.startTrainedModelDeployment({
           model_id: modelId,
+          ...(request.query ? request.query : {}),
         });
         return response.ok({
           body,
