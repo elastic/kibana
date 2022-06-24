@@ -256,72 +256,72 @@ describe('SearchSourceAlertTypeExpression', () => {
     });
     wrapper.update();
     expect(copy).toHaveBeenCalled();
-    expect(JSON.parse(wrapper.find(EuiCopy).props().textToCopy)).toMatchInlineSnapshot(`
-      Object {
-        "_source": Object {
-          "excludes": Array [],
-        },
-        "fields": Array [
-          Object {
-            "field": "@timestamp",
-            "format": "date_time",
+    expect(wrapper.find(EuiCopy).props().textToCopy).toMatchInlineSnapshot(`
+      "{
+        \\"fields\\": [
+          {
+            \\"field\\": \\"@timestamp\\",
+            \\"format\\": \\"date_time\\"
           },
-          Object {
-            "field": "timestamp",
-            "format": "date_time",
+          {
+            \\"field\\": \\"timestamp\\",
+            \\"format\\": \\"date_time\\"
           },
-          Object {
-            "field": "utc_time",
-            "format": "date_time",
-          },
+          {
+            \\"field\\": \\"utc_time\\",
+            \\"format\\": \\"date_time\\"
+          }
         ],
-        "query": Object {
-          "bool": Object {
-            "filter": Array [
-              Object {
-                "bool": Object {
-                  "must_not": Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "response": "200",
-                          },
-                        },
+        \\"script_fields\\": {},
+        \\"stored_fields\\": [
+          \\"*\\"
+        ],
+        \\"runtime_mappings\\": {
+          \\"hour_of_day\\": {
+            \\"type\\": \\"long\\",
+            \\"script\\": {
+              \\"source\\": \\"emit(doc['timestamp'].value.getHour());\\"
+            }
+          }
+        },
+        \\"_source\\": {
+          \\"excludes\\": []
+        },
+        \\"query\\": {
+          \\"bool\\": {
+            \\"must\\": [],
+            \\"filter\\": [
+              {
+                \\"bool\\": {
+                  \\"must_not\\": {
+                    \\"bool\\": {
+                      \\"should\\": [
+                        {
+                          \\"match\\": {
+                            \\"response\\": \\"200\\"
+                          }
+                        }
                       ],
-                    },
-                  },
-                },
+                      \\"minimum_should_match\\": 1
+                    }
+                  }
+                }
               },
-              Object {
-                "range": Object {
-                  "timestamp": Object {
-                    "format": "strict_date_optional_time",
-                    "gte": "2022-06-19T02:49:51.192Z",
-                    "lte": "2022-06-24T02:49:51.192Z",
-                  },
-                },
-              },
+              {
+                \\"range\\": {
+                  \\"timestamp\\": {
+                    \\"format\\": \\"strict_date_optional_time\\",
+                    \\"gte\\": \\"2022-06-19T02:49:51.192Z\\",
+                    \\"lte\\": \\"2022-06-24T02:49:51.192Z\\"
+                  }
+                }
+              }
             ],
-            "must": Array [],
-            "must_not": Array [],
-            "should": Array [],
-          },
-        },
-        "runtime_mappings": Object {
-          "hour_of_day": Object {
-            "script": Object {
-              "source": "emit(doc['timestamp'].value.getHour());",
-            },
-            "type": "long",
-          },
-        },
-        "script_fields": Object {},
-        "stored_fields": Array [
-          "*",
-        ],
-      }
+            \\"should\\": [],
+            \\"must_not\\": []
+          }
+        }
+      }"
     `);
   });
 
