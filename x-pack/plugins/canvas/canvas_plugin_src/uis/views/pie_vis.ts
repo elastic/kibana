@@ -50,8 +50,11 @@ export const pieVis = () => ({
       name: 'isDonut',
       displayName: strings.getIsDonutDisplayName(),
       help: strings.getIsDonutHelp(),
-      argType: 'toggle',
+      argType: 'inlineToggle',
       default: false,
+      options: {
+        labelValue: strings.getEnableLabel(),
+      },
     },
     {
       name: 'emptySizeRatio',
@@ -66,11 +69,28 @@ export const pieVis = () => ({
       },
     },
     {
+      name: 'palette',
+      argType: 'palette',
+    },
+    {
+      name: 'distinctColors',
+      displayName: strings.getDistictColorsDisplayName(),
+      help: strings.getDistictColorsHelp(),
+      argType: 'inlineToggle',
+      default: false,
+      options: {
+        labelValue: strings.getEnableLabel(),
+      },
+    },
+    {
       name: 'addTooltip',
       displayName: strings.getAddTooltipDisplayName(),
       help: strings.getAddTooltipHelp(),
-      argType: 'toggle',
+      argType: 'inlineToggle',
       default: true,
+      options: {
+        labelValue: strings.getShowLabel(),
+      },
     },
     {
       name: 'legendDisplay',
@@ -105,15 +125,21 @@ export const pieVis = () => ({
       name: 'nestedLegend',
       displayName: strings.getNestedLegendDisplayName(),
       help: strings.getNestedLegendHelp(),
-      argType: 'toggle',
+      argType: 'inlineToggle',
       default: false,
+      options: {
+        labelValue: strings.getEnableLabel(),
+      },
     },
     {
       name: 'truncateLegend',
       displayName: strings.getTruncateLegendDisplayName(),
       help: strings.getTruncateLegendHelp(),
-      argType: 'toggle',
+      argType: 'inlineToggle',
       default: true,
+      options: {
+        labelValue: strings.getTruncateLabel(),
+      },
     },
     {
       name: 'maxLegendLines',
@@ -123,29 +149,24 @@ export const pieVis = () => ({
       default: 1,
     },
     {
-      name: 'distinctColors',
-      displayName: strings.getDistictColorsDisplayName(),
-      help: strings.getDistictColorsHelp(),
-      argType: 'toggle',
-      default: false,
-    },
-    {
       name: 'respectSourceOrder',
       displayName: strings.getRespectSourceOrderDisplayName(),
       help: strings.getRespectSourceOrderHelp(),
-      argType: 'toggle',
+      argType: 'inlineToggle',
       default: true,
+      options: {
+        labelValue: strings.getSaveLabel(),
+      },
     },
     {
       name: 'startFromSecondLargestSlice',
       displayName: strings.getStartFromSecondLargestSliceDisplayName(),
       help: strings.getStartFromSecondLargestSliceHelp(),
-      argType: 'toggle',
+      argType: 'inlineToggle',
       default: true,
-    },
-    {
-      name: 'palette',
-      argType: 'palette',
+      options: {
+        labelValue: strings.getEnableLabel(),
+      },
     },
     {
       name: 'labels',

@@ -1678,7 +1678,7 @@ export const ViewStrings = {
       }),
     getAddTooltipDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.addTooltipDisplayName', {
-        defaultMessage: 'Show tooltip',
+        defaultMessage: 'Tooltip',
       }),
     getAddTooltipHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.addTooltipHelp', {
@@ -1690,7 +1690,7 @@ export const ViewStrings = {
       }),
     getLegendPositionHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionLabel', {
-        defaultMessage: 'Specifies the legend position.',
+        defaultMessage: 'Specifies the legend position',
       }),
     getLegendPositionTopOption: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionTopLabel', {
@@ -1714,7 +1714,7 @@ export const ViewStrings = {
       }),
     getLegendDisplayHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendDisplayLabel', {
-        defaultMessage: 'Specifies the legend visibility.',
+        defaultMessage: 'Specifies the legend visibility',
       }),
     getLegendDisplayDefaultOption: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendDisplayDefaultLabel', {
@@ -1730,11 +1730,11 @@ export const ViewStrings = {
       }),
     getNestedLegendDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.nestedLegendDisplayName', {
-        defaultMessage: 'A detailed legend',
+        defaultMessage: 'Detailed legend',
       }),
     getNestedLegendHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.nestedLegendHelp', {
-        defaultMessage: 'Show a more detailed legend',
+        defaultMessage: 'Show more detailed legend',
       }),
     getTruncateLegendDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.truncateLegendDisplayName', {
@@ -1754,28 +1754,28 @@ export const ViewStrings = {
       }),
     getDistictColorsDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.distinctColorsDisplayName', {
-        defaultMessage: 'Enable distinct colors',
+        defaultMessage: 'Distinct colors',
       }),
     getDistictColorsHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.distinctColorsHelp', {
         defaultMessage:
-          'Maps different color per slice. Slices with the same value have the same color',
+          'Maps a different color per slice. Slices with the same value have the same color.',
       }),
     getRespectSourceOrderDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.respectSourceOrderDisplayName', {
-        defaultMessage: 'Save a source order of the data',
+        defaultMessage: 'Original data order',
       }),
     getRespectSourceOrderHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.respectSourceOrderHelp', {
-        defaultMessage: 'Save a source order of the data',
+        defaultMessage: 'Saves a source order of the data',
       }),
     getIsDonutDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.isDonutDisplayName', {
-        defaultMessage: 'Donut',
+        defaultMessage: 'Donut mode',
       }),
     getIsDonutHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.isDonutHelp', {
-        defaultMessage: 'Enable donut view',
+        defaultMessage: 'Enable donut mode',
       }),
     getEmptySizeRatioDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioDisplayName', {
@@ -1789,7 +1789,7 @@ export const ViewStrings = {
       i18n.translate(
         'xpack.canvas.uis.views.partitionVis.args.startFromSecondLargestSliceDisplayName',
         {
-          defaultMessage: 'Starts placement with the second largest slice',
+          defaultMessage: 'Starts with the second largest slice',
         }
       ),
     getStartFromSecondLargestSliceHelp: () =>
@@ -1803,6 +1803,22 @@ export const ViewStrings = {
     getLabelsHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.labelsHelp', {
         defaultMessage: 'Set up labels configuration',
+      }),
+    getEnableLabel: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.options.enableHelp', {
+        defaultMessage: 'Enable',
+      }),
+    getSaveLabel: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.options.saveHelp', {
+        defaultMessage: 'Save',
+      }),
+    getTruncateLabel: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.options.truncateHelp', {
+        defaultMessage: 'Truncate',
+      }),
+    getShowLabel: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.options.showHelp', {
+        defaultMessage: 'Show',
       }),
   },
 };
