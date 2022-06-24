@@ -8,6 +8,7 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -25,6 +26,14 @@ import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
+
+function isOfAggregateQueryType(query: AggregateQuery | Query): query is AggregateQuery {
+  return Boolean(query && 'sql' in query);
+}
+
+function getAggregateQueryMode(query: AggregateQuery): string {
+  return Object.keys(query)[0];
+}
 
 export function useDiscoverState({
   services,
@@ -225,6 +234,17 @@ export function useDiscoverState({
       refetch$.next(undefined);
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
+
+  useEffect(() => {
+    let textBasedLanguageMode = '';
+    if (state.query && isOfAggregateQueryType(state.query)) {
+      const aggregatedQuery = state.query as AggregateQuery;
+      textBasedLanguageMode = getAggregateQueryMode(aggregatedQuery);
+    } else {
+      textBasedLanguageMode = '';
+    }
+    stateContainer.setAppState({ textBasedLanguageMode });
+  }, [state, stateContainer]);
 
   return {
     data$,

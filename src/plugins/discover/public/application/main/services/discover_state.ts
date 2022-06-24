@@ -91,6 +91,10 @@ export interface AppState {
    * Document explorer row height option
    */
   rowHeight?: number;
+  /**
+   * Text based languages mode (sql | esql)
+   */
+  textBasedLanguageMode?: string;
 }
 
 interface GetStateParams {
@@ -176,8 +180,12 @@ export interface GetStateReturn {
 }
 const APP_STATE_URL_KEY = '_a';
 
-function isOfAggregateQueryType(arg: AggregateQuery | Query): arg is AggregateQuery {
-  return Boolean(arg && 'sql' in arg);
+function isOfAggregateQueryType(query: AggregateQuery | Query): query is AggregateQuery {
+  return Boolean(query && 'sql' in query);
+}
+
+function getAggregateQueryMode(query: AggregateQuery): string {
+  return Object.keys(query)[0];
 }
 
 /**
@@ -202,7 +210,8 @@ export function getState({
 
   if (appStateFromUrl && appStateFromUrl.query && !appStateFromUrl.query.language) {
     if (isOfAggregateQueryType(appStateFromUrl.query)) {
-      appStateFromUrl.query = appStateFromUrl.query;
+      const aggregatedQuery = appStateFromUrl.query as AggregateQuery;
+      appStateFromUrl.textBasedLanguageMode = getAggregateQueryMode(aggregatedQuery);
     } else {
       appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
     }

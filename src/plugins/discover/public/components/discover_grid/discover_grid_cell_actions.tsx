@@ -10,6 +10,7 @@ import React, { useContext } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { DiscoverGridContext, GridContext } from './discover_grid_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { copyValueToClipboard } from '../../utils/copy_value_to_clipboard';
@@ -24,7 +25,7 @@ function onFilterCell(
   const value = String(row.flattened[columnId]);
   const field = context.indexPattern.fields.getByName(columnId);
 
-  if (value && field) {
+  if (value && field && context.onFilter) {
     context.onFilter(field, value, mode);
   }
 }
@@ -116,10 +117,10 @@ export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCell
   );
 };
 
-export function buildCellActions(field: DataViewField) {
+export function buildCellActions(field: DataViewField, onFilter?: DocViewFilterFn) {
   if (field?.type === '_source') {
     return [CopyBtn];
-  } else if (!field.filterable) {
+  } else if (!onFilter || !field.filterable) {
     return undefined;
   }
 

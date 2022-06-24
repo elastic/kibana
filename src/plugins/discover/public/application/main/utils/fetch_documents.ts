@@ -10,6 +10,7 @@ import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
 import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
+import { buildDataTableRecordList } from '../../../utils/build_data_record';
 import { FetchDeps } from './fetch_all';
 
 /**
@@ -31,6 +32,7 @@ export const fetchDocuments = (
     // not a rollup index pattern.
     searchSource.setOverwriteDataViewType(undefined);
   }
+  const dataView = searchSource.getField('index')!;
 
   const executionContext = {
     description: 'fetch documents',
@@ -53,7 +55,9 @@ export const fetchDocuments = (
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),
-      map((res) => res.rawResponse.hits.hits)
+      map((res) => {
+        return buildDataTableRecordList(res.rawResponse.hits.hits, dataView);
+      })
     );
 
   return lastValueFrom(fetch$);

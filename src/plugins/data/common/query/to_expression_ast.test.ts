@@ -21,54 +21,18 @@ describe('queryStateToExpressionAst', () => {
 
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "findFunction": [Function],
-        "functions": Array [
+        "chain": Array [
           Object {
-            "addArgument": [Function],
             "arguments": Object {},
-            "getArgument": [Function],
-            "name": "kibana",
-            "removeArgument": [Function],
-            "replaceArgument": [Function],
-            "toAst": [Function],
-            "toString": [Function],
-            "type": "expression_function_builder",
+            "function": "kibana",
+            "type": "function",
           },
           Object {
-            "addArgument": [Function],
             "arguments": Object {
-              "filters": Array [],
-              "q": Array [
-                Object {
-                  "findFunction": [Function],
-                  "functions": Array [
-                    Object {
-                      "addArgument": [Function],
-                      "arguments": Object {
-                        "q": Array [
-                          "\\"\\"",
-                        ],
-                      },
-                      "getArgument": [Function],
-                      "name": "lucene",
-                      "removeArgument": [Function],
-                      "replaceArgument": [Function],
-                      "toAst": [Function],
-                      "toString": [Function],
-                      "type": "expression_function_builder",
-                    },
-                  ],
-                  "toAst": [Function],
-                  "toString": [Function],
-                  "type": "expression_builder",
-                },
-              ],
               "timeRange": Array [
                 Object {
-                  "findFunction": [Function],
-                  "functions": Array [
+                  "chain": Array [
                     Object {
-                      "addArgument": [Function],
                       "arguments": Object {
                         "from": Array [
                           "now",
@@ -77,33 +41,19 @@ describe('queryStateToExpressionAst', () => {
                           "now+7d",
                         ],
                       },
-                      "getArgument": [Function],
-                      "name": "timerange",
-                      "removeArgument": [Function],
-                      "replaceArgument": [Function],
-                      "toAst": [Function],
-                      "toString": [Function],
-                      "type": "expression_function_builder",
+                      "function": "timerange",
+                      "type": "function",
                     },
                   ],
-                  "toAst": [Function],
-                  "toString": [Function],
-                  "type": "expression_builder",
+                  "type": "expression",
                 },
               ],
             },
-            "getArgument": [Function],
-            "name": "kibana_context",
-            "removeArgument": [Function],
-            "replaceArgument": [Function],
-            "toAst": [Function],
-            "toString": [Function],
-            "type": "expression_function_builder",
+            "function": "kibana_context",
+            "type": "function",
           },
         ],
-        "toAst": [Function],
-        "toString": [Function],
-        "type": "expression_builder",
+        "type": "expression",
       }
     `);
   });

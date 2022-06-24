@@ -54,7 +54,7 @@ function DiscoverDocumentsComponent({
   expandedDoc?: DataTableRecord;
   indexPattern: DataView;
   navigateTo: (url: string) => void;
-  onAddFilter: DocViewFilterFn;
+  onAddFilter?: DocViewFilterFn;
   savedSearch: SavedSearch;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   state: AppState;
@@ -109,8 +109,11 @@ function DiscoverDocumentsComponent({
   );
 
   const showTimeCol = useMemo(
-    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
-    [uiSettings, indexPattern.timeFieldName]
+    () =>
+      !state.textBasedLanguageMode &&
+      !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
+      !!indexPattern.timeFieldName,
+    [uiSettings, indexPattern.timeFieldName, state.textBasedLanguageMode]
   );
 
   if (
@@ -150,7 +153,7 @@ function DiscoverDocumentsComponent({
             onFilter={onAddFilter as DocViewFilterFn}
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
-            onSort={onSort}
+            onSort={!state.textBasedLanguageMode ? onSort : undefined}
             useNewFieldsApi={useNewFieldsApi}
             dataTestSubj="discoverDocTable"
           />
@@ -173,18 +176,19 @@ function DiscoverDocumentsComponent({
               sampleSize={sampleSize}
               searchDescription={savedSearch.description}
               searchTitle={savedSearch.title}
-              setExpandedDoc={setExpandedDoc}
+              setExpandedDoc={!state.textBasedLanguageMode ? setExpandedDoc : undefined}
               showTimeCol={showTimeCol}
               settings={state.grid}
               onAddColumn={onAddColumn}
               onFilter={onAddFilter as DocViewFilterFn}
               onRemoveColumn={onRemoveColumn}
               onSetColumns={onSetColumns}
-              onSort={onSort}
+              onSort={!state.textBasedLanguageMode ? onSort : undefined}
               onResize={onResize}
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
+              isSortEnabled={!state.textBasedLanguageMode}
             />
           </div>
         </>

@@ -9,7 +9,6 @@ import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
 import {
   sendCompleteMsg,
   sendErrorMsg,
@@ -33,6 +32,7 @@ import {
   SavedSearchData,
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
+import { fetchSql } from './fetch_sql';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -87,15 +87,17 @@ export function fetchAll(
       sendResetMsg(dataSubjects, initialFetchStatus);
     }
 
-    const { hideChart, sort } = appStateContainer.getState();
+    const { hideChart, sort, query, textBasedLanguageMode } = appStateContainer.getState();
 
     // Update the base searchSource, base for all child fetches
-    updateSearchSource(searchSource, false, {
-      indexPattern,
-      services,
-      sort: sort as SortOrder[],
-      useNewFieldsApi,
-    });
+    if (!textBasedLanguageMode) {
+      updateSearchSource(searchSource, false, {
+        indexPattern,
+        services,
+        sort: sort as SortOrder[],
+        useNewFieldsApi,
+      });
+    }
 
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
@@ -107,11 +109,19 @@ export function fetchAll(
       !hideChart && indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP;
 
     // Start fetching all required requests
-    const documents = fetchDocuments(searchSource.createCopy(), fetchDeps);
-    const charts = isChartVisible ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;
-    const totalHits = !isChartVisible
-      ? fetchTotalHits(searchSource.createCopy(), fetchDeps)
-      : undefined;
+    const documents =
+      textBasedLanguageMode && query
+        ? fetchSql(query, services.indexPatterns, data, services.expressions)
+        : fetchDocuments(searchSource.createCopy(), fetchDeps);
+
+    const charts =
+      isChartVisible && !textBasedLanguageMode
+        ? fetchChart(searchSource.createCopy(), fetchDeps)
+        : undefined;
+    const totalHits =
+      !isChartVisible && !textBasedLanguageMode
+        ? fetchTotalHits(searchSource.createCopy(), fetchDeps)
+        : undefined;
 
     /**
      * This method checks the passed in hit count and will send a PARTIAL message to main$
@@ -140,13 +150,10 @@ export function fetchAll(
             result: docs.length,
           });
         }
-        const dataView = searchSource.getField('index')!;
-
-        const resultDocs = docs.map((doc) => buildDataTableRecord(doc, dataView));
 
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,
-          result: resultDocs,
+          result: docs,
         });
 
         checkHitCount(docs.length);

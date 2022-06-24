@@ -222,7 +222,7 @@ export interface DiscoverFieldProps {
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Callback to remove/deselect a the field
    * @param fieldName
@@ -369,6 +369,30 @@ function DiscoverFieldComponent({
     </EuiPopoverTitle>
   );
 
+  const button = (
+    <FieldButton
+      size="s"
+      className="dscSidebarItem"
+      isActive={infoIsOpen}
+      onClick={togglePopover}
+      dataTestSubj={`field-${field.name}-showDetails`}
+      fieldIcon={<DiscoverFieldTypeIcon field={field} />}
+      fieldAction={
+        <ActionButton
+          field={field}
+          isSelected={selected}
+          alwaysShow={alwaysShowActionButton}
+          toggleDisplay={toggleDisplay}
+        />
+      }
+      fieldName={<FieldName field={field} />}
+      fieldInfoIcon={field.type === 'conflict' && <FieldInfoIcon />}
+    />
+  );
+  if (!onAddFilter) {
+    return button;
+  }
+
   const renderPopover = () => {
     const details = getDetails(field);
     return (
@@ -415,26 +439,7 @@ function DiscoverFieldComponent({
   return (
     <EuiPopover
       display="block"
-      button={
-        <FieldButton
-          size="s"
-          className="dscSidebarItem"
-          isActive={infoIsOpen}
-          onClick={togglePopover}
-          dataTestSubj={`field-${field.name}-showDetails`}
-          fieldIcon={<DiscoverFieldTypeIcon field={field} />}
-          fieldAction={
-            <ActionButton
-              field={field}
-              isSelected={selected}
-              alwaysShow={alwaysShowActionButton}
-              toggleDisplay={toggleDisplay}
-            />
-          }
-          fieldName={<FieldName field={field} />}
-          fieldInfoIcon={field.type === 'conflict' && <FieldInfoIcon />}
-        />
-      }
+      button={button}
       isOpen={infoIsOpen}
       closePopover={() => setOpen(false)}
       anchorPosition="rightUp"

@@ -259,7 +259,9 @@ export function DiscoverLayout({
               documents$={savedSearchData$.documents$}
               indexPatternList={indexPatternList}
               onAddField={onAddColumn}
-              onAddFilter={onAddFilter}
+              onAddFilter={
+                !state.textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined
+              }
               onRemoveField={onRemoveColumn}
               onChangeIndexPattern={onChangeIndexPattern}
               selectedIndexPattern={indexPattern}
@@ -325,28 +327,34 @@ export function DiscoverLayout({
                   gutterSize="none"
                   responsive={false}
                 >
-                  <EuiFlexItem grow={false}>
-                    <DiscoverChartMemoized
-                      resetSavedSearch={resetSavedSearch}
-                      savedSearch={savedSearch}
-                      savedSearchDataChart$={charts$}
-                      savedSearchDataTotalHits$={totalHits$}
-                      stateContainer={stateContainer}
-                      indexPattern={indexPattern}
-                      viewMode={viewMode}
-                      setDiscoverViewMode={setDiscoverViewMode}
-                      hideChart={state.hideChart}
-                      interval={state.interval}
-                    />
-                  </EuiFlexItem>
-                  <EuiHorizontalRule margin="none" />
+                  {!state.textBasedLanguageMode && (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <DiscoverChartMemoized
+                          resetSavedSearch={resetSavedSearch}
+                          savedSearch={savedSearch}
+                          savedSearchDataChart$={charts$}
+                          savedSearchDataTotalHits$={totalHits$}
+                          stateContainer={stateContainer}
+                          indexPattern={indexPattern}
+                          viewMode={viewMode}
+                          setDiscoverViewMode={setDiscoverViewMode}
+                          hideChart={state.hideChart}
+                          interval={state.interval}
+                        />
+                      </EuiFlexItem>
+                      <EuiHorizontalRule margin="none" />
+                    </>
+                  )}
                   {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
                     <DiscoverDocuments
                       documents$={savedSearchData$.documents$}
                       expandedDoc={expandedDoc}
                       indexPattern={indexPattern}
                       navigateTo={navigateTo}
-                      onAddFilter={onAddFilter as DocViewFilterFn}
+                      onAddFilter={
+                        !state.textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined
+                      }
                       savedSearch={savedSearch}
                       setExpandedDoc={setExpandedDoc}
                       state={state}
@@ -361,7 +369,9 @@ export function DiscoverLayout({
                       filters={state.filters}
                       columns={columns}
                       stateContainer={stateContainer}
-                      onAddFilter={onAddFilter}
+                      onAddFilter={
+                        !state.textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined
+                      }
                       trackUiMetric={trackUiMetric}
                       savedSearchRefetch$={savedSearchRefetch$}
                     />
