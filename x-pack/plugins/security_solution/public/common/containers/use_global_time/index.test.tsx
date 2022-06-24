@@ -38,15 +38,21 @@ describe('useGlobalTime', () => {
   });
 
   test('clear all queries at unmount', () => {
-    const { rerender } = renderHook(() => useGlobalTime());
-    act(() => rerender());
+    const { unmount } = renderHook(() => useGlobalTime());
+    unmount();
     expect(mockDispatch.mock.calls[0][0].type).toEqual(
       'x-pack/security_solution/local/inputs/DELETE_ALL_QUERY'
     );
   });
 
   test('do NOT clear all queries at unmount', () => {
-    const { rerender } = renderHook(() => useGlobalTime(false));
+    const { unmount } = renderHook(() => useGlobalTime(false));
+    unmount();
+    expect(mockDispatch.mock.calls.length).toBe(0);
+  });
+
+  test('do NOT clear all queries when setting state', () => {
+    const { rerender } = renderHook(() => useGlobalTime());
     act(() => rerender());
     expect(mockDispatch.mock.calls.length).toBe(0);
   });
