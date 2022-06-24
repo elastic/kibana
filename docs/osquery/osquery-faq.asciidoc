@@ -1,7 +1,7 @@
 [[osquery-faq]]
 == Osquery FAQ
 
-This frequently-asked-questions list answers some common questions about
+This list of frequently asked questions answers common questions about
 using Osquery in {kib}.
 
 [float]
@@ -11,7 +11,7 @@ using Osquery in {kib}.
 Osquery uses a superset of SQLite for queries.
 See the Osquery documentation for a guide to help you 
 https://osquery.readthedocs.io/en/stable/introduction/sql/[get started with osquery SQL].
-If you need help with more advanced questions, the Osquery community has an active
+For help with more advanced questions, the Osquery community has an active
 Slack workspace and GitHub project. You can find links for both at https://osquery.io/[osquery.io].
 
 [float]
@@ -19,7 +19,7 @@ Slack workspace and GitHub project. You can find links for both at https://osque
 ===  How often is Osquery updated for Osquery Manager?
 When a new https://github.com/osquery/osquery/releases[version of Osquery is released], 
 it is included in a subsequent Elastic Agent release and applied when the agent is upgraded.
-After that, when running queries from Osquery Manager in {kib}, it uses the updated Osquery version. 
+After that, when running queries from Osquery Manager in {kib}, the updated Osquery version is used. 
 Refer to the Fleet and Elastic Agent Guide for help with 
 {fleet-guide}/upgrade-elastic-agent.html[upgrading Fleet-managed Elastic Agents].
 
@@ -34,19 +34,19 @@ response is the Osquery version installed on the agent.
 The Osquery Manager integration brings https://osquery.io/[Osquery] capabilities to the Elastic Stack and 
 makes it easier to manage Osquery across a large number of hosts.
 Most Osquery functionality works the same way in {kib} as it does when you deploy Osquery yourself.
-However, there are a few differences and known issues outlined below.
+However, there are a few differences and known issues, outlined below.
 
 [float]
 [[osquery-fda]]
 ==== How do I grant Full Disk Access?
 
 Full Disk Access (FDA) is required to fully query some tables on MacOS. Granting FDA is
-not yet supported for Osquery Manager, but we're working on it. This impacts a small set
+not yet supported for Osquery Manager. This impacts a small set
 of tables that access file directories that are restricted due to heightened permissions from Apple, 
 including https://osquery.io/schema/current#file[file], 
 https://osquery.io/schema/current#file_events[file_events], 
 https://osquery.io/schema/current#es_process_events[es_process_events],
-or any custom tables configured with 
+and any custom tables configured with 
 https://osquery.readthedocs.io/en/stable/deployment/configuration/#automatic-table-construction[ATC] 
 that require access to these directories.
 When querying these tables, you won't get results from the restricted directories. 
@@ -64,7 +64,7 @@ https://osquery.io/schema/current#carves[carves] table queries do not return res
 
 The https://osquery.readthedocs.io/en/stable/introduction/sql/#shell-help[Osquery `.help` command] 
 is not available when running live queries in {kib}. Instead, refer to the 
-https://osquery.io/schema/[Osquery schema] to see all available tables, fields, 
+https://osquery.io/schema/[Osquery schema] for all available tables, fields, 
 and supported Operating Systems for each.
 
 [float]
@@ -80,5 +80,5 @@ https://osquery.readthedocs.io/en/stable/deployment/extensions/[Osquery extensio
 Yes, you can set up 
 https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/[Osquery FIM] using 
 the Advanced configuration option for Osquery Manager (see <<osquery-custom-config>>).
-However, Elastic also provides a File Integrity Monitoring integration for Elastic Agent, which may prove
+However, Elastic also provides a File Integrity Monitoring integration for Elastic Agent, which might prove
 to be easier to configure than the current options available for Osquery Manager.
