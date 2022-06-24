@@ -5,25 +5,29 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
+
 import type { IRouter, Logger } from '@kbn/core/server';
-// import type { DataRequestHandlerContext, IEsSearchRequest } from '@kbn/data-plugin/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/aiops-utils';
 
 import {
+  addChangePoints,
   aiopsExplainLogRateSpikesSchema,
   updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
 import { API_ENDPOINT } from '../../common/api';
+import type { ChangePoint } from '../../common/types';
 
 import { fetchFieldCandidates } from './queries/fetch_field_candidates';
+import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
 
 // Overall progress is a float from 0 to 1.
 // const LOADED_OVERALL_HISTOGRAM = 0.05;
 const LOADED_FIELD_CANDIDATES = 0.05;
 // const LOADED_DONE = 1;
-// const PROGRESS_STEP_P_VALUES = 0.6;
+const PROGRESS_STEP_P_VALUES = 0.6;
 // const PROGRESS_STEP_HISTOGRAMS = 0.1;
 // const PROGRESS_STEP_FREQUENT_ITEMS = 0.1;
 
@@ -83,6 +87,44 @@ export const defineExplainLogRateSpikesRoute = (
             loadingState: `Identified ${fieldCandidates.length} field candidates.`,
           })
         );
+
+        const changePoints: ChangePoint[] = [];
+        const fieldsToSample = new Set<string>();
+        const chunkSize = 10;
+
+        const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
+
+        for (const fieldCandidatesChunk of fieldCandidatesChunks) {
+          const { changePoints: pValues } = await fetchChangePointPValues(
+            client,
+            request.body,
+            fieldCandidatesChunk
+          );
+
+          if (pValues.length > 0) {
+            pValues.forEach((d) => {
+              fieldsToSample.add(d.fieldName);
+            });
+            changePoints.push(...pValues);
+          }
+
+          loaded += (1 / fieldCandidatesChunks.length) * PROGRESS_STEP_P_VALUES;
+          push(addChangePoints(pValues));
+          push(
+            updateLoadingStateAction({
+              ccsWarning: false,
+              loaded,
+              loadingState: `Identified ${
+                changePoints?.length ?? 0
+              } significant field/value pairs.`,
+            })
+          );
+
+          if (shouldStop) {
+            end();
+            return;
+          }
+        }
 
         end();
       })();

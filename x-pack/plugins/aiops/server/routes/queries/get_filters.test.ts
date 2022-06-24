@@ -15,6 +15,10 @@ describe('getFilters', () => {
       kuery: '',
       start: 1577836800000,
       end: 1609459200000,
+      baselineMin: 10,
+      baselineMax: 20,
+      deviationMin: 30,
+      deviationMax: 40,
     });
     expect(filters).toEqual([]);
   });
@@ -26,6 +30,10 @@ describe('getFilters', () => {
       kuery: '',
       start: 1577836800000,
       end: 1609459200000,
+      baselineMin: 10,
+      baselineMax: 20,
+      deviationMin: 30,
+      deviationMax: 40,
     });
     expect(filters).toEqual([
       {

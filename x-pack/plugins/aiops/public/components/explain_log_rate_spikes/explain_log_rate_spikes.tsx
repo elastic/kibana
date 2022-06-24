@@ -34,6 +34,11 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
       // TODO Consider time ranges.
       start: 0,
       end: 2147483647000,
+      // TODO identify dynamically or via UI
+      baselineMin: 10,
+      baselineMax: 20,
+      deviationMin: 30,
+      deviationMax: 40,
       // TODO Consider an optional Kuery.
       kuery: '',
       // TODO Handle data view without time fields.

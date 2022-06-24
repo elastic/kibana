@@ -13,3 +13,20 @@ export interface FieldValuePair {
   fieldValue: string | number;
   isFallbackResult?: boolean;
 }
+
+export interface HistogramItem {
+  doc_count: number;
+  key: number;
+  key_as_string: string;
+}
+
+export interface ChangePoint extends FieldValuePair {
+  doc_count: number;
+  bg_count: number;
+  score: number;
+  pValue: number | null;
+  normalizedScore: number;
+}
+export interface ChangePointHistogram extends FieldValuePair {
+  histogram: HistogramItem[];
+}

@@ -15,6 +15,10 @@ describe('getRequestBase', () => {
       kuery: '',
       start: 1577836800000,
       end: 1609459200000,
+      baselineMin: 10,
+      baselineMax: 20,
+      deviationMin: 30,
+      deviationMax: 40,
     });
     expect(requestBase.ignore_throttled).toEqual(undefined);
   });
@@ -27,6 +31,10 @@ describe('getRequestBase', () => {
       kuery: '',
       start: 1577836800000,
       end: 1609459200000,
+      baselineMin: 10,
+      baselineMax: 20,
+      deviationMin: 30,
+      deviationMax: 40,
     });
     expect(requestBase.ignore_throttled).toEqual(false);
   });
