@@ -26,6 +26,10 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               const numAlerts = alerts.length;
               logger.debug(`Found ${numAlerts} alerts.`);
 
+              const ruleDataClientWriter = await ruleDataClient.getWriter({
+                namespace: options.spaceId,
+              });
+
               // Only write alerts if:
               // - writing is enabled
               //   AND
@@ -92,15 +96,13 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   };
                 });
 
-                const response = await ruleDataClient
-                  .getWriter({ namespace: options.spaceId })
-                  .bulk({
-                    body: augmentedAlerts.flatMap((alert) => [
-                      { create: { _id: alert._id } },
-                      alert._source,
-                    ]),
-                    refresh,
-                  });
+                const response = await ruleDataClientWriter.bulk({
+                  body: augmentedAlerts.flatMap((alert) => [
+                    { create: { _id: alert._id } },
+                    alert._source,
+                  ]),
+                  refresh,
+                });
 
                 if (response == null) {
                   return { createdAlerts: [], errors: {} };
