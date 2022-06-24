@@ -6,19 +6,3 @@
  */
 
 export * from './exploratory_view';
-
-// const seriesUrl = createExploratoryViewUrl({
-//   reportType: 'kpi-over-time',
-//   allSeries: [
-//     {
-//       name: 'elastic-page-view',
-//       dataType: 'ux',
-//       time: {
-//         from: '2021-01-18T12:20:01.682Z',
-//         to: '2021-01-18T12:25:27.484Z',
-//       },
-//       selectedMetricField: '___records___',
-//       reportDefinitions: { 'service.name': ['elastic-co-frontend'] },
-//     },
-//   ],
-// });
