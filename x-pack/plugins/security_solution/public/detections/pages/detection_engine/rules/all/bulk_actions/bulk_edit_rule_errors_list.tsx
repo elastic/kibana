@@ -52,12 +52,22 @@ const BulkEditRuleErrorsListComponent = ({ ruleErrors = [] }: BulkEditRuleErrors
                   />
                 </li>
               );
+            case BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_AUTH:
+              return (
+                <li key={message}>
+                  <FormattedMessage
+                    id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.machineLearningRulesIndexEditDescription"
+                    defaultMessage="{rulesCount, plural, =1 {# Machine Learning rule} other {# Machine Learning rules}} can't be edited ({message})"
+                    values={{ rulesCount, message }}
+                  />
+                </li>
+              );
             default:
               return (
                 <li key={message}>
                   <FormattedMessage
                     id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.defaultRulesEditFailureDescription"
-                    defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} can't be edited due to error: {message}"
+                    defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} can't be edited ({message})"
                     values={{ rulesCount, message }}
                   />
                 </li>

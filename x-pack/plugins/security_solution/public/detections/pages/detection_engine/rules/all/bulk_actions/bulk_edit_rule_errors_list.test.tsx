@@ -41,12 +41,8 @@ describe('Component BulkEditRuleErrorsList', () => {
     ];
     render(<BulkEditRuleErrorsList ruleErrors={ruleErrors} />, { wrapper: Wrapper });
 
-    expect(
-      screen.getByText("2 rules can't be edited due to error: test failure")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("1 rule can't be edited due to error: another failure")
-    ).toBeInTheDocument();
+    expect(screen.getByText("2 rules can't be edited (test failure)")).toBeInTheDocument();
+    expect(screen.getByText("1 rule can't be edited (another failure)")).toBeInTheDocument();
   });
 
   test.each([
@@ -60,9 +56,9 @@ describe('Component BulkEditRuleErrorsList', () => {
     ],
     [
       BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_AUTH,
-      "2 rules can't be edited due to error: test failure",
+      "2 Machine Learning rules can't be edited (test failure)",
     ],
-    [undefined, "2 rules can't be edited due to error: test failure"],
+    [undefined, "2 rules can't be edited (test failure)"],
   ])('should render correct message for "%s" errorCode', (errorCode, value) => {
     const ruleErrors: DryRunResult['ruleErrors'] = [
       {
