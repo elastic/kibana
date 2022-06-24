@@ -7,20 +7,41 @@
  */
 
 import { EuiButton, EuiAccordion, htmlIdGenerator } from '@elastic/eui';
-import { GridItemHTMLElement, GridStack, GridStackNode, GridStackWidget } from 'gridstack';
-// import 'gridstack/dist/h5/gridstack-dd-native';
-import React, { FC, useCallback, useEffect, useState, useMemo, useRef } from 'react';
+import {
+  GridItemHTMLElement,
+  GridStack,
+  GridStackNode,
+  GridStackEventHandlerCallback,
+  GridStackWidget,
+} from 'gridstack';
+import 'gridstack/dist/h5/gridstack-dd-native';
+import React, {
+  FC,
+  useCallback,
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+  Ref,
+  createRef,
+} from 'react';
 import { GridItem } from './grid_item';
 
-import {
-  ColumnOptions,
-  DEFAULT_GUTTERSIZE,
-  GRID_CLASS,
-  GRID_CONFIG,
-  HANDLE_CLASS,
-  NUM_COLUMNS,
-  PANEL_CLASS,
-} from '../constants';
+type ColumnOptions = 12 | 24 | 48;
+
+const GRID_CLASS = 'dshGrid';
+const HANDLE_CLASS = 'dshPanel__wrapper';
+const PANEL_CLASS = 'embPanel';
+const NUM_COLUMNS = 48;
+const DEFAULT_CELL_HEIGHT = 20;
+const DEFAULT_GROUP_HEIGHT = NUM_COLUMNS / 3;
+const DEFAULT_GUTTERSIZE = 4;
+
+const GRID_CONFIG = {
+  12: { class: 'dshLayout__grid--small', cellHeight: DEFAULT_CELL_HEIGHT * 4 },
+  24: { class: 'dshLayout__grid--medium', cellHeight: DEFAULT_CELL_HEIGHT * 2 },
+  48: { class: 'dshLayout__grid--large', cellHeight: DEFAULT_CELL_HEIGHT },
+};
 
 interface Props {
   gridData?: GridStackWidget[];
@@ -34,7 +55,7 @@ export const Grid: FC<Props> = ({
   guttersize = DEFAULT_GUTTERSIZE, // TODO: do we want to allow 0 or should we set a min value?
 }) => {
   const gridRef = useRef<GridStack>();
-  const panelRefs = useRef<{ [key: string]: HTMLDivElement }>({});
+  const panelRefs = useRef<{ [key: string]: Ref<HTMLDivElement> }>({});
   const [panels, setPanels] = useState<GridStackNode[]>(gridData);
   const [info, setInfo] = useState<string>('');
 
@@ -52,35 +73,43 @@ export const Grid: FC<Props> = ({
     [columns, guttersize]
   );
 
+  if (Object.keys(panelRefs).length !== panels.length) {
+    panels.map((panel) => {
+      if (!panelRefs.current[panel.id!]) {
+        panelRefs.current[panel.id!] = createRef();
+      }
+    });
+  }
+
   const renderPanelInWidget = (panel: GridStackNode) => {
-    if (gridRef.current) gridRef.current.addWidget(panelRefs.current[panel.id!], panel);
+    gridRef?.current?.addWidget(panelRefs.current[panel.id!]!.current, panel);
   };
 
   useEffect(() => {
-    gridRef.current = GridStack.init({
-      ...sharedGridParams,
-      class: GRID_CLASS,
-    });
+    if (!gridRef.current) {
+      gridRef.current = GridStack.init({
+        ...sharedGridParams,
+        class: GRID_CLASS,
+      });
 
-    gridRef.current.on('drag', (event, element) => {
-      const node = (element as GridItemHTMLElement)?.gridstackNode;
-      if (!node) return;
-      setInfo(`you just dragged node #${node.id} to ${node.x},${node.y} – good job!`);
-    });
-  });
+      gridRef.current.on('drag', (event, element) => {
+        const node = (element as GridItemHTMLElement)?.gridstackNode;
+        if (!node) return;
+        setInfo(`you just dragged node #${node.id} to ${node.x},${node.y} – good job!`);
+      });
+    }
 
-  useEffect(() => {
     const grid = gridRef.current;
 
-    if (grid && gridData.length) {
+    if (gridData.length) {
       grid.batchUpdate();
       grid.removeAll(false);
       gridData.map(renderPanelInWidget);
       grid.commit();
     }
-  }, [gridData]);
+  }, [gridData, sharedGridParams]);
 
-  const addNewPanel = useCallback(async () => {
+  const addNewPanel = useCallback(() => {
     const grid = gridRef.current;
 
     if (!grid) {
@@ -89,25 +118,65 @@ export const Grid: FC<Props> = ({
     }
 
     const id = htmlIdGenerator('panel')();
-    const panelNode = {
+    const panelNode: GridStackNode = {
       w: Math.ceil((Math.random() * columns) / 2 + 1),
       h: Math.ceil((Math.random() * columns) / 3 + 1),
-      x: 0,
-      y: 0,
       id,
       content: id,
+      resizeHandles: 'se',
+      autoPosition: true,
     };
 
-    setPanels([...panels, panelNode]);
-    grid.batchUpdate();
-    await new Promise((f) => setTimeout(f, 60));
-    renderPanelInWidget(panelNode);
-    grid.commit();
+    setPanels(panels.concat([panelNode]));
+    grid.addWidget(panelNode);
   }, [panels, setPanels, columns]);
+
+  const addNewPanelGroup = useCallback(() => {
+    const grid = gridRef.current;
+    if (!grid) {
+      // TODO: error handling bc grid isn't instantiated
+      return;
+    }
+
+    const id = htmlIdGenerator('panel-group')();
+    const groupNode = {
+      id,
+      autoPosition: true,
+      w: columns,
+      h: DEFAULT_GROUP_HEIGHT,
+      noResize: true,
+      content: `<h1 style="height:${GRID_CONFIG[columns].cellHeight}px;width:100%">title</h1>`,
+      subGrid: {
+        ...sharedGridParams,
+        children: [],
+        class: 'dshPanelGroup',
+      },
+    };
+
+    setPanels(panels.concat([groupNode]));
+    const newGroup = grid.addWidget(groupNode);
+    const subGrid = newGroup.gridstackNode?.subGrid as GridStack;
+
+    const updateHeight = () => {
+      if (subGrid && gridRef?.current) {
+        // the +2 here accounts for the height of the title and extra space for dragging at the bottom
+        gridRef?.current.update(newGroup, { h: subGrid.getRow() + 2 });
+      }
+    };
+
+    const resizeWrapper: GridStackEventHandlerCallback = (event, el) => {
+      if (el) {
+        updateHeight();
+      }
+    };
+
+    subGrid.on('drag', resizeWrapper);
+  }, [panels, columns, sharedGridParams]);
 
   return (
     <div>
       <EuiButton onClick={addNewPanel}>Add Panel</EuiButton>&nbsp;
+      <EuiButton onClick={addNewPanelGroup}>Add Grid</EuiButton>&nbsp;
       <div>{info}</div>
       <div>Count:{panels.length}</div>
       <EuiAccordion id={`accordion`} buttonContent="Panel data">
@@ -116,7 +185,9 @@ export const Grid: FC<Props> = ({
       <div className={`grid-stack dshLayout--editing ${GRID_CONFIG[columns].class}`}>
         {panels.map((panel) => {
           const callbackRef = (element: HTMLDivElement) => {
-            panelRefs.current[panel.id!] = element;
+            if (panelRefs.current[panel.id]) {
+              panelRefs.current[panel.id!].current = element;
+            }
           };
           return <GridItem panel={panel} callbackRef={callbackRef} />;
         })}
