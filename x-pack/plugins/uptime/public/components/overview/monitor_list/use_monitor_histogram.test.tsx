@@ -25,9 +25,6 @@ describe('useMonitorHistogram', () => {
 
   it('calls dynamic heartbeat index', () => {
     renderHook((props) => useMonitorHistogram(props), {
-      initialProps: {
-        items: [],
-      },
       wrapper: MemoryRouter,
     });
     expect(useEsSearch).toBeCalledWith(
