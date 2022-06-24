@@ -178,7 +178,7 @@ image::images/highlights-maps-vector-tiles.png[Joins for vector tiles in Maps]
 === Improved Content Security Policy
 
 {kib} now has experimental support for a more restrictive
-https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP[Content Security Policy].
+https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP[Content Security Policy](CSP).
 Specifically, we removed the need for script-src `unsafe-eval`,
 which provides an additional level of protection against cross-site scripting (XSS) attacks.
 
