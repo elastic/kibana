@@ -86,7 +86,6 @@ export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: 
         <DynamicTreeView
           query={JSON.parse(filterQueryWithTimeRange)}
           indexPattern={indexPattern?.title}
-          selectionDepth={{}}
           tree={tree}
           aria-label="Logical Tree View"
           onSelect={(selectionDepth, key, type) => {

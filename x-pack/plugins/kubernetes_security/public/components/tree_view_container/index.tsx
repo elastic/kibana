@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiSplitPanel, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
 import { IndexPattern, GlobalFilter, TreeNavSelection, KubernetesCollection } from '../../types';
 import { TreeNav } from './tree_nav';
 import { addTreeNavSelectionToFilterQuery } from './helpers';
+import { Breadcrumb } from './breadcrumb';
 
 export interface TreeViewContainerDeps {
   globalFilter: GlobalFilter;
@@ -26,9 +27,14 @@ export const TreeViewContainer = ({
   const styles = useStyles();
   const [treeNavSelection, setTreeNavSelection] = useState<TreeNavSelection>({});
 
-  const onTreeNavSelect = (selection: TreeNavSelection) => {
+  const onTreeNavSelect = useCallback((selection: TreeNavSelection) => {
     setTreeNavSelection(selection);
-  };
+  }, []);
+
+  const hasSelection = useMemo(
+    () => !!treeNavSelection[KubernetesCollection.cluster],
+    [treeNavSelection]
+  );
 
   return (
     <EuiSplitPanel.Outer direction="row" hasBorder borderRadius="m" css={styles.outerPanel}>
@@ -38,12 +44,13 @@ export const TreeViewContainer = ({
             indexPattern={indexPattern}
             globalFilter={globalFilter}
             onSelect={onTreeNavSelect}
-            hasSelection={!!treeNavSelection[KubernetesCollection.cluster]}
+            hasSelection={hasSelection}
           />
         </EuiText>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner css={styles.sessionsPanel}>
-        {treeNavSelection[KubernetesCollection.cluster] &&
+        <Breadcrumb treeNavSelection={treeNavSelection} onSelect={onTreeNavSelect} />
+        {hasSelection &&
           renderSessionsView(
             addTreeNavSelectionToFilterQuery(globalFilter.filterQuery, treeNavSelection)
           )}

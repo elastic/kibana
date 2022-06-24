@@ -50,7 +50,7 @@ type DynamicTree = {
 type Props = {
   tree: DynamicTree[];
   depth?: number;
-  selectionDepth: TreeNavSelection;
+  selectionDepth?: TreeNavSelection;
   query: QueryDslQueryContainerBool;
   indexPattern?: string;
   onSelect?: (selectionDepth: TreeNavSelection, key: string | number, type: string) => void;
@@ -61,7 +61,7 @@ type Props = {
 export const DynamicTreeView = ({
   tree,
   depth = 0,
-  selectionDepth,
+  selectionDepth = {},
   query,
   indexPattern,
   onSelect,
