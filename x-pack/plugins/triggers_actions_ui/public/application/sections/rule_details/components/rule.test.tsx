@@ -6,15 +6,15 @@
  */
 
 import * as React from 'react';
-import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { RuleComponent, alertToListItem } from './rule';
 import { AlertListItem } from './types';
 import { RuleAlertList } from './rule_alert_list';
-import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
+import { RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
+import { mockRule } from './test_helpers';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -460,34 +460,6 @@ describe('tabbed content', () => {
     expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
   });
 });
-
-function mockRule(overloads: Partial<Rule> = {}): Rule {
-  return {
-    id: uuid.v4(),
-    enabled: true,
-    name: `rule-${uuid.v4()}`,
-    tags: [],
-    ruleTypeId: '.noop',
-    consumer: 'consumer',
-    schedule: { interval: '1m' },
-    actions: [],
-    params: {},
-    createdBy: null,
-    updatedBy: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    apiKeyOwner: null,
-    throttle: null,
-    notifyWhen: null,
-    muteAll: false,
-    mutedInstanceIds: [],
-    executionStatus: {
-      status: 'unknown',
-      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-    },
-    ...overloads,
-  };
-}
 
 function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
   return {

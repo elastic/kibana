@@ -44,7 +44,6 @@ import {
   ActionType,
   ActionConnector,
   TriggersActionsUiConfig,
-  RuleTableItem,
 } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
@@ -62,7 +61,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { ruleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
-import { RuleStatusDropdown } from '../../rules_list/components/rule_status_dropdown';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -311,34 +309,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         }
         description={
           <EuiFlexGroup gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.stateTitle"
-                        defaultMessage="State"
-                      />
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <RuleStatusDropdown
-                    disableRule={async () => await disableRule(rule)}
-                    enableRule={async () => await enableRule(rule)}
-                    snoozeRule={async (snoozeSchedule) => {
-                      await snoozeRule(rule, snoozeSchedule);
-                    }}
-                    unsnoozeRule={async (scheduleIds) => await unsnoozeRule(rule, scheduleIds)}
-                    rule={rule as RuleTableItem}
-                    onRuleChanged={requestRefresh}
-                    direction="row"
-                    isEditable={hasEditButton}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
