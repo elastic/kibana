@@ -30,9 +30,9 @@ export const OUTPUT_MESSAGES = Object.freeze({
     }),
   expandSection: {
     placedAt: i18n.translate(
-      'xpack.securitySolution.responseActionsList.list.item.expandSection.commandPlacedAt',
+      'xpack.securitySolution.responseActionsList.list.item.expandSection.placedAt',
       {
-        defaultMessage: 'Command placed at',
+        defaultMessage: 'Command placed',
       }
     ),
     input: i18n.translate(

@@ -20,9 +20,11 @@ import {
   EuiHorizontalRule,
   EuiScreenReaderOnly,
   EuiText,
+  EuiCodeBlock,
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import type {
   DurationRange,
@@ -31,15 +33,10 @@ import type {
 import type { HorizontalAlignment } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { ACTION_LIST_DATE_RANGE_FILTER_STORAGE_KEY } from '../../../../../common/constants';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import {
-  ActionDetails,
-  LogsEndpointActionResponse,
-  EndpointActivityLogAction,
-} from '../../../../../common/endpoint/types';
+import { ActionDetails } from '../../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../../common/endpoint/schema/actions';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
@@ -62,11 +59,35 @@ const defaultDateRangeOptions = Object.freeze({
   recentlyUsedDateRanges: [],
 });
 
+const getCommand = (
+  command: ActionDetails['command']
+): Exclude<ActionDetails['command'], 'unisolate'> | 'release' =>
+  command === 'unisolate' ? 'release' : command;
+
 // Truncated usernames
-const StyledFacetButton = styled(EuiFacetButton)`
+const StyledFacetButton = euiStyled(EuiFacetButton)`
   .euiText {
     margin-top: 0.38rem;
     overflow-y: visible !important;
+  }
+`;
+
+const StyledDescriptionList = euiStyled(EuiDescriptionList)`
+  dt, dd {
+    color: ${(props) => props.theme.eui.euiColorDarkShade} !important;
+    font-size: ${(props) => props.theme.eui.euiFontSizeXS} !important;
+  }
+  dt {
+    font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold}
+  }
+`;
+
+const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
+  transparentBackground: true,
+  paddingSize: 'none',
+})`
+  code {
+    color: ${(props) => props.theme.eui.euiColorDarkShade} !important;
   }
 `;
 
@@ -186,21 +207,11 @@ export const ResponseActionsList = memo<
           isCompleted,
           wasSuccessful,
           isExpired,
-          command,
-          logEntries,
+          command: _command,
+          parameters,
         } = item;
 
-        // TODO: Remove this once we have
-        // ActionDetails.output, ActionDetails.parameters and ActionDetails.comments
-        const responseData = logEntries.reduce<
-          Array<LogsEndpointActionResponse['EndpointActions']['data']>
-        >((acc, curr) => {
-          if (curr.type === 'response') {
-            acc.push(curr.item.data.EndpointActions.data);
-          }
-          return acc;
-        }, []);
-
+        const command = getCommand(_command);
         const descriptionListLeft = [
           {
             title: OUTPUT_MESSAGES.expandSection.placedAt,
@@ -229,9 +240,7 @@ export const ResponseActionsList = memo<
           },
           {
             title: OUTPUT_MESSAGES.expandSection.parameters,
-            description: responseData.length
-              ? responseData[0].parameters ?? emptyValue
-              : emptyValue,
+            description: parameters ? parameters : "entity_id: 'id240722'",
           },
         ];
 
@@ -244,11 +253,30 @@ export const ResponseActionsList = memo<
 
         itemIdToExpandedRowMapValues[item.id] = (
           <EuiFlexGroup>
-            {[descriptionListLeft, descriptionListCenter, descriptionListRight].map((list) => (
-              <EuiFlexItem>
-                <EuiDescriptionList listItems={list} compressed={true} />
-              </EuiFlexItem>
-            ))}
+            {[descriptionListLeft, descriptionListCenter, descriptionListRight].map((_list) => {
+              const list = _list.map((l) => {
+                const isParameters = l.title === OUTPUT_MESSAGES.expandSection.parameters;
+                const isOutput = l.title === OUTPUT_MESSAGES.expandSection.output;
+                return {
+                  title: l.title,
+                  description:
+                    isParameters || isOutput ? (
+                      // codeblock for parameters
+                      <StyledEuiCodeBlock lang={isOutput ? 'markup' : 'shell'}>
+                        {l.description}
+                      </StyledEuiCodeBlock>
+                    ) : (
+                      l.description
+                    ),
+                };
+              });
+
+              return (
+                <EuiFlexItem>
+                  <StyledDescriptionList listItems={list} compressed={true} />
+                </EuiFlexItem>
+              );
+            })}
           </EuiFlexGroup>
         );
       }
@@ -285,7 +313,8 @@ export const ResponseActionsList = memo<
         name: TABLE_COLUMN_NAMES.command,
         width: '10%',
         truncateText: true,
-        render: (command: ActionDetails['command']) => {
+        render: (_command: ActionDetails['command']) => {
+          const command = getCommand(_command);
           return (
             <EuiToolTip content={command} anchorClassName="eui-textTruncate">
               <FormattedMessage
@@ -298,14 +327,11 @@ export const ResponseActionsList = memo<
         },
       },
       {
-        field: 'logEntries',
+        field: 'createdBy',
         name: TABLE_COLUMN_NAMES.user,
         width: '14%',
         truncateText: true,
-        render: (logEntries: ActionDetails['logEntries']) => {
-          const userId =
-            (logEntries.filter((e) => e.type === 'action')[0] as EndpointActivityLogAction).item
-              .data.user.id || emptyValue;
+        render: (userId: ActionDetails['createdBy']) => {
           return (
             <StyledFacetButton
               icon={
@@ -329,6 +355,7 @@ export const ResponseActionsList = memo<
           );
         },
       },
+      // conditional hostname column
       {
         field: 'agents',
         name: TABLE_COLUMN_NAMES.host,
@@ -350,16 +377,12 @@ export const ResponseActionsList = memo<
           );
         },
       },
-      // conditional hostname column
       {
-        field: 'logEntries',
+        field: 'comment',
         name: TABLE_COLUMN_NAMES.comments,
         width: '30%',
         truncateText: true,
-        render: (logEntries: ActionDetails['logEntries']) => {
-          const comment =
-            (logEntries.filter((e) => e.type === 'action')[0] as EndpointActivityLogAction).item
-              .data.EndpointActions.data.comment || emptyValue;
+        render: (comment: ActionDetails['comment']) => {
           return (
             <EuiToolTip content={comment} anchorClassName="eui-textTruncate">
               <EuiText
@@ -367,7 +390,7 @@ export const ResponseActionsList = memo<
                 className="eui-textTruncate eui-fullWidth"
                 data-test-subj={getTestId('column-comments')}
               >
-                {comment}
+                {comment ?? emptyValue}
               </EuiText>
             </EuiToolTip>
           );
@@ -431,10 +454,9 @@ export const ResponseActionsList = memo<
         },
       },
     ];
-    // TODO: filter out the column instead
-    // do this when the API returns comment, parameters and user
+    // filter out the host column
     if (hideHostNameColumn) {
-      columns.splice(3, 1);
+      return columns.filter((column) => column.field !== 'agents');
     }
     return columns;
   }, [getTestId, hideHostNameColumn, itemIdToExpandedRowMap, onClickCallback]);
