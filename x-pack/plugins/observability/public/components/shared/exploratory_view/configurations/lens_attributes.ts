@@ -889,7 +889,7 @@ export class LensAttributes {
         yRight: !this.isMultiSeries,
       },
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       preferredSeriesType: 'line',
       layers: this.getDataLayers(),
       ...(this.layerConfigs[0].seriesConfig.yTitle

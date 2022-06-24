@@ -6,13 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -54,7 +48,7 @@ export function PageViewsTrend() {
   const showAnalyzeButton = false;
 
   return (
-    <div>
+    <>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -83,8 +77,7 @@ export function PageViewsTrend() {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
       <PageViewsChart breakdown={breakdown} uiFilters={uxUiFilters} />
-    </div>
+    </>
   );
 }
