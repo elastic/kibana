@@ -171,7 +171,10 @@ export class RuleDataClient implements IRuleDataClient {
     // Wait until both index and namespace level resources have been installed / updated.
     if (!isWriteEnabled()) {
       this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
-      throw new RuleDataWriteDisabledError(isWriteInitializationError() ? 'error' : 'config');
+      throw new RuleDataWriteDisabledError({
+        reason: isWriteInitializationError() ? 'error' : 'config',
+        registrationContext: indexInfo.indexOptions.registrationContext,
+      });
     }
 
     try {

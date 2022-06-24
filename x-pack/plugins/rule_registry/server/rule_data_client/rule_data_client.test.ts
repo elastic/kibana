@@ -191,7 +191,7 @@ describe('RuleDataClient', () => {
       );
 
       await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Rule registry writing is disabled. Make sure that \\"xpack.ruleRegistry.write.enabled\\" configuration is not set to false within \\"kibana.yml\\"."`
+        `"Rule registry writing is disabled. Make sure that \\"xpack.ruleRegistry.write.enabled\\" configuration is not set to false and \\"observability.apm\\" is not disabled in \\"xpack.ruleRegistry.write.disabledRegistrationContexts\\" within \\"kibana.yml\\"."`
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
         `Writing is disabled, bulk() will not write any data.`
