@@ -133,7 +133,7 @@ export function usePageLoadDistribution(
     pageLoadDistribution: pageDist,
     percentiles: durPercentiles?.values,
     minDuration: microToSec(minDuration),
-    maxDuration: percDistRequest ? maxPercQuery : microToSec(maxDuration),
+    maxDuration: percDistRequest.data ? maxPercQuery : microToSec(maxDuration),
     loading: pageDistributionRequest.loading,
   };
 }

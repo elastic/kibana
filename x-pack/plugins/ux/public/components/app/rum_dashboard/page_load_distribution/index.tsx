@@ -24,10 +24,12 @@ import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { PercentileRange } from './types';
 import { usePageLoadDistribution } from '../../../../services/data/page_load_distribution_query';
+import { useDataView } from '../local_uifilters/use_data_view';
 
 export function PageLoadDistribution() {
   const { http } = useKibanaServices();
 
+  const { dataViewTitle } = useDataView();
   const { rangeId, urlParams, uxUiFilters } = useLegacyUrlParams();
 
   const { start, end, rangeFrom, rangeTo } = urlParams;
@@ -120,6 +122,7 @@ export function PageLoadDistribution() {
             ? null
             : { pageLoadDistribution, percentiles, minDuration, maxDuration }
         }
+        dataViewTitle={dataViewTitle}
         onPercentileChange={onPercentileChange}
         loading={!!loading}
         breakdown={breakdown}

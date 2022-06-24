@@ -21,6 +21,7 @@ interface Props {
   value: string;
   percentileRange: PercentileRange;
   onLoadingChange: (loading: boolean) => void;
+  dataViewTitle?: string;
 }
 
 export function BreakdownSeries({
@@ -28,6 +29,7 @@ export function BreakdownSeries({
   value,
   percentileRange,
   onLoadingChange,
+  dataViewTitle,
 }: Props) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
@@ -35,21 +37,22 @@ export function BreakdownSeries({
     ? EUI_CHARTS_THEME_DARK
     : EUI_CHARTS_THEME_LIGHT;
 
-  const { breakdowns, status } = useBreakdowns({
+  const { breakdowns, loading } = useBreakdowns({
     field,
     value,
     percentileRange,
+    dataViewTitle,
   });
 
   useEffect(() => {
-    onLoadingChange(status !== 'success');
-  }, [status, onLoadingChange]);
+    onLoadingChange(loading);
+  }, [loading, onLoadingChange]);
 
   // sort index 1 color vizColors1 is already used for overall,
   // so don't user that here
   return (
     <>
-      {breakdowns.map(({ data: seriesData, name }, sortIndex) => (
+      {(breakdowns ?? []).map(({ data: seriesData, name }, sortIndex) => (
         <LineSeries
           id={`${field}-${value}-${name}`}
           key={`${field}-${value}-${name}`}

@@ -49,6 +49,7 @@ interface Props {
   breakdown: BreakdownItem | null;
   percentileRange: PercentileRange;
   loading: boolean;
+  dataViewTitle?: string;
 }
 
 const PageLoadChart = styled(Chart)`
@@ -63,6 +64,7 @@ export function PageLoadDistChart({
   breakdown,
   loading,
   percentileRange,
+  dataViewTitle,
 }: Props) {
   const [breakdownLoading, setBreakdownLoading] = useState(false);
   const onBrushEnd = ({ x }: XYBrushEvent) => {
@@ -136,6 +138,7 @@ export function PageLoadDistChart({
           />
           {breakdown && (
             <BreakdownSeries
+              dataViewTitle={dataViewTitle}
               key={`${breakdown.type}-${breakdown.name}`}
               field={breakdown.type}
               value={breakdown.name}
