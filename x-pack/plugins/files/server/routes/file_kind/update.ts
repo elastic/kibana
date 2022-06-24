@@ -8,7 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { FileJSON } from '../../../common/types';
 import type { FileKindsRequestHandler } from './types';
-import { findFile } from './helpers';
+import { getById } from './helpers';
 
 export const method = 'patch' as const;
 
@@ -39,7 +39,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
     params: { fileId: id },
     body: attrs,
   } = req;
-  const { error, result: file } = await findFile(fileService.asCurrentUser(), id, fileKind);
+  const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
   try {
     await file.update(attrs);

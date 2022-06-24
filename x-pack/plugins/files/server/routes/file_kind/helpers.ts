@@ -14,10 +14,9 @@ type ResultOrHttpError =
   | { result?: undefined; error: IKibanaResponse };
 
 /**
- * A simple helper to map service responses to a response or an appropriate http
- * error.
+ * A helper that given an ID will return a file or map errors to an http response.
  */
-export async function findFile(
+export async function getById(
   fileService: FileServiceStart,
   id: string,
   fileKind: string

@@ -7,7 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { FileJSON } from '../../../common/types';
-import { findFile } from './helpers';
+import { getById } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
 interface Response {
@@ -26,7 +26,7 @@ export const handler: FileKindsRequestHandler<Params> = async ({ files, fileKind
   const {
     params: { fileId: id },
   } = req;
-  const { error, result: file } = await findFile(fileService.asCurrentUser(), id, fileKind);
+  const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
   const body: Response = {
     file: file.toJSON(),

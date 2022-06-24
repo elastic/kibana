@@ -8,7 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Readable } from 'stream';
 
-import { findFile } from './helpers';
+import { getById } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
 export const method = 'put' as const;
@@ -35,7 +35,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
     body: stream,
     params: { fileId: id },
   } = req;
-  const { error, result: file } = await findFile(fileService.asCurrentUser(), id, fileKind);
+  const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
   await file.uploadContent(stream as Readable);
   const body: Response = { ok: true };
