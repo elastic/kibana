@@ -109,8 +109,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.anomalyExplorer.scrollChartsContainerIntoView();
       await ml.anomaliesTable.ensureDetailsOpen(0);
+      await ml.anomaliesTable.scrollRowIntoView(0);
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.takeScreenshot('ml-population-anomaly', screenshotDirectories);
+      await mlScreenshots.takeScreenshot(
+        'ml-population-anomaly',
+        screenshotDirectories,
+        1500,
+        1300
+      );
     });
   });
 }
