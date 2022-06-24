@@ -20,6 +20,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useHandleAddToTimeline } from './add_to_timeline_button';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
@@ -165,6 +166,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   const {
     services: { osquery },
   } = useKibana();
+  const isOsqueryDetectionActionEnabled = useIsExperimentalFeatureEnabled('osqueryDetectionAction');
 
   // @ts-expect-error the types are there
   const { OsqueryResults } = osquery;
@@ -356,6 +358,9 @@ const EventDetailsComponent: React.FC<Props> = ({
   );
 
   const osqueryTab = useMemo(() => {
+    if (!isOsqueryDetectionActionEnabled) {
+      return;
+    }
     const osqueryActionsLength = rawEventData?._source['kibana.alert.rule.actions']?.filter(
       (action: { action_type_id: string }) => action.action_type_id === '.osquery'
     )?.length;

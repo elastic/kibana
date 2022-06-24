@@ -23,6 +23,7 @@ export const allowedExperimentalValues = Object.freeze({
   policyListEnabled: true,
   policyResponseInFleetEnabled: false,
   groupedNavigation: true,
+  osqueryDetectionAction: true,
 
   /**
    * This is used for enabling the end to end tests for the security_solution telemetry.

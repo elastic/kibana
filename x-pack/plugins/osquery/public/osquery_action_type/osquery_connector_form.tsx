@@ -10,15 +10,18 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { QueryClientProvider } from 'react-query';
-import { isEmpty, map, pickBy } from 'lodash';
+import { isEmpty, pickBy } from 'lodash';
 import { EuiAccordionProps, EuiSpacer } from '@elastic/eui';
 import { isDeepEqual } from 'react-use/lib/util';
 import uuid from 'uuid';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { ECSMapping } from '../../common/schemas/common';
 import { StyledEuiAccordion } from '../components/accordion';
 import { ECSMappingEditorField } from '../packs/queries/lazy_ecs_mapping_editor_field';
-import { convertECSMappingToObject } from '../../common/schemas/common/utils';
+import {
+  convertECSMappingToFormValue,
+  convertECSMappingToObject,
+  EcsMappingFormValueArray,
+} from '../../common/schemas/common/utils';
 import { Form, UseField, useForm } from '../shared_imports';
 import { queryClient } from '../query_client';
 import { SavedQueriesDropdown } from '../saved_queries/saved_queries_dropdown';
@@ -27,11 +30,10 @@ import { useKibana } from '../common/lib/kibana';
 import { osqueryConnectorFormSchema } from './schema';
 
 export interface OsqueryActionParams {
-  message: {
-    alerts: string;
-    query: string;
-    ecs_mapping: ECSMapping;
-  };
+  alerts: string;
+  query: string;
+  ecs_mapping: Record<string, Record<'field', string>>;
+  id?: string;
 }
 
 const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryActionParams>> = ({
@@ -60,42 +62,39 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
     [permissions.readSavedQueries, permissions.runSavedQueries]
   );
 
-  const prepareEcsMapping = (mapping?: Record<string, Record<string, string>>) =>
-    mapping
-      ? map(mapping, (value, key) => ({
-          key,
-          result: {
-            type: Object.keys(value)[0],
-            value: Object.values(value)[0],
-          },
-        }))
-      : [];
-
-  const { form } = useForm({
+  const { form } = useForm<{
+    query: string;
+    savedQueryId: string | null;
+    ecs_mapping: EcsMappingFormValueArray;
+  }>({
     id: FORM_ID,
     schema: osqueryConnectorFormSchema,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    serializer: ({ savedQueryId, ecs_mapping, ...formData }) =>
-      pickBy(
+    // @ts-expect-error update types
+    serializer: (payload) => {
+      const { savedQueryId, ecs_mapping: EcsMapping, ...formData } = payload;
+
+      return pickBy(
         {
           ...formData,
           saved_query_id: savedQueryId,
-          ecs_mapping: convertECSMappingToObject(ecs_mapping),
+          ecs_mapping: convertECSMappingToObject(EcsMapping),
         },
         (value) => !isEmpty(value)
-      ),
+      );
+    },
+
     options: {
       stripEmptyFields: false,
     },
     defaultValue: {
-      // @ts-expect-error update types
-      query: actionParams.message?.query,
-      // @ts-expect-error update types
+      query: actionParams?.query,
       savedQueryId: null,
-      // @ts-expect-error update types
-      ecs_mapping: prepareEcsMapping(actionParams.message?.ecs_mapping),
+      ecs_mapping: actionParams?.ecs_mapping
+        ? convertECSMappingToFormValue(actionParams?.ecs_mapping)
+        : [],
     },
   });
+
   const { updateFieldValues, setFieldValue, getFormData } = form;
   const ecsFieldProps = useMemo(
     () => ({
@@ -106,16 +105,10 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
   const formData = getFormData();
   const formDataRef = useRef(formData);
   const handleUpdate = useCallback(() => {
-    editAction(
-      'message',
-      {
-        alerts: `[{{context.alerts}}]`,
-        query: formData.query,
-        ecs_mapping: formData.ecs_mapping,
-        id: uniqueId,
-      },
-      index
-    );
+    editAction('query', formData.query, index);
+    editAction('alerts', `[{{context.alerts}}]`, index);
+    editAction('ecs_mapping', formData.ecs_mapping, index);
+    editAction('id', uniqueId, index);
   }, [editAction, formData.ecs_mapping, formData.query, index, uniqueId]);
 
   const handleSavedQueryChange = useCallback(
@@ -124,7 +117,7 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
         updateFieldValues({
           query: savedQuery.query,
           savedQueryId: savedQuery.savedQueryId,
-          ecs_mapping: prepareEcsMapping(savedQuery.ecs_mapping),
+          ecs_mapping: convertECSMappingToFormValue(savedQuery.ecs_mapping),
         });
         setAdvancedContentState('open');
       } else {
@@ -144,7 +137,7 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
   }, [formData, formData.query, handleUpdate]);
 
   useEffectOnce(() => {
-    if (actionParams.message?.ecs_mapping) {
+    if (actionParams?.ecs_mapping) {
       setAdvancedContentState('open');
     }
   });

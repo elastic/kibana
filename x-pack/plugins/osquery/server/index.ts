@@ -13,8 +13,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,
   exposeToBrowser: {
     actionEnabled: true,
-    savedQueries: true,
-    packs: true,
+    detectionAction: true,
   },
 };
 export function plugin(initializerContext: PluginInitializerContext) {

@@ -84,8 +84,7 @@ describe('Alert Event Details', () => {
     cy.contains(TIMELINE_NAME).click();
     cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
   });
-  // TODO think on how to get these actions triggered faster (because now they are not triggered during the test).
-  it.skip('user is enabled to add detection action with osquery', () => {
+  it('user is enabled to add detection action with osquery', () => {
     cy.visit('/app/security/rules');
     cy.contains(RULE_NAME).click();
     cy.contains('Edit rule settings').click();
@@ -111,7 +110,8 @@ describe('Alert Event Details', () => {
     cy.contains('Unique identifier for the group on the system/platform.').should('exist');
     cy.contains('Group ID (unsigned)').should('exist');
   });
-  it('sees osquery results from last action', () => {
+  // TODO think on how to get these actions triggered faster (because now they are not triggered during the test).
+  it.skip('sees osquery results from last action', () => {
     cy.visit('/app/security/alerts');
     cy.getBySel('header-page-title').contains('Alerts').should('exist');
     cy.getBySel('expand-event').first().click({ force: true });

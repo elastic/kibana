@@ -17,7 +17,6 @@ import {
 } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { INTERNAL_OSQUERY_FEATURE_FLAGS } from '../common/constants';
 import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
@@ -238,7 +237,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     defineRoutes(router, osqueryContext);
 
-    if (INTERNAL_OSQUERY_FEATURE_FLAGS.DETECTION_ACTION) {
+    if (config.detectionAction) {
       plugins.actions.registerType(getOsqueryActionType(osqueryContext));
     }
 

@@ -87,7 +87,6 @@ export const useAllActions = ({
   );
 };
 
-// TODO think how we can unify this and above function
 export const useInfiniteAllActions = ({
   activePage,
   direction,

@@ -9,7 +9,3 @@ export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 export const DEFAULT_DARK_MODE = 'theme:darkMode';
 export const OSQUERY_INTEGRATION_NAME = 'osquery_manager';
 export const BASE_PATH = '/app/osquery';
-
-export const INTERNAL_OSQUERY_FEATURE_FLAGS = {
-  DETECTION_ACTION: true,
-};

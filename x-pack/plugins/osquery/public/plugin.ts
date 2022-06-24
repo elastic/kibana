@@ -14,7 +14,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { INTERNAL_OSQUERY_FEATURE_FLAGS } from '../common/constants';
+import { ConfigType } from '../server/config';
 import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 import { getActionType } from './osquery_action_type';
 import {
@@ -43,6 +43,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   public setup(core: CoreSetup, plugins: SetupPlugins): OsqueryPluginSetup {
     const storage = this.storage;
     const kibanaVersion = this.kibanaVersion;
+    const config = this.initializerContext.config.get<ConfigType>();
+
     // Register an application into the side navigation menu
     core.application.register({
       id: 'osquery',
@@ -67,7 +69,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       },
     });
 
-    if (INTERNAL_OSQUERY_FEATURE_FLAGS.DETECTION_ACTION) {
+    // TODO find config of detectionACtion
+    // console.log({ core, plugins });
+    if (config.detectionAction) {
       const actionType = getActionType();
       plugins.triggersActionsUi.actionTypeRegistry.register(actionType);
     }

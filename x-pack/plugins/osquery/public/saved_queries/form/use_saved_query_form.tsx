@@ -10,7 +10,10 @@ import uuid from 'uuid';
 import { produce } from 'immer';
 import { useMemo } from 'react';
 
-import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
+import {
+  convertECSMappingToFormValue,
+  convertECSMappingToObject,
+} from '../../../common/schemas/common/utils';
 import { useForm } from '../../shared_imports';
 import { createFormSchema } from '../../packs/queries/schema';
 import { PackFormData } from '../../packs/queries/use_pack_query_form';
@@ -90,14 +93,7 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
         platform: payload.platform,
         version: payload.version ? [payload.version] : [],
         ecs_mapping:
-          (!isEmpty(payload.ecs_mapping) &&
-            map(payload.ecs_mapping, (value, key) => ({
-              key,
-              result: {
-                type: Object.keys(value)[0],
-                value: Object.values(value)[0],
-              },
-            }))) ??
+          (!isEmpty(payload.ecs_mapping) && convertECSMappingToFormValue(payload.ecs_mapping)) ??
           [],
       };
     },

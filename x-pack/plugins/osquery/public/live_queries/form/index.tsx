@@ -17,8 +17,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from 'react-query';
 
-import { pickBy, isEmpty, map } from 'lodash';
-import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
+import { pickBy, isEmpty } from 'lodash';
+import {
+  convertECSMappingToFormValue,
+  convertECSMappingToObject,
+} from '../../../common/schemas/common/utils';
 import { UseField, Form, FormData, useForm, useFormData } from '../../shared_imports';
 import { AgentsTableField } from './agents_table_field';
 import { LiveQueryQueryField } from './live_query_query_field';
@@ -164,13 +167,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           query: savedQuery.query,
           savedQueryId: savedQuery.savedQueryId,
           ecs_mapping: savedQuery.ecs_mapping
-            ? map(savedQuery.ecs_mapping, (value, key) => ({
-                key,
-                result: {
-                  type: Object.keys(value)[0],
-                  value: Object.values(value)[0],
-                },
-              }))
+            ? convertECSMappingToFormValue(savedQuery.ecs_mapping)
             : [],
         });
 
@@ -342,13 +339,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         query: defaultValue.query,
         savedQueryId: defaultValue.savedQueryId,
         ecs_mapping: defaultValue.ecs_mapping
-          ? map(defaultValue.ecs_mapping, (value, key) => ({
-              key,
-              result: {
-                type: Object.keys(value)[0],
-                value: Object.values(value)[0],
-              },
-            }))
+          ? convertECSMappingToFormValue(defaultValue.ecs_mapping)
           : undefined,
       });
     }

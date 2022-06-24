@@ -26,7 +26,7 @@ export const getOsqueryActionType = (osqueryContext: OsqueryAppContext) => ({
 
 // @ts-expect-error update types
 async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<unknown>> {
-  const { query, ecs_mapping: ecsMapping, alerts, id } = execOptions.params.message;
+  const { query, ecs_mapping: ecsMapping, alerts, id } = execOptions.params;
 
   const parsedAlerts: IAlert[] = JSON.parse(alerts);
 

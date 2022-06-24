@@ -602,7 +602,7 @@ const osqueryResultFieldValidator = async (
     : undefined;
 };
 
-interface ECSMappingEditorFormData {
+export interface ECSMappingEditorFormData {
   key: string;
   value: {
     field?: string;

@@ -5,7 +5,26 @@
  * 2.0.
  */
 
-import { isEmpty, reduce } from 'lodash';
+import { isEmpty, map, reduce } from 'lodash';
+
+export type EcsMappingFormValueArray = Array<{
+  key: string;
+  result: {
+    type: string;
+    value: string;
+  };
+}>;
+
+export const convertECSMappingToFormValue = (
+  mapping: Record<string, Record<'field', string>>
+): EcsMappingFormValueArray =>
+  map(mapping, (value, key) => ({
+    key,
+    result: {
+      type: Object.keys(value)[0],
+      value: Object.values(value)[0],
+    },
+  }));
 
 export const convertECSMappingToArray = (ecsMapping: Record<string, object> | undefined) =>
   ecsMapping
@@ -16,13 +35,7 @@ export const convertECSMappingToArray = (ecsMapping: Record<string, object> | un
     : undefined;
 
 export const convertECSMappingToObject = (
-  ecsMapping: Array<{
-    key: string;
-    result: {
-      type: string;
-      value: string;
-    };
-  }>
+  ecsMapping: EcsMappingFormValueArray
 ): Record<string, { field?: string; value?: string }> =>
   reduce(
     ecsMapping,

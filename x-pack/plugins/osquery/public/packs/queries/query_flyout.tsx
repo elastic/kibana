@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { map } from 'lodash';
 import {
   EuiFlyout,
   EuiTitle,
@@ -23,6 +22,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { convertECSMappingToFormValue } from '../../../common/schemas/common/utils';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { Form, getUseField, Field } from '../../shared_imports';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
@@ -76,14 +76,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           version: savedQuery.version,
           interval: savedQuery.interval,
           // @ts-expect-error update types
-          ecs_mapping:
-            map(savedQuery.ecs_mapping, (value, key) => ({
-              key,
-              result: {
-                type: Object.keys(value)[0],
-                value: Object.values(value)[0],
-              },
-            })) ?? [],
+          ecs_mapping: convertECSMappingToFormValue(savedQuery.ecs_mapping) ?? [],
         });
       }
     },
