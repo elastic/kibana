@@ -18,13 +18,19 @@ import { Visualization } from '../../../types';
 import { LayerPanels } from './config_panel';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ActionRegistry } from '@kbn/ui-actions-plugin/public/types';
-import { UiActionsService } from '@kbn/ui-actions-plugin/public';
+import { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { generateId } from '../../../id_generator';
 import { mountWithProvider } from '../../../mocks';
 import { LayerType, layerTypes } from '../../../../common';
-import { ReactWrapper } from 'enzyme';
 import { addLayer } from '../../../state_management';
+import { ReactWrapper } from 'enzyme';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { createUpdateFilterReferencesAction } from '@kbn/unified-search-plugin/public/actions/update_filter_references_action';
+import {
+  updateFilterReferencesTrigger,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/unified-search-plugin/public/triggers';
 
 jest.mock('../../../id_generator');
 
@@ -48,9 +54,16 @@ afterEach(() => {
 
 describe('ConfigPanel', () => {
   const frame = createMockFramePublicAPI();
-  const actions: ActionRegistry = new Map();
-  const uiActions = new UiActionsService({
-    actions,
+  let action: Action<object>;
+  let filterManager: FilterManager;
+  let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
+  beforeEach(() => {
+    filterManager = new FilterManager(coreMock.createStart().uiSettings);
+    uiActions = uiActionsPluginMock.createPlugin();
+    action = createUpdateFilterReferencesAction(filterManager);
+    uiActions.setup.registerAction(action);
+    uiActions.setup.registerTrigger(updateFilterReferencesTrigger);
+    uiActions.setup.addTriggerAction(UPDATE_FILTER_REFERENCES_TRIGGER, action);
   });
   function prepareAndMountComponent(
     props: ReturnType<typeof getDefaultProps>,
@@ -64,7 +77,16 @@ describe('ConfigPanel', () => {
           datasourceStates: {
             testDatasource: {
               isLoading: false,
-              state: 'state',
+              state: {
+                layers: {
+                  first: {
+                    indexPatternId: 'indexPattern',
+                  },
+                  second: {
+                    indexPatternId: 'indexPattern',
+                  },
+                },
+              },
             },
           },
           activeDatasourceId: 'testDatasource',
@@ -101,7 +123,7 @@ describe('ConfigPanel', () => {
       datasourceStates: {
         testDatasource: {
           isLoading: false,
-          state: 'state',
+          state: { layers: ['first', 'second'] },
         },
       },
       visualizationState: 'state',
@@ -113,7 +135,7 @@ describe('ConfigPanel', () => {
       core: coreMock.createStart(),
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
-      uiActions,
+      uiActions: uiActions.setup as UiActionsStart,
     };
   }
 
