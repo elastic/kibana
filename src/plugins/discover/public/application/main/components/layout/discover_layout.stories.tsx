@@ -7,6 +7,7 @@
  */
 
 import { storiesOf } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { DataView, DataViewAttributes, SavedObject } from '@kbn/data-views-plugin/common';
@@ -294,10 +295,10 @@ function getProps(indexPattern: DataView) {
     indexPattern,
     indexPatternList,
     inspectorAdapters: { requests: new RequestAdapter() },
-    navigateTo: () => void 0,
-    onChangeIndexPattern: () => void 0,
-    onUpdateQuery: () => void 0,
-    resetSavedSearch: () => void 0,
+    navigateTo: action('navigate to somewhere nice'),
+    onChangeIndexPattern: action('change the data view'),
+    onUpdateQuery: action('update the query'),
+    resetSavedSearch: action('reset the saved search the query'),
     savedSearch: savedSearchMock,
     savedSearchData$,
     savedSearchRefetch$: new Subject(),
@@ -311,7 +312,7 @@ function getProps(indexPattern: DataView) {
         }),
       },
     } as unknown as GetStateReturn,
-    setExpandedDoc: () => void 0,
+    setExpandedDoc: () => action('opening an expanded doc'),
   } as unknown as DiscoverLayoutProps;
 }
 
