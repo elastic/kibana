@@ -1,9 +1,0 @@
-{
-  "name": "Query which is disabled",
-  "description": "Example query which will is disabled and will not run after being posted",
-  "risk_score": 1,
-  "severity": "high",
-  "type": "query",
-  "query": "user.name: root or user.name: admin",
-  "enabled": false
-}

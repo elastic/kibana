@@ -1,6 +1,0 @@
-{
-  "rules": {
-    "@typescript-eslint/consistent-type-definitions": 0,
-    "@typescript-eslint/no-explicit-any": ["error", { "ignoreRestArgs": true }]
-  }
-}

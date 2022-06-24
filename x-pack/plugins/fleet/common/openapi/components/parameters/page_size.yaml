@@ -1,7 +1,0 @@
-name: perPage
-in: query
-description: The number of items to return
-required: false
-schema:
-  type: integer
-  default: 50

@@ -1,9 +1,0 @@
-## Node command line options
-## See `node --help` and `node --v8-options` for available options
-## Please note you should specify one option per line
-
-## max size of old space in megabytes
-#--max-old-space-size=4096
-
-## do not terminate process on unhandled promise rejection
- --unhandled-rejections=warn

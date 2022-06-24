@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`snapshot API throws when server response doesn't correspond to expected type 1`] = `
-Object {
-  "foo": "bar",
-}
-`;

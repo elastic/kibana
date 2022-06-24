@@ -1,9 +1,0 @@
-{
-  "name": "Query With Max Signals",
-  "description": "Simplest query with max signals set to something other than default",
-  "risk_score": 1,
-  "severity": "high",
-  "type": "query",
-  "query": "user.name: root or user.name: admin",
-  "max_signals": 500
-}

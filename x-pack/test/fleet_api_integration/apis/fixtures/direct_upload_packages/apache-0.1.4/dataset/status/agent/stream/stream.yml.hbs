@@ -1,9 +1,0 @@
-metricsets: ["status"]
-hosts:
-{{#each hosts}}
-  - {{this}}
-{{/each}}
-period: {{period}}
-{{#if server_status_path}}
-server_status_path: {{server_status_path}}
-{{/if}}

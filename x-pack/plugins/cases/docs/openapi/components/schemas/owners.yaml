@@ -1,9 +1,0 @@
-type: string
-description: >
-  The application that owns the cases: Stack Management, Observability, or
-  Elastic Security.
-enum:
-  - cases
-  - observability
-  - securitySolution
-example: cases

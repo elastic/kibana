@@ -1,8 +1,0 @@
-{
-  "list_id": "endpoint_list",
-  "tags": ["user added string for a tag", "malware"],
-  "type": "endpoint",
-  "description": "This is a sample agnostic endpoint type exception",
-  "name": "Sample Endpoint Exception List",
-  "namespace_type": "agnostic"
-}

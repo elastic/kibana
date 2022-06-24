@@ -1,7 +1,0 @@
-{
-  "list_id": "detection_list_1",
-  "tags": ["user added string for a tag", "malware"],
-  "type": "detection",
-  "description": "This is a sample detection type exception list",
-  "name": "Detection Exception List (1)"
-}

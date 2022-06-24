@@ -1,6 +1,0 @@
-{
-  "id": "boolean_list",
-  "name": "Simple list with boolean values",
-  "description": "This list has booleans",
-  "type": "boolean"
-}

@@ -1,7 +1,0 @@
-{
-  "security.authenticate": {
-    "data_autocomplete_rules": {
-      "password": ""
-    }
-  }
-}
