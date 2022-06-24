@@ -91,34 +91,6 @@ export const uxFiltersByName = {
 
 export type UxLocalUIFilterName = keyof typeof uxFiltersByName;
 
-export interface UxLocalUIFilter {
-  name: UxLocalUIFilterName;
-  title: string;
-  fieldName: string;
-  excluded?: boolean;
-  value: string[];
-}
-
-type UxLocalUIFilterMap = {
-  [key in UxLocalUIFilterName]: UxLocalUIFilter;
-};
-
-export const uxLocalUIFilterNames = Object.keys(
-  uxFiltersByName
-) as UxLocalUIFilterName[];
-
-export const uxLocalUIFilters = uxLocalUIFilterNames.reduce((acc, key) => {
-  const field = uxFiltersByName[key];
-
-  return {
-    ...acc,
-    [key]: {
-      ...field,
-      name: key,
-    },
-  };
-}, {} as UxLocalUIFilterMap);
-
 export type UxUIFilters = {
   environment?: string;
 } & {
