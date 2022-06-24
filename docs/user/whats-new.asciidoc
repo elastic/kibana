@@ -227,7 +227,7 @@ average duration of your cases and delete comments in {kib}.
 
 [float]
 [[highlights-8.3-osquery]]
-=== Enhancements to Qsquery
+=== Enhancements to Osquery
 
 [float]
 ==== New saved queries available
