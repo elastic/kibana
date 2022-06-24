@@ -96,7 +96,7 @@ export interface DataViewsServiceDeps {
    */
   fieldFormats: FieldFormatsStartCommon;
   /**
-   * Hander for service notifications
+   * Handler for service notifications
    */
   onNotification: OnNotification;
   /**
@@ -111,6 +111,10 @@ export interface DataViewsServiceDeps {
    * Determines whether the user can save data views
    */
   getCanSave: () => Promise<boolean>;
+  /**
+   * Determines whether the user can save advancedSettings (used for defaultIndex)
+   */
+  getCanSaveAdvancedSettings: () => Promise<boolean>;
 }
 
 /**
@@ -276,10 +280,13 @@ export class DataViewsService {
   private onError: OnError;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
   /**
+   * Can the user save advanced settings?
+   */
+  private getCanSaveAdvancedSettings: () => Promise<boolean>;
+  /**
    * Can the user save data views?
    */
   public getCanSave: () => Promise<boolean>;
-
   /**
    * DataViewsService constructor
    * @param deps Service dependencies
@@ -293,6 +300,7 @@ export class DataViewsService {
       onNotification,
       onError,
       getCanSave = () => Promise.resolve(false),
+      getCanSaveAdvancedSettings,
     } = deps;
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -301,6 +309,7 @@ export class DataViewsService {
     this.onNotification = onNotification;
     this.onError = onError;
     this.getCanSave = getCanSave;
+    this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
     this.dataViewCache = createDataViewCache();
   }
@@ -837,9 +846,10 @@ export class DataViewsService {
   }
 
   /**
-   * Save existing dat aview. Will attempt to merge differences if there are conflicts.
+   * Save existing data view. Will attempt to merge differences if there are conflicts.
    * @param indexPattern
    * @param saveAttempts
+   * @param ignoreErrors
    */
 
   async updateSavedObject(
@@ -959,7 +969,10 @@ export class DataViewsService {
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
 
     if (defaultId && !exists) {
-      await this.config.remove('defaultIndex');
+      if (await this.getCanSaveAdvancedSettings()) {
+        await this.config.remove('defaultIndex');
+      }
+
       defaultId = undefined;
     }
 
@@ -973,7 +986,9 @@ export class DataViewsService {
       );
 
       defaultId = userDataViews[0]?.id ?? patterns[0].id;
-      await this.config.set('defaultIndex', defaultId);
+      if (await this.getCanSaveAdvancedSettings()) {
+        await this.config.set('defaultIndex', defaultId);
+      }
     }
 
     if (defaultId) {
