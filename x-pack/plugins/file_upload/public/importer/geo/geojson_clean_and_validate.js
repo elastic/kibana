@@ -11,15 +11,15 @@ import GeometryPrecisionReducer from 'jsts/org/locationtech/jts/precision/Geomet
 import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader';
 import GeoJSONWriter from 'jsts/org/locationtech/jts/io/GeoJSONWriter';
 
-  // The GeoJSON specification suggests limiting coordinate precision to six decimal places
-  // See https://datatracker.ietf.org/doc/html/rfc7946#section-11.2
-  // We can enforce rounding to six decimal places by setting the PrecisionModel scale
-  // scale = 10^n where n = maximum number of decimal places
-  const precisionModel = new PrecisionModel(Math.pow(10, 6));
-  const geometryPrecisionReducer = new GeometryPrecisionReducer(precisionModel);
-  geometryPrecisionReducer.setChangePrecisionModel(true);
-  const geoJSONReader = new GeoJSONReader();
-  const geoJSONWriter = new GeoJSONWriter();
+// The GeoJSON specification suggests limiting coordinate precision to six decimal places
+// See https://datatracker.ietf.org/doc/html/rfc7946#section-11.2
+// We can enforce rounding to six decimal places by setting the PrecisionModel scale
+// scale = 10^n where n = maximum number of decimal places
+const precisionModel = new PrecisionModel(Math.pow(10, 6));
+const geometryPrecisionReducer = new GeometryPrecisionReducer(precisionModel);
+geometryPrecisionReducer.setChangePrecisionModel(true);
+const geoJSONReader = new GeoJSONReader();
+const geoJSONWriter = new GeoJSONWriter();
 
 export function geoJsonCleanAndValidate(feature) {
   let cleanedGeometry;
