@@ -1,9 +1,0 @@
-{
-  "rules": {
-    "sort-keys": 1,
-    "@typescript-eslint/member-ordering": [
-      1,
-      { "default": {"order": "alphabetically"}}
-    ]
-  }
-}
