@@ -21,21 +21,19 @@ type TemplateProps = Pick<
   'pageSideBar' | 'pageSideBarProps' | 'template' | 'children'
 >;
 
-type RequiredProps<T> = T &
-  TemplateProps & {
-    isEmptyState?: boolean;
-  };
-
-type Props<T> = RequiredProps<T> & {
-  solutionNav: SolutionNavProps;
+type ComponentProps = TemplateProps & {
+  isEmptyState?: boolean;
 };
+
+type Props<P> = P &
+  ComponentProps & {
+    solutionNav: SolutionNavProps;
+  };
 
 const SOLUTION_NAV_COLLAPSED_KEY = 'solutionNavIsCollapsed';
 
-export const withSolutionNav = <T extends object>(
-  WrappedComponent: ComponentType<RequiredProps<T>>
-) => {
-  const WithSolutionNav = (props: Props<T>) => {
+export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: ComponentType<P>) => {
+  const WithSolutionNav = (props: Props<P>) => {
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
     const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
     const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
@@ -80,7 +78,7 @@ export const withSolutionNav = <T extends object>(
     return (
       <WrappedComponent
         {...{
-          ...(propagatedProps as RequiredProps<T>),
+          ...(propagatedProps as P),
           pageSideBar,
           pageSideBarProps,
           template: templateToUse,
