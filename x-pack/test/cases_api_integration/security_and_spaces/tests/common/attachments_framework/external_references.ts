@@ -298,7 +298,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-      const ref = getReference(esResponse, postExternalReferenceSOReq.externalReferenceId);
+      const ref = getReference(esResponse, postExternalReferenceNoSOReq.externalReferenceId);
 
       expect(ref).to.be(undefined);
       expect(comment).to.eql({
