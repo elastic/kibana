@@ -35,8 +35,10 @@ h1 {
   }
 }
 
-.grid-stack .grid-stack-nested {
+.grid-stack-item .grid-stack-nested {
   background: #e4e4c1;
+  margin-top: 10px !important;
+  // padding-top: 10px !important;
 }
 
 .dshPanelGroup {

@@ -11,12 +11,13 @@ import 'gridstack/dist/h5/gridstack-dd-native';
 import React, { createRef, MutableRefObject, useEffect, useRef, useState } from 'react';
 
 const sub = [
-  { id: '3', x: 0, y: 0 },
-  { id: '4', x: 1, y: 0 },
-  { id: '5', x: 2, y: 0 },
-  { id: '6', x: 3, y: 0 },
-  { id: '7', x: 0, y: 1 },
-  { id: '8', x: 1, y: 1 },
+  { id: '4', x: 0, y: 0, w: 2, h: 2 },
+  { id: '5', x: 2, y: 0, h: 2 },
+  { id: '6', x: 3, y: 0, w: 3 },
+  { id: '7', x: 3, y: 1 },
+  { id: '8', x: 4, y: 1, w: 2 },
+  { id: '9', x: 0, y: 2 },
+  { id: '10', x: 1, y: 2 },
 ];
 
 const subOptions = {
@@ -40,26 +41,31 @@ const Item = ({ id }: { id: string }) => (
 
 export const SubgridDemo = () => {
   const refs = useRef<{ [key: string]: MutableRefObject<HTMLDivElement> }>({});
-  const subGridRefs = useRef<{ [key: string]: MutableRefObject<HTMLDivElement> }>({});
+  const subGridRefs = useRef<{
+    [subgridKey: string]: { [key: string]: MutableRefObject<HTMLDivElement> };
+  }>({});
   const gridRef = useRef<GridStack>();
   const [items, setItems] = useState<GridStackWidget[]>([
     { id: '0', x: 0, y: 0 },
     { id: '1', x: 1, y: 0 },
     {
+      id: 'group-1',
       x: 0,
       y: 1,
       w: 12,
-      h: 4,
+      h: 5,
+      noResize: true,
       subGrid: { children: sub, ...subOptions } as GridStackOptions,
     },
     {
-      id: '2',
+      id: 'group-2',
       x: 0,
-      y: 5,
+      y: 6,
       w: 12,
       h: 4,
+      noResize: true,
       subGrid: {
-        children: [],
+        children: [{ id: '11', x: 0, y: 0, w: 2, h: 2 }],
         ...subOptions,
       } as GridStackOptions,
     },
@@ -70,9 +76,14 @@ export const SubgridDemo = () => {
       refs.current[item.id!] = refs.current[item.id!] || createRef();
       if (item.subGrid) {
         const children = (item.subGrid as GridStackOptions).children;
+
         children?.forEach((child) => {
-          subGridRefs.current[child.id!] = subGridRefs.current[child.id!] || createRef();
+          if (!subGridRefs.current[item.id!]) subGridRefs.current[item.id!] = {};
+          subGridRefs.current[item.id!][child.id!] =
+            subGridRefs.current?.[item.id!]?.[child.id!] || createRef();
         });
+
+        // console.log(subGridRefs.current[item.id!]);
       }
     });
   }
@@ -106,44 +117,47 @@ export const SubgridDemo = () => {
       const widget = grid.makeWidget(refs.current[item.id!].current);
       grid.update(widget, item);
       if (item.subGrid) {
-        const newGrid = GridStack.addGrid(widget.children[0], {
-          ...item.subGrid,
-          children: [],
-        } as GridStackOptions);
+        const newGrid = GridStack.addGrid(
+          widget.children[0] as HTMLDivElement,
+          {
+            ...item.subGrid,
+            children: [], // need to set children to empty so I can handle the render myself
+          } as GridStackOptions
+        );
 
         const children = (item.subGrid as GridStackOptions)?.children;
         children?.forEach((child) => {
-          const childWidget = newGrid?.addWidget(subGridRefs.current[child.id!].current);
+          const childWidget = newGrid?.addWidget(subGridRefs.current[item.id!][child.id!].current);
           if (childWidget) newGrid.update(childWidget, child);
         });
       }
     });
     grid.commit();
+    // console.log(grid);
   }, [items]);
 
   return (
     <div className={`grid-stack controlled`}>
-      {items.map((item, i) => {
+      {items.map((item) => {
         const subgrid = item.subGrid;
         const children = (subgrid as GridStackOptions)?.children;
 
         return (
           <div ref={refs.current[item.id!]} key={item.id} className={'grid-stack-item'}>
-            {subgrid ? (
+            {subgrid && children ? (
               <div
                 className="grid-stack-item-content"
                 style={{
                   backgroundColor: 'lightblue',
                 }}
               >
-                {children &&
-                  children.map((child) => {
-                    return (
-                      <div ref={subGridRefs.current[child.id!]} className="grid-stack-item">
-                        <Item id={child.id as string} />
-                      </div>
-                    );
-                  })}
+                {children.map((child) => {
+                  return (
+                    <div ref={subGridRefs.current[item.id!][child.id!]} className="grid-stack-item">
+                      <Item id={child.id as string} />
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <Item id={item.id as string} />
