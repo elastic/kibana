@@ -230,7 +230,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('filter with non-existent field renders in warning mode', async function () {
-        const hasBadFieldFilter = await filterBar.hasFilter('baad-field', 'warning', false);
+        const hasBadFieldFilter = await filterBar.hasFilter('baad-field', 'warn', false);
         expect(hasBadFieldFilter).to.be(true);
       });
 
