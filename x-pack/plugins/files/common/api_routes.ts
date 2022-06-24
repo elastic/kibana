@@ -9,12 +9,14 @@ import { PLUGIN_ID } from './constants';
 
 const API_BASE_PATH = `/api/${PLUGIN_ID}`;
 
+const FILES_API_BASE_PATH = `${API_BASE_PATH}/files`;
+
 export const FILE_KIND_API_ROUTES = {
-  getCreateFileRoute: (fileKind: string) => `${API_BASE_PATH}/${fileKind}/create`,
-  getUploadRoute: (fileKind: string) => `${API_BASE_PATH}/${fileKind}/{fileId}/upload`,
-  getUpdateRoute: (fileKind: string) => `${API_BASE_PATH}/${fileKind}/{fileId}/update`,
-  getDeleteRoute: (fileKind: string) => `${API_BASE_PATH}/${fileKind}/{fileId}/delete`,
-  getDownloadRoute: (fileKind: string) => `${API_BASE_PATH}/${fileKind}/{fileId}/download`,
-  getListRoute: (fileKind: string) => `${API_BASE_PATH}/${fileKind}/list`,
-  getFindRoute: (fileKind: string) => `${API_BASE_PATH}/${fileKind}/{fileId}`,
+  getCreateFileRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}`,
+  getUploadRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}/upload`,
+  getDownloadRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}/download`,
+  getUpdateRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}`,
+  getDeleteRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}`,
+  getListRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/list`,
+  getFindRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}`,
 };
