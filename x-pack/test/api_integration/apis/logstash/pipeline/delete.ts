@@ -9,12 +9,12 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+
   describe('delete', () => {
-    const archive = 'x-pack/test/functional/es_archives/logstash/empty';
 
     before('load pipelines archive', async () => {
-      await esArchiver.load(archive);
+      await kibanaServer.savedObjects.cleanStandardList();
 
       await supertest
         .put('/api/logstash/pipeline/fast_generator')
@@ -28,8 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest.get('/api/logstash/pipeline/fast_generator').expect(200);
     });
 
-    after('unload pipelines archive', () => {
-      return esArchiver.unload(archive);
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should delete the specified pipeline', async () => {
