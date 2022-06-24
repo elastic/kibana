@@ -12,11 +12,16 @@ import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { ProcessorEvent } from '../../../../../../../../common/processor_event';
+import { UndefinedType } from 'io-ts';
 
 type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
 
 interface IWaterfallGroup {
   [key: string]: IWaterfallSpanOrTransaction[];
+}
+
+interface IWaterfallMapEntry {
+  [key: string]: IWaterfallSpanOrTransaction;
 }
 
 const ROOT_ID = 'root';
@@ -311,6 +316,12 @@ const getWaterfallItems = (
   });
 
 function reparentSpans(waterfallItems: IWaterfallSpanOrTransaction[]) {
+  const waterfallItemsById = waterfallItems.reduce((map: IWaterfallMapEntry, item) => {
+    map[item.id] = item;
+    return map;
+  }, {});
+  
+  
   // find children that needs to be re-parented and map them to their correct parent id
   const childIdToParentIdMapping = Object.fromEntries(
     flatten(
@@ -318,14 +329,14 @@ function reparentSpans(waterfallItems: IWaterfallSpanOrTransaction[]) {
         if (waterfallItem.docType === 'span') {
           const childIds = waterfallItem.doc.child?.id ?? [];
           const childIdsMapping = childIds.map((id) => [id, waterfallItem.id]);
-          // if there is a cyclic dependency (e.g. inferred span with child.id = parent.id)
+          // if there is a cyclic dependency (e.g. inferred span with child.id equal to or above parent.id in the hierarchy)
           // then we need to update the parent of the waterfallItem to its current grandparent 
-          if(waterfallItem.parentId && childIds.includes(waterfallItem.parentId)){
-            const parent = waterfallItems.find(item => item.id === waterfallItem.parentId);
-            if(parent?.parentId){
-              return {...childIdsMapping, ...{[waterfallItem.id]: parent.parentId}}
-            }
+          const childAboveParent = waterfallItem.parentId ? getChildAboveParent(waterfallItemsById, childIds, waterfallItem.parentId) : undefined;
+
+          if(childAboveParent?.parentId){
+            return {...childIdsMapping, ...{[waterfallItem.id]: childAboveParent.parentId}}
           }
+
           return childIdsMapping;
         }
         return [];
@@ -345,6 +356,30 @@ function reparentSpans(waterfallItems: IWaterfallSpanOrTransaction[]) {
 
     return waterfallItem;
   });
+}
+
+function getChildAboveParent(waterfallItemsById: IWaterfallMapEntry, childIds: string[], parentId: string) {
+  for (const childId of childIds) {
+    if(!isChildBelowParent(waterfallItemsById, childId, parentId)){
+      return waterfallItemsById[childId];
+    }
+  }
+  return undefined;
+}
+
+function isChildBelowParent(waterfallItemsById: IWaterfallMapEntry, childsId: string, parentId: string) {
+  var currentItem = waterfallItemsById[childsId];
+  var currentId = currentItem?.parentId;
+
+  while (currentId) {
+    if(currentId === parentId){
+      return true;
+    }
+
+    currentItem = waterfallItemsById[currentId];
+    currentId = currentItem?.parentId;
+  }
+  return false;
 }
 
 const getChildrenGroupedByParentId = (
