@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const screenshot = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('overview page - Analytics apps', function describeIndexTests() {
@@ -54,7 +55,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on a card should lead to the appropriate app', async () => {
+      await screenshot.take('screenshot1');
+      await log.error('Starting test...');
       const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');
+      await log.error(kbnOverviewAppsCards.length + '');
       const dashboardCard = kbnOverviewAppsCards.at(0);
       expect(dashboardCard).not.to.be(undefined);
       if (dashboardCard) {
