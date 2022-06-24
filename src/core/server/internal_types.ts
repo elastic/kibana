@@ -11,6 +11,11 @@ import {
   InternalLoggingServicePreboot,
   InternalLoggingServiceSetup,
 } from '@kbn/core-logging-server-internal';
+import type {
+  AnalyticsServicePreboot,
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+} from '@kbn/core-analytics-server';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { InternalContextPreboot, ContextSetup } from './context';
 import {
@@ -45,11 +50,6 @@ import type {
   InternalExecutionContextStart,
 } from './execution_context';
 import { InternalPrebootServicePreboot } from './preboot';
-import type {
-  AnalyticsServicePreboot,
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
-} from './analytics';
 
 /** @internal */
 export interface InternalCorePreboot {
