@@ -192,14 +192,10 @@ export default ({ getService }: FtrProviderContext) => {
         expect(actualFilterStats).to.have.property('item_count').eql(expected.item_count);
         if (expected.used_by !== undefined) {
           expect(actualFilterStats).to.have.property('used_by');
-          expect(actualFilterStats.used_by).to.have.property('jobs');
-          expect(actualFilterStats.used_by.jobs).to.have.length(expected.used_by.jobs.length);
-          expect(actualFilterStats.used_by.jobs).to.eql(expected.used_by.jobs);
-          expect(actualFilterStats.used_by).to.have.property('detectors');
-          expect(actualFilterStats.used_by.detectors).to.have.length(
-            expected.used_by.detectors.length
-          );
-          expect(actualFilterStats.used_by.detectors).to.eql(expected.used_by.detectors);
+          expect(actualFilterStats.used_by).to.have.property('jobs').eql(expected.used_by.jobs);
+          expect(actualFilterStats.used_by)
+            .to.have.property('detectors')
+            .eql(expected.used_by.detectors);
         } else {
           expect(actualFilterStats).not.to.have.property('used_by');
         }
