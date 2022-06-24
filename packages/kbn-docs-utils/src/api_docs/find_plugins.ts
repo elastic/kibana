@@ -35,7 +35,7 @@ export function findPlugins(): PluginOrPackage[] {
  */
 export function findPackages(): PluginOrPackage[] {
   const packagePaths = globby
-    .sync(Path.resolve(REPO_ROOT, 'packages/**/package.json'), { absolute: true })
+    .sync(Path.resolve(REPO_ROOT, '{x-pack/,}packages/**/package.json'), { absolute: true })
     .map((path) =>
       // absolute paths returned from globby are using normalize or
       // something so the path separators are `/` even on windows,
@@ -59,6 +59,14 @@ export function findPackages(): PluginOrPackage[] {
       scope = ApiScope.CLIENT;
     }
 
+    let ownerName = '[Owner missing]';
+    // Some of these author fields have "<email@gmail.com>" in the name which mdx chokes on. Removing the < and > seems to work.
+    if (Array.isArray(manifest.author)) {
+      ownerName = manifest.author.map((d) => d.replace(/[<>]/gi, '')).join(', ');
+    } else if (typeof manifest.author === 'string') {
+      ownerName = manifest.author.replace(/[<>]/gi, '');
+    }
+
     acc.push({
       directory: Path.dirname(path),
       manifestPath: path,
@@ -66,8 +74,7 @@ export function findPackages(): PluginOrPackage[] {
         ...manifest,
         id: manifest.name,
         serviceFolders: [],
-        // Some of these author fields have "<email@gmail.com>" in the name which mdx chokes on. Removing the < and > seems to work.
-        owner: { name: manifest.author?.replace(/[<>]/gi, '') || '[Owner missing]' },
+        owner: { name: ownerName },
       },
       isPlugin: false,
       scope,
