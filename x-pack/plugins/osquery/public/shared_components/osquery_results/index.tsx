@@ -12,8 +12,9 @@ import {
   EuiLoadingContent,
   EuiText,
   EuiSpacer,
+  EuiFlexItem,
 } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
 import { CoreStart } from '@kbn/core/public';
 
@@ -21,6 +22,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { useInView } from 'react-intersection-observer';
 
 import { map } from 'lodash';
+import styled from 'styled-components';
 import { AGENT, AGENT_QUERY } from '../../agents/translations';
 import { OsqueryActionType } from '../../../common/types';
 import { useInfiniteAllActions } from '../../actions/use_all_actions';
@@ -39,6 +41,11 @@ interface OsqueryResultsProps {
   eventDetailId: string;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
+
+const StyledScrolledEuiFlexItem = styled(EuiFlexItem)`
+  overflow-y: auto;
+  max-height: 60px;
+`;
 
 const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
   agentIds,
@@ -60,7 +67,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
     sortField: '@timestamp',
     eventDetailId,
     // @ts-expect-error terms is fine
-    filterQuery: { terms: { 'data.id': map(ruleActions, 'params.message.id') } },
+    filterQuery: { terms: { 'data.id': map(ruleActions, 'params.id') } },
   });
 
   useEffect(() => {
@@ -68,6 +75,17 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
       fetchNextPage();
     }
   }, [fetchNextPage, inView]);
+
+  const agentsList = useMemo(
+    () => (
+      <StyledScrolledEuiFlexItem>
+        {agentIds.map((agent, id) => (
+          <EuiFlexItem key={id}>{agent}</EuiFlexItem>
+        ))}
+      </StyledScrolledEuiFlexItem>
+    ),
+    [agentIds]
+  );
 
   return (
     <div data-test-subj={'osquery-results'}>
@@ -95,7 +113,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
                 paddingSize="m"
                 transparentBackground={!agentIds[0].length}
               >
-                {agentIds[0]}
+                {agentsList}
               </EuiCodeBlock>
               <EuiSpacer size="m" />
               <EuiText>

@@ -22,7 +22,7 @@ export const getActionType = (): ActionTypeModel => ({
     };
     validationResult.errors = errors;
 
-    if (actionParams.message && !actionParams.message.query) {
+    if (actionParams && !actionParams.query) {
       errors.message.push(
         i18n.translate('xpack.osquery.connector.requiredQuery', {
           defaultMessage: 'Query is required.',
