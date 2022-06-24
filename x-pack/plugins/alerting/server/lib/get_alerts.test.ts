@@ -91,9 +91,9 @@ describe('getAlerts', () => {
       expect(newAlert2State.start).toEqual('1970-01-01T00:00:00.000Z');
 
       // @ts-expect-error
-      expect(newAlert1State.duration).not.toBeDefined();
+      expect(newAlert1State.duration).toEqual('0');
       // @ts-expect-error
-      expect(newAlert2State.duration).not.toBeDefined();
+      expect(newAlert2State.duration).toEqual('0');
 
       // @ts-expect-error
       expect(newAlert1State.end).not.toBeDefined();

@@ -46,7 +46,7 @@ export function getAlerts<
 
           // Inject start time into alert state for new alerts
           const state = newAlerts[id].getState();
-          newAlerts[id].replaceState({ ...state, start: currentTime });
+          newAlerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
         } else {
           // this alert did exist in previous run
           // calculate duration to date for active alerts

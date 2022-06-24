@@ -48,15 +48,6 @@ export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
 }
 
-export interface TrackAlertDurationsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
-> {
-  originalAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
-  currentAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext>>;
-}
-
 export interface GenerateNewAndRecoveredAlertEventsParams<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,

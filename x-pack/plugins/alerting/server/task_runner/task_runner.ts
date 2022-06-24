@@ -6,12 +6,12 @@
  */
 
 import apm from 'elastic-apm-node';
-import { omit, without } from 'lodash';
+import { omit } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import uuid from 'uuid';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
-import { millisToNanos, nanosToMillis } from '@kbn/event-log-plugin/server';
+import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { Alert, createAlertFactory } from '../alert';
@@ -62,7 +62,6 @@ import {
   RuleTaskInstance,
   RuleTaskRunResult,
   ScheduleActionsForRecoveredAlertsParams,
-  TrackAlertDurationsParams,
   RuleRunResult,
   RuleTaskStateAndMetrics,
 } from './types';
@@ -89,9 +88,9 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
 export class TaskRunner<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
-  State extends RuleTypeState,
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
+  RuleState extends RuleTypeState,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
@@ -102,9 +101,9 @@ export class TaskRunner<
   private ruleType: NormalizedRuleType<
     Params,
     ExtractedParams,
+    RuleState,
     State,
-    InstanceState,
-    InstanceContext,
+    Context,
     ActionGroupIds,
     RecoveryActionGroupId
   >;
@@ -120,9 +119,9 @@ export class TaskRunner<
     ruleType: NormalizedRuleType<
       Params,
       ExtractedParams,
+      RuleState,
       State,
-      InstanceState,
-      InstanceContext,
+      Context,
       ActionGroupIds,
       RecoveryActionGroupId
     >,
@@ -158,9 +157,9 @@ export class TaskRunner<
     return createExecutionHandler<
       Params,
       ExtractedParams,
+      RuleState,
       State,
-      InstanceState,
-      InstanceContext,
+      Context,
       ActionGroupIds,
       RecoveryActionGroupId
     >({
@@ -227,7 +226,7 @@ export class TaskRunner<
 
   private async executeAlert(
     alertId: string,
-    alert: Alert<InstanceState, InstanceContext, ActionGroupIds | RecoveryActionGroupId>,
+    alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     ruleRunMetricsStore: RuleRunMetricsStore
   ) {
@@ -275,7 +274,11 @@ export class TaskRunner<
     } = rule;
     const {
       params: { alertId: ruleId },
-      state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
+      state: {
+        alertInstances: alertRawInstances = {},
+        alertTypeState: ruleTypeState = {},
+        previousStartedAt,
+      },
     } = this.taskInstance;
 
     const executionHandler = this.getExecutionHandler(
@@ -293,10 +296,10 @@ export class TaskRunner<
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const ruleType = this.ruleTypeRegistry.get(alertTypeId);
 
-    const alerts: Record<string, Alert<InstanceState, InstanceContext>> = {};
+    const alerts: Record<string, Alert<State, Context>> = {};
     for (const id in alertRawInstances) {
       if (alertRawInstances.hasOwnProperty(id)) {
-        alerts[id] = new Alert<InstanceState, InstanceContext>(id, alertRawInstances[id]);
+        alerts[id] = new Alert<State, Context>(id, alertRawInstances[id]);
       }
     }
     const originalAlertIds = new Set(Object.keys(alerts));
@@ -349,8 +352,8 @@ export class TaskRunner<
             uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
             scopedClusterClient: wrappedScopedClusterClient.client(),
             alertFactory: createAlertFactory<
-              InstanceState,
-              InstanceContext,
+              State,
+              Context,
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
             >({
               alerts,
@@ -361,7 +364,7 @@ export class TaskRunner<
             shouldStopExecution: () => this.cancelled,
           },
           params,
-          state: alertTypeState as State,
+          state: ruleTypeState as RuleState,
           startedAt: this.taskInstance.startedAt!,
           previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
           spaceId,
@@ -421,8 +424,8 @@ export class TaskRunner<
     ruleRunMetricsStore.setEsSearchDurationMs(searchMetrics.esSearchDurationMs);
 
     const { newAlerts, activeAlerts, recoveredAlerts } = getAlerts<
-      InstanceState,
-      InstanceContext,
+      State,
+      Context,
       ActionGroupIds,
       RecoveryActionGroupId
     >(alerts, originalAlertIds);
@@ -454,7 +457,7 @@ export class TaskRunner<
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
       const alertsWithExecutableActions = Object.entries(activeAlerts).filter(
-        ([alertName, alert]: [string, Alert<InstanceState, InstanceContext, ActionGroupIds>]) => {
+        ([alertName, alert]: [string, Alert<State, Context, ActionGroupIds>]) => {
           const throttled = alert.isThrottled(throttle);
           const muted = mutedAlertIdsSet.has(alertName);
           let shouldExecuteAction = true;
@@ -482,16 +485,12 @@ export class TaskRunner<
 
       await Promise.all(
         alertsWithExecutableActions.map(
-          ([alertId, alert]: [string, Alert<InstanceState, InstanceContext, ActionGroupIds>]) =>
+          ([alertId, alert]: [string, Alert<State, Context, ActionGroupIds>]) =>
             this.executeAlert(alertId, alert, executionHandler, ruleRunMetricsStore)
         )
       );
 
-      await scheduleActionsForRecoveredAlerts<
-        InstanceState,
-        InstanceContext,
-        RecoveryActionGroupId
-      >({
+      await scheduleActionsForRecoveredAlerts<State, Context, RecoveryActionGroupId>({
         recoveryActionGroup: this.ruleType.recoveryActionGroup,
         recoveredAlerts,
         executionHandler,
@@ -798,52 +797,6 @@ export class TaskRunner<
     );
     await this.updateRuleSavedObject(ruleId, namespace, {
       executionStatus: ruleExecutionStatusToRaw(executionStatus),
-    });
-  }
-}
-
-function trackAlertDurations<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
->(params: TrackAlertDurationsParams<InstanceState, InstanceContext>) {
-  const currentTime = new Date().toISOString();
-  const { currentAlerts, originalAlerts, recoveredAlerts } = params;
-  const originalAlertIds = Object.keys(originalAlerts);
-  const currentAlertIds = Object.keys(currentAlerts);
-  const recoveredAlertIds = Object.keys(recoveredAlerts);
-  const newAlertIds = without(currentAlertIds, ...originalAlertIds);
-
-  // Inject start time into alert state of new alerts
-  for (const id of newAlertIds) {
-    const state = currentAlerts[id].getState();
-    currentAlerts[id].replaceState({ ...state, start: currentTime });
-  }
-
-  // Calculate duration to date for active alerts
-  for (const id of currentAlertIds) {
-    const state = originalAlertIds.includes(id)
-      ? originalAlerts[id].getState()
-      : currentAlerts[id].getState();
-    const durationInMs =
-      new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
-    const duration = state.start ? millisToNanos(durationInMs) : undefined;
-    currentAlerts[id].replaceState({
-      ...state,
-      ...(state.start ? { start: state.start } : {}),
-      ...(duration !== undefined ? { duration } : {}),
-    });
-  }
-
-  // Inject end time into alert state of recovered alerts
-  for (const id of recoveredAlertIds) {
-    const state = recoveredAlerts[id].getState();
-    const durationInMs =
-      new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
-    const duration = state.start ? millisToNanos(durationInMs) : undefined;
-    recoveredAlerts[id].replaceState({
-      ...state,
-      ...(duration ? { duration } : {}),
-      ...(state.start ? { end: currentTime } : {}),
     });
   }
 }

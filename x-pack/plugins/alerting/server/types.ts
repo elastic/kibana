@@ -68,6 +68,7 @@ export type AlertingRequestHandlerContext = CustomRequestHandlerContext<{
  * @internal
  */
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
+
 export interface RuleExecutorServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
