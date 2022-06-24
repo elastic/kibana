@@ -11649,6 +11649,19 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.FleetConfigType.packageVerification",
+            "type": "Object",
+            "tags": [],
+            "label": "packageVerification",
+            "description": [],
+            "signature": [
+              "{ gpgKeyPath?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.FleetConfigType.developer",
             "type": "Object",
             "tags": [],

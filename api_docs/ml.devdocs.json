@@ -3084,51 +3084,6 @@
       },
       {
         "parentPluginId": "ml",
-        "id": "def-common.isPopulatedObject",
-        "type": "Function",
-        "tags": [],
-        "label": "isPopulatedObject",
-        "description": [],
-        "signature": [
-          "<U extends string = string>(arg: unknown, requiredAttributes?: U[]) => arg is Record<U, unknown>"
-        ],
-        "path": "x-pack/plugins/ml/common/util/object_utils.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "ml",
-            "id": "def-common.isPopulatedObject.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "arg",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "x-pack/plugins/ml/common/util/object_utils.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-common.isPopulatedObject.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "requiredAttributes",
-            "description": [],
-            "signature": [
-              "U[]"
-            ],
-            "path": "x-pack/plugins/ml/common/util/object_utils.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
         "id": "def-common.isRuntimeField",
         "type": "Function",
         "tags": [],

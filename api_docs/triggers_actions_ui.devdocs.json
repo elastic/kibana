@@ -5503,11 +5503,13 @@
           "label": "getRuleTagBadge",
           "description": [],
           "signature": [
-            "(props: ",
+            "<T extends ",
+            "RuleTagBadgeOptions",
+            ">(props: ",
             "RuleTagBadgeProps",
-            ") => React.ReactElement<",
+            "<T>) => React.ReactElement<",
             "RuleTagBadgeProps",
-            ", string | React.JSXElementConstructor<any>>"
+            "<T>, string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
@@ -5515,12 +5517,13 @@
             {
               "parentPluginId": "triggersActionsUi",
               "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleTagBadge.$1",
-              "type": "Object",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "RuleTagBadgeProps"
+                "RuleTagBadgeProps",
+                "<T>"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
