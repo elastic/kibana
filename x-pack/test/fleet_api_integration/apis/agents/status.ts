@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: AGENTS_INDEX,
         body: {
           doc: {
-            last_checkin: new Date().toISOString(),
+            last_checkin: new Date(Date.now() - 1000 * 60 * 3).toISOString(), // 2m online
           },
         },
       });
@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: AGENTS_INDEX,
         body: {
           doc: {
-            last_checkin: new Date(Date.now() - 1000 * 60 * 60 * 60 * 10).toISOString(),
+            last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(), // 6m offline
           },
         },
       });
