@@ -152,19 +152,16 @@ const servicesRoute = createApmServerRoute({
 });
 
 const servicesDetailedStatisticsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/detailed_statistics',
+  endpoint: 'POST /internal/apm/services/detailed_statistics',
   params: t.type({
     query: t.intersection([
-      // t.intersection seemingly only supports 5 arguments so let's wrap them in another intersection
-      t.intersection([
-        environmentRt,
-        kueryRt,
-        rangeRt,
-        offsetRt,
-        probabilityRt,
-      ]),
-      t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      offsetRt,
+      probabilityRt,
     ]),
+    body: t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -207,15 +204,10 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       plugins: { security },
     } = resources;
 
-    const {
-      environment,
-      kuery,
-      offset,
-      serviceNames,
-      start,
-      end,
-      probability,
-    } = params.query;
+    const { environment, kuery, offset, start, end, probability } =
+      params.query;
+
+    const { serviceNames } = params.body;
 
     const [setup, randomSampler] = await Promise.all([
       setupRequest(resources),

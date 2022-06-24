@@ -169,6 +169,10 @@ export const home = {
         t.partial({
           refreshPaused: t.union([t.literal('true'), t.literal('false')]),
           refreshInterval: t.string,
+          page: toNumberRt,
+          pageSize: toNumberRt,
+          sortField: t.string,
+          sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
         }),
         offsetRt,
       ]),
