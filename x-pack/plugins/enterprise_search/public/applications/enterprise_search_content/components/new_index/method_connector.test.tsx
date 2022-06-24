@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
 import { EuiSteps } from '@elastic/eui';
 
-import { MethodApi } from './method_api';
+import { Status } from '../../../../../common/types/api';
+
+import { MethodConnector } from './method_connector';
 import { NewSearchIndexTemplate } from './new_search_index_template';
 
-describe('MethodApi', () => {
+describe('MethodConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockValues({ status: Status.IDLE });
+    setMockActions({ makeRequest: jest.fn() });
   });
 
-  it('renders API ingestion method tab', () => {
-    const wrapper = shallow(<MethodApi />);
+  it('renders connector ingestion method tab', () => {
+    const wrapper = shallow(<MethodConnector />);
     const template = wrapper.find(NewSearchIndexTemplate);
 
-    expect(template.prop('type')).toEqual('api');
+    expect(template.prop('type')).toEqual('connector');
     expect(template.find(EuiSteps)).toHaveLength(1);
   });
 });
