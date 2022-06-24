@@ -155,7 +155,7 @@ export const getAnnotationsGroupedByInterval = (
     collectiveConfig = {
       ...configArr[0],
       roundedTimestamp: Number(roundedTimestamp),
-      axisMode: 'bottom',
+      position: 'bottom',
     };
     if (configArr.length > 1) {
       const commonStyles = getCommonStyles(configArr);
