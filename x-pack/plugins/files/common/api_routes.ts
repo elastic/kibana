@@ -19,5 +19,5 @@ export const FILE_KIND_API_ROUTES = {
   getUpdateRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}`,
   getDeleteRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}`,
   getListRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/list`,
-  getFindRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}`,
+  getByIdRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{fileId}`,
 };

@@ -162,7 +162,7 @@ export interface FileKind {
     delete?: {
       tags: string[];
     };
-    find?: {
+    getById?: {
       tags: string[];
     };
     list?: {

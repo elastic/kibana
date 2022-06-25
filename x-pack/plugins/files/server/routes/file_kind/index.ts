@@ -17,7 +17,7 @@ import * as update from './update';
 import * as deleteEndpoint from './delete';
 import * as list from './list';
 import * as download from './download';
-import * as find from './find';
+import * as getById from './get_by_id';
 
 export function registerFileKindRoutes(router: FilesRouter) {
   fileKindsRegistry.getAll().forEach((fileKind) => {
@@ -112,18 +112,18 @@ export function registerFileKindRoutes(router: FilesRouter) {
         download.handler
       );
     }
-    if (fileKind.http.find) {
-      fileKindRouter[find.method](
+    if (fileKind.http.getById) {
+      fileKindRouter[getById.method](
         {
-          path: FILE_KIND_API_ROUTES.getFindRoute(fileKind.id),
+          path: FILE_KIND_API_ROUTES.getByIdRoute(fileKind.id),
           validate: {
-            params: find.paramsSchema,
+            params: getById.paramsSchema,
           },
           options: {
-            tags: fileKind.http.find.tags,
+            tags: fileKind.http.getById.tags,
           },
         },
-        find.handler
+        getById.handler
       );
     }
   });

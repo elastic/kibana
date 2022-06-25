@@ -43,7 +43,7 @@ describe('File kind HTTP API', () => {
         delete: { tags: ['access:myapp'] },
         update: { tags: ['access:myapp'] },
         download: { tags: ['access:myapp'] },
-        find: { tags: ['access:myapp'] },
+        getById: { tags: ['access:myapp'] },
         list: { tags: ['access:myapp'] },
       },
     });
