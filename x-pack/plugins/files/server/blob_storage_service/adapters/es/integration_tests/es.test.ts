@@ -136,11 +136,11 @@ describe('Elasticsearch blob storage', () => {
   });
 
   it('sets attributes on a blob', async () => {
-    const attrs: BlobAttributes = [
+    const attributes: BlobAttributes = [
       ['foo', 'bar'],
       ['myObject', { foo: 'bar' }],
     ];
-    const { id } = await esBlobStorage.upload(Readable.from(['upload this']), attrs);
+    const { id } = await esBlobStorage.upload(Readable.from(['upload this']), { attributes });
     const attrsResponse = await esBlobStorage.getAttributes(id);
     expect(attrsResponse).toEqual(
       expect.objectContaining({

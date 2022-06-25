@@ -8,14 +8,13 @@
 import assert from 'assert';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { pipeline as _pipeline, Readable } from 'stream';
+import { Readable, Transform } from 'stream';
+import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
 import type { BlobAttributes, BlobStorage, BlobAttributesResponse } from '../../types';
 import type { ReadableContentStream } from './content_stream';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';
 import { FileChunkDocument, mappings } from './mappings';
-
-const pipeline = promisify(_pipeline);
 
 /**
  * Export this value for convenience to be used in tests. Do not use outside of
@@ -68,7 +67,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
 
   public async upload(
     src: Readable,
-    attributes?: BlobAttributes
+    { attributes, transforms }: { attributes?: BlobAttributes; transforms?: Transform[] } = {}
   ): Promise<{ id: string; size: number }> {
     await this.createIndexIfNotExists();
 
@@ -84,9 +83,9 @@ export class ElasticsearchBlobStorage implements BlobStorage {
         },
         attributes,
       });
-      await pipeline(src, dest);
-
-      if (attributes) this.esClient.indices.refresh({ index: this.index }).catch(() => {}); // Enable search on attrs, fire and forget
+      await pipeline.apply(null, [src, ...(transforms ?? []), dest] as unknown as Parameters<
+        typeof pipeline
+      >);
 
       return {
         id: dest.getContentReferenceId()!,
