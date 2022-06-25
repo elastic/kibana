@@ -45,10 +45,12 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
         context_setup: {
           document: req.body.document,
           index: req.body.index,
-        } as any,
+        },
       };
 
       try {
+        // client types need to be update to support this request format
+        // @ts-expect-error
         const { result } = await client.asCurrentUser.scriptsPainlessExecute(body);
         const fieldValue = result as HttpResponsePayload;
 
