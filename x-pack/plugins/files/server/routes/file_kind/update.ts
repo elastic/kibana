@@ -51,7 +51,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
       statusCode: 500,
       body: {
         message:
-          'Something went wrong while update file attributes. Check server logs for more details.',
+          'Something went wrong while updating file attributes. Check server logs for more details.',
       },
     });
   }
