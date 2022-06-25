@@ -8,38 +8,19 @@
 import { Transform } from 'stream';
 import { MaxByteSizeExceededError } from './errors';
 
-export class MaxByteSizeTransform extends Transform {
-  private bytesSeen = 0;
+export function enforceMaxByteSizeTransform(maxByteSize: number) {
+  let bytesSeen: number = 0;
+  return new Transform({
+    transform(chunk: Buffer, _, cb) {
+      if (!Buffer.isBuffer(chunk))
+        throw new Error(`Received a non-buffer chunk. All chunk must be buffers.`);
 
-  constructor(
-    private readonly maxByteSize: number,
-    private readonly encoding: 'utf8' | 'base64' = 'utf8'
-  ) {
-    super();
-  }
-
-  _transform = (
-    chunk: Buffer | string,
-    encoding: BufferEncoding,
-    cb: (err: Error | null | undefined, chunk?: Buffer | string) => void
-  ) => {
-    this.bytesSeen += Buffer.isBuffer(chunk)
-      ? chunk.byteLength
-      : Buffer.byteLength(chunk, this.encoding);
-    if (this.bytesSeen > this.maxByteSize) {
-      cb(new MaxByteSizeExceededError(this.maxByteSize));
-    } else {
-      cb(null, chunk);
-    }
-  };
-
-  public static create({
-    maxByteSize,
-    encoding,
-  }: {
-    maxByteSize: number;
-    encoding?: 'utf8' | 'base64';
-  }): Transform {
-    return new MaxByteSizeTransform(maxByteSize, encoding);
-  }
+      bytesSeen += chunk.byteLength;
+      if (bytesSeen > maxByteSize) {
+        cb(new MaxByteSizeExceededError(maxByteSize));
+      } else {
+        cb(null, chunk);
+      }
+    },
+  });
 }

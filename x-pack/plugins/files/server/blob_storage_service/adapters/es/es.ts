@@ -8,14 +8,13 @@
 import assert from 'assert';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { pipeline as _pipeline, Readable, Transform } from 'stream';
+import { Readable, Transform } from 'stream';
+import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
 import type { BlobAttributes, BlobStorage, BlobAttributesResponse } from '../../types';
 import type { ReadableContentStream } from './content_stream';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';
 import { FileChunkDocument, mappings } from './mappings';
-
-const pipeline = promisify(_pipeline);
 
 /**
  * Export this value for convenience to be used in tests. Do not use outside of

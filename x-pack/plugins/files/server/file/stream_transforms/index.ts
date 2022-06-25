@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MaxByteSizeTransform } from './max_byte_size_transform';
+export { enforceMaxByteSizeTransform } from './max_byte_size_transform';
