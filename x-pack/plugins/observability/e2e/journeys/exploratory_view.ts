@@ -6,16 +6,33 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
-import { loginToKibana, waitForLoadingToFinish } from '@kbn/synthetics-plugin/e2e/journeys/utils';
+import { createExploratoryViewUrl } from '../../public/components/shared/exploratory_view/configurations/exploratory_view_url';
+import { loginToKibana, TIMEOUT_60_SEC, waitForLoadingToFinish } from '../utils';
 
 journey('Exploratory view', async ({ page, params }) => {
   before(async () => {
     await waitForLoadingToFinish({ page });
   });
 
-  const baseUrl = `${params.kibanaUrl}/app/observability/exploratory-view/?rangeFrom=now-15m&rangeTo=now#?reportType=kpi-over-time&sr=!((dt:ux,mt:___records___,n:undefined-page-views,rdf:(service.name:!()),time:(from:'2021-01-18T12:20:01.682Z',to:'2021-01-18T12:25:27.484Z')))`;
+  const expUrl = createExploratoryViewUrl({
+    reportType: 'kpi-over-time',
+    allSeries: [
+      {
+        name: 'Elastic page views',
+        time: {
+          from: '2021-01-18T12:20:01.682Z',
+          to: '2021-01-18T12:25:27.484Z',
+        },
+        selectedMetricField: '___records___',
+        reportDefinitions: { 'service.name': [] },
+        dataType: 'ux',
+      },
+    ],
+  });
 
-  step('Go to UX Dashboard', async () => {
+  const baseUrl = `${params.kibanaUrl}${expUrl}`;
+
+  step('Go to Exploratory view', async () => {
     await page.goto(baseUrl, {
       waitUntil: 'networkidle',
     });
@@ -27,10 +44,11 @@ journey('Exploratory view', async ({ page, params }) => {
   });
 
   step('renders as expected', async () => {
+    await page.waitForTimeout(30 * 1000);
     await page.click('text=User experience (RUM)');
-    await page.click('[aria-label="Toggle series information"] >> text=Page views');
-    await page.click('canvas[role="presentation"]');
-    await page.click('[aria-label="Edit series"]');
+    await page.click('[aria-label="Toggle series information"] >> text=Page views', TIMEOUT_60_SEC);
+    await page.click('canvas[role="presentation"]', TIMEOUT_60_SEC);
+    await page.click('[aria-label="Edit series"]', TIMEOUT_60_SEC);
     await page.click('button:has-text("No breakdown")');
     await page.click('button[role="option"]:has-text("Operating system")');
     await page.click('button:has-text("Apply changes")');

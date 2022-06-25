@@ -58,3 +58,7 @@ export const getQuerystring = (params: object) => {
 };
 
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const TIMEOUT_60_SEC = {
+  timeout: 60 * 1000,
+};
