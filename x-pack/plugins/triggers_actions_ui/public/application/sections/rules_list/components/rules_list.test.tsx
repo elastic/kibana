@@ -466,6 +466,94 @@ describe.skip('rules_list component empty', () => {
   });
 });
 
+describe('rules_list component with props', () => {
+  let wrapper: ReactWrapper<any>;
+  async function setup(editable: boolean = true) {
+    loadRules.mockResolvedValue({
+      page: 1,
+      perPage: 10000,
+      total: 4,
+      data: mockedRulesData,
+    });
+    loadActionTypes.mockResolvedValue([
+      {
+        id: 'test',
+        name: 'Test',
+      },
+      {
+        id: 'test2',
+        name: 'Test2',
+      },
+    ]);
+    loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+    loadAllActions.mockResolvedValue([]);
+    loadRuleAggregations.mockResolvedValue({
+      ruleEnabledStatus: { enabled: 2, disabled: 0 },
+      ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
+      ruleMutedStatus: { muted: 0, unmuted: 2 },
+      ruleTags,
+    });
+    loadRuleTags.mockResolvedValue({
+      ruleTags,
+    });
+
+    const ruleTypeMock: RuleTypeModel = {
+      id: 'test_rule_type',
+      iconClass: 'test',
+      description: 'Rule when testing',
+      documentationUrl: 'https://localhost.local/docs',
+      validate: () => {
+        return { errors: {} };
+      },
+      ruleParamsExpression: jest.fn(),
+      requiresAppContext: !editable,
+    };
+
+    ruleTypeRegistry.has.mockReturnValue(true);
+    ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    wrapper = mountWithIntl(<RulesList statusFilter={['disabled']} setStatusFilter={jest.fn()} />);
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadRules).toHaveBeenCalled();
+    expect(loadActionTypes).toHaveBeenCalled();
+    expect(loadRuleAggregations).toHaveBeenCalled();
+  }
+  it('can filter by rule states', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    loadRules.mockReset();
+    await setup();
+
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        ruleStatusesFilter: ['disabled'],
+      })
+    );
+
+    wrapper.find('[data-test-subj="ruleStatusFilterButton"] button').simulate('click');
+
+    wrapper.find('[data-test-subj="ruleStatusFilterOption-enabled"]').first().simulate('click');
+
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        ruleStatusesFilter: ['disabled', 'enabled'],
+      })
+    );
+
+    // when I click on the status, I expect setStatusFilter to have been called
+    // expect(wrapper.instance().props.setStatusFilter).toHaveBeenCalled();
+    expect(wrapper.prop('setStatusFilter')).toHaveBeenCalled();
+    expect(wrapper.prop('setStatusFilter')).toHaveBeenLastCalledWith(['disabled', 'enabled']);
+  });
+});
+
 describe('rules_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
