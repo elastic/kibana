@@ -24,6 +24,7 @@ import {
 import { createAuditEvent } from '../audit_events';
 import { InternalFileService } from '../file_service/internal_file_service';
 import { BlobStorage } from '../blob_storage_service/types';
+import { enforceMaxByteSizeTransform } from './stream_transforms';
 
 /**
  * Public class that provides all data and functionality consumers will need at the
@@ -80,7 +81,9 @@ export class File<M = unknown> implements IFile {
     });
 
     try {
-      const { id: contentRef, size } = await this.blobStorage.upload(content);
+      const { id: contentRef, size } = await this.blobStorage.upload(content, {
+        transforms: [enforceMaxByteSizeTransform(this.fileKindDescriptor.maxSizeBytes ?? Infinity)],
+      });
       await this.updateFileState({
         action: 'uploaded',
         payload: { content_ref: contentRef, size },

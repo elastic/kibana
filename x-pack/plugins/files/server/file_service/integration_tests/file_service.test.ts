@@ -24,6 +24,7 @@ import { CreateFileArgs } from '../internal_file_service';
 describe('FileService', () => {
   const fileKind: string = 'test';
   const fileKindNonDefault: string = 'test-non-default';
+  const fileKindTinyFiles: string = 'tiny-files';
   const nonDefaultIndex = '.kibana-test-files';
 
   let manageES: TestElasticsearchUtils;
@@ -50,6 +51,11 @@ describe('FileService', () => {
       id: fileKindNonDefault,
       http: {},
       blobStoreSettings: { esSingleIndex: { index: nonDefaultIndex } },
+    });
+    fileKindsRegistry.register({
+      id: fileKindTinyFiles,
+      maxSizeBytes: 10,
+      http: {},
     });
     coreStart = await kbnRoot.start();
     esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -152,6 +158,18 @@ describe('FileService', () => {
     expect(updatedFile2.meta.some).toBe(updatableFields.meta.some);
     expect(updatedFile2.name).toBe(updatableFields.name);
     expect(updatedFile2.alt).toBe(updatableFields.alt);
+  });
+
+  it('enforces max size settings', async () => {
+    const file = await createDisposableFile({ fileKind: fileKindTinyFiles, name: 'test' });
+    const tinyContent = Readable.from(['ok']);
+    await file.uploadContent(tinyContent);
+
+    const file2 = await createDisposableFile({ fileKind: fileKindTinyFiles, name: 'test' });
+    const notSoTinyContent = Readable.from(['nok'.repeat(10)]);
+    await expect(() => file2.uploadContent(notSoTinyContent)).rejects.toThrow(
+      new Error('Maximum of 10 bytes exceeded')
+    );
   });
 
   describe('ES blob integration and file kinds', () => {
