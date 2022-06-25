@@ -8,13 +8,12 @@
 import sinon from 'sinon';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getAlerts } from './get_alerts';
-import { Alert, createAlertFactory } from '../alert';
+import { Alert } from '../alert';
 import { DefaultActionGroupId } from '../types';
 
 const logger = loggingSystemMock.create().get();
 
 describe('getAlerts', () => {
-  let alertFactory;
   let clock: sinon.SinonFakeTimers;
 
   beforeAll(() => {
@@ -23,10 +22,6 @@ describe('getAlerts', () => {
 
   beforeEach(() => {
     clock.reset();
-    alertFactory = createAlertFactory({
-      alerts: {},
-      logger,
-    });
   });
 
   afterAll(() => clock.restore());
