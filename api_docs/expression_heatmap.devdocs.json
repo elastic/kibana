@@ -580,6 +580,14 @@
           },
           "; chartsThemeService: ",
           "Theme",
+          "; datatableUtilities: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.DatatableUtilitiesService",
+            "text": "DatatableUtilitiesService"
+          },
           "; onClickValue: (data: { data: { table: Pick<",
           {
             "pluginId": "expressions",

@@ -95,7 +95,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
     fetchContextRows,
     fetchAllRows,
     fetchSurroundingRows,
-    fetchedState.anchor._id,
+    fetchedState.anchor.id,
   ]);
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
@@ -110,7 +110,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   const rows = useMemo(
     () => [
       ...(fetchedState.predecessors || []),
-      ...(fetchedState.anchor._id ? [fetchedState.anchor] : []),
+      ...(fetchedState.anchor.id ? [fetchedState.anchor] : []),
       ...(fetchedState.successors || []),
     ],
     [fetchedState.predecessors, fetchedState.anchor, fetchedState.successors]
@@ -118,7 +118,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
 
   const addFilter = useCallback(
     async (field: DataViewField | string, values: unknown, operation: string) => {
-      const newFilters = generateFilters(filterManager, field, values, operation, indexPattern.id!);
+      const newFilters = generateFilters(filterManager, field, values, operation, indexPattern);
       filterManager.addFilters(newFilters);
       if (indexPatterns) {
         const fieldName = typeof field === 'string' ? field : field.name;
