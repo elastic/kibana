@@ -7,7 +7,19 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge, EuiCard } from '@elastic/eui';
+import classNames from 'classnames';
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiText,
+  EuiSplitPanel,
+  EuiButtonIcon,
+  EuiSpacer,
+} from '@elastic/eui';
+
+import './button_group.scss';
 
 export interface ButtonGroupOption {
   id: string;
@@ -15,7 +27,7 @@ export interface ButtonGroupOption {
   label: string;
   description: string;
   footer: string;
-  badgeLabel?: string;
+  badge?: React.ReactNode;
 }
 
 interface Props {
@@ -25,28 +37,57 @@ interface Props {
 }
 
 export const ButtonGroup: React.FC<Props> = ({ options, selected, onChange }) => (
-  <EuiFlexGroup direction="column" gutterSize="l">
+  <EuiFlexGroup direction="column" gutterSize="m" className="buttonGroup">
     {options.map((option) => (
-      <EuiFlexItem grow={false}>
-        <EuiCard
+      <EuiFlexItem
+        grow={false}
+        onClick={() => {
+          onChange(option);
+        }}
+      >
+        <EuiSplitPanel.Outer
+          grow
           hasBorder
-          titleSize="xs"
-          title={option.label}
-          description={
-            <EuiText size="xs" color="subdued">
-              {option.description}
+          borderRadius="m"
+          hasShadow={false}
+          className={classNames('buttonGroupOption', {
+            'buttonGroupOption-selected': option === selected,
+          })}
+        >
+          <EuiSplitPanel.Inner color="plain" paddingSize="s">
+            <EuiFlexGroup alignItems="center" responsive={false}>
+              <EuiFlexItem>
+                {option.badge && (
+                  <>
+                    <div>{option.badge}</div>
+                    <EuiSpacer size="xs" />
+                  </>
+                )}
+                <EuiTitle size="xs">
+                  <h4>{option.label}</h4>
+                </EuiTitle>
+                <EuiSpacer size="xs" />
+                <EuiText size="xs" color="subdued">
+                  <p>{option.description}</p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon display="base" iconType="arrowRight" aria-label={option.label} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner
+            color={selected === option ? 'primary' : 'subdued'}
+            paddingSize="s"
+            className="buttonGroupOption--footer"
+          >
+            <EuiText size="xs" color={option === selected ? undefined : 'subdued'}>
+              <p>
+                <strong>{option.footer}</strong>
+              </p>
             </EuiText>
-          }
-          footer={<EuiBadge color="hollow">{option.footer}</EuiBadge>}
-          selectable={{
-            onClick: () => onChange(option),
-            isSelected: option === selected,
-          }}
-          betaBadgeProps={{
-            label: option.badgeLabel,
-            size: 's',
-          }}
-        />
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
       </EuiFlexItem>
     ))}
   </EuiFlexGroup>

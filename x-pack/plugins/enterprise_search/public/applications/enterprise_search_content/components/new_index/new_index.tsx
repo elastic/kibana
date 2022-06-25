@@ -16,7 +16,15 @@ import React, { useState, useEffect } from 'react';
 
 import { useActions } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -79,7 +87,11 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
     footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.footer', {
       defaultMessage: 'Development required',
     }),
-    badgeLabel: 'Technical preview',
+    badge: (
+      <EuiBadge iconType="beaker">
+        <EuiText size="xs">Technical Preview</EuiText>
+      </EuiBadge>
+    ),
   },
 ];
 
