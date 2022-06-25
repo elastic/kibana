@@ -7,9 +7,10 @@
 
 import { FILE_KIND_API_ROUTES } from '../../../common/api_routes';
 import { fileKindsRegistry } from '../../file_kinds_registry';
-import { FilesRouter } from '../types';
-import { enhanceRouter } from './enhance_router';
 
+import { FilesRouter } from '../types';
+
+import { enhanceRouter } from './enhance_router';
 import * as create from './create';
 import * as upload from './upload';
 import * as update from './update';
