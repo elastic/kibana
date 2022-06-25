@@ -18,6 +18,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
+  const document = { foo: 1, bar: 'hello' };
+
   const createIndex = async () => {
     await es.indices.create({
       index: INDEX_NAME,
