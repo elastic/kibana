@@ -55,6 +55,8 @@ export class FilesPlugin
     core
       .getStartServices()
       .then(() => {
+        // File routes can only be registered during start phase because we need
+        // to give plugins a chance to register file kinds.
         registerRoutes(router);
       })
       .catch(() => {
