@@ -33,6 +33,9 @@ const properties: Properties = {
   mime: {
     type: 'keyword',
   },
+  extension: {
+    type: 'keyword',
+  },
   size: {
     type: 'long',
   },
