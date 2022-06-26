@@ -37,6 +37,7 @@ export const MethodEs: React.FC = () => {
       docsUrl="#"
       type="elasticsearch"
       onNameChange={(value: string) => onNameChange(value)}
+      onSubmit={() => null}
     >
       <EuiPanel
         color="subdued"
