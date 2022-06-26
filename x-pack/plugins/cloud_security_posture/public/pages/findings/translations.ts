@@ -42,9 +42,9 @@ export const RESOURCE = i18n.translate('xpack.csp.findings.resourceLabel', {
   defaultMessage: 'Resource',
 });
 
-export const RESOURCE_NAME = i18n.translate('xpack.csp.findings.resourceNameLabel', {
-  defaultMessage: 'Resource Name',
-});
+// export const RESOURCE_NAME = i18n.translate('xpack.csp.findings.resourceNameLabel', {
+//   defaultMessage: 'Resource Name',
+// });
 
 export const GENERAL = i18n.translate('xpack.csp.findings.findingsFlyout.generalTabLabel', {
   defaultMessage: 'General',
@@ -58,47 +58,47 @@ export const JSON = i18n.translate('xpack.csp.findings.findingsFlyout.jsonTabLab
   defaultMessage: 'JSON',
 });
 
-export const RESOURCE_ID = i18n.translate(
-  'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnLabel',
-  {
-    defaultMessage: 'Resource ID',
-  }
-);
+// export const RESOURCE_ID = i18n.translate(
+//   'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnLabel',
+//   {
+//     defaultMessage: 'Resource ID',
+//   }
+// );
 
-export const RESULT = i18n.translate(
-  'xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel',
-  {
-    defaultMessage: 'Result',
-  }
-);
+// export const RESULT = i18n.translate(
+//   'xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel',
+//   {
+//     defaultMessage: 'Result',
+//   }
+// );
 
-export const RESOURCE_TYPE = i18n.translate(
-  'xpack.csp.findings.findingsTable.findingsTableColumn.resourceTypeColumnLabel',
-  {
-    defaultMessage: 'Resource Type',
-  }
-);
+// export const RESOURCE_TYPE = i18n.translate(
+//   'xpack.csp.findings.findingsTable.findingsTableColumn.resourceTypeColumnLabel',
+//   {
+//     defaultMessage: 'Resource Type',
+//   }
+// );
 
-export const CLUSTER_ID = i18n.translate(
-  'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
-  {
-    defaultMessage: 'Cluster ID',
-  }
-);
+// export const CLUSTER_ID = i18n.translate(
+//   'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
+//   {
+//     defaultMessage: 'Cluster ID',
+//   }
+// );
 
-export const CIS_SECTION = i18n.translate(
-  'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
-  {
-    defaultMessage: 'CIS Section',
-  }
-);
+// export const CIS_SECTION = i18n.translate(
+//   'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
+//   {
+//     defaultMessage: 'CIS Section',
+//   }
+// );
 
-export const LAST_CHECKED = i18n.translate(
-  'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',
-  {
-    defaultMessage: 'Last Checked',
-  }
-);
+// export const LAST_CHECKED = i18n.translate(
+//   'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',
+//   {
+//     defaultMessage: 'Last Checked',
+//   }
+// );
 
 export const FILENAME = i18n.translate('xpack.csp.findings.filenameLabel', {
   defaultMessage: 'Filename',
@@ -124,9 +124,9 @@ export const GID = i18n.translate('xpack.csp.findings.gidLabel', {
   defaultMessage: 'GID',
 });
 
-export const RULE = i18n.translate('xpack.csp.findings.ruleLabel', {
-  defaultMessage: 'Rule',
-});
+// export const RULE = i18n.translate('xpack.csp.findings.ruleLabel', {
+//   defaultMessage: 'Rule',
+// });
 
 export const DESCRIPTION = i18n.translate('xpack.csp.findings.descriptionLabel', {
   defaultMessage: 'Description',
@@ -256,20 +256,20 @@ export const PLATFORM = i18n.translate('xpack.csp.findings.platformLabel', {
   defaultMessage: 'Platform',
 });
 
-export const NO_FINDINGS = i18n.translate('xpack.csp.findings.nonFindingsLabel', {
-  defaultMessage: 'There are no Findings',
-});
+// export const NO_FINDINGS = i18n.translate('xpack.csp.findings.nonFindingsLabel', {
+//   defaultMessage: 'There are no Findings',
+// });
 
 export const DETAILS = i18n.translate('xpack.csp.findings.findingsFlyout.detailsTabLabel', {
   defaultMessage: 'Details',
 });
 
-export const FINDINGS_SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.csp.findings.searchBar.searchPlaceholder',
-  { defaultMessage: 'Search findings (eg. rule.section.keyword : "API Server" )' }
-);
+// export const FINDINGS_SEARCH_PLACEHOLDER = i18n.translate(
+//   'xpack.csp.findings.searchBar.searchPlaceholder',
+//   { defaultMessage: 'Search findings (eg. rule.section.keyword : "API Server" )' }
+// );
 
-export const PAGE_SEARCH_ERROR_MESSAGE = i18n.translate(
-  'xpack.csp.findings.errorCallout.pageSearchErrorTitle',
-  { defaultMessage: 'We encountered an error retrieving search results' }
-);
+// export const PAGE_SEARCH_ERROR_MESSAGE = i18n.translate(
+//   'xpack.csp.findings.errorCallout.pageSearchErrorTitle',
+//   { defaultMessage: 'We encountered an error retrieving search results' }
+// );

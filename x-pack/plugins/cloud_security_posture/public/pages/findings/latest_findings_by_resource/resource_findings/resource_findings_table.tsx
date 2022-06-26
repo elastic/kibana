@@ -13,7 +13,7 @@ import {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
 } from '@elastic/eui';
-import * as TEXT from '../../translations';
+import { i18n } from '@kbn/i18n';
 import { getExpandColumn, getFindingsColumns } from '../../layout/findings_layout';
 import type { CspFinding } from '../../types';
 import { FindingsRuleFlyout } from '../../findings_flyout/findings_flyout';
@@ -36,7 +36,18 @@ const ResourceFindingsTableComponent = ({ items, loading, pagination, setTableOp
     []
   );
   if (!loading && !items.length)
-    return <EuiEmptyPrompt iconType="logoKibana" title={<h2>{TEXT.NO_FINDINGS}</h2>} />;
+    return (
+      <EuiEmptyPrompt
+        iconType="logoKibana"
+        title={
+          <h2>
+            {i18n.translate('xpack.csp.findings.resourceFindings.noFindingsTitle', {
+              defaultMessage: 'There are no Findings',
+            })}
+          </h2>
+        }
+      />
+    );
 
   return (
     <>
