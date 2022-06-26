@@ -185,6 +185,7 @@ export const previewRulesRoute = async (
               id: string
             ) => Pick<
               Alert<TInstanceState, TInstanceContext, TActionGroupIds>,
+              | 'getId'
               | 'getState'
               | 'replaceState'
               | 'scheduleActions'

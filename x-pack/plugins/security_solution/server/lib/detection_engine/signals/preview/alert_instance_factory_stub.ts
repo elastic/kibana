@@ -23,6 +23,9 @@ export const alertInstanceFactoryStub = <
 >(
   id: string
 ) => ({
+  getId() {
+    return id;
+  },
   getState() {
     return {} as unknown as TInstanceState;
   },

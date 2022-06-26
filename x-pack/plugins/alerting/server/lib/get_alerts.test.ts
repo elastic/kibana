@@ -6,12 +6,9 @@
  */
 
 import sinon from 'sinon';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getAlerts } from './get_alerts';
 import { Alert } from '../alert';
 import { DefaultActionGroupId } from '../types';
-
-const logger = loggingSystemMock.create().get();
 
 describe('getAlerts', () => {
   let clock: sinon.SinonFakeTimers;
