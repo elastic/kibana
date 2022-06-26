@@ -19,9 +19,9 @@ import {
 import moment from 'moment';
 import { PartitionElementEvent } from '@elastic/charts';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
+import { i18n } from '@kbn/i18n';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import { ChartPanel } from '../../../components/chart_panel';
-import * as TEXT from '../translations';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
 import { INTERNAL_FEATURE_FLAGS, RULE_FAILED } from '../../../../common/constants';
@@ -96,7 +96,15 @@ export const BenchmarksSection = ({
                   grow={4}
                   style={{ borderRight: `1px solid ${euiTheme.colors.lightShade}` }}
                 >
-                  <ChartPanel title={TEXT.COMPLIANCE_SCORE} hasBorder={false}>
+                  <ChartPanel
+                    title={i18n.translate(
+                      'xpack.csp.dashboard.benchmarkSection.complianceScorePanelTitle',
+                      {
+                        defaultMessage: 'Compliance Score',
+                      }
+                    )}
+                    hasBorder={false}
+                  >
                     <CloudPostureScoreChart
                       id={`${cluster.meta.clusterId}_score_chart`}
                       data={cluster.stats}
@@ -108,7 +116,15 @@ export const BenchmarksSection = ({
                   </ChartPanel>
                 </EuiFlexItem>
                 <EuiFlexItem grow={4}>
-                  <ChartPanel title={TEXT.RISKS} hasBorder={false}>
+                  <ChartPanel
+                    title={i18n.translate(
+                      'xpack.csp.dashboard.benchmarkSection.failedFindingsPanelTitle',
+                      {
+                        defaultMessage: 'Failed Findings',
+                      }
+                    )}
+                    hasBorder={false}
+                  >
                     <RisksTable
                       data={cluster.groupedFindingsEvaluation}
                       maxItems={3}
