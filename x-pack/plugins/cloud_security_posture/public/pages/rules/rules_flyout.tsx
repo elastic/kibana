@@ -48,7 +48,7 @@ export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
     >
       <EuiFlyoutHeader>
         <EuiTitle size="l">
-          <h2>{rule.attributes.name}</h2>
+          <h2>{rule.attributes.metadata.name}</h2>
         </EuiTitle>
         <EuiSpacer />
         <EuiTabs>
@@ -67,7 +67,10 @@ export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
       <EuiFlyoutBody>
         {tab === 'overview' && <RuleOverviewTab rule={rule} toggleRule={() => toggleRule(rule)} />}
         {tab === 'remediation' && (
-          <EuiDescriptionList compressed={false} listItems={getRemediationList(rule.attributes)} />
+          <EuiDescriptionList
+            compressed={false}
+            listItems={getRemediationList(rule.attributes.metadata)}
+          />
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
@@ -87,7 +90,7 @@ const RuleOverviewTab = ({ rule, toggleRule }: { rule: RuleSavedObject; toggleRu
       </span>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiDescriptionList listItems={getRuleList(rule.attributes)} />
+      <EuiDescriptionList listItems={getRuleList(rule.attributes.metadata)} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

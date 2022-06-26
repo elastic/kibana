@@ -44,14 +44,22 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
     title: '',
     description: <Markdown>{rule.remediation}</Markdown>,
   },
-  {
-    title: TEXT.IMPACT,
-    description: <Markdown>{rule.impact}</Markdown>,
-  },
-  {
-    title: TEXT.DEFAULT_VALUE,
-    description: <Markdown>{rule.default_value}</Markdown>,
-  },
+  ...(rule.impact
+    ? [
+        {
+          title: TEXT.IMPACT,
+          description: <Markdown>{rule.impact}</Markdown>,
+        },
+      ]
+    : []),
+  ...(rule.default_value
+    ? [
+        {
+          title: TEXT.DEFAULT_VALUE,
+          description: <Markdown>{rule.default_value}</Markdown>,
+        },
+      ]
+    : []),
   {
     title: TEXT.RATIONALE,
     description: <Markdown>{rule.rationale}</Markdown>,

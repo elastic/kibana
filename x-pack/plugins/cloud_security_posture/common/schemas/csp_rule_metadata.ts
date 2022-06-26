@@ -5,17 +5,14 @@
  * 2.0.
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
-import { cspRuleMetadataSchema } from './csp_rule_metadata';
 
-export const cspRuleTemplateSchemaV830 = rt.object({
+export const cspRuleMetadataSchema = rt.object({
   audit: rt.string(),
   benchmark: rt.object({ name: rt.string(), version: rt.string() }),
   default_value: rt.maybe(rt.string()),
   description: rt.string(),
-  enabled: rt.boolean(),
   id: rt.string(),
   impact: rt.maybe(rt.string()),
-  muted: rt.boolean(),
   name: rt.string(),
   profile_applicability: rt.string(),
   rationale: rt.string(),
@@ -27,12 +24,4 @@ export const cspRuleTemplateSchemaV830 = rt.object({
   version: rt.string(),
 });
 
-export const cspRuleTemplateSchemaV840 = rt.object({
-  enabled: rt.boolean(),
-  metadata: cspRuleMetadataSchema,
-  muted: rt.boolean(),
-});
-
-export type CspRuleTemplateTypeV830 = TypeOf<typeof cspRuleTemplateSchemaV830>;
-export type CspRuleTemplateTypeV840 = TypeOf<typeof cspRuleTemplateSchemaV840>;
-export type CspRuleTemplateType = CspRuleTemplateTypeV840;
+export type CspRuleMetadataType = TypeOf<typeof cspRuleMetadataSchema>;

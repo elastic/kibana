@@ -108,7 +108,7 @@ const getColumns = ({
   setSelectedRuleId,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<RuleSavedObject>> => [
   {
-    field: 'attributes.name',
+    field: 'attributes.metadata.name',
     name: TEXT.RULE_NAME,
     width: '60%',
     truncateText: true,
@@ -127,7 +127,7 @@ const getColumns = ({
     ),
   },
   {
-    field: 'attributes.section',
+    field: 'attributes.metadata.section',
     name: TEXT.CIS_SECTION,
     width: '15%',
   },

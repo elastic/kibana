@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CSP_RULE_SAVED_OBJECT_TYPE } from '../constants';
+
 /**
  * @example
  * declare const foo: Array<string | undefined | null>
@@ -19,3 +21,14 @@ export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'
 
   return defaultMessage; // TODO: i18n
 };
+
+export const createCspRuleSearchFilterByPackagePolicy = ({
+  packagePolicyId,
+  policyId,
+}: {
+  packagePolicyId: string;
+  policyId?: string;
+}): string =>
+  `${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.package_policy_id: "${packagePolicyId}"${
+    policyId ? ` AND ${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.policy_id: "${policyId}"` : ''
+  }`;

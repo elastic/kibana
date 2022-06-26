@@ -50,20 +50,35 @@ const getRuleMock = ({
   savedObjectId?: string;
   id?: string;
   enabled: boolean;
-}) =>
+}): RuleSavedObject =>
   ({
     id: savedObjectId,
     updatedAt: chance.date().toISOString(),
     attributes: {
-      id,
-      name: chance.sentence(),
+      metadata: {
+        audit: chance.sentence(),
+        benchmark: {
+          name: chance.word(),
+          version: chance.sentence(),
+        },
+        default_value: chance.sentence(),
+        description: chance.sentence(),
+        id,
+        impact: chance.sentence(),
+        name: chance.sentence(),
+        profile_applicability: chance.sentence(),
+        rationale: chance.sentence(),
+        references: chance.sentence(),
+        rego_rule_id: chance.word(),
+        remediation: chance.sentence(),
+        section: chance.sentence(),
+        tags: [chance.word(), chance.word()],
+        version: chance.sentence(),
+      },
       package_policy_id: packagePolicyId,
       policy_id: policyId,
       enabled,
-      benchmark: {
-        name: chance.word(),
-        version: chance.sentence(),
-      },
+      muted: false,
     },
   } as RuleSavedObject);
 
@@ -115,7 +130,7 @@ describe('<RulesContainer />', () => {
     );
 
     expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
-    expect(await screen.findByText(rule1.attributes.name)).toBeInTheDocument();
+    expect(await screen.findByText(rule1.attributes.metadata.name)).toBeInTheDocument();
     expect(
       screen
         .getByTestId(TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule1.id))

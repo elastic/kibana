@@ -36,4 +36,5 @@ export const INTERNAL_FEATURE_FLAGS = {
   showFindingsGroupBy: true,
 } as const;
 
-export const cspRuleAssetSavedObjectType = 'csp_rule';
+export const CSP_RULE_SAVED_OBJECT_TYPE = 'csp_rule';
+export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
