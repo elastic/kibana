@@ -32,7 +32,10 @@ import {
 import { CspAppContext } from '../../plugin';
 import type { Benchmark, CspRulesStatus } from '../../../common/types';
 import type { CspRuleType } from '../../../common/schemas';
-import { filterByPackagePolicy, isNonNullable } from '../../../common/utils/helpers';
+import {
+  createCspRuleSearchFilterByPackagePolicy,
+  isNonNullable,
+} from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
@@ -107,7 +110,7 @@ export const getCspRulesStatus = (
 ): Promise<SavedObjectsFindResponse<CspRuleType, RulesStatusAggregation>> => {
   const cspRules = soClient.find<CspRuleType, RulesStatusAggregation>({
     type: CSP_RULE_SAVED_OBJECT_TYPE,
-    filter: filterByPackagePolicy({
+    filter: createCspRuleSearchFilterByPackagePolicy({
       packagePolicyId: packagePolicy.id,
       policyId: packagePolicy.policy_id,
     }),

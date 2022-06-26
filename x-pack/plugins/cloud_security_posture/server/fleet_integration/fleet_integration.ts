@@ -13,7 +13,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { PackagePolicy, DeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
-import { filterByPackagePolicy } from '../../common/utils/helpers';
+import { createCspRuleSearchFilterByPackagePolicy } from '../../common/utils/helpers';
 import {
   CSP_RULE_SAVED_OBJECT_TYPE,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
@@ -71,7 +71,7 @@ export const removeCspRulesInstancesCallback = async (
   try {
     const { saved_objects: cspRules }: SavedObjectsFindResponse<CspRuleType> = await soClient.find({
       type: CSP_RULE_SAVED_OBJECT_TYPE,
-      filter: filterByPackagePolicy({
+      filter: createCspRuleSearchFilterByPackagePolicy({
         packagePolicyId: deletedPackagePolicy.id,
         policyId: deletedPackagePolicy.policy_id,
       }),

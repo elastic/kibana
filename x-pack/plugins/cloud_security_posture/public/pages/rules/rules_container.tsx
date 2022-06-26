@@ -9,7 +9,7 @@ import { type EuiBasicTable, EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eu
 import { useParams } from 'react-router-dom';
 import {
   extractErrorMessage,
-  filterByPackagePolicy,
+  createCspRuleSearchFilterByPackagePolicy,
   isNonNullable,
 } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
@@ -100,7 +100,7 @@ export const RulesContainer = () => {
   const [isAllSelected, setIsAllSelected] = useState<boolean>(false);
   const [visibleSelectedRulesIds, setVisibleSelectedRulesIds] = useState<string[]>([]);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
-    filter: filterByPackagePolicy({
+    filter: createCspRuleSearchFilterByPackagePolicy({
       packagePolicyId: params.packagePolicyId,
       policyId: params.policyId,
     }),

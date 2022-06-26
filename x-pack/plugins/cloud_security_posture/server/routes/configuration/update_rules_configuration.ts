@@ -19,7 +19,7 @@ import yaml from 'js-yaml';
 import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { filterByPackagePolicy } from '../../../common/utils/helpers';
+import { createCspRuleSearchFilterByPackagePolicy } from '../../../common/utils/helpers';
 import { CspAppContext } from '../../plugin';
 import type { CspRuleType, CspRulesConfigSchema } from '../../../common/schemas';
 import {
@@ -55,7 +55,7 @@ export const getCspRules = (
 ): Promise<SavedObjectsFindResponse<CspRuleType, unknown>> => {
   return soClient.find<CspRuleType>({
     type: CSP_RULE_SAVED_OBJECT_TYPE,
-    filter: filterByPackagePolicy({
+    filter: createCspRuleSearchFilterByPackagePolicy({
       packagePolicyId: packagePolicy.id,
       policyId: packagePolicy.policy_id,
     }),

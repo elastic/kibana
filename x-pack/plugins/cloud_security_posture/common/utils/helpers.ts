@@ -22,7 +22,7 @@ export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'
   return defaultMessage; // TODO: i18n
 };
 
-export const filterByPackagePolicy = ({
+export const createCspRuleSearchFilterByPackagePolicy = ({
   packagePolicyId,
   policyId,
 }: {

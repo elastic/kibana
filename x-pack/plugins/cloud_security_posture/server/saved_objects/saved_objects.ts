@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsServiceSetup } from '@kbn/core/server';
-import { cspRule, cspRuleTemplate } from './mappings';
+import { cspRuleSavedObjectMapping, cspRuleTemplateSavedObjectMapping } from './mappings';
 import { cspRuleMigrations, cspRuleTemplateMigrations } from './migrations';
 import {
   cspRuleSchemaV830,
@@ -43,7 +43,7 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
       '8.4.0': cspRuleSchemaV840,
     },
     migrations: cspRuleMigrations,
-    mappings: cspRule,
+    mappings: cspRuleSavedObjectMapping,
   });
   savedObjects.registerType<CspRuleTemplateType>({
     name: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
@@ -58,6 +58,6 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
       '8.4.0': cspRuleTemplateSchemaV840,
     },
     migrations: cspRuleTemplateMigrations,
-    mappings: cspRuleTemplate,
+    mappings: cspRuleTemplateSavedObjectMapping,
   });
 }
