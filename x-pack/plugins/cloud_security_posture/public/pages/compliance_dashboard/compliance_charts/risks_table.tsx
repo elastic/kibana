@@ -97,7 +97,7 @@ export const RisksTable = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onViewAllClick} iconType="search">
               <FormattedMessage
-                id="xpack.csp.dashboard.viewAllButtonTitle"
+                id="xpack.csp.dashboard.risksTable.viewAllButtonTitle"
                 defaultMessage="View all failed findings"
               />
             </EuiButtonEmpty>
