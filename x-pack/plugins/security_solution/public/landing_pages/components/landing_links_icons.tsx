@@ -29,8 +29,8 @@ const Description = styled(EuiFlexItem)`
 `;
 
 const StyledEuiTitle = styled(EuiTitle)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.xs};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) => (

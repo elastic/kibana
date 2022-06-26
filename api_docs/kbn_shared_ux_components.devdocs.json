@@ -21,72 +21,6 @@
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.AddFromLibraryButton",
-        "type": "Function",
-        "tags": [],
-        "label": "AddFromLibraryButton",
-        "description": [],
-        "signature": [
-          "({ onClick, ...rest }: ",
-          "Props",
-          ") => JSX.Element"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/toolbar/buttons/add_from_library/add_from_library.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.AddFromLibraryButton.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ onClick, ...rest }",
-            "description": [],
-            "signature": [
-              "Props"
-            ],
-            "path": "packages/kbn-shared-ux-components/src/toolbar/buttons/add_from_library/add_from_library.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.IconButtonGroup",
-        "type": "Function",
-        "tags": [],
-        "label": "IconButtonGroup",
-        "description": [],
-        "signature": [
-          "({ buttons, legend }: ",
-          "Props",
-          ") => JSX.Element"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/toolbar/buttons/icon_button_group/icon_button_group.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.IconButtonGroup.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ buttons, legend }",
-            "description": [],
-            "signature": [
-              "Props"
-            ],
-            "path": "packages/kbn-shared-ux-components/src/toolbar/buttons/icon_button_group/icon_button_group.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
         "id": "def-common.KibanaPageTemplate",
         "type": "Function",
         "tags": [],
@@ -213,72 +147,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.ToolbarButton",
-        "type": "Function",
-        "tags": [],
-        "label": "ToolbarButton",
-        "description": [],
-        "signature": [
-          "({ label, iconSide, ...rest }: ",
-          "Props",
-          ") => JSX.Element"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/toolbar/buttons/primary/primary.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.ToolbarButton.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ label, iconSide = 'left', ...rest }",
-            "description": [],
-            "signature": [
-              "Props"
-            ],
-            "path": "packages/kbn-shared-ux-components/src/toolbar/buttons/primary/primary.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.ToolbarPopover",
-        "type": "Function",
-        "tags": [],
-        "label": "ToolbarPopover",
-        "description": [],
-        "signature": [
-          "({ label, iconType, children, iconSide, ...popover }: ",
-          "Props",
-          ") => JSX.Element"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/toolbar/popovers/popover.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.ToolbarPopover.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{ label, iconType, children, iconSide, ...popover }",
-            "description": [],
-            "signature": [
-              "Props"
-            ],
-            "path": "packages/kbn-shared-ux-components/src/toolbar/popovers/popover.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -368,7 +236,7 @@
             ],
             "signature": [
               "{ [x: string]: ",
-              "ElasticAgentCardProps",
+              "NoDataCardProps",
               "; }"
             ],
             "path": "packages/kbn-shared-ux-components/src/page_template/no_data_page/types.ts",

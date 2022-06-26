@@ -9,7 +9,7 @@ import uuid from 'uuid';
 
 import {
   EndpointActionListRequestSchema,
-  HostIsolationRequestSchema,
+  NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
 } from './actions';
 
@@ -147,16 +147,16 @@ describe('actions schemas', () => {
     });
   });
 
-  describe('HostIsolationRequestSchema', () => {
+  describe('NoParametersRequestSchema', () => {
     it('should require at least 1 Endpoint ID', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({});
+        NoParametersRequestSchema.body.validate({});
       }).toThrow();
     });
 
     it('should accept an Endpoint ID as the only required field', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({
+        NoParametersRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
         });
       }).not.toThrow();
@@ -164,7 +164,7 @@ describe('actions schemas', () => {
 
     it('should accept a comment', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({
+        NoParametersRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           comment: 'a user comment',
         });
@@ -173,7 +173,7 @@ describe('actions schemas', () => {
 
     it('should accept alert IDs', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({
+        NoParametersRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           alert_ids: ['0000000-000-00'],
         });
@@ -182,7 +182,7 @@ describe('actions schemas', () => {
 
     it('should accept case IDs', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({
+        NoParametersRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           case_ids: ['000000000-000-000'],
         });
@@ -193,7 +193,7 @@ describe('actions schemas', () => {
   describe('KillOrSuspendProcessRequestSchema', () => {
     it('should require at least 1 Endpoint ID', () => {
       expect(() => {
-        HostIsolationRequestSchema.body.validate({});
+        NoParametersRequestSchema.body.validate({});
       }).toThrow();
     });
 
@@ -213,7 +213,7 @@ describe('actions schemas', () => {
         KillOrSuspendProcessRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           parameters: {
-            entity_id: 5678,
+            entity_id: 'abc123',
           },
         });
       }).not.toThrow();
@@ -225,7 +225,7 @@ describe('actions schemas', () => {
           endpoint_ids: ['ABC-XYZ-000'],
           parameters: {
             pid: 1234,
-            entity_id: 5678,
+            entity_id: 'abc123',
           },
         });
       }).toThrow();

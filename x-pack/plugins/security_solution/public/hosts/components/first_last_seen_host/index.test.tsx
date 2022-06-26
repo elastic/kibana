@@ -66,7 +66,7 @@ describe('FirstLastSeen Component', () => {
 
     await waitFor(() => {
       expect(getByTestId('test-render-output').innerHTML).toBe(
-        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+        `<div class="euiText css-1vkrgyt-euiText-s"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
       );
     });
   });
@@ -83,7 +83,7 @@ describe('FirstLastSeen Component', () => {
     );
     await waitFor(() => {
       expect(getByTestId('test-render-output').innerHTML).toBe(
-        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+        `<div class="euiText css-1vkrgyt-euiText-s"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
       );
     });
   });
@@ -107,7 +107,7 @@ describe('FirstLastSeen Component', () => {
 
     await waitFor(() => {
       expect(getByTestId('test-render-output').innerHTML).toBe(
-        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+        `<div class="euiText css-1vkrgyt-euiText-s"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
       );
     });
   });
@@ -131,7 +131,7 @@ describe('FirstLastSeen Component', () => {
 
     await waitFor(() => {
       expect(getByTestId('test-render-output').innerHTML).toBe(
-        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+        `<div class="euiText css-1vkrgyt-euiText-s"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
       );
     });
   });

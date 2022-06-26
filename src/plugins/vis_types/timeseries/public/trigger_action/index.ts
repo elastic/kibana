@@ -69,10 +69,11 @@ export const triggerTSVBtoLensConfiguration = async (
     }
 
     // handle multiple metrics
-    let metricsArray = getSeries(layer.metrics, seriesNum);
-    if (!metricsArray) {
+    const series = getSeries(layer.metrics, seriesNum);
+    if (!series) {
       return null;
     }
+    const { metrics: metricsArray, seriesAgg } = series;
     let filter: {
       kql?: string | { [key: string]: any } | undefined;
       lucene?: string | { [key: string]: any } | undefined;
@@ -85,7 +86,7 @@ export const triggerTSVBtoLensConfiguration = async (
       }
     }
 
-    metricsArray = metricsArray.map((metric) => {
+    const metricsWithParams = metricsArray.map((metric) => {
       return {
         ...metric,
         color: metric.color ?? layer.color,
@@ -146,7 +147,8 @@ export const triggerTSVBtoLensConfiguration = async (
           parentFormat: { id: 'terms' },
         },
       }),
-      metrics: [...metricsArray],
+      collapseFn: seriesAgg,
+      metrics: [...metricsWithParams],
       timeInterval: model.interval && !model.interval?.includes('=') ? model.interval : 'auto',
       ...(SUPPORTED_FORMATTERS.includes(layer.formatter) && { format: layer.formatter }),
       ...(layer.label && { label: layer.label }),
