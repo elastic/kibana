@@ -24,7 +24,10 @@ import {
   DefaultFieldRenderer,
   hostIdRenderer,
 } from '../../../timelines/components/field_renderers/field_renderers';
-import { FirstLastSeen, FirstLastSeenType } from '../../../common/components/first_last_seen';
+import {
+  FirstLastSeen,
+  FirstLastSeenType,
+} from '../../../common/components/first_last_seen/first_last_seen';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { Loader } from '../../../common/components/loader';
 import { NetworkDetailsLink } from '../../../common/components/links';

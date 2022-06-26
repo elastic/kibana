@@ -8,15 +8,18 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { Direction } from '../../../../common/search_strategy';
-import { FirstLastSeenProps } from '../../components/first_last_seen';
+import { FirstLastSeenProps } from '../../components/first_last_seen/first_last_seen';
 import { useKibana } from '../../lib/kibana';
-import { useFirstLastSeen } from '.';
+import { useFirstLastSeen } from './use_first_last_seen';
 
 jest.mock('../../lib/kibana');
 
+const firstSeen = '2022-06-03T19:48:36.165Z';
+const lastSeen = '2022-06-13T19:48:36.165Z';
+
 const mockSearchStrategy = jest.fn();
 
-(useKibana as jest.Mock).mockReturnValue({
+const mockKibana = (useKibana as jest.Mock).mockReturnValue({
   services: {
     data: {
       search: {
@@ -24,7 +27,7 @@ const mockSearchStrategy = jest.fn();
           unsubscribe: jest.fn(),
           subscribe: jest.fn(({ next, error }) => {
             try {
-              next(defaultReturn);
+              next({ firstSeen });
               /* eslint-disable no-empty */
             } catch (e) {}
             return {
@@ -68,7 +71,7 @@ describe('useFistLastSeen', () => {
     ]);
   });
 
-  it('should return parsed items', () => {
+  it('should return parsed items for first seen', () => {
     const { result } = renderUseFirstLastSeen();
 
     expect(result.current).toEqual([
@@ -81,37 +84,39 @@ describe('useFistLastSeen', () => {
       },
     ]);
   });
-});
 
-const defaultReturn = {
-  rawResponse: {
-    took: 1,
-    timed_out: false,
-    _shards: {
-      total: 4,
-      successful: 4,
-      skipped: 0,
-      failed: 0,
-    },
-    hits: {
-      max_score: null,
-      hits: [
-        {
-          _index: '.ds-logs-endpoint.events.process-default-2022.06.03-000001',
-          _id: 'BTUcK4EBPzpK1u8_xlT0',
-          _score: null,
-          _source: {
-            '@timestamp': 1654285716165,
+  it('should return parsed items for last seen', () => {
+    mockKibana.mockReturnValueOnce({
+      services: {
+        data: {
+          search: {
+            search: mockSearchStrategy.mockReturnValue({
+              unsubscribe: jest.fn(),
+              subscribe: jest.fn(({ next, error }) => {
+                try {
+                  next({ lastSeen });
+                  /* eslint-disable no-empty */
+                } catch (e) {}
+                return {
+                  unsubscribe: jest.fn(),
+                };
+              }),
+            }),
           },
-          fields: {
-            '@timestamp': ['2022-06-03T19:48:36.165Z'],
-          },
-          sort: [1654285716165],
+          query: jest.fn(),
         },
-      ],
-    },
-  },
-  isPartial: false,
-  isRunning: false,
-  firstSeen: '2022-06-03T19:48:36.165Z',
-};
+      },
+    });
+    const { result } = renderUseFirstLastSeen();
+
+    expect(result.current).toEqual([
+      false,
+      {
+        errorMessage: null,
+        lastSeen: '2022-06-13T19:48:36.165Z',
+        id: 'firstLastSeenQuery',
+        order: null,
+      },
+    ]);
+  });
+});

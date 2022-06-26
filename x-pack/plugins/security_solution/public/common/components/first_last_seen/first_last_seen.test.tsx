@@ -9,16 +9,16 @@ import React from 'react';
 
 import { render, waitFor } from '@testing-library/react';
 
-import { useFirstLastSeen } from '../../containers/first_last_seen';
+import { useFirstLastSeen } from '../../containers/use_first_last_seen';
 import { TestProviders } from '../../mock';
-import { FirstLastSeen, FirstLastSeenProps, FirstLastSeenType } from '.';
+import { FirstLastSeen, FirstLastSeenProps, FirstLastSeenType } from './first_last_seen';
 
 const MOCKED_RESPONSE = {
   firstSeen: '2019-04-08T16:09:40.692Z',
   lastSeen: '2022-04-08T18:35:45.064Z',
 };
 
-jest.mock('../../containers/first_last_seen');
+jest.mock('../../containers/use_first_last_seen');
 const useFirstLastSeenMock = useFirstLastSeen as jest.Mock;
 useFirstLastSeenMock.mockReturnValue([false, MOCKED_RESPONSE]);
 

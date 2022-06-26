@@ -27,7 +27,10 @@ import {
   reputationRenderer,
   whoisRenderer,
 } from '../../../timelines/components/field_renderers/field_renderers';
-import { FirstLastSeen, FirstLastSeenType } from '../../../common/components/first_last_seen';
+import {
+  FirstLastSeen,
+  FirstLastSeenType,
+} from '../../../common/components/first_last_seen/first_last_seen';
 import * as i18n from './translations';
 import { OverviewWrapper } from '../../../common/components/page';
 import { Loader } from '../../../common/components/loader';

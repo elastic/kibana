@@ -92,12 +92,14 @@ export const useFirstLastSeen = ({
                 }));
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
+                console.log('here');
                 setLoading(false);
                 addWarning(i18n.ERROR_FIRST_LAST_SEEN_HOST);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
+              console.log('test');
               setLoading(false);
               setFirstLastSeenResponse((prevResponse) => ({
                 ...prevResponse,
