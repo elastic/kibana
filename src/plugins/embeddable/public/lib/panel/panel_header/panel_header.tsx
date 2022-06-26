@@ -152,31 +152,26 @@ export function PanelHeader({
     );
   };
 
-  if (!showPanelBar) {
+  const PanelOption = () => {
     return (
-      <div data-test-subj="dashboardPanelTitle__wrapper" className={classes}>
         <PanelOptionsMenu
-          getActionContextMenuPanel={getActionContextMenuPanel}
-          isViewMode={isViewMode}
-          closeContextMenu={closeContextMenu}
-          title={title}
-          index={index}
-        />
-        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
+              getActionContextMenuPanel={getActionContextMenuPanel}
+              isViewMode={isViewMode}
+              closeContextMenu={closeContextMenu}
+              title={title}
+              index={index}
+            />
+            <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
+     );
+  };
+
+  if (!showPanelBar) {
+      hidePanelTitle
+    ? <PanelOption/>
+    : <div data-test-subj="dashboardPanelTitle__wrapper" className={classes}>
+        <PanelOption/>
       </div>
-    );
-  } else if (hidePanelTitle) {
-    return (
-    <PanelOptionsMenu
-          getActionContextMenuPanel={getActionContextMenuPanel}
-          isViewMode={isViewMode}
-          closeContextMenu={closeContextMenu}
-          title={title}
-          index={index}
-        />
-        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
-    );
-  }
+  } 
 
   const renderTitle = () => {
     let titleComponent;
