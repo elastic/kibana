@@ -9,10 +9,6 @@ import { getESAssetMetadata } from '../services/epm/elasticsearch/meta';
 
 const meta = getESAssetMetadata();
 
-export const PACKAGE_TEMPLATE_SUFFIX = '@package';
-
-export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
-
 export const FLEET_FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
 export const FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME = '.fleet_globals-1';

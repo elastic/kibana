@@ -16,7 +16,7 @@ import type {
   IndexTemplateMappings,
 } from '../../../../types';
 import { appContextService } from '../../..';
-import { getRegistryDataStreamAssetBaseName } from '..';
+import { getRegistryDataStreamAssetBaseName } from '../../../../../common';
 import {
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,

@@ -18,14 +18,19 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { useRouteMatch } from 'react-router-dom';
 
 import type {
+  NewPackagePolicy,
   NewPackagePolicyInputStream,
+  PackageInfo,
   RegistryStream,
   RegistryVarsEntry,
 } from '../../../../../../types';
 import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
+import { PackagePolicyEditorDatastreamPipelines } from '../../datastream_pipelines';
+import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 
@@ -34,38 +39,51 @@ const FlexItemWithMaxWidth = styled(EuiFlexItem)`
 `;
 
 export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
-  packageInputStream: RegistryStream;
+  packagePolicy: NewPackagePolicy;
+  packageInputStream: RegistryStream & { data_stream: { dataset: string; type: string } };
+  packageInfo: PackageInfo;
   packagePolicyInputStream: NewPackagePolicyInputStream;
   updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
 }> = memo(
   ({
+    packagePolicy,
     packageInputStream,
+    packageInfo,
     packagePolicyInputStream,
     updatePackagePolicyInputStream,
     inputStreamValidationResults,
     forceShowErrors,
   }) => {
+    const {
+      params: { packagePolicyId },
+    } = useRouteMatch<{ packagePolicyId?: string }>();
+
+    const isPackagePolicyEdit = !!packagePolicyId;
+
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>();
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
 
-    const requiredVars: RegistryVarsEntry[] = [];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const advancedVars: RegistryVarsEntry[] = [];
+    const [requiredVars, advancedVars] = useMemo(() => {
+      const _requiredVars: RegistryVarsEntry[] = [];
+      const _advancedVars: RegistryVarsEntry[] = [];
 
-    if (packageInputStream.vars && packageInputStream.vars.length) {
-      packageInputStream.vars.forEach((varDef) => {
-        if (isAdvancedVar(varDef)) {
-          advancedVars.push(varDef);
-        } else {
-          requiredVars.push(varDef);
-        }
-      });
-    }
+      if (packageInputStream.vars && packageInputStream.vars.length) {
+        packageInputStream.vars.forEach((varDef) => {
+          if (isAdvancedVar(varDef)) {
+            _advancedVars.push(varDef);
+          } else {
+            _requiredVars.push(varDef);
+          }
+        });
+      }
+
+      return [_requiredVars, _advancedVars];
+    }, [packageInputStream.vars]);
 
     const advancedVarsWithErrorsCount: number = useMemo(
       () =>
@@ -135,7 +153,8 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                 </EuiFlexItem>
               );
             })}
-            {advancedVars.length ? (
+            {/* Advanced section */}
+            {(isPackagePolicyEdit || advancedVars.length) && (
               <Fragment>
                 <EuiFlexItem>
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -165,8 +184,9 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                     ) : null}
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                {isShowingAdvanced
-                  ? advancedVars.map((varDef) => {
+                {isShowingAdvanced ? (
+                  <>
+                    {advancedVars.map((varDef) => {
                       if (!packagePolicyInputStream.vars) return null;
                       const { name: varName, type: varType } = varDef;
                       const value = packagePolicyInputStream.vars?.[varName]?.value;
@@ -192,10 +212,28 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                           />
                         </EuiFlexItem>
                       );
-                    })
-                  : null}
+                    })}
+                    {/* Only show datastream pipelines and mappings on edit */}
+                    {isPackagePolicyEdit && (
+                      <>
+                        <EuiFlexItem>
+                          <PackagePolicyEditorDatastreamPipelines
+                            dataStream={packageInputStream.data_stream}
+                            packageInfo={packageInfo}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <PackagePolicyEditorDatastreamMappings
+                            dataStream={packageInputStream.data_stream}
+                            packageInfo={packageInfo}
+                          />
+                        </EuiFlexItem>
+                      </>
+                    )}
+                  </>
+                ) : null}
               </Fragment>
-            ) : null}
+            )}
           </EuiFlexGroup>
         </FlexItemWithMaxWidth>
       </EuiFlexGrid>
