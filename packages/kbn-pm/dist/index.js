@@ -56511,10 +56511,1286 @@ module.exports.default = sortPackageJson
 
 /***/ }),
 
-/***/ "../../node_modules/spdx-expression-parse/index.js":
+/***/ "../../node_modules/strip-ansi/index.js":
 /***/ (function(module, exports, __webpack_require__) {
 
-var parser = __webpack_require__("../../node_modules/spdx-expression-parse/parser.js").parser
+"use strict";
+
+const ansiRegex = __webpack_require__("../../node_modules/ansi-regex/index.js");
+
+module.exports = string => typeof string === 'string' ? string.replace(ansiRegex(), '') : string;
+
+
+/***/ }),
+
+/***/ "../../node_modules/strip-bom/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = string => {
+	if (typeof string !== 'string') {
+		throw new TypeError(`Expected a string, got ${typeof string}`);
+	}
+
+	// Catches EFBBBF (UTF-8 BOM) because the buffer-to-string
+	// conversion translates it to FEFF (UTF-16 BOM)
+	if (string.charCodeAt(0) === 0xFEFF) {
+		return string.slice(1);
+	}
+
+	return string;
+};
+
+
+/***/ }),
+
+/***/ "../../node_modules/strip-final-newline/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = input => {
+	const LF = typeof input === 'string' ? '\n' : '\n'.charCodeAt();
+	const CR = typeof input === 'string' ? '\r' : '\r'.charCodeAt();
+
+	if (input[input.length - 1] === LF) {
+		input = input.slice(0, input.length - 1);
+	}
+
+	if (input[input.length - 1] === CR) {
+		input = input.slice(0, input.length - 1);
+	}
+
+	return input;
+};
+
+
+/***/ }),
+
+/***/ "../../node_modules/strong-log-transformer/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+// Copyright IBM Corp. 2014,2018. All Rights Reserved.
+// Node module: strong-log-transformer
+// This file is licensed under the Apache License 2.0.
+// License text available at https://opensource.org/licenses/Apache-2.0
+
+module.exports = __webpack_require__("../../node_modules/strong-log-transformer/lib/logger.js");
+module.exports.cli = __webpack_require__("../../node_modules/strong-log-transformer/lib/cli.js");
+
+
+/***/ }),
+
+/***/ "../../node_modules/strong-log-transformer/lib/cli.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+// Copyright IBM Corp. 2014,2018. All Rights Reserved.
+// Node module: strong-log-transformer
+// This file is licensed under the Apache License 2.0.
+// License text available at https://opensource.org/licenses/Apache-2.0
+
+
+
+var minimist = __webpack_require__("../../node_modules/minimist/index.js");
+var path = __webpack_require__("path");
+
+var Logger = __webpack_require__("../../node_modules/strong-log-transformer/lib/logger.js");
+var pkg = __webpack_require__("../../node_modules/strong-log-transformer/package.json");
+
+module.exports = cli;
+
+function cli(args) {
+  var opts = minimist(args.slice(2));
+  var $0 = path.basename(args[1]);
+  var p = console.log.bind(console);
+  if (opts.v || opts.version) {
+    version($0, p);
+  } else if (opts.h || opts.help) {
+    usage($0, p);
+  } else if (args.length < 3) {
+    process.stdin.pipe(Logger()).pipe(process.stdout);
+  } else {
+    process.stdin.pipe(Logger(opts)).pipe(process.stdout);
+  }
+}
+
+function version($0, p) {
+  p('%s v%s', pkg.name, pkg.version);
+}
+
+function usage($0, p) {
+  var PADDING = '               ';
+  var opt, def;
+  p('Usage: %s [options]', $0);
+  p('');
+  p('%s', pkg.description);
+  p('');
+  p('OPTIONS:');
+  for (opt in Logger.DEFAULTS) {
+    def = Logger.DEFAULTS[opt];
+    if (typeof def === 'boolean')
+      boolOpt(opt, Logger.DEFAULTS[opt]);
+    else
+      stdOpt(opt, Logger.DEFAULTS[opt]);
+  }
+  p('');
+
+  function boolOpt(name, def) {
+    name = name + PADDING.slice(0, 20-name.length);
+    p('   --%s default: %s', name, def);
+  }
+
+  function stdOpt(name, def) {
+    var value = name.toUpperCase() +
+                PADDING.slice(0, 19 - name.length*2);
+    p('   --%s %s default: %j', name, value, def);
+  }
+}
+
+
+/***/ }),
+
+/***/ "../../node_modules/strong-log-transformer/lib/logger.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+// Copyright IBM Corp. 2014,2018. All Rights Reserved.
+// Node module: strong-log-transformer
+// This file is licensed under the Apache License 2.0.
+// License text available at https://opensource.org/licenses/Apache-2.0
+
+
+
+var stream = __webpack_require__("stream");
+var util = __webpack_require__("util");
+var fs = __webpack_require__("fs");
+
+var through = __webpack_require__("../../node_modules/through/index.js");
+var duplexer = __webpack_require__("../../node_modules/duplexer/index.js");
+var StringDecoder = __webpack_require__("string_decoder").StringDecoder;
+
+module.exports = Logger;
+
+Logger.DEFAULTS = {
+  format: 'text',
+  tag: '',
+  mergeMultiline: false,
+  timeStamp: false,
+};
+
+var formatters = {
+  text: textFormatter,
+  json: jsonFormatter,
+}
+
+function Logger(options) {
+  var defaults = JSON.parse(JSON.stringify(Logger.DEFAULTS));
+  options = util._extend(defaults, options || {});
+  var catcher = deLiner();
+  var emitter = catcher;
+  var transforms = [
+    objectifier(),
+  ];
+
+  if (options.tag) {
+    transforms.push(staticTagger(options.tag));
+  }
+
+  if (options.mergeMultiline) {
+    transforms.push(lineMerger());
+  }
+
+  // TODO
+  // if (options.pidStamp) {
+  //   transforms.push(pidStamper(options.pid));
+  // }
+
+  // TODO
+  // if (options.workerStamp) {
+  //   transforms.push(workerStamper(options.worker));
+  // }
+
+  transforms.push(formatters[options.format](options));
+
+  // restore line endings that were removed by line splitting
+  transforms.push(reLiner());
+
+  for (var t in transforms) {
+    emitter = emitter.pipe(transforms[t]);
+  }
+
+  return duplexer(catcher, emitter);
+}
+
+function deLiner() {
+  var decoder = new StringDecoder('utf8');
+  var last = '';
+
+  return new stream.Transform({
+    transform(chunk, _enc, callback) {
+      last += decoder.write(chunk);
+      var list = last.split(/\r\n|[\n\v\f\r\x85\u2028\u2029]/g);
+      last = list.pop();
+      for (var i = 0; i < list.length; i++) {
+        // swallow empty lines
+        if (list[i]) {
+          this.push(list[i]);
+        }
+      }
+      callback();
+    },
+    flush(callback) {
+      // incomplete UTF8 sequences become UTF8 replacement characters
+      last += decoder.end();
+      if (last) {
+        this.push(last);
+      }
+      callback();
+    },
+  });
+}
+
+function reLiner() {
+  return through(appendNewline);
+
+  function appendNewline(line) {
+    this.emit('data', line + '\n');
+  }
+}
+
+function objectifier() {
+  return through(objectify, null, {autoDestroy: false});
+
+  function objectify(line) {
+    this.emit('data', {
+      msg: line,
+      time: Date.now(),
+    });
+  }
+}
+
+function staticTagger(tag) {
+  return through(tagger);
+
+  function tagger(logEvent) {
+    logEvent.tag = tag;
+    this.emit('data', logEvent);
+  }
+}
+
+function textFormatter(options) {
+  return through(textify);
+
+  function textify(logEvent) {
+    var line = util.format('%s%s', textifyTags(logEvent.tag),
+                           logEvent.msg.toString());
+    if (options.timeStamp) {
+      line = util.format('%s %s', new Date(logEvent.time).toISOString(), line);
+    }
+    this.emit('data', line.replace(/\n/g, '\\n'));
+  }
+
+  function textifyTags(tags) {
+    var str = '';
+    if (typeof tags === 'string') {
+      str = tags + ' ';
+    } else if (typeof tags === 'object') {
+      for (var t in tags) {
+        str += t + ':' + tags[t] + ' ';
+      }
+    }
+    return str;
+  }
+}
+
+function jsonFormatter(options) {
+  return through(jsonify);
+
+  function jsonify(logEvent) {
+    if (options.timeStamp) {
+      logEvent.time = new Date(logEvent.time).toISOString();
+    } else {
+      delete logEvent.time;
+    }
+    logEvent.msg = logEvent.msg.toString();
+    this.emit('data', JSON.stringify(logEvent));
+  }
+}
+
+function lineMerger(host) {
+  var previousLine = null;
+  var flushTimer = null;
+  var stream = through(lineMergerWrite, lineMergerEnd);
+  var flush = _flush.bind(stream);
+
+  return stream;
+
+  function lineMergerWrite(line) {
+    if (/^\s+/.test(line.msg)) {
+      if (previousLine) {
+        previousLine.msg += '\n' + line.msg;
+      } else {
+        previousLine = line;
+      }
+    } else {
+      flush();
+      previousLine = line;
+    }
+    // rolling timeout
+    clearTimeout(flushTimer);
+    flushTimer = setTimeout(flush.bind(this), 10);
+  }
+
+  function _flush() {
+    if (previousLine) {
+      this.emit('data', previousLine);
+      previousLine = null;
+    }
+  }
+
+  function lineMergerEnd() {
+    flush.call(this);
+    this.emit('end');
+  }
+}
+
+
+/***/ }),
+
+/***/ "../../node_modules/strong-log-transformer/package.json":
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"name\":\"strong-log-transformer\",\"version\":\"2.1.0\",\"description\":\"Stream transformer that prefixes lines with timestamps and other things.\",\"author\":\"Ryan Graham <ryan@strongloop.com>\",\"license\":\"Apache-2.0\",\"repository\":{\"type\":\"git\",\"url\":\"git://github.com/strongloop/strong-log-transformer\"},\"keywords\":[\"logging\",\"streams\"],\"bugs\":{\"url\":\"https://github.com/strongloop/strong-log-transformer/issues\"},\"homepage\":\"https://github.com/strongloop/strong-log-transformer\",\"directories\":{\"test\":\"test\"},\"bin\":{\"sl-log-transformer\":\"bin/sl-log-transformer.js\"},\"main\":\"index.js\",\"scripts\":{\"test\":\"tap --100 test/test-*\"},\"dependencies\":{\"duplexer\":\"^0.1.1\",\"minimist\":\"^1.2.0\",\"through\":\"^2.3.4\"},\"devDependencies\":{\"tap\":\"^12.0.1\"},\"engines\":{\"node\":\">=4\"}}");
+
+/***/ }),
+
+/***/ "../../node_modules/supports-color/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const os = __webpack_require__("os");
+const tty = __webpack_require__("tty");
+const hasFlag = __webpack_require__("../../node_modules/has-flag/index.js");
+
+const {env} = process;
+
+let forceColor;
+if (hasFlag('no-color') ||
+	hasFlag('no-colors') ||
+	hasFlag('color=false') ||
+	hasFlag('color=never')) {
+	forceColor = 0;
+} else if (hasFlag('color') ||
+	hasFlag('colors') ||
+	hasFlag('color=true') ||
+	hasFlag('color=always')) {
+	forceColor = 1;
+}
+
+if ('FORCE_COLOR' in env) {
+	if (env.FORCE_COLOR === 'true') {
+		forceColor = 1;
+	} else if (env.FORCE_COLOR === 'false') {
+		forceColor = 0;
+	} else {
+		forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
+	}
+}
+
+function translateLevel(level) {
+	if (level === 0) {
+		return false;
+	}
+
+	return {
+		level,
+		hasBasic: true,
+		has256: level >= 2,
+		has16m: level >= 3
+	};
+}
+
+function supportsColor(haveStream, streamIsTTY) {
+	if (forceColor === 0) {
+		return 0;
+	}
+
+	if (hasFlag('color=16m') ||
+		hasFlag('color=full') ||
+		hasFlag('color=truecolor')) {
+		return 3;
+	}
+
+	if (hasFlag('color=256')) {
+		return 2;
+	}
+
+	if (haveStream && !streamIsTTY && forceColor === undefined) {
+		return 0;
+	}
+
+	const min = forceColor || 0;
+
+	if (env.TERM === 'dumb') {
+		return min;
+	}
+
+	if (process.platform === 'win32') {
+		// Windows 10 build 10586 is the first Windows release that supports 256 colors.
+		// Windows 10 build 14931 is the first release that supports 16m/TrueColor.
+		const osRelease = os.release().split('.');
+		if (
+			Number(osRelease[0]) >= 10 &&
+			Number(osRelease[2]) >= 10586
+		) {
+			return Number(osRelease[2]) >= 14931 ? 3 : 2;
+		}
+
+		return 1;
+	}
+
+	if ('CI' in env) {
+		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
+			return 1;
+		}
+
+		return min;
+	}
+
+	if ('TEAMCITY_VERSION' in env) {
+		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+	}
+
+	if ('GITHUB_ACTIONS' in env) {
+		return 1;
+	}
+
+	if (env.COLORTERM === 'truecolor') {
+		return 3;
+	}
+
+	if ('TERM_PROGRAM' in env) {
+		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
+
+		switch (env.TERM_PROGRAM) {
+			case 'iTerm.app':
+				return version >= 3 ? 3 : 2;
+			case 'Apple_Terminal':
+				return 2;
+			// No default
+		}
+	}
+
+	if (/-256(color)?$/i.test(env.TERM)) {
+		return 2;
+	}
+
+	if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+		return 1;
+	}
+
+	if ('COLORTERM' in env) {
+		return 1;
+	}
+
+	return min;
+}
+
+function getSupportLevel(stream) {
+	const level = supportsColor(stream, stream && stream.isTTY);
+	return translateLevel(level);
+}
+
+module.exports = {
+	supportsColor: getSupportLevel,
+	stdout: translateLevel(supportsColor(true, tty.isatty(1))),
+	stderr: translateLevel(supportsColor(true, tty.isatty(2)))
+};
+
+
+/***/ }),
+
+/***/ "../../node_modules/through/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+var Stream = __webpack_require__("stream")
+
+// through
+//
+// a stream that does nothing but re-emit the input.
+// useful for aggregating a series of changing but not ending streams into one stream)
+
+exports = module.exports = through
+through.through = through
+
+//create a readable writable stream.
+
+function through (write, end, opts) {
+  write = write || function (data) { this.queue(data) }
+  end = end || function () { this.queue(null) }
+
+  var ended = false, destroyed = false, buffer = [], _ended = false
+  var stream = new Stream()
+  stream.readable = stream.writable = true
+  stream.paused = false
+
+//  stream.autoPause   = !(opts && opts.autoPause   === false)
+  stream.autoDestroy = !(opts && opts.autoDestroy === false)
+
+  stream.write = function (data) {
+    write.call(this, data)
+    return !stream.paused
+  }
+
+  function drain() {
+    while(buffer.length && !stream.paused) {
+      var data = buffer.shift()
+      if(null === data)
+        return stream.emit('end')
+      else
+        stream.emit('data', data)
+    }
+  }
+
+  stream.queue = stream.push = function (data) {
+//    console.error(ended)
+    if(_ended) return stream
+    if(data === null) _ended = true
+    buffer.push(data)
+    drain()
+    return stream
+  }
+
+  //this will be registered as the first 'end' listener
+  //must call destroy next tick, to make sure we're after any
+  //stream piped from here.
+  //this is only a problem if end is not emitted synchronously.
+  //a nicer way to do this is to make sure this is the last listener for 'end'
+
+  stream.on('end', function () {
+    stream.readable = false
+    if(!stream.writable && stream.autoDestroy)
+      process.nextTick(function () {
+        stream.destroy()
+      })
+  })
+
+  function _end () {
+    stream.writable = false
+    end.call(stream)
+    if(!stream.readable && stream.autoDestroy)
+      stream.destroy()
+  }
+
+  stream.end = function (data) {
+    if(ended) return
+    ended = true
+    if(arguments.length) stream.write(data)
+    _end() // will emit or queue
+    return stream
+  }
+
+  stream.destroy = function () {
+    if(destroyed) return
+    destroyed = true
+    ended = true
+    buffer.length = 0
+    stream.writable = stream.readable = false
+    stream.emit('close')
+    return stream
+  }
+
+  stream.pause = function () {
+    if(stream.paused) return
+    stream.paused = true
+    return stream
+  }
+
+  stream.resume = function () {
+    if(stream.paused) {
+      stream.paused = false
+      stream.emit('resume')
+    }
+    drain()
+    //may have become paused again,
+    //as drain emits 'data'.
+    if(!stream.paused)
+      stream.emit('drain')
+    return stream
+  }
+  return stream
+}
+
+
+
+/***/ }),
+
+/***/ "../../node_modules/to-regex-range/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * to-regex-range <https://github.com/micromatch/to-regex-range>
+ *
+ * Copyright (c) 2015-present, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+const isNumber = __webpack_require__("../../node_modules/to-regex-range/node_modules/is-number/index.js");
+
+const toRegexRange = (min, max, options) => {
+  if (isNumber(min) === false) {
+    throw new TypeError('toRegexRange: expected the first argument to be a number');
+  }
+
+  if (max === void 0 || min === max) {
+    return String(min);
+  }
+
+  if (isNumber(max) === false) {
+    throw new TypeError('toRegexRange: expected the second argument to be a number.');
+  }
+
+  let opts = { relaxZeros: true, ...options };
+  if (typeof opts.strictZeros === 'boolean') {
+    opts.relaxZeros = opts.strictZeros === false;
+  }
+
+  let relax = String(opts.relaxZeros);
+  let shorthand = String(opts.shorthand);
+  let capture = String(opts.capture);
+  let wrap = String(opts.wrap);
+  let cacheKey = min + ':' + max + '=' + relax + shorthand + capture + wrap;
+
+  if (toRegexRange.cache.hasOwnProperty(cacheKey)) {
+    return toRegexRange.cache[cacheKey].result;
+  }
+
+  let a = Math.min(min, max);
+  let b = Math.max(min, max);
+
+  if (Math.abs(a - b) === 1) {
+    let result = min + '|' + max;
+    if (opts.capture) {
+      return `(${result})`;
+    }
+    if (opts.wrap === false) {
+      return result;
+    }
+    return `(?:${result})`;
+  }
+
+  let isPadded = hasPadding(min) || hasPadding(max);
+  let state = { min, max, a, b };
+  let positives = [];
+  let negatives = [];
+
+  if (isPadded) {
+    state.isPadded = isPadded;
+    state.maxLen = String(state.max).length;
+  }
+
+  if (a < 0) {
+    let newMin = b < 0 ? Math.abs(b) : 1;
+    negatives = splitToPatterns(newMin, Math.abs(a), state, opts);
+    a = state.a = 0;
+  }
+
+  if (b >= 0) {
+    positives = splitToPatterns(a, b, state, opts);
+  }
+
+  state.negatives = negatives;
+  state.positives = positives;
+  state.result = collatePatterns(negatives, positives, opts);
+
+  if (opts.capture === true) {
+    state.result = `(${state.result})`;
+  } else if (opts.wrap !== false && (positives.length + negatives.length) > 1) {
+    state.result = `(?:${state.result})`;
+  }
+
+  toRegexRange.cache[cacheKey] = state;
+  return state.result;
+};
+
+function collatePatterns(neg, pos, options) {
+  let onlyNegative = filterPatterns(neg, pos, '-', false, options) || [];
+  let onlyPositive = filterPatterns(pos, neg, '', false, options) || [];
+  let intersected = filterPatterns(neg, pos, '-?', true, options) || [];
+  let subpatterns = onlyNegative.concat(intersected).concat(onlyPositive);
+  return subpatterns.join('|');
+}
+
+function splitToRanges(min, max) {
+  let nines = 1;
+  let zeros = 1;
+
+  let stop = countNines(min, nines);
+  let stops = new Set([max]);
+
+  while (min <= stop && stop <= max) {
+    stops.add(stop);
+    nines += 1;
+    stop = countNines(min, nines);
+  }
+
+  stop = countZeros(max + 1, zeros) - 1;
+
+  while (min < stop && stop <= max) {
+    stops.add(stop);
+    zeros += 1;
+    stop = countZeros(max + 1, zeros) - 1;
+  }
+
+  stops = [...stops];
+  stops.sort(compare);
+  return stops;
+}
+
+/**
+ * Convert a range to a regex pattern
+ * @param {Number} `start`
+ * @param {Number} `stop`
+ * @return {String}
+ */
+
+function rangeToPattern(start, stop, options) {
+  if (start === stop) {
+    return { pattern: start, count: [], digits: 0 };
+  }
+
+  let zipped = zip(start, stop);
+  let digits = zipped.length;
+  let pattern = '';
+  let count = 0;
+
+  for (let i = 0; i < digits; i++) {
+    let [startDigit, stopDigit] = zipped[i];
+
+    if (startDigit === stopDigit) {
+      pattern += startDigit;
+
+    } else if (startDigit !== '0' || stopDigit !== '9') {
+      pattern += toCharacterClass(startDigit, stopDigit, options);
+
+    } else {
+      count++;
+    }
+  }
+
+  if (count) {
+    pattern += options.shorthand === true ? '\\d' : '[0-9]';
+  }
+
+  return { pattern, count: [count], digits };
+}
+
+function splitToPatterns(min, max, tok, options) {
+  let ranges = splitToRanges(min, max);
+  let tokens = [];
+  let start = min;
+  let prev;
+
+  for (let i = 0; i < ranges.length; i++) {
+    let max = ranges[i];
+    let obj = rangeToPattern(String(start), String(max), options);
+    let zeros = '';
+
+    if (!tok.isPadded && prev && prev.pattern === obj.pattern) {
+      if (prev.count.length > 1) {
+        prev.count.pop();
+      }
+
+      prev.count.push(obj.count[0]);
+      prev.string = prev.pattern + toQuantifier(prev.count);
+      start = max + 1;
+      continue;
+    }
+
+    if (tok.isPadded) {
+      zeros = padZeros(max, tok, options);
+    }
+
+    obj.string = zeros + obj.pattern + toQuantifier(obj.count);
+    tokens.push(obj);
+    start = max + 1;
+    prev = obj;
+  }
+
+  return tokens;
+}
+
+function filterPatterns(arr, comparison, prefix, intersection, options) {
+  let result = [];
+
+  for (let ele of arr) {
+    let { string } = ele;
+
+    // only push if _both_ are negative...
+    if (!intersection && !contains(comparison, 'string', string)) {
+      result.push(prefix + string);
+    }
+
+    // or _both_ are positive
+    if (intersection && contains(comparison, 'string', string)) {
+      result.push(prefix + string);
+    }
+  }
+  return result;
+}
+
+/**
+ * Zip strings
+ */
+
+function zip(a, b) {
+  let arr = [];
+  for (let i = 0; i < a.length; i++) arr.push([a[i], b[i]]);
+  return arr;
+}
+
+function compare(a, b) {
+  return a > b ? 1 : b > a ? -1 : 0;
+}
+
+function contains(arr, key, val) {
+  return arr.some(ele => ele[key] === val);
+}
+
+function countNines(min, len) {
+  return Number(String(min).slice(0, -len) + '9'.repeat(len));
+}
+
+function countZeros(integer, zeros) {
+  return integer - (integer % Math.pow(10, zeros));
+}
+
+function toQuantifier(digits) {
+  let [start = 0, stop = ''] = digits;
+  if (stop || start > 1) {
+    return `{${start + (stop ? ',' + stop : '')}}`;
+  }
+  return '';
+}
+
+function toCharacterClass(a, b, options) {
+  return `[${a}${(b - a === 1) ? '' : '-'}${b}]`;
+}
+
+function hasPadding(str) {
+  return /^-?(0+)\d/.test(str);
+}
+
+function padZeros(value, tok, options) {
+  if (!tok.isPadded) {
+    return value;
+  }
+
+  let diff = Math.abs(tok.maxLen - String(value).length);
+  let relax = options.relaxZeros !== false;
+
+  switch (diff) {
+    case 0:
+      return '';
+    case 1:
+      return relax ? '0?' : '0';
+    case 2:
+      return relax ? '0{0,2}' : '00';
+    default: {
+      return relax ? `0{0,${diff}}` : `0{${diff}}`;
+    }
+  }
+}
+
+/**
+ * Cache
+ */
+
+toRegexRange.cache = {};
+toRegexRange.clearCache = () => (toRegexRange.cache = {});
+
+/**
+ * Expose `toRegexRange`
+ */
+
+module.exports = toRegexRange;
+
+
+/***/ }),
+
+/***/ "../../node_modules/to-regex-range/node_modules/is-number/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * is-number <https://github.com/jonschlinkert/is-number>
+ *
+ * Copyright (c) 2014-present, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+module.exports = function(num) {
+  if (typeof num === 'number') {
+    return num - num === 0;
+  }
+  if (typeof num === 'string' && num.trim() !== '') {
+    return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
+  }
+  return false;
+};
+
+
+/***/ }),
+
+/***/ "../../node_modules/validate-npm-package-license/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+var parse = __webpack_require__("../../node_modules/validate-npm-package-license/node_modules/spdx-expression-parse/index.js");
+var correct = __webpack_require__("../../node_modules/validate-npm-package-license/node_modules/spdx-correct/index.js");
+
+var genericWarning = (
+  'license should be ' +
+  'a valid SPDX license expression (without "LicenseRef"), ' +
+  '"UNLICENSED", or ' +
+  '"SEE LICENSE IN <filename>"'
+);
+
+var fileReferenceRE = /^SEE LICEN[CS]E IN (.+)$/;
+
+function startsWith(prefix, string) {
+  return string.slice(0, prefix.length) === prefix;
+}
+
+function usesLicenseRef(ast) {
+  if (ast.hasOwnProperty('license')) {
+    var license = ast.license;
+    return (
+      startsWith('LicenseRef', license) ||
+      startsWith('DocumentRef', license)
+    );
+  } else {
+    return (
+      usesLicenseRef(ast.left) ||
+      usesLicenseRef(ast.right)
+    );
+  }
+}
+
+module.exports = function(argument) {
+  var ast;
+
+  try {
+    ast = parse(argument);
+  } catch (e) {
+    var match
+    if (
+      argument === 'UNLICENSED' ||
+      argument === 'UNLICENCED'
+    ) {
+      return {
+        validForOldPackages: true,
+        validForNewPackages: true,
+        unlicensed: true
+      };
+    } else if (match = fileReferenceRE.exec(argument)) {
+      return {
+        validForOldPackages: true,
+        validForNewPackages: true,
+        inFile: match[1]
+      };
+    } else {
+      var result = {
+        validForOldPackages: false,
+        validForNewPackages: false,
+        warnings: [genericWarning]
+      };
+      var corrected = correct(argument);
+      if (corrected) {
+        result.warnings.push(
+          'license is similar to the valid expression "' + corrected + '"'
+        );
+      }
+      return result;
+    }
+  }
+
+  if (usesLicenseRef(ast)) {
+    return {
+      validForNewPackages: false,
+      validForOldPackages: false,
+      spdx: true,
+      warnings: [genericWarning]
+    };
+  } else {
+    return {
+      validForNewPackages: true,
+      validForOldPackages: true,
+      spdx: true
+    };
+  }
+};
+
+
+/***/ }),
+
+/***/ "../../node_modules/validate-npm-package-license/node_modules/spdx-correct/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+var licenseIDs = __webpack_require__("../../node_modules/validate-npm-package-license/node_modules/spdx-license-ids/spdx-license-ids.json");
+
+function valid(string) {
+  return licenseIDs.indexOf(string) > -1;
+}
+
+// Common transpositions of license identifier acronyms
+var transpositions = [
+  ['APGL', 'AGPL'],
+  ['Gpl', 'GPL'],
+  ['GLP', 'GPL'],
+  ['APL', 'Apache'],
+  ['ISD', 'ISC'],
+  ['GLP', 'GPL'],
+  ['IST', 'ISC'],
+  ['Claude', 'Clause'],
+  [' or later', '+'],
+  [' International', ''],
+  ['GNU', 'GPL'],
+  ['GUN', 'GPL'],
+  ['+', ''],
+  ['GNU GPL', 'GPL'],
+  ['GNU/GPL', 'GPL'],
+  ['GNU GLP', 'GPL'],
+  ['GNU General Public License', 'GPL'],
+  ['Gnu public license', 'GPL'],
+  ['GNU Public License', 'GPL'],
+  ['GNU GENERAL PUBLIC LICENSE', 'GPL'],
+  ['MTI', 'MIT'],
+  ['Mozilla Public License', 'MPL'],
+  ['WTH', 'WTF'],
+  ['-License', '']
+];
+
+var TRANSPOSED = 0;
+var CORRECT = 1;
+
+// Simple corrections to nearly valid identifiers.
+var transforms = [
+  // e.g. 'mit'
+  function(argument) {
+    return argument.toUpperCase();
+  },
+  // e.g. 'MIT '
+  function(argument) {
+    return argument.trim();
+  },
+  // e.g. 'M.I.T.'
+  function(argument) {
+    return argument.replace(/\./g, '');
+  },
+  // e.g. 'Apache- 2.0'
+  function(argument) {
+    return argument.replace(/\s+/g, '');
+  },
+  // e.g. 'CC BY 4.0''
+  function(argument) {
+    return argument.replace(/\s+/g, '-');
+  },
+  // e.g. 'LGPLv2.1'
+  function(argument) {
+    return argument.replace('v', '-');
+  },
+  // e.g. 'Apache 2.0'
+  function(argument) {
+    return argument.replace(/,?\s*(\d)/, '-$1');
+  },
+  // e.g. 'GPL 2'
+  function(argument) {
+    return argument.replace(/,?\s*(\d)/, '-$1.0');
+  },
+  // e.g. 'Apache Version 2.0'
+  function(argument) {
+    return argument.replace(/,?\s*(V\.|v\.|V|v|Version|version)\s*(\d)/, '-$2');
+  },
+  // e.g. 'Apache Version 2'
+  function(argument) {
+    return argument.replace(/,?\s*(V\.|v\.|V|v|Version|version)\s*(\d)/, '-$2.0');
+  },
+  // e.g. 'ZLIB'
+  function(argument) {
+    return argument[0].toUpperCase() + argument.slice(1);
+  },
+  // e.g. 'MPL/2.0'
+  function(argument) {
+    return argument.replace('/', '-');
+  },
+  // e.g. 'Apache 2'
+  function(argument) {
+    return argument
+      .replace(/\s*V\s*(\d)/, '-$1')
+      .replace(/(\d)$/, '$1.0');
+  },
+  // e.g. 'GPL-2.0-'
+  function(argument) {
+    return argument.slice(0, argument.length - 1);
+  },
+  // e.g. 'GPL2'
+  function(argument) {
+    return argument.replace(/(\d)$/, '-$1.0');
+  },
+  // e.g. 'BSD 3'
+  function(argument) {
+    return argument.replace(/(-| )?(\d)$/, '-$2-Clause');
+  },
+  // e.g. 'BSD clause 3'
+  function(argument) {
+    return argument.replace(/(-| )clause(-| )(\d)/, '-$3-Clause');
+  },
+  // e.g. 'BY-NC-4.0'
+  function(argument) {
+    return 'CC-' + argument;
+  },
+  // e.g. 'BY-NC'
+  function(argument) {
+    return 'CC-' + argument + '-4.0';
+  },
+  // e.g. 'Attribution-NonCommercial'
+  function(argument) {
+    return argument
+      .replace('Attribution', 'BY')
+      .replace('NonCommercial', 'NC')
+      .replace('NoDerivatives', 'ND')
+      .replace(/ (\d)/, '-$1')
+      .replace(/ ?International/, '');
+  },
+  // e.g. 'Attribution-NonCommercial'
+  function(argument) {
+    return 'CC-' +
+      argument
+      .replace('Attribution', 'BY')
+      .replace('NonCommercial', 'NC')
+      .replace('NoDerivatives', 'ND')
+      .replace(/ (\d)/, '-$1')
+      .replace(/ ?International/, '') +
+      '-4.0';
+  }
+];
+
+// If all else fails, guess that strings containing certain substrings
+// meant to identify certain licenses.
+var lastResorts = [
+  ['UNLI', 'Unlicense'],
+  ['WTF', 'WTFPL'],
+  ['2 CLAUSE', 'BSD-2-Clause'],
+  ['2-CLAUSE', 'BSD-2-Clause'],
+  ['3 CLAUSE', 'BSD-3-Clause'],
+  ['3-CLAUSE', 'BSD-3-Clause'],
+  ['AFFERO', 'AGPL-3.0'],
+  ['AGPL', 'AGPL-3.0'],
+  ['APACHE', 'Apache-2.0'],
+  ['ARTISTIC', 'Artistic-2.0'],
+  ['Affero', 'AGPL-3.0'],
+  ['BEER', 'Beerware'],
+  ['BOOST', 'BSL-1.0'],
+  ['BSD', 'BSD-2-Clause'],
+  ['ECLIPSE', 'EPL-1.0'],
+  ['FUCK', 'WTFPL'],
+  ['GNU', 'GPL-3.0'],
+  ['LGPL', 'LGPL-3.0'],
+  ['GPL', 'GPL-3.0'],
+  ['MIT', 'MIT'],
+  ['MPL', 'MPL-2.0'],
+  ['X11', 'X11'],
+  ['ZLIB', 'Zlib']
+];
+
+var SUBSTRING = 0;
+var IDENTIFIER = 1;
+
+var validTransformation = function(identifier) {
+  for (var i = 0; i < transforms.length; i++) {
+    var transformed = transforms[i](identifier);
+    if (transformed !== identifier && valid(transformed)) {
+      return transformed;
+    }
+  }
+  return null;
+};
+
+var validLastResort = function(identifier) {
+  var upperCased = identifier.toUpperCase();
+  for (var i = 0; i < lastResorts.length; i++) {
+    var lastResort = lastResorts[i];
+    if (upperCased.indexOf(lastResort[SUBSTRING]) > -1) {
+      return lastResort[IDENTIFIER];
+    }
+  }
+  return null;
+};
+
+var anyCorrection = function(identifier, check) {
+  for (var i = 0; i < transpositions.length; i++) {
+    var transposition = transpositions[i];
+    var transposed = transposition[TRANSPOSED];
+    if (identifier.indexOf(transposed) > -1) {
+      var corrected = identifier.replace(
+        transposed,
+        transposition[CORRECT]
+      );
+      var checked = check(corrected);
+      if (checked !== null) {
+        return checked;
+      }
+    }
+  }
+  return null;
+};
+
+module.exports = function(identifier) {
+  identifier = identifier.replace(/\+$/, '');
+  if (valid(identifier)) {
+    return identifier;
+  }
+  var transformed = validTransformation(identifier);
+  if (transformed !== null) {
+    return transformed;
+  }
+  transformed = anyCorrection(identifier, function(argument) {
+    if (valid(argument)) {
+      return argument;
+    }
+    return validTransformation(argument);
+  });
+  if (transformed !== null) {
+    return transformed;
+  }
+  transformed = validLastResort(identifier);
+  if (transformed !== null) {
+    return transformed;
+  }
+  transformed = anyCorrection(identifier, validLastResort);
+  if (transformed !== null) {
+    return transformed;
+  }
+  return null;
+};
+
+
+/***/ }),
+
+/***/ "../../node_modules/validate-npm-package-license/node_modules/spdx-expression-parse/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+var parser = __webpack_require__("../../node_modules/validate-npm-package-license/node_modules/spdx-expression-parse/parser.js").parser
 
 module.exports = function (argument) {
   return parser.parse(argument)
@@ -56523,7 +57799,7 @@ module.exports = function (argument) {
 
 /***/ }),
 
-/***/ "../../node_modules/spdx-expression-parse/parser.js":
+/***/ "../../node_modules/validate-npm-package-license/node_modules/spdx-expression-parse/parser.js":
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {/* parser generated by jison 0.4.17 */
@@ -57888,1286 +59164,10 @@ if ( true && __webpack_require__.c[__webpack_require__.s] === module) {
 
 /***/ }),
 
-/***/ "../../node_modules/spdx-license-ids/spdx-license-ids.json":
+/***/ "../../node_modules/validate-npm-package-license/node_modules/spdx-license-ids/spdx-license-ids.json":
 /***/ (function(module) {
 
 module.exports = JSON.parse("[\"Glide\",\"Abstyles\",\"AFL-1.1\",\"AFL-1.2\",\"AFL-2.0\",\"AFL-2.1\",\"AFL-3.0\",\"AMPAS\",\"APL-1.0\",\"Adobe-Glyph\",\"APAFML\",\"Adobe-2006\",\"AGPL-1.0\",\"Afmparse\",\"Aladdin\",\"ADSL\",\"AMDPLPA\",\"ANTLR-PD\",\"Apache-1.0\",\"Apache-1.1\",\"Apache-2.0\",\"AML\",\"APSL-1.0\",\"APSL-1.1\",\"APSL-1.2\",\"APSL-2.0\",\"Artistic-1.0\",\"Artistic-1.0-Perl\",\"Artistic-1.0-cl8\",\"Artistic-2.0\",\"AAL\",\"Bahyph\",\"Barr\",\"Beerware\",\"BitTorrent-1.0\",\"BitTorrent-1.1\",\"BSL-1.0\",\"Borceux\",\"BSD-2-Clause\",\"BSD-2-Clause-FreeBSD\",\"BSD-2-Clause-NetBSD\",\"BSD-3-Clause\",\"BSD-3-Clause-Clear\",\"BSD-4-Clause\",\"BSD-Protection\",\"BSD-Source-Code\",\"BSD-3-Clause-Attribution\",\"0BSD\",\"BSD-4-Clause-UC\",\"bzip2-1.0.5\",\"bzip2-1.0.6\",\"Caldera\",\"CECILL-1.0\",\"CECILL-1.1\",\"CECILL-2.0\",\"CECILL-2.1\",\"CECILL-B\",\"CECILL-C\",\"ClArtistic\",\"MIT-CMU\",\"CNRI-Jython\",\"CNRI-Python\",\"CNRI-Python-GPL-Compatible\",\"CPOL-1.02\",\"CDDL-1.0\",\"CDDL-1.1\",\"CPAL-1.0\",\"CPL-1.0\",\"CATOSL-1.1\",\"Condor-1.1\",\"CC-BY-1.0\",\"CC-BY-2.0\",\"CC-BY-2.5\",\"CC-BY-3.0\",\"CC-BY-4.0\",\"CC-BY-ND-1.0\",\"CC-BY-ND-2.0\",\"CC-BY-ND-2.5\",\"CC-BY-ND-3.0\",\"CC-BY-ND-4.0\",\"CC-BY-NC-1.0\",\"CC-BY-NC-2.0\",\"CC-BY-NC-2.5\",\"CC-BY-NC-3.0\",\"CC-BY-NC-4.0\",\"CC-BY-NC-ND-1.0\",\"CC-BY-NC-ND-2.0\",\"CC-BY-NC-ND-2.5\",\"CC-BY-NC-ND-3.0\",\"CC-BY-NC-ND-4.0\",\"CC-BY-NC-SA-1.0\",\"CC-BY-NC-SA-2.0\",\"CC-BY-NC-SA-2.5\",\"CC-BY-NC-SA-3.0\",\"CC-BY-NC-SA-4.0\",\"CC-BY-SA-1.0\",\"CC-BY-SA-2.0\",\"CC-BY-SA-2.5\",\"CC-BY-SA-3.0\",\"CC-BY-SA-4.0\",\"CC0-1.0\",\"Crossword\",\"CrystalStacker\",\"CUA-OPL-1.0\",\"Cube\",\"curl\",\"D-FSL-1.0\",\"diffmark\",\"WTFPL\",\"DOC\",\"Dotseqn\",\"DSDP\",\"dvipdfm\",\"EPL-1.0\",\"ECL-1.0\",\"ECL-2.0\",\"eGenix\",\"EFL-1.0\",\"EFL-2.0\",\"MIT-advertising\",\"MIT-enna\",\"Entessa\",\"ErlPL-1.1\",\"EUDatagrid\",\"EUPL-1.0\",\"EUPL-1.1\",\"Eurosym\",\"Fair\",\"MIT-feh\",\"Frameworx-1.0\",\"FreeImage\",\"FTL\",\"FSFAP\",\"FSFUL\",\"FSFULLR\",\"Giftware\",\"GL2PS\",\"Glulxe\",\"AGPL-3.0\",\"GFDL-1.1\",\"GFDL-1.2\",\"GFDL-1.3\",\"GPL-1.0\",\"GPL-2.0\",\"GPL-3.0\",\"LGPL-2.1\",\"LGPL-3.0\",\"LGPL-2.0\",\"gnuplot\",\"gSOAP-1.3b\",\"HaskellReport\",\"HPND\",\"IBM-pibs\",\"IPL-1.0\",\"ICU\",\"ImageMagick\",\"iMatix\",\"Imlib2\",\"IJG\",\"Info-ZIP\",\"Intel-ACPI\",\"Intel\",\"Interbase-1.0\",\"IPA\",\"ISC\",\"JasPer-2.0\",\"JSON\",\"LPPL-1.0\",\"LPPL-1.1\",\"LPPL-1.2\",\"LPPL-1.3a\",\"LPPL-1.3c\",\"Latex2e\",\"BSD-3-Clause-LBNL\",\"Leptonica\",\"LGPLLR\",\"Libpng\",\"libtiff\",\"LAL-1.2\",\"LAL-1.3\",\"LiLiQ-P-1.1\",\"LiLiQ-Rplus-1.1\",\"LiLiQ-R-1.1\",\"LPL-1.02\",\"LPL-1.0\",\"MakeIndex\",\"MTLL\",\"MS-PL\",\"MS-RL\",\"MirOS\",\"MITNFA\",\"MIT\",\"Motosoto\",\"MPL-1.0\",\"MPL-1.1\",\"MPL-2.0\",\"MPL-2.0-no-copyleft-exception\",\"mpich2\",\"Multics\",\"Mup\",\"NASA-1.3\",\"Naumen\",\"NBPL-1.0\",\"NetCDF\",\"NGPL\",\"NOSL\",\"NPL-1.0\",\"NPL-1.1\",\"Newsletr\",\"NLPL\",\"Nokia\",\"NPOSL-3.0\",\"NLOD-1.0\",\"Noweb\",\"NRL\",\"NTP\",\"Nunit\",\"OCLC-2.0\",\"ODbL-1.0\",\"PDDL-1.0\",\"OCCT-PL\",\"OGTSL\",\"OLDAP-2.2.2\",\"OLDAP-1.1\",\"OLDAP-1.2\",\"OLDAP-1.3\",\"OLDAP-1.4\",\"OLDAP-2.0\",\"OLDAP-2.0.1\",\"OLDAP-2.1\",\"OLDAP-2.2\",\"OLDAP-2.2.1\",\"OLDAP-2.3\",\"OLDAP-2.4\",\"OLDAP-2.5\",\"OLDAP-2.6\",\"OLDAP-2.7\",\"OLDAP-2.8\",\"OML\",\"OPL-1.0\",\"OSL-1.0\",\"OSL-1.1\",\"OSL-2.0\",\"OSL-2.1\",\"OSL-3.0\",\"OpenSSL\",\"OSET-PL-2.1\",\"PHP-3.0\",\"PHP-3.01\",\"Plexus\",\"PostgreSQL\",\"psfrag\",\"psutils\",\"Python-2.0\",\"QPL-1.0\",\"Qhull\",\"Rdisc\",\"RPSL-1.0\",\"RPL-1.1\",\"RPL-1.5\",\"RHeCos-1.1\",\"RSCPL\",\"RSA-MD\",\"Ruby\",\"SAX-PD\",\"Saxpath\",\"SCEA\",\"SWL\",\"SMPPL\",\"Sendmail\",\"SGI-B-1.0\",\"SGI-B-1.1\",\"SGI-B-2.0\",\"OFL-1.0\",\"OFL-1.1\",\"SimPL-2.0\",\"Sleepycat\",\"SNIA\",\"Spencer-86\",\"Spencer-94\",\"Spencer-99\",\"SMLNJ\",\"SugarCRM-1.1.3\",\"SISSL\",\"SISSL-1.2\",\"SPL-1.0\",\"Watcom-1.0\",\"TCL\",\"Unlicense\",\"TMate\",\"TORQUE-1.1\",\"TOSL\",\"Unicode-TOU\",\"UPL-1.0\",\"NCSA\",\"Vim\",\"VOSTROM\",\"VSL-1.0\",\"W3C-19980720\",\"W3C\",\"Wsuipa\",\"Xnet\",\"X11\",\"Xerox\",\"XFree86-1.1\",\"xinetd\",\"xpp\",\"XSkat\",\"YPL-1.0\",\"YPL-1.1\",\"Zed\",\"Zend-2.0\",\"Zimbra-1.3\",\"Zimbra-1.4\",\"Zlib\",\"zlib-acknowledgement\",\"ZPL-1.1\",\"ZPL-2.0\",\"ZPL-2.1\",\"BSD-3-Clause-No-Nuclear-License\",\"BSD-3-Clause-No-Nuclear-Warranty\",\"BSD-3-Clause-No-Nuclear-License-2014\",\"eCos-2.0\",\"GPL-2.0-with-autoconf-exception\",\"GPL-2.0-with-bison-exception\",\"GPL-2.0-with-classpath-exception\",\"GPL-2.0-with-font-exception\",\"GPL-2.0-with-GCC-exception\",\"GPL-3.0-with-autoconf-exception\",\"GPL-3.0-with-GCC-exception\",\"StandardML-NJ\",\"WXwindows\"]");
-
-/***/ }),
-
-/***/ "../../node_modules/strip-ansi/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-const ansiRegex = __webpack_require__("../../node_modules/ansi-regex/index.js");
-
-module.exports = string => typeof string === 'string' ? string.replace(ansiRegex(), '') : string;
-
-
-/***/ }),
-
-/***/ "../../node_modules/strip-bom/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = string => {
-	if (typeof string !== 'string') {
-		throw new TypeError(`Expected a string, got ${typeof string}`);
-	}
-
-	// Catches EFBBBF (UTF-8 BOM) because the buffer-to-string
-	// conversion translates it to FEFF (UTF-16 BOM)
-	if (string.charCodeAt(0) === 0xFEFF) {
-		return string.slice(1);
-	}
-
-	return string;
-};
-
-
-/***/ }),
-
-/***/ "../../node_modules/strip-final-newline/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = input => {
-	const LF = typeof input === 'string' ? '\n' : '\n'.charCodeAt();
-	const CR = typeof input === 'string' ? '\r' : '\r'.charCodeAt();
-
-	if (input[input.length - 1] === LF) {
-		input = input.slice(0, input.length - 1);
-	}
-
-	if (input[input.length - 1] === CR) {
-		input = input.slice(0, input.length - 1);
-	}
-
-	return input;
-};
-
-
-/***/ }),
-
-/***/ "../../node_modules/strong-log-transformer/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-// Copyright IBM Corp. 2014,2018. All Rights Reserved.
-// Node module: strong-log-transformer
-// This file is licensed under the Apache License 2.0.
-// License text available at https://opensource.org/licenses/Apache-2.0
-
-module.exports = __webpack_require__("../../node_modules/strong-log-transformer/lib/logger.js");
-module.exports.cli = __webpack_require__("../../node_modules/strong-log-transformer/lib/cli.js");
-
-
-/***/ }),
-
-/***/ "../../node_modules/strong-log-transformer/lib/cli.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-// Copyright IBM Corp. 2014,2018. All Rights Reserved.
-// Node module: strong-log-transformer
-// This file is licensed under the Apache License 2.0.
-// License text available at https://opensource.org/licenses/Apache-2.0
-
-
-
-var minimist = __webpack_require__("../../node_modules/minimist/index.js");
-var path = __webpack_require__("path");
-
-var Logger = __webpack_require__("../../node_modules/strong-log-transformer/lib/logger.js");
-var pkg = __webpack_require__("../../node_modules/strong-log-transformer/package.json");
-
-module.exports = cli;
-
-function cli(args) {
-  var opts = minimist(args.slice(2));
-  var $0 = path.basename(args[1]);
-  var p = console.log.bind(console);
-  if (opts.v || opts.version) {
-    version($0, p);
-  } else if (opts.h || opts.help) {
-    usage($0, p);
-  } else if (args.length < 3) {
-    process.stdin.pipe(Logger()).pipe(process.stdout);
-  } else {
-    process.stdin.pipe(Logger(opts)).pipe(process.stdout);
-  }
-}
-
-function version($0, p) {
-  p('%s v%s', pkg.name, pkg.version);
-}
-
-function usage($0, p) {
-  var PADDING = '               ';
-  var opt, def;
-  p('Usage: %s [options]', $0);
-  p('');
-  p('%s', pkg.description);
-  p('');
-  p('OPTIONS:');
-  for (opt in Logger.DEFAULTS) {
-    def = Logger.DEFAULTS[opt];
-    if (typeof def === 'boolean')
-      boolOpt(opt, Logger.DEFAULTS[opt]);
-    else
-      stdOpt(opt, Logger.DEFAULTS[opt]);
-  }
-  p('');
-
-  function boolOpt(name, def) {
-    name = name + PADDING.slice(0, 20-name.length);
-    p('   --%s default: %s', name, def);
-  }
-
-  function stdOpt(name, def) {
-    var value = name.toUpperCase() +
-                PADDING.slice(0, 19 - name.length*2);
-    p('   --%s %s default: %j', name, value, def);
-  }
-}
-
-
-/***/ }),
-
-/***/ "../../node_modules/strong-log-transformer/lib/logger.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-// Copyright IBM Corp. 2014,2018. All Rights Reserved.
-// Node module: strong-log-transformer
-// This file is licensed under the Apache License 2.0.
-// License text available at https://opensource.org/licenses/Apache-2.0
-
-
-
-var stream = __webpack_require__("stream");
-var util = __webpack_require__("util");
-var fs = __webpack_require__("fs");
-
-var through = __webpack_require__("../../node_modules/through/index.js");
-var duplexer = __webpack_require__("../../node_modules/duplexer/index.js");
-var StringDecoder = __webpack_require__("string_decoder").StringDecoder;
-
-module.exports = Logger;
-
-Logger.DEFAULTS = {
-  format: 'text',
-  tag: '',
-  mergeMultiline: false,
-  timeStamp: false,
-};
-
-var formatters = {
-  text: textFormatter,
-  json: jsonFormatter,
-}
-
-function Logger(options) {
-  var defaults = JSON.parse(JSON.stringify(Logger.DEFAULTS));
-  options = util._extend(defaults, options || {});
-  var catcher = deLiner();
-  var emitter = catcher;
-  var transforms = [
-    objectifier(),
-  ];
-
-  if (options.tag) {
-    transforms.push(staticTagger(options.tag));
-  }
-
-  if (options.mergeMultiline) {
-    transforms.push(lineMerger());
-  }
-
-  // TODO
-  // if (options.pidStamp) {
-  //   transforms.push(pidStamper(options.pid));
-  // }
-
-  // TODO
-  // if (options.workerStamp) {
-  //   transforms.push(workerStamper(options.worker));
-  // }
-
-  transforms.push(formatters[options.format](options));
-
-  // restore line endings that were removed by line splitting
-  transforms.push(reLiner());
-
-  for (var t in transforms) {
-    emitter = emitter.pipe(transforms[t]);
-  }
-
-  return duplexer(catcher, emitter);
-}
-
-function deLiner() {
-  var decoder = new StringDecoder('utf8');
-  var last = '';
-
-  return new stream.Transform({
-    transform(chunk, _enc, callback) {
-      last += decoder.write(chunk);
-      var list = last.split(/\r\n|[\n\v\f\r\x85\u2028\u2029]/g);
-      last = list.pop();
-      for (var i = 0; i < list.length; i++) {
-        // swallow empty lines
-        if (list[i]) {
-          this.push(list[i]);
-        }
-      }
-      callback();
-    },
-    flush(callback) {
-      // incomplete UTF8 sequences become UTF8 replacement characters
-      last += decoder.end();
-      if (last) {
-        this.push(last);
-      }
-      callback();
-    },
-  });
-}
-
-function reLiner() {
-  return through(appendNewline);
-
-  function appendNewline(line) {
-    this.emit('data', line + '\n');
-  }
-}
-
-function objectifier() {
-  return through(objectify, null, {autoDestroy: false});
-
-  function objectify(line) {
-    this.emit('data', {
-      msg: line,
-      time: Date.now(),
-    });
-  }
-}
-
-function staticTagger(tag) {
-  return through(tagger);
-
-  function tagger(logEvent) {
-    logEvent.tag = tag;
-    this.emit('data', logEvent);
-  }
-}
-
-function textFormatter(options) {
-  return through(textify);
-
-  function textify(logEvent) {
-    var line = util.format('%s%s', textifyTags(logEvent.tag),
-                           logEvent.msg.toString());
-    if (options.timeStamp) {
-      line = util.format('%s %s', new Date(logEvent.time).toISOString(), line);
-    }
-    this.emit('data', line.replace(/\n/g, '\\n'));
-  }
-
-  function textifyTags(tags) {
-    var str = '';
-    if (typeof tags === 'string') {
-      str = tags + ' ';
-    } else if (typeof tags === 'object') {
-      for (var t in tags) {
-        str += t + ':' + tags[t] + ' ';
-      }
-    }
-    return str;
-  }
-}
-
-function jsonFormatter(options) {
-  return through(jsonify);
-
-  function jsonify(logEvent) {
-    if (options.timeStamp) {
-      logEvent.time = new Date(logEvent.time).toISOString();
-    } else {
-      delete logEvent.time;
-    }
-    logEvent.msg = logEvent.msg.toString();
-    this.emit('data', JSON.stringify(logEvent));
-  }
-}
-
-function lineMerger(host) {
-  var previousLine = null;
-  var flushTimer = null;
-  var stream = through(lineMergerWrite, lineMergerEnd);
-  var flush = _flush.bind(stream);
-
-  return stream;
-
-  function lineMergerWrite(line) {
-    if (/^\s+/.test(line.msg)) {
-      if (previousLine) {
-        previousLine.msg += '\n' + line.msg;
-      } else {
-        previousLine = line;
-      }
-    } else {
-      flush();
-      previousLine = line;
-    }
-    // rolling timeout
-    clearTimeout(flushTimer);
-    flushTimer = setTimeout(flush.bind(this), 10);
-  }
-
-  function _flush() {
-    if (previousLine) {
-      this.emit('data', previousLine);
-      previousLine = null;
-    }
-  }
-
-  function lineMergerEnd() {
-    flush.call(this);
-    this.emit('end');
-  }
-}
-
-
-/***/ }),
-
-/***/ "../../node_modules/strong-log-transformer/package.json":
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"name\":\"strong-log-transformer\",\"version\":\"2.1.0\",\"description\":\"Stream transformer that prefixes lines with timestamps and other things.\",\"author\":\"Ryan Graham <ryan@strongloop.com>\",\"license\":\"Apache-2.0\",\"repository\":{\"type\":\"git\",\"url\":\"git://github.com/strongloop/strong-log-transformer\"},\"keywords\":[\"logging\",\"streams\"],\"bugs\":{\"url\":\"https://github.com/strongloop/strong-log-transformer/issues\"},\"homepage\":\"https://github.com/strongloop/strong-log-transformer\",\"directories\":{\"test\":\"test\"},\"bin\":{\"sl-log-transformer\":\"bin/sl-log-transformer.js\"},\"main\":\"index.js\",\"scripts\":{\"test\":\"tap --100 test/test-*\"},\"dependencies\":{\"duplexer\":\"^0.1.1\",\"minimist\":\"^1.2.0\",\"through\":\"^2.3.4\"},\"devDependencies\":{\"tap\":\"^12.0.1\"},\"engines\":{\"node\":\">=4\"}}");
-
-/***/ }),
-
-/***/ "../../node_modules/supports-color/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-const os = __webpack_require__("os");
-const tty = __webpack_require__("tty");
-const hasFlag = __webpack_require__("../../node_modules/has-flag/index.js");
-
-const {env} = process;
-
-let forceColor;
-if (hasFlag('no-color') ||
-	hasFlag('no-colors') ||
-	hasFlag('color=false') ||
-	hasFlag('color=never')) {
-	forceColor = 0;
-} else if (hasFlag('color') ||
-	hasFlag('colors') ||
-	hasFlag('color=true') ||
-	hasFlag('color=always')) {
-	forceColor = 1;
-}
-
-if ('FORCE_COLOR' in env) {
-	if (env.FORCE_COLOR === 'true') {
-		forceColor = 1;
-	} else if (env.FORCE_COLOR === 'false') {
-		forceColor = 0;
-	} else {
-		forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
-	}
-}
-
-function translateLevel(level) {
-	if (level === 0) {
-		return false;
-	}
-
-	return {
-		level,
-		hasBasic: true,
-		has256: level >= 2,
-		has16m: level >= 3
-	};
-}
-
-function supportsColor(haveStream, streamIsTTY) {
-	if (forceColor === 0) {
-		return 0;
-	}
-
-	if (hasFlag('color=16m') ||
-		hasFlag('color=full') ||
-		hasFlag('color=truecolor')) {
-		return 3;
-	}
-
-	if (hasFlag('color=256')) {
-		return 2;
-	}
-
-	if (haveStream && !streamIsTTY && forceColor === undefined) {
-		return 0;
-	}
-
-	const min = forceColor || 0;
-
-	if (env.TERM === 'dumb') {
-		return min;
-	}
-
-	if (process.platform === 'win32') {
-		// Windows 10 build 10586 is the first Windows release that supports 256 colors.
-		// Windows 10 build 14931 is the first release that supports 16m/TrueColor.
-		const osRelease = os.release().split('.');
-		if (
-			Number(osRelease[0]) >= 10 &&
-			Number(osRelease[2]) >= 10586
-		) {
-			return Number(osRelease[2]) >= 14931 ? 3 : 2;
-		}
-
-		return 1;
-	}
-
-	if ('CI' in env) {
-		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
-			return 1;
-		}
-
-		return min;
-	}
-
-	if ('TEAMCITY_VERSION' in env) {
-		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
-	}
-
-	if ('GITHUB_ACTIONS' in env) {
-		return 1;
-	}
-
-	if (env.COLORTERM === 'truecolor') {
-		return 3;
-	}
-
-	if ('TERM_PROGRAM' in env) {
-		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
-
-		switch (env.TERM_PROGRAM) {
-			case 'iTerm.app':
-				return version >= 3 ? 3 : 2;
-			case 'Apple_Terminal':
-				return 2;
-			// No default
-		}
-	}
-
-	if (/-256(color)?$/i.test(env.TERM)) {
-		return 2;
-	}
-
-	if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
-		return 1;
-	}
-
-	if ('COLORTERM' in env) {
-		return 1;
-	}
-
-	return min;
-}
-
-function getSupportLevel(stream) {
-	const level = supportsColor(stream, stream && stream.isTTY);
-	return translateLevel(level);
-}
-
-module.exports = {
-	supportsColor: getSupportLevel,
-	stdout: translateLevel(supportsColor(true, tty.isatty(1))),
-	stderr: translateLevel(supportsColor(true, tty.isatty(2)))
-};
-
-
-/***/ }),
-
-/***/ "../../node_modules/through/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-var Stream = __webpack_require__("stream")
-
-// through
-//
-// a stream that does nothing but re-emit the input.
-// useful for aggregating a series of changing but not ending streams into one stream)
-
-exports = module.exports = through
-through.through = through
-
-//create a readable writable stream.
-
-function through (write, end, opts) {
-  write = write || function (data) { this.queue(data) }
-  end = end || function () { this.queue(null) }
-
-  var ended = false, destroyed = false, buffer = [], _ended = false
-  var stream = new Stream()
-  stream.readable = stream.writable = true
-  stream.paused = false
-
-//  stream.autoPause   = !(opts && opts.autoPause   === false)
-  stream.autoDestroy = !(opts && opts.autoDestroy === false)
-
-  stream.write = function (data) {
-    write.call(this, data)
-    return !stream.paused
-  }
-
-  function drain() {
-    while(buffer.length && !stream.paused) {
-      var data = buffer.shift()
-      if(null === data)
-        return stream.emit('end')
-      else
-        stream.emit('data', data)
-    }
-  }
-
-  stream.queue = stream.push = function (data) {
-//    console.error(ended)
-    if(_ended) return stream
-    if(data === null) _ended = true
-    buffer.push(data)
-    drain()
-    return stream
-  }
-
-  //this will be registered as the first 'end' listener
-  //must call destroy next tick, to make sure we're after any
-  //stream piped from here.
-  //this is only a problem if end is not emitted synchronously.
-  //a nicer way to do this is to make sure this is the last listener for 'end'
-
-  stream.on('end', function () {
-    stream.readable = false
-    if(!stream.writable && stream.autoDestroy)
-      process.nextTick(function () {
-        stream.destroy()
-      })
-  })
-
-  function _end () {
-    stream.writable = false
-    end.call(stream)
-    if(!stream.readable && stream.autoDestroy)
-      stream.destroy()
-  }
-
-  stream.end = function (data) {
-    if(ended) return
-    ended = true
-    if(arguments.length) stream.write(data)
-    _end() // will emit or queue
-    return stream
-  }
-
-  stream.destroy = function () {
-    if(destroyed) return
-    destroyed = true
-    ended = true
-    buffer.length = 0
-    stream.writable = stream.readable = false
-    stream.emit('close')
-    return stream
-  }
-
-  stream.pause = function () {
-    if(stream.paused) return
-    stream.paused = true
-    return stream
-  }
-
-  stream.resume = function () {
-    if(stream.paused) {
-      stream.paused = false
-      stream.emit('resume')
-    }
-    drain()
-    //may have become paused again,
-    //as drain emits 'data'.
-    if(!stream.paused)
-      stream.emit('drain')
-    return stream
-  }
-  return stream
-}
-
-
-
-/***/ }),
-
-/***/ "../../node_modules/to-regex-range/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * to-regex-range <https://github.com/micromatch/to-regex-range>
- *
- * Copyright (c) 2015-present, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-
-
-const isNumber = __webpack_require__("../../node_modules/to-regex-range/node_modules/is-number/index.js");
-
-const toRegexRange = (min, max, options) => {
-  if (isNumber(min) === false) {
-    throw new TypeError('toRegexRange: expected the first argument to be a number');
-  }
-
-  if (max === void 0 || min === max) {
-    return String(min);
-  }
-
-  if (isNumber(max) === false) {
-    throw new TypeError('toRegexRange: expected the second argument to be a number.');
-  }
-
-  let opts = { relaxZeros: true, ...options };
-  if (typeof opts.strictZeros === 'boolean') {
-    opts.relaxZeros = opts.strictZeros === false;
-  }
-
-  let relax = String(opts.relaxZeros);
-  let shorthand = String(opts.shorthand);
-  let capture = String(opts.capture);
-  let wrap = String(opts.wrap);
-  let cacheKey = min + ':' + max + '=' + relax + shorthand + capture + wrap;
-
-  if (toRegexRange.cache.hasOwnProperty(cacheKey)) {
-    return toRegexRange.cache[cacheKey].result;
-  }
-
-  let a = Math.min(min, max);
-  let b = Math.max(min, max);
-
-  if (Math.abs(a - b) === 1) {
-    let result = min + '|' + max;
-    if (opts.capture) {
-      return `(${result})`;
-    }
-    if (opts.wrap === false) {
-      return result;
-    }
-    return `(?:${result})`;
-  }
-
-  let isPadded = hasPadding(min) || hasPadding(max);
-  let state = { min, max, a, b };
-  let positives = [];
-  let negatives = [];
-
-  if (isPadded) {
-    state.isPadded = isPadded;
-    state.maxLen = String(state.max).length;
-  }
-
-  if (a < 0) {
-    let newMin = b < 0 ? Math.abs(b) : 1;
-    negatives = splitToPatterns(newMin, Math.abs(a), state, opts);
-    a = state.a = 0;
-  }
-
-  if (b >= 0) {
-    positives = splitToPatterns(a, b, state, opts);
-  }
-
-  state.negatives = negatives;
-  state.positives = positives;
-  state.result = collatePatterns(negatives, positives, opts);
-
-  if (opts.capture === true) {
-    state.result = `(${state.result})`;
-  } else if (opts.wrap !== false && (positives.length + negatives.length) > 1) {
-    state.result = `(?:${state.result})`;
-  }
-
-  toRegexRange.cache[cacheKey] = state;
-  return state.result;
-};
-
-function collatePatterns(neg, pos, options) {
-  let onlyNegative = filterPatterns(neg, pos, '-', false, options) || [];
-  let onlyPositive = filterPatterns(pos, neg, '', false, options) || [];
-  let intersected = filterPatterns(neg, pos, '-?', true, options) || [];
-  let subpatterns = onlyNegative.concat(intersected).concat(onlyPositive);
-  return subpatterns.join('|');
-}
-
-function splitToRanges(min, max) {
-  let nines = 1;
-  let zeros = 1;
-
-  let stop = countNines(min, nines);
-  let stops = new Set([max]);
-
-  while (min <= stop && stop <= max) {
-    stops.add(stop);
-    nines += 1;
-    stop = countNines(min, nines);
-  }
-
-  stop = countZeros(max + 1, zeros) - 1;
-
-  while (min < stop && stop <= max) {
-    stops.add(stop);
-    zeros += 1;
-    stop = countZeros(max + 1, zeros) - 1;
-  }
-
-  stops = [...stops];
-  stops.sort(compare);
-  return stops;
-}
-
-/**
- * Convert a range to a regex pattern
- * @param {Number} `start`
- * @param {Number} `stop`
- * @return {String}
- */
-
-function rangeToPattern(start, stop, options) {
-  if (start === stop) {
-    return { pattern: start, count: [], digits: 0 };
-  }
-
-  let zipped = zip(start, stop);
-  let digits = zipped.length;
-  let pattern = '';
-  let count = 0;
-
-  for (let i = 0; i < digits; i++) {
-    let [startDigit, stopDigit] = zipped[i];
-
-    if (startDigit === stopDigit) {
-      pattern += startDigit;
-
-    } else if (startDigit !== '0' || stopDigit !== '9') {
-      pattern += toCharacterClass(startDigit, stopDigit, options);
-
-    } else {
-      count++;
-    }
-  }
-
-  if (count) {
-    pattern += options.shorthand === true ? '\\d' : '[0-9]';
-  }
-
-  return { pattern, count: [count], digits };
-}
-
-function splitToPatterns(min, max, tok, options) {
-  let ranges = splitToRanges(min, max);
-  let tokens = [];
-  let start = min;
-  let prev;
-
-  for (let i = 0; i < ranges.length; i++) {
-    let max = ranges[i];
-    let obj = rangeToPattern(String(start), String(max), options);
-    let zeros = '';
-
-    if (!tok.isPadded && prev && prev.pattern === obj.pattern) {
-      if (prev.count.length > 1) {
-        prev.count.pop();
-      }
-
-      prev.count.push(obj.count[0]);
-      prev.string = prev.pattern + toQuantifier(prev.count);
-      start = max + 1;
-      continue;
-    }
-
-    if (tok.isPadded) {
-      zeros = padZeros(max, tok, options);
-    }
-
-    obj.string = zeros + obj.pattern + toQuantifier(obj.count);
-    tokens.push(obj);
-    start = max + 1;
-    prev = obj;
-  }
-
-  return tokens;
-}
-
-function filterPatterns(arr, comparison, prefix, intersection, options) {
-  let result = [];
-
-  for (let ele of arr) {
-    let { string } = ele;
-
-    // only push if _both_ are negative...
-    if (!intersection && !contains(comparison, 'string', string)) {
-      result.push(prefix + string);
-    }
-
-    // or _both_ are positive
-    if (intersection && contains(comparison, 'string', string)) {
-      result.push(prefix + string);
-    }
-  }
-  return result;
-}
-
-/**
- * Zip strings
- */
-
-function zip(a, b) {
-  let arr = [];
-  for (let i = 0; i < a.length; i++) arr.push([a[i], b[i]]);
-  return arr;
-}
-
-function compare(a, b) {
-  return a > b ? 1 : b > a ? -1 : 0;
-}
-
-function contains(arr, key, val) {
-  return arr.some(ele => ele[key] === val);
-}
-
-function countNines(min, len) {
-  return Number(String(min).slice(0, -len) + '9'.repeat(len));
-}
-
-function countZeros(integer, zeros) {
-  return integer - (integer % Math.pow(10, zeros));
-}
-
-function toQuantifier(digits) {
-  let [start = 0, stop = ''] = digits;
-  if (stop || start > 1) {
-    return `{${start + (stop ? ',' + stop : '')}}`;
-  }
-  return '';
-}
-
-function toCharacterClass(a, b, options) {
-  return `[${a}${(b - a === 1) ? '' : '-'}${b}]`;
-}
-
-function hasPadding(str) {
-  return /^-?(0+)\d/.test(str);
-}
-
-function padZeros(value, tok, options) {
-  if (!tok.isPadded) {
-    return value;
-  }
-
-  let diff = Math.abs(tok.maxLen - String(value).length);
-  let relax = options.relaxZeros !== false;
-
-  switch (diff) {
-    case 0:
-      return '';
-    case 1:
-      return relax ? '0?' : '0';
-    case 2:
-      return relax ? '0{0,2}' : '00';
-    default: {
-      return relax ? `0{0,${diff}}` : `0{${diff}}`;
-    }
-  }
-}
-
-/**
- * Cache
- */
-
-toRegexRange.cache = {};
-toRegexRange.clearCache = () => (toRegexRange.cache = {});
-
-/**
- * Expose `toRegexRange`
- */
-
-module.exports = toRegexRange;
-
-
-/***/ }),
-
-/***/ "../../node_modules/to-regex-range/node_modules/is-number/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-number <https://github.com/jonschlinkert/is-number>
- *
- * Copyright (c) 2014-present, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-
-
-module.exports = function(num) {
-  if (typeof num === 'number') {
-    return num - num === 0;
-  }
-  if (typeof num === 'string' && num.trim() !== '') {
-    return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
-  }
-  return false;
-};
-
-
-/***/ }),
-
-/***/ "../../node_modules/validate-npm-package-license/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-var parse = __webpack_require__("../../node_modules/spdx-expression-parse/index.js");
-var correct = __webpack_require__("../../node_modules/validate-npm-package-license/node_modules/spdx-correct/index.js");
-
-var genericWarning = (
-  'license should be ' +
-  'a valid SPDX license expression (without "LicenseRef"), ' +
-  '"UNLICENSED", or ' +
-  '"SEE LICENSE IN <filename>"'
-);
-
-var fileReferenceRE = /^SEE LICEN[CS]E IN (.+)$/;
-
-function startsWith(prefix, string) {
-  return string.slice(0, prefix.length) === prefix;
-}
-
-function usesLicenseRef(ast) {
-  if (ast.hasOwnProperty('license')) {
-    var license = ast.license;
-    return (
-      startsWith('LicenseRef', license) ||
-      startsWith('DocumentRef', license)
-    );
-  } else {
-    return (
-      usesLicenseRef(ast.left) ||
-      usesLicenseRef(ast.right)
-    );
-  }
-}
-
-module.exports = function(argument) {
-  var ast;
-
-  try {
-    ast = parse(argument);
-  } catch (e) {
-    var match
-    if (
-      argument === 'UNLICENSED' ||
-      argument === 'UNLICENCED'
-    ) {
-      return {
-        validForOldPackages: true,
-        validForNewPackages: true,
-        unlicensed: true
-      };
-    } else if (match = fileReferenceRE.exec(argument)) {
-      return {
-        validForOldPackages: true,
-        validForNewPackages: true,
-        inFile: match[1]
-      };
-    } else {
-      var result = {
-        validForOldPackages: false,
-        validForNewPackages: false,
-        warnings: [genericWarning]
-      };
-      var corrected = correct(argument);
-      if (corrected) {
-        result.warnings.push(
-          'license is similar to the valid expression "' + corrected + '"'
-        );
-      }
-      return result;
-    }
-  }
-
-  if (usesLicenseRef(ast)) {
-    return {
-      validForNewPackages: false,
-      validForOldPackages: false,
-      spdx: true,
-      warnings: [genericWarning]
-    };
-  } else {
-    return {
-      validForNewPackages: true,
-      validForOldPackages: true,
-      spdx: true
-    };
-  }
-};
-
-
-/***/ }),
-
-/***/ "../../node_modules/validate-npm-package-license/node_modules/spdx-correct/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-var licenseIDs = __webpack_require__("../../node_modules/spdx-license-ids/spdx-license-ids.json");
-
-function valid(string) {
-  return licenseIDs.indexOf(string) > -1;
-}
-
-// Common transpositions of license identifier acronyms
-var transpositions = [
-  ['APGL', 'AGPL'],
-  ['Gpl', 'GPL'],
-  ['GLP', 'GPL'],
-  ['APL', 'Apache'],
-  ['ISD', 'ISC'],
-  ['GLP', 'GPL'],
-  ['IST', 'ISC'],
-  ['Claude', 'Clause'],
-  [' or later', '+'],
-  [' International', ''],
-  ['GNU', 'GPL'],
-  ['GUN', 'GPL'],
-  ['+', ''],
-  ['GNU GPL', 'GPL'],
-  ['GNU/GPL', 'GPL'],
-  ['GNU GLP', 'GPL'],
-  ['GNU General Public License', 'GPL'],
-  ['Gnu public license', 'GPL'],
-  ['GNU Public License', 'GPL'],
-  ['GNU GENERAL PUBLIC LICENSE', 'GPL'],
-  ['MTI', 'MIT'],
-  ['Mozilla Public License', 'MPL'],
-  ['WTH', 'WTF'],
-  ['-License', '']
-];
-
-var TRANSPOSED = 0;
-var CORRECT = 1;
-
-// Simple corrections to nearly valid identifiers.
-var transforms = [
-  // e.g. 'mit'
-  function(argument) {
-    return argument.toUpperCase();
-  },
-  // e.g. 'MIT '
-  function(argument) {
-    return argument.trim();
-  },
-  // e.g. 'M.I.T.'
-  function(argument) {
-    return argument.replace(/\./g, '');
-  },
-  // e.g. 'Apache- 2.0'
-  function(argument) {
-    return argument.replace(/\s+/g, '');
-  },
-  // e.g. 'CC BY 4.0''
-  function(argument) {
-    return argument.replace(/\s+/g, '-');
-  },
-  // e.g. 'LGPLv2.1'
-  function(argument) {
-    return argument.replace('v', '-');
-  },
-  // e.g. 'Apache 2.0'
-  function(argument) {
-    return argument.replace(/,?\s*(\d)/, '-$1');
-  },
-  // e.g. 'GPL 2'
-  function(argument) {
-    return argument.replace(/,?\s*(\d)/, '-$1.0');
-  },
-  // e.g. 'Apache Version 2.0'
-  function(argument) {
-    return argument.replace(/,?\s*(V\.|v\.|V|v|Version|version)\s*(\d)/, '-$2');
-  },
-  // e.g. 'Apache Version 2'
-  function(argument) {
-    return argument.replace(/,?\s*(V\.|v\.|V|v|Version|version)\s*(\d)/, '-$2.0');
-  },
-  // e.g. 'ZLIB'
-  function(argument) {
-    return argument[0].toUpperCase() + argument.slice(1);
-  },
-  // e.g. 'MPL/2.0'
-  function(argument) {
-    return argument.replace('/', '-');
-  },
-  // e.g. 'Apache 2'
-  function(argument) {
-    return argument
-      .replace(/\s*V\s*(\d)/, '-$1')
-      .replace(/(\d)$/, '$1.0');
-  },
-  // e.g. 'GPL-2.0-'
-  function(argument) {
-    return argument.slice(0, argument.length - 1);
-  },
-  // e.g. 'GPL2'
-  function(argument) {
-    return argument.replace(/(\d)$/, '-$1.0');
-  },
-  // e.g. 'BSD 3'
-  function(argument) {
-    return argument.replace(/(-| )?(\d)$/, '-$2-Clause');
-  },
-  // e.g. 'BSD clause 3'
-  function(argument) {
-    return argument.replace(/(-| )clause(-| )(\d)/, '-$3-Clause');
-  },
-  // e.g. 'BY-NC-4.0'
-  function(argument) {
-    return 'CC-' + argument;
-  },
-  // e.g. 'BY-NC'
-  function(argument) {
-    return 'CC-' + argument + '-4.0';
-  },
-  // e.g. 'Attribution-NonCommercial'
-  function(argument) {
-    return argument
-      .replace('Attribution', 'BY')
-      .replace('NonCommercial', 'NC')
-      .replace('NoDerivatives', 'ND')
-      .replace(/ (\d)/, '-$1')
-      .replace(/ ?International/, '');
-  },
-  // e.g. 'Attribution-NonCommercial'
-  function(argument) {
-    return 'CC-' +
-      argument
-      .replace('Attribution', 'BY')
-      .replace('NonCommercial', 'NC')
-      .replace('NoDerivatives', 'ND')
-      .replace(/ (\d)/, '-$1')
-      .replace(/ ?International/, '') +
-      '-4.0';
-  }
-];
-
-// If all else fails, guess that strings containing certain substrings
-// meant to identify certain licenses.
-var lastResorts = [
-  ['UNLI', 'Unlicense'],
-  ['WTF', 'WTFPL'],
-  ['2 CLAUSE', 'BSD-2-Clause'],
-  ['2-CLAUSE', 'BSD-2-Clause'],
-  ['3 CLAUSE', 'BSD-3-Clause'],
-  ['3-CLAUSE', 'BSD-3-Clause'],
-  ['AFFERO', 'AGPL-3.0'],
-  ['AGPL', 'AGPL-3.0'],
-  ['APACHE', 'Apache-2.0'],
-  ['ARTISTIC', 'Artistic-2.0'],
-  ['Affero', 'AGPL-3.0'],
-  ['BEER', 'Beerware'],
-  ['BOOST', 'BSL-1.0'],
-  ['BSD', 'BSD-2-Clause'],
-  ['ECLIPSE', 'EPL-1.0'],
-  ['FUCK', 'WTFPL'],
-  ['GNU', 'GPL-3.0'],
-  ['LGPL', 'LGPL-3.0'],
-  ['GPL', 'GPL-3.0'],
-  ['MIT', 'MIT'],
-  ['MPL', 'MPL-2.0'],
-  ['X11', 'X11'],
-  ['ZLIB', 'Zlib']
-];
-
-var SUBSTRING = 0;
-var IDENTIFIER = 1;
-
-var validTransformation = function(identifier) {
-  for (var i = 0; i < transforms.length; i++) {
-    var transformed = transforms[i](identifier);
-    if (transformed !== identifier && valid(transformed)) {
-      return transformed;
-    }
-  }
-  return null;
-};
-
-var validLastResort = function(identifier) {
-  var upperCased = identifier.toUpperCase();
-  for (var i = 0; i < lastResorts.length; i++) {
-    var lastResort = lastResorts[i];
-    if (upperCased.indexOf(lastResort[SUBSTRING]) > -1) {
-      return lastResort[IDENTIFIER];
-    }
-  }
-  return null;
-};
-
-var anyCorrection = function(identifier, check) {
-  for (var i = 0; i < transpositions.length; i++) {
-    var transposition = transpositions[i];
-    var transposed = transposition[TRANSPOSED];
-    if (identifier.indexOf(transposed) > -1) {
-      var corrected = identifier.replace(
-        transposed,
-        transposition[CORRECT]
-      );
-      var checked = check(corrected);
-      if (checked !== null) {
-        return checked;
-      }
-    }
-  }
-  return null;
-};
-
-module.exports = function(identifier) {
-  identifier = identifier.replace(/\+$/, '');
-  if (valid(identifier)) {
-    return identifier;
-  }
-  var transformed = validTransformation(identifier);
-  if (transformed !== null) {
-    return transformed;
-  }
-  transformed = anyCorrection(identifier, function(argument) {
-    if (valid(argument)) {
-      return argument;
-    }
-    return validTransformation(argument);
-  });
-  if (transformed !== null) {
-    return transformed;
-  }
-  transformed = validLastResort(identifier);
-  if (transformed !== null) {
-    return transformed;
-  }
-  transformed = anyCorrection(identifier, validLastResort);
-  if (transformed !== null) {
-    return transformed;
-  }
-  return null;
-};
-
 
 /***/ }),
 
