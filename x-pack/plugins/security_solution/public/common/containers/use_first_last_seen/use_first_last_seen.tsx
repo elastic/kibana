@@ -31,7 +31,7 @@ export interface FirstLastSeenArgs {
   lastSeen?: string | null;
   order: Direction.asc | Direction.desc | null;
 }
-interface UseFirstLastSeen {
+export interface UseFirstLastSeen {
   field: string;
   value: string;
   order: Direction.asc | Direction.desc;
@@ -92,14 +92,12 @@ export const useFirstLastSeen = ({
                 }));
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
-                console.log('here');
                 setLoading(false);
                 addWarning(i18n.ERROR_FIRST_LAST_SEEN_HOST);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              console.log('test');
               setLoading(false);
               setFirstLastSeenResponse((prevResponse) => ({
                 ...prevResponse,
