@@ -15,6 +15,7 @@ import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery } from '../types';
+import { getAggregationCount, getFindingsCountAggQuery } from '../utils';
 
 interface UseFindingsByResourceOptions extends FindingsBaseEsQuery {
   from: NonNullable<estypes.SearchRequest['from']>;
@@ -56,6 +57,7 @@ export interface FindingsByResourcePage {
 interface FindingsByResourceAggs {
   resource_total: estypes.AggregationsCardinalityAggregate;
   resources: estypes.AggregationsMultiBucketAggregateBase<FindingsAggBucket>;
+  count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
 interface FindingsAggBucket extends estypes.AggregationsStringRareTermsBucketKeys {
@@ -76,6 +78,7 @@ export const getFindingsByResourceAggQuery = ({
     query,
     size: 0,
     aggs: {
+      ...getFindingsCountAggQuery(),
       resource_total: { cardinality: { field: 'resource.id' } },
       resources: {
         terms: { field: 'resource.id', size: MAX_BUCKETS },
@@ -138,12 +141,16 @@ export const useFindingsByResource = (options: UseFindingsByResourceOptions) => 
 
       if (!aggregations) throw new Error('expected aggregations to be defined');
 
-      if (!Array.isArray(aggregations.resources.buckets))
+      if (
+        !Array.isArray(aggregations.resources.buckets) ||
+        !Array.isArray(aggregations.count.buckets)
+      )
         throw new Error('expected buckets to be an array');
 
       return {
         page: aggregations.resources.buckets.map(createFindingsByResource),
         total: aggregations.resource_total.value,
+        count: getAggregationCount(aggregations.count.buckets),
         newPitId: newPitId!,
       };
     },
