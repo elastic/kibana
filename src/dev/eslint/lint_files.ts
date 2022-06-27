@@ -35,14 +35,14 @@ export function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boole
     CLIEngine.outputFixes(report);
   }
 
-  const failTypes = [];
-  if (report.errorCount > 0) failTypes.push('errors');
+  if (report.errorCount || report.warningCount) {
+    log[report.errorCount ? 'error' : 'warning'](cli.getFormatter()(report.results));
+  }
 
-  if (!failTypes.length) {
+  if (!report.errorCount) {
     log.success('[eslint] %d files linted successfully', files.length);
     return;
   }
 
-  log.error(cli.getFormatter()(report.results));
-  throw createFailError(`[eslint] ${failTypes.join(' & ')}`);
+  throw createFailError(`[eslint] errors`);
 }
