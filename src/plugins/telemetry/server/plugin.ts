@@ -8,13 +8,11 @@
 
 import { URL } from 'url';
 import {
-  catchError,
   type Observable,
-  of,
   startWith,
   firstValueFrom,
   ReplaySubject,
-  exhaustMap,
+  switchMap,
   timer,
   distinctUntilChanged,
   filter,
@@ -129,15 +127,15 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     // If the opt-in selection cannot be changed, set it as early as possible.
     const { optIn, allowChangingOptInStatus } = this.initialConfig;
-    const initialStatus = allowChangingOptInStatus === false ? optIn : undefined;
+    this.isOptedIn = allowChangingOptInStatus === false ? optIn : undefined;
 
     // Poll for the opt-in status
     this.isOptedIn$ = timer(0, OPT_IN_POLL_INTERVAL_MS).pipe(
       takeUntil(this.pluginStop$),
-      exhaustMap(() => this.getOptInStatus()),
-      startWith(initialStatus),
-      distinctUntilChanged(),
+      switchMap(() => this.getOptInStatus()),
+      startWith(this.isOptedIn),
       filter((isOptedIn): isOptedIn is boolean => typeof isOptedIn === 'boolean'),
+      distinctUntilChanged(),
       tap((optedIn) => (this.isOptedIn = optedIn)),
       shareReplay(1)
     );
@@ -221,8 +219,8 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
   private async getOptInStatus(): Promise<boolean | undefined> {
     const internalRepositoryClient = await firstValueFrom(
-      // if the Observable completes without emitting, firstValueFrom will trigger an exception
-      this.savedObjectsInternalClient$.pipe(catchError((err) => of(undefined)))
+      this.savedObjectsInternalClient$,
+      { defaultValue: undefined }
     );
     if (!internalRepositoryClient) return;
 
@@ -238,17 +236,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       return;
     }
 
-    const configMaybe = await withTimeout<TelemetryConfigType>({
-      promise: firstValueFrom(this.config$),
-      timeoutMs: 3000,
-    });
-
-    // If we can't get configuration in 3 second, skip this round.
-    if (configMaybe.timedout) {
-      return;
-    }
-
-    const config = configMaybe.value;
+    const config = await firstValueFrom(this.config$);
     const allowChangingOptInStatus = config.allowChangingOptInStatus;
     const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
     const currentKibanaVersion = this.currentKibanaVersion;
