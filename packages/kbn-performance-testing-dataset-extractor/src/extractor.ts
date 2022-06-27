@@ -15,12 +15,14 @@ import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { initClient, Document } from './es_client';
 
 const DATE_FORMAT = `YYYY-MM-DD'T'HH:mm:ss.SSS'Z'`;
+const STATIC_RESOURCES_PATTERN = /\.(css|ico|js|json|jpeg|jpg|gif|png|otf|ttf|woff|woff2)$/;
 
 interface CLIParams {
   param: {
     journeyName: string;
     scalabilitySetup: ScalabilitySetup;
     buildId: string;
+    withoutStaticResources: boolean;
   };
   client: {
     baseURL: string;
@@ -61,13 +63,47 @@ const calculateTransactionTimeRage = (hit: SearchHit<Document>) => {
   return { startTime, endTime };
 };
 
+const getTraceItems = (
+  hits: Array<SearchHit<Document>>,
+  withoutStaticResources: boolean,
+  log: ToolingLog
+) => {
+  const data = hits
+    .map((hit) => hit!._source as Document)
+    .map((hit) => {
+      const payload = hit.http.request?.body?.original;
+      return {
+        processor: hit.processor,
+        traceId: hit.trace.id,
+        timestamp: hit['@timestamp'],
+        environment: hit.environment,
+        request: {
+          url: { path: hit.url.path },
+          headers: hit.http.request.headers,
+          method: hit.http.request.method,
+          body: payload ? parsePayload(payload, hit.trace.id, log) : undefined,
+        },
+        response: { statusCode: hit.http.response.status_code },
+        transaction: {
+          id: hit.transaction.id,
+          name: hit.transaction.name,
+          type: hit.transaction.type,
+        },
+      };
+    });
+
+  return withoutStaticResources
+    ? data.filter((item) => !STATIC_RESOURCES_PATTERN.test(item.request.url.path))
+    : data;
+};
+
 export const extractor = async ({ param, client, log }: CLIParams) => {
   const authOptions = {
     node: client.baseURL,
     username: client.username,
     password: client.password,
   };
-  const { journeyName, scalabilitySetup, buildId } = param;
+  const { journeyName, scalabilitySetup, buildId, withoutStaticResources } = param;
   log.info(
     `Searching transactions with 'labels.testBuildId=${buildId}' and 'labels.journeyName=${journeyName}'`
   );
@@ -97,42 +133,18 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   const source = hits[0]!._source as Document;
   const kibanaVersion = source.service.version;
 
-  const data = hits
-    .map((hit) => hit!._source as Document)
-    .map((hit) => {
-      const payload = hit.http.request?.body?.original;
-      return {
-        processor: hit.processor,
-        traceId: hit.trace.id,
-        timestamp: hit['@timestamp'],
-        environment: hit.environment,
-        request: {
-          url: { path: hit.url.path },
-          headers: hit.http.request.headers,
-          method: hit.http.request.method,
-          body: payload ? parsePayload(payload, hit.trace.id, log) : undefined,
-        },
-        response: { statusCode: hit.http.response.status_code },
-        transaction: {
-          id: hit.transaction.id,
-          name: hit.transaction.name,
-          type: hit.transaction.type,
-        },
-      };
-    });
-
   const output = {
     journeyName,
     kibanaVersion,
     scalabilitySetup,
-    traceItems: data,
+    traceItems: getTraceItems(hits, withoutStaticResources, log),
   };
 
   const outputDir = path.resolve('target/scalability_traces');
   const fileName = `${output.journeyName.replace(/ /g, '')}-${buildId}.json`;
   const filePath = path.resolve(outputDir, fileName);
 
-  log.info(`Found ${hits.length} transactions, output file: ${filePath}`);
+  log.info(`Found ${output.traceItems.length} transactions, output file: ${filePath}`);
   if (!existsSync(outputDir)) {
     await fs.mkdir(outputDir, { recursive: true });
   }
