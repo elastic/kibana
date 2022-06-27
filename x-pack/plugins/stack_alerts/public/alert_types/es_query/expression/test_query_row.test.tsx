@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import { EuiCopy } from '@elastic/eui';
+import { copyToClipboard } from '@elastic/eui';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { TestQueryRow } from './test_query_row';
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    __esModule: true,
+    ...original,
+    copyToClipboard: jest.fn(() => true),
+  };
+});
 
 const COPIED_QUERY = 'COPIED QUERY';
 const onFetch = () => Promise.resolve({ nrOfDocs: 42, timeWindow: '5m' });
@@ -55,19 +64,16 @@ describe('TestQueryRow', () => {
     expect(localOnFetch).toHaveBeenCalled();
   });
 
-  it('should call the copyQuery callback and use the returned value when the copy query button is clicked', async () => {
+  it('should call the copyQuery callback and pass the returned value to copyToClipboard when the copy query button is clicked', async () => {
     const localOnCopyQuery = jest.fn(onCopyQuery);
     const component = mountWithIntl(
       <TestQueryRow fetch={onFetch} copyQuery={localOnCopyQuery} hasValidationErrors={false} />
     );
-    // EuiCopy.copy() calls document.execCommand() which isn't support in jsdom, so mock it
-    jest.spyOn(component.find<EuiCopy>(EuiCopy).instance(), 'copy').mockImplementation();
-    expect(component.find(EuiCopy).props().textToCopy).not.toBe(COPIED_QUERY);
     await act(async () => {
       findTestSubject(component, 'copyQuery').simulate('click');
     });
     component.update();
     expect(localOnCopyQuery).toHaveBeenCalled();
-    expect(component.find(EuiCopy).props().textToCopy).toBe(COPIED_QUERY);
+    expect(copyToClipboard).toHaveBeenCalledWith(COPIED_QUERY);
   });
 });
