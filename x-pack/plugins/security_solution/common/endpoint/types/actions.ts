@@ -13,13 +13,14 @@ import {
 } from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
-export interface OutputActions {
-  type: string;
-}
 
-export type OutputsType<TOutputType extends OutputActions = OutputActions> =
-  | Record<string, TOutputType | undefined>
-  | undefined;
+/** The output provided by some of the Endpoint responses */
+interface ActionResponseOutput<TOutputContent extends object = object> {
+  type: 'json' | 'text';
+  content: {
+    entries: TOutputContent[];
+  };
+}
 
 export interface RunningProcessesEntry {
   command: string;
@@ -27,12 +28,7 @@ export interface RunningProcessesEntry {
   entity_id: string;
   user: string;
 }
-export interface OutputActionRunningProcess extends OutputActions {
-  type: 'json' | 'text';
-  content: {
-    entries: RunningProcessesEntry[];
-  };
-}
+
 export const RESPONSE_ACTION_COMMANDS = [
   'isolate',
   'unisolate',
@@ -94,12 +90,13 @@ export interface LogsEndpointAction {
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16
  */
-export interface LogsEndpointActionResponse {
+export interface LogsEndpointActionResponse<TOutputContent extends object = object> {
   '@timestamp': string;
   agent: {
     id: string | string[];
   };
-  EndpointActions: EndpointActionFields & ActionResponseFields;
+  EndpointActions: EndpointActionFields &
+    ActionResponseFields & { output?: ActionResponseOutput<TOutputContent> };
   error?: EcsError;
 }
 
@@ -121,14 +118,10 @@ export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId;
 
-export interface EndpointActionData<
-  T extends EndpointActionDataParameterTypes = undefined,
-  TOutputActions extends OutputActions = OutputActions
-> {
+export interface EndpointActionData<T extends EndpointActionDataParameterTypes = never> {
   command: ResponseActions;
   comment?: string;
   parameters?: T;
-  output?: TOutputActions;
 }
 
 export interface FleetActionResponseData {
@@ -252,7 +245,7 @@ export interface PendingActionsResponse {
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
 
-export interface ActionDetails<TOutputType extends OutputActions = OutputActions> {
+export interface ActionDetails<TOutputContent extends object = object> {
   /** The action id */
   id: string;
   /**
@@ -283,7 +276,7 @@ export interface ActionDetails<TOutputType extends OutputActions = OutputActions
   /**
    * The output data from an action
    */
-  outputs?: OutputsType<TOutputType>;
+  outputs?: Record<string, ActionResponseOutput<TOutputContent>>;
   /** user that created the action */
   createdBy: string;
   /** comment submitted with action */
@@ -292,7 +285,7 @@ export interface ActionDetails<TOutputType extends OutputActions = OutputActions
   parameters?: EndpointActionDataParameterTypes;
 }
 
-export interface ActionDetailsApiResponse<TOutputType extends OutputActions = OutputActions> {
+export interface ActionDetailsApiResponse<TOutputType extends object = object> {
   data: ActionDetails<TOutputType>;
 }
 export interface ActionListApiResponse {

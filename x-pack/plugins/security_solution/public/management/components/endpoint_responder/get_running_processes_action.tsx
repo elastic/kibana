@@ -6,18 +6,32 @@
  */
 
 import React, { memo, useEffect, useMemo } from 'react';
+import styled from 'styled-components';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  ActionDetails,
-  OutputActionRunningProcess,
-  RunningProcessesEntry,
-} from '../../../../common/endpoint/types';
+import { ActionDetails, RunningProcessesEntry } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import { EndpointCommandDefinitionMeta } from './types';
 import { CommandExecutionComponentProps } from '../console/types';
 import { useSendGetEndpointRunningProcessesRequest } from '../../hooks/endpoint/use_send_get_endpoint_running_processes_request';
+
+// @ts-expect-error TS2769
+const StyledEuiBasicTable = styled(EuiBasicTable)`
+  .euiTable {
+    background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+  }
+  .euiTableHeaderCell {
+    border-bottom: ${(props) => props.theme.eui.euiBorderThin};
+    .euiTableCellContent__text {
+      font-weight: 400;
+    }
+  }
+  .euiTableRowCell {
+    border-top: none !important;
+    border-bottom: none !important;
+  }
+`;
 
 export const GetRunningProcessesActionResult = memo<
   CommandExecutionComponentProps<
@@ -25,7 +39,7 @@ export const GetRunningProcessesActionResult = memo<
     {
       actionId?: string;
       actionRequestSent?: boolean;
-      completedActionDetails?: ActionDetails<OutputActionRunningProcess>;
+      completedActionDetails?: ActionDetails<RunningProcessesEntry>;
     },
     EndpointCommandDefinitionMeta
   >
@@ -38,7 +52,7 @@ export const GetRunningProcessesActionResult = memo<
 
   const getRunningProcessesApi = useSendGetEndpointRunningProcessesRequest();
 
-  const { data: actionDetails } = useGetActionDetails<OutputActionRunningProcess>(actionId ?? '-', {
+  const { data: actionDetails } = useGetActionDetails<RunningProcessesEntry>(actionId ?? '-', {
     enabled: Boolean(actionId) && isPending,
     refetchInterval: isPending ? 3000 : false,
   });
@@ -115,7 +129,7 @@ export const GetRunningProcessesActionResult = memo<
       field: 'entity_id',
       name: i18n.translate(
         'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.enityId',
-        { defaultMessage: 'Entity id' }
+        { defaultMessage: 'ENTITY ID' }
       ),
       width: '15%',
     },
@@ -131,7 +145,7 @@ export const GetRunningProcessesActionResult = memo<
       field: 'command',
       name: i18n.translate(
         'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.command',
-        { defaultMessage: 'Command' }
+        { defaultMessage: 'COMMAND' }
       ),
       width: '55%',
     },
@@ -139,7 +153,7 @@ export const GetRunningProcessesActionResult = memo<
       field: 'user',
       name: i18n.translate(
         'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.user',
-        { defaultMessage: 'User' }
+        { defaultMessage: 'USER' }
       ),
       width: '15%',
     },
@@ -148,7 +162,7 @@ export const GetRunningProcessesActionResult = memo<
   // Show results
   return (
     <ResultComponent data-test-subj="getRunningProcessesSuccessCallout" showTitle={false}>
-      <EuiBasicTable<RunningProcessesEntry> items={[...tableEntries]} columns={columns} />
+      <StyledEuiBasicTable items={[...tableEntries]} columns={columns} />
     </ResultComponent>
   );
 });
