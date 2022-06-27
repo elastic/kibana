@@ -181,7 +181,7 @@ export class AttributeService<
         this.showSaveModal(
           <SavedObjectSaveModal
             onSave={onSave}
-            onClose={() => reject()}
+            onClose={() => {}}
             title={get(
               saveOptions,
               'saveModalTitle',
