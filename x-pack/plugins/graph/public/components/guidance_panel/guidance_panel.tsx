@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -78,9 +78,14 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
   const kibana = useKibana<IDataPluginServices>();
   const { services, overlays } = kibana;
   const { savedObjects, uiSettings, application, data } = services;
-  const hasDataViews = useMemo(() => {
-    return data.dataViews.hasUserDataView();
-  }, [data.dataViews]);
+  const [hasDataViews, setHasDataViews] = useState<boolean>(true);
+
+  useEffect(() => {
+    const checkIfDataViewsExist = async () => {
+      setHasDataViews(await data.dataViews.hasData.hasUserDataView());
+    };
+    checkIfDataViewsExist();
+  }, [setHasDataViews, data.dataViews]);
 
   if (!overlays || !application) return null;
 
