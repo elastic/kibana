@@ -44,6 +44,17 @@ const msTimeUnitLabel = i18n.translate('xpack.monitoring.metrics.kibana.msTimeUn
   defaultMessage: 'ms',
 });
 
+const ruleQueueDurationTitle = i18n.translate('xpack.monitoring.metrics.kibana.ruleQueueDuration', {
+  defaultMessage: 'Rule Queue Duration',
+});
+
+const actionQueueDurationTitle = i18n.translate(
+  'xpack.monitoring.metrics.kibana.actionQueueDuration',
+  {
+    defaultMessage: 'Action Queue Duration',
+  }
+);
+
 export const metrics = {
   kibana_cluster_requests: new KibanaEventsRateClusterMetric({
     field: 'kibana_stats.requests.total',
@@ -337,7 +348,7 @@ export const metrics = {
   kibana_cluster_rule_overdue_count: new KibanaClusterRuleMetric({
     field: 'kibana.cluster_rules.overdue.count',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueCountLabel', {
-      defaultMessage: 'Rule Queue Length',
+      defaultMessage: 'Rule Queue',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueCountDescription',
@@ -351,6 +362,7 @@ export const metrics = {
     isNotSupportedInInternalCollection: true,
   }),
   kibana_cluster_rule_overdue_p50: new KibanaClusterRuleMetric({
+    title: ruleQueueDurationTitle,
     field: 'kibana.cluster_rules.overdue.delay.p50',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP50Label', {
       defaultMessage: 'Average Rule Queue Duration',
@@ -367,6 +379,7 @@ export const metrics = {
     isNotSupportedInInternalCollection: true,
   }),
   kibana_cluster_rule_overdue_p99: new KibanaClusterRuleMetric({
+    title: ruleQueueDurationTitle,
     field: 'kibana.cluster_rules.overdue.delay.p99',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP99Label', {
       defaultMessage: 'Longest Rule Queue Duration',
@@ -387,7 +400,7 @@ export const metrics = {
     label: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueCountLabel',
       {
-        defaultMessage: 'Action Queue Length',
+        defaultMessage: 'Action Queue',
       }
     ),
     description: i18n.translate(
@@ -402,6 +415,7 @@ export const metrics = {
     isNotSupportedInInternalCollection: true,
   }),
   kibana_cluster_action_overdue_p50: new KibanaClusterActionMetric({
+    title: actionQueueDurationTitle,
     field: 'kibana.cluster_actions.overdue.delay.p50',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP50Label', {
       defaultMessage: 'Average Action Queue Duration',
@@ -418,6 +432,7 @@ export const metrics = {
     isNotSupportedInInternalCollection: true,
   }),
   kibana_cluster_action_overdue_p99: new KibanaClusterActionMetric({
+    title: actionQueueDurationTitle,
     field: 'kibana.cluster_actions.overdue.delay.p99',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP99Label', {
       defaultMessage: 'Longest Action Queue Duration',
