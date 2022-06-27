@@ -208,10 +208,11 @@ export class TaskScheduling {
    * @returns {Promise<RunSoonResult>}
    */
   public async runSoon(taskId: string): Promise<RunSoonResult> {
-    const task = await this.getIdleTask(taskId);
+    const task = await this.getNonRunningTask(taskId);
     try {
       await this.store.update({
         ...task,
+        status: TaskStatus.Idle,
         scheduledAt: new Date(),
         runAt: new Date(),
       });
@@ -404,15 +405,15 @@ export class TaskScheduling {
     );
   }
 
-  private async getIdleTask(taskId: string) {
+  private async getNonRunningTask(taskId: string) {
     const task = await this.store.get(taskId);
     switch (task.status) {
       case TaskStatus.Claiming:
       case TaskStatus.Running:
         throw Error(`Failed to run task "${taskId}" as it is currently running`);
-      case TaskStatus.Failed:
       case TaskStatus.Unrecognized:
         throw Error(`Failed to run task "${taskId}" with status ${task.status}`);
+      case TaskStatus.Failed:
       default:
         return task;
     }

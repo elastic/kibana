@@ -283,6 +283,26 @@ describe('TaskScheduling', () => {
       expect(result).toEqual({ id });
     });
 
+    test('runs failed tasks too', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Failed }));
+      mockTaskStore.update.mockResolvedValueOnce(mockTask({ id }));
+
+      const result = await taskScheduling.runSoon(id);
+      expect(mockTaskStore.update).toHaveBeenCalledWith(
+        mockTask({
+          id,
+          status: TaskStatus.Idle,
+          runAt: expect.any(Date),
+          scheduledAt: expect.any(Date),
+        })
+      );
+      expect(mockTaskStore.get).toHaveBeenCalledWith(id);
+      expect(result).toEqual({ id });
+    });
+
     test('rejects when the task update fails', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
@@ -338,19 +358,6 @@ describe('TaskScheduling', () => {
         Error(
           'Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" as it is currently running'
         )
-      );
-    });
-
-    test('rejects when the task status is failed', async () => {
-      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-
-      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Failed }));
-      mockTaskStore.update.mockRejectedValueOnce(409);
-
-      const result = taskScheduling.runSoon(id);
-      await expect(result).rejects.toEqual(
-        Error('Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" with status failed')
       );
     });
 
