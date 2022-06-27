@@ -14,7 +14,7 @@ import {
   type CriteriaWithPagination,
   type EuiTableActionsColumnType,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as TEST_SUBJECTS from '../test_subjects';
 import type { CspFinding } from '../types';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
@@ -53,14 +53,15 @@ const FindingsTableComponent = ({
     return (
       <EuiEmptyPrompt
         iconType="logoKibana"
+        data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE_NO_FINDINGS_EMPTY_STATE}
         title={
           <h2>
-            {i18n.translate('xpack.csp.findings.latestFindings.noFindingsTitle', {
-              defaultMessage: 'There are no Findings',
-            })}
+            <FormattedMessage
+              id="xpack.csp.findings.latestFindings.noFindingsTitle"
+              defaultMessage="There are no Findings"
+            />
           </h2>
         }
-        data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE_NO_FINDINGS_EMPTY_STATE}
       />
     );
 

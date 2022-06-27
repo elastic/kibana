@@ -53,9 +53,10 @@ const FindingsByResourceTableComponent = ({
         iconType="logoKibana"
         title={
           <h2>
-            {i18n.translate('xpack.csp.findings.findingsByResource.noFindingsTitle', {
-              defaultMessage: 'There are no Findings',
-            })}
+            <FormattedMessage
+              id="xpack.csp.findings.findingsByResource.noFindingsTitle"
+              defaultMessage="There are no Findings"
+            />
           </h2>
         }
       />
