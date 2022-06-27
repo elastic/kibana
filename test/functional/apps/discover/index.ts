@@ -30,6 +30,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_discover'));
       loadTestFile(require.resolve('./_discover_accessibility'));
       loadTestFile(require.resolve('./_discover_histogram'));
+      loadTestFile(require.resolve('./_doc_accessibility'));
       loadTestFile(require.resolve('./classic/_doc_table'));
       loadTestFile(require.resolve('./classic/_doc_table_newline'));
       loadTestFile(require.resolve('./_filter_editor'));

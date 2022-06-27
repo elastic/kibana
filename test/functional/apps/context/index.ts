@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       );
     });
 
+    loadTestFile(require.resolve('./_context_accessibility'));
     loadTestFile(require.resolve('./_context_navigation'));
     loadTestFile(require.resolve('./_discover_navigation'));
     loadTestFile(require.resolve('./classic/_discover_navigation'));
