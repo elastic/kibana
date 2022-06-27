@@ -9,17 +9,42 @@ import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
+import { useStartServices } from '../../../../hooks';
+
 export function useHistoryBlock(isEdited: boolean) {
   const history = useHistory();
+  const { overlays, application } = useStartServices();
 
   useEffect(() => {
     if (!isEdited) {
       return;
     }
-    return history.block(
-      i18n.translate('xpack.fleet.editPackagePolicy.historyBlockMessage', {
-        defaultMessage: `Are you sure you want to leave? Changes will be lost.`,
-      })
-    );
-  }, [history, isEdited]);
+
+    const unblock = history.block((state) => {
+      async function confirmAsync() {
+        const confirmRes = await overlays.openConfirm(
+          i18n.translate('xpack.fleet.editPackagePolicy.historyBlockDescription', {
+            defaultMessage: `Unsaved changes will be lost.`,
+          }),
+          {
+            title: i18n.translate('xpack.fleet.editPackagePolicy.historyBlockTitle', {
+              defaultMessage: 'Are you sure you want to leave?',
+            }),
+            buttonColor: 'danger',
+          }
+        );
+
+        if (confirmRes) {
+          unblock();
+          application.navigateToUrl(
+            `${state.pathname}?${state.search !== '' ? `?${state.search}` : ''}`
+          );
+        }
+      }
+      confirmAsync();
+      return false;
+    });
+
+    return unblock;
+  }, [history, isEdited, overlays, application]);
 }
