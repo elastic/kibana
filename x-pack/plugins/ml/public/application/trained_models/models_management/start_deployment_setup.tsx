@@ -108,10 +108,10 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
           legend={i18n.translate(
             'xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLegend',
             {
-              defaultMessage: 'Wait for it',
+              defaultMessage: 'Threads per allocation selector',
             }
           )}
-          name={'name'}
+          name={'threadsPerAllocation'}
           idSelected={toggleIdSelected}
           onChange={(optionId) => {
             const value = threadsPerAllocationsOptions.find((v) => v.id === optionId)!.value;
