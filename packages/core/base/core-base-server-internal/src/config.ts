@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type { CoreContext } from './core_context';
-export type { CoreService, ServiceConfigDescriptor } from './services';
-export { CriticalError } from './errors';
-export { uuidRegexp } from './regexp';
-export { coreConfigPaths } from './config';
+/**
+ * Constants for Core config paths that are used from multiple service.
+ *
+ * @internal
+ */
+export const coreConfigPaths = {
+  /**
+   * Config path of the http service's config.
+   */
+  http: 'server',
+};
