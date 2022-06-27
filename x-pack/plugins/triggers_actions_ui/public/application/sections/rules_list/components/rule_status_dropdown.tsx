@@ -68,6 +68,7 @@ export const usePreviousSnoozeInterval: (
       parseInterval(intervalFromStorage);
     } catch (e) {
       intervalFromStorage = null;
+      localStorage.removeItem(PREV_SNOOZE_INTERVAL_KEY);
     }
   }
   const usePropsInterval = typeof propsInterval !== 'undefined';
