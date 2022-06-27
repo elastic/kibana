@@ -8,7 +8,7 @@ exports[`Header should render normally 1`] = `
     class="euiFlexItem"
   >
     <div
-      class="euiText euiText--small"
+      class="euiText css-1vkrgyt-euiText-s"
     >
       <p>
         <span>

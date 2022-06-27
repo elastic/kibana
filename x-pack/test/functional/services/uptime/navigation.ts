@@ -83,6 +83,10 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     },
 
     async loadDataAndGoToMonitorPage(dateStart: string, dateEnd: string, monitorId: string) {
+      const hasTour = await testSubjects.exists('syntheticsManagementTourDismiss');
+      if (hasTour) {
+        await testSubjects.click('syntheticsManagementTourDismiss');
+      }
       await PageObjects.timePicker.setAbsoluteRange(dateStart, dateEnd);
       await this.goToMonitor(monitorId);
     },

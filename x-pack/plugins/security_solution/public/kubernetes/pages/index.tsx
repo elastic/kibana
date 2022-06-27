@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';
 import { SecurityPageName } from '../../../common/constants';
@@ -13,17 +14,70 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
+import { inputsSelectors } from '../../common/store';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useGlobalTime } from '../../common/containers/use_global_time';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { convertToBuildEsQuery } from '../../common/lib/keury';
+import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
+import { SessionsView } from '../../common/components/sessions_viewer';
+import { TimelineId } from '../../../common/types/timeline';
+import { kubernetesSessionsHeaders } from './constants';
 
 export const KubernetesContainer = React.memo(() => {
-  const { kubernetesSecurity } = useKibana().services;
+  const { kubernetesSecurity, uiSettings } = useKibana().services;
   const { globalFullScreen } = useGlobalFullScreen();
   const {
     indexPattern,
     // runtimeMappings,
     // loading: isLoadingIndexPattern,
   } = useSourcererDataView();
+  const { from, to } = useGlobalTime();
+
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+
+  const [filterQuery, kqlError] = useMemo(
+    () =>
+      convertToBuildEsQuery({
+        config: getEsQueryConfig(uiSettings),
+        indexPattern,
+        queries: [query],
+        filters,
+      }),
+    [filters, indexPattern, uiSettings, query]
+  );
+
+  useInvalidFilterQuery({
+    id: 'kubernetesQuery',
+    filterQuery,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
+
+  const renderSessionsView = useCallback(
+    (sessionsFilterQuery: string | undefined) => (
+      <SessionsView
+        timelineId={TimelineId.kubernetesPageSessions}
+        endDate={to}
+        pageFilters={[]}
+        startDate={from}
+        filterQuery={sessionsFilterQuery}
+        columns={kubernetesSessionsHeaders}
+        defaultColumns={kubernetesSessionsHeaders}
+      />
+    ),
+    [from, to]
+  );
+
   return (
     <SecuritySolutionPageWrapper noPadding>
       {kubernetesSecurity.getKubernetesPage({
@@ -32,6 +86,13 @@ export const KubernetesContainer = React.memo(() => {
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
         ),
+        indexPattern,
+        globalFilter: {
+          filterQuery,
+          startDate: from,
+          endDate: to,
+        },
+        renderSessionsView,
       })}
       <SpyRoute pageName={SecurityPageName.kubernetes} />
     </SecuritySolutionPageWrapper>
