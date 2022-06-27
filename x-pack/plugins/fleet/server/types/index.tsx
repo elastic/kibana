@@ -74,6 +74,9 @@ export type {
   FleetServerAgentAction,
   FleetServerPolicy,
   FullAgentPolicyInputStream,
+  DownloadSourceBase,
+  DownloadSource,
+  DownloadSourceAttributes,
 } from '../../common';
 export {
   ElasticsearchAssetType,
