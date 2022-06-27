@@ -30,7 +30,7 @@ const PrependContainer = euiStyled.div`
   align-items: center;
   background-color: ${({ theme }) =>
     theme.eui.euiFormInputGroupLabelBackground};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
+  padding: 0 ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 export function TimeComparison() {
