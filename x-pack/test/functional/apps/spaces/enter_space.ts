@@ -11,18 +11,20 @@ export default function enterSpaceFunctonalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
 
   describe('Enter Space', function () {
     this.tags('includeFirefox');
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/spaces/enter_space');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/spaces/enter_space'
+      );
       await PageObjects.security.forceLogout();
     });
-    after(
-      async () => await esArchiver.unload('x-pack/test/functional/es_archives/spaces/enter_space')
-    );
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
     afterEach(async () => {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
