@@ -8,7 +8,7 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
-import { CommentRequest } from '@kbn/cases-plugin/common/api';
+import { CommentRequest, CommentType } from '@kbn/cases-plugin/common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -254,10 +254,14 @@ export default ({ getService }: FtrProviderContext): void => {
         params: [postCommentUserReq, postExternalReferenceSOReq],
       });
 
+      const externalRefComment = patchedCase.comments?.find(
+        (comment) => comment.type === CommentType.externalReference
+      );
+
       const esResponse = await getSOFromKibanaIndex({
         es,
         soType: CASE_COMMENT_SAVED_OBJECT,
-        soId: patchedCase.comments![1].id,
+        soId: externalRefComment!.id,
       });
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
@@ -290,10 +294,14 @@ export default ({ getService }: FtrProviderContext): void => {
         params: [postCommentUserReq, postExternalReferenceNoSOReq],
       });
 
+      const externalRefComment = patchedCase.comments?.find(
+        (comment) => comment.type === CommentType.externalReference
+      );
+
       const esResponse = await getSOFromKibanaIndex({
         es,
         soType: CASE_COMMENT_SAVED_OBJECT,
-        soId: patchedCase.comments![1].id,
+        soId: externalRefComment!.id,
       });
 
       const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
