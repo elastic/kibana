@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -42,15 +42,19 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
   const numOfAllocation = config.numOfAllocations;
   const threadsPerAllocations = config.threadsPerAllocations;
 
-  const threadsPerAllocationsOptions = new Array(6).fill(null).map((v, i) => {
-    const value = Math.pow(2, i);
+  const threadsPerAllocationsOptions = useMemo(
+    () =>
+      new Array(6).fill(null).map((v, i) => {
+        const value = Math.pow(2, i);
 
-    return {
-      id: String(value),
-      label: String(value),
-      value,
-    };
-  });
+        return {
+          id: String(value),
+          label: String(value),
+          value,
+        };
+      }),
+    []
+  );
 
   const toggleIdSelected = threadsPerAllocationsOptions.find(
     (v) => v.value === threadsPerAllocations
