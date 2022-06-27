@@ -42,7 +42,7 @@ import {
   ContextMenuActions,
 } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
-import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../../constants';
+import { AGENTS_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentHealth,
