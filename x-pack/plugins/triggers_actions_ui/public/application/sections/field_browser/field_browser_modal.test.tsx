@@ -8,7 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { TestProviders, mockBrowserFields, defaultHeaders } from '../../../../mock';
+import { mockBrowserFields } from './mock';
 import { FieldBrowserModal, FieldBrowserModalProps } from './field_browser_modal';
 
 const mockOnHide = jest.fn();
@@ -16,7 +16,7 @@ const mockOnToggleColumn = jest.fn();
 const mockOnResetColumns = jest.fn();
 
 const testProps: FieldBrowserModalProps = {
-  columnHeaders: [],
+  columnIds: [],
   filteredBrowserFields: mockBrowserFields,
   searchInput: '',
   appliedFilterInput: '',
@@ -38,53 +38,33 @@ describe('FieldBrowserModal', () => {
   });
 
   test('it renders the Close button', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FieldBrowserModal {...testProps} />
-      </TestProviders>
-    );
+    const wrapper = mount(<FieldBrowserModal {...testProps} />);
 
     expect(wrapper.find('[data-test-subj="close"]').first().text()).toEqual('Close');
   });
 
   test('it invokes the Close button', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FieldBrowserModal {...testProps} />
-      </TestProviders>
-    );
+    const wrapper = mount(<FieldBrowserModal {...testProps} />);
 
     wrapper.find('[data-test-subj="close"]').first().simulate('click');
     expect(mockOnHide).toBeCalled();
   });
 
   test('it renders the Reset Fields button', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FieldBrowserModal {...testProps} />
-      </TestProviders>
-    );
+    const wrapper = mount(<FieldBrowserModal {...testProps} />);
 
     expect(wrapper.find('[data-test-subj="reset-fields"]').first().text()).toEqual('Reset Fields');
   });
 
   test('it invokes onResetColumns callback when the user clicks the Reset Fields button', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FieldBrowserModal {...testProps} columnHeaders={defaultHeaders} />
-      </TestProviders>
-    );
+    const wrapper = mount(<FieldBrowserModal {...testProps} columnIds={['test']} />);
 
     wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
     expect(mockOnResetColumns).toHaveBeenCalled();
   });
 
   test('it invokes onHide when the user clicks the Reset Fields button', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FieldBrowserModal {...testProps} />
-      </TestProviders>
-    );
+    const wrapper = mount(<FieldBrowserModal {...testProps} />);
 
     wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
 
@@ -92,41 +72,25 @@ describe('FieldBrowserModal', () => {
   });
 
   test('it renders the search', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FieldBrowserModal {...testProps} />
-      </TestProviders>
-    );
+    const wrapper = mount(<FieldBrowserModal {...testProps} />);
 
     expect(wrapper.find('[data-test-subj="field-search"]').exists()).toBe(true);
   });
 
   test('it renders the categories selector', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FieldBrowserModal {...testProps} />
-      </TestProviders>
-    );
+    const wrapper = mount(<FieldBrowserModal {...testProps} />);
 
     expect(wrapper.find('[data-test-subj="categories-selector"]').exists()).toBe(true);
   });
 
   test('it renders the fields table', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FieldBrowserModal {...testProps} />
-      </TestProviders>
-    );
+    const wrapper = mount(<FieldBrowserModal {...testProps} />);
 
     expect(wrapper.find('[data-test-subj="field-table"]').exists()).toBe(true);
   });
 
   test('focuses the search input when the component mounts', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FieldBrowserModal {...testProps} />
-      </TestProviders>
-    );
+    const wrapper = mount(<FieldBrowserModal {...testProps} />);
 
     expect(
       wrapper.find('[data-test-subj="field-search"]').first().getDOMNode().id ===
@@ -139,13 +103,10 @@ describe('FieldBrowserModal', () => {
     const inputText = 'event.category';
 
     const wrapper = mount(
-      <TestProviders>
-        <FieldBrowserModal {...testProps} onSearchInputChange={onSearchInputChange} />
-      </TestProviders>
+      <FieldBrowserModal {...testProps} onSearchInputChange={onSearchInputChange} />
     );
 
     const searchField = wrapper.find('[data-test-subj="field-search"]').first();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const changeEvent: any = { target: { value: inputText } };
     const onChange = searchField.props().onChange;
 
@@ -159,14 +120,12 @@ describe('FieldBrowserModal', () => {
     const MyTestComponent = () => <div>{'test'}</div>;
 
     const wrapper = mount(
-      <TestProviders>
-        <FieldBrowserModal
-          {...testProps}
-          options={{
-            createFieldButton: MyTestComponent,
-          }}
-        />
-      </TestProviders>
+      <FieldBrowserModal
+        {...testProps}
+        options={{
+          createFieldButton: MyTestComponent,
+        }}
+      />
     );
 
     expect(wrapper.find(MyTestComponent).exists()).toBeTruthy();

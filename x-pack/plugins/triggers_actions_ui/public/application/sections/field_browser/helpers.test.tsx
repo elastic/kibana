@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockBrowserFields } from '../../../../mock';
+import { mockBrowserFields } from './mock';
 
 import {
   categoryHasFields,
@@ -13,8 +13,7 @@ import {
   filterBrowserFieldsByFieldName,
   filterSelectedBrowserFields,
 } from './helpers';
-import { BrowserFields } from '../../../../../common/search_strategy';
-import { ColumnHeaderOptions } from '../../../../../common';
+import type { BrowserFields } from './types';
 
 describe('helpers', () => {
   describe('categoryHasFields', () => {
@@ -257,25 +256,21 @@ describe('helpers', () => {
   });
 
   describe('filterSelectedBrowserFields', () => {
-    const columnHeaders = [
-      { id: 'agent.ephemeral_id' },
-      { id: 'agent.id' },
-      { id: 'container.id' },
-    ] as ColumnHeaderOptions[];
+    const columnIds = ['agent.ephemeral_id', 'agent.id', 'container.id'];
 
     test('it returns an empty collection when browserFields is empty', () => {
-      expect(filterSelectedBrowserFields({ browserFields: {}, columnHeaders: [] })).toEqual({});
+      expect(filterSelectedBrowserFields({ browserFields: {}, columnIds: [] })).toEqual({});
     });
 
-    test('it returns an empty collection when browserFields is empty and columnHeaders is non empty', () => {
-      expect(filterSelectedBrowserFields({ browserFields: {}, columnHeaders })).toEqual({});
+    test('it returns an empty collection when browserFields is empty and columnIds is non empty', () => {
+      expect(filterSelectedBrowserFields({ browserFields: {}, columnIds })).toEqual({});
     });
 
-    test('it returns an empty collection when browserFields is NOT empty and columnHeaders is empty', () => {
+    test('it returns an empty collection when browserFields is NOT empty and columnIds is empty', () => {
       expect(
         filterSelectedBrowserFields({
           browserFields: mockBrowserFields,
-          columnHeaders: [],
+          columnIds: [],
         })
       ).toEqual({});
     });
@@ -330,7 +325,7 @@ describe('helpers', () => {
       expect(
         filterSelectedBrowserFields({
           browserFields: mockBrowserFields,
-          columnHeaders,
+          columnIds,
         })
       ).toEqual(filtered);
     });

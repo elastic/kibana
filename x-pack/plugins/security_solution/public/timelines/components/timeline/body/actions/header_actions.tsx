@@ -90,7 +90,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   timelineId,
   fieldBrowserOptions,
 }) => {
-  const { timelines: timelinesUi } = useKibana().services;
+  const { triggersActionsUi } = useKibana().services;
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const dispatch = useDispatch();
@@ -219,9 +219,9 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
 
       <EventsTh role="button">
         <FieldBrowserContainer>
-          {timelinesUi.getFieldBrowser({
+          {triggersActionsUi.getFieldBrowser({
             browserFields,
-            columnHeaders,
+            columnIds: columnHeaders.map(({ id }) => id),
             onResetColumns,
             onToggleColumn,
             options: fieldBrowserOptions,

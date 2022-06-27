@@ -19,8 +19,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import type { BrowserFields } from '../../../../../common/search_strategy';
-import type { FieldBrowserProps, ColumnHeaderOptions } from '../../../../../common/types';
+import type { FieldBrowserProps, BrowserFields } from './types';
 import { Search } from './search';
 
 import { CLOSE_BUTTON_CLASS_NAME, FIELD_BROWSER_WIDTH, RESET_FIELDS_CLASS_NAME } from './helpers';
@@ -37,7 +36,7 @@ export type FieldBrowserModalProps = Pick<
   /**
    * The current timeline column headers
    */
-  columnHeaders: ColumnHeaderOptions[];
+  columnIds: string[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -88,7 +87,7 @@ export type FieldBrowserModalProps = Pick<
  */
 const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
   appliedFilterInput,
-  columnHeaders,
+  columnIds,
   filteredBrowserFields,
   filterSelectedEnabled,
   isSearching,
@@ -169,7 +168,7 @@ const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
           <EuiSpacer size="l" />
 
           <FieldTable
-            columnHeaders={columnHeaders}
+            columnIds={columnIds}
             filteredBrowserFields={filteredBrowserFields}
             filterSelectedEnabled={filterSelectedEnabled}
             searchInput={appliedFilterInput}

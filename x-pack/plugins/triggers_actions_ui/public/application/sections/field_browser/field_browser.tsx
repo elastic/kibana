@@ -10,8 +10,7 @@ import { debounce } from 'lodash';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import type { FieldBrowserProps } from '../../../../../common/types/field_browser';
+import type { FieldBrowserProps, BrowserFields } from './types';
 import { FieldBrowserModal } from './field_browser_modal';
 import { filterBrowserFieldsByFieldName, filterSelectedBrowserFields } from './helpers';
 import * as i18n from './translations';
@@ -31,7 +30,7 @@ FieldBrowserButtonContainer.displayName = 'FieldBrowserButtonContainer';
  * Manages the state of the field browser
  */
 export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
-  columnHeaders,
+  columnIds,
   browserFields,
   onResetColumns,
   onToggleColumn,
@@ -73,9 +72,9 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
   const selectionFilteredBrowserFields = useMemo<BrowserFields>(
     () =>
       filterSelectedEnabled
-        ? filterSelectedBrowserFields({ browserFields, columnHeaders })
+        ? filterSelectedBrowserFields({ browserFields, columnIds })
         : browserFields,
-    [browserFields, columnHeaders, filterSelectedEnabled]
+    [browserFields, columnIds, filterSelectedEnabled]
   );
 
   useEffect(() => {
@@ -141,7 +140,7 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
 
       {show && (
         <FieldBrowserModal
-          columnHeaders={columnHeaders}
+          columnIds={columnIds}
           filteredBrowserFields={
             filteredBrowserFields != null ? filteredBrowserFields : browserFields
           }

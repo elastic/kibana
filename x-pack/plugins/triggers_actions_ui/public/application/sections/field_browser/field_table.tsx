@@ -8,10 +8,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { EuiInMemoryTable, Pagination, Direction } from '@elastic/eui';
-import { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
 import { getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
-import type { GetFieldTableColumns } from '../../../../../common/types/field_browser';
+import type { BrowserFields, GetFieldTableColumns } from './types';
 import { FieldTableHeader } from './field_table_header';
 
 const DEFAULT_SORTING: { field: string; direction: Direction } = {
@@ -20,7 +19,7 @@ const DEFAULT_SORTING: { field: string; direction: Direction } = {
 } as const;
 
 export interface FieldTableProps {
-  columnHeaders: ColumnHeaderOptions[];
+  columnIds: string[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -62,7 +61,7 @@ const Count = styled.span`
 Count.displayName = 'Count';
 
 const FieldTableComponent: React.FC<FieldTableProps> = ({
-  columnHeaders,
+  columnIds,
   filteredBrowserFields,
   filterSelectedEnabled,
   getFieldTableColumns,
@@ -83,9 +82,9 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
       getFieldItems({
         browserFields: filteredBrowserFields,
         selectedCategoryIds,
-        columnHeaders,
+        columnIds,
       }),
-    [columnHeaders, filteredBrowserFields, selectedCategoryIds]
+    [columnIds, filteredBrowserFields, selectedCategoryIds]
   );
 
   /**

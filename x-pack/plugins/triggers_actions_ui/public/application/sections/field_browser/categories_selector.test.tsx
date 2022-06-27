@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { mockBrowserFields, TestProviders } from '../../../../mock';
+import { mockBrowserFields } from './mock';
 
 import { CategoriesSelector } from './categories_selector';
 
@@ -25,11 +25,7 @@ describe('CategoriesSelector', () => {
 
   it('should render the default selector button', () => {
     const categoriesCount = Object.keys(mockBrowserFields).length;
-    const result = render(
-      <TestProviders>
-        <CategoriesSelector {...defaultProps} />
-      </TestProviders>
-    );
+    const result = render(<CategoriesSelector {...defaultProps} />);
 
     expect(result.getByTestId('categories-filter-button')).toBeInTheDocument();
     expect(result.getByText('Categories')).toBeInTheDocument();
@@ -38,9 +34,7 @@ describe('CategoriesSelector', () => {
 
   it('should render the selector button with selected categories', () => {
     const result = render(
-      <TestProviders>
-        <CategoriesSelector {...defaultProps} selectedCategoryIds={['base', 'event']} />
-      </TestProviders>
+      <CategoriesSelector {...defaultProps} selectedCategoryIds={['base', 'event']} />
     );
 
     expect(result.getByTestId('categories-filter-button')).toBeInTheDocument();
@@ -49,11 +43,7 @@ describe('CategoriesSelector', () => {
   });
 
   it('should open the category selector', () => {
-    const result = render(
-      <TestProviders>
-        <CategoriesSelector {...defaultProps} />
-      </TestProviders>
-    );
+    const result = render(<CategoriesSelector {...defaultProps} />);
 
     result.getByTestId('categories-filter-button').click();
 
@@ -63,9 +53,7 @@ describe('CategoriesSelector', () => {
 
   it('should open the category selector with selected categories', () => {
     const result = render(
-      <TestProviders>
-        <CategoriesSelector {...defaultProps} selectedCategoryIds={['base', 'event']} />
-      </TestProviders>
+      <CategoriesSelector {...defaultProps} selectedCategoryIds={['base', 'event']} />
     );
 
     result.getByTestId('categories-filter-button').click();
@@ -79,11 +67,7 @@ describe('CategoriesSelector', () => {
   });
 
   it('should call setSelectedCategoryIds when category selected', () => {
-    const result = render(
-      <TestProviders>
-        <CategoriesSelector {...defaultProps} />
-      </TestProviders>
-    );
+    const result = render(<CategoriesSelector {...defaultProps} />);
 
     result.getByTestId('categories-filter-button').click();
     result.getByTestId(`categories-selector-option-base`).click();

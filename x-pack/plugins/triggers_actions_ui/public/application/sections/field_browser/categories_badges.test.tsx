@@ -7,7 +7,6 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../mock';
 
 import { CategoriesBadges } from './categories_badges';
 
@@ -23,11 +22,7 @@ describe('CategoriesBadges', () => {
   });
 
   it('should render empty badges', () => {
-    const result = render(
-      <TestProviders>
-        <CategoriesBadges {...defaultProps} />
-      </TestProviders>
-    );
+    const result = render(<CategoriesBadges {...defaultProps} />);
 
     const badges = result.getByTestId('category-badges');
     expect(badges).toBeInTheDocument();
@@ -36,9 +31,7 @@ describe('CategoriesBadges', () => {
 
   it('should render the selector button with selected categories', () => {
     const result = render(
-      <TestProviders>
-        <CategoriesBadges {...defaultProps} selectedCategoryIds={['base', 'event']} />
-      </TestProviders>
+      <CategoriesBadges {...defaultProps} selectedCategoryIds={['base', 'event']} />
     );
 
     const badges = result.getByTestId('category-badges');
@@ -49,9 +42,7 @@ describe('CategoriesBadges', () => {
 
   it('should call the set selected callback when badge unselect button clicked', () => {
     const result = render(
-      <TestProviders>
-        <CategoriesBadges {...defaultProps} selectedCategoryIds={['base', 'event']} />
-      </TestProviders>
+      <CategoriesBadges {...defaultProps} selectedCategoryIds={['base', 'event']} />
     );
 
     result.getByTestId('category-badge-unselect-base').click();

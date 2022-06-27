@@ -8,10 +8,7 @@
 import { MutableRefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
-import type {
-  CreateFieldComponent,
-  GetFieldTableColumns,
-} from '@kbn/timelines-plugin/common/types';
+import { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import { TimelineId } from '../../../../common/types';
 import { useDataView } from '../../../common/containers/source/use_data_view';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -37,8 +34,8 @@ export interface UseFieldBrowserOptionsProps {
 }
 
 export type UseFieldBrowserOptions = (props: UseFieldBrowserOptionsProps) => {
-  createFieldButton: CreateFieldComponent | undefined;
-  getFieldTableColumns: GetFieldTableColumns;
+  createFieldButton: FieldBrowserOptions['createFieldButton'];
+  getFieldTableColumns: NonNullable<FieldBrowserOptions['getFieldTableColumns']>;
 };
 
 export const useFieldBrowserOptions: UseFieldBrowserOptions = ({

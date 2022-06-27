@@ -20,16 +20,14 @@ import {
 import { uniqBy } from 'lodash/fp';
 import styled from 'styled-components';
 
-import { getEmptyValue } from '../../../empty_value';
-import { getExampleText, getIconFromType } from '../../../utils/helpers';
-import type { BrowserFields } from '../../../../../common/search_strategy';
+import { getEmptyValue, getExampleText, getIconFromType } from './helpers';
 import type {
-  ColumnHeaderOptions,
+  BrowserFields,
   BrowserFieldItem,
   FieldTableColumns,
   GetFieldTableColumns,
-} from '../../../../../common/types';
-import { TruncatableText } from '../../../truncatable_text';
+} from './types';
+import { TruncatableText } from './truncatable_text';
 import { FieldName } from './field_name';
 import * as i18n from './translations';
 
@@ -52,15 +50,15 @@ Description.displayName = 'Description';
 export const getFieldItems = ({
   browserFields,
   selectedCategoryIds,
-  columnHeaders,
+  columnIds,
 }: {
   browserFields: BrowserFields;
   selectedCategoryIds: string[];
-  columnHeaders: ColumnHeaderOptions[];
+  columnIds: string[];
 }): BrowserFieldItem[] => {
   const categoryIds =
     selectedCategoryIds.length > 0 ? selectedCategoryIds : Object.keys(browserFields);
-  const selectedFieldIds = new Set(columnHeaders.map(({ id }) => id));
+  const selectedFieldIds = new Set(columnIds);
 
   return uniqBy(
     'name',

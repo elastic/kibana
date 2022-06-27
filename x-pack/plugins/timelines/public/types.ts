@@ -11,6 +11,7 @@ import { Store } from 'redux';
 import { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type {
   LastUpdatedAtProps,
   LoadingPanelProps,
@@ -46,6 +47,7 @@ export interface TimelinesUIStart {
 export interface TimelinesStartPlugins {
   data: DataPublicPluginStart;
   cases: CasesUiStart;
+  triggersActionsUi: TriggersActionsStart;
 }
 
 export type TimelinesStartServices = CoreStart & TimelinesStartPlugins;

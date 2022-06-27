@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../mock';
 import { FieldTableHeader, FieldTableHeaderProps } from './field_table_header';
 
 const mockOnFilterSelectedChange = jest.fn();
@@ -20,30 +19,18 @@ const defaultProps: FieldTableHeaderProps = {
 describe('FieldTableHeader', () => {
   describe('FieldCount', () => {
     it('should render empty field table', () => {
-      const result = render(
-        <TestProviders>
-          <FieldTableHeader {...defaultProps} />
-        </TestProviders>
-      );
+      const result = render(<FieldTableHeader {...defaultProps} />);
 
       expect(result.getByTestId('fields-showing').textContent).toBe('Showing 0 fields');
     });
 
     it('should render field table with one singular field count value', () => {
-      const result = render(
-        <TestProviders>
-          <FieldTableHeader {...defaultProps} fieldCount={1} />
-        </TestProviders>
-      );
+      const result = render(<FieldTableHeader {...defaultProps} fieldCount={1} />);
 
       expect(result.getByTestId('fields-showing').textContent).toBe('Showing 1 field');
     });
     it('should render field table with multiple fields count value', () => {
-      const result = render(
-        <TestProviders>
-          <FieldTableHeader {...defaultProps} fieldCount={4} />
-        </TestProviders>
-      );
+      const result = render(<FieldTableHeader {...defaultProps} fieldCount={4} />);
 
       expect(result.getByTestId('fields-showing').textContent).toBe('Showing 4 fields');
     });
@@ -55,31 +42,19 @@ describe('FieldTableHeader', () => {
     });
 
     it('should render "view all" option when filterSelected is not enabled', () => {
-      const result = render(
-        <TestProviders>
-          <FieldTableHeader {...defaultProps} filterSelectedEnabled={false} />
-        </TestProviders>
-      );
+      const result = render(<FieldTableHeader {...defaultProps} filterSelectedEnabled={false} />);
 
       expect(result.getByTestId('viewSelectorButton').textContent).toBe('View: all');
     });
 
     it('should render "view selected" option when filterSelected is not enabled', () => {
-      const result = render(
-        <TestProviders>
-          <FieldTableHeader {...defaultProps} filterSelectedEnabled={true} />
-        </TestProviders>
-      );
+      const result = render(<FieldTableHeader {...defaultProps} filterSelectedEnabled={true} />);
 
       expect(result.getByTestId('viewSelectorButton').textContent).toBe('View: selected');
     });
 
     it('should open the view selector with button click', async () => {
-      const result = render(
-        <TestProviders>
-          <FieldTableHeader {...defaultProps} />
-        </TestProviders>
-      );
+      const result = render(<FieldTableHeader {...defaultProps} />);
 
       expect(result.queryByTestId('viewSelectorMenu')).not.toBeInTheDocument();
       expect(result.queryByTestId('viewSelectorOption-all')).not.toBeInTheDocument();
@@ -93,11 +68,7 @@ describe('FieldTableHeader', () => {
     });
 
     it('should callback when "view all" option is clicked', () => {
-      const result = render(
-        <TestProviders>
-          <FieldTableHeader {...defaultProps} filterSelectedEnabled={false} />
-        </TestProviders>
-      );
+      const result = render(<FieldTableHeader {...defaultProps} filterSelectedEnabled={false} />);
 
       result.getByTestId('viewSelectorButton').click();
       result.getByTestId('viewSelectorOption-all').click();
@@ -105,11 +76,7 @@ describe('FieldTableHeader', () => {
     });
 
     it('should callback when "view selected" option is clicked', () => {
-      const result = render(
-        <TestProviders>
-          <FieldTableHeader {...defaultProps} filterSelectedEnabled={false} />
-        </TestProviders>
-      );
+      const result = render(<FieldTableHeader {...defaultProps} filterSelectedEnabled={false} />);
 
       result.getByTestId('viewSelectorButton').click();
       result.getByTestId('viewSelectorOption-selected').click();

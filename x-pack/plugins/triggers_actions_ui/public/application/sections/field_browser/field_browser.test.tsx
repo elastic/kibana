@@ -8,26 +8,22 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
-import { mockBrowserFields, TestProviders } from '../../../../mock';
+import { mockBrowserFields } from './mock';
 
 import { FIELD_BROWSER_WIDTH } from './helpers';
 
 import { FieldBrowserComponent } from './field_browser';
-import { FieldBrowserProps } from '../../../field_browser';
+import type { FieldBrowserProps } from './types';
 
 const defaultProps: FieldBrowserProps = {
   browserFields: mockBrowserFields,
-  columnHeaders: [],
+  columnIds: [],
   onToggleColumn: jest.fn(),
   onResetColumns: jest.fn(),
 };
 
 const renderComponent = (props: Partial<FieldBrowserProps> = {}) =>
-  render(
-    <TestProviders>
-      <FieldBrowserComponent {...{ ...defaultProps, ...props }} />
-    </TestProviders>
-  );
+  render(<FieldBrowserComponent {...{ ...defaultProps, ...props }} />);
 
 describe('StatefulFieldsBrowser', () => {
   it('should render the Fields button, which displays the fields browser on click', () => {

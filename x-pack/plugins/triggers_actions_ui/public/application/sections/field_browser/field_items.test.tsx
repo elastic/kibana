@@ -9,27 +9,12 @@ import React from 'react';
 import { omit } from 'lodash/fp';
 import { render } from '@testing-library/react';
 import { EuiInMemoryTable } from '@elastic/eui';
-import { mockBrowserFields } from '../../../../mock';
-import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
-import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../body/constants';
+import { mockBrowserFields } from './mock';
 
 import { getFieldColumns, getFieldItems } from './field_items';
-import { ColumnHeaderOptions } from '../../../../../common/types';
 
 const timestampFieldId = '@timestamp';
-const columnHeaders: ColumnHeaderOptions[] = [
-  {
-    category: 'base',
-    columnHeaderType: defaultColumnHeaderType,
-    description:
-      'Date/time when the event originated.\nFor log events this is the date/time when the event was generated, and not when it was read.\nRequired field for all events.',
-    example: '2016-05-23T08:05:34.853Z',
-    id: timestampFieldId,
-    type: 'date',
-    aggregatable: true,
-    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  },
-];
+const columnIds = [timestampFieldId];
 
 describe('field_items', () => {
   describe('getFieldItems', () => {
@@ -39,7 +24,7 @@ describe('field_items', () => {
       const fieldItems = getFieldItems({
         selectedCategoryIds: ['base'],
         browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
-        columnHeaders: [],
+        columnIds: [],
       });
 
       expect(fieldItems[0]).toEqual({
@@ -57,7 +42,7 @@ describe('field_items', () => {
       const fieldItems = getFieldItems({
         selectedCategoryIds: ['base'],
         browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
-        columnHeaders,
+        columnIds,
       });
 
       expect(fieldItems[0]).toMatchObject({
@@ -78,7 +63,7 @@ describe('field_items', () => {
             },
           },
         },
-        columnHeaders,
+        columnIds,
       });
 
       expect(fieldItems[0]).toMatchObject({
@@ -95,7 +80,7 @@ describe('field_items', () => {
       const fieldItems = getFieldItems({
         selectedCategoryIds: [],
         browserFields: mockBrowserFields,
-        columnHeaders: [],
+        columnIds: [],
       });
 
       expect(fieldItems.length).toBe(fieldCount);
@@ -112,7 +97,7 @@ describe('field_items', () => {
       const fieldItems = getFieldItems({
         selectedCategoryIds,
         browserFields: mockBrowserFields,
-        columnHeaders: [],
+        columnIds: [],
       });
 
       expect(fieldItems.length).toBe(fieldCount);
@@ -195,7 +180,7 @@ describe('field_items', () => {
       const fieldItems = getFieldItems({
         selectedCategoryIds: ['base'],
         browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
-        columnHeaders: [],
+        columnIds: [],
       });
 
       const columns = getFieldColumns(getFieldColumnsParams);
@@ -218,7 +203,7 @@ describe('field_items', () => {
       const fieldItems = getFieldItems({
         selectedCategoryIds: ['base'],
         browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
-        columnHeaders: [],
+        columnIds: [],
       });
 
       const columns = getFieldColumns(getFieldColumnsParams);

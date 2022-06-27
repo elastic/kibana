@@ -6,10 +6,10 @@
  */
 
 import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
 
-import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
-import { ColumnHeaderOptions } from '../../../../../common';
+import { BrowserField, BrowserFields } from './types';
 
 export const LoadingSpinner = styled(EuiLoadingSpinner)`
   cursor: pointer;
@@ -50,7 +50,6 @@ export function filterBrowserFieldsByFieldName({
   for (const [categoryName, categoryDescriptor] of Object.entries(browserFields)) {
     if (!categoryDescriptor.fields) {
       // ignore any category that is missing fields. This is not expected to happen.
-      // eslint-disable-next-line no-continue
       continue;
     }
 
@@ -67,7 +66,6 @@ export function filterBrowserFieldsByFieldName({
 
       if (!fieldNameFromDescriptor) {
         // Ignore any field that is missing a name in its descriptor. This is not expected to happen.
-        // eslint-disable-next-line no-continue
         continue;
       }
 
@@ -94,23 +92,22 @@ export function filterBrowserFieldsByFieldName({
 
 /**
  * Filters the selected `BrowserFields` to return a new collection where every
- * category contains at least one field that is present in the `columnHeaders`.
+ * category contains at least one field that is present in the `columnIds`.
  */
 export const filterSelectedBrowserFields = ({
   browserFields,
-  columnHeaders,
+  columnIds,
 }: {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeaderOptions[];
+  columnIds: string[];
 }): BrowserFields => {
-  const selectedFieldIds = new Set(columnHeaders.map(({ id }) => id));
+  const selectedFieldIds = new Set(columnIds);
 
   const result: Record<string, Partial<BrowserField>> = {};
 
   for (const [categoryName, categoryDescriptor] of Object.entries(browserFields)) {
     if (!categoryDescriptor.fields) {
       // ignore any category that is missing fields. This is not expected to happen.
-      // eslint-disable-next-line no-continue
       continue;
     }
 
@@ -127,7 +124,6 @@ export const filterSelectedBrowserFields = ({
 
       if (!fieldNameFromDescriptor) {
         // Ignore any field that is missing a name in its descriptor. This is not expected to happen.
-        // eslint-disable-next-line no-continue
         continue;
       }
 
@@ -146,6 +142,37 @@ export const filterSelectedBrowserFields = ({
   }
   return result;
 };
+
+export const getIconFromType = (type: string | null | undefined) => {
+  switch (type) {
+    case 'string': // fall through
+    case 'keyword':
+      return 'string';
+    case 'number': // fall through
+    case 'long':
+      return 'number';
+    case 'date':
+      return 'clock';
+    case 'ip':
+    case 'geo_point':
+      return 'globe';
+    case 'object':
+      return 'questionInCircle';
+    case 'float':
+      return 'number';
+    default:
+      return 'questionInCircle';
+  }
+};
+
+export const getEmptyValue = () => '—';
+
+/** Returns example text, or an empty string if the field does not have an example */
+export const getExampleText = (example: string | number | null | undefined): string =>
+  !isEmpty(example) ? `Example: ${example}` : '';
+
+/** Returns `true` if the escape key was pressed */
+export const isEscape = (event: React.KeyboardEvent): boolean => event.key === 'Escape';
 
 export const CATEGORY_TABLE_CLASS_NAME = 'category-table';
 export const CLOSE_BUTTON_CLASS_NAME = 'close-button';

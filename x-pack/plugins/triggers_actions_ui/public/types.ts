@@ -55,6 +55,10 @@ import type { RuleEventLogListProps } from './application/sections/rule_details/
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
+import type {
+  FieldBrowserOptions,
+  FieldBrowserProps,
+} from './application/sections/field_browser/types';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -94,6 +98,8 @@ export type {
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
   RulesListNotifyBadgeProps,
+  FieldBrowserProps,
+  FieldBrowserOptions,
 };
 export type { ActionType, AsApiContract };
 export {
