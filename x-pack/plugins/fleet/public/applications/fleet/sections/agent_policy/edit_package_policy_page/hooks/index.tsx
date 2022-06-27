@@ -18,7 +18,7 @@ export function useHistoryBlock(isEdited: boolean) {
     }
     return history.block(
       i18n.translate('xpack.fleet.editPackagePolicy.historyBlockMessage', {
-        defaultMessage: `Are you sure you want to leave? Changes will be lost`,
+        defaultMessage: `Are you sure you want to leave? Changes will be lost.`,
       })
     );
   }, [history, isEdited]);
