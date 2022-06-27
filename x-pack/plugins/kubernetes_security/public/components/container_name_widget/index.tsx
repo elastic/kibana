@@ -74,24 +74,23 @@ export const ContainerNameWidget = ({
     countBy,
     indexPattern?.title,
     sortDirection,
-    pageNumber,
+    pageNumber
   );
-//   console.log(data)
+  //   console.log(data)
 
   const onTableChange = ({ sort = {} }) => {
     const { field: sortField, direction: sortDirection } = sort;
 
     setSortField(sortField);
     setSortDirection(sortDirection);
-    //setPageNumber(pageNumber => pageNumber +  0)
+    // setPageNumber(pageNumber => pageNumber +  0)
 
-    fetchNextPage()
-
+    fetchNextPage();
   };
 
-  useEffect(()=>{
-      fetchNextPage()
-  },[fetchNextPage])
+  useEffect(() => {
+    fetchNextPage();
+  }, [fetchNextPage]);
 
   const sorting = {
     sort: {
@@ -145,14 +144,14 @@ export const ContainerNameWidget = ({
     }
   );
 
-//   const containerNameArrayx: ContainerNameArrayDataValue[] = data
-//     ? data.map((aggResult: ContainerNameWidgetDataValueMap) => {
-//         return {
-//           name: aggResult.key,
-//           count: aggResult.count_by_aggs.value,
-//         };
-//       })
-//     : [];
+  //   const containerNameArrayx: ContainerNameArrayDataValue[] = data
+  //     ? data.map((aggResult: ContainerNameWidgetDataValueMap) => {
+  //         return {
+  //           name: aggResult.key,
+  //           count: aggResult.count_by_aggs.value,
+  //         };
+  //       })
+  //     : [];
 
   const containerNameArray: ContainerNameArrayDataValue[] = useMemo(() => {
     return data
@@ -217,48 +216,48 @@ export const ContainerNameWidget = ({
     ];
   }, [filterButtons.filterForButtons, filterButtons.filterOutButtons, containerNameArray]);
 
-//   const columnsx = [
-//     {
-//       field: 'name',
-//       name: widgetTitle,
-//       'data-test-subj': 'containserImageNameSessionCount',
-//       render: (name: string) => {
-//         const indexHelper = containerNameArray.findIndex((obj) => {
-//           console.log(name);
-//           return obj.name === name;
-//         });
-//         return (
-//           <EuiFlexItem
-//             key={`percentage-widget--haha}`}
-//             onMouseEnter={() => setHoveredFilter(indexHelper)}
-//             onMouseLeave={() => setHoveredFilter(null)}
-//             data-test-subj={'test-alpha'}
-//           >
-//             <EuiText size="xs" css={styles.dataInfo}>
-//               {name}
-//               {true && (
-//                 <div css={styles.filters}>
-//                   {filterButtons.filterForButtons[indexHelper]}
-//                   {filterButtons.filterOutButtons[indexHelper]}
-//                 </div>
-//               )}
-//             </EuiText>
-//           </EuiFlexItem>
-//         );
-//       },
-//       align: 'left',
-//     },
-//     {
-//       field: 'count',
-//       name: 'Count',
-//       'data-test-subj': 'containerImageNameSessionCount',
-//       render: (count: number) => {
-//         return <span css={styles.countValue}>{count}</span>;
-//       },
-//       sortable: true,
-//       align: 'right',
-//     },
-//   ];
+  //   const columnsx = [
+  //     {
+  //       field: 'name',
+  //       name: widgetTitle,
+  //       'data-test-subj': 'containserImageNameSessionCount',
+  //       render: (name: string) => {
+  //         const indexHelper = containerNameArray.findIndex((obj) => {
+  //           console.log(name);
+  //           return obj.name === name;
+  //         });
+  //         return (
+  //           <EuiFlexItem
+  //             key={`percentage-widget--haha}`}
+  //             onMouseEnter={() => setHoveredFilter(indexHelper)}
+  //             onMouseLeave={() => setHoveredFilter(null)}
+  //             data-test-subj={'test-alpha'}
+  //           >
+  //             <EuiText size="xs" css={styles.dataInfo}>
+  //               {name}
+  //               {true && (
+  //                 <div css={styles.filters}>
+  //                   {filterButtons.filterForButtons[indexHelper]}
+  //                   {filterButtons.filterOutButtons[indexHelper]}
+  //                 </div>
+  //               )}
+  //             </EuiText>
+  //           </EuiFlexItem>
+  //         );
+  //       },
+  //       align: 'left',
+  //     },
+  //     {
+  //       field: 'count',
+  //       name: 'Count',
+  //       'data-test-subj': 'containerImageNameSessionCount',
+  //       render: (count: number) => {
+  //         return <span css={styles.countValue}>{count}</span>;
+  //       },
+  //       sortable: true,
+  //       align: 'right',
+  //     },
+  //   ];
 
   //   const sorting = {
   //       sort: {

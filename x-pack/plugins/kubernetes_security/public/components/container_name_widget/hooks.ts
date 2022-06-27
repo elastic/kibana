@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery, useInfiniteQuery } from 'react-query';
+import { useInfiniteQuery } from 'react-query';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QUERY_KEY_CONTAINER_NAME_WIDGET, AGGREGATE_ROUTE } from '../../../common/constants';
@@ -18,7 +18,7 @@ export const useFetchContainerNameData = (
   countBy?: string,
   index?: string,
   sortByCount?: string,
-  pageNumber?:number,
+  pageNumber?: number
 ) => {
   const { http } = useKibana<CoreStart>().services;
   const cachingKeys = [
@@ -32,7 +32,7 @@ export const useFetchContainerNameData = (
   ];
   const query = useInfiniteQuery(
     cachingKeys,
-    async ({pageParam = 0}) => {
+    async ({ pageParam = 0 }) => {
       const res = await http.get<AggregateResult[]>(AGGREGATE_ROUTE, {
         query: {
           query: filterQuery,
@@ -49,9 +49,9 @@ export const useFetchContainerNameData = (
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
-      getNextPageParam: (lastPage,pages) => (lastPage.hasNextPage ? pages.length :undefined)
-    },
+      getNextPageParam: (lastPage, pages) => (lastPage.hasNextPage ? pages.length : undefined),
+    }
   );
-console.log(query)
+  console.log(query);
   return query;
 };
