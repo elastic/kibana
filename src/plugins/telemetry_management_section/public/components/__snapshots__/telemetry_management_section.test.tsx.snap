@@ -264,7 +264,6 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "defaultConfig": Object {
         "allowChangingOptInStatus": false,
         "banner": true,
-        "enabled": true,
         "optIn": true,
         "sendUsageFrom": "browser",
         "sendUsageTo": "staging",

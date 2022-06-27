@@ -88,8 +88,6 @@ interface TelemetryPluginSetupDependencies {
  * Public-exposed configuration
  */
 export interface TelemetryPluginConfig {
-  /** Is the plugin enabled? **/
-  enabled: boolean;
   /** The banner is expected to be shown when needed **/
   banner: boolean;
   /** Does the cluster allow changing the opt-in/out status via the UI? **/
