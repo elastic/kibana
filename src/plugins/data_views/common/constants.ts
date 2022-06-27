@@ -29,11 +29,8 @@ export const RUNTIME_FIELD_TYPES = [
  */
 export const DEFAULT_ASSETS_TO_IGNORE = {
   LOGS_INDEX_PATTERN: 'logs-*',
-  METRICS_INDEX_PATTERN: 'metrics-*',
   LOGS_DATA_STREAM_TO_IGNORE: 'logs-elastic_agent', // ignore ds created by Fleet server itself
-  METRICS_DATA_STREAM_TO_IGNORE: 'metrics-elastic_agent', // ignore ds created by Fleet server itself
   ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE: 'logs-enterprise_search.api-default', // ignore ds created by enterprise search
-  METRICS_ENDPOINT_INDEX_TO_IGNORE: 'metrics-endpoint.metadata_current_default', // ignore index created by Fleet endpoint package installed by default in Cloud
 };
 
 /**
