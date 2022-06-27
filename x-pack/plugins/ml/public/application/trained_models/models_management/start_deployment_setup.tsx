@@ -119,6 +119,7 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
 };
 
 interface StartDeploymentModalProps {
+  modelId: string;
   onConfigChange: (config: ThreadingParams) => void;
   onClose: () => void;
 }
@@ -130,6 +131,7 @@ interface StartDeploymentModalProps {
  * @param onClose
  */
 export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
+  modelId,
   onConfigChange,
   onClose,
 }) => {
@@ -145,7 +147,8 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
           <h2>
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.startDeployment.modalTitle"
-              defaultMessage="Start deployment"
+              defaultMessage="Start {modelId} deployment"
+              values={{ modelId }}
             />
           </h2>
         </EuiModalHeaderTitle>
@@ -188,6 +191,7 @@ export const getUserThreadingParamsCallback =
           toMountPoint(
             wrapWithTheme(
               <StartDeploymentModal
+                modelId={modelId}
                 onConfigChange={(config) => {
                   modalSession.close();
                   resolve(config);
