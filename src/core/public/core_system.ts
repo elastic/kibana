@@ -18,9 +18,10 @@ import { ThemeService } from '@kbn/core-theme-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
+import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
+import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
-import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
@@ -145,6 +146,7 @@ export class CoreSystem {
   private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart) {
     analytics.reportEvent('Loaded Kibana', {
       kibana_version: this.coreContext.env.packageInfo.version,
+      protocol: window.location.protocol,
       ...fetchOptionalMemoryInfo(),
       ...this.getLoadMarksInfo(),
     });
@@ -387,6 +389,12 @@ export class CoreSystem {
           _meta: {
             description: 'When the application emits the first app navigation',
             optional: true,
+          },
+        },
+        protocol: {
+          type: 'keyword',
+          _meta: {
+            description: 'Value from window.location.protocol',
           },
         },
       },
