@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { HttpFetchError } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import {
   DEFAULT_CONTINUOUS_MODE_DELAY,
@@ -23,7 +24,6 @@ import type {
   PutTransformsPivotRequestSchema,
   PutTransformsRequestSchema,
 } from '../../../common/api_schemas/transforms';
-import { isPopulatedObject } from '../../../common/shared_imports';
 import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
 import { isDataView } from '../../../common/types/data_view';
 
