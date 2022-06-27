@@ -87,8 +87,8 @@ export default function spaceSelectorFunctionalTests({
         await PageObjects.spaceSelector.expectSearchBoxInSpacesSelector();
       });
 
-      it('search for "ce 1" and find one space', async () => {
-        await PageObjects.spaceSelector.setSearchBoxInSpacesSelector('ce 1');
+      it('search for "ce-1 name" and find one space', async () => {
+        await PageObjects.spaceSelector.setSearchBoxInSpacesSelector('ce-1 name');
         await PageObjects.spaceSelector.expectToFindThatManySpace(1);
       });
 
