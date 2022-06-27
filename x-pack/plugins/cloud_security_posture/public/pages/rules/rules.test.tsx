@@ -17,6 +17,7 @@ import type { PageUrlParams } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegrationInfo: jest.fn(),
@@ -31,9 +32,20 @@ const queryClient = new QueryClient({
 
 const getTestComponent =
   (params: PageUrlParams): React.FC =>
-  () =>
-    (
-      <TestProvider>
+  () => {
+    const coreStart = coreMock.createStart();
+    const core = {
+      ...coreStart,
+      application: {
+        ...coreStart.application,
+        capabilities: {
+          ...coreStart.application.capabilities,
+          siem: { crud: true },
+        },
+      },
+    };
+    return (
+      <TestProvider core={core}>
         <Rules
           {...({
             match: { params },
@@ -41,11 +53,13 @@ const getTestComponent =
         />
       </TestProvider>
     );
+  };
 
 describe('<Rules />', () => {
   beforeEach(() => {
     queryClient.clear();
     jest.clearAllMocks();
+
     (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
       data: { item: { status: 'installed' } },
     }));

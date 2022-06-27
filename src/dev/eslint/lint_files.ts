@@ -37,7 +37,6 @@ export function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boole
 
   const failTypes = [];
   if (report.errorCount > 0) failTypes.push('errors');
-  if (report.warningCount > 0) failTypes.push('warning');
 
   if (!failTypes.length) {
     log.success('[eslint] %d files linted successfully', files.length);
