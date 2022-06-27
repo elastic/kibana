@@ -6,8 +6,18 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { AiopsPluginSetup, AiopsPluginStart } from './types';
+
+// move to ./types like above // remove
+export interface AiOpsStartDependencies {
+  data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
+  fieldFormats: FieldFormatsStart;
+}
 
 export class AiopsPlugin implements Plugin<AiopsPluginSetup, AiopsPluginStart> {
   public setup(core: CoreSetup) {}

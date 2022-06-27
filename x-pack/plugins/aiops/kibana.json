@@ -10,6 +10,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
+    "charts",
     "data",
     "licensing"
   ],

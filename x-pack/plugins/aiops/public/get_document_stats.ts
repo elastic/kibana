@@ -6,10 +6,10 @@
  */
 // @ts-nocheck // remove
 import { each, get } from 'lodash';
+import { Query } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
-import type { OverallStatsSearchStrategyParams } from '../../../../../common/types/field_stats';
+// import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
 
 export interface DocumentCountStats {
   interval?: number;
@@ -17,6 +17,21 @@ export interface DocumentCountStats {
   timeRangeEarliest?: number;
   timeRangeLatest?: number;
   totalCount: number;
+}
+
+export interface OverallStatsSearchStrategyParams {
+  earliest?: number;
+  latest?: number;
+  //   aggInterval: TimeBucketsInterval;
+  intervalMs?: number;
+  searchQuery: Query['query'];
+  //   samplerShardSize: number;
+  index: string;
+  timeFieldName?: string;
+  runtimeFieldMap?: estypes.MappingRuntimeFields;
+  //   aggregatableFields: string[];
+  //   nonAggregatableFields: string[];
+  fieldsToFetch?: string[];
 }
 
 export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyParams) => {
@@ -30,10 +45,9 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
     intervalMs,
     fieldsToFetch,
   } = params;
-  console.log('---- PARAMS ------', params); // remove
 
   const size = 0;
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
+  const filterCriteria = {}; // buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
 
   // Don't use the sampler aggregation as this can lead to some potentially
   // confusing date histogram results depending on the date range of data amongst shards.
@@ -50,7 +64,7 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
   const searchBody = {
     query: {
       bool: {
-        filter: filterCriteria,
+        // filter: filterCriteria,
       },
     },
     ...(!fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
@@ -60,7 +74,6 @@ export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyP
     track_total_hits: true,
     size,
   };
-  console.log('---- SEARCH BODY ------', JSON.stringify(searchBody, null, 2)); // remove
   return {
     index,
     body: searchBody,
@@ -71,7 +84,6 @@ export const processDocumentCountStats = (
   body: estypes.SearchResponse | undefined,
   params: OverallStatsSearchStrategyParams
 ): DocumentCountStats | undefined => {
-  console.log('----- BODY ----', body); // remove
   if (!body) return undefined;
 
   const totalCount = (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total ?? 0;
