@@ -395,7 +395,6 @@ export class CoreSystem {
           type: 'keyword',
           _meta: {
             description: 'Value from window.location.protocol',
-            optional: true,
           },
         },
       },
