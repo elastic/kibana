@@ -309,6 +309,66 @@ describe('useLoadRules', () => {
     expect(loadRules).toBeCalledWith(expect.objectContaining(params));
   });
 
+  it('should call loadRules API only with the o11y rule types', async () => {
+    const params = {
+      page: {
+        index: 0,
+        size: 25,
+      },
+      typesFilter: [],
+    };
+
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useLoadRules({
+        ...params,
+        onPage,
+        onError,
+        filteredRuleTypes: ['apm.error_rate', 'metrics.alert.inventory.threshold'],
+      })
+    );
+
+    await act(async () => {
+      result.current.loadRules();
+      await waitForNextUpdate();
+    });
+
+    expect(loadRules).toBeCalledWith(
+      expect.objectContaining({
+        typesFilter: ['apm.error_rate', 'metrics.alert.inventory.threshold'],
+      })
+    );
+  });
+
+  it('should call loadRules API with the UI specified rule types', async () => {
+    const params = {
+      page: {
+        index: 0,
+        size: 25,
+      },
+      typesFilter: ['apm.error_rate'],
+    };
+
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useLoadRules({
+        ...params,
+        onPage,
+        onError,
+        filteredRuleTypes: ['apm.error_rate', 'metrics.alert.inventory.threshold'],
+      })
+    );
+
+    await act(async () => {
+      result.current.loadRules();
+      await waitForNextUpdate();
+    });
+
+    expect(loadRules).toBeCalledWith(
+      expect.objectContaining({
+        typesFilter: ['apm.error_rate'],
+      })
+    );
+  });
+
   it('should reset the page if the data is fetched while paged', async () => {
     loadRules.mockResolvedValue({
       ...MOCK_RULE_DATA,
