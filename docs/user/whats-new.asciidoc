@@ -1,7 +1,5 @@
 [[whats-new]]
-== What's new in 8.0
-
-coming::[8.3.0]
+== What's new in {minor-version}
 
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
