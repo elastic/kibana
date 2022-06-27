@@ -23,7 +23,6 @@ type PayloadType = 'params' | 'query' | 'body';
 interface IMockRouter {
   method: MethodType;
   path: string;
-  context?: jest.Mocked<RequestHandlerContext>;
 }
 interface IMockRouterRequest {
   body?: object;
@@ -36,15 +35,13 @@ export class MockRouter {
   public router!: jest.Mocked<IRouter>;
   public method: MethodType;
   public path: string;
-  public context: jest.Mocked<RequestHandlerContext>;
   public payload?: PayloadType;
   public response = httpServerMock.createResponseFactory();
 
-  constructor({ method, path, context = {} as jest.Mocked<RequestHandlerContext> }: IMockRouter) {
+  constructor({ method, path }: IMockRouter) {
     this.createRouter();
     this.method = method;
     this.path = path;
-    this.context = context;
   }
 
   public createRouter = () => {
@@ -54,7 +51,8 @@ export class MockRouter {
   public callRoute = async (request: MockRouterRequest) => {
     const route = this.findRouteRegistration();
     const [, handler] = route;
-    await handler(this.context, httpServerMock.createKibanaRequest(request as any), this.response);
+    const context = {} as jest.Mocked<RequestHandlerContext>;
+    await handler(context, httpServerMock.createKibanaRequest(request as any), this.response);
   };
 
   /**
