@@ -395,7 +395,7 @@ The danger is that in such a situation, a Task with that same `id` might already
 To achieve this you should use the `ensureScheduling` api which has the exact same behavior as `schedule`, except it allows the scheduling of a Task with an `id` that's already in assigned to another Task and it will assume that the existing Task is the one you wished to `schedule`, treating this as a successful operation.
 
 #### runSoon
-Using `runSoon` you can instruct TaskManger to run an existing task on-demand, without waiting for its scheduled time to be reached.
+Using `runSoon` you can instruct TaskManager to run an existing task as soon as possible by updating the next scheduled run date to be now
 
 ```js
 export class Plugin {

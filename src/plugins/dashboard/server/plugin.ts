@@ -84,8 +84,8 @@ export class DashboardPlugin
 
     if (plugins.taskManager) {
       scheduleDashboardTelemetry(this.logger, plugins.taskManager)
-        .then(() => {
-          plugins.taskManager.runSoon(TASK_ID);
+        .then(async () => {
+          await plugins.taskManager.runSoon(TASK_ID);
         })
         .catch((e) => {
           this.logger.debug(`Error scheduling task, received ${e.message}`);
