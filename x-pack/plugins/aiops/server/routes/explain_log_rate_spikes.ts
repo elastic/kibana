@@ -109,7 +109,9 @@ export const defineExplainLogRateSpikesRoute = (
           }
 
           loaded += (1 / fieldCandidatesChunks.length) * PROGRESS_STEP_P_VALUES;
-          push(addChangePoints(pValues));
+          if (pValues.length > 0) {
+            push(addChangePoints(pValues));
+          }
           push(
             updateLoadingStateAction({
               ccsWarning: false,
