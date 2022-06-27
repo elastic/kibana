@@ -53,7 +53,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
     return (
       <>
         {numberOfConditions}&nbsp;
-        {i18n.translate('xpack.observability.ruleDetails.conditions', {
+        {i18n.translate('xpack.triggersActionsUI.ruleDetails.conditions', {
           defaultMessage: 'condition{s}',
           values: { s: numberOfConditions > 1 ? 's' : '' },
         })}
@@ -83,7 +83,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiTitle size="s">
             <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.observability.ruleDetails.definition', {
+              {i18n.translate('xpack.triggersActionsUI.ruleDetails.definition', {
                 defaultMessage: 'Definition',
               })}
             </EuiFlexItem>
@@ -101,7 +101,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
           <EuiFlexItem>
             <EuiFlexGroup>
               <ItemTitleRuleSummary>
-                {i18n.translate('xpack.observability.ruleDetails.ruleType', {
+                {i18n.translate('xpack.triggersActionsUI.ruleDetails.ruleType', {
                   defaultMessage: 'Rule type',
                 })}
               </ItemTitleRuleSummary>
@@ -115,7 +115,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
             <EuiFlexGroup alignItems="flexStart" responsive={false}>
               <ItemTitleRuleSummary>
-                {i18n.translate('xpack.observability.ruleDetails.description', {
+                {i18n.translate('xpack.triggersActionsUI.ruleDetails.description', {
                   defaultMessage: 'Description',
                 })}
               </ItemTitleRuleSummary>
@@ -126,7 +126,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
             <EuiFlexGroup>
               <ItemTitleRuleSummary>
-                {i18n.translate('xpack.observability.ruleDetails.conditionsTitle', {
+                {i18n.translate('xpack.triggersActionsUI.ruleDetails.conditionsTitle', {
                   defaultMessage: 'Conditions',
                 })}
               </ItemTitleRuleSummary>
@@ -146,7 +146,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
           <EuiFlexItem>
             <EuiFlexGroup>
               <ItemTitleRuleSummary>
-                {i18n.translate('xpack.observability.ruleDetails.runsEvery', {
+                {i18n.translate('xpack.triggersActionsUI.ruleDetails.runsEvery', {
                   defaultMessage: 'Runs every',
                 })}
               </ItemTitleRuleSummary>
@@ -158,7 +158,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
             <EuiFlexGroup>
               <ItemTitleRuleSummary>
-                {i18n.translate('xpack.observability.ruleDetails.notifyWhen', {
+                {i18n.translate('xpack.triggersActionsUI.ruleDetails.notifyWhen', {
                   defaultMessage: 'Notify',
                 })}
               </ItemTitleRuleSummary>
@@ -168,7 +168,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
             <EuiSpacer size="m" />
             <EuiFlexGroup alignItems="baseline">
               <ItemTitleRuleSummary>
-                {i18n.translate('xpack.observability.ruleDetails.actions', {
+                {i18n.translate('xpack.triggersActionsUI.ruleDetails.actions', {
                   defaultMessage: 'Actions',
                 })}
               </ItemTitleRuleSummary>

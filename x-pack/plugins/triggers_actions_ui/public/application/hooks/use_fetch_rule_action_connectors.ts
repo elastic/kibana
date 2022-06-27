@@ -12,7 +12,7 @@ import { ActionConnector, loadAllActions } from '../..';
 import { useKibana } from '../../common/lib/kibana';
 
 const ACTIONS_LOAD_ERROR = (errorMessage: string) =>
-  i18n.translate('xpack.observability.ruleDetails.connectorsLoadError', {
+  i18n.translate('xpack.triggersActionsUI.ruleDetails.connectorsLoadError', {
     defaultMessage: 'Unable to load rule actions connectors. Reason: {message}',
     values: { message: errorMessage },
   });
