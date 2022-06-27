@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'home']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'home', 'dashboardControls']);
   const browser = getService('browser');
 
   describe('Dashboard controls a11y tests', () => {
@@ -55,22 +55,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('typeFilter-string');
     });
 
-    it('Options control panel', async () => {
+    it('Options control panel & dashboard with options control', async () => {
       await testSubjects.click('field-picker-select-OriginCityName');
       await a11y.testAppSnapshot();
-    });
-
-    it('Dashboard with options control panel', async () => {
       await testSubjects.click('control-editor-save');
       await a11y.testAppSnapshot();
     });
 
-    it('Range control panel', async () => {
+    it('Range control panel & dashboard with both range and options control', async () => {
       await testSubjects.click('dashboard-controls-menu-button');
       await testSubjects.click('controls-create-button');
       await testSubjects.click('field-picker-select-AvgTicketPrice');
       await a11y.testAppSnapshot();
       await testSubjects.click('control-editor-save');
+      await a11y.testAppSnapshot();
     });
 
     it('Controls setting panel', async () => {
@@ -83,6 +81,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Dashboard with options and range control panel', async () => {
       await testSubjects.click('dashboardQuickSaveMenuItem');
+      await a11y.testAppSnapshot();
+      const optionsControlId = (await PageObjects.dashboardControls.getAllControlIds())[0];
+      await PageObjects.dashboardControls.optionsListOpenPopover(optionsControlId);
       await a11y.testAppSnapshot();
     });
   });
