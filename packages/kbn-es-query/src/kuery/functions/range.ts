@@ -14,6 +14,7 @@ import { getFields } from './utils/get_fields';
 import { getDataViewFieldSubtypeNested, getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 import type { DataViewBase, KueryNode, KueryQueryOptions } from '../..';
+import type { KqlContext } from '../types';
 
 export function buildNodeParams(
   fieldName: string,
@@ -30,7 +31,7 @@ export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
-  context: Record<string, any> = {}
+  context: KqlContext = {}
 ): estypes.QueryDslQueryContainer {
   const [fieldNameArg, operatorArg, valueArg] = node.arguments;
   const fullFieldNameArg = getFullFieldNameNode(
