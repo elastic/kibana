@@ -11,8 +11,8 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '..';
 import uuid from 'uuid';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '..';
 import { SavedObjectsClientCommon } from '../types';
 
 import { createDataViewCache } from '.';
