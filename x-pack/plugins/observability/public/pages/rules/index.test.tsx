@@ -104,7 +104,7 @@ describe('RulesPage with all capabilities', () => {
       expect.objectContaining({
         showActionFilter: false,
         showCreateRuleButton: false,
-        ruleDetailsLink: 'alerts/rules/:ruleId',
+        ruleDetailsRoute: 'alerts/rules/:ruleId',
         filteredSolutions: OBSERVABILITY_SOLUTIONS,
       })
     );
