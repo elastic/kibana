@@ -15,9 +15,9 @@ import type {
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
+  SeriesType,
 } from './types';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
-import type { SeriesType } from '@kbn/expression-xy-plugin/common';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
