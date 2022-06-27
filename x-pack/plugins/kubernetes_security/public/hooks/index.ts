@@ -7,3 +7,4 @@
 
 export { useEuiTheme } from './use_eui_theme';
 export { useSetFilter } from './use_filter';
+export { useScroll } from './use_scroll';

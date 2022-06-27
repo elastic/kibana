@@ -91,7 +91,7 @@ export const doSearch = async (
             bucket_sort: {
               bucket_sort: {
                 sort: [sort], // defaulting to alphabetic sort
-                size: AGGREGATE_PAGE_SIZE,
+                size: AGGREGATE_PAGE_SIZE + 1,
                 from: AGGREGATE_PAGE_SIZE * page,
               },
             },
@@ -102,6 +102,13 @@ export const doSearch = async (
   });
 
   const agg: any = search.aggregations?.custom_agg;
+  const buckets = agg?.buckets || [];
+  
+  const hasNextPage = buckets.length > AGGREGATE_PAGE_SIZE;
 
-  return agg?.buckets || [];
+  if(hasNextPage){
+    buckets.pop()
+  }
+
+  return {buckets, hasNextPage};
 };

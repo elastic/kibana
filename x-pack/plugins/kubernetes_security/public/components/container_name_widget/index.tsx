@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { ReactNode, useMemo, useState, useEffect } from 'react';
+import React, { ReactNode, useMemo, useState, useEffect, useRef } from 'react';
 import { EuiFlexItem, EuiText, EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
-import { useSetFilter } from '../../hooks';
+import { useSetFilter, useScroll } from '../../hooks';
 import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
 import { useFetchContainerNameData } from './hooks';
 import { CONTAINER_IMAGE_NAME } from '../../../common/constants';
@@ -42,10 +41,6 @@ interface FilterButtons {
   filterOutButtons: ReactNode[];
 }
 
-const Wrapper = styled.div`
-  margin-top: -${({ theme }) => theme.eui.euiSizeS};
-`;
-
 export const ContainerNameWidget = ({
   widgetKey,
   indexPattern,
@@ -56,7 +51,6 @@ export const ContainerNameWidget = ({
   const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
   const [sortField, setSortField] = useState('count');
   const [sortDirection, setSortDirection] = useState('desc');
-  const [pageNumber, setPageNumber] = useState(0);
   const styles = useStyles();
 
   const filterQueryWithTimeRange = useMemo(() => {
@@ -67,27 +61,25 @@ export const ContainerNameWidget = ({
     );
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
 
-  const { data, fetchNextPage, isFetchingNextPage, isLoading } = useFetchContainerNameData(
+  const { data, fetchNextPage, isFetchingNextPage } = useFetchContainerNameData(
     filterQueryWithTimeRange,
     widgetKey,
     groupedBy,
     countBy,
     indexPattern?.title,
     sortDirection,
-    pageNumber,
   );
-//   console.log(data)
 
   const onTableChange = ({ sort = {} }) => {
+    // @ ts-ignore
     const { field: sortField, direction: sortDirection } = sort;
 
     setSortField(sortField);
     setSortDirection(sortDirection);
-    //setPageNumber(pageNumber => pageNumber +  0)
-
-    fetchNextPage()
 
   };
+
+  
 
   useEffect(()=>{
       fetchNextPage()
@@ -106,7 +98,8 @@ export const ContainerNameWidget = ({
     const result: FilterButtons = {
       filterForButtons:
         data &&
-        data.pages[0].map((aggResult: ContainerNameWidgetDataValueMap) => {
+        data?.pages?.map((aggsData) => {
+            return aggsData?.buckets.map((aggData) => {
           return getFilterForValueButton({
             field: CONTAINER_IMAGE_NAME,
             filterManager,
@@ -115,13 +108,16 @@ export const ContainerNameWidget = ({
             onFilterAdded: () => {},
             ownFocus: false,
             showTooltip: true,
-            value: aggResult.key,
+            value: aggData.key,
           });
-        }),
+          //here below
+        })
+        }).flat(),
 
       filterOutButtons:
         data &&
-        data.pages[0].map((aggResult: ContainerNameWidgetDataValueMap) => {
+        data?.pages?.map((aggsData) => {
+            return aggsData?.buckets.map((aggData) => {
           return getFilterOutValueButton({
             field: CONTAINER_IMAGE_NAME,
             filterManager,
@@ -130,11 +126,13 @@ export const ContainerNameWidget = ({
             onFilterAdded: () => {},
             ownFocus: false,
             showTooltip: true,
-            value: aggResult.key,
+            value: aggData.key,
           });
-        }),
+          //here below
+        })
+        }).flat(),
     };
-
+    //return true
     return result;
   }, [data, getFilterForValueButton, getFilterOutValueButton, filterManager, hoveredFilter]);
 
@@ -145,33 +143,19 @@ export const ContainerNameWidget = ({
     }
   );
 
-//   const containerNameArrayx: ContainerNameArrayDataValue[] = data
-//     ? data.map((aggResult: ContainerNameWidgetDataValueMap) => {
-//         return {
-//           name: aggResult.key,
-//           count: aggResult.count_by_aggs.value,
-//         };
-//       })
-//     : [];
-
   const containerNameArray: ContainerNameArrayDataValue[] = useMemo(() => {
     return data
-      ? data.pages[0].map((aggResult: ContainerNameWidgetDataValueMap) => {
-          return {
-            name: aggResult.key,
-            count: aggResult.count_by_aggs.value,
-          };
-        })
+      ? data?.pages?.map((aggsData) => {
+            return aggsData?.buckets.map((aggData) => {
+                return {
+                    name: aggData.key,
+                    count: aggData.count_by_aggs.value,
+          }});
+        }).flat()
       : [];
   }, [data]);
 
   const columns = useMemo(() => {
-    if (
-      filterButtons.filterForButtons === undefined &&
-      filterButtons.filterOutButtons === undefined
-    ) {
-      return [];
-    }
 
     return [
       {
@@ -182,6 +166,7 @@ export const ContainerNameWidget = ({
           const indexHelper = containerNameArray.findIndex((obj) => {
             return obj.name === name;
           });
+        
           return (
             <EuiFlexItem
               key={`percentage-widget--haha}`}
@@ -217,70 +202,31 @@ export const ContainerNameWidget = ({
     ];
   }, [filterButtons.filterForButtons, filterButtons.filterOutButtons, containerNameArray]);
 
-//   const columnsx = [
-//     {
-//       field: 'name',
-//       name: widgetTitle,
-//       'data-test-subj': 'containserImageNameSessionCount',
-//       render: (name: string) => {
-//         const indexHelper = containerNameArray.findIndex((obj) => {
-//           console.log(name);
-//           return obj.name === name;
-//         });
-//         return (
-//           <EuiFlexItem
-//             key={`percentage-widget--haha}`}
-//             onMouseEnter={() => setHoveredFilter(indexHelper)}
-//             onMouseLeave={() => setHoveredFilter(null)}
-//             data-test-subj={'test-alpha'}
-//           >
-//             <EuiText size="xs" css={styles.dataInfo}>
-//               {name}
-//               {true && (
-//                 <div css={styles.filters}>
-//                   {filterButtons.filterForButtons[indexHelper]}
-//                   {filterButtons.filterOutButtons[indexHelper]}
-//                 </div>
-//               )}
-//             </EuiText>
-//           </EuiFlexItem>
-//         );
-//       },
-//       align: 'left',
-//     },
-//     {
-//       field: 'count',
-//       name: 'Count',
-//       'data-test-subj': 'containerImageNameSessionCount',
-//       render: (count: number) => {
-//         return <span css={styles.countValue}>{count}</span>;
-//       },
-//       sortable: true,
-//       align: 'right',
-//     },
-//   ];
-
-  //   const sorting = {
-  //       sort: {
-  //           field : 'count',
-  //           direction : 'asc',
-  //       },
-  //   }
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  useScroll({
+    div: scrollerRef.current,
+    handler: (pos: number, endReached: boolean) => {
+      if (!isFetchingNextPage && endReached) {
+        fetchNextPage();
+      }
+    },
+  });
 
   return (
-    <Wrapper
+    <div
       data-test-subj="containerNameSessionTable"
       className="eui-yScroll"
       css={styles.container}
+      ref={scrollerRef}
     >
       <EuiBasicTable
-        tableCaption="Trial"
+        tableCaption="Container Name Session Table"
         aria-label="Container Name Session Widget"
         items={containerNameArray}
         columns={columns}
         sorting={sorting}
         onChange={onTableChange}
       />
-    </Wrapper>
+    </div>
   );
 };
