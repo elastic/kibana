@@ -33,7 +33,7 @@ export function ProgressControls({
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 data-test-subj="aiopsProgressTitleMessage"
-                id="aiops.progressTitle"
+                id="xpack.aiops.progressTitle"
                 defaultMessage="Progress: {progress}% — {progressMessage}"
                 values={{ progress: Math.round(progress * 100), progressMessage }}
               />
@@ -41,7 +41,7 @@ export function ProgressControls({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiProgress
-              aria-label={i18n.translate('aiops.progressAriaLabel', {
+              aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
                 defaultMessage: 'Progress',
               })}
               value={Math.round(progress * 100)}
@@ -54,12 +54,12 @@ export function ProgressControls({
       <EuiFlexItem grow={false}>
         {!isRunning && (
           <EuiButton size="s" onClick={onRefresh}>
-            <FormattedMessage id="aiops.refreshButtonTitle" defaultMessage="Refresh" />
+            <FormattedMessage id="xpack.aiops.refreshButtonTitle" defaultMessage="Refresh" />
           </EuiButton>
         )}
         {isRunning && (
           <EuiButton size="s" onClick={onCancel}>
-            <FormattedMessage id="aiops.cancelButtonTitle" defaultMessage="Cancel" />
+            <FormattedMessage id="xpack.aiops.cancelButtonTitle" defaultMessage="Cancel" />
           </EuiButton>
         )}
       </EuiFlexItem>
