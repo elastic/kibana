@@ -72,6 +72,8 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                 <EuiFlexItem key={packageInput.type}>
                   <PackagePolicyInputPanel
                     packageInput={packageInput}
+                    packageInfo={packageInfo}
+                    packagePolicy={packagePolicy}
                     packageInputStreams={packageInputStreams}
                     packagePolicyInput={packagePolicyInput}
                     updatePackagePolicyInput={(updatedInput: Partial<NewPackagePolicyInput>) => {
