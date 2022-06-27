@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { SearchIndex } from './search_index';
+import React from 'react';
+
+export const SearchIndexIndexMappings: React.FC = () => {
+  return <>Index Mappings</>;
+};

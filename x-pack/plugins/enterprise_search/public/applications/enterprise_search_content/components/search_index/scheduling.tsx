@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { SearchIndex } from './search_index';
+import React from 'react';
+
+export const SearchIndexScheduling: React.FC = () => {
+  // TODO If index && !index.connector then do something
+
+  return <>Scheduling</>;
+};
