@@ -6,15 +6,13 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import {
-  EuiExpression,
-  EuiToken,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiExpression, EuiToken, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
-import { ExceptionListItemSchema, ListOperatorTypeEnum, NonEmptyNestedEntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ExceptionListItemSchema,
+  ListOperatorTypeEnum,
+  NonEmptyNestedEntriesArray,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import * as i18n from './translations';
 
@@ -65,40 +63,34 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
     const getNestedEntriesContent = useCallback(
       (type: string, nestedEntries: NonEmptyNestedEntriesArray) => {
         if (type === 'nested' && nestedEntries.length) {
-          return nestedEntries.map(
-            (entry) => {
-              const {
-                field: nestedField,
-                type: nestedType,
-                operator: nestedOperator,
-              } = entry;
-              const nestedValue = "value" in entry ? entry.value : '';
+          return nestedEntries.map((entry) => {
+            const { field: nestedField, type: nestedType, operator: nestedOperator } = entry;
+            const nestedValue = 'value' in entry ? entry.value : '';
 
-              return (
-                <EuiFlexGroupNested
-                  data-test-subj={`${dataTestSubj}-nestedCondition`}
-                  key={nestedField + nestedType + nestedValue}
-                  direction="row"
-                  alignItems="center"
-                  gutterSize="m"
-                  responsive={false}
-                >
-                  <EuiFlexItemNested grow={false}>
-                    <EuiToken iconType="tokenNested" size="s" />
-                  </EuiFlexItemNested>
-                  <EuiFlexItemNested grow={false}>
-                    <EuiExpression description={''} value={nestedField} color="subdued" />
-                  </EuiFlexItemNested>
-                  <EuiFlexItemNested grow={false}>
-                    <EuiExpression
-                      description={getEntryOperator(nestedType, nestedOperator)}
-                      value={getEntryValue(nestedType, nestedValue)}
-                    />
-                  </EuiFlexItemNested>
-                </EuiFlexGroupNested>
-              );
-            }
-          );
+            return (
+              <EuiFlexGroupNested
+                data-test-subj={`${dataTestSubj}-nestedCondition`}
+                key={nestedField + nestedType + nestedValue}
+                direction="row"
+                alignItems="center"
+                gutterSize="m"
+                responsive={false}
+              >
+                <EuiFlexItemNested grow={false}>
+                  <EuiToken iconType="tokenNested" size="s" />
+                </EuiFlexItemNested>
+                <EuiFlexItemNested grow={false}>
+                  <EuiExpression description={''} value={nestedField} color="subdued" />
+                </EuiFlexItemNested>
+                <EuiFlexItemNested grow={false}>
+                  <EuiExpression
+                    description={getEntryOperator(nestedType, nestedOperator)}
+                    value={getEntryValue(nestedType, nestedValue)}
+                  />
+                </EuiFlexItemNested>
+              </EuiFlexGroupNested>
+            );
+          });
         }
       },
       []
@@ -107,13 +99,10 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
     return (
       <div data-test-subj={dataTestSubj}>
         {entries.map((entry, index) => {
-          const {
-            field,
-            type
-          } = entry;
-          const value = "value" in entry ? entry.value : '';
-          const nestedEntries = "entries" in entry ? entry.entries : [];
-          const operator = "operator" in entry ? entry.operator : '';
+          const { field, type } = entry;
+          const value = 'value' in entry ? entry.value : '';
+          const nestedEntries = 'entries' in entry ? entry.entries : [];
+          const operator = 'operator' in entry ? entry.operator : '';
 
           return (
             <div data-test-subj={`${dataTestSubj}-condition`} key={field + type + value + index}>
@@ -121,7 +110,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
                 <EuiExpression
                   description={index === 0 ? i18n.DESCRIPTOR_WHEN : i18n.CONDITION_AND}
                   value={field}
-                  color={index === 0 ? "primary" : "subdued"}
+                  color={index === 0 ? 'primary' : 'subdued'}
                 />
                 <EuiExpression
                   description={getEntryOperator(type, operator)}

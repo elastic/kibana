@@ -34,22 +34,22 @@ describe('ExceptionItemCardHeader', () => {
               key: 'edit',
               icon: 'pencil',
               label: i18n.EXCEPTION_ITEM_EDIT_BUTTON,
-              onClick: jest.fn()
+              onClick: jest.fn(),
             },
             {
               key: 'delete',
               icon: 'trash',
               label: i18n.EXCEPTION_ITEM_DELETE_BUTTON,
-              onClick: jest.fn()
+              onClick: jest.fn(),
             },
           ]}
         />
       </ThemeProvider>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="exceptionItemHeader-title"]').at(0).text()
-    ).toEqual('some name');
+    expect(wrapper.find('[data-test-subj="exceptionItemHeader-title"]').at(0).text()).toEqual(
+      'some name'
+    );
   });
 
   it('it displays actions', () => {
@@ -59,29 +59,32 @@ describe('ExceptionItemCardHeader', () => {
       <ThemeProvider theme={mockTheme}>
         <ExceptionItemCardHeader
           actions={[
-              {
-                key: 'edit',
-                icon: 'pencil',
-                label: i18n.EXCEPTION_ITEM_EDIT_BUTTON,
-                onClick: handleEdit
-              },
-              {
-                key: 'delete',
-                icon: 'trash',
-                label: i18n.EXCEPTION_ITEM_DELETE_BUTTON,
-                onClick: handleDelete
-              },
-            ]}
+            {
+              key: 'edit',
+              icon: 'pencil',
+              label: i18n.EXCEPTION_ITEM_EDIT_BUTTON,
+              onClick: handleEdit,
+            },
+            {
+              key: 'delete',
+              icon: 'trash',
+              label: i18n.EXCEPTION_ITEM_DELETE_BUTTON,
+              onClick: handleDelete,
+            },
+          ]}
           item={getExceptionListItemSchemaMock()}
           dataTestSubj="exceptionItemHeader"
         />
       </ThemeProvider>
     );
-    
+
     // click on popover
-    wrapper.find('button[data-test-subj="exceptionItemHeader-actionButton"]').at(0).simulate('click');
+    wrapper
+      .find('button[data-test-subj="exceptionItemHeader-actionButton"]')
+      .at(0)
+      .simulate('click');
     expect(wrapper.find('button[data-test-subj="exceptionItemHeader-actionItem"]')).toHaveLength(2);
-    
+
     wrapper.find('button[data-test-subj="exceptionItemHeader-actionItem"]').at(0).simulate('click');
     expect(handleEdit).toHaveBeenCalled();
 
@@ -96,26 +99,29 @@ describe('ExceptionItemCardHeader', () => {
       <ThemeProvider theme={mockTheme}>
         <ExceptionItemCardHeader
           actions={[
-              {
-                key: 'edit',
-                icon: 'pencil',
-                label: i18n.EXCEPTION_ITEM_EDIT_BUTTON,
-                onClick: handleEdit
-              },
-              {
-                key: 'delete',
-                icon: 'trash',
-                label: i18n.EXCEPTION_ITEM_DELETE_BUTTON,
-                onClick: handleDelete
-              },
-            ]}
+            {
+              key: 'edit',
+              icon: 'pencil',
+              label: i18n.EXCEPTION_ITEM_EDIT_BUTTON,
+              onClick: handleEdit,
+            },
+            {
+              key: 'delete',
+              icon: 'trash',
+              label: i18n.EXCEPTION_ITEM_DELETE_BUTTON,
+              onClick: handleDelete,
+            },
+          ]}
           item={getExceptionListItemSchemaMock()}
           disableActions
           dataTestSubj="exceptionItemHeader"
         />
       </ThemeProvider>
     );
-    
-    expect(wrapper.find('button[data-test-subj="exceptionItemHeader-actionButton"]').at(0).props().disabled).toBeTruthy();
+
+    expect(
+      wrapper.find('button[data-test-subj="exceptionItemHeader-actionButton"]').at(0).props()
+        .disabled
+    ).toBeTruthy();
   });
 });

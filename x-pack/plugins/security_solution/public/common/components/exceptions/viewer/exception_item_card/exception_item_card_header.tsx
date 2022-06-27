@@ -6,12 +6,21 @@
  */
 
 import React, { memo, useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanelProps, EuiContextMenuPanel, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTitle, EuiContextMenuItem } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuPanelProps,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiTitle,
+  EuiContextMenuItem,
+} from '@elastic/eui';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export interface ExceptionItemCardHeaderProps {
   item: ExceptionListItemSchema;
-  actions: Array<{ key: string; icon: string; label: string; onClick: () => void; }>;
+  actions: Array<{ key: string; icon: string; label: string; onClick: () => void }>;
   disableActions?: boolean;
   dataTestSubj: string;
 }
@@ -36,9 +45,9 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
         >
           {action.label}
         </EuiContextMenuItem>
-      ))
+      ));
     }, []);
-    
+
     return (
       <EuiFlexGroup data-test-subj={dataTestSubj} justifyContent="spaceBetween">
         <EuiFlexItem grow={9}>
@@ -48,7 +57,7 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
-            button={(
+            button={
               <EuiButtonIcon
                 isDisabled={disableActions}
                 aria-label="Exception item actions menu"
@@ -56,13 +65,13 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
                 onClick={onItemActionsClick}
                 data-test-subj={`${dataTestSubj}-actionButton`}
               />
-            )}
+            }
             panelPaddingSize="none"
             isOpen={isPopoverOpen}
             closePopover={onClosePopover}
             data-test-subj={`${dataTestSubj}-items`}
           >
-            <EuiContextMenuPanel size='s' items={itemActions} />
+            <EuiContextMenuPanel size="s" items={itemActions} />
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
