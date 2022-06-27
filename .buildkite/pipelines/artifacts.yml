@@ -21,6 +21,7 @@ steps:
         - exit_status: '*'
           limit: 1
     concurrency: 20
+    concurrency_group: package-testing-deb
 
   - command: TEST_PACKAGE=rpm .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
