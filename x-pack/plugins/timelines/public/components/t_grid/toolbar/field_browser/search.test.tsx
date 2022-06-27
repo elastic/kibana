@@ -10,18 +10,11 @@ import React from 'react';
 import { TestProviders } from '../../../../mock';
 import { Search } from './search';
 
-const timelineId = 'test';
-
 describe('Search', () => {
   test('it renders the field search input with the expected placeholder text when the searchInput prop is empty', () => {
     const wrapper = mount(
       <TestProviders>
-        <Search
-          isSearching={false}
-          onSearchInputChange={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
-        />
+        <Search isSearching={false} onSearchInputChange={jest.fn()} searchInput="" />
       </TestProviders>
     );
 
@@ -35,12 +28,7 @@ describe('Search', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Search
-          isSearching={false}
-          onSearchInputChange={jest.fn()}
-          searchInput={searchInput}
-          timelineId={timelineId}
-        />
+        <Search isSearching={false} onSearchInputChange={jest.fn()} searchInput={searchInput} />
       </TestProviders>
     );
 
@@ -50,12 +38,7 @@ describe('Search', () => {
   test('it renders the field search input with a spinner when isSearching is true', () => {
     const wrapper = mount(
       <TestProviders>
-        <Search
-          isSearching={true}
-          onSearchInputChange={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
-        />
+        <Search isSearching={true} onSearchInputChange={jest.fn()} searchInput="" />
       </TestProviders>
     );
 
@@ -67,12 +50,7 @@ describe('Search', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Search
-          isSearching={false}
-          onSearchInputChange={onSearchInputChange}
-          searchInput=""
-          timelineId={timelineId}
-        />
+        <Search isSearching={false} onSearchInputChange={onSearchInputChange} searchInput="" />
       </TestProviders>
     );
 
