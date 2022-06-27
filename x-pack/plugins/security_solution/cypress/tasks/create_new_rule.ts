@@ -267,7 +267,10 @@ export const fillDefineCustomRuleWithImportedQueryAndDataViewAndContinue = (
     '[data-test-subj="detectionsDataViewSelectorDropdown"] [data-test-subj="comboBoxSearchInput"]'
   )
     .click()
-    .type('auditbeat-*{downarrow}{enter}{esc}');
+    .type('auditbeat-*');
+  cy.get('[data-test-subj="comboBoxOptionsList detectionsDataViewSelectorDropdown-optionsList"]')
+    .contains('auditbeat-*')
+    .click();
 
   // cy.get('#auditbeat-*').click();
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
