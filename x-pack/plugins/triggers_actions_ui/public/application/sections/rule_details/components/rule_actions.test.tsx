@@ -18,7 +18,7 @@ const mockedUseFetchRuleActionConnectorsHook = jest.spyOn(
   useFetchRuleActionConnectorsHook,
   'useFetchRuleActionConnectors'
 );
-describe('Actions', () => {
+describe('Rule Actions', () => {
   async function setup() {
     const ruleActions = [
       {
