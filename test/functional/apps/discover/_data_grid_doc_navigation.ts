@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const defaultSettings = { defaultIndex: 'logstash-*', 'doc_table:legacy': false };
+  const defaultSettings = { defaultIndex: 'logstash-*' };
 
   describe('discover data grid doc link', function () {
     before(async () => {
