@@ -66,6 +66,10 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                     defaultMessage: 'Saved search',
                   }
                 ),
+                includeFields: ['isTextBasedQuery'],
+                showSavedObject: (savedObject: any) => {
+                  return !savedObject.attributes.isTextBasedQuery;
+                },
               },
               {
                 type: 'index-pattern',

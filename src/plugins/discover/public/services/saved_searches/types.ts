@@ -21,6 +21,7 @@ export interface SavedSearchAttributes {
     columns?: Record<string, DiscoverGridSettingsColumn>;
   };
   hideChart: boolean;
+  isTextBasedQuery: boolean;
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;
   };
@@ -53,4 +54,5 @@ export interface SavedSearch {
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  isTextBasedQuery?: boolean;
 }
