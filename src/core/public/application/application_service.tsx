@@ -320,7 +320,7 @@ export class ApplicationService {
       navigateToApp,
       navigateToUrl: async (
         url: string,
-        { skipAppLeave = false, forceRedirect = false }: NavigateToUrlOptions = {}
+        { skipAppLeave = false, forceRedirect = false, state }: NavigateToUrlOptions = {}
       ) => {
         const appInfo = parseAppUrl(url, http.basePath, this.apps);
         if ((forceRedirect || !appInfo) === true) {
@@ -330,7 +330,7 @@ export class ApplicationService {
           return this.redirectTo!(url);
         }
         if (appInfo) {
-          return navigateToApp(appInfo.app, { path: appInfo.path, skipAppLeave });
+          return navigateToApp(appInfo.app, { path: appInfo.path, skipAppLeave, state });
         }
       },
       getComponent: () => {

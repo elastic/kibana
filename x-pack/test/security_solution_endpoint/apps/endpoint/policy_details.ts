@@ -325,6 +325,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should show trusted apps card and link should go back to policy', async () => {
         await testSubjects.existOrFail('trustedApps-fleet-integration-card');
         await (await testSubjects.find('trustedApps-link-to-exceptions')).click();
+        await (await testSubjects.find('confirmModalConfirmButton')).click(); // Fleet show a confirm modal on unsaved changes
         await testSubjects.existOrFail('policyDetailsPage');
         await (await testSubjects.find('policyDetailsBackLink')).click();
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
@@ -334,6 +335,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const eventFiltersCard = await testSubjects.find('eventFilters-fleet-integration-card');
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(eventFiltersCard);
         await (await testSubjects.find('eventFilters-link-to-exceptions')).click();
+        await (await testSubjects.find('confirmModalConfirmButton')).click(); // Fleet show a confirm modal on unsaved changes
         await testSubjects.existOrFail('policyDetailsPage');
         await (await testSubjects.find('policyDetailsBackLink')).click();
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
@@ -343,6 +345,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const blocklistsCard = await testSubjects.find('blocklists-fleet-integration-card');
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(blocklistsCard);
         await (await testSubjects.find('blocklists-link-to-exceptions')).click();
+        await (await testSubjects.find('confirmModalConfirmButton')).click(); // Fleet show a confirm modal on unsaved changes
         await testSubjects.existOrFail('policyDetailsPage');
         await (await testSubjects.find('policyDetailsBackLink')).click();
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');

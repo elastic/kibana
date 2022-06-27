@@ -24,21 +24,18 @@ export function useHistoryBlock(isEdited: boolean) {
       async function confirmAsync() {
         const confirmRes = await overlays.openConfirm(
           i18n.translate('xpack.fleet.editPackagePolicy.historyBlockDescription', {
-            defaultMessage: `Unsaved changes will be lost.`,
+            defaultMessage: `Unsaved changes will be discarded. Are you sure you would like to continue?`,
           }),
           {
             title: i18n.translate('xpack.fleet.editPackagePolicy.historyBlockTitle', {
-              defaultMessage: 'Are you sure you want to leave?',
+              defaultMessage: 'Discard Changes?',
             }),
-            buttonColor: 'danger',
           }
         );
 
         if (confirmRes) {
           unblock();
-          application.navigateToUrl(
-            `${state.pathname}?${state.search !== '' ? `?${state.search}` : ''}`
-          );
+          application.navigateToUrl(state.pathname, { state: state.state });
         }
       }
       confirmAsync();
