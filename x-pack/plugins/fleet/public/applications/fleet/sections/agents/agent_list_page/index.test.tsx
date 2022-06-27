@@ -156,4 +156,43 @@ describe('agent_list_page', () => {
 
     utils.getByText('4 agents selected');
   });
+
+  it('should pass sort parameters on table sort', () => {
+    act(() => {
+      fireEvent.click(utils.getByTitle('Last activity'));
+    });
+
+    expect(mockedSendGetAgents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sortField: 'last_checkin',
+        sortOrder: 'asc',
+      })
+    );
+  });
+
+  it('should pass keyword field on table sort on version', () => {
+    act(() => {
+      fireEvent.click(utils.getByTitle('Version'));
+    });
+
+    expect(mockedSendGetAgents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sortField: 'local_metadata.elastic.agent.version.keyword',
+        sortOrder: 'asc',
+      })
+    );
+  });
+
+  it('should pass keyword field on table sort on hostname', () => {
+    act(() => {
+      fireEvent.click(utils.getByTitle('Host'));
+    });
+
+    expect(mockedSendGetAgents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sortField: 'local_metadata.host.hostname.keyword',
+        sortOrder: 'asc',
+      })
+    );
+  });
 });
