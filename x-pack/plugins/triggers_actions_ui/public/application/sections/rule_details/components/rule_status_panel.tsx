@@ -27,7 +27,10 @@ import {
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 
-type ComponentOpts = RuleApis & {
+type ComponentOpts = Pick<
+  RuleApis,
+  'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule' | 'loadExecutionLogAggregations'
+> & {
   rule: any;
   isEditable: boolean;
   requestRefresh: () => void;

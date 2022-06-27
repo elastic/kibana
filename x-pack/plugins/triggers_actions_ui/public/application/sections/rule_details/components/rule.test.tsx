@@ -403,6 +403,46 @@ describe('execution duration overview', () => {
   });
 });
 
+describe('disable/enable functionality', () => {
+  it('should show that the rule is enabled', () => {
+    const rule = mockRule();
+    const ruleType = mockRuleType();
+    const ruleSummary = mockRuleSummary();
+    const wrapper = mountWithIntl(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />
+    );
+    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"]').first();
+
+    expect(actionsElem.text()).toEqual('Enabled');
+  });
+
+  it('should show that the rule is disabled', async () => {
+    const rule = mockRule({
+      enabled: false,
+    });
+    const ruleType = mockRuleType();
+    const ruleSummary = mockRuleSummary();
+    const wrapper = mountWithIntl(
+      <RuleComponent
+        {...mockAPIs}
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        readOnly={false}
+      />
+    );
+    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"]').first();
+
+    expect(actionsElem.text()).toEqual('Disabled');
+  });
+});
+
 describe('tabbed content', () => {
   it('tabbed content renders when the event log experiment is on', async () => {
     // Enable the event log experiment
