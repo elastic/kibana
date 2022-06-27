@@ -84,9 +84,9 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
               color="danger"
               data-test-subj="queryFormTypeChooserCancel"
               aria-label={i18n.translate(
-                'xpack.stackAlerts.esQuery.ui.selectQueryFormType.deleteAriaLabel',
+                'xpack.stackAlerts.esQuery.ui.selectQueryFormType.cancelSelectionAriaLabel',
                 {
-                  defaultMessage: 'Delete',
+                  defaultMessage: 'Cancel selection',
                 }
               )}
               onClick={() => onFormTypeSelect(null)}

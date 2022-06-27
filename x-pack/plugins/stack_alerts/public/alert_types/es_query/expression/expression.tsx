@@ -40,7 +40,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
   const [activeQueryFormType, setActiveQueryFormType] = useState<QueryFormType | null>(null);
 
   const resetFormType = useCallback(() => {
-    // @ts-ignore Reset rule params regardless of their type
+    // @ts-expect-error Reset rule params regardless of their type
     setRuleProperty('params', {});
     setActiveQueryFormType(null);
   }, [setActiveQueryFormType, setRuleProperty]);
