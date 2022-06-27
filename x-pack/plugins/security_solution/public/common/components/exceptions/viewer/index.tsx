@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiPanel } from '@elastic/eui';
 import uuid from 'uuid';
 
 import type {
@@ -20,7 +20,6 @@ import * as i18n from '../translations';
 import { useStateToaster } from '../../toasters';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana } from '../../../lib/kibana';
-import { Panel } from '../../panel';
 import { Loader } from '../../loader';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
 import { ExceptionListItemIdentifiers, Filter } from '../types';
@@ -28,9 +27,10 @@ import { allExceptionItemsReducer, State, ViewerFlyoutName } from './reducer';
 
 import { ExceptionsViewerPagination } from './exceptions_pagination';
 import { ExceptionsViewerUtility } from './exceptions_utility';
-import { ExceptionsViewerItems } from './exceptions_viewer_items';
+import { ExceptionItemsViewer } from './exceptions_viewer_items';
 import { EditExceptionFlyout } from '../edit_exception_flyout';
 import { AddExceptionFlyout } from '../add_exception_flyout';
+import { CreateExceptionList } from '../create_exception_list';
 
 const initialState: State = {
   filterOptions: { filter: '', tags: [] },
@@ -53,24 +53,24 @@ const initialState: State = {
 };
 
 interface ExceptionsViewerProps {
+  rule: Rule;
   ruleId: string;
   ruleName: string;
   ruleIndices: string[];
   dataViewId?: string;
   exceptionListsMeta: ExceptionListIdentifiers[];
   availableListTypes: ExceptionListTypeEnum[];
-  commentsAccordionId: string;
   onRuleChange?: () => void;
 }
 
 const ExceptionsViewerComponent = ({
+  rule,
   ruleId,
   ruleName,
   ruleIndices,
   dataViewId,
   exceptionListsMeta,
   availableListTypes,
-  commentsAccordionId,
   onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
@@ -260,7 +260,7 @@ const ExceptionsViewerComponent = ({
         lists: exceptionListsMeta,
         exception,
       });
-      console.log({exception})
+
       setCurrentModal('editException');
     },
     [setCurrentModal, exceptionListsMeta]
@@ -312,6 +312,28 @@ const ExceptionsViewerComponent = ({
     [setLoadingItemIds, deleteExceptionItem, loadingItemIds, handleFetchList, onDispatchToaster]
   );
 
+  const handleCreateExceptionList = useCallback(
+    () => {
+      setCurrentModal('createExceptionList');
+    },
+    [setCurrentModal]
+  );
+
+  const handleCloseCreateExceptionListModal = useCallback(
+    () => {
+      setCurrentModal(null);
+    },
+    [setCurrentModal]
+  );
+
+  const handleCreateExceptionListModalSuccess = useCallback(
+    () => {
+      handleCloseCreateExceptionListModal();
+      setCurrentModal('addException');
+    },
+    [handleCloseCreateExceptionListModal, setCurrentModal]
+  );
+
   // Logic for initial render
   useEffect((): void => {
     if (isInitLoading && !loadingList && (exceptions.length === 0 || exceptions != null)) {
@@ -354,6 +376,7 @@ const ExceptionsViewerComponent = ({
 
       {currentModal === 'addException' && exceptionListTypeToEdit != null && (
         <AddExceptionFlyout
+          showAlertCloseOptions={true}
           ruleName={ruleName}
           ruleIndices={ruleIndices}
           dataViewId={dataViewId}
@@ -365,31 +388,42 @@ const ExceptionsViewerComponent = ({
         />
       )}
 
-      <Panel loading={isInitLoading || loadingList}>
+      {currentModal === 'createExceptionList' && (
+        <CreateExceptionList
+          rule={rule}
+          showFirstLinkedListCallout={showEmpty}
+          handleCloseModal={handleCloseCreateExceptionListModal}
+          handleCreateExceptionListSuccess={handleCreateExceptionListModalSuccess}
+        />
+      )}
+
+      <EuiPanel hasBorder={false} hasShadow={false}>
         {(isInitLoading || loadingList) && (
           <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
         )}
+        {!showEmpty && (
+          <>
+            <ExceptionsViewerHeader
+              isInitLoading={isInitLoading}
+              supportedListTypes={supportedListTypes}
+              detectionsListItems={totalDetectionsItems}
+              endpointListItems={totalEndpointItems}
+              onFilterChange={handleFilterChange}
+              onAddExceptionClick={handleAddException}
+            />
+            <EuiSpacer size="l" />
 
-        <ExceptionsViewerHeader
-          isInitLoading={isInitLoading}
-          supportedListTypes={supportedListTypes}
-          detectionsListItems={totalDetectionsItems}
-          endpointListItems={totalEndpointItems}
-          onFilterChange={handleFilterChange}
-          onAddExceptionClick={handleAddException}
-        />
+            <ExceptionsViewerUtility
+              pagination={pagination}
+              showEndpointListsOnly={showEndpointListsOnly}
+              showDetectionsListsOnly={showDetectionsListsOnly}
+              onRefreshClick={handleFetchList}
+              ruleSettingsUrl={ruleSettingsUrl}
+            />
+          </>
+        )}
 
-        <EuiSpacer size="l" />
-
-        <ExceptionsViewerUtility
-          pagination={pagination}
-          showEndpointListsOnly={showEndpointListsOnly}
-          showDetectionsListsOnly={showDetectionsListsOnly}
-          onRefreshClick={handleFetchList}
-          ruleSettingsUrl={ruleSettingsUrl}
-        />
-
-        <ExceptionsViewerItems
+        <ExceptionItemsViewer
           disableActions={!canUserCRUD || !hasIndexWrite}
           showEmpty={showEmpty}
           showNoResults={showNoResults}
@@ -398,13 +432,16 @@ const ExceptionsViewerComponent = ({
           loadingItemIds={loadingItemIds}
           onDeleteException={handleDeleteException}
           onEditExceptionItem={handleEditException}
+          onCreateExceptionList={handleCreateExceptionList}
         />
 
-        <ExceptionsViewerPagination
-          onPaginationChange={handleFilterChange}
-          pagination={pagination}
-        />
-      </Panel>
+        {!showEmpty && (
+          <ExceptionsViewerPagination
+            onPaginationChange={handleFilterChange}
+            pagination={pagination}
+          />
+        )}
+      </EuiPanel>
     </>
   );
 };
