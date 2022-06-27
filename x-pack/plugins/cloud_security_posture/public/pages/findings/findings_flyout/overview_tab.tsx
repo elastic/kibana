@@ -54,18 +54,26 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
     title: '',
     description: <Markdown>{rule.remediation}</Markdown>,
   },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.impactTitle', {
-      defaultMessage: 'Impact',
-    }),
-    description: <Markdown>{rule.impact}</Markdown>,
-  },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.defaultValueTitle', {
-      defaultMessage: 'Default Value',
-    }),
-    description: <Markdown>{rule.default_value}</Markdown>,
-  },
+  ...(rule.impact
+    ? [
+        {
+          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.impactTitle', {
+            defaultMessage: 'Impact',
+          }),
+          description: <Markdown>{rule.impact}</Markdown>,
+        },
+      ]
+    : []),
+  ...(rule.default_value
+    ? [
+        {
+          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.defaultValueTitle', {
+            defaultMessage: 'Default Value',
+          }),
+          description: <Markdown>{rule.default_value}</Markdown>,
+        },
+      ]
+    : []),
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.rationaleTitle', {
       defaultMessage: 'Rationale',

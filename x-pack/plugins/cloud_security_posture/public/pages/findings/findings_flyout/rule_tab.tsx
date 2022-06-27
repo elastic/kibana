@@ -54,12 +54,16 @@ export const getRuleList = (rule: CspFinding['rule']) => [
     }),
     description: <Markdown>{rule.audit}</Markdown>,
   },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.referencesTitle', {
-      defaultMessage: 'References',
-    }),
-    description: <Markdown>{rule.references}</Markdown>,
-  },
+  ...(rule.references
+    ? [
+        {
+          title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.referencesTitle', {
+            defaultMessage: 'References',
+          }),
+          description: <Markdown>{rule.references}</Markdown>,
+        },
+      ]
+    : []),
 ];
 
 export const RuleTab = ({ data }: { data: CspFinding }) => (
