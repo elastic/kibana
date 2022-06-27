@@ -31,7 +31,7 @@ import {
   EDITOR_MIN_HEIGHT,
 } from './text_based_languages_editor.styles';
 import { MemoizedDocumentation } from './documentation';
-import { useDebounceWithOptions } from './helpers';
+import { useDebounceWithOptions, parseErrors } from './helpers';
 import { EditorFooter } from './editor_footer';
 
 interface TextBasedLanguagesEditorProps {
@@ -86,6 +86,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isWordWrapped, setIsWordWrapped] = useState(true);
   const [userDrags, setUserDrags] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
+  const [editorErrors, setEditorErrors] = useState<
+    Array<{ startLineNumber: number; message: string }>
+  >([]);
 
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
@@ -172,10 +175,18 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       if (!isCodeEditorExpanded) {
         editor1.current?.onDidContentSizeChange(updateHeight);
       }
+      if (errors && errors.length) {
+        const parsedErrors = parseErrors(errors, code);
+        setEditorErrors(parsedErrors);
+        monaco.editor.setModelMarkers(editorModel.current, 'Unified search', parsedErrors);
+      } else {
+        monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
+        setEditorErrors([]);
+      }
     },
     { skipFirstRender: false },
     256,
-    []
+    [errors]
   );
 
   // Clean up the monaco editor and DOM on unmount
@@ -383,7 +394,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       <EditorFooter
                         lines={lines}
                         containerCSS={styles.bottomContainer}
-                        errors={errors}
+                        errors={editorErrors}
                       />
                     )}
                   </div>
@@ -431,7 +442,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         )}
       </EuiFlexGroup>
       {isCodeEditorExpanded && (
-        <EditorFooter lines={lines} containerCSS={styles.bottomContainer} errors={errors} />
+        <EditorFooter lines={lines} containerCSS={styles.bottomContainer} errors={editorErrors} />
       )}
       {isCodeEditorExpanded && (
         <div css={styles.dragResizeContainer} onMouseDown={onMouseDownResizeHandler}>

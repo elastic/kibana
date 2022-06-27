@@ -101,8 +101,6 @@ export function fetchAll(
     if (query && isOfAggregateQueryType(query)) {
       const aggregatedQuery = query as AggregateQuery;
       textBasedLanguageMode = getAggregateQueryMode(aggregatedQuery);
-    } else {
-      textBasedLanguageMode = '';
     }
 
     // Update the base searchSource, base for all child fetches

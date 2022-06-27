@@ -121,7 +121,7 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING },
+      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
       {
         fetchStatus: FetchStatus.COMPLETE,
         result: documents,
@@ -143,7 +143,7 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING },
+      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
       { fetchStatus: FetchStatus.PARTIAL, result: 2 },
       { fetchStatus: FetchStatus.COMPLETE, result: 42 },
     ]);
@@ -155,7 +155,7 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING },
+      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
       { fetchStatus: FetchStatus.COMPLETE, bucketInterval: {}, chartData: {} },
     ]);
   });
@@ -168,7 +168,7 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING },
+      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
       { fetchStatus: FetchStatus.PARTIAL, result: 0 }, // From documents query
       { fetchStatus: FetchStatus.COMPLETE, result: 32 },
     ]);
@@ -186,15 +186,20 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collectTotalHits()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING },
+      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
       { fetchStatus: FetchStatus.PARTIAL, result: 1 },
       { fetchStatus: FetchStatus.ERROR, error: { msg: 'Oh noes!' } },
     ]);
     expect(await collectMain()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING },
-      { fetchStatus: FetchStatus.PARTIAL },
-      { fetchStatus: FetchStatus.COMPLETE, foundDocuments: true },
+      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
+      { fetchStatus: FetchStatus.PARTIAL, textBasedLanguageMode: '' },
+      {
+        fetchStatus: FetchStatus.COMPLETE,
+        foundDocuments: true,
+        error: undefined,
+        textBasedLanguageMode: '',
+      },
     ]);
   });
 
@@ -205,9 +210,13 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collectMain()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING },
-      { fetchStatus: FetchStatus.PARTIAL }, // From totalHits query
-      { fetchStatus: FetchStatus.ERROR, error: { msg: 'This query failed' } },
+      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
+      { fetchStatus: FetchStatus.PARTIAL, textBasedLanguageMode: '' }, // From totalHits query
+      {
+        fetchStatus: FetchStatus.ERROR,
+        error: { msg: 'This query failed' },
+        textBasedLanguageMode: '',
+      },
       // Here should be no COMPLETE coming anymore
     ]);
   });

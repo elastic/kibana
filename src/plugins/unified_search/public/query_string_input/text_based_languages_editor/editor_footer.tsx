@@ -28,7 +28,7 @@ const COMMAND_KEY = isMac ? '⌘' : '^';
 interface EditorFooterProps {
   lines: number;
   containerCSS: Interpolation<Theme>;
-  errors?: Error[];
+  errors?: Array<{ startLineNumber: number; message: string }>;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -91,7 +91,15 @@ export const EditorFooter = memo(function EditorFooter({
                         {errors.map((error, index) => {
                           return (
                             <EuiDescriptionListDescription key={index}>
-                              {String(error)}
+                              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                                <EuiFlexItem grow={false}>
+                                  <EuiIcon type="crossInACircleFilled" color="danger" size="s" />
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>
+                                  {`Line ${error.startLineNumber}`}
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>{error.message}</EuiFlexItem>
+                              </EuiFlexGroup>
                             </EuiDescriptionListDescription>
                           );
                         })}
