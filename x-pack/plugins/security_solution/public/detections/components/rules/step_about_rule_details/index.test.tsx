@@ -20,7 +20,7 @@ import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 jest.mock('../../../../common/lib/kibana');
 
 const mockTheme = getMockTheme({
-  eui: { euiSizeL: '10px', euiBreakpoints: { s: '450px' }, paddingSizes: { m: '10px' } },
+  eui: { euiSizeL: '10px', euiBreakpoints: { s: '450px' }, euiSizeM: '10px' },
 });
 
 describe('StepAboutRuleToggleDetails', () => {
