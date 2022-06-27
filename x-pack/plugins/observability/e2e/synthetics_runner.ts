@@ -85,6 +85,7 @@ export class SyntheticsRunner {
       playwrightOptions: { headless, chromiumSandbox: false, timeout: 60 * 1000 },
       match: match === 'undefined' ? '' : match,
       pauseOnError,
+      screenshots: 'only-on-failure',
     });
 
     await this.assertResults(results);
