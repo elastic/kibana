@@ -17,10 +17,10 @@ import type {
   ApplicationStart,
   DocLinksStart,
 } from '@kbn/core/public';
-
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
+
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import type {
   TelemetrySavedObjectAttributes,
@@ -148,12 +148,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       telemetryConstants = getTelemetryConstants(docLinks);
     });
 
-    import('@kbn/analytics-shippers-elastic-v3-browser').then(({ ElasticV3BrowserShipper }) => {
-      analytics.registerShipper(ElasticV3BrowserShipper, {
-        channelName: 'kibana-browser',
-        version: currentKibanaVersion,
-        sendTo: config.sendUsageTo === 'prod' ? 'production' : 'staging',
-      });
+    analytics.registerShipper(ElasticV3BrowserShipper, {
+      channelName: 'kibana-browser',
+      version: currentKibanaVersion,
+      sendTo: config.sendUsageTo === 'prod' ? 'production' : 'staging',
     });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
