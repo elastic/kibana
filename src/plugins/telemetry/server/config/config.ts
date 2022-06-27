@@ -19,13 +19,7 @@ const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   allowChangingOptInStatus: schema.boolean({ defaultValue: true }),
   hidePrivacyStatement: schema.boolean({ defaultValue: false }),
-  optIn: schema.conditional(
-    schema.siblingRef('allowChangingOptInStatus'),
-    schema.literal(false),
-    schema.maybe(schema.literal(true)),
-    schema.boolean({ defaultValue: true }),
-    { defaultValue: true }
-  ),
+  optIn: schema.boolean({ defaultValue: true }),
   // `config` is used internally and not intended to be set
   config: schema.string({ defaultValue: getConfigPath() }),
   banner: schema.boolean({ defaultValue: true }),
@@ -45,7 +39,6 @@ export type TelemetryConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   schema: configSchema,
   exposeToBrowser: {
-    enabled: true,
     banner: true,
     allowChangingOptInStatus: true,
     optIn: true,
@@ -53,4 +46,17 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
     sendUsageTo: true,
     hidePrivacyStatement: true,
   },
+  deprecations: () => [
+    (cfg) => {
+      if (cfg.telemetry?.enabled === false) {
+        return {
+          set: [
+            { path: 'telemetry.optIn', value: false },
+            { path: 'telemetry.allowChangingOptInStatus', value: false },
+          ],
+          unset: [{ path: 'telemetry.enabled' }],
+        };
+      }
+    },
+  ],
 };
