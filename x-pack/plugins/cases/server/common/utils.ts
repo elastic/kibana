@@ -24,6 +24,7 @@ import {
   CaseStatuses,
   CommentAttributes,
   CommentRequest,
+  CommentRequestActionsType,
   CommentRequestAlertType,
   CommentRequestExternalReferenceSOType,
   CommentRequestExternalReferenceType,
@@ -222,7 +223,7 @@ export const isCommentRequestTypeUser = (
  */
 export const isCommentRequestTypeActions = (
   context: CommentRequest
-): context is CommentRequestUserType => {
+): context is CommentRequestActionsType => {
   return context.type === CommentType.actions;
 };
 
@@ -394,4 +395,8 @@ export const asArray = <T>(field?: T | T[] | null): T[] => {
   }
 
   return Array.isArray(field) ? field : [field];
+};
+
+export const assertUnreachable = (x: never): never => {
+  throw new Error('You should not reach this part of code');
 };

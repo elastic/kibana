@@ -36,6 +36,7 @@ import {
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
   isCommentRequestTypeExternalReference,
+  assertUnreachable,
 } from '../common/utils';
 import { SavedObjectFindOptionsKueryNode } from '../common/types';
 
@@ -90,6 +91,13 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
     }
   } else if (isCommentRequestTypeExternalReference(comment)) {
     decodeExternalReferenceAttachment(comment);
+  } else {
+    /**
+     * This assertion ensures that TS will show an error
+     * when we add a new attachment type. This way, we rely on TS
+     * to remind us that we have to do a check for the new attachment.
+     */
+    assertUnreachable(comment);
   }
 };
 
