@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from '../translations';
-import { ExceptionItem } from './exception_item';
-import { AndOrBadge } from '../../and_or_badge';
+import { ExceptionItem } from './exception_item_2';
 import type { ExceptionListItemIdentifiers } from '../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
@@ -81,14 +80,6 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
             exceptions.length > 0 &&
             exceptions.map((exception, index) => (
               <MyFlexItem data-test-subj="exceptionItemContainer" grow={false} key={exception.id}>
-                {index !== 0 ? (
-                  <>
-                    <AndOrBadge data-test-subj="exceptionItemOrBadge" type="or" />
-                    <EuiSpacer />
-                  </>
-                ) : (
-                  <EuiSpacer size="s" />
-                )}
                 <ExceptionItem
                   disableActions={disableActions}
                   loadingItemIds={loadingItemIds}
@@ -96,6 +87,7 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
                   exceptionItem={exception}
                   onDeleteException={onDeleteException}
                   onEditException={onEditExceptionItem}
+                  dataTestSubj={`exceptionItemCard-${exception.name}`}
                 />
               </MyFlexItem>
             ))}
