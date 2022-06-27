@@ -8,12 +8,10 @@
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingContent, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import moment from 'moment';
 import { useGetEndpointDetails } from '../../hooks/endpoint/use_get_endpoint_details';
 import { useGetEndpointPendingActionsSummary } from '../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
 import { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
 import { EndpointAgentAndIsolationStatus } from '../endpoint_agent_and_isolation_status';
-import { getMaybeDate } from '../../../common/components/formatted_date/maybe_date';
 
 interface HeaderEndpointInfoProps {
   endpointId: string;
@@ -88,11 +86,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
             id="xpack.securitySolution.responder.header.lastSeen"
             defaultMessage="Last seen {date}"
             values={{
-              date: (
-                <FormattedRelative
-                  value={moment.utc(getMaybeDate(endpointDetails.metadata['@timestamp'])).toDate()}
-                />
-              ),
+              date: <FormattedRelative value={endpointDetails.metadata['@timestamp']} />,
             }}
           />
         </EuiText>
