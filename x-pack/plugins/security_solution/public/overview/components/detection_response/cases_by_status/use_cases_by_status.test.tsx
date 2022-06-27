@@ -18,12 +18,17 @@ import {
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
 Date.now = jest.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
+const mockSetQuery = jest.fn();
+const mockDeleteQuery = jest.fn();
 
 jest.mock('../../../../common/containers/use_global_time', () => {
   return {
-    useGlobalTime: jest
-      .fn()
-      .mockReturnValue({ from: '2022-04-05T12:00:00.000Z', to: '2022-04-08T12:00:00.000Z' }),
+    useGlobalTime: jest.fn().mockReturnValue({
+      from: '2022-04-05T12:00:00.000Z',
+      to: '2022-04-08T12:00:00.000Z',
+      setQuery: () => mockSetQuery(),
+      deleteQuery: () => mockDeleteQuery(),
+    }),
   };
 });
 jest.mock('../../../../common/lib/kibana');
@@ -98,6 +103,36 @@ describe('useCasesByStatus', () => {
         totalCounts: 6,
         updatedAt: dateNow,
       });
+    });
+  });
+
+  test('it should call setQuery when fetching', async () => {
+    await act(async () => {
+      const { waitForNextUpdate } = renderHook<UseCasesByStatusProps, UseCasesByStatusResults>(
+        () => useCasesByStatus({ skip: false }),
+        {
+          wrapper: TestProviders,
+        }
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      expect(mockSetQuery).toHaveBeenCalled();
+    });
+  });
+
+  test('it should call deleteQuery when unmounting', async () => {
+    await act(async () => {
+      const { waitForNextUpdate, unmount } = renderHook<
+        UseCasesByStatusProps,
+        UseCasesByStatusResults
+      >(() => useCasesByStatus({ skip: false }), {
+        wrapper: TestProviders,
+      });
+      await waitForNextUpdate();
+
+      unmount();
+
+      expect(mockDeleteQuery).toHaveBeenCalled();
     });
   });
 
