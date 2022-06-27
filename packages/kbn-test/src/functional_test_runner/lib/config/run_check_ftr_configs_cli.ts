@@ -62,7 +62,7 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
-        if (file.match(/\.jest\.config\(t|j)s$/)) {
+        if (file.match(/jest.config.(t|j)s$/)) {
           return false;
         }
 
