@@ -6,27 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { withSuspense } from '@kbn/shared-ux-utility';
-
-export { ToolbarButton, IconButtonGroup, AddFromLibraryButton, ToolbarPopover } from './toolbar';
 export { KibanaPageTemplateSolutionNav } from './page_template/solution_nav';
-export type { KibanaPageTemplateProps } from './page_template';
-export { KibanaPageTemplate } from './page_template';
 
-/**
- *  A `KibanaNoDataPage` component, with service hooks. Consumers should use `React.Suspennse` or the
- * `withSuspense` HOC to load this component.
- */
-export const KibanaNoDataPageLazy = React.lazy(() =>
-  import('./empty_state').then(({ KibanaNoDataPage }) => ({
-    default: KibanaNoDataPage,
-  }))
-);
+// TODO: clintandrewhall - NoDataPageProps is a temporary addition until it is split into its own package
+export type { KibanaPageTemplateProps, NoDataPageProps } from './page_template';
 
-/**
- * A `KibanaNoDataPage` component. The component is wrapped by the `withSuspense` HOC.
- * This component can be used directly by consumers and will load the `KibanaNoDataPageLazy` lazily with
- * a predefined fallback and error boundary.
- */
-export const KibanaNoDataPage = withSuspense(KibanaNoDataPageLazy);
+// TODO: clintandrewhall - NoDataConfigPage is a temporary addition until it is split into its own package
+export { KibanaPageTemplate, NoDataConfigPage } from './page_template';

@@ -61,9 +61,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     dashboard: {
       guide: `${KIBANA_DOCS}dashboard.html`,
       drilldowns: `${KIBANA_DOCS}drilldowns.html`,
-      drilldownsTriggerPicker: `${KIBANA_DOCS}drilldowns.html#url-drilldowns`,
-      urlDrilldownTemplateSyntax: `${KIBANA_DOCS}url_templating-language.html`,
-      urlDrilldownVariables: `${KIBANA_DOCS}url_templating-language.html#url-template-variables`,
+      drilldownsTriggerPicker: `${KIBANA_DOCS}create-drilldowns.html#url-drilldowns`,
+      urlDrilldownTemplateSyntax: `${KIBANA_DOCS}create-drilldowns.html#url_templating-language`,
+      urlDrilldownVariables: `${KIBANA_DOCS}create-drilldowns.html#url-template-variables`,
     },
     discover: {
       guide: `${KIBANA_DOCS}discover.html`,
@@ -143,7 +143,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       jiraServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-server-connector.html`,
       networkDrive: `${WORKPLACE_SEARCH_DOCS}network-drives.html`,
       oneDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-onedrive-connector.html`,
-      outlook: `${WORKPLACE_SEARCH_DOCS}microsoft-outlook.html`,
       permissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html#organizational-sources-private-sources`,
       salesforce: `${WORKPLACE_SEARCH_DOCS}workplace-search-salesforce-connector.html`,
       security: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html`,
@@ -152,9 +151,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       sharePointServer: `${WORKPLACE_SEARCH_DOCS}sharepoint-server.html`,
       slack: `${WORKPLACE_SEARCH_DOCS}workplace-search-slack-connector.html`,
       synch: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html`,
-      teams: `${WORKPLACE_SEARCH_DOCS}microsoft-teams.html`,
       zendesk: `${WORKPLACE_SEARCH_DOCS}workplace-search-zendesk-connector.html`,
-      zoom: `${WORKPLACE_SEARCH_DOCS}zoom.html`,
     },
     metricbeat: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
@@ -343,6 +340,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
       eventFilters: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/event-filters.html`,
       blocklist: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/blocklist.html`,
+      policyResponseTroubleshooting: {
+        full_disk_access: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/deploy-elastic-endpoint.html#enable-fda-endpoint`,
+      },
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,

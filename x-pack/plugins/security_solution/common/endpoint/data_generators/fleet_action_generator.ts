@@ -11,14 +11,13 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { BaseDataGenerator } from './base_data_generator';
 import {
+  ActivityLogAction,
   ActivityLogActionResponse,
   ActivityLogItemTypes,
   EndpointAction,
   EndpointActionResponse,
-  ISOLATION_ACTIONS,
+  RESPONSE_ACTION_COMMANDS,
 } from '../types';
-
-const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
 export class FleetActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action (isolate or unisolate) */
@@ -37,8 +36,9 @@ export class FleetActionGenerator extends BaseDataGenerator {
         agents: [this.seededUUIDv4()],
         user_id: 'elastic',
         data: {
-          command: this.randomIsolateCommand(),
+          command: this.randomResponseActionCommand(),
           comment: this.randomString(15),
+          parameter: undefined,
         },
       },
       overrides
@@ -68,8 +68,9 @@ export class FleetActionGenerator extends BaseDataGenerator {
     return merge(
       {
         action_data: {
-          command: this.randomIsolateCommand(),
+          command: this.randomResponseActionCommand(),
           comment: '',
+          parameter: undefined,
         },
         action_id: this.seededUUIDv4(),
         agent_id: this.seededUUIDv4(),
@@ -88,6 +89,23 @@ export class FleetActionGenerator extends BaseDataGenerator {
     return Object.assign(this.toEsSearchHit(this.generateResponse(overrides)), {
       _index: AGENT_ACTIONS_RESULTS_INDEX,
     });
+  }
+
+  /**
+   * An Activity Log entry as returned by the Activity log API
+   * @param overrides
+   */
+  generateActivityLogAction(overrides: DeepPartial<ActivityLogAction> = {}): ActivityLogAction {
+    return merge(
+      {
+        type: ActivityLogItemTypes.FLEET_ACTION,
+        item: {
+          id: this.seededUUIDv4(),
+          data: this.generate(),
+        },
+      },
+      overrides
+    );
   }
 
   /**
@@ -117,7 +135,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
     return super.randomN(max);
   }
 
-  protected randomIsolateCommand() {
-    return this.randomChoice(ISOLATION_COMMANDS);
+  protected randomResponseActionCommand() {
+    return this.randomChoice(RESPONSE_ACTION_COMMANDS);
   }
 }

@@ -23,7 +23,6 @@ describe('copyValueToClipboard', () => {
   const valueToStringConverter: ValueToStringConverter = (rowIndex, columnId, options) =>
     convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      rowsFlattened: discoverGridContextComplexMock.rowsFlattened,
       dataView: discoverGridContextComplexMock.indexPattern,
       services: discoverServiceMock,
       rowIndex,
@@ -127,7 +126,7 @@ describe('copyValueToClipboard', () => {
       '"bool_enabled"\nfalse\ntrue'
     );
     expect(discoverServiceMock.toastNotifications.addInfo).toHaveBeenCalledWith({
-      title: 'Copied values of "bool_enabled" column to clipboard',
+      title: 'Values of "bool_enabled" column copied to clipboard',
     });
   });
 
@@ -142,8 +141,8 @@ describe('copyValueToClipboard', () => {
 
     expect(result).toBe('"scripted_string"\n"hi there"\n"\'=1+2"";=1+2"');
     expect(discoverServiceMock.toastNotifications.addWarning).toHaveBeenCalledWith({
-      title: 'Copied values of "scripted_string" column to clipboard',
-      text: 'It may contain formulas whose values have been escaped.',
+      title: 'Values of "scripted_string" column copied to clipboard',
+      text: 'Values may contain formulas that are escaped.',
     });
   });
 });

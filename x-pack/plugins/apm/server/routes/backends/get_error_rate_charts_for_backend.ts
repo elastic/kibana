@@ -5,33 +5,46 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import { EventOutcome } from '../../../common/event_outcome';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import {
+  getDocCountFieldForServiceDestinationStatistics,
+  getDocumentTypeFilterForServiceDestinationStatistics,
+  getProcessorEventForServiceDestinationStatistics,
+} from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 
 export async function getErrorRateChartsForBackend({
   backendName,
+  spanName,
   setup,
   start,
   end,
   environment,
   kuery,
+  searchServiceDestinationMetrics,
   offset,
 }: {
   backendName: string;
+  spanName: string;
   setup: Setup;
   start: number;
   end: number;
   environment: string;
   kuery: string;
+  searchServiceDestinationMetrics: boolean;
   offset?: string;
 }) {
   const { apmEventClient } = setup;
@@ -44,7 +57,11 @@ export async function getErrorRateChartsForBackend({
 
   const response = await apmEventClient.search('get_error_rate_for_backend', {
     apm: {
-      events: [ProcessorEvent.metric],
+      events: [
+        getProcessorEventForServiceDestinationStatistics(
+          searchServiceDestinationMetrics
+        ),
+      ],
     },
     body: {
       size: 0,
@@ -54,6 +71,10 @@ export async function getErrorRateChartsForBackend({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...rangeQuery(startWithOffset, endWithOffset),
+            ...termQuery(SPAN_NAME, spanName || null),
+            ...getDocumentTypeFilterForServiceDestinationStatistics(
+              searchServiceDestinationMetrics
+            ),
             { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
             {
               terms: {
@@ -71,11 +92,36 @@ export async function getErrorRateChartsForBackend({
             metricsInterval: 60,
           }),
           aggs: {
+            ...(searchServiceDestinationMetrics
+              ? {
+                  total_count: {
+                    sum: {
+                      field: getDocCountFieldForServiceDestinationStatistics(
+                        searchServiceDestinationMetrics
+                      ),
+                    },
+                  },
+                }
+              : {}),
             failures: {
               filter: {
                 term: {
                   [EVENT_OUTCOME]: EventOutcome.failure,
                 },
+              },
+              aggs: {
+                ...(searchServiceDestinationMetrics
+                  ? {
+                      total_count: {
+                        sum: {
+                          field:
+                            getDocCountFieldForServiceDestinationStatistics(
+                              searchServiceDestinationMetrics
+                            ),
+                        },
+                      },
+                    }
+                  : {}),
               },
             },
           },
@@ -86,8 +132,9 @@ export async function getErrorRateChartsForBackend({
 
   return (
     response.aggregations?.timeseries.buckets.map((bucket) => {
-      const totalCount = bucket.doc_count;
-      const failureCount = bucket.failures.doc_count;
+      const totalCount = bucket.total_count?.value ?? bucket.doc_count;
+      const failureCount =
+        bucket.failures.total_count?.value ?? bucket.failures.doc_count;
 
       return {
         x: bucket.key + offsetInMs,

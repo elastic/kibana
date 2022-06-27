@@ -1,156 +1,340 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Field Renderers #autonomousSystemRenderer it renders correctly against snapshot 1`] = `
+<DocumentFragment>
+  .c0 .euiPopover__anchor {
+  width: 100%;
+}
+
+.c1 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c1 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
 <div
-  className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
->
-  <EuiFlexItem
-    grow={false}
+    class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
-    <DefaultDraggable
-      field="source.as.organization.name"
-      id="autonomous-system-renderer-default-draggable-ip-overview-source.as.organization.name"
-      isDraggable={false}
-      value="Test Org"
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    /
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <DefaultDraggable
-      field="source.as.number"
-      fieldType="number"
-      id="autonomous-system-renderer-default-draggable-ip-overview-source.as.number"
-      isAggregatable={true}
-      isDraggable={false}
-      value="12345"
-    />
-  </EuiFlexItem>
-</div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class=""
+      >
+        <div
+          class="euiPopover euiPopover--anchorDownCenter c0"
+        >
+          <div
+            class="euiPopover__anchor"
+          >
+            <div
+              data-test-subj="withHoverActionsButton"
+            >
+              <div
+                data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_organization_name"
+                tabindex="-1"
+              >
+                <span
+                  class="c1"
+                  data-test-subj="render-content-source.as.organization.name"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    Test Org
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      /
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class=""
+      >
+        <div
+          class="euiPopover euiPopover--anchorDownCenter c0"
+        >
+          <div
+            class="euiPopover__anchor"
+          >
+            <div
+              data-test-subj="withHoverActionsButton"
+            >
+              <div
+                data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_number"
+                tabindex="-1"
+              >
+                <span
+                  class="c1"
+                  data-test-subj="render-content-source.as.number"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    12345
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
 `;
 
 exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`] = `
-<LocalizedDateTooltip
-  date={2019-02-07T17:19:41.636Z}
->
-  <PreferenceFormattedDate
-    data-test-subj="preference-time"
-    value={2019-02-07T17:19:41.636Z}
-  />
-</LocalizedDateTooltip>
+<DocumentFragment>
+  <span
+    class="euiToolTipAnchor"
+  >
+    Feb 7, 2019 @ 17:19:41.636
+  </span>
+</DocumentFragment>
 `;
 
 exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
-<DraggableWrapper
-  dataProvider={
-    Object {
-      "and": Array [],
-      "enabled": true,
-      "excluded": false,
-      "id": "host-name-renderer-default-draggable-ip-overview-host-name",
-      "kqlQuery": "",
-      "name": "raspberrypi",
-      "queryMatch": Object {
-        "field": "host.name",
-        "operator": ":",
-        "value": "raspberrypi",
-      },
-    }
-  }
-  fieldType="keyword"
-  hideTopN={false}
-  isAggregatable={true}
-  isDraggable={false}
-  render={[Function]}
-/>
+<DocumentFragment>
+  .c0 .euiPopover__anchor {
+  width: 100%;
+}
+
+.c1 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c1 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
+<div
+    class=""
+  >
+    <div
+      class="euiPopover euiPopover--anchorDownCenter c0"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <div
+          data-test-subj="withHoverActionsButton"
+        >
+          <div
+            data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
+            tabindex="-1"
+          >
+            <span
+              class="c1"
+              data-test-subj="render-content-host.name"
+            >
+              <span
+                class="euiToolTipAnchor"
+              >
+                <a
+                  class="euiLink css-102pf9n-euiLink-primary"
+                  data-test-subj="host-details-button"
+                  href="securitySolutionUI/hosts/raspberrypi?timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now%2Fd,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now%2Fd)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now%2Fd,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now%2Fd)))"
+                  rel="noreferrer"
+                >
+                  raspberrypi
+                </a>
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
 `;
 
 exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
-<DraggableWrapper
-  dataProvider={
-    Object {
-      "and": Array [],
-      "enabled": true,
-      "excluded": false,
-      "id": "host-name-renderer-default-draggable-ip-overview-host-name",
-      "kqlQuery": "",
-      "name": "raspberrypi",
-      "queryMatch": Object {
-        "field": "host.name",
-        "operator": ":",
-        "value": "raspberrypi",
-      },
-    }
-  }
-  fieldType="keyword"
-  hideTopN={false}
-  isAggregatable={true}
-  isDraggable={false}
-  render={[Function]}
-/>
+<DocumentFragment>
+  .c0 .euiPopover__anchor {
+  width: 100%;
+}
+
+.c1 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c1 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
+<div
+    class=""
+  >
+    <div
+      class="euiPopover euiPopover--anchorDownCenter c0"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <div
+          data-test-subj="withHoverActionsButton"
+        >
+          <div
+            data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
+            tabindex="-1"
+          >
+            <span
+              class="c1"
+              data-test-subj="render-content-host.name"
+            >
+              <span
+                class="euiToolTipAnchor"
+              >
+                <a
+                  class="euiLink css-102pf9n-euiLink-primary"
+                  data-test-subj="host-details-button"
+                  href="securitySolutionUI/hosts/raspberrypi?timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now%2Fd,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now%2Fd)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now%2Fd,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now%2Fd)))"
+                  rel="noreferrer"
+                >
+                  raspberrypi
+                </a>
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
 `;
 
 exports[`Field Renderers #locationRenderer it renders correctly against snapshot 1`] = `
+<DocumentFragment>
+  .c0 .euiPopover__anchor {
+  width: 100%;
+}
+
+.c1 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c1 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
 <div
-  className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-  data-test-subj="location-field"
->
-  <EuiFlexItem
-    grow={false}
+    class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
-    <DefaultDraggable
-      field="source.geo.city_name"
-      fieldType="keyword"
-      id="location-renderer-default-draggable-ip-overview-source.geo.city_name"
-      isAggregatable={true}
-      isDraggable={false}
-      value={
-        Array [
-          "New York",
-        ]
-      }
-    />
-  </EuiFlexItem>
-  , 
-  <EuiFlexItem
-    grow={false}
-  >
-    <DefaultDraggable
-      field="source.geo.region_name"
-      fieldType="keyword"
-      id="location-renderer-default-draggable-ip-overview-source.geo.region_name"
-      isAggregatable={true}
-      isDraggable={false}
-      value={
-        Array [
-          "New York",
-        ]
-      }
-    />
-  </EuiFlexItem>
-</div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class=""
+      >
+        <div
+          class="euiPopover euiPopover--anchorDownCenter c0"
+        >
+          <div
+            class="euiPopover__anchor"
+          >
+            <div
+              data-test-subj="withHoverActionsButton"
+            >
+              <div
+                data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_city_name"
+                tabindex="-1"
+              >
+                <span
+                  class="c1"
+                  data-test-subj="render-content-source.geo.city_name"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    New York
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    , 
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class=""
+      >
+        <div
+          class="euiPopover euiPopover--anchorDownCenter c0"
+        >
+          <div
+            class="euiPopover__anchor"
+          >
+            <div
+              data-test-subj="withHoverActionsButton"
+            >
+              <div
+                data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_region_name"
+                tabindex="-1"
+              >
+                <span
+                  class="c1"
+                  data-test-subj="render-content-source.geo.region_name"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    New York
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
 `;
 
-exports[`Field Renderers #reputationRenderer it renders correctly against snapshot 1`] = `
-<DragDropContext
-  onDragEnd={[MockFunction]}
->
-  <Memo(ReputationLinkComponent)
-    direction="column"
-    domain="10.10.10.10"
-  />
-</DragDropContext>
-`;
+exports[`Field Renderers #reputationRenderer it renders correctly against snapshot 1`] = `<DocumentFragment />`;
 
 exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`] = `
-<ExternalLink
-  url="https://www.iana.org/whois?q=10.10.10.10"
->
-  iana.org
-</ExternalLink>
+<DocumentFragment>
+  <span
+    class="euiToolTipAnchor"
+  >
+    <a
+      class="euiLink css-102pf9n-euiLink-primary"
+      data-test-subj="externalLink"
+      href="https://www.iana.org/whois?q=10.10.10.10"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      iana.org
+      <span
+        class="css-q4vwwx-euiLink__externalIcon"
+        data-euiicon-type="popout"
+      >
+        External link
+      </span>
+      <span
+        class="euiScreenReaderOnly"
+      >
+        (opens in a new tab or window)
+      </span>
+    </a>
+  </span>
+</DocumentFragment>
 `;

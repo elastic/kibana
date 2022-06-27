@@ -121,6 +121,7 @@ export enum SecurityPageName {
   kubernetes = 'kubernetes',
   exploreLanding = 'explore',
   dashboardsLanding = 'dashboards',
+  noPage = '',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -217,6 +218,10 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
   { "name": "virustotal.com", "url_template": "https://www.virustotal.com/gui/search/{{ip}}" },
   { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
 ]`;
+
+/** This Kibana Advanced Setting shows related integrations on the Rules Table */
+export const SHOW_RELATED_INTEGRATIONS_SETTING =
+  'securitySolution:showRelatedIntegrations' as const;
 
 /**
  * Id for the notifications alerting type

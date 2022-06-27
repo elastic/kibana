@@ -958,6 +958,19 @@ module.exports = {
       },
     },
 
+    {
+      // disable imports from legacy uptime plugin
+      files: ['x-pack/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: ['**/legacy_uptime/*'],
+          },
+        ],
+      },
+    },
+
     /**
      * Fleet overrides
      */
@@ -1429,6 +1442,8 @@ module.exports = {
         'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
         'react/jsx-boolean-value': ['error', 'never'],
+        'sort-keys': 1, // warning
+        '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
         '@typescript-eslint/no-unused-vars': [
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
