@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { Component, RefObject } from 'react';
+import React, { Component } from 'react';
 import _ from 'lodash';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { RangeFieldMeta } from '../../../../../../common/descriptor_types';
 import { DynamicSizeProperty } from '../../properties/dynamic_size_property';
+import { RightAlignedText } from './right_aligned_text';
 
 const FONT_SIZE = 10;
 const HALF_FONT_SIZE = FONT_SIZE / 2;
@@ -23,17 +25,31 @@ interface Props {
 
 interface State {
   label: string;
-  maxLabelWidth?: number;
+  maxLabelWidth: number;
+  fieldMeta: RangeFieldMeta | null
 }
 
 export class MarkerSizeLegend extends Component<Props, State> {
   private _isMounted: boolean = false;
-  private _textRefs: Record<string, RefObject<SVGTextElement>> = {};
-  private _prevFieldMeta = this.props.style.getRangeFieldMeta();
+  
+  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
+    const nextFieldMeta = nextProps.style.getRangeFieldMeta();
+    return !_.isEqual(nextFieldMeta, prevState.fieldMeta)
+      ? {
+        maxLabelWidth: 0,
+        fieldMeta: nextFieldMeta,
+      }
+      : null;
+  }
 
-  state: State = {
-    label: EMPTY_VALUE,
-  };
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      label: EMPTY_VALUE,
+      maxLabelWidth: 0,
+      fieldMeta: this.props.style.getRangeFieldMeta(),
+    };
+  }
 
   componentDidMount() {
     this._isMounted = true;
@@ -42,29 +58,6 @@ export class MarkerSizeLegend extends Component<Props, State> {
 
   componentDidUpdate() {
     this._loadLabel();
-
-    if (this.state.maxLabelWidth === undefined && Object.values(this._textRefs).length) {
-      const missingRefElements = Object.values(this._textRefs).some((ref) => {
-        return ref.current == null;
-      });
-      if (!missingRefElements) {
-        let maxLabelWidth = 0;
-        Object.values(this._textRefs).forEach((ref) => {
-          const width = ref.current?.getBBox().width;
-          if (width && width > maxLabelWidth) {
-            maxLabelWidth = width;
-          }
-        });
-        this.setState({ maxLabelWidth });
-      }
-    }
-
-    const nextFieldMeta = this.props.style.getRangeFieldMeta();
-    if (!_.isEqual(this._prevFieldMeta, nextFieldMeta)) {
-      this._prevFieldMeta = nextFieldMeta;
-      this._textRefs = {};
-      this.setState({ maxLabelWidth: undefined });
-    }
   }
 
   componentWillUnmount() {
@@ -86,8 +79,14 @@ export class MarkerSizeLegend extends Component<Props, State> {
     return value === EMPTY_VALUE ? value : this.props.style.formatField(value);
   }
 
+  _onRightAlignedWidthChange = (width: number) => {
+    if (width > this.state.maxLabelWidth) {
+      this.setState({ maxLabelWidth: width });
+    }
+  }
+
   _renderMarkers() {
-    const fieldMeta = this.props.style.getRangeFieldMeta();
+    const fieldMeta = this.state.fieldMeta;
     const options = this.props.style.getOptions();
     if (!fieldMeta || !options) {
       return null;
@@ -106,15 +105,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
     const makeMarker = (radius: number, formattedValue: string | number) => {
       const circleCenterY = circleBottomY - radius;
       const circleTopY = circleCenterY - radius;
-      let ref = this._textRefs[formattedValue];
-      if (!ref) {
-        ref = React.createRef<SVGTextElement>();
-        this._textRefs[formattedValue] = ref;
-      }
-      const textOffset =
-        this.state.maxLabelWidth === undefined
-          ? -1000 // render labels off screen until max length is known
-          : this.state.maxLabelWidth + HALF_FONT_SIZE;
+      const textOffset = this.state.maxLabelWidth + HALF_FONT_SIZE;
       return (
         <g key={radius}>
           <line
@@ -124,15 +115,13 @@ export class MarkerSizeLegend extends Component<Props, State> {
             x2={circleCenterX * 2.25}
             y2={circleTopY}
           />
-          <text
-            ref={ref}
+          <RightAlignedText
+            setWidth={this._onRightAlignedWidthChange}
             style={{ fontSize: FONT_SIZE, fill: euiThemeVars.euiTextColor }}
-            textAnchor="end"
             x={circleCenterX * 2.25 + textOffset}
             y={circleTopY + HALF_FONT_SIZE}
-          >
-            {formattedValue}
-          </text>
+            value={formattedValue}
+          />
           <circle style={circleStyle} cx={circleCenterX} cy={circleCenterY} r={radius} />
         </g>
       );
