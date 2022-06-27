@@ -189,7 +189,14 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
   );
 };
 
-export const getUserThreadingParamsCallback =
+/**
+ * Returns a callback for requesting user's input for threading params
+ * with a form rendered in a modal window.
+ *
+ * @param overlays
+ * @param theme$
+ */
+export const getUserInputThreadingParamsProvider =
   (overlays: OverlayStart, theme$: Observable<CoreTheme>) =>
   (modelId: string): Promise<ThreadingParams | void> => {
     return new Promise(async (resolve, reject) => {

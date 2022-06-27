@@ -27,7 +27,7 @@ import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/t
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { getUserThreadingParamsCallback } from './start_deployment_setup';
+import { getUserInputThreadingParamsProvider } from './start_deployment_setup';
 import { getAnalysisType } from '../../data_frame_analytics/common';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
@@ -140,8 +140,8 @@ export const ModelsList: FC<Props> = ({
   const [showTestFlyout, setShowTestFlyout] = useState<ModelItem | null>(null);
   const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays, theme), []);
 
-  const getUserThreadingParams = useMemo(
-    () => getUserThreadingParamsCallback(overlays, theme.theme$),
+  const getUserInputThreadingParams = useMemo(
+    () => getUserInputThreadingParamsProvider(overlays, theme.theme$),
     [overlays, theme.theme$]
   );
 
@@ -375,7 +375,7 @@ export const ModelsList: FC<Props> = ({
           },
           available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
           onClick: async (item) => {
-            const threadingParams = await getUserThreadingParams(item.model_id);
+            const threadingParams = await getUserInputThreadingParams(item.model_id);
 
             if (!threadingParams) return;
 
