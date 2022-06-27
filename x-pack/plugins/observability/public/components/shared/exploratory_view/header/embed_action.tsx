@@ -28,15 +28,13 @@ export function EmbedAction({
         setIsOpen(!isOpen);
       }}
     >
-      {i18n.translate('xpack.observability.expView.heading.addToCase', {
-        defaultMessage: 'Embed <></>',
-      })}
+      {EMBED_LABEL}
     </EuiButtonEmpty>
   );
 
   return (
     <EuiPopover button={button} isOpen={isOpen} closePopover={() => setIsOpen(false)}>
-      <EuiPopoverTitle>Embed Exploratory view (Dev only feature)</EuiPopoverTitle>
+      <EuiPopoverTitle>{EMBED_TITLE_LABEL}</EuiPopoverTitle>
       <EuiCodeBlock
         language="jsx"
         fontSize="m"
@@ -58,3 +56,11 @@ const { ExploratoryViewEmbeddable } = observability;
     </EuiPopover>
   );
 }
+
+const EMBED_TITLE_LABEL = i18n.translate('xpack.observability.expView.heading.embedTitle', {
+  defaultMessage: 'Embed Exploratory view (Dev only feature)',
+});
+
+const EMBED_LABEL = i18n.translate('xpack.observability.expView.heading.embed', {
+  defaultMessage: 'Embed <></>',
+});
