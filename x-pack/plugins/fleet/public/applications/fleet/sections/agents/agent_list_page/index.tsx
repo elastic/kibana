@@ -639,7 +639,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
-          totalItemCount: totalAgents,
+          totalItemCount: Math.min(totalAgents, SO_SEARCH_LIMIT),
           pageSizeOptions,
         }}
         isSelectable={true}
