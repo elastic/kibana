@@ -43,7 +43,7 @@ interface BulkCreateThresholdSignalsParams {
   wrapHits: WrapHits;
 }
 
-const getThresholdTerms = (bucket: ThresholdBucket) => {
+const getThresholdTerms = (bucket: ThresholdBucket): Record<string, unknown> => {
   return Object.keys(bucket.key).reduce(
     (acc, val) => ({
       ...acc,
@@ -61,35 +61,40 @@ const getTransformedHits = (
   threshold: ThresholdNormalized,
   ruleId: string
 ) =>
-  buckets.map((bucket, i) => ({
+  buckets.map((bucket, i) => {
     // In case of `terms` aggregation, `bucket.key` will be an empty string. Note that `Object.values('')` is `[]`,
     // so the below logic works in either case (whether `terms` or `composite`).
-    _index: inputIndex,
-    _id: calculateThresholdSignalUuid(
-      ruleId,
-      startedAt,
-      threshold.field,
-      Object.values(bucket.key).sort().join(',')
-    ),
-    _source: {
-      [TIMESTAMP]: (bucket.max_timestamp as AggregationsMaxAggregate).value_as_string,
-      ...getThresholdTerms(bucket),
-      threshold_result: {
-        cardinality: threshold.cardinality?.length
-          ? [
-              {
-                field: threshold.cardinality[0].field,
-                value: (bucket.cardinality_count as AggregationsCardinalityAggregate).value,
-              },
-            ]
-          : undefined,
-        count: bucket.doc_count,
-        from:
-          new Date((bucket.min_timestamp as AggregationsMinAggregate).value_as_string as string) ??
-          from,
+    const thresholdTerms = getThresholdTerms(bucket);
+    return {
+      _index: inputIndex,
+      _id: calculateThresholdSignalUuid(
+        ruleId,
+        startedAt,
+        threshold.field,
+        Object.values(bucket.key).sort().join(',')
+      ),
+      _source: {
+        [TIMESTAMP]: (bucket.max_timestamp as AggregationsMaxAggregate).value_as_string,
+        ...thresholdTerms,
+        threshold_result: {
+          cardinality: threshold.cardinality?.length
+            ? [
+                {
+                  field: threshold.cardinality[0].field,
+                  value: (bucket.cardinality_count as AggregationsCardinalityAggregate).value,
+                },
+              ]
+            : undefined,
+          count: bucket.doc_count,
+          from:
+            new Date(
+              (bucket.min_timestamp as AggregationsMinAggregate).value_as_string as string
+            ) ?? from,
+          terms: Object.entries(thresholdTerms).map(([key, val]) => ({ field: key, value: val })),
+        },
       },
-    },
-  }));
+    };
+  });
 
 export const transformThresholdResultsToEcs = (
   buckets: ThresholdBucket[],

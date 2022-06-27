@@ -66,6 +66,16 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
           'source.ip': '127.0.0.1',
           threshold_result: {
             from: new Date('2020-12-17T16:28:03.000Z'), // from min_timestamp
+            terms: [
+              {
+                field: 'source.ip',
+                value: '127.0.0.1',
+              },
+              {
+                field: 'host.name',
+                value: 'garden-gnomes',
+              },
+            ],
             cardinality: [
               {
                 field: 'destination.ip',
@@ -149,6 +159,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
           '@timestamp': '2020-12-17T16:30:03.000Z',
           threshold_result: {
             from: new Date('2020-12-17T16:28:03.000Z'),
+            terms: [],
             cardinality: [
               {
                 field: 'destination.ip',
