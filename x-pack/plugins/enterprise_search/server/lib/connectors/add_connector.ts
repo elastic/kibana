@@ -40,7 +40,7 @@ export const addConnector = async (
     created_at: null,
     index_name: input.index_name,
     last_seen: null,
-    last_synced: 'never',
+    last_synced: null,
     scheduling: { enabled: false, interval: null },
     service_type: null,
     status: 'not connected',

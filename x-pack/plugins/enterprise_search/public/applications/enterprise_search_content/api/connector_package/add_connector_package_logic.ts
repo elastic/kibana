@@ -17,7 +17,6 @@ interface AddConnectorActions {
 }
 
 export const AddConnectorPackageLogic = kea<MakeLogicType<{}, AddConnectorActions>>({
-  path: ['enterprise_search', 'add_connector'],
   connect: {
     actions: [AddConnectorPackageApiLogic, ['apiSuccess']],
   },
@@ -28,4 +27,5 @@ export const AddConnectorPackageLogic = kea<MakeLogicType<{}, AddConnectorAction
       );
     },
   },
+  path: ['enterprise_search', 'add_connector'],
 });

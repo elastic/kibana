@@ -17,6 +17,7 @@ export interface Connector {
   api_key_id: string | null;
   configuration: Record<string, KeyValuePair | undefined>;
   created_at: string | null;
+  id: string;
   index_name: string;
   last_seen: string | null;
   last_synced: string | null;
