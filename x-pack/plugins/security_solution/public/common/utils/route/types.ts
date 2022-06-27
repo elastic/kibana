@@ -16,6 +16,7 @@ import { NetworkRouteType } from '../../../network/pages/navigation/types';
 import { AdministrationSubTab as AdministrationType } from '../../../management/types';
 import { FlowTarget } from '../../../../common/search_strategy';
 import { UsersTableType } from '../../../users/store/model';
+import { SecurityPageName } from '../../../app/types';
 
 export type SiemRouteType =
   | HostsTableType
@@ -24,7 +25,7 @@ export type SiemRouteType =
   | AdministrationType
   | UsersTableType;
 export interface RouteSpyState {
-  pageName: string;
+  pageName: SecurityPageName;
   detailName: string | undefined;
   tabName: SiemRouteType | undefined;
   search: string;

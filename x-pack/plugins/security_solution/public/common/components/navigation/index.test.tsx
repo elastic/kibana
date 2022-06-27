@@ -15,6 +15,7 @@ import { HostsTableType } from '../../../hosts/store/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
 import { TimelineTabs } from '../../../../common/types/timeline';
+import { SecurityPageName } from '../../../app/types';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -61,7 +62,7 @@ describe('SIEM Navigation', () => {
   const mockProps: TabNavigationComponentProps &
     SecuritySolutionTabNavigationProps &
     RouteSpyState = {
-    pageName: 'hosts',
+    pageName: SecurityPageName.hosts,
     pathName: '/',
     detailName: undefined,
     search: '',
@@ -92,7 +93,6 @@ describe('SIEM Navigation', () => {
       },
       [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
       [CONSTANTS.filters]: [],
-      [CONSTANTS.sourcerer]: {},
       [CONSTANTS.timeline]: {
         activeTab: TimelineTabs.query,
         id: '',
