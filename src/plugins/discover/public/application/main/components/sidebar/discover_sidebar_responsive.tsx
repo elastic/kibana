@@ -247,6 +247,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               onSave: async (dataView) => {
                 onDataViewCreated(dataView);
               },
+              allowAdHocDataView: true,
             });
             if (setDataViewEditorRef) {
               setDataViewEditorRef(ref);

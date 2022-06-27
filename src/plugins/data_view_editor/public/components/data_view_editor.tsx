@@ -24,6 +24,7 @@ export const DataViewEditor = ({
   defaultTypeIsRollup = false,
   requireTimestampField = false,
   editData,
+  allowAdHocDataView,
 }: DataViewEditorPropsWithServices) => {
   const { Provider: KibanaReactContextProvider } =
     createKibanaReactContext<DataViewEditorContext>(services);
@@ -37,6 +38,7 @@ export const DataViewEditor = ({
           defaultTypeIsRollup={defaultTypeIsRollup}
           requireTimestampField={requireTimestampField}
           editData={editData}
+          allowAdHocDataView={allowAdHocDataView}
         />
       </EuiFlyout>
     </KibanaReactContextProvider>

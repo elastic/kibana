@@ -53,7 +53,7 @@ export interface Props {
   /**
    * Handler for the "save" footer button
    */
-  onSave: (dataViewSpec: DataViewSpec) => void;
+  onSave: (dataViewSpec: DataViewSpec, persist: boolean) => void;
   /**
    * Handler for the "cancel" footer button
    */
@@ -61,6 +61,7 @@ export interface Props {
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
   editData?: DataView;
+  allowAdHoc: boolean;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -77,6 +78,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   defaultTypeIsRollup,
   requireTimestampField = false,
   editData,
+  allowAdHoc,
 }: Props) => {
   const {
     services: { http, dataViews, uiSettings, searchClient, overlays },
@@ -86,6 +88,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     // Prefill with data if editData exists
     defaultValue: {
       type: defaultTypeIsRollup ? INDEX_PATTERN_TYPE.ROLLUP : INDEX_PATTERN_TYPE.DEFAULT,
+      isAdHoc: false,
       ...(editData
         ? {
             title: editData.title,
@@ -127,11 +130,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
           dataViewName: formData.name || formData.title,
           overlays,
           onEdit: async () => {
-            await onSave(indexPatternStub);
+            await onSave(indexPatternStub, !formData.isAdHoc);
           },
         });
       } else {
-        await onSave(indexPatternStub);
+        await onSave(indexPatternStub, !formData.isAdHoc);
       }
     },
   });
@@ -407,9 +410,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
         </Form>
         <Footer
           onCancel={onCancel}
-          onSubmit={() => form.submit()}
+          onSubmit={(isAdHoc?: boolean) => {
+            form.getFields().isAdHoc.setValue(isAdHoc || false);
+            form.submit();
+          }}
           submitDisabled={form.isSubmitted && !form.isValid}
           isEdit={!!editData}
+          allowAdHoc={allowAdHoc}
         />
       </FlyoutPanels.Item>
       <FlyoutPanels.Item>
