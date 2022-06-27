@@ -78,12 +78,11 @@ export async function verifyPackageSignature({
 
   const signatureVerificationResult = verificationResult.signatures[0];
 
-  const verified = false;
+  let verified = false;
   try {
-    await signatureVerificationResult.verified;
+    verified = await signatureVerificationResult.verified;
   } catch (e) {
-    logger.error(`Error verifying package ${e}`); // TODO: make this nicer?
+    logger.error(`Error verifying package signature: ${e}`);
   }
-
   return { verified, keyId: signatureVerificationResult.keyID.toHex() };
 }
