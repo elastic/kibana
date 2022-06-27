@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/**
+ * Time range defintion for baseline and deviation to be used by spike log analysis.
+ */
 export interface WindowParameters {
   baselineMin: number;
   baselineMax: number;
@@ -24,10 +27,10 @@ export interface WindowParameters {
  *
  * The algorithm for doing this is based on the typical granularities that exist in machine data.
  *
- * @param clickTime
- * @param minTime
- * @param maxTime
- * @returns { baseline_min, baseline_max, deviation_min, deviation_max }
+ * @param clickTime timestamp of the clicked log rate spike.
+ * @param minTime minimum timestamp of the time window to be analysed
+ * @param maxTime maximum timestamp of the time window to be analysed
+ * @returns WindowParameters
  */
 export const getWindowParameters = (
   clickTime: number,

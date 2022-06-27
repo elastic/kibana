@@ -7,10 +7,7 @@
 
 export interface FieldValuePair {
   fieldName: string;
-  // For dynamic fieldValues we only identify fields as `string`,
-  // but for example `http.response.status_code` which is part of
-  // of the list of predefined field candidates is of type long/number.
-  fieldValue: string | number;
+  fieldValue: string;
   isFallbackResult?: boolean;
 }
 
