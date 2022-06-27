@@ -13,7 +13,7 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'Start in headless mode',
   })
-  .option('pauseOnError', {
+  .option('bail', {
     default: false,
     type: 'boolean',
     description: 'Pause on error',

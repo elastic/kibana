@@ -10,7 +10,7 @@ import { SyntheticsRunner } from './synthetics_start';
 
 import { argv } from './parse_args_params';
 
-const { headless, grep, pauseOnError } = argv;
+const { headless, grep, bail: pauseOnError } = argv;
 
 async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaConfig = await readConfigFile(require.resolve('./config.ts'));
