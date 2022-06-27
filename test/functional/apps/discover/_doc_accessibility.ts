@@ -51,9 +51,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should give focus to the table tab link when Tab is pressed', async () => {
+    it('should give focus to the first tab link when Tab is pressed', async () => {
       await browser.pressKeys(browser.keys.TAB);
-      const tableTab = await testSubjects.find('docViewerTab-Table');
+      const tableTab = await testSubjects.find('docViewerTab-0');
       const activeElement = await find.activeElement();
       expect(await tableTab.getAttribute('data-test-subj')).to.eql(
         await activeElement.getAttribute('data-test-subj')
