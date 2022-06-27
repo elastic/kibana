@@ -68,6 +68,7 @@ import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
 import { fixApmDurationVars, hasUpgradeAvailable } from './utils';
+import { useHistoryBlock } from './hooks';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -406,6 +407,8 @@ export const EditPackagePolicyForm = memo<{
     return result;
   };
 
+  useHistoryBlock(isEdited);
+
   const onSubmit = async () => {
     if (formState === 'VALID' && hasErrors) {
       setFormState('INVALID');
@@ -418,6 +421,7 @@ export const EditPackagePolicyForm = memo<{
 
     const { error } = await savePackagePolicy();
     if (!error) {
+      setIsEdited(false);
       application.navigateToUrl(successRedirectPath);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationTitle', {
