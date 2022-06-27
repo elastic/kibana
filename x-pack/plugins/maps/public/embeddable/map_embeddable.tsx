@@ -326,7 +326,7 @@ export class MapEmbeddable
     }
 
     if (!getMapReady(this._savedMap.getStore().getState())) {
-      // Initialize synchroinzed view to map's goto
+      // Initialize synchronized view to map's goto
       // Use goto because un-rendered map will not have accurate mapCenter and mapZoom.
       const goto = getGoto(this._savedMap.getStore().getState());
       if (goto && goto.center) {
