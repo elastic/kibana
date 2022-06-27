@@ -11,31 +11,34 @@ import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 import classnames from 'classnames';
 import type {
   IconPosition,
-  YAxisMode,
-  ExtendedYConfig,
+  ReferenceLineDecorationConfig,
   CollectiveConfig,
 } from '../../common/types';
 import { getBaseIconPlacement } from '../components';
 import { hasIcon, iconSet } from './icon';
+import { AxesMap, getOriginalAxisPosition } from './axes_configuration';
 
 export const LINES_MARKER_SIZE = 20;
 
-type PartialExtendedYConfig = Pick<
-  ExtendedYConfig,
-  'axisMode' | 'icon' | 'iconPosition' | 'textVisibility'
->;
+type PartialReferenceLineDecorationConfig = Pick<
+  ReferenceLineDecorationConfig,
+  'icon' | 'iconPosition' | 'textVisibility'
+> & {
+  position?: Position;
+};
 
-type PartialCollectiveConfig = Pick<CollectiveConfig, 'axisMode' | 'icon' | 'textVisibility'>;
+type PartialCollectiveConfig = Pick<CollectiveConfig, 'position' | 'icon' | 'textVisibility'>;
 
-const isExtendedYConfig = (
-  config: PartialExtendedYConfig | PartialCollectiveConfig | undefined
-): config is PartialExtendedYConfig =>
-  (config as PartialExtendedYConfig)?.iconPosition ? true : false;
+const isExtendedDecorationConfig = (
+  config: PartialReferenceLineDecorationConfig | PartialCollectiveConfig | undefined
+): config is PartialReferenceLineDecorationConfig =>
+  (config as PartialReferenceLineDecorationConfig)?.iconPosition ? true : false;
 
 // Note: it does not take into consideration whether the reference line is in view or not
 export const getLinesCausedPaddings = (
-  visualConfigs: Array<PartialExtendedYConfig | PartialCollectiveConfig | undefined>,
-  axesMap: Record<'left' | 'right', unknown>
+  visualConfigs: Array<PartialReferenceLineDecorationConfig | PartialCollectiveConfig | undefined>,
+  axesMap: AxesMap,
+  shouldRotate: boolean
 ) => {
   // collect all paddings for the 4 axis: if any text is detected double it.
   const paddings: Partial<Record<Position, number>> = {};
@@ -44,11 +47,15 @@ export const getLinesCausedPaddings = (
     if (!config) {
       return;
     }
-    const { axisMode, icon, textVisibility } = config;
-    const iconPosition = isExtendedYConfig(config) ? config.iconPosition : undefined;
+    const { position, icon, textVisibility } = config;
+    const iconPosition = isExtendedDecorationConfig(config) ? config.iconPosition : undefined;
 
-    if (axisMode && (hasIcon(icon) || textVisibility)) {
-      const placement = getBaseIconPlacement(iconPosition, axesMap, axisMode);
+    if (position && (hasIcon(icon) || textVisibility)) {
+      const placement = getBaseIconPlacement(
+        iconPosition,
+        axesMap,
+        getOriginalAxisPosition(position, shouldRotate)
+      );
       paddings[placement] = Math.max(
         paddings[placement] || 0,
         LINES_MARKER_SIZE * (textVisibility ? 2 : 1) // double the padding size if there's text
@@ -174,7 +181,7 @@ export const AnnotationIcon = ({
 };
 
 interface MarkerConfig {
-  axisMode?: YAxisMode;
+  position?: Position;
   icon?: string;
   textVisibility?: boolean;
   iconPosition?: IconPosition;

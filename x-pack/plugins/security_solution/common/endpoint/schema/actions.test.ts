@@ -213,7 +213,7 @@ describe('actions schemas', () => {
         KillOrSuspendProcessRequestSchema.body.validate({
           endpoint_ids: ['ABC-XYZ-000'],
           parameters: {
-            entity_id: 5678,
+            entity_id: 'abc123',
           },
         });
       }).not.toThrow();
@@ -225,7 +225,7 @@ describe('actions schemas', () => {
           endpoint_ids: ['ABC-XYZ-000'],
           parameters: {
             pid: 1234,
-            entity_id: 5678,
+            entity_id: 'abc123',
           },
         });
       }).toThrow();
