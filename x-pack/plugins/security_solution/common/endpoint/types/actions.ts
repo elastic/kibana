@@ -222,13 +222,9 @@ export interface HostIsolationResponse {
 }
 
 export type RunningProcessesRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
-export interface RunningProcessesResponse {
-  action: string;
-}
-
-export interface ResponseActionApiResponse {
-  action?: string; // only if command is isolate or release
-  data: ActionDetails;
+export interface ResponseActionApiResponse<TOutput extends object = object> {
+  action?: string;
+  data: ActionDetails<TOutput>;
 }
 
 export interface EndpointPendingActions {
