@@ -61,7 +61,7 @@ export const searchAfterAndBulkCreate = async ({
 
     let threatPitId: OpenPointInTimeResponse['id'] = (
       await services.scopedClusterClient.asCurrentUser.openPointInTime({
-        index: 'threat-indicator',
+        index: 'filebeat*',
         keep_alive: THREAT_PIT_KEEP_ALIVE,
       })
     ).id;
@@ -177,15 +177,15 @@ export const searchAfterAndBulkCreate = async ({
                 .map((item, index) => ({
                   entries: [
                     {
-                      field: 'indicator_value',
+                      field: 'url.full',
                       type: 'mapping',
-                      value: `alert_data.threat_${index}.keyword`,
+                      value: `threat.indicator.url.full`,
                     },
                   ],
                 })),
               threatList: createdItems.map((item) => ({
                 ...item,
-                fields: { indicator_value: [item?.indicator_value] },
+                fields: { 'url.full': [item?.url?.full] },
               })),
               entryKey: 'field',
             });
@@ -196,7 +196,7 @@ export const searchAfterAndBulkCreate = async ({
               threatFilters: [threatFilter],
               query: '*:*',
               language: 'kuery',
-              index: ['threat-indicator'],
+              index: ['filebeat*'],
               logger,
               buildRuleMessage,
               threatListConfig: {
@@ -205,9 +205,11 @@ export const searchAfterAndBulkCreate = async ({
               },
               pitId: threatPitId,
               reassignPitId: reassignThreatPitId,
+              runtimeMappings: undefined,
             });
             logger.debug(`---- threats -----`);
-            // logger.debug(`---- threatFilter ----- ${JSON.stringify(threatFilter)} `);
+            logger.debug(`---- threatFilter ----- ${JSON.stringify(threatFilter)} `);
+            logger.debug(`---- threatListHits ----- ${JSON.stringify(threatListHits)} `);
             logger.debug(`---- threatListHits ----- ${threatListHits.length} `);
             logger.debug(`---- threats -----`);
           }
