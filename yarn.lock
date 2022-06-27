@@ -2949,7 +2949,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-utils@link:bazel-bin/packages/kbn-aiops-utils":
+"@kbn/aiops-utils@link:bazel-bin/x-pack/packages/ml/aiops_utils":
   version "0.0.0"
   uid ""
 
@@ -3018,6 +3018,10 @@
   uid ""
 
 "@kbn/ci-stats-core@link:bazel-bin/packages/kbn-ci-stats-core":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ci-stats-performance-metrics@link:bazel-bin/packages/kbn-ci-stats-performance-metrics":
   version "0.0.0"
   uid ""
 
@@ -3122,6 +3126,18 @@
   uid ""
 
 "@kbn/core-doc-links-server@link:bazel-bin/packages/core/doc-links/core-doc-links-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-fatal-errors-browser-internal@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-fatal-errors-browser-mocks@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-fatal-errors-browser@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser":
   version "0.0.0"
   uid ""
 
@@ -3294,6 +3310,18 @@
   uid ""
 
 "@kbn/mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-agg-utils@link:bazel-bin/x-pack/packages/ml/agg_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-is-populated-object@link:bazel-bin/x-pack/packages/ml/is_populated_object":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-string-hash@link:bazel-bin/x-pack/packages/ml/string_hash":
   version "0.0.0"
   uid ""
 
@@ -6376,7 +6404,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__aiops-utils@link:bazel-bin/packages/kbn-aiops-utils/npm_module_types":
+"@types/kbn__aiops-utils@link:bazel-bin/x-pack/packages/ml/aiops_utils/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6429,6 +6457,10 @@
   uid ""
 
 "@types/kbn__ci-stats-core@link:bazel-bin/packages/kbn-ci-stats-core/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ci-stats-performance-metrics@link:bazel-bin/packages/kbn-ci-stats-performance-metrics/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6545,6 +6577,18 @@
   uid ""
 
 "@types/kbn__core-doc-links-server@link:bazel-bin/packages/core/doc-links/core-doc-links-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-fatal-errors-browser-internal@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-fatal-errors-browser-mocks@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-fatal-errors-browser@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6692,6 +6736,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__kbn-ci-stats-performance-metrics@link:bazel-bin/packages/kbn-kbn-ci-stats-performance-metrics/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__kibana-json-schema@link:bazel-bin/packages/kbn-kibana-json-schema/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6705,6 +6753,18 @@
   uid ""
 
 "@types/kbn__mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ml-agg-utils@link:bazel-bin/x-pack/packages/ml/agg_utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ml-is-populated-object@link:bazel-bin/x-pack/packages/ml/is_populated_object/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ml-string-hash@link:bazel-bin/x-pack/packages/ml/string_hash/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -23893,6 +23953,13 @@ qs@^6.10.0:
   dependencies:
     side-channel "^1.0.4"
 
+qs@^6.10.5:
+  version "6.10.5"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.10.5.tgz#974715920a80ff6a262264acd2c7e6c2a53282b4"
+  integrity sha512-O5RlPh0VFtR78y79rgcgKK4wbAI0C5zGVLztOIdpWX6ep368q5Hv6XRxDvXuZ9q3C6v+e3n8UfZZJw7IIG27eQ==
+  dependencies:
+    side-channel "^1.0.4"
+
 qs@^6.7.0:
   version "6.9.4"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.9.4.tgz#9090b290d1f91728d3c22e54843ca44aea5ab687"
@@ -24007,11 +24074,6 @@ randexp@0.4.6:
   dependencies:
     discontinuous-range "1.0.0"
     ret "~0.1.10"
-
-random-word-slugs@^0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/random-word-slugs/-/random-word-slugs-0.0.5.tgz#6ccd6c7ea320be9fbc19507f8c3a7d4a970ff61f"
-  integrity sha512-KwelmWsWHiMl3MKauB5usAIPg2FgwAku+FVYEuf32yyhZmEh3Fq4nXBxeUAgXB2F+G/HTeDsqXsmuupmOMnjRg==
 
 randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.5, randombytes@^2.1.0:
   version "2.1.0"
