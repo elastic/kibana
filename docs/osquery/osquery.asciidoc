@@ -62,9 +62,10 @@ description, and other <<osquery-manage-query,details>>.
 [[osquery-view-history]]
 == View or rerun previous live queries
 
-From the *Live queries history* section on the *Live queries* tab:
+The *Live queries history* section on the *Live queries* tab shows a log of queries run over the last 30 days.
+Each query has the following options:
 
-* Click image:images/play-icon.png[Right-pointing triangle] to replay a query.
+* Click image:images/play-icon.png[Right-pointing triangle] to rerun a query.
 
 * Click image:images/table-icon.png[Table icon] to view the query <<osquery-results,results>> and <<osquery-status,status>>.
 +
@@ -120,64 +121,15 @@ image::images/scheduled-pack.png[Shows queries in the pack and details about eac
 . View scheduled query results in <<discover,*Discover*>> or the drag-and-drop <<lens,*Lens*>> editor.
 
 [float]
-[[osquery-prebuilt-packs]]
-== Prebuilt Elastic packs
-
-The Osquery Manager integration includes a set of prebuilt Osquery packs that you can optionally load. Once added, you can then activate and schedule the packs. 
-
-You can modify the scheduled agent policies for a prebuilt pack, but you cannot edit queries in the pack. To edit the queries, you must first create a copy of the pack.
-
-For information about the prebuilt packs that are available, refer to <<prebuilt-packs>>.
-
-[float]
-[[load-prebuilt-packs]]
-=== Load and activate prebuilt Elastic packs
-
-. Go to *Packs*, and then click *Load Elastic prebuilt packs*.
-+
-NOTE: This option is only available if new or updated prebuilt packs are available.
-
-. For each pack that you want to schedule: 
-
-* Enable the option to make the pack *Active*.
-
-* Click the pack name, then *Edit*.
-
-* Update the *Scheduled agent policies* to specify the policies where this pack should run.
-
-. Click *Update pack*.
-
-[float]
-[[copy-prebuilt-packs]]
-=== Copy prebuilt Elastic packs
-
-To modify queries in prebuilt packs, you must first make a copy of the pack.
-
-. Go to *Stack Management* -> *Saved Objects*.
-
-. Search for the Osquery packs you want to modify by name.
-
-. Select the checkboxes of the packs to export.
-
-. Click *Export x objects*.
-
-. Click *Import*.
-
-. Select the import option *Create new objects with random IDs*, then click *Import* to import the pack. This creates a copy of the pack that you can edit.
-
-
-[float]
 [[osquery-manage-query]]
 == Save queries
 
 You can save queries in two ways:
 
 * After running a live query, click the *Save for later* link.
-* From the *Saved queries* tab, click the **Add saved query** button.
+* From the *Saved queries* tab, click **Add saved query**.
 
-Once you save a query, you can only edit it from the *Saved queries* tab.
-
-To add or edit saved queries from the *Saved queries* tab:
+Once you save a query, you can only edit it from the *Saved queries* tab:
 
 . Go to *Saved queries*, and then click **Add saved query** or the edit icon.
 . Provide the following fields:
@@ -204,6 +156,71 @@ To add or edit saved queries from the *Saved queries* tab:
 
 . Click *Save* or *Update*.
 
+[float]
+[[osquery-prebuilt-packs-queries]]
+== Prebuilt Elastic packs and queries
+Osquery Manager includes a set of prebuilt Osquery packs and saved queries
+that can help you get started using the integration.
+
+[float]
+[[osquery-prebuilt-queries]]
+=== Prebuilt queries
+A set of saved queries are included with the integration and available to run as a live query. 
+Note the following about the prebuilt queries:
+
+* The queries are not editable. 
+
+* Several of the queries include default ECS mappings to standardize the results.
+
+* The prebuilt Elastic queries all follow the same naming convention and identify  
+what type of information is being queried, what operating system it supports if it's limited to one or more,
+and that these are Elastic queries. For example, `firewall_rules_windows_elastic`. 
+
+[float]
+[[osquery-prebuilt-packs]]
+=== Prebuilt packs
+The prebuilt Osquery packs are included with the integration and can be optionally loaded. 
+Once added, you can then activate and schedule the packs. 
+
+You can modify the scheduled agent policies for a prebuilt pack, but you cannot edit queries in the pack. To edit the queries, you must first create a copy of the pack.
+
+For information about the prebuilt packs that are available, refer to <<prebuilt-packs>>.
+
+[float]
+[[load-prebuilt-packs]]
+==== Load and activate prebuilt Elastic packs
+
+. Go to *Packs*, and then click *Load Elastic prebuilt packs*.
++
+NOTE: This option is only available if new or updated prebuilt packs are available.
+
+. For each pack that you want to schedule: 
+
+* Enable the option to make the pack *Active*.
+
+* Click the pack name, then *Edit*.
+
+* Update the *Scheduled agent policies* to specify the policies where this pack should run.
+
+. Click *Update pack*.
+
+[float]
+[[copy-prebuilt-packs]]
+==== Copy prebuilt Elastic packs
+
+To modify queries in prebuilt packs, you must first make a copy of the pack.
+
+. Go to *Stack Management* -> *Saved Objects*.
+
+. Search for the Osquery packs you want to modify by name.
+
+. Select the checkboxes of the packs to export.
+
+. Click *Export x objects*.
+
+. Click *Import*.
+
+. Select the import option *Create new objects with random IDs*, then click *Import* to import the pack. This creates a copy of the pack that you can edit.
 
 [float]
 [[osquery-map-fields]]
@@ -276,9 +293,8 @@ A query can have the following status:
 |===
 
 NOTE: If an agent is offline, the request status remains **pending** as {kib} retries the request.
-By default, a query request times out after five minutes. The time out applies to the time it takes
-to deliver the action request to an agent to run a query. If the action completes after the timeout period,
-the results are still returned.
+By default, a query request times out after one minute. An action timeout error is returned when
+the query does not complete within that interval.
 
 
 [float]
@@ -314,3 +330,5 @@ include::manage-integration.asciidoc[]
 include::exported-fields-reference.asciidoc[]
 
 include::prebuilt-packs.asciidoc[]
+
+include::osquery-faq.asciidoc[]
