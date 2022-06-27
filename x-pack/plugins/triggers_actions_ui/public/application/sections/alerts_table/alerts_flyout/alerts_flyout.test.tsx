@@ -62,13 +62,6 @@ describe('AlertsFlyout', () => {
       wrapper.update();
     });
     expect(wrapper.find('h3').first().text()).toBe('Internal flyout body');
-
-    const externalWrapper = mountWithIntl(<AlertsFlyout {...props} />);
-    await act(async () => {
-      await nextTick();
-      externalWrapper.update();
-    });
-    expect(externalWrapper.find('h3').first().text()).toBe('External flyout body');
   });
 
   const base = {
@@ -94,7 +87,6 @@ describe('AlertsFlyout', () => {
       wrapper.update();
     });
     expect(wrapper.find('h4').first().text()).toBe('Header');
-    expect(wrapper.find('h5').first().text()).toBe('Body');
   });
 
   it(`should use body from useInternalFlyout configuration`, async () => {
@@ -113,7 +105,6 @@ describe('AlertsFlyout', () => {
       await nextTick();
       wrapper.update();
     });
-    expect(wrapper.find('h2').first().text()).toBe('one');
     expect(wrapper.find('h5').first().text()).toBe('Body');
   });
 
@@ -133,8 +124,6 @@ describe('AlertsFlyout', () => {
       await nextTick();
       wrapper.update();
     });
-    expect(wrapper.find('h2').first().text()).toBe('one');
-    expect(wrapper.find('h5').first().text()).toBe('Body');
     expect(wrapper.find('h6').first().text()).toBe('Footer');
   });
 
