@@ -83,7 +83,7 @@ export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => 
     width: '15%',
     sortable: true,
     render: (filename: string) => (
-      <EuiToolTip position="top" content={filename}>
+      <EuiToolTip position="top" content={filename} anchorClassName="eui-textTruncate">
         <span>{filename}</span>
       </EuiToolTip>
     ),
