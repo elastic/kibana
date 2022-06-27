@@ -18,7 +18,6 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiIconTip,
-  EuiPageHeader,
   EuiPageTemplate,
   EuiSpacer,
   EuiText,
@@ -514,19 +513,14 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           <EuiPageTemplate
             style={{ backgroundColor: euiTheme.colors.emptyShade }}
             className="eui-fullHeight"
-            bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
-            bottomBarProps={{ paddingSize: 'm', position: 'fixed' }}
-            restrictWidth={1000}
-          >
-            <EuiPageHeader
-              pageTitle={
+            pageHeader={{
+              pageTitle: (
                 <FormattedMessage
                   id="xpack.security.accountManagement.userProfile.title"
                   defaultMessage="Profile"
                 />
-              }
-              bottomBorder={true}
-              rightSideItems={rightSideItems.reverse().map((item) => (
+              ),
+              rightSideItems: rightSideItems.reverse().map((item) => (
                 <>
                   <EuiDescriptionList
                     textStyle="reverse"
@@ -559,9 +553,12 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                     compressed
                   />
                 </>
-              ))}
-            />
-            <EuiSpacer />
+              )),
+            }}
+            bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
+            bottomBarProps={{ paddingSize: 'm', position: 'fixed' }}
+            restrictWidth={1000}
+          >
             <Form aria-labelledby={titleId}>
               <UserDetailsEditor user={user} />
               <UserAvatarEditor user={user} formik={formik} />
