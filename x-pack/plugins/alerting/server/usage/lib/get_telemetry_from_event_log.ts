@@ -226,7 +226,11 @@ export async function getExecutionsPerDayCount({
     };
   } catch (err) {
     logger.warn(
-      `Error executing alerting telemetry task: getExecutionsPerDayCount - ${JSON.stringify(err)}`
+      `Error executing alerting telemetry task: getExecutionsPerDayCount - ${JSON.stringify(err)}`,
+      {
+        tags: ['alerting', 'telemetry-failed'],
+        error: { stack_trace: err.stack },
+      }
     );
     return {
       countTotalRuleExecutions: 0,
@@ -312,7 +316,11 @@ export async function getExecutionTimeoutsPerDayCount({
     logger.warn(
       `Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - ${JSON.stringify(
         err
-      )}`
+      )}`,
+      {
+        tags: ['alerting', 'telemetry-failed'],
+        error: { stack_trace: err.stack },
+      }
     );
     return {
       countExecutionTimeouts: 0,

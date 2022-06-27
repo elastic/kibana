@@ -122,7 +122,11 @@ export async function getFailedAndUnrecognizedTasksPerDay({
     logger.warn(
       `Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - ${JSON.stringify(
         err
-      )}`
+      )}`,
+      {
+        tags: ['alerting', 'telemetry-failed'],
+        error: { stack_trace: err.stack },
+      }
     );
     return {
       countFailedAndUnrecognizedTasks: 0,

@@ -13,7 +13,8 @@ import {
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
-const mockLogger = loggingSystemMock.create().get();
+const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
+
 describe('task manager telemetry', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -203,7 +204,7 @@ describe('task manager telemetry', () => {
       const telemetry = await getFailedAndUnrecognizedTasksPerDay({
         esClient,
         taskManagerIndex: 'test',
-        logger: mockLogger,
+        logger,
       });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
@@ -233,13 +234,18 @@ describe('task manager telemetry', () => {
       const telemetry = await getFailedAndUnrecognizedTasksPerDay({
         esClient,
         taskManagerIndex: 'test',
-        logger: mockLogger,
+        logger,
       });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        `Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - {}`
+
+      const loggerCall = logger.warn.mock.calls[0][0];
+      const loggerMeta = logger.warn.mock.calls[0][1];
+      expect(loggerCall as string).toMatchInlineSnapshot(
+        `"Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - {}"`
       );
+      expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
+      expect(loggerMeta?.error?.stack_trace).toBeDefined();
       expect(telemetry).toStrictEqual({
         countFailedAndUnrecognizedTasks: 0,
         countFailedAndUnrecognizedTasksByStatus: {},

@@ -17,7 +17,8 @@ import {
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
-const mockLogger = loggingSystemMock.create().get();
+const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
+
 describe('event log telemetry', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -1296,7 +1297,7 @@ describe('event log telemetry', () => {
       const telemetry = await getExecutionsPerDayCount({
         esClient,
         eventLogIndex: 'test',
-        logger: mockLogger,
+        logger,
       });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
@@ -1406,13 +1407,17 @@ describe('event log telemetry', () => {
       const telemetry = await getExecutionsPerDayCount({
         esClient,
         eventLogIndex: 'test',
-        logger: mockLogger,
+        logger,
       });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        `Error executing alerting telemetry task: getExecutionsPerDayCount - {}`
+      const loggerCall = logger.warn.mock.calls[0][0];
+      const loggerMeta = logger.warn.mock.calls[0][1];
+      expect(loggerCall as string).toMatchInlineSnapshot(
+        `"Error executing alerting telemetry task: getExecutionsPerDayCount - {}"`
       );
+      expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
+      expect(loggerMeta?.error?.stack_trace).toBeDefined();
       expect(telemetry).toStrictEqual({
         countTotalRuleExecutions: 0,
         countRuleExecutionsByType: {},
@@ -1477,7 +1482,7 @@ describe('event log telemetry', () => {
       const telemetry = await getExecutionTimeoutsPerDayCount({
         esClient,
         eventLogIndex: 'test',
-        logger: mockLogger,
+        logger,
       });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
@@ -1499,13 +1504,17 @@ describe('event log telemetry', () => {
       const telemetry = await getExecutionTimeoutsPerDayCount({
         esClient,
         eventLogIndex: 'test',
-        logger: mockLogger,
+        logger,
       });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        `Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - {}`
+      const loggerCall = logger.warn.mock.calls[0][0];
+      const loggerMeta = logger.warn.mock.calls[0][1];
+      expect(loggerCall as string).toMatchInlineSnapshot(
+        `"Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - {}"`
       );
+      expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
+      expect(loggerMeta?.error?.stack_trace).toBeDefined();
       expect(telemetry).toStrictEqual({
         countExecutionTimeouts: 0,
         countExecutionTimeoutsByType: {},
