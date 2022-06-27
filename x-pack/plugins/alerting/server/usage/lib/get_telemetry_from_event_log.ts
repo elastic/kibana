@@ -117,29 +117,7 @@ export async function getExecutionsPerDayCount({
       index: eventLogIndex,
       size: 0,
       body: {
-        query: {
-          bool: {
-            filter: {
-              bool: {
-                must: [
-                  {
-                    term: { 'event.action': 'execute' },
-                  },
-                  {
-                    term: { 'event.provider': 'alerting' },
-                  },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: 'now-1d',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        },
+        query: getProviderAndActionFilterForTimeRange('execute'),
         aggs: {
           ...executionTimeAggs,
           percentile_scheduled_actions: generatedActionsPercentilesAgg,
@@ -262,29 +240,7 @@ export async function getExecutionTimeoutsPerDayCount({
       index: eventLogIndex,
       size: 0,
       body: {
-        query: {
-          bool: {
-            filter: {
-              bool: {
-                must: [
-                  {
-                    term: { 'event.action': 'execute-timeout' },
-                  },
-                  {
-                    term: { 'event.provider': 'alerting' },
-                  },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: 'now-1d',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        },
+        query: getProviderAndActionFilterForTimeRange('execute-timeout'),
         aggs: {
           by_rule_type_id: {
             terms: {
@@ -624,5 +580,35 @@ export function parseExecutionCountAggregationResults(results: {
       actionPercentiles as AggregationsKeyedPercentiles
     ),
     alertsPercentiles: parsePercentileAggs(alertPercentiles as AggregationsKeyedPercentiles),
+  };
+}
+
+function getProviderAndActionFilterForTimeRange(
+  action: string,
+  provider: string = 'alerting',
+  range: string = '1d'
+) {
+  return {
+    bool: {
+      filter: {
+        bool: {
+          must: [
+            {
+              term: { 'event.action': action },
+            },
+            {
+              term: { 'event.provider': provider },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: `now-${range}`,
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
   };
 }
