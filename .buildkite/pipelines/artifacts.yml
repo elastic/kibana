@@ -20,6 +20,7 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
+    concurrency: 20
 
   - command: TEST_PACKAGE=rpm .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
