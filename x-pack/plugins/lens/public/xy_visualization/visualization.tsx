@@ -17,18 +17,22 @@ import { ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import {
-  FillStyle,
-  SeriesType,
-  YAxisMode,
-  ExtendedYConfig,
-} from '@kbn/expression-xy-plugin/common';
+import { FillStyle } from '@kbn/expression-xy-plugin/common';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader } from './xy_config_panel/layer_header';
-import { Visualization, AccessorConfig, FramePublicAPI } from '../types';
-import { State, visualizationTypes, XYSuggestion, XYLayerConfig, XYDataLayerConfig } from './types';
+import type { Visualization, AccessorConfig, FramePublicAPI } from '../types';
+import {
+  State,
+  visualizationTypes,
+  XYSuggestion,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  YConfig,
+  YAxisMode,
+  SeriesType,
+} from './types';
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
@@ -360,7 +364,7 @@ export const getXyVisualization = ({
     }
     const isReferenceLine = metrics.some((metric) => metric.agg === 'static_value');
     const axisMode = axisPosition as YAxisMode;
-    const yConfig = metrics.map<ExtendedYConfig>((metric, idx) => {
+    const yConfig = metrics.map<YConfig>((metric, idx) => {
       return {
         color: metric.color,
         forAccessor: metric.accessor ?? foundLayer.accessors[idx],
