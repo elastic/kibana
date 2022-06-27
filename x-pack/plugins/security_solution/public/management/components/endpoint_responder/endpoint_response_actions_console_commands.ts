@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
+import { KillProcessActionResult } from './kill_process_aciton';
 import { EndpointStatusActionResult } from './status_action';
 
 export const getEndpointResponseActionsConsoleCommands = (
@@ -52,6 +53,40 @@ export const getEndpointResponseActionsConsoleCommands = (
             'xpack.securitySolution.endpointConsoleCommands.release.arg.comment',
             { defaultMessage: 'A comment to go along with the action' }
           ),
+        },
+      },
+    },
+    {
+      name: 'kill-process',
+      about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.killProcess.about', {
+        defaultMessage: 'Kill a running process',
+      }),
+      RenderComponent: KillProcessActionResult,
+      meta: {
+        endpointId: endpointAgentId,
+      },
+      args: {
+        comment: {
+          required: false,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.release.arg.comment',
+            { defaultMessage: 'A comment to go along with the action' }
+          ),
+        },
+        pid: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
+            defaultMessage: 'A PID representng the process to kill',
+          }),
+        },
+        entityId: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
+            defaultMessage: 'An Entity ID representng the process to kill',
+          }),
         },
       },
     },
