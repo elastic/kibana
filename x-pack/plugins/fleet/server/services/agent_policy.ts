@@ -116,14 +116,12 @@ class AgentPolicyService {
       existingAgentPolicy,
       this.hasAPMIntegration(existingAgentPolicy)
     );
-
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
       ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
-
     if (options.bumpRevision) {
       await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id);
     }
@@ -714,7 +712,6 @@ class AgentPolicyService {
     if (!defaultOutputId) {
       return;
     }
-
     const policy = await agentPolicyService.get(soClient, agentPolicyId);
     const fullPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
     if (!policy || !fullPolicy || !fullPolicy.revision) {
