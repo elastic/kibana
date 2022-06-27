@@ -328,25 +328,6 @@ describe('rule_details', () => {
     });
   });
 
-  describe('snooze functionality', () => {
-    it('should render "Snooze Indefinitely" when rule is enabled and mute all', () => {
-      const rule = mockRule({
-        enabled: true,
-        muteAll: true,
-      });
-      const wrapper = mountWithIntl(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-      );
-      const actionsElem = wrapper
-        .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
-        .first();
-      expect(actionsElem.text()).toEqual('Snoozed');
-      expect(wrapper.find('[data-test-subj="remainingSnoozeTime"]').first().text()).toEqual(
-        'Indefinitely'
-      );
-    });
-  });
-
   describe('edit button', () => {
     const actionTypes: ActionType[] = [
       {
