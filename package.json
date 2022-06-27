@@ -576,6 +576,7 @@
     "@microsoft/api-documenter": "7.13.68",
     "@microsoft/api-extractor": "7.18.19",
     "@octokit/rest": "^16.35.0",
+    "@openpgp/web-stream-tools": "^0.0.10",
     "@percy/agent": "^0.28.6",
     "@storybook/addon-a11y": "^6.4.22",
     "@storybook/addon-actions": "^6.4.22",
