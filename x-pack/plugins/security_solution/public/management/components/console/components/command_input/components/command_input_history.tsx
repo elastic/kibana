@@ -158,8 +158,6 @@ export const CommandInputHistory = memo(() => {
     >
       {renderSelectionContent}
     </EuiSelectable>
-    // <div>
-    // </div>
   );
 });
 CommandInputHistory.displayName = 'CommandInputHistory';
