@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { ProgressControls } from './components/progress_controls';
 export { getWindowParameters } from './lib/get_window_parameters';
 export type { WindowParameters } from './lib/get_window_parameters';
 export { streamFactory } from './lib/stream_factory';

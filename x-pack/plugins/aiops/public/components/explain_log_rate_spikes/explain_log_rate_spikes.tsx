@@ -10,7 +10,7 @@ import React, { useEffect, FC } from 'react';
 import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { useFetchStream } from '@kbn/aiops-utils';
+import { useFetchStream, ProgressControls } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -34,7 +34,10 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
   const kibana = useKibana();
   const basePath = kibana.services.http?.basePath.get() ?? '';
 
-  const { start, data, isRunning } = useFetchStream<ApiExplainLogRateSpikes, typeof basePath>(
+  const { cancel, start, data, isRunning } = useFetchStream<
+    ApiExplainLogRateSpikes,
+    typeof basePath
+  >(
     `${basePath}/internal/aiops/explain_log_rate_spikes`,
     {
       // TODO Consider time ranges.
@@ -58,7 +61,13 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
   return (
     <EuiText>
       <h2>{dataView.title}</h2>
-      <p>{isRunning ? 'Loading ...' : 'Done.'}</p>
+      <ProgressControls
+        progress={data.loaded}
+        progressMessage={data.loadingState ?? ''}
+        isRunning={isRunning}
+        onRefresh={start}
+        onCancel={cancel}
+      />
       <EuiSpacer size="xs" />
       <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
         {JSON.stringify(data, null, 2)}

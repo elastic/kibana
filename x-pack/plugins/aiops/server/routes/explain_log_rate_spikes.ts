@@ -25,9 +25,9 @@ import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
 
 // Overall progress is a float from 0 to 1.
 // const LOADED_OVERALL_HISTOGRAM = 0.05;
-const LOADED_FIELD_CANDIDATES = 0.05;
+const LOADED_FIELD_CANDIDATES = 0.2;
 // const LOADED_DONE = 1;
-const PROGRESS_STEP_P_VALUES = 0.6;
+const PROGRESS_STEP_P_VALUES = 0.8;
 // const PROGRESS_STEP_HISTOGRAMS = 0.1;
 // const PROGRESS_STEP_FREQUENT_ITEMS = 0.1;
 

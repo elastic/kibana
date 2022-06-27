@@ -6,7 +6,7 @@
  */
 
 /**
- * Time range defintion for baseline and deviation to be used by spike log analysis.
+ * Time range definition for baseline and deviation to be used by spike log analysis.
  */
 export interface WindowParameters {
   baselineMin: number;
