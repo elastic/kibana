@@ -3337,7 +3337,7 @@
         "required": false,
         "schema": {
           "type": "integer",
-          "default": 50
+          "default": 20
         }
       },
       "page_index": {
@@ -3386,13 +3386,11 @@
         "in": "query",
         "required": false,
         "schema": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "asc",
-              "desc"
-            ]
-          }
+          "type": "string",
+          "enum": [
+            "asc",
+            "desc"
+          ]
         }
       }
     },
