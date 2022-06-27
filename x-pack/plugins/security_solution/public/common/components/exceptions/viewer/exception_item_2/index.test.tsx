@@ -132,7 +132,7 @@ describe('ExceptionItemCard', () => {
 
     // click on popover
     wrapper.find('button[data-test-subj="exceptionItemCardHeader-actionButton"]').at(0).simulate('click');
-    wrapper.find('button[data-test-subj="exceptionItemCardHeader-actionItem"]').at(0).simulate('click');
+    wrapper.find('button[data-test-subj="exceptionItemCardHeader-actionItem"]').at(1).simulate('click');
 
     expect(mockOnDeleteException).toHaveBeenCalledWith({
       id: '1',
