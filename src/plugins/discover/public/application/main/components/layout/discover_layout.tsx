@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
@@ -59,6 +60,14 @@ const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
+
+function isOfAggregateQueryType(query: AggregateQuery | Query): query is AggregateQuery {
+  return Boolean(query && 'sql' in query);
+}
+
+function getAggregateQueryMode(query: AggregateQuery): string {
+  return Object.keys(query)[0];
+}
 
 export function DiscoverLayout({
   indexPattern,
@@ -136,8 +145,13 @@ export function DiscoverLayout({
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const resultState = useMemo(
-    () => getResultState(dataState.fetchStatus, dataState.foundDocuments!),
-    [dataState.fetchStatus, dataState.foundDocuments]
+    () =>
+      getResultState(
+        dataState.fetchStatus,
+        dataState.foundDocuments!,
+        dataState.textBasedLanguageMode
+      ),
+    [dataState.fetchStatus, dataState.foundDocuments, dataState.textBasedLanguageMode]
   );
 
   const onOpenInspector = useCallback(() => {
@@ -167,6 +181,12 @@ export function DiscoverLayout({
     state,
     useNewFieldsApi,
   });
+
+  let textBasedLanguageMode = '';
+  if (state.query && isOfAggregateQueryType(state.query)) {
+    const aggregatedQuery = state.query as AggregateQuery;
+    textBasedLanguageMode = getAggregateQueryMode(aggregatedQuery);
+  }
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: string, operation: '+' | '-') => {
@@ -251,7 +271,7 @@ export function DiscoverLayout({
         resetSavedSearch={resetSavedSearch}
         onChangeIndexPattern={onChangeIndexPattern}
         onEditRuntimeField={onEditRuntimeField}
-        textBasedLanguageMode={dataState.textBasedLanguageMode}
+        textBasedLanguageMode={textBasedLanguageMode}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
@@ -267,9 +287,7 @@ export function DiscoverLayout({
               documents$={savedSearchData$.documents$}
               indexPatternList={indexPatternList}
               onAddField={onAddColumn}
-              onAddFilter={
-                !dataState.textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined
-              }
+              onAddFilter={!textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined}
               onRemoveField={onRemoveColumn}
               onChangeIndexPattern={onChangeIndexPattern}
               selectedIndexPattern={indexPattern}
@@ -335,7 +353,7 @@ export function DiscoverLayout({
                   gutterSize="none"
                   responsive={false}
                 >
-                  {!dataState.textBasedLanguageMode && (
+                  {!textBasedLanguageMode && (
                     <>
                       <EuiFlexItem grow={false}>
                         <DiscoverChartMemoized
@@ -361,9 +379,7 @@ export function DiscoverLayout({
                       indexPattern={indexPattern}
                       navigateTo={navigateTo}
                       onAddFilter={
-                        !dataState.textBasedLanguageMode
-                          ? (onAddFilter as DocViewFilterFn)
-                          : undefined
+                        !textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined
                       }
                       savedSearch={savedSearch}
                       setExpandedDoc={setExpandedDoc}
@@ -380,9 +396,7 @@ export function DiscoverLayout({
                       columns={columns}
                       stateContainer={stateContainer}
                       onAddFilter={
-                        !dataState.textBasedLanguageMode
-                          ? (onAddFilter as DocViewFilterFn)
-                          : undefined
+                        !textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined
                       }
                       trackUiMetric={trackUiMetric}
                       savedSearchRefetch$={savedSearchRefetch$}

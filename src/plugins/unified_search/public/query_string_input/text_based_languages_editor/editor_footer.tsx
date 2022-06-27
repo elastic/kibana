@@ -48,7 +48,12 @@ export const EditorFooter = memo(function EditorFooter({
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              <p>{`${lines} lines`}</p>
+              <p>
+                {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.lineCount', {
+                  defaultMessage: '{count} {count, plural, one {line} other {lines}}',
+                  values: { count: lines },
+                })}
+              </p>
             </EuiText>
           </EuiFlexItem>
           {errors && errors.length > 0 && (
@@ -71,7 +76,15 @@ export const EditorFooter = memo(function EditorFooter({
                         `}
                         onClick={() => setIsPopoverOpen(true)}
                       >
-                        <p>{`${errors.length} errors`}</p>
+                        <p>
+                          {i18n.translate(
+                            'unifiedSearch.query.textBasedLanguagesEditor.errorCount',
+                            {
+                              defaultMessage: '{count} {count, plural, one {error} other {errors}}',
+                              values: { count: errors.length },
+                            }
+                          )}
+                        </p>
                       </EuiText>
                     }
                     ownFocus={false}
@@ -91,12 +104,18 @@ export const EditorFooter = memo(function EditorFooter({
                         {errors.map((error, index) => {
                           return (
                             <EuiDescriptionListDescription key={index}>
-                              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                              <EuiFlexGroup gutterSize="s" alignItems="center">
                                 <EuiFlexItem grow={false}>
                                   <EuiIcon type="crossInACircleFilled" color="danger" size="s" />
                                 </EuiFlexItem>
-                                <EuiFlexItem grow={false}>
-                                  {`Line ${error.startLineNumber}`}
+                                <EuiFlexItem>
+                                  {i18n.translate(
+                                    'unifiedSearch.query.textBasedLanguagesEditor.lineNumber',
+                                    {
+                                      defaultMessage: 'Line{lineNumber}',
+                                      values: { lineNumber: error.startLineNumber },
+                                    }
+                                  )}
                                 </EuiFlexItem>
                                 <EuiFlexItem grow={false}>{error.message}</EuiFlexItem>
                               </EuiFlexGroup>

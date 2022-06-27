@@ -360,7 +360,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   <div css={styles.editorContainer}>
                     {!isCompactFocused && (
                       <EuiBadge color="default" css={styles.linesBadge}>
-                        {`${lines} lines`}
+                        {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.lineCount', {
+                          defaultMessage: '{count} {count, plural, one {line} other {lines}}',
+                          values: { count: lines },
+                        })}
                       </EuiBadge>
                     )}
                     {!isCompactFocused && errors && errors.length > 0 && (
