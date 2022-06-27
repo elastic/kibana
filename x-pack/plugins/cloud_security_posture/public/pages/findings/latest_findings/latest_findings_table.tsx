@@ -14,12 +14,11 @@ import {
   type EuiTableActionsColumnType,
   type EuiTableFieldDataColumnType,
 } from '@elastic/eui';
-import type { Serializable } from '@kbn/utility-types';
 import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
 import type { CspFinding } from '../types';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
-import { getExpandColumn, getFindingsColumns } from '../layout/findings_layout';
+import { getExpandColumn, getFindingsColumns, type OnAddFilter } from '../layout/findings_layout';
 
 type TableProps = Required<EuiBasicTableProps<CspFinding>>;
 
@@ -29,7 +28,7 @@ interface Props {
   pagination: Pagination;
   sorting: TableProps['sorting'];
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
-  onAddFilter(field: string, value: Serializable, negate: boolean): void;
+  onAddFilter: OnAddFilter;
 }
 
 const FindingsTableComponent = ({

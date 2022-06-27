@@ -72,12 +72,14 @@ export const getExpandColumn = <T extends unknown>({
   ],
 });
 
+export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate: boolean) => void;
+
 export const getFindingsColumns = ({
   onAddFilter,
 }: {
-  onAddFilter?(key: string, value: Serializable, negate: boolean): void;
-} = {}): Array<EuiTableFieldDataColumnType<CspFinding>> =>
-  [
+  onAddFilter: OnAddFilter;
+}): Array<EuiTableFieldDataColumnType<CspFinding>> => [
+  ...[
     {
       field: 'resource.id',
       name: (
@@ -147,23 +149,24 @@ export const getFindingsColumns = ({
       truncateText: true,
       sortable: true,
     },
-    {
-      field: '@timestamp',
-      width: '150px',
-      name: TEXT.LAST_CHECKED,
-      truncateText: true,
-      sortable: true,
-      render: (timestamp: number) => (
-        <EuiToolTip position="top" content={timestamp}>
-          <span>{moment(timestamp).fromNow()}</span>
-        </EuiToolTip>
-      ),
-    },
-  ].map((column) => (onAddFilter ? createColumnWithFilters(column, { onAddFilter }) : column));
+  ].map((column) => createColumnWithFilters<CspFinding>(column, { onAddFilter })),
+  {
+    field: '@timestamp',
+    width: '150px',
+    name: TEXT.LAST_CHECKED,
+    truncateText: true,
+    sortable: true,
+    render: (timestamp: number) => (
+      <EuiToolTip position="top" content={timestamp}>
+        <span>{moment(timestamp).fromNow()}</span>
+      </EuiToolTip>
+    ),
+  },
+];
 
 export const createColumnWithFilters = <T extends unknown>(
   column: EuiTableFieldDataColumnType<T>,
-  { onAddFilter }: { onAddFilter(key: string, value: Serializable, negate: boolean): void }
+  { onAddFilter }: { onAddFilter: OnAddFilter }
 ): EuiTableFieldDataColumnType<T> => ({
   ...column,
   render: (cellValue: Serializable, item: T) => (

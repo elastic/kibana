@@ -13,9 +13,12 @@ import {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
 } from '@elastic/eui';
-import { Serializable } from '@kbn/utility-types';
 import * as TEXT from '../../translations';
-import { getExpandColumn, getFindingsColumns } from '../../layout/findings_layout';
+import {
+  getExpandColumn,
+  getFindingsColumns,
+  type OnAddFilter,
+} from '../../layout/findings_layout';
 import type { CspFinding } from '../../types';
 import { FindingsRuleFlyout } from '../../findings_flyout/findings_flyout';
 
@@ -24,7 +27,7 @@ interface Props {
   loading: boolean;
   pagination: Pagination;
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
-  onAddFilter(field: string, value: Serializable, negate: boolean): void;
+  onAddFilter: OnAddFilter;
 }
 
 const ResourceFindingsTableComponent = ({
