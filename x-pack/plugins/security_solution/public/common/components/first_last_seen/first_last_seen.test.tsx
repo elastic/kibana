@@ -33,7 +33,6 @@ describe('FirstLastSeen Component', () => {
           field="host.name"
           value="some-host"
           indexPatterns={[]}
-          docValueFields={[]}
           type={FirstLastSeenType.FIRST_SEEN}
           {...overrides}
         />

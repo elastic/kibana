@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { FirstLastSeenRequestOptions } from '../../../../../common/search_strategy/security_solution/first_last_seen';
 
 export const buildFirstOrLastSeenQuery = ({
   field,
   value,
   defaultIndex,
-  docValueFields,
   order,
 }: FirstLastSeenRequestOptions) => {
   const filter = [{ term: { [field]: value } }];
@@ -23,7 +21,6 @@ export const buildFirstOrLastSeenQuery = ({
     ignore_unavailable: true,
     track_total_hits: false,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       query: { bool: { filter } },
       _source: false,
       fields: [

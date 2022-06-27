@@ -178,7 +178,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     inspect={inspect}
                     hostName={detailName}
                     indexNames={selectedPatterns}
-                    docValueFields={docValueFields}
                   />
                 )}
               </AnomalyTableProvider>

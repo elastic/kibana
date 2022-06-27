@@ -12,7 +12,6 @@ import { Subscription } from 'rxjs';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 
 import {
-  DocValueFields,
   Direction,
   FirstLastSeenQuery,
   FirstLastSeenRequestOptions,
@@ -36,7 +35,6 @@ export interface UseFirstLastSeen {
   value: string;
   order: Direction.asc | Direction.desc;
   defaultIndex: string[];
-  docValueFields: DocValueFields[];
 }
 
 export const useFirstLastSeen = ({
@@ -44,7 +42,6 @@ export const useFirstLastSeen = ({
   value,
   order,
   defaultIndex,
-  docValueFields,
 }: UseFirstLastSeen): [boolean, FirstLastSeenArgs] => {
   const { search } = useKibana().services.data;
   const abortCtrl = useRef(new AbortController());
@@ -53,7 +50,6 @@ export const useFirstLastSeen = ({
 
   const [firstLastSeenRequest, setFirstLastSeenRequest] = useState<FirstLastSeenRequestOptions>({
     defaultIndex,
-    docValueFields: docValueFields ?? [],
     factoryQueryType: FirstLastSeenQuery,
     field,
     value,
@@ -122,7 +118,6 @@ export const useFirstLastSeen = ({
       const myRequest = {
         ...prevRequest,
         defaultIndex,
-        docValueFields: docValueFields ?? [],
         field,
         value,
       };
@@ -131,7 +126,7 @@ export const useFirstLastSeen = ({
       }
       return prevRequest;
     });
-  }, [defaultIndex, docValueFields, field, value]);
+  }, [defaultIndex, field, value]);
 
   useEffect(() => {
     firstLastSeenSearch(firstLastSeenRequest);

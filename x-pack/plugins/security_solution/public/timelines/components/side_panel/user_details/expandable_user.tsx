@@ -56,7 +56,7 @@ export const ExpandableUserDetails = ({
   isDraggable,
 }: ExpandableUserProps & { contextID: string; isDraggable?: boolean }) => {
   const { to, from, isInitializing } = useGlobalTime();
-  const { docValueFields, selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns } = useSourcererDataView();
 
   const [loading, { userDetails }] = useUserDetails({
     endDate: to,
@@ -94,7 +94,6 @@ export const ExpandableUserDetails = ({
               to: fromTo.to,
             });
           }}
-          docValueFields={docValueFields}
           indexPatterns={selectedPatterns}
         />
       )}

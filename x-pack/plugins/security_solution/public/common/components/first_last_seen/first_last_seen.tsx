@@ -12,7 +12,7 @@ import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import { useFirstLastSeen } from '../../containers/use_first_last_seen';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { Direction, DocValueFields } from '../../../../common/search_strategy';
+import { Direction } from '../../../../common/search_strategy';
 
 export enum FirstLastSeenType {
   FIRST_SEEN = 'first-seen',
@@ -21,20 +21,18 @@ export enum FirstLastSeenType {
 
 export interface FirstLastSeenProps {
   indexPatterns: string[];
-  docValueFields: DocValueFields[];
   field: string;
   type: FirstLastSeenType;
   value: string;
 }
 
 export const FirstLastSeen = React.memo<FirstLastSeenProps>(
-  ({ indexPatterns, docValueFields, field, type, value }) => {
+  ({ indexPatterns, field, type, value }) => {
     const [loading, { firstSeen, lastSeen, errorMessage }] = useFirstLastSeen({
       field,
       value,
       order: type === FirstLastSeenType.FIRST_SEEN ? Direction.asc : Direction.desc,
       defaultIndex: indexPatterns,
-      docValueFields,
     });
     const valueSeen = useMemo(
       () => (type === FirstLastSeenType.FIRST_SEEN ? firstSeen : lastSeen),

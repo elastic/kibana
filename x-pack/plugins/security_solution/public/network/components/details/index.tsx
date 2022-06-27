@@ -12,7 +12,6 @@ import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import {
-  DocValueFields,
   FlowTargetSourceDest,
   NetworkDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
@@ -56,7 +55,6 @@ export interface IpOverviewProps {
   narrowDateRange: NarrowDateRange;
   startDate: string;
   type: networkModel.NetworkType;
-  docValueFields: DocValueFields[];
   indexPatterns: string[];
 }
 
@@ -75,7 +73,6 @@ export const IpOverview = React.memo<IpOverviewProps>(
     isLoadingAnomaliesData,
     anomaliesData,
     narrowDateRange,
-    docValueFields,
     indexPatterns,
   }) => {
     const capabilities = useMlCapabilities();
@@ -125,7 +122,6 @@ export const IpOverview = React.memo<IpOverviewProps>(
           title: i18n.FIRST_SEEN,
           description: (
             <FirstLastSeen
-              docValueFields={docValueFields}
               indexPatterns={indexPatterns}
               field={`${flowTarget}.ip`}
               value={ip}
@@ -137,7 +133,6 @@ export const IpOverview = React.memo<IpOverviewProps>(
           title: i18n.LAST_SEEN,
           description: (
             <FirstLastSeen
-              docValueFields={docValueFields}
               indexPatterns={indexPatterns}
               field={`${flowTarget}.ip`}
               value={ip}

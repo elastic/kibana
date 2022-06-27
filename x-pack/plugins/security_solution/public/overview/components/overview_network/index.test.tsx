@@ -52,7 +52,6 @@ const defaultProps = {
   startDate,
   setQuery: jest.fn(),
   indexNames: [],
-  docValueFields: [],
 };
 
 const MOCKED_RESPONSE = {

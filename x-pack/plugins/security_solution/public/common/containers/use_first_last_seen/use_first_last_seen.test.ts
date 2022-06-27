@@ -56,7 +56,6 @@ const renderUseFirstLastSeen = (overrides?: Partial<UseFirstLastSeen>) =>
       field: 'host.name',
       value: 'some-host',
       defaultIndex: [],
-      docValueFields: [],
       ...overrides,
     })
   );
@@ -86,7 +85,6 @@ describe('useFistLastSeen', () => {
     expect(mockSearchStrategy).toHaveBeenCalledWith(
       {
         defaultIndex: [],
-        docValueFields: [],
         factoryQueryType: 'firstlastseen',
         field: 'host.name',
         order: 'asc',
@@ -133,7 +131,6 @@ describe('useFistLastSeen', () => {
     expect(mockSearchStrategy).toHaveBeenCalledWith(
       {
         defaultIndex: [],
-        docValueFields: [],
         factoryQueryType: 'firstlastseen',
         field: 'host.name',
         order: 'desc',

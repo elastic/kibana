@@ -52,7 +52,6 @@ describe('User Summary Component', () => {
       startDate: '2019-06-15T06:00:00.000Z',
       userName: 'testUserName',
       indexPatterns: [],
-      docValueFields: [],
     };
 
     test('it renders the default User Summary', () => {

@@ -168,7 +168,6 @@ const NetworkDetailsComponent: React.FC = () => {
               startDate={from}
               endDate={to}
               narrowDateRange={narrowDateRange}
-              docValueFields={docValueFields}
               indexPatterns={selectedPatterns}
             />
 

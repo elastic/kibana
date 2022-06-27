@@ -53,7 +53,6 @@ export interface UserSummaryProps {
   endDate: string;
   narrowDateRange: NarrowDateRange;
   userName: string;
-  docValueFields: DocValueFields[];
   indexPatterns: string[];
 }
 
@@ -76,7 +75,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
     startDate,
     endDate,
     userName,
-    docValueFields,
     indexPatterns,
   }) => {
     const capabilities = useMlCapabilities();
@@ -180,7 +178,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
             title: i18n.FIRST_SEEN,
             description: (
               <FirstLastSeen
-                docValueFields={docValueFields}
                 indexPatterns={indexPatterns}
                 field={'user.name'}
                 value={userName}
@@ -192,7 +189,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
             title: i18n.LAST_SEEN,
             description: (
               <FirstLastSeen
-                docValueFields={docValueFields}
                 indexPatterns={indexPatterns}
                 field={'user.name'}
                 value={userName}
@@ -225,16 +221,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
           },
         ],
       ],
-      [
-        data,
-        docValueFields,
-        indexPatterns,
-        getDefaultRenderer,
-        contextID,
-        isDraggable,
-        userName,
-        firstColumn,
-      ]
+      [data, indexPatterns, getDefaultRenderer, contextID, isDraggable, userName, firstColumn]
     );
     return (
       <>

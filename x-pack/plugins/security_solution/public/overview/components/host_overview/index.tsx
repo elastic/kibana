@@ -45,7 +45,6 @@ import { RiskScore } from '../../../common/components/severity/common';
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
   data: HostItem;
-  docValueFields: DocValueFields[];
   id: string;
   isDraggable?: boolean;
   isInDetailsSidePanel: boolean;
@@ -69,7 +68,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
     anomaliesData,
     contextID,
     data,
-    docValueFields,
     endDate,
     id,
     isDraggable = false,
@@ -143,7 +141,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.FIRST_SEEN,
           description: (
             <FirstLastSeen
-              docValueFields={docValueFields}
               indexPatterns={indexNames}
               field={'host.name'}
               value={hostName}
@@ -155,7 +152,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.LAST_SEEN,
           description: (
             <FirstLastSeen
-              docValueFields={docValueFields}
               indexPatterns={indexNames}
               field={'host.name'}
               value={hostName}
@@ -164,7 +160,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           ),
         },
       ],
-      [data, docValueFields, indexNames, hostName, isDraggable]
+      [data, indexNames, hostName, isDraggable]
     );
     const firstColumn = useMemo(
       () =>
