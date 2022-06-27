@@ -274,13 +274,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-      expect(data?.axes?.y?.[0].title).to.eql(axisTitle);
+      expect(data?.axes?.y?.[1].title).to.eql(axisTitle);
 
       // hide the gridlines
       await testSubjects.click('lnsshowyLeftAxisGridlines');
 
       data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-      expect(data?.axes?.y?.[0].gridlines.length).to.eql(0);
+      expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
     });
 
     it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {
