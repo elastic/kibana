@@ -38,7 +38,7 @@ import type {
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
-import { withTimeout } from '@kbn/std';
+
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
 import {
