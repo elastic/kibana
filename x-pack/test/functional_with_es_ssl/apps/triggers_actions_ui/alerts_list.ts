@@ -107,28 +107,33 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.byCssSelector(
         '.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)'
       );
-      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResults.length).to.equal(1);
-      expect(searchResults[0].name).to.equal('bTest: Noop');
-      expect(searchResults[0].interval).to.equal('1 min');
-      expect(searchResults[0].tags).to.equal('2');
-      expect(searchResults[0].duration).to.match(/\d{2,}:\d{2}/);
+      await retry.try(async () => {
+        const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(searchResults.length).to.equal(1);
+        expect(searchResults[0].name).to.equal('bTest: Noop');
+        expect(searchResults[0].interval).to.equal('1 min');
+        expect(searchResults[0].tags).to.equal('2');
+        expect(searchResults[0].duration).to.match(/\d{2,}:\d{2}/);
+      });
 
       const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
       await searchClearButton.click();
       await find.byCssSelector(
         '.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)'
       );
-      const searchResultsAfterClear = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterClear.length).to.equal(2);
-      expect(searchResultsAfterClear[0].name).to.equal('bTest: Noop');
-      expect(searchResultsAfterClear[0].interval).to.equal('1 min');
-      expect(searchResultsAfterClear[0].tags).to.equal('2');
-      expect(searchResultsAfterClear[0].duration).to.match(/\d{2,}:\d{2}/);
-      expect(searchResultsAfterClear[1].name).to.equal('cTest: Noop');
-      expect(searchResultsAfterClear[1].interval).to.equal('1 min');
-      expect(searchResultsAfterClear[1].tags).to.equal('');
-      expect(searchResultsAfterClear[1].duration).to.match(/\d{2,}:\d{2}/);
+
+      await retry.try(async () => {
+        const searchResultsAfterClear = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(searchResultsAfterClear.length).to.equal(2);
+        expect(searchResultsAfterClear[0].name).to.equal('bTest: Noop');
+        expect(searchResultsAfterClear[0].interval).to.equal('1 min');
+        expect(searchResultsAfterClear[0].tags).to.equal('2');
+        expect(searchResultsAfterClear[0].duration).to.match(/\d{2,}:\d{2}/);
+        expect(searchResultsAfterClear[1].name).to.equal('cTest: Noop');
+        expect(searchResultsAfterClear[1].interval).to.equal('1 min');
+        expect(searchResultsAfterClear[1].tags).to.equal('');
+        expect(searchResultsAfterClear[1].duration).to.match(/\d{2,}:\d{2}/);
+      });
     });
 
     it('should search for tags', async () => {
@@ -495,9 +500,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await createAlert({ supertest, objectRemover });
       const failingAlert = await createFailingAlert({ supertest, objectRemover });
       await refreshAlertsList();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await testSubjects.click('ruleTypeFilterButton');
 
       await retry.try(async () => {
+        const isOpen = await testSubjects.exists('ruleType0Group');
+        if (!isOpen) {
+          await testSubjects.click('ruleTypeFilterButton');
+        }
         expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).to.eql('Alerts');
       });
 
@@ -704,22 +714,43 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('snoozeButton');
       await testSubjects.click('ruleSnoozeApply');
 
-      await retry.try(async () => {
-        await testSubjects.missingOrFail('rulesListNotifyBadge-snoozed');
-      });
+      await find.byCssSelector(
+        '[data-test-subj="rulesListNotifyBadge-unsnoozed"]:not(.euiButton-isDisabled)'
+      );
+      await testSubjects.existOrFail('rulesListNotifyBadge-snoozed');
+    });
 
+    it('should allow rules to be snoozed indefinitely using the right side dropdown', async () => {
+      const createdAlert = await createAlert({
+        supertest,
+        objectRemover,
+      });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('snoozeButton');
       await testSubjects.click('ruleSnoozeIndefiniteApply');
 
-      await retry.try(async () => {
-        await testSubjects.missingOrFail('rulesListNotifyBadge-snoozedIndefinitely');
+      await find.byCssSelector(
+        '[data-test-subj="rulesListNotifyBadge-unsnoozed"]:not(.euiButton-isDisabled)'
+      );
+      await testSubjects.existOrFail('rulesListNotifyBadge-snoozedIndefinitely');
+    });
+
+    it('should allow snoozed rules to be unsnoozed using the right side dropdown', async () => {
+      const createdAlert = await createAlert({
+        supertest,
+        objectRemover,
+      });
+
+      await snoozeAlert({
+        supertest,
+        alertId: createdAlert.id,
       });
 
       await refreshAlertsList();
@@ -728,9 +759,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('snoozeButton');
       await testSubjects.click('ruleSnoozeCancel');
 
-      await retry.try(async () => {
-        await testSubjects.missingOrFail('rulesListNotifyBadge-unsnoozed');
-      });
+      await find.byCssSelector(
+        '[data-test-subj="rulesListNotifyBadge-snoozed"]:not(.euiButton-isDisabled)'
+      );
+      await refreshAlertsList();
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      await testSubjects.missingOrFail('rulesListNotifyBadge-snoozed');
+      await testSubjects.missingOrFail('rulesListNotifyBadge-snoozedIndefinitely');
     });
   });
 };
