@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/rollup/data');
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/rollup/config'
+        'x-pack/test/functional/fixtures/kbn_archiver/rollup/config.json'
       );
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
