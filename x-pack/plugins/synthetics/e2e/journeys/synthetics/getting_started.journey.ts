@@ -6,7 +6,6 @@
  */
 
 import { journey, step, expect, before, Page } from '@elastic/synthetics';
-import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 
 journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: any }) => {
