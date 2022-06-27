@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
@@ -18,11 +18,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { Link, generatePath } from 'react-router-dom';
+import type { Serializable } from '@kbn/utility-types';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
 import type { FindingsByResourcePage } from './use_findings_by_resource';
 import { findingsNavigation } from '../../../common/navigation/constants';
+import { createColumnWithFilters } from '../layout/findings_layout';
 
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
@@ -32,20 +34,31 @@ interface Props {
   loading: boolean;
   pagination: Pagination;
   setTableOptions(options: CriteriaWithPagination<FindingsByResourcePage>): void;
+  onAddFilter(field: string, value: Serializable, negate: boolean): void;
 }
 
-export const getResourceId = (resource: FindingsByResourcePage) =>
-  [resource.resource_id, ...resource.cis_sections].join('/');
+export const getResourceId = (resource: FindingsByResourcePage) => {
+  return [resource.resource_id, ...resource['rule.section']].join('/');
+};
 
 const FindingsByResourceTableComponent = ({
   items,
   loading,
   pagination,
   setTableOptions,
+  onAddFilter,
 }: Props) => {
   const getRowProps = (row: FindingsByResourcePage) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
   });
+
+  const columns = useMemo(
+    () => [
+      ...columnsWithFilters.map((column) => createColumnWithFilters(column, { onAddFilter })),
+      ...columnsWithoutFilters,
+    ],
+    [onAddFilter]
+  );
 
   if (!loading && !items.length)
     return <EuiEmptyPrompt iconType="logoKibana" title={<h2>{TEXT.NO_FINDINGS}</h2>} />;
@@ -62,7 +75,7 @@ const FindingsByResourceTableComponent = ({
   );
 };
 
-const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
+const columnsWithFilters: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
   {
     field: 'resource_id',
     name: (
@@ -83,7 +96,7 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     ),
   },
   {
-    field: 'resource_subtype',
+    field: 'resource.sub_type',
     truncateText: true,
     name: (
       <FormattedMessage
@@ -93,7 +106,7 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     ),
   },
   {
-    field: 'resource_name',
+    field: 'resource.name',
     truncateText: true,
     name: (
       <FormattedMessage
@@ -103,7 +116,7 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     ),
   },
   {
-    field: 'cis_sections',
+    field: 'rule.section',
     truncateText: true,
     name: (
       <FormattedMessage
@@ -128,6 +141,9 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     ),
     truncateText: true,
   },
+];
+
+const columnsWithoutFilters: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
   {
     field: 'failed_findings',
     width: '150px',
