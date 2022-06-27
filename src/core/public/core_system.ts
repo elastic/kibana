@@ -19,9 +19,10 @@ import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-ana
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { first } from 'rxjs/operators';
+import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
+import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
-import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
