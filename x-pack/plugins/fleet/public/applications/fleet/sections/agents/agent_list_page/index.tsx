@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { differenceBy } from 'lodash';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -317,6 +318,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
     const isHosted = agentPolicy?.is_managed === true;
     return !isHosted;
+  };
+
+  const onSelectionChange = (newAgents: Agent[]) => {
+    setSelectedAgents(newAgents);
+    if (selectionMode === 'query' && newAgents.length < selectedAgents.length) {
+      // differentiating between selection changed by agents dropping from current page or user action
+      const areSelectedAgentsStillVisible =
+        selectedAgents.length > 0 && differenceBy(selectedAgents, agents, 'id').length === 0;
+      if (areSelectedAgentsStillVisible) {
+        setSelectionMode('manual');
+      }
+    }
   };
 
   const agentToUnenrollHasFleetServer = useMemo(() => {
@@ -631,10 +644,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         }}
         isSelectable={true}
         selection={{
-          onSelectionChange: (newAgents: Agent[]) => {
-            setSelectedAgents(newAgents);
-            setSelectionMode('manual');
-          },
+          onSelectionChange,
           selectable: isAgentSelectable,
           selectableMessage: (selectable, agent) => {
             if (selectable) return '';
