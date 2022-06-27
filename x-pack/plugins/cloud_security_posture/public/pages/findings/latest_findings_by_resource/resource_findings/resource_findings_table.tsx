@@ -15,8 +15,9 @@ import {
 } from '@elastic/eui';
 import * as TEXT from '../../translations';
 import {
+  baseFindingsColumns,
+  createColumnWithFilters,
   getExpandColumn,
-  getFindingsColumns,
   type OnAddFilter,
 } from '../../layout/findings_layout';
 import type { CspFinding } from '../../types';
@@ -45,7 +46,14 @@ const ResourceFindingsTableComponent = ({
   ] = useMemo(
     () => [
       getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
-      ...getFindingsColumns({ onAddFilter }),
+      baseFindingsColumns['resource.id'],
+      createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
+      baseFindingsColumns['rule.section'],
+      createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
+      baseFindingsColumns['@timestamp'],
     ],
     [onAddFilter]
   );

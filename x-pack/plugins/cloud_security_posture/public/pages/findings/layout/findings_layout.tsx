@@ -23,7 +23,6 @@ import type { Serializable } from '@kbn/utility-types';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import * as TEXT from '../translations';
-import { CspFinding } from '../types';
 import {
   FINDINGS_TABLE_CELL_ADD_FILTER,
   FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER,
@@ -74,82 +73,72 @@ export const getExpandColumn = <T extends unknown>({
 
 export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate: boolean) => void;
 
-export const getFindingsColumns = ({
-  onAddFilter,
-}: {
-  onAddFilter: OnAddFilter;
-}): Array<EuiTableFieldDataColumnType<CspFinding>> => [
-  ...[
-    {
-      field: 'resource.id',
-      name: (
-        <ColumnNameWithTooltip
-          columnName={TEXT.RESOURCE_ID}
-          tooltipContent={i18n.translate(
-            'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnTooltipLabel',
-            {
-              defaultMessage: 'Custom Elastic Resource ID',
-            }
-          )}
-        />
-      ),
-      truncateText: true,
-      width: '15%',
-      sortable: true,
-      render: (filename: string) => (
-        <EuiToolTip position="top" content={filename}>
-          <span>{filename}</span>
-        </EuiToolTip>
-      ),
-    },
-    {
-      field: 'result.evaluation',
-      name: TEXT.RESULT,
-      width: '120px',
-      sortable: true,
-      render: (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
-        <CspEvaluationBadge type={type} />
-      ),
-    },
-    {
-      field: 'resource.sub_type',
-      name: TEXT.RESOURCE_TYPE,
-      sortable: true,
-      width: '150px',
-    },
-    {
-      field: 'resource.name',
-      name: TEXT.RESOURCE_NAME,
-      sortable: true,
-    },
-    {
-      field: 'rule.name',
-      name: TEXT.RULE,
-      sortable: true,
-    },
-    {
-      field: 'rule.section',
-      name: TEXT.CIS_SECTION,
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'cluster_id',
-      name: (
-        <ColumnNameWithTooltip
-          columnName={TEXT.CLUSTER_ID}
-          tooltipContent={i18n.translate(
-            'xpack.csp.findings.resourceTable.resourceTableColumn.clusterIdColumnTooltipLabel',
-            {
-              defaultMessage: 'Kube-System Namespace ID',
-            }
-          )}
-        />
-      ),
-      truncateText: true,
-      sortable: true,
-    },
-  ].map((column) => createColumnWithFilters<CspFinding>(column, { onAddFilter })),
+const baseColumns = [
+  {
+    field: 'resource.id',
+    name: (
+      <ColumnNameWithTooltip
+        columnName={TEXT.RESOURCE_ID}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnTooltipLabel',
+          { defaultMessage: 'Custom Elastic Resource ID' }
+        )}
+      />
+    ),
+    truncateText: true,
+    width: '15%',
+    sortable: true,
+    render: (filename: string) => (
+      <EuiToolTip position="top" content={filename}>
+        <span>{filename}</span>
+      </EuiToolTip>
+    ),
+  },
+  {
+    field: 'result.evaluation',
+    name: TEXT.RESULT,
+    width: '120px',
+    sortable: true,
+    render: (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
+      <CspEvaluationBadge type={type} />
+    ),
+  },
+  {
+    field: 'resource.sub_type',
+    name: TEXT.RESOURCE_TYPE,
+    sortable: true,
+    width: '150px',
+  },
+  {
+    field: 'resource.name',
+    name: TEXT.RESOURCE_NAME,
+    sortable: true,
+  },
+  {
+    field: 'rule.name',
+    name: TEXT.RULE,
+    sortable: true,
+  },
+  {
+    field: 'rule.section',
+    name: TEXT.CIS_SECTION,
+    sortable: true,
+    truncateText: true,
+  },
+  {
+    field: 'cluster_id',
+    name: (
+      <ColumnNameWithTooltip
+        columnName={TEXT.CLUSTER_ID}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.resourceTable.resourceTableColumn.clusterIdColumnTooltipLabel',
+          { defaultMessage: 'Kube-System Namespace ID' }
+        )}
+      />
+    ),
+    truncateText: true,
+    sortable: true,
+  },
   {
     field: '@timestamp',
     width: '150px',
@@ -162,7 +151,11 @@ export const getFindingsColumns = ({
       </EuiToolTip>
     ),
   },
-];
+] as const;
+
+export const baseFindingsColumns = Object.fromEntries(
+  baseColumns.map((column) => [column.field, column])
+) as Record<typeof baseColumns[number]['field'], typeof baseColumns[number]>;
 
 export const createColumnWithFilters = <T extends unknown>(
   column: EuiTableFieldDataColumnType<T>,

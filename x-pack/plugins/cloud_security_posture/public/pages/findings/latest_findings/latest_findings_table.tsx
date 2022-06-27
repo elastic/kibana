@@ -18,7 +18,12 @@ import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
 import type { CspFinding } from '../types';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
-import { getExpandColumn, getFindingsColumns, type OnAddFilter } from '../layout/findings_layout';
+import {
+  baseFindingsColumns,
+  createColumnWithFilters,
+  getExpandColumn,
+  type OnAddFilter,
+} from '../layout/findings_layout';
 
 type TableProps = Required<EuiBasicTableProps<CspFinding>>;
 
@@ -30,6 +35,24 @@ interface Props {
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
   onAddFilter: OnAddFilter;
 }
+
+export const getColumns = ({
+  setSelectedFinding,
+  onAddFilter,
+}: {
+  setSelectedFinding(v: CspFinding): void;
+  onAddFilter: OnAddFilter;
+}) => [
+  getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
+  createColumnWithFilters(baseFindingsColumns['resource.id'], { onAddFilter }),
+  createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
+  createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
+  createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
+  createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
+  baseFindingsColumns['rule.section'],
+  createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
+  baseFindingsColumns['@timestamp'],
+];
 
 const FindingsTableComponent = ({
   loading,
@@ -55,7 +78,14 @@ const FindingsTableComponent = ({
   ] = useMemo(
     () => [
       getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
-      ...getFindingsColumns({ onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.id'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
+      baseFindingsColumns['rule.section'],
+      createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
+      baseFindingsColumns['@timestamp'],
     ],
     [onAddFilter]
   );

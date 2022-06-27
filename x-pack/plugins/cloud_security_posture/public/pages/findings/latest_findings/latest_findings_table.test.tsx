@@ -13,7 +13,7 @@ import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
 import type { CspFinding } from '../types';
 import { TestProvider } from '../../../test/test_provider';
-import { getFindingsColumns } from '../layout/findings_layout';
+import { createColumnWithFilters, baseFindingsColumns } from '../layout/findings_layout';
 
 const chance = new Chance();
 
@@ -117,13 +117,14 @@ describe('<FindingsTable />', () => {
     const names = chance.unique(chance.sentence, 10);
     const data = names.map(getFakeFindings);
 
+    const filterProps = { onAddFilter: jest.fn() };
     const props: TableProps = {
       loading: false,
       items: data,
       sorting: { sort: { field: '@timestamp', direction: 'desc' } },
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
       setTableOptions: jest.fn(),
-      onAddFilter: jest.fn(),
+      ...filterProps,
     };
 
     render(
@@ -134,7 +135,14 @@ describe('<FindingsTable />', () => {
 
     const row = data[0];
 
-    const columns = getFindingsColumns({ onAddFilter: props.onAddFilter });
+    const columns = [
+      createColumnWithFilters(baseFindingsColumns['resource.id'], filterProps),
+      createColumnWithFilters(baseFindingsColumns['result.evaluation'], filterProps),
+      createColumnWithFilters(baseFindingsColumns['resource.sub_type'], filterProps),
+      createColumnWithFilters(baseFindingsColumns['resource.name'], filterProps),
+      createColumnWithFilters(baseFindingsColumns['rule.name'], filterProps),
+      createColumnWithFilters(baseFindingsColumns.cluster_id, filterProps),
+    ];
 
     columns.forEach((column) => {
       const cellElement = screen.getByTestId(
