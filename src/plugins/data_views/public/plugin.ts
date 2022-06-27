@@ -74,6 +74,8 @@ export class DataViewsPublicPlugin
       },
       getCanSave: () => Promise.resolve(application.capabilities.indexPatterns.save === true),
       getCanSaveSync: () => application.capabilities.indexPatterns.save === true,
+      getCanSaveAdvancedSettings: () =>
+        Promise.resolve(application.capabilities.advancedSettings.save === true),
     });
   }
 
