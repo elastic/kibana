@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import React, { ReactNode, useMemo, useState, useCallback } from 'react';
-import {
-  EuiDataGrid,
-  EuiPanel,
-  EuiDataGridColumn,
-  EuiDataGridColumnVisibility,
-  EuiDataGridStyle,
-  EuiDataGridSorting,
-  EuiDataGridInMemory,
-} from '@elastic/eui';
+import React, { ReactNode, useMemo, useState, useEffect } from 'react';
+import { EuiFlexItem, EuiText, EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { useSetFilter } from '../../hooks';
@@ -25,14 +18,12 @@ import { CONTAINER_IMAGE_NAME } from '../../../common/constants';
 
 export interface ContainerNameWidgetDataValueMap {
   key: string;
-  doc_count:number;
   count_by_aggs: {
     value: number;
   };
 }
 
 export interface ContainerNameArrayDataValue {
-  [key: string]: any;
   name: string;
   count: number;
 }
@@ -50,6 +41,10 @@ interface FilterButtons {
   filterOutButtons: ReactNode[];
 }
 
+const Wrapper = styled.div`
+  margin-top: -${({ theme }) => theme.eui.euiSizeS};
+`;
+
 export const ContainerNameWidget = ({
   widgetKey,
   indexPattern,
@@ -57,6 +52,10 @@ export const ContainerNameWidget = ({
   groupedBy,
   countBy,
 }: ContainerNameWidgetDeps) => {
+  const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
+  const [sortField, setSortField] = useState('count');
+  const [sortDirection, setSortDirection] = useState('desc');
+  const [pageNumber, setPageNumber] = useState(0);
   const styles = useStyles();
 
   const filterQueryWithTimeRange = useMemo(() => {
@@ -67,20 +66,46 @@ export const ContainerNameWidget = ({
     );
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
 
-  const { data } = useFetchContainerNameData(
+  const { data, fetchNextPage, isFetchingNextPage, isLoading } = useFetchContainerNameData(
     filterQueryWithTimeRange,
     widgetKey,
     groupedBy,
     countBy,
-    indexPattern?.title
+    indexPattern?.title,
+    sortDirection,
+    pageNumber,
   );
+//   console.log(data)
+
+  const onTableChange = ({ sort = {} }) => {
+    const { field: sortField, direction: sortDirection } = sort;
+
+    setSortField(sortField);
+    setSortDirection(sortDirection);
+    //setPageNumber(pageNumber => pageNumber +  0)
+
+    fetchNextPage()
+
+  };
+
+  useEffect(()=>{
+      fetchNextPage()
+  },[fetchNextPage])
+
+  const sorting = {
+    sort: {
+      field: sortField,
+      direction: sortDirection,
+    },
+    enableAllColumns: true,
+  };
 
   const { getFilterForValueButton, getFilterOutValueButton, filterManager } = useSetFilter();
   const filterButtons = useMemo(() => {
     const result: FilterButtons = {
       filterForButtons:
         data &&
-        data.map((aggResult: ContainerNameWidgetDataValueMap) => {
+        data.pages[0].map((aggResult: ContainerNameWidgetDataValueMap) => {
           return getFilterForValueButton({
             field: CONTAINER_IMAGE_NAME,
             filterManager,
@@ -95,7 +120,7 @@ export const ContainerNameWidget = ({
 
       filterOutButtons:
         data &&
-        data.map((aggResult: ContainerNameWidgetDataValueMap) => {
+        data.pages[0].map((aggResult: ContainerNameWidgetDataValueMap) => {
           return getFilterOutValueButton({
             field: CONTAINER_IMAGE_NAME,
             filterManager,
@@ -110,7 +135,7 @@ export const ContainerNameWidget = ({
     };
 
     return result;
-  }, [data, getFilterForValueButton, getFilterOutValueButton, filterManager]);
+  }, [data, getFilterForValueButton, getFilterOutValueButton, filterManager, hoveredFilter]);
 
   const widgetTitle = i18n.translate(
     'xpack.kubernetesSecurity.containerNameWidget.ContainerImage',
@@ -119,88 +144,142 @@ export const ContainerNameWidget = ({
     }
   );
 
-  const containerNameArray: ContainerNameArrayDataValue[] = data
-    ? data.map((aggResult: ContainerNameWidgetDataValueMap) => {
-        return {
-          name: aggResult.key,
-          count: aggResult.count_by_aggs.value,
-        };
-      })
-    : [];
+//   const containerNameArrayx: ContainerNameArrayDataValue[] = data
+//     ? data.map((aggResult: ContainerNameWidgetDataValueMap) => {
+//         return {
+//           name: aggResult.key,
+//           count: aggResult.count_by_aggs.value,
+//         };
+//       })
+//     : [];
 
-  const columns: EuiDataGridColumn[] = [
-    {
-      id: 'name',
-      displayAsText: widgetTitle,
-      actions: false,
-      initialWidth: 216,
-      isResizable: true,
-      cellActions: [
-        ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+  const containerNameArray: ContainerNameArrayDataValue[] = useMemo(() => {
+    return data
+      ? data.pages[0].map((aggResult: ContainerNameWidgetDataValueMap) => {
+          return {
+            name: aggResult.key,
+            count: aggResult.count_by_aggs.value,
+          };
+        })
+      : [];
+  }, [data]);
+
+  const columns = useMemo(() => {
+    if (
+      filterButtons.filterForButtons === undefined &&
+      filterButtons.filterOutButtons === undefined
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        field: 'name',
+        name: widgetTitle,
+        'data-test-subj': 'containserImageNameSessionCount',
+        render: (name: string) => {
           const indexHelper = containerNameArray.findIndex((obj) => {
-            return obj.name === containerNameArray[rowIndex][columnId];
+            return obj.name === name;
           });
-          return <> {filterButtons.filterForButtons[indexHelper]}</>;
+          return (
+            <EuiFlexItem
+              key={`percentage-widget--haha}`}
+              onMouseEnter={() => setHoveredFilter(indexHelper)}
+              onMouseLeave={() => setHoveredFilter(null)}
+              data-test-subj={'test-alpha'}
+            >
+              <EuiText size="xs" css={styles.dataInfo}>
+                {name}
+                {hoveredFilter === indexHelper && (
+                  <div css={styles.filters}>
+                    {filterButtons.filterForButtons[indexHelper]}
+                    {filterButtons.filterOutButtons[indexHelper]}
+                  </div>
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          );
         },
-        ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-          const indexHelper = containerNameArray.findIndex((obj) => {
-            return obj.name === containerNameArray[rowIndex][columnId];
-          });
-          return <>{filterButtons.filterOutButtons[indexHelper]}</>;
+        align: 'left',
+        sortable: true,
+      },
+      {
+        field: 'count',
+        name: 'Count',
+        'data-test-subj': 'containerImageNameSessionCount',
+        render: (count: number) => {
+          return <span css={styles.countValue}>{count}</span>;
         },
-      ],
-    },
-    {
-      id: 'count',
-      displayAsText: 'Count',
-      initialWidth: 75,
-    },
-  ];
+        sortable: true,
+        align: 'right',
+      },
+    ];
+  }, [filterButtons.filterForButtons, filterButtons.filterOutButtons, containerNameArray]);
 
-  const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
+//   const columnsx = [
+//     {
+//       field: 'name',
+//       name: widgetTitle,
+//       'data-test-subj': 'containserImageNameSessionCount',
+//       render: (name: string) => {
+//         const indexHelper = containerNameArray.findIndex((obj) => {
+//           console.log(name);
+//           return obj.name === name;
+//         });
+//         return (
+//           <EuiFlexItem
+//             key={`percentage-widget--haha}`}
+//             onMouseEnter={() => setHoveredFilter(indexHelper)}
+//             onMouseLeave={() => setHoveredFilter(null)}
+//             data-test-subj={'test-alpha'}
+//           >
+//             <EuiText size="xs" css={styles.dataInfo}>
+//               {name}
+//               {true && (
+//                 <div css={styles.filters}>
+//                   {filterButtons.filterForButtons[indexHelper]}
+//                   {filterButtons.filterOutButtons[indexHelper]}
+//                 </div>
+//               )}
+//             </EuiText>
+//           </EuiFlexItem>
+//         );
+//       },
+//       align: 'left',
+//     },
+//     {
+//       field: 'count',
+//       name: 'Count',
+//       'data-test-subj': 'containerImageNameSessionCount',
+//       render: (count: number) => {
+//         return <span css={styles.countValue}>{count}</span>;
+//       },
+//       sortable: true,
+//       align: 'right',
+//     },
+//   ];
 
-  // Sorting
-  const [sortingColumns, setSortingColumns] = useState([]);
-  const onSort = useCallback(
-    (sortingColumn) => {
-      setSortingColumns(sortingColumn);
-    },
-    [setSortingColumns]
-  );
-
-  const GridStyle: EuiDataGridStyle = {
-    border: 'none',
-    header: 'underline',
-    fontSize: 's',
-  };
-
-  const ColumnVisibility: EuiDataGridColumnVisibility = {
-    visibleColumns,
-    setVisibleColumns,
-  };
-
-  const InMemory: EuiDataGridInMemory = { level: 'sorting' };
-
-  const Sorting: EuiDataGridSorting = {
-    columns: sortingColumns,
-    onSort,
-  };
+  //   const sorting = {
+  //       sort: {
+  //           field : 'count',
+  //           direction : 'asc',
+  //       },
+  //   }
 
   return (
-    <EuiPanel css={styles.tablePadding} hasShadow={false}>
-      <EuiDataGrid
-        aria-label="Container name sessions table widget"
+    <Wrapper
+      data-test-subj="containerNameSessionTable"
+      className="eui-yScroll"
+      css={styles.container}
+    >
+      <EuiBasicTable
+        tableCaption="Trial"
+        aria-label="Container Name Session Widget"
+        items={containerNameArray}
         columns={columns}
-        rowCount={containerNameArray.length}
-        toolbarVisibility={false}
-        gridStyle={GridStyle}
-        columnVisibility={ColumnVisibility}
-        renderCellValue={({ rowIndex, columnId }: { rowIndex: number; columnId: string }) =>
-          containerNameArray[rowIndex][columnId]
-        }
-        inMemory={InMemory}
-        sorting={Sorting}
+        sorting={sorting}
+        onChange={onTableChange}
       />
-    </EuiPanel>
+    </Wrapper>
   );
 };
