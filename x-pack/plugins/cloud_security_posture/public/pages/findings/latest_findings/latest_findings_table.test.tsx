@@ -5,13 +5,15 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { render, screen, within } from '@testing-library/react';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsTable } from './latest_findings_table';
 import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
 import type { CspFinding } from '../types';
 import { TestProvider } from '../../../test/test_provider';
+import { getFindingsColumns } from '../layout/findings_layout';
 
 const chance = new Chance();
 
@@ -75,6 +77,7 @@ describe('<FindingsTable />', () => {
       sorting: { sort: { field: '@timestamp', direction: 'desc' } },
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
       setTableOptions: jest.fn(),
+      onAddFilter: jest.fn(),
     };
 
     render(
@@ -96,6 +99,7 @@ describe('<FindingsTable />', () => {
       sorting: { sort: { field: '@timestamp', direction: 'desc' } },
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
       setTableOptions: jest.fn(),
+      onAddFilter: jest.fn(),
     };
 
     render(
@@ -106,6 +110,55 @@ describe('<FindingsTable />', () => {
 
     data.forEach((item) => {
       expect(screen.getByText(item.rule.name)).toBeInTheDocument();
+    });
+  });
+
+  it('adds filter with a cell button click', () => {
+    const names = chance.unique(chance.sentence, 10);
+    const data = names.map(getFakeFindings);
+
+    const props: TableProps = {
+      loading: false,
+      items: data,
+      sorting: { sort: { field: '@timestamp', direction: 'desc' } },
+      pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
+      setTableOptions: jest.fn(),
+      onAddFilter: jest.fn(),
+    };
+
+    render(
+      <TestProvider>
+        <FindingsTable {...props} />
+      </TestProvider>
+    );
+
+    const row = data[0];
+
+    const columns = getFindingsColumns({ onAddFilter: props.onAddFilter });
+
+    columns.forEach((column) => {
+      const cellElement = screen.getByTestId(
+        TEST_SUBJECTS.getFindingsTableCellTestId(column.field, row.resource.id)
+      );
+      userEvent.hover(cellElement);
+      const addFilterElement = within(cellElement).getByTestId(
+        TEST_SUBJECTS.FINDINGS_TABLE_CELL_ADD_FILTER
+      );
+      const addNegatedFilterElement = within(cellElement).getByTestId(
+        TEST_SUBJECTS.FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER
+      );
+
+      // We need to account for values like resource.id (deep.nested.values)
+      const value = column.field.split('.').reduce<any>((a, c) => a[c], row);
+
+      expect(addFilterElement).toBeVisible();
+      expect(addNegatedFilterElement).toBeVisible();
+
+      userEvent.click(addFilterElement);
+      expect(props.onAddFilter).toHaveBeenCalledWith(column.field, value, false);
+
+      userEvent.click(addNegatedFilterElement);
+      expect(props.onAddFilter).toHaveBeenCalledWith(column.field, value, true);
     });
   });
 });

@@ -8,12 +8,13 @@ import React, { useMemo, useState } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
-  EuiBasicTableColumn,
   type Pagination,
   type EuiBasicTableProps,
   type CriteriaWithPagination,
   type EuiTableActionsColumnType,
+  type EuiTableFieldDataColumnType,
 } from '@elastic/eui';
+import type { Serializable } from '@kbn/utility-types';
 import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
 import type { CspFinding } from '../types';
@@ -28,6 +29,7 @@ interface Props {
   pagination: Pagination;
   sorting: TableProps['sorting'];
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
+  onAddFilter(field: string, value: Serializable, negate: boolean): void;
 }
 
 const FindingsTableComponent = ({
@@ -36,15 +38,27 @@ const FindingsTableComponent = ({
   pagination,
   sorting,
   setTableOptions,
+  onAddFilter,
 }: Props) => {
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
+  const getRowProps = (row: CspFinding) => ({
+    'data-test-subj': TEST_SUBJECTS.getFindingsTableRowTestId(row.resource.id),
+  });
+
+  const getCellProps = (row: CspFinding, column: EuiTableFieldDataColumnType<CspFinding>) => ({
+    'data-test-subj': TEST_SUBJECTS.getFindingsTableCellTestId(column.field, row.resource.id),
+  });
+
   const columns: [
     EuiTableActionsColumnType<CspFinding>,
-    ...Array<EuiBasicTableColumn<CspFinding>>
+    ...Array<EuiTableFieldDataColumnType<CspFinding>>
   ] = useMemo(
-    () => [getExpandColumn<CspFinding>({ onClick: setSelectedFinding }), ...getFindingsColumns()],
-    []
+    () => [
+      getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
+      ...getFindingsColumns({ onAddFilter }),
+    ],
+    [onAddFilter]
   );
 
   // Show "zero state"
@@ -68,6 +82,8 @@ const FindingsTableComponent = ({
         pagination={pagination}
         sorting={sorting}
         onChange={setTableOptions}
+        rowProps={getRowProps}
+        cellProps={getCellProps}
         hasActions
       />
       {selectedFinding && (
