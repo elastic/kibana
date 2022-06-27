@@ -165,8 +165,9 @@ export const useBulkActions = ({
       const handleDeleteAction = async () => {
         setIsRefreshOn(false);
         closePopover();
+
         if (isAllSelected) {
-          setIsRefreshOn(false);
+          // User has cancelled deletion
           if ((await confirmDeletion()) === false) {
             setIsRefreshOn(true);
             return;
