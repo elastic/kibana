@@ -20,6 +20,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils';
@@ -37,7 +38,7 @@ export default function AlertsFlyoutBody(props: FlyoutProps) {
   const { http } = services;
   const dateFormat = useUiSetting<string>('dateFormat');
   const prepend = http?.basePath.prepend;
-  const ruleId = get(props.alert, 'kibana.alert.rule.uuid') ?? null;
+  const ruleId = get(props.alert.fields, ALERT_RULE_UUID) ?? null;
   const linkToRule = ruleId && prepend ? prepend(paths.management.ruleDetails(ruleId)) : null;
   const overviewListItems = [
     {
@@ -49,9 +50,17 @@ export default function AlertsFlyoutBody(props: FlyoutProps) {
       ),
     },
     {
-      title: translations.alertsFlyout.lastUpdatedLabel,
+      title: translations.alertsFlyout.startedAtLabel,
       description: (
         <span title={alert.start.toString()}>{moment(alert.start).format(dateFormat)}</span>
+      ),
+    },
+    {
+      title: translations.alertsFlyout.lastUpdatedLabel,
+      description: (
+        <span title={alert.lastUpdated.toString()}>
+          {moment(alert.lastUpdated).format(dateFormat)}
+        </span>
       ),
     },
     {
