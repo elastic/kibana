@@ -245,6 +245,7 @@ export function DiscoverLayout({
         resetSavedSearch={resetSavedSearch}
         onChangeIndexPattern={onChangeIndexPattern}
         onEditRuntimeField={onEditRuntimeField}
+        textBasedLanguageMode={dataState.textBasedLanguageMode}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -260,7 +261,7 @@ export function DiscoverLayout({
               indexPatternList={indexPatternList}
               onAddField={onAddColumn}
               onAddFilter={
-                !state.textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined
+                !dataState.textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined
               }
               onRemoveField={onRemoveColumn}
               onChangeIndexPattern={onChangeIndexPattern}
@@ -327,7 +328,7 @@ export function DiscoverLayout({
                   gutterSize="none"
                   responsive={false}
                 >
-                  {!state.textBasedLanguageMode && (
+                  {!dataState.textBasedLanguageMode && (
                     <>
                       <EuiFlexItem grow={false}>
                         <DiscoverChartMemoized
@@ -353,7 +354,9 @@ export function DiscoverLayout({
                       indexPattern={indexPattern}
                       navigateTo={navigateTo}
                       onAddFilter={
-                        !state.textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined
+                        !dataState.textBasedLanguageMode
+                          ? (onAddFilter as DocViewFilterFn)
+                          : undefined
                       }
                       savedSearch={savedSearch}
                       setExpandedDoc={setExpandedDoc}
@@ -370,7 +373,9 @@ export function DiscoverLayout({
                       columns={columns}
                       stateContainer={stateContainer}
                       onAddFilter={
-                        !state.textBasedLanguageMode ? (onAddFilter as DocViewFilterFn) : undefined
+                        !dataState.textBasedLanguageMode
+                          ? (onAddFilter as DocViewFilterFn)
+                          : undefined
                       }
                       trackUiMetric={trackUiMetric}
                       savedSearchRefetch$={savedSearchRefetch$}

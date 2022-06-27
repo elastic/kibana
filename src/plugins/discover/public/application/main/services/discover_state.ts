@@ -90,10 +90,6 @@ export interface AppState {
    * Document explorer row height option
    */
   rowHeight?: number;
-  /**
-   * Text based languages mode (sql | esql)
-   */
-  textBasedLanguageMode?: string;
 }
 
 export interface AppStateUrl extends Omit<AppState, 'sort'> {

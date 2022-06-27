@@ -28,6 +28,7 @@ export type DiscoverTopNavProps = Pick<
   resetSavedSearch: () => void;
   onChangeIndexPattern: (indexPattern: string) => void;
   onEditRuntimeField: () => void;
+  textBasedLanguageMode?: string;
 };
 
 export const DiscoverTopNav = ({
@@ -43,6 +44,7 @@ export const DiscoverTopNav = ({
   resetSavedSearch,
   onChangeIndexPattern,
   onEditRuntimeField,
+  textBasedLanguageMode,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
   const showDatePicker = useMemo(
@@ -135,6 +137,7 @@ export const DiscoverTopNav = ({
         onOpenInspector,
         searchSource,
         onOpenSavedSearch,
+        textBasedLanguageMode,
       }),
     [
       indexPattern,
@@ -145,6 +148,7 @@ export const DiscoverTopNav = ({
       onOpenInspector,
       searchSource,
       onOpenSavedSearch,
+      textBasedLanguageMode,
     ]
   );
 
@@ -177,7 +181,6 @@ export const DiscoverTopNav = ({
     onChangeDataView: (newIndexPatternId: string) => onChangeIndexPattern(newIndexPatternId),
     textBasedLanguages: ['SQL'] as DataViewPickerProps['textBasedLanguages'],
   };
-  const state = stateContainer.appStateContainer.getState();
 
   return (
     <TopNavMenu
@@ -191,9 +194,7 @@ export const DiscoverTopNav = ({
       savedQueryId={savedQuery}
       screenTitle={savedSearch.title}
       showDatePicker={showDatePicker}
-      showSaveQuery={
-        !state.textBasedLanguageMode && Boolean(services.capabilities.discover.saveQuery)
-      }
+      showSaveQuery={!textBasedLanguageMode && Boolean(services.capabilities.discover.saveQuery)}
       showSearchBar={true}
       useDefaultBehaviors={true}
       dataViewPickerComponentProps={dataViewPickerProps}

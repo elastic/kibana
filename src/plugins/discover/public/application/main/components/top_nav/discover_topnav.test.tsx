@@ -32,13 +32,7 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
 
   return {
     stateContainer: {
-      appStateContainer: {
-        getState: jest.fn(() => {
-          return {
-            textBasedLanguageMode: undefined,
-          };
-        }),
-      },
+      stateContainer: {} as GetStateReturn,
     } as unknown as GetStateReturn,
     indexPattern: indexPatternMock,
     savedSearch: savedSearchMock,

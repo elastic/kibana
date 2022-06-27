@@ -32,6 +32,7 @@ export const getTopNavLinks = ({
   onOpenInspector,
   searchSource,
   onOpenSavedSearch,
+  textBasedLanguageMode,
 }: {
   indexPattern: DataView;
   navigateTo: (url: string) => void;
@@ -41,8 +42,8 @@ export const getTopNavLinks = ({
   onOpenInspector: () => void;
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
+  textBasedLanguageMode?: string;
 }): TopNavMenuData[] => {
-  const textBasedLanguageMode = state.appStateContainer.getState().textBasedLanguageMode;
   const options = {
     id: 'options',
     label: i18n.translate('discover.localMenu.localMenu.optionsTitle', {

@@ -210,7 +210,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const editField = useMemo(
     () =>
-      !props.state.textBasedLanguageMode && canEditDataView && selectedIndexPattern
+      !documentState.textBasedLanguageMode && canEditDataView && selectedIndexPattern
         ? (fieldName?: string) => {
             const ref = dataViewFieldEditor.openEditor({
               ctx: {
@@ -230,7 +230,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           }
         : undefined,
     [
-      props.state.textBasedLanguageMode,
+      documentState.textBasedLanguageMode,
       canEditDataView,
       selectedIndexPattern,
       dataViewFieldEditor,

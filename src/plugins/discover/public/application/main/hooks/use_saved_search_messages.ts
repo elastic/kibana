@@ -33,10 +33,12 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
   if (main$.getValue().fetchStatus === FetchStatus.COMPLETE) {
     return;
   }
+  const textBasedLanguageMode = main$.getValue().textBasedLanguageMode;
   main$.next({
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments,
     error: undefined,
+    textBasedLanguageMode,
   });
 }
 
@@ -45,8 +47,10 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
  */
 export function sendPartialMsg(main$: DataMain$) {
   if (main$.getValue().fetchStatus === FetchStatus.LOADING) {
+    const textBasedLanguageMode = main$.getValue().textBasedLanguageMode;
     main$.next({
       fetchStatus: FetchStatus.PARTIAL,
+      textBasedLanguageMode,
     });
   }
 }
@@ -54,10 +58,14 @@ export function sendPartialMsg(main$: DataMain$) {
 /**
  * Send LOADING message via main observable
  */
-export function sendLoadingMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$) {
+export function sendLoadingMsg(
+  data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$,
+  textBasedLanguageMode: string
+) {
   if (data$.getValue().fetchStatus !== FetchStatus.LOADING) {
     data$.next({
       fetchStatus: FetchStatus.LOADING,
+      textBasedLanguageMode,
     });
   }
 }
@@ -69,9 +77,11 @@ export function sendErrorMsg(
   data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$,
   error: Error
 ) {
+  const textBasedLanguageMode = data$.getValue().textBasedLanguageMode;
   data$.next({
     fetchStatus: FetchStatus.ERROR,
     error,
+    textBasedLanguageMode,
   });
 }
 
@@ -80,21 +90,26 @@ export function sendErrorMsg(
  * Needed when index pattern is switched or a new runtime field is added
  */
 export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchStatus) {
+  const textBasedLanguageMode = data.main$.getValue().textBasedLanguageMode;
   data.main$.next({
     fetchStatus: initialFetchStatus,
     foundDocuments: undefined,
+    textBasedLanguageMode,
   });
   data.documents$.next({
     fetchStatus: initialFetchStatus,
     result: [],
+    textBasedLanguageMode,
   });
   data.charts$.next({
     fetchStatus: initialFetchStatus,
     chartData: undefined,
     bucketInterval: undefined,
+    textBasedLanguageMode,
   });
   data.totalHits$.next({
     fetchStatus: initialFetchStatus,
     result: undefined,
+    textBasedLanguageMode,
   });
 }

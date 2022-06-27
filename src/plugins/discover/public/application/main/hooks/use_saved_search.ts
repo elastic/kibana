@@ -7,6 +7,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -58,6 +59,7 @@ export type DataRefetchMsg = 'reset' | undefined;
 export interface DataMsg {
   fetchStatus: FetchStatus;
   error?: Error;
+  textBasedLanguageMode?: string;
 }
 
 export interface DataMainMsg extends DataMsg {
@@ -83,6 +85,14 @@ export interface DataAvailableFieldsMsg extends DataMsg {
   fields?: string[];
 }
 
+function isOfAggregateQueryType(query: AggregateQuery | Query): query is AggregateQuery {
+  return Boolean(query && 'sql' in query);
+}
+
+function getAggregateQueryMode(query: AggregateQuery): string {
+  return Object.keys(query)[0];
+}
+
 /**
  * This hook return 2 observables, refetch$ allows to trigger data fetching, data$ to subscribe
  * to the data fetching
@@ -106,6 +116,14 @@ export const useSavedSearch = ({
 }) => {
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
+  const { query } = stateContainer.appStateContainer.getState();
+  let textBasedLanguageMode = '';
+  if (query && isOfAggregateQueryType(query)) {
+    const aggregatedQuery = query as AggregateQuery;
+    textBasedLanguageMode = getAggregateQueryMode(aggregatedQuery);
+  } else {
+    textBasedLanguageMode = '';
+  }
 
   const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
 
@@ -113,17 +131,12 @@ export const useSavedSearch = ({
    * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
-  const main$: DataMain$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const documents$: DataDocuments$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const totalHits$: DataTotalHits$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const charts$: DataCharts$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const availableFields$: AvailableFields$ = useBehaviorSubject({
-    fetchStatus: initialFetchStatus,
-  });
+  const initialState = { fetchStatus: initialFetchStatus, textBasedLanguageMode };
+  const main$: DataMain$ = useBehaviorSubject(initialState) as DataMain$;
+  const documents$: DataDocuments$ = useBehaviorSubject(initialState) as DataDocuments$;
+  const totalHits$: DataTotalHits$ = useBehaviorSubject(initialState) as DataTotalHits$;
+  const charts$: DataCharts$ = useBehaviorSubject(initialState) as DataCharts$;
+  const availableFields$: AvailableFields$ = useBehaviorSubject(initialState) as AvailableFields$;
 
   const dataSubjects = useMemo(() => {
     return {

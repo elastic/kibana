@@ -110,10 +110,10 @@ function DiscoverDocumentsComponent({
 
   const showTimeCol = useMemo(
     () =>
-      !state.textBasedLanguageMode &&
+      !documentState.textBasedLanguageMode &&
       !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
       !!indexPattern.timeFieldName,
-    [uiSettings, indexPattern.timeFieldName, state.textBasedLanguageMode]
+    [uiSettings, indexPattern.timeFieldName, documentState.textBasedLanguageMode]
   );
 
   if (
@@ -153,7 +153,7 @@ function DiscoverDocumentsComponent({
             onFilter={onAddFilter as DocViewFilterFn}
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
-            onSort={!state.textBasedLanguageMode ? onSort : undefined}
+            onSort={!documentState.textBasedLanguageMode ? onSort : undefined}
             useNewFieldsApi={useNewFieldsApi}
             dataTestSubj="discoverDocTable"
           />
@@ -176,19 +176,19 @@ function DiscoverDocumentsComponent({
               sampleSize={sampleSize}
               searchDescription={savedSearch.description}
               searchTitle={savedSearch.title}
-              setExpandedDoc={!state.textBasedLanguageMode ? setExpandedDoc : undefined}
+              setExpandedDoc={!documentState.textBasedLanguageMode ? setExpandedDoc : undefined}
               showTimeCol={showTimeCol}
               settings={state.grid}
               onAddColumn={onAddColumn}
               onFilter={onAddFilter as DocViewFilterFn}
               onRemoveColumn={onRemoveColumn}
               onSetColumns={onSetColumns}
-              onSort={!state.textBasedLanguageMode ? onSort : undefined}
+              onSort={!documentState.textBasedLanguageMode ? onSort : undefined}
               onResize={onResize}
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
-              isSortEnabled={!state.textBasedLanguageMode}
+              isSortEnabled={!documentState.textBasedLanguageMode}
             />
           </div>
         </>

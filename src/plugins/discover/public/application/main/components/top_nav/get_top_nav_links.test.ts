@@ -24,15 +24,7 @@ const services = {
   },
 } as unknown as DiscoverServices;
 
-const state = {
-  appStateContainer: {
-    getState: jest.fn(() => {
-      return {
-        textBasedLanguageMode: undefined,
-      };
-    }),
-  },
-} as unknown as GetStateReturn;
+const state = {} as unknown as GetStateReturn;
 
 test('getTopNavLinks result', () => {
   const topNavLinks = getTopNavLinks({
