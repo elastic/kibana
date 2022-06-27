@@ -198,6 +198,31 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      it('should bulk reassign multiple agents by kuery in batches', async () => {
+        const { body: unenrolledBody } = await supertest
+          .post(`/api/fleet/agents/bulk_reassign`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: 'active: true',
+            policy_id: 'policy2',
+            batchSize: 2,
+          })
+          .expect(200);
+
+        expect(unenrolledBody).to.eql({
+          agent1: { success: true },
+          agent2: { success: true },
+          agent3: { success: true },
+          agent4: { success: true },
+        });
+
+        const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
+        expect(body.total).to.eql(4);
+        body.items.forEach((agent: any) => {
+          expect(agent.policy_id).to.eql('policy2');
+        });
+      });
+
       it('should throw an error for invalid policy id for bulk reassign', async () => {
         await supertest
           .post(`/api/fleet/agents/bulk_reassign`)
