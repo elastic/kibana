@@ -17,13 +17,15 @@ import {
   FLEET_FINAL_PIPELINE_ID,
   FLEET_FINAL_PIPELINE_VERSION,
 } from '../../../../constants';
+import {
+  getCustomPipelineNameForDatastream,
+  getPipelineNameForDatastream,
+} from '../../../../../common';
 
 import { appendMetadataToIngestPipeline } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
 import {
-  getCustomPipelineNameForDatastream,
-  getPipelineNameForDatastream,
   getPipelineNameForInstallation,
   rewriteIngestPipeline,
   isTopLevelPipeline,
