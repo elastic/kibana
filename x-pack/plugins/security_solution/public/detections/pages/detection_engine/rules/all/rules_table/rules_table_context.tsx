@@ -117,6 +117,14 @@ export interface RulesTableActions {
   setFilterOptions: (newFilter: Partial<FilterOptions>) => void;
   setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>;
   setIsInMemorySorting: (value: boolean) => void;
+  /**
+   * enable/disable rules table auto refresh
+   *
+   * @example
+   *
+   * setIsRefreshOn(true) // enables auto refresh
+   * setIsRefreshOn(false) // disables auto refresh
+   */
   setIsRefreshOn: React.Dispatch<React.SetStateAction<boolean>>;
   setLoadingRules: React.Dispatch<React.SetStateAction<LoadingRules>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;

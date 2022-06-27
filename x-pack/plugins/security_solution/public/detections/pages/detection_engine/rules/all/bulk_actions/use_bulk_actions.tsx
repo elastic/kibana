@@ -103,7 +103,9 @@ export const useBulkActions = ({
 
       const handleEnableAction = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.ENABLE });
+        setIsRefreshOn(false);
         closePopover();
+
         const disabledRules = selectedRules.filter(({ enabled }) => !enabled);
         const disabledRulesNoML = disabledRules.filter(({ type }) => !isMlRule(type));
 
@@ -124,11 +126,14 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: ruleIds },
         });
         invalidateRules();
+        setIsRefreshOn(true);
       };
 
       const handleDisableActions = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.DISABLE });
+        setIsRefreshOn(false);
         closePopover();
+
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
         await executeRulesBulkAction({
           visibleRuleIds: enabledIds,
@@ -138,11 +143,14 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: enabledIds },
         });
         invalidateRules();
+        setIsRefreshOn(true);
       };
 
       const handleDuplicateAction = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
+        setIsRefreshOn(false);
         closePopover();
+
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.duplicate,
@@ -151,13 +159,16 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
+        setIsRefreshOn(true);
       };
 
       const handleDeleteAction = async () => {
+        setIsRefreshOn(false);
         closePopover();
         if (isAllSelected) {
+          setIsRefreshOn(false);
           if ((await confirmDeletion()) === false) {
-            // User has cancelled deletion
+            setIsRefreshOn(true);
             return;
           }
         }
@@ -171,9 +182,11 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
+        setIsRefreshOn(true);
       };
 
       const handleExportAction = async () => {
+        setIsRefreshOn(false);
         closePopover();
 
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
@@ -184,6 +197,7 @@ export const useBulkActions = ({
           toasts,
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
+        setIsRefreshOn(true);
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
@@ -268,6 +282,7 @@ export const useBulkActions = ({
 
         isBulkEditFinished = true;
         invalidateRules();
+        setIsRefreshOn(true);
         if (getIsMounted()) {
           await resolveTagsRefetch(bulkEditActionType);
         }
