@@ -77,6 +77,7 @@ export const ContainerNameWidget = ({
     setSortField(sortField);
     setSortDirection(sortDirection);
 
+    fetchNextPage();
   };
 
   
