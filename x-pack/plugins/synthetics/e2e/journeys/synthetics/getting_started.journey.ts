@@ -16,7 +16,6 @@ journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: a
     await syntheticsApp.fillFirstMonitorDetails({
       url: 'https://www.elastic.co',
       locations: ['us_central'],
-      apmServiceName: 'synthetics',
     });
   };
 
@@ -34,9 +33,13 @@ journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: a
     expect(await invalid.isVisible()).toBeFalsy();
   });
 
-  step('shows validation error on touch', async () => {
-    await page.click(byTestId('urls-input'));
-    await page.click(byTestId('comboBoxInput'));
+  step('enable monitor management', async () => {
+    await syntheticsApp.enableMonitorManagement(true);
+  });
+
+  step('shows validation error on submit', async () => {
+    await page.click('text=Create monitor');
+
     expect(await page.isVisible('text=URL is required')).toBeTruthy();
   });
 
@@ -47,6 +50,5 @@ journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: a
 
   step('it navigates to details page after saving', async () => {
     await page.click('text=Dismiss');
-    expect(await page.isVisible('text=My first monitor')).toBeTruthy();
   });
 });
