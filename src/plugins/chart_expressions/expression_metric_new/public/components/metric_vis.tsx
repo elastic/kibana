@@ -8,8 +8,10 @@
 
 import React, { useCallback } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { Chart, Metric, MetricSpec, RenderChangeListener, Settings } from '@elastic/charts';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { VisParams } from '../../common';
@@ -18,9 +20,42 @@ import { getPaletteService, getThemeService } from '../services';
 // TODO - find a reasonable default (from EUI perhaps?)
 const defaultColor = '#5e5e5e';
 
-const maxDecimals = 3;
+const getFormatter = (
+  accessor: ExpressionValueVisDimension | string,
+  columns: Datatable['columns']
+) => {
+  const formatId = getFormatByAccessor(accessor, columns)?.id ?? 'number';
+  if (!['number', 'currency', 'percent', 'bytes', 'duration'].includes(formatId)) {
+    throw new Error(
+      i18n.translate('newMetricVis.errors.unsupportedColumnFormat', {
+        defaultMessage: 'Metric Visualization - Unsupported column format: "{id}"',
+        values: {
+          id: formatId,
+        },
+      })
+    );
+  }
+  const intlOptions: Intl.NumberFormatOptions = {};
 
-const formatValue = (val: unknown) => String(Number(val).toFixed(maxDecimals));
+  if (formatId !== 'duration') {
+    intlOptions.maximumFractionDigits = 2;
+  }
+
+  if (['number', 'currency', 'percent'].includes(formatId)) {
+    intlOptions.notation = 'compact';
+  }
+
+  if (formatId === 'currency') {
+    intlOptions.currency = 'USD'; // TODO - get this from somewhere
+    intlOptions.style = 'currency';
+  }
+
+  if (formatId === 'percent') {
+    intlOptions.style = 'percent';
+  }
+
+  return new Intl.NumberFormat('en', intlOptions).format; // TODO - look up locale
+};
 
 const getColor = (value: number, paletteParams: CustomPaletteState | undefined) =>
   paletteParams
@@ -37,20 +72,15 @@ export interface MetricVisComponentProps {
 }
 
 const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponentProps) => {
-  const onRenderChange = useCallback<RenderChangeListener>(
-    (isRendered) => {
-      if (isRendered) {
-        renderComplete();
-      }
-    },
-    [renderComplete]
-  );
-
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
+  const formatPrimaryMetric = getFormatter(config.dimensions.metric, data.columns);
 
-  const secondaryMetricColumn = config.dimensions.secondaryMetric
-    ? getColumnByAccessor(config.dimensions.secondaryMetric, data.columns)
-    : undefined;
+  let secondaryMetricColumn;
+  let formatSecondaryMetric: ReturnType<typeof getFormatter>;
+  if (config.dimensions.secondaryMetric) {
+    secondaryMetricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, data.columns);
+    formatSecondaryMetric = getFormatter(config.dimensions.secondaryMetric, data.columns);
+  }
 
   const breakdownByColumn = config.dimensions.breakdownBy
     ? getColumnByAccessor(config.dimensions.breakdownBy, data.columns)
@@ -62,7 +92,7 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
     typeof config.metric.progressMin === 'number' && typeof config.metric.progressMax === 'number';
 
   const commonProps = {
-    valueFormatter: formatValue,
+    valueFormatter: formatPrimaryMetric,
     ...(useProgressBar
       ? {
           domain: { min: config.metric.progressMin, max: config.metric.progressMax },
@@ -82,7 +112,7 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
       extra: (
         <span>
           {secondaryMetricColumn
-            ? formatValue(data.rows[0][secondaryMetricColumn.id])
+            ? formatSecondaryMetric!(data.rows[0][secondaryMetricColumn.id])
             : config.metric.extraText}
         </span>
       ),
@@ -102,7 +132,7 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
         extra: (
           <span>
             {secondaryMetricColumn
-              ? formatValue(row[secondaryMetricColumn.id])
+              ? formatSecondaryMetric!(row[secondaryMetricColumn.id])
               : config.metric.extraText}
           </span>
         ),
@@ -124,6 +154,15 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
   }
 
   const chartTheme = getThemeService().useChartsTheme();
+  const onRenderChange = useCallback<RenderChangeListener>(
+    (isRendered) => {
+      if (isRendered) {
+        renderComplete();
+      }
+    },
+    [renderComplete]
+  );
+
   return (
     <Chart>
       <Settings
