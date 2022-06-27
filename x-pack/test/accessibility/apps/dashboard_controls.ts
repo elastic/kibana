@@ -79,12 +79,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('control-group-editor-save');
     });
 
-    it('Dashboard with options and range control panel', async () => {
+    it('Dashboard with options and range control panel popovers', async () => {
       await testSubjects.click('dashboardQuickSaveMenuItem');
       await a11y.testAppSnapshot();
       const optionsControlId = (await PageObjects.dashboardControls.getAllControlIds())[0];
       await PageObjects.dashboardControls.optionsListOpenPopover(optionsControlId);
       await a11y.testAppSnapshot();
+      // a11y error on range control https://github.com/elastic/kibana/issues/135266 - uncomment after the fix
+      // const rangeControlId = (await PageObjects.dashboardControls.getAllControlIds())[1];
+      // await PageObjects.dashboardControls.rangeSliderOpenPopover(rangeControlId);
+      // await a11y.testAppSnapshot();
     });
   });
 }
