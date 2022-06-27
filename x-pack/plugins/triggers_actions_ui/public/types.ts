@@ -51,7 +51,10 @@ import type { ComponentOpts as RuleStatusDropdownProps } from './application/sec
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
 import type { RulesListProps } from './application/sections/rules_list/components/rules_list';
-import type { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
+import type {
+  RuleTagBadgeProps,
+  RuleTagBadgeOptions,
+} from './application/sections/rules_list/components/rule_tag_badge';
 import type { RuleEventLogListProps } from './application/sections/rule_details/components/rule_event_log_list';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
@@ -91,6 +94,7 @@ export type {
   RuleTagFilterProps,
   RuleStatusFilterProps,
   RuleTagBadgeProps,
+  RuleTagBadgeOptions,
   RuleEventLogListProps,
   RulesListProps,
   CreateConnectorFlyoutProps,
