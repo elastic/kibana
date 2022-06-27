@@ -6,41 +6,41 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const NAME = i18n.translate('xpack.csp.findings.nameLabel', {
-  defaultMessage: 'Name',
-});
+// export const NAME = i18n.translate('xpack.csp.findings.nameLabel', {
+//   defaultMessage: 'Name',
+// });
 
-export const IMPACT = i18n.translate('xpack.csp.findings.impactLabel', {
-  defaultMessage: 'Impact',
-});
+// export const IMPACT = i18n.translate('xpack.csp.findings.impactLabel', {
+//   defaultMessage: 'Impact',
+// });
+//
+// export const DEFAULT_VALUE = i18n.translate('xpack.csp.findings.defaultValueLabel', {
+//   defaultMessage: 'Default Value',
+// });
 
-export const DEFAULT_VALUE = i18n.translate('xpack.csp.findings.defaultValueLabel', {
-  defaultMessage: 'Default Value',
-});
+// export const RATIONALE = i18n.translate('xpack.csp.findings.rationaleLabel', {
+//   defaultMessage: 'Rationale',
+// });
 
-export const RATIONALE = i18n.translate('xpack.csp.findings.rationaleLabel', {
-  defaultMessage: 'Rationale',
-});
-
-export const SEARCH_FAILED = i18n.translate('xpack.csp.findings.searchFailedLabel', {
-  defaultMessage: 'Search failed',
-});
+// export const SEARCH_FAILED = i18n.translate('xpack.csp.findings.searchFailedLabel', {
+//   defaultMessage: 'Search failed',
+// });
 
 export const TAGS = i18n.translate('xpack.csp.findings.tagsLabel', {
   defaultMessage: 'Tags',
 });
 
-export const RULE_NAME = i18n.translate('xpack.csp.findings.ruleNameLabel', {
-  defaultMessage: 'Rule Name',
-});
+// export const RULE_NAME = i18n.translate('xpack.csp.findings.ruleNameLabel', {
+//   defaultMessage: 'Rule Name',
+// });
 
 export const OS = i18n.translate('xpack.csp.findings.osLabel', {
   defaultMessage: 'OS',
 });
 
-export const RESOURCE = i18n.translate('xpack.csp.findings.resourceLabel', {
-  defaultMessage: 'Resource',
-});
+// export const RESOURCE = i18n.translate('xpack.csp.findings.resourceLabel', {
+//   defaultMessage: 'Resource',
+// });
 
 // export const RESOURCE_NAME = i18n.translate('xpack.csp.findings.resourceNameLabel', {
 //   defaultMessage: 'Resource Name',
@@ -50,13 +50,13 @@ export const GENERAL = i18n.translate('xpack.csp.findings.findingsFlyout.general
   defaultMessage: 'General',
 });
 
-export const OVERVIEW = i18n.translate('xpack.csp.findings.findingsFlyout.overviewTabLabel', {
-  defaultMessage: 'Overview',
-});
+// export const OVERVIEW = i18n.translate('xpack.csp.findings.findingsFlyout.overviewTabLabel', {
+//   defaultMessage: 'Overview',
+// });
 
-export const JSON = i18n.translate('xpack.csp.findings.findingsFlyout.jsonTabLabel', {
-  defaultMessage: 'JSON',
-});
+// export const JSON = i18n.translate('xpack.csp.findings.findingsFlyout.jsonTabLabel', {
+//   defaultMessage: 'JSON',
+// });
 
 // export const RESOURCE_ID = i18n.translate(
 //   'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnLabel',
@@ -132,9 +132,9 @@ export const DESCRIPTION = i18n.translate('xpack.csp.findings.descriptionLabel',
   defaultMessage: 'Description',
 });
 
-export const REMEDIATION = i18n.translate('xpack.csp.findings.remediationLabel', {
-  defaultMessage: 'Remediation',
-});
+// export const REMEDIATION = i18n.translate('xpack.csp.findings.remediationLabel', {
+//   defaultMessage: 'Remediation',
+// });
 
 export const BENCHMARK = i18n.translate('xpack.csp.findings.benchmarkLabel', {
   defaultMessage: 'Benchmark',
@@ -152,53 +152,53 @@ export const RULE_EVALUATED_AT = i18n.translate('xpack.csp.findings.ruleEvaluate
   defaultMessage: 'Rule evaluated at',
 });
 
-export const EVALUATED_AT = i18n.translate('xpack.csp.findings.evaluatedAt', {
-  defaultMessage: 'Evaluated at',
-});
+// export const EVALUATED_AT = i18n.translate('xpack.csp.findings.evaluatedAt', {
+//   defaultMessage: 'Evaluated at',
+// });
 
-export const FRAMEWORK_SOURCES = i18n.translate('xpack.csp.findings.frameworkSourcesLabel', {
-  defaultMessage: 'Framework Sources',
-});
+// export const FRAMEWORK_SOURCES = i18n.translate('xpack.csp.findings.frameworkSourcesLabel', {
+//   defaultMessage: 'Framework Sources',
+// });
 
 export const SECTION = i18n.translate('xpack.csp.findings.sectionLabel', {
   defaultMessage: 'Section',
 });
+//
+// export const AUDIT = i18n.translate('xpack.csp.findings.auditLabel', {
+//   defaultMessage: 'Audit',
+// });
 
-export const AUDIT = i18n.translate('xpack.csp.findings.auditLabel', {
-  defaultMessage: 'Audit',
-});
-
-export const REFERENCES = i18n.translate(
-  'xpack.csp.findings.findingsFlyout.generalTab.referencesLabel',
-  {
-    defaultMessage: 'References',
-  }
-);
+// export const REFERENCES = i18n.translate(
+//   'xpack.csp.findings.findingsFlyout.generalTab.referencesLabel',
+//   {
+//     defaultMessage: 'References',
+//   }
+// );
 
 export const RESULT_DETAILS = i18n.translate('xpack.csp.findings.resultLabel', {
   defaultMessage: 'Result Details',
 });
 
-export const PROFILE_APPLICABILITY = i18n.translate(
-  'xpack.csp.findings.profileApplicabilityLabel',
-  { defaultMessage: 'Profile Applicability' }
-);
+// export const PROFILE_APPLICABILITY = i18n.translate(
+//   'xpack.csp.findings.profileApplicabilityLabel',
+//   { defaultMessage: 'Profile Applicability' }
+// );
 
 export const EVALUATION = i18n.translate('xpack.csp.findings.evaluationLabel', {
   defaultMessage: 'Evaluation',
 });
 
-export const EXPECTED = i18n.translate('xpack.csp.findings.expectedLabel', {
-  defaultMessage: 'Expected',
-});
+// export const EXPECTED = i18n.translate('xpack.csp.findings.expectedLabel', {
+//   defaultMessage: 'Expected',
+// });
+//
+// export const ACTUAL = i18n.translate('xpack.csp.findings.actualLabel', {
+//   defaultMessage: 'Actual',
+// });
 
-export const ACTUAL = i18n.translate('xpack.csp.findings.actualLabel', {
-  defaultMessage: 'Actual',
-});
-
-export const EVIDENCE = i18n.translate('xpack.csp.findings.evidenceLabel', {
-  defaultMessage: 'Evidence',
-});
+// export const EVIDENCE = i18n.translate('xpack.csp.findings.evidenceLabel', {
+//   defaultMessage: 'Evidence',
+// });
 
 export const TIMESTAMP = i18n.translate('xpack.csp.findings.timestampLabel', {
   defaultMessage: 'Timestamp',
@@ -260,9 +260,9 @@ export const PLATFORM = i18n.translate('xpack.csp.findings.platformLabel', {
 //   defaultMessage: 'There are no Findings',
 // });
 
-export const DETAILS = i18n.translate('xpack.csp.findings.findingsFlyout.detailsTabLabel', {
-  defaultMessage: 'Details',
-});
+// export const DETAILS = i18n.translate('xpack.csp.findings.findingsFlyout.detailsTabLabel', {
+//   defaultMessage: 'Details',
+// });
 
 // export const FINDINGS_SEARCH_PLACEHOLDER = i18n.translate(
 //   'xpack.csp.findings.searchBar.searchPlaceholder',

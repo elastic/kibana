@@ -49,7 +49,7 @@ const FindingsByResourceTableComponent = ({
   if (!loading && !items.length)
     return (
       <EuiEmptyPrompt
-        data-test-subj={TEST_SUBJECTS.FINDINGS_BY_RESOURCE_NO_FINDINGS_EMPTY_STATE}
+        data-test-subj={TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE_NO_FINDINGS_EMPTY_STATE}
         iconType="logoKibana"
         title={
           <h2>

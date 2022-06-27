@@ -55,7 +55,7 @@ describe('<FindingsByResourceTable />', () => {
     );
 
     expect(
-      screen.getByTestId(TEST_SUBJECTS.FINDINGS_BY_RESOURCE_NO_FINDINGS_EMPTY_STATE)
+      screen.getByTestId(TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE_NO_FINDINGS_EMPTY_STATE)
     ).toBeInTheDocument();
   });
 
