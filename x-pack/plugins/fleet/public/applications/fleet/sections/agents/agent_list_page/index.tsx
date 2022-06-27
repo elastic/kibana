@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { differenceBy } from 'lodash';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -319,6 +320,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     return !isHosted;
   };
 
+  const onSelectionChange = (newAgents: Agent[]) => {
+    setSelectedAgents(newAgents);
+    if (selectionMode === 'query' && newAgents.length < selectedAgents.length) {
+      // differentiating between selection changed by agents dropping from current page or user action
+      const areSelectedAgentsStillVisible =
+        selectedAgents.length > 0 && differenceBy(selectedAgents, agents, 'id').length === 0;
+      if (areSelectedAgentsStillVisible) {
+        setSelectionMode('manual');
+      }
+    }
+  };
+
   const agentToUnenrollHasFleetServer = useMemo(() => {
     if (!agentToUnenroll || !agentToUnenroll.policy_id) {
       return false;
@@ -626,15 +639,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
-          totalItemCount: totalAgents,
+          totalItemCount: Math.min(totalAgents, SO_SEARCH_LIMIT),
           pageSizeOptions,
         }}
         isSelectable={true}
         selection={{
-          onSelectionChange: (newAgents: Agent[]) => {
-            setSelectedAgents(newAgents);
-            setSelectionMode('manual');
-          },
+          onSelectionChange,
           selectable: isAgentSelectable,
           selectableMessage: (selectable, agent) => {
             if (selectable) return '';
