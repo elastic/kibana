@@ -24,6 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.event_type).to.eql('Loaded Kibana');
       expect(event.properties).to.have.property('kibana_version');
       expect(event.properties.kibana_version).to.be.a('string');
+      expect(event.properties).to.have.property('protocol');
+      expect(event.properties.protocol).to.be.a('string');
 
       // Kibana Loaded timings
       expect(event.properties).to.have.property('load_started');
