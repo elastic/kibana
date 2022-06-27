@@ -37,6 +37,7 @@ describe('createAlertFactory()', () => {
                 "state": Object {},
               }
         `);
+    // @ts-expect-error
     expect(result.getId()).toEqual('1');
   });
 
