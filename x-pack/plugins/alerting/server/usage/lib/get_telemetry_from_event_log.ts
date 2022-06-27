@@ -344,53 +344,52 @@ export function parseRuleTypeBucket(
   | 'generatedActionsPercentilesByType'
   | 'alertsPercentilesByType'
 > {
-  return (buckets ?? []).reduce(
-    (summary, bucket) => {
-      const ruleType: string = replaceDotSymbols(bucket?.key) ?? '';
-      const numExecutions: number = bucket?.doc_count ?? 0;
-      const avgExecutionTimeNanos = bucket?.avg_execution_time?.value ?? 0;
-      const avgEsSearchTimeMillis = bucket?.avg_es_search_duration?.value ?? 0;
-      const avgTotalSearchTimeMillis = bucket?.avg_total_search_duration?.value ?? 0;
-      const actionPercentiles = bucket?.percentile_scheduled_actions?.values ?? {};
-      const alertPercentiles = bucket?.percentile_alerts?.values ?? {};
+  let summary = {
+    countRuleExecutionsByType: {},
+    avgExecutionTimeByType: {},
+    avgEsSearchDurationByType: {},
+    avgTotalSearchDurationByType: {},
+    generatedActionsPercentilesByType: { p50: {}, p90: {}, p99: {} },
+    alertsPercentilesByType: { p50: {}, p90: {}, p99: {} },
+  };
+  for (const bucket of buckets ?? []) {
+    const ruleType: string = replaceDotSymbols(bucket?.key) ?? '';
+    const numExecutions: number = bucket?.doc_count ?? 0;
+    const avgExecutionTimeNanos = bucket?.avg_execution_time?.value ?? 0;
+    const avgEsSearchTimeMillis = bucket?.avg_es_search_duration?.value ?? 0;
+    const avgTotalSearchTimeMillis = bucket?.avg_total_search_duration?.value ?? 0;
+    const actionPercentiles = bucket?.percentile_scheduled_actions?.values ?? {};
+    const alertPercentiles = bucket?.percentile_alerts?.values ?? {};
 
-      return {
-        ...summary,
-        countRuleExecutionsByType: {
-          ...summary.countRuleExecutionsByType,
-          [ruleType]: numExecutions,
-        },
-        avgExecutionTimeByType: {
-          ...summary.avgExecutionTimeByType,
-          [ruleType]: Math.round(avgExecutionTimeNanos / Millis2Nanos),
-        },
-        avgEsSearchDurationByType: {
-          ...summary.avgEsSearchDurationByType,
-          [ruleType]: Math.round(avgEsSearchTimeMillis),
-        },
-        avgTotalSearchDurationByType: {
-          ...summary.avgTotalSearchDurationByType,
-          [ruleType]: Math.round(avgTotalSearchTimeMillis),
-        },
-        generatedActionsPercentilesByType: merge(
-          summary.generatedActionsPercentilesByType,
-          parsePercentileAggs(actionPercentiles as AggregationsKeyedPercentiles, ruleType)
-        ),
-        alertsPercentilesByType: merge(
-          summary.alertsPercentilesByType,
-          parsePercentileAggs(alertPercentiles as AggregationsKeyedPercentiles, ruleType)
-        ),
-      };
-    },
-    {
-      countRuleExecutionsByType: {},
-      avgExecutionTimeByType: {},
-      avgEsSearchDurationByType: {},
-      avgTotalSearchDurationByType: {},
-      generatedActionsPercentilesByType: { p50: {}, p90: {}, p99: {} },
-      alertsPercentilesByType: { p50: {}, p90: {}, p99: {} },
-    }
-  );
+    summary = {
+      countRuleExecutionsByType: {
+        ...summary.countRuleExecutionsByType,
+        [ruleType]: numExecutions,
+      },
+      avgExecutionTimeByType: {
+        ...summary.avgExecutionTimeByType,
+        [ruleType]: Math.round(avgExecutionTimeNanos / Millis2Nanos),
+      },
+      avgEsSearchDurationByType: {
+        ...summary.avgEsSearchDurationByType,
+        [ruleType]: Math.round(avgEsSearchTimeMillis),
+      },
+      avgTotalSearchDurationByType: {
+        ...summary.avgTotalSearchDurationByType,
+        [ruleType]: Math.round(avgTotalSearchTimeMillis),
+      },
+      generatedActionsPercentilesByType: merge(
+        summary.generatedActionsPercentilesByType,
+        parsePercentileAggs(actionPercentiles as AggregationsKeyedPercentiles, ruleType)
+      ),
+      alertsPercentilesByType: merge(
+        summary.alertsPercentilesByType,
+        parsePercentileAggs(alertPercentiles as AggregationsKeyedPercentiles, ruleType)
+      ),
+    };
+  }
+
+  return summary;
 }
 
 interface FlattenedExecutionFailureBucket {
