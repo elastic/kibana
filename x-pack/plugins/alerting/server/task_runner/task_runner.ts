@@ -460,6 +460,8 @@ export class TaskRunner<
     if (ruleIsSnoozed) {
       this.markRuleAsSnoozed(rule.id, rulesClient);
     }
+    rulesClient.clearExpiredSnoozes({ id: rule.id });
+
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
