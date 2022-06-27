@@ -40,7 +40,7 @@ export function createLayout({ id, dimensions, selectors, ...config }: LayoutPar
 
   if (dimensions) {
     if (layoutId === 'preserve_layout') {
-      return new PreserveLayout(sanitizeLayout(dimensions), selectors);
+      return new PreserveLayout(sanitizeLayout(dimensions), selectors, config.zoom);
     }
 
     if (layoutId === 'canvas') {

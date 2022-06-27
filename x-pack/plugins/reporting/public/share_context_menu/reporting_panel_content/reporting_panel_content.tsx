@@ -8,19 +8,22 @@
 import {
   EuiAccordion,
   EuiButton,
+  EuiButtonEmpty,
   EuiCopy,
+  EuiFieldNumber,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
 } from '@elastic/eui';
+import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import React, { Component, ReactElement } from 'react';
-import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
-import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import React, { Component, ReactElement } from 'react';
+import url from 'url';
 import {
   CSV_REPORT_TYPE,
   PDF_REPORT_TYPE,
@@ -62,6 +65,8 @@ interface State {
   absoluteUrl: string;
   layoutId: string;
   objectType: string;
+  useCustomCaptureZoomLevel: boolean;
+  customCaptureZoomLevel: undefined | number;
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
@@ -78,6 +83,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
       absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
       layoutId: '',
       objectType,
+      useCustomCaptureZoomLevel: false,
+      customCaptureZoomLevel: undefined,
     };
   }
 
@@ -133,16 +140,30 @@ class ReportingPanelContentUi extends Component<Props, State> {
       return <ErrorUrlTooLongPanel isUnsaved={false} />;
     }
     return (
-      <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
-        {(copy) => (
-          <EuiButton color={isUnsaved ? 'warning' : 'primary'} fullWidth onClick={copy} size="s">
-            <FormattedMessage
-              id="xpack.reporting.panelContent.copyUrlButtonLabel"
-              defaultMessage="Copy POST URL"
-            />
-          </EuiButton>
-        )}
-      </EuiCopy>
+      <>
+        <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
+          {(copy) => (
+            <EuiButtonEmpty
+              flush="left"
+              iconType="copyClipboard"
+              color={isUnsaved ? 'warning' : 'primary'}
+              onClick={copy}
+              size="xs"
+            >
+              <FormattedMessage
+                id="xpack.reporting.panelContent.copyUrlButtonLabel"
+                defaultMessage="Copy POST URL"
+              />
+            </EuiButtonEmpty>
+          )}
+        </EuiCopy>
+        <EuiText size="xs" color="subdued">
+          <FormattedMessage
+            id="xpack.reporting.panelContent.howToCallGenerationDescription"
+            defaultMessage="Use this POST URL to call generation from outside Kibana. For example, using Watcher."
+          />
+        </EuiText>
+      </>
     );
   }
 
@@ -202,15 +223,37 @@ class ReportingPanelContentUi extends Component<Props, State> {
           paddingSize="none"
         >
           <EuiSpacer size="s" />
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.reporting.panelContent.howToCallGenerationDescription"
-                defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
-              />
-            </p>
-          </EuiText>
+          <EuiSwitch
+            compressed
+            label="Adjust zoom level"
+            aria-label="Adjust zoom level"
+            checked={this.state.useCustomCaptureZoomLevel}
+            onChange={() =>
+              this.setState(({ useCustomCaptureZoomLevel }) => ({
+                useCustomCaptureZoomLevel: !useCustomCaptureZoomLevel,
+              }))
+            }
+          />
           <EuiSpacer size="s" />
+          <EuiFormRow
+            aria-label="Zoom level"
+            helpText="Increase this value to make images and text appear larger in the final result"
+          >
+            <EuiFieldNumber
+              disabled={!this.state.useCustomCaptureZoomLevel}
+              value={this.state.customCaptureZoomLevel}
+              min={1}
+              onChange={(e) => {
+                const value = e.target.value;
+                this.setState({
+                  customCaptureZoomLevel: value ? parseInt(e.target.value, 10) : undefined,
+                });
+              }}
+              compressed
+              placeholder="1"
+            />
+          </EuiFormRow>
+          <EuiSpacer size="l" />
           {this.renderCopyURLButton({ isUnsaved, exceedsMaxLength })}
         </EuiAccordion>
       </EuiForm>
@@ -269,9 +312,11 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
   private createReportingJob = () => {
     const { intl } = this.props;
-    const decoratedJobParams = this.props.apiClient.getDecoratedJobParams(
-      this.props.getJobParams()
-    );
+    const params = this.props.getJobParams();
+    if (this.state.useCustomCaptureZoomLevel && this.state.customCaptureZoomLevel) {
+      params.layout!.zoom = this.state.customCaptureZoomLevel;
+    }
+    const decoratedJobParams = this.props.apiClient.getDecoratedJobParams(params);
 
     return this.props.apiClient
       .createReportingJob(this.props.reportType, decoratedJobParams)

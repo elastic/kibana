@@ -23,12 +23,16 @@ export class PreserveLayout extends BaseLayout implements Layout {
   private readonly scaledHeight: number;
   private readonly scaledWidth: number;
 
-  constructor(size: Size, selectors?: Partial<LayoutSelectorDictionary>) {
+  constructor(
+    size: Size,
+    selectors?: Partial<LayoutSelectorDictionary>,
+    private readonly zoom: number = ZOOM
+  ) {
     super('preserve_layout');
     this.height = size.height;
     this.width = size.width;
-    this.scaledHeight = size.height * ZOOM;
-    this.scaledWidth = size.width * ZOOM;
+    this.scaledHeight = size.height * this.zoom;
+    this.scaledWidth = size.width * this.zoom;
 
     this.selectors = { ...DEFAULT_SELECTORS, ...selectors };
   }
@@ -46,14 +50,14 @@ export class PreserveLayout extends BaseLayout implements Layout {
   }
 
   public getBrowserZoom() {
-    return ZOOM;
+    return this.zoom;
   }
 
   public getViewport() {
     return {
       height: this.height,
       width: this.width,
-      zoom: ZOOM,
+      zoom: this.zoom,
     };
   }
 
