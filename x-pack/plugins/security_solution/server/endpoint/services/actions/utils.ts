@@ -16,12 +16,14 @@ import type {
   ActivityLogActionResponse,
   ActivityLogEntry,
   EndpointAction,
+  EndpointActionDataParameterTypes,
   EndpointActionResponse,
   EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
   OutputsType,
+  ResponseActions,
 } from '../../../../common/endpoint/types';
 import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
 /**
@@ -51,8 +53,9 @@ interface NormalizedActionRequest {
   agents: string[];
   createdBy: string;
   createdAt: string;
-  command: string;
+  command: ResponseActions;
   comment?: string;
+  parameters?: EndpointActionDataParameterTypes;
 }
 
 /**
@@ -77,6 +80,7 @@ export const mapToNormalizedActionRequest = (
       expiration: actionRequest.EndpointActions.expiration,
       id: actionRequest.EndpointActions.action_id,
       type,
+      parameters: actionRequest.EndpointActions.data.parameters,
     };
   }
 
@@ -90,6 +94,7 @@ export const mapToNormalizedActionRequest = (
     expiration: actionRequest.expiration,
     id: actionRequest.action_id,
     type,
+    parameters: actionRequest.data.parameters,
   };
 };
 

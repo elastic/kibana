@@ -1,0 +1,216 @@
+{
+  "id": "@kbn/ml-agg-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.buildSamplerAggregation",
+        "type": "Function",
+        "tags": [],
+        "label": "buildSamplerAggregation",
+        "description": [
+          "\nWraps the supplied aggregations in a sampler aggregation.\nA supplied samplerShardSize (the shard_size parameter of the sampler aggregation)\nof less than 1 indicates no sampling, and the aggs are returned as-is."
+        ],
+        "signature": [
+          "(aggs: any, samplerShardSize: number) => Record<string, ",
+          "AggregationsAggregationContainer",
+          ">"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.buildSamplerAggregation.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "aggs",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.buildSamplerAggregation.$2",
+            "type": "number",
+            "tags": [],
+            "label": "samplerShardSize",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.getAggIntervals",
+        "type": "Function",
+        "tags": [],
+        "label": "getAggIntervals",
+        "description": [
+          "\nReturns aggregation intervals for the supplied document fields."
+        ],
+        "signature": [
+          "(client: ElasticsearchClient, indexPattern: string, query: ",
+          "QueryDslQueryContainer",
+          ", fields: HistogramField[], samplerShardSize: number, runtimeMappings?: ",
+          "MappingRuntimeFields",
+          " | undefined) => Promise<NumericColumnStatsMap>"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/get_agg_intervals.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.getAggIntervals.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/get_agg_intervals.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.getAggIntervals.$2",
+            "type": "string",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/get_agg_intervals.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.getAggIntervals.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "QueryDslQueryContainer"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/get_agg_intervals.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.getAggIntervals.$4",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "HistogramField[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/get_agg_intervals.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.getAggIntervals.$5",
+            "type": "number",
+            "tags": [],
+            "label": "samplerShardSize",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/get_agg_intervals.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.getAggIntervals.$6",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeMappings",
+            "description": [],
+            "signature": [
+              "MappingRuntimeFields",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/get_agg_intervals.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.getSamplerAggregationsResponsePath",
+        "type": "Function",
+        "tags": [],
+        "label": "getSamplerAggregationsResponsePath",
+        "description": [],
+        "signature": [
+          "(samplerShardSize: number) => string[]"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.getSamplerAggregationsResponsePath.$1",
+            "type": "number",
+            "tags": [],
+            "label": "samplerShardSize",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
