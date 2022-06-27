@@ -47,7 +47,6 @@ journey('Exploratory view', async ({ page, params }) => {
     await page.waitForTimeout(60 * 1000);
     await page.click('text=User experience (RUM)');
     await page.click('[aria-label="Toggle series information"] >> text=Page views', TIMEOUT_60_SEC);
-    await page.click('canvas[role="presentation"]', TIMEOUT_60_SEC);
     await page.click('[aria-label="Edit series"]', TIMEOUT_60_SEC);
     await page.click('button:has-text("No breakdown")');
     await page.click('button[role="option"]:has-text("Operating system")');
