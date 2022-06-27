@@ -6,10 +6,12 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { pick } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { safeLoad } from 'js-yaml';
+import deepEqual from 'fast-deep-equal';
 import {
   EuiButtonEmpty,
   EuiBottomBar,
@@ -334,7 +336,14 @@ export const EditPackagePolicyForm = memo<{
   // Update package policy method
   const updatePackagePolicy = useCallback(
     (updatedFields: Partial<UpdatePackagePolicy>) => {
-      setIsEdited(true);
+      const isDeepEqual = deepEqual(
+        JSON.parse(JSON.stringify(updatedFields)),
+        JSON.parse(JSON.stringify(pick(packagePolicy, Object.keys(updatedFields))))
+      );
+      if (!isDeepEqual) {
+        setIsEdited(true);
+      }
+
       const newPackagePolicy = {
         ...packagePolicy,
         ...updatedFields,
