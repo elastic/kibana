@@ -30,7 +30,7 @@ const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseBu
 });
 
 const saveButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutSaveButtonLabel', {
-  defaultMessage: 'Create data view',
+  defaultMessage: 'Save data view to Kibana',
 });
 
 const editButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutEditButtonLabel', {
@@ -38,7 +38,7 @@ const editButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutEditButt
 });
 
 const exploreButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutExploreButtonLabel', {
-  defaultMessage: 'Explore',
+  defaultMessage: 'Explore results',
 });
 
 export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit, allowAdHoc }: FooterProps) => {
@@ -68,12 +68,11 @@ export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit, allowAdHoc 
             {allowAdHoc && (
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  color="ghost"
+                  color="primary"
                   onClick={submitAdHoc}
                   data-test-subj="exploreIndexPatternButton"
-                  fill
                   disabled={submitDisabled}
-                  title={i18n.translate('indexPatternEditor.editor.flyoutExploreButtonLabel', {
+                  title={i18n.translate('indexPatternEditor.editor.flyoutExploreButtonTitle', {
                     defaultMessage:
                       'Explore creates a DataView without persisting it in a saved object',
                   })}
