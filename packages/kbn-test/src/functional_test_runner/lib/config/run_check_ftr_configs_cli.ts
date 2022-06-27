@@ -46,7 +46,7 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
-        if (!file.match(/(test|e2e|jest).*config[^\/]*\.(t|j)s$/)) {
+        if (!file.match(/(test|e2e).*config[^\/]*\.(t|j)s$/)) {
           return false;
         }
 
@@ -59,6 +59,10 @@ export async function runCheckFtrConfigsCli() {
         }
 
         if (file.match(/\/common\/config.(t|j)s$/)) {
+          return false;
+        }
+
+        if (file.match(/\.jest\.config\(t|j)s$/)) {
           return false;
         }
 
