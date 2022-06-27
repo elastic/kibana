@@ -23,7 +23,7 @@ export function ExpViewActionMenuContent({
 }) {
   const kServices = useKibana<ObservabilityAppServices>().services;
 
-  const { lens } = kServices;
+  const { lens, isDev } = kServices;
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
 
@@ -37,9 +37,11 @@ export function ExpViewActionMenuContent({
         responsive={false}
         style={{ paddingRight: 20 }}
       >
-        <EuiFlexItem grow={false}>
-          <EmbedAction />
-        </EuiFlexItem>
+        {isDev && (
+          <EuiFlexItem grow={false}>
+            <EmbedAction lensAttributes={lensAttributes} />
+          </EuiFlexItem>
+        )}
         {timeRange && (
           <EuiFlexItem grow={false}>
             <AddToCaseAction lensAttributes={lensAttributes} timeRange={timeRange} />

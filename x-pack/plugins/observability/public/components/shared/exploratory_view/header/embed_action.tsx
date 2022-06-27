@@ -8,30 +8,17 @@
 import { EuiButtonEmpty, EuiPopover, EuiCodeBlock, EuiPopoverTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { ObservabilityAppServices } from '../../../../application/types';
 
-export interface AddToCaseProps {
-  appId?: 'securitySolutionUI' | 'observability';
-  autoOpen?: boolean;
+export function EmbedAction({
+  lensAttributes,
+}: {
   lensAttributes: TypedLensByValueInput['attributes'] | null;
-  owner?: string;
-  setAutoOpen?: (val: boolean) => void;
-  timeRange: { from: string; to: string };
-}
-
-export function EmbedAction() {
-  const kServices = useKibana<ObservabilityAppServices>().services;
-
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   const { reportType, allSeries } = useSeriesStorage();
-
-  const {
-    application: { getUrlForApp },
-  } = kServices;
 
   const button = (
     <EuiButtonEmpty
