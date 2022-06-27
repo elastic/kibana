@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
+import { getQueryFilter } from '../get_query_filter';
 import type {
   GetThreatListOptions,
   ThreatListCountOptions,
@@ -40,13 +40,14 @@ export const getThreatList = async ({
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
-  const queryFilter = getQueryFilter(
+  const { queryFilter } = await getQueryFilter({
     query,
-    language ?? 'kuery',
-    threatFilters,
+    language: language ?? 'kuery',
+    filters: threatFilters,
     index,
-    exceptionItems
-  );
+    lists: exceptionItems,
+    listClient,
+  });
 
   ruleExecutionLogger.debug(
     `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
@@ -97,14 +98,16 @@ export const getThreatListCount = async ({
   threatFilters,
   index,
   exceptionItems,
+  listClient,
 }: ThreatListCountOptions): Promise<number> => {
-  const queryFilter = getQueryFilter(
+  const { queryFilter } = await getQueryFilter({
     query,
-    language ?? 'kuery',
-    threatFilters,
+    language: language ?? 'kuery',
+    filters: threatFilters,
     index,
-    exceptionItems
-  );
+    lists: exceptionItems,
+    listClient,
+  });
   const response = await esClient.count({
     body: {
       query: queryFilter,

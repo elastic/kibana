@@ -76,6 +76,7 @@ export const createThresholdAlertType = (
           secondaryTimestamp,
           ruleExecutionLogger,
           aggregatableTimestampField,
+          listClient,
         },
         services,
         startedAt,
@@ -99,6 +100,7 @@ export const createThresholdAlertType = (
         primaryTimestamp,
         secondaryTimestamp,
         aggregatableTimestampField,
+        listClient,
       });
 
       return result;

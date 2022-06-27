@@ -54,7 +54,7 @@ export const createThreatSignal = async ({
     );
     return currentResult;
   } else {
-    const esFilter = await getFilter({
+    const { esFilter } = await getFilter({
       type,
       filters: [...filters, threatFilter],
       language,
@@ -63,6 +63,7 @@ export const createThreatSignal = async ({
       services,
       index: inputIndex,
       lists: exceptionItems,
+      listClient,
     });
 
     ruleExecutionLogger.debug(

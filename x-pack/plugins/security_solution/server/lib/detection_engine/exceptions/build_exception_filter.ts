@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { chunk } from 'lodash/fp';
 
 import {
-  CreateExceptionListItemSchema,
   EntryExists,
   EntryMatch,
   EntryMatchAny,
@@ -20,31 +18,26 @@ import {
   entriesMatchAny,
   entriesNested,
   OsTypeArray,
-  entriesMatchWildcard,
-  EntryMatchWildcard,
   EntryList,
   entriesList,
-  Entry,
+  EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Filter } from '@kbn/es-query';
 import { ListClient } from '@kbn/lists-plugin/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { partition } from 'lodash';
-import { hasLargeValueList } from '../has_large_value_list';
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
+import { MAXIMUM_VALUE_LIST_SIZE_FOR_EXCEPTIONS } from '../../../../common/detection_engine/constants';
 
-type NonListEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists | EntryMatchWildcard;
-interface ExceptionListItemNonLargeList extends ExceptionListItemSchema {
-  entries: NonListEntry[];
+// Removes wildcard entries as they're not currently supported for rule execution
+export type ExceptionEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists | EntryList;
+
+interface ExceptionListItemSchemaSansWildcard extends ExceptionListItemSchema {
+  entries: ExceptionEntry[];
 }
 
-interface CreateExceptionListItemNonLargeList extends CreateExceptionListItemSchema {
-  entries: NonListEntry[];
-}
-
-export type ExceptionItemSansLargeValueLists =
-  | ExceptionListItemNonLargeList
-  | CreateExceptionListItemNonLargeList;
+export type ExceptionItem = ExceptionListItemSchemaSansWildcard;
 
 export interface BooleanFilter {
   bool: estypes.QueryDslBoolQuery;
@@ -54,10 +47,14 @@ export interface NestedFilter {
   nested: estypes.QueryDslNestedQuery;
 }
 
+export const hasWildcardEntry = (entries: EntriesArray): boolean => {
+  return entries.some(({ type }) => type === 'wildcard');
+};
+
 export const chunkExceptions = (
-  exceptions: ExceptionItemSansLargeValueLists[],
+  exceptions: ExceptionItem[],
   chunkSize: number
-): ExceptionItemSansLargeValueLists[][] => {
+): ExceptionItem[][] => {
   return chunk(chunkSize, exceptions);
 };
 
@@ -81,15 +78,15 @@ export const chunkExceptions = (
  */
 export const transformOsType = (
   osTypes: OsTypeArray,
-  entries: NonListEntry[]
-): NonListEntry[][] => {
-  const hostTypeTransformed = osTypes.map<NonListEntry[]>((osType) => {
+  entries: ExceptionEntry[]
+): ExceptionEntry[][] => {
+  const hostTypeTransformed = osTypes.map<ExceptionEntry[]>((osType) => {
     return [
       { field: 'host.os.type', operator: 'included', type: 'match', value: osType },
       ...entries,
     ];
   });
-  const caseLessTransformed = osTypes.map<NonListEntry[]>((osType) => {
+  const caseLessTransformed = osTypes.map<ExceptionEntry[]>((osType) => {
     return [
       { field: 'host.os.name.caseless', operator: 'included', type: 'match', value: osType },
       ...entries,
@@ -103,34 +100,48 @@ export const transformOsType = (
  * @param osTypes The os_type array from the REST interface that is an array such as ['windows', 'linux']
  * @param entries The entries to join the OR's with before the elastic filter change out
  */
-export const buildExceptionItemFilterWithOsType = (
+export const buildExceptionItemFilterWithOsType = async (
   osTypes: OsTypeArray,
-  entries: NonListEntry[]
-): BooleanFilter[] => {
+  entries: ExceptionEntry[],
+  listClient: ListClient
+): Promise<BooleanFilter[]> => {
   const entriesWithOsTypes = transformOsType(osTypes, entries);
-  return entriesWithOsTypes.map((entryWithOsType) => {
-    return {
-      bool: {
-        filter: entryWithOsType.map((entry) => createInnerAndClauses(entry)),
-      },
-    };
-  });
+  const exceptionItemFilter = await Promise.all(
+    entriesWithOsTypes.map(async (entryWithOsType) => {
+      return {
+        bool: {
+          filter: await Promise.all(
+            entryWithOsType.map((entry) => createInnerAndClauses({ entry, listClient }))
+          ),
+        },
+      };
+    })
+  );
+  return exceptionItemFilter;
 };
 
-export const buildExceptionItemFilter = (
-  exceptionItem: ExceptionItemSansLargeValueLists
-): Array<BooleanFilter | NestedFilter> => {
+export const buildExceptionItemFilter = async (
+  exceptionItem: ExceptionItem,
+  listClient: ListClient
+): Promise<Array<BooleanFilter | NestedFilter>> => {
   const { entries, os_types: osTypes } = exceptionItem;
   if (osTypes != null && osTypes.length > 0) {
-    return buildExceptionItemFilterWithOsType(osTypes, entries);
+    const exceptionItemFilter = await buildExceptionItemFilterWithOsType(
+      osTypes,
+      entries,
+      listClient
+    );
+    return exceptionItemFilter;
   } else {
     if (entries.length === 1) {
-      return [createInnerAndClauses(entries[0])];
+      return [await createInnerAndClauses({ entry: entries[0], listClient })];
     } else {
       return [
         {
           bool: {
-            filter: entries.map((entry) => createInnerAndClauses(entry)),
+            filter: await Promise.all(
+              entries.map((entry) => createInnerAndClauses({ entry, listClient }))
+            ),
           },
         },
       ];
@@ -138,75 +149,84 @@ export const buildExceptionItemFilter = (
   }
 };
 
-export const createOrClauses = (
-  exceptionItems: ExceptionItemSansLargeValueLists[]
-): Array<BooleanFilter | NestedFilter> => {
-  return exceptionItems.flatMap((exceptionItem) => buildExceptionItemFilter(exceptionItem));
+export const createOrClauses = async (
+  exceptionItems: ExceptionItem[],
+  listClient: ListClient
+): Promise<Array<BooleanFilter | NestedFilter>> => {
+  const orClauses = await Promise.all(
+    exceptionItems.map((exceptionItem) => buildExceptionItemFilter(exceptionItem, listClient))
+  );
+  return orClauses.flat(); // TODO: does this work?
 };
 
 export const filterOutLargeValueLists = async (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  exceptionItems: ExceptionItem[],
   listClient: ListClient
 ) => {
-  return await Promise.all(
-    exceptionItems.map(async (exceptionItem) => {
+  const [filteredExceptions, largeValueListExceptions] = partition(
+    exceptionItems,
+    (exceptionItem) => {
       const listEntries = exceptionItem.entries.filter((entry): entry is EntryList =>
         entriesList.is(entry)
       );
-      exceptionItem.entries = await Promise.all(
-        listEntries.filter(async (entry) => {
-          const {
-            list: { id },
-          } = entry;
-          const valueList = await listClient.findListItem({
-            listId: id,
-            perPage: 0,
-            page: 0,
-            filter: '',
-            currentIndexPosition: 0,
-          });
-          // Limit for value list size to be put into the initial ES request
-          if (valueList && valueList.total <= 500) {
-            return entry;
-          }
-        })
-      );
-      return exceptionItem;
-    })
+      return listEntries.every(async (listEntry) => {
+        const {
+          list: { id },
+        } = listEntry;
+        const valueList = await listClient.findListItem({
+          listId: id,
+          perPage: 0,
+          page: 0,
+          filter: '',
+          currentIndexPosition: 0,
+        });
+
+        if (valueList && valueList.total <= MAXIMUM_VALUE_LIST_SIZE_FOR_EXCEPTIONS) {
+          return true;
+        }
+      });
+    }
   );
+  return { filteredExceptions, largeValueListExceptions };
 };
 
-export const buildExceptionFilter = ({
+export const buildExceptionFilter = async ({
   lists,
   excludeExceptions,
   chunkSize,
   alias = null,
   listClient,
 }: {
-  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+  lists: ExceptionListItemSchema[];
   excludeExceptions: boolean;
   chunkSize: number;
   alias: string | null;
-  listClient?: ListClient;
-}): Filter | undefined => {
-  // Remove exception items with large value lists. These are evaluated
-  // elsewhere for the moment being.
-
-  const [exceptionsWithoutValueLists, valueListExceptions] = partition(
-    lists,
-    (item): item is ExceptionListItemSchema | CreateExceptionListItemSchema =>
-      !hasLargeValueList(item.entries)
+  listClient: ListClient;
+}): Promise<{ filter: Filter | undefined; unprocessedExceptions: ExceptionListItemSchema[] }> => {
+  // Remove wildcard entries, they are not currently supported for rule exceptions
+  const filteredLists: ExceptionItem[] = lists.filter(
+    (item): item is ExceptionItem => !hasWildcardEntry(item.entries)
   );
 
-  const smallValueListExceptions: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
-    [];
-  if (listClient) {
-    filterOutLargeValueLists(valueListExceptions, listClient).then((filteredExceptions) => {
-      smallValueListExceptions.push(...filteredExceptions);
-    });
-  }
+  // Remove exception items with large value lists. These are evaluated
+  // elsewhere for the moment being.
+  const [exceptionsWithoutValueLists, valueListExceptions] = partition(
+    filteredLists,
+    (item): item is ExceptionItem => !hasLargeValueList(item.entries)
+  );
 
-  exceptionsWithoutValueLists.push(...smallValueListExceptions);
+  // Exceptions that we will convert into Filters and put into an ES request
+  const exceptionsWithoutLargeValueLists: ExceptionItem[] = [...exceptionsWithoutValueLists];
+
+  // Exceptions that contain large value list exceptions and will be processed later on in rule execution
+  const unprocessedExceptions: ExceptionItem[] = [];
+
+  filterOutLargeValueLists(valueListExceptions, listClient).then(
+    ({ filteredExceptions, largeValueListExceptions }) => {
+      exceptionsWithoutLargeValueLists.push(...filteredExceptions);
+      unprocessedExceptions.push(...largeValueListExceptions);
+    }
+  );
 
   const exceptionFilter: Filter = {
     meta: {
@@ -221,35 +241,38 @@ export const buildExceptionFilter = ({
     },
   };
 
-  if (exceptionsWithoutValueLists.length === 0) {
-    return undefined;
-  } else if (exceptionsWithoutValueLists.length <= chunkSize) {
-    const clause = createOrClauses(exceptionsWithoutValueLists);
+  if (exceptionsWithoutLargeValueLists.length === 0) {
+    return { filter: undefined, unprocessedExceptions };
+  } else if (exceptionsWithoutLargeValueLists.length <= chunkSize) {
+    const clause = await createOrClauses(exceptionsWithoutLargeValueLists, listClient);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     exceptionFilter.query!.bool!.should = clause;
-    return exceptionFilter;
+    return { filter: exceptionFilter, unprocessedExceptions };
   } else {
-    const chunks = chunkExceptions(exceptionsWithoutValueLists, chunkSize);
+    const chunks = chunkExceptions(exceptionsWithoutLargeValueLists, chunkSize);
 
-    const filters = chunks.map((exceptionsChunk) => {
-      const orClauses = createOrClauses(exceptionsChunk);
+    const filters = await Promise.all(
+      chunks.map(async (exceptionsChunk) => {
+        const orClauses = await createOrClauses(exceptionsChunk, listClient);
 
-      return {
-        meta: {
-          alias: null,
-          disabled: false,
-          negate: false,
-        },
-        query: {
-          bool: {
-            should: orClauses,
+        return {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
           },
-        },
-      };
-    });
+          query: {
+            bool: {
+              should: orClauses,
+            },
+          },
+        };
+      })
+    );
 
     const clauses = filters.map<BooleanFilter>(({ query }) => query);
 
-    return {
+    const filter = {
       meta: {
         alias,
         disabled: false,
@@ -261,6 +284,7 @@ export const buildExceptionFilter = ({
         },
       },
     };
+    return { filter, unprocessedExceptions };
   }
 };
 
@@ -344,25 +368,6 @@ export const buildMatchAnyClause = (entry: EntryMatchAny): BooleanFilter => {
   }
 };
 
-export const buildMatchWildcardClause = (entry: EntryMatchWildcard): BooleanFilter => {
-  const { field, operator, value } = entry;
-  const wildcardClause = {
-    bool: {
-      filter: {
-        wildcard: {
-          [field]: value,
-        },
-      },
-    },
-  };
-
-  if (operator === 'excluded') {
-    return buildExclusionClause(wildcardClause);
-  } else {
-    return wildcardClause;
-  }
-};
-
 export const buildExistsClause = (entry: EntryExists): BooleanFilter => {
   const { field, operator } = entry;
   const existsClause = {
@@ -390,41 +395,63 @@ const isBooleanFilter = (clause: object): clause is BooleanFilter => {
   return keys.includes('bool') != null;
 };
 
-export const buildListClause = async (entry: EntryList, listClient: ListClient): BooleanFilter => {
+export const buildListClause = async (
+  entry: EntryList,
+  listClient: ListClient
+): Promise<BooleanFilter> => {
   const { field, operator } = entry;
-  const list = await listClient.findListItem({ listId: entry.list.id });
+  const list = await listClient.findListItem({
+    listId: entry.list.id,
+    perPage: MAXIMUM_VALUE_LIST_SIZE_FOR_EXCEPTIONS,
+    page: 0,
+    filter: '',
+    currentIndexPosition: 0,
+  });
+  const listValues = list?.data.map((listItem) => listItem.value);
   return {
     bool: {
       [operator === 'excluded' ? 'must_not' : 'must']: {
         terms: {
-          [field]: list,
+          [field]: listValues,
         },
       },
     },
   };
 };
 
-export const getBaseNestedClause = (
-  entries: NonListEntry[],
-  parentField: string
-): BooleanFilter => {
+export const getBaseNestedClause = async (
+  entries: ExceptionEntry[],
+  parentField: string,
+  listClient: ListClient
+): Promise<BooleanFilter> => {
   if (entries.length === 1) {
     const [singleNestedEntry] = entries;
-    const innerClause = createInnerAndClauses(singleNestedEntry, parentField);
+    const innerClause = await createInnerAndClauses({
+      entry: singleNestedEntry,
+      parent: parentField,
+      listClient,
+    });
     return isBooleanFilter(innerClause) ? innerClause : { bool: {} };
   }
 
   return {
     bool: {
-      filter: entries.map((nestedEntry) => createInnerAndClauses(nestedEntry, parentField)),
+      filter: await Promise.all(
+        entries.map((nestedEntry) =>
+          createInnerAndClauses({ entry: nestedEntry, parent: parentField, listClient })
+        )
+      ),
     },
   };
 };
 
-export const buildNestedClause = (entry: EntryNested): NestedFilter => {
+export const buildNestedClause = async (
+  entry: EntryNested,
+  listClient: ListClient
+): Promise<NestedFilter> => {
   const { field, entries } = entry;
 
-  const baseNestedClause = getBaseNestedClause(entries, field);
+  const baseNestedClause = await getBaseNestedClause(entries, field, listClient);
 
   return {
     nested: {
@@ -435,24 +462,30 @@ export const buildNestedClause = (entry: EntryNested): NestedFilter => {
   };
 };
 
-export const createInnerAndClauses = (
-  entry: Entry,
-  parent?: string
-): BooleanFilter | NestedFilter => {
-  const field = parent != null ? `${parent}.${entry.field}` : entry.field;
+export const createInnerAndClauses = async ({
+  entry,
+  parent,
+  listClient,
+}: {
+  entry: ExceptionEntry;
+  parent?: string;
+  listClient: ListClient;
+}): Promise<BooleanFilter | NestedFilter> => {
   if (entriesExists.is(entry)) {
+    const field = parent != null ? `${parent}.${entry.field}` : entry.field;
     return buildExistsClause({ ...entry, field });
   } else if (entriesMatch.is(entry)) {
+    const field = parent != null ? `${parent}.${entry.field}` : entry.field;
     return buildMatchClause({ ...entry, field });
   } else if (entriesMatchAny.is(entry)) {
+    const field = parent != null ? `${parent}.${entry.field}` : entry.field;
     return buildMatchAnyClause({ ...entry, field });
-  } else if (entriesMatchWildcard.is(entry)) {
-    return buildMatchWildcardClause({ ...entry, field });
   } else if (entriesList.is(entry)) {
     const field = parent != null ? `${parent}.${entry.field}` : entry.field;
-    return buildListClause({ ...entry, field });
+    const listClause = await buildListClause({ ...entry, field }, listClient);
+    return listClause;
   } else if (entriesNested.is(entry)) {
-    return buildNestedClause(entry);
+    return buildNestedClause(entry, listClient);
   } else {
     throw new TypeError(`Unexpected exception entry: ${entry}`);
   }

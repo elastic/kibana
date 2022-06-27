@@ -66,7 +66,7 @@ export const queryExecutor = async ({
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('queryExecutor', async () => {
-    const esFilter = await getFilter({
+    const { esFilter, unprocessedExceptions } = await getFilter({
       type: ruleParams.type,
       filters: ruleParams.filters,
       language: ruleParams.language,
@@ -75,14 +75,15 @@ export const queryExecutor = async ({
       services,
       index: inputIndex,
       lists: exceptionItems,
+      listClient,
     });
 
     return searchAfterAndBulkCreate({
       tuple,
+      exceptionsList: unprocessedExceptions,
       completeRule,
       services,
       listClient,
-      exceptionsList: exceptionItems,
       ruleExecutionLogger,
       eventsTelemetry,
       inputIndexPattern: inputIndex,

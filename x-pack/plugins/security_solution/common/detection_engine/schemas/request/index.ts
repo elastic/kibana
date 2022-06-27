@@ -20,3 +20,4 @@ export * from './query_signals_index_schema';
 export * from './rule_schemas';
 export * from './set_signal_status_schema';
 export * from './update_rules_bulk_schema';
+export * from './get_exception_filter_schema';

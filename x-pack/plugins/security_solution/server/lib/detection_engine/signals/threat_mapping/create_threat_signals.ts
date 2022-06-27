@@ -87,6 +87,7 @@ export const createThreatSignals = async ({
     filters: allEventFilters,
     primaryTimestamp,
     secondaryTimestamp,
+    listClient,
   });
 
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
@@ -113,6 +114,7 @@ export const createThreatSignals = async ({
     query: threatQuery,
     language: threatLanguage,
     index: threatIndex,
+    listClient,
   });
 
   ruleExecutionLogger.debug(`Total indicator items: ${threatListCount}`);
@@ -195,6 +197,7 @@ export const createThreatSignals = async ({
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
+          listClient,
         }),
 
       createSignal: (slicedChunk) =>

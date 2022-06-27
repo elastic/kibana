@@ -17,6 +17,7 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
 import { assertUnreachable } from '../../../../common/utility_types';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import type {
@@ -27,6 +28,7 @@ import type {
 import type { PartialFilter } from '../types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { ESBoolQuery } from '../../../../common/typed_json';
+import { getQueryFilter } from './get_query_filter';
 
 interface GetFilterArgs {
   type: Type;
@@ -37,6 +39,7 @@ interface GetFilterArgs {
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   index: IndexOrUndefined;
   lists: ExceptionListItemSchema[];
+  listClient: ListClient;
 }
 
 interface QueryAttributes {
@@ -57,10 +60,22 @@ export const getFilter = async ({
   type,
   query,
   lists,
-}: GetFilterArgs): Promise<ESBoolQuery> => {
-  const queryFilter = () => {
+  listClient,
+}: GetFilterArgs): Promise<{
+  esFilter: ESBoolQuery;
+  unprocessedExceptions: ExceptionListItemSchema[];
+}> => {
+  const queryFilter = async () => {
     if (query != null && language != null && index != null) {
-      return getQueryFilter(query, language, filters || [], index, lists);
+      const { queryFilter: esFilter, unprocessedExceptions } = await getQueryFilter({
+        query,
+        language,
+        filters: filters || [],
+        index,
+        lists,
+        listClient,
+      });
+      return { esFilter, unprocessedExceptions };
     } else {
       throw new BadRequestError('query, filters, and index parameter should be defined');
     }
@@ -73,18 +88,28 @@ export const getFilter = async ({
         const savedObject = await withSecuritySpan('getSavedFilter', () =>
           services.savedObjectsClient.get<QueryAttributes>('query', savedId)
         );
-        return getQueryFilter(
-          savedObject.attributes.query.query,
-          savedObject.attributes.query.language,
-          savedObject.attributes.filters,
+        const { queryFilter: esFilter, unprocessedExceptions } = await getQueryFilter({
+          query: savedObject.attributes.query.query,
+          language: savedObject.attributes.query.language,
+          filters: savedObject.attributes.filters,
           index,
-          lists
-        );
+          lists,
+          listClient,
+        });
+        return { esFilter, unprocessedExceptions };
       } catch (err) {
         // saved object does not exist, so try and fall back if the user pushed
         // any additional language, query, filters, etc...
         if (query != null && language != null && index != null) {
-          return getQueryFilter(query, language, filters || [], index, lists);
+          const { queryFilter: esFilter, unprocessedExceptions } = await getQueryFilter({
+            query,
+            language,
+            filters: filters || [],
+            index,
+            lists,
+            listClient,
+          });
+          return { esFilter, unprocessedExceptions };
         } else {
           // user did not give any additional fall back mechanism for generating a rule
           // rethrow error for activity monitoring

@@ -206,6 +206,7 @@ export interface ThreatListCountOptions {
   language: ThreatLanguageOrUndefined;
   query: string;
   threatFilters: unknown[];
+  listClient: ListClient;
 }
 
 export interface ThreatListDoc {
@@ -261,6 +262,7 @@ export interface EventsOptions {
   secondaryTimestamp?: string;
   tuple: RuleRangeTuple;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  listClient: ListClient;
 }
 
 export interface EventDoc {
@@ -278,6 +280,7 @@ export interface EventCountOptions {
   tuple: RuleRangeTuple;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  listClient: ListClient;
 }
 
 export interface SignalMatch {

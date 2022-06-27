@@ -276,6 +276,8 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_create` as const;
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
+// TODO: I dont know what im doing
+export const DETECTION_ENGINE_EXCEPTIONS = `${DETECTION_ENGINE_URL}/exceptions` as const;
 
 export const DEV_TOOL_PREBUILT_CONTENT =
   `/internal/prebuilt_content/dev_tool/{console_id}` as const;

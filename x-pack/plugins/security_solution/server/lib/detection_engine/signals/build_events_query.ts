@@ -6,13 +6,14 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListClient } from '@kbn/lists-plugin/server';
 import { isEmpty } from 'lodash';
 import type {
   FiltersOrUndefined,
   TimestampOverrideOrUndefined,
   TimestampOverride,
 } from '../../../../common/detection_engine/schemas/common/schemas';
-import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
+import { getQueryFilter } from './get_query_filter';
 
 interface BuildEventsSearchQuery {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
@@ -43,6 +44,7 @@ interface BuildEqlSearchRequestParams {
   eventCategoryOverride?: string;
   timestampField?: string;
   tiebreakerField?: string;
+  listClient: ListClient;
 }
 
 const buildTimeRangeFilter = ({
@@ -208,7 +210,7 @@ export const buildEventsSearchQuery = ({
   return searchQuery;
 };
 
-export const buildEqlSearchRequest = ({
+export const buildEqlSearchRequest = async ({
   query,
   index,
   from,
@@ -222,7 +224,8 @@ export const buildEqlSearchRequest = ({
   eventCategoryOverride,
   timestampField,
   tiebreakerField,
-}: BuildEqlSearchRequestParams): estypes.EqlSearchRequest => {
+  listClient,
+}: BuildEqlSearchRequestParams): Promise<estypes.EqlSearchRequest> => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
     : [primaryTimestamp];
@@ -231,7 +234,14 @@ export const buildEqlSearchRequest = ({
     format: 'strict_date_optional_time',
   }));
 
-  const esFilter = getQueryFilter('', 'eql', filters || [], index, exceptionLists);
+  const { queryFilter: esFilter } = await getQueryFilter({
+    query: '',
+    language: 'eql',
+    filters: filters || [],
+    index,
+    lists: exceptionLists,
+    listClient,
+  });
 
   const rangeFilter = buildTimeRangeFilter({
     to,

@@ -20,6 +20,7 @@ import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 
 describe('threshold_executor', () => {
   let alertServices: RuleExecutorServicesMock;
@@ -77,7 +78,7 @@ describe('threshold_executor', () => {
         runtimeMappings: {},
         inputIndex: ['auditbeat-*'],
         primaryTimestamp: TIMESTAMP,
-        aggregatableTimestampField: TIMESTAMP,
+        listClient: getListClientMock(),
       });
       expect(response.warningMessages.length).toEqual(1);
     });

@@ -7,6 +7,7 @@
 
 import { buildEqlSearchRequest, buildEventsSearchQuery } from './build_events_query';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 
 const emptyFilter = {
   bool: {
@@ -567,6 +568,7 @@ describe('create_signals', () => {
         exceptionLists: [],
         runtimeMappings: undefined,
         eventCategoryOverride: undefined,
+        listClient: getListClientMock(),
       });
       expect(request).toEqual({
         allow_no_indices: true,
@@ -619,6 +621,7 @@ describe('create_signals', () => {
         runtimeMappings: undefined,
         eventCategoryOverride: 'event.other_category',
         timestampField: undefined,
+        listClient: getListClientMock(),
       });
       expect(request).toEqual({
         allow_no_indices: true,
@@ -759,6 +762,7 @@ describe('create_signals', () => {
         exceptionLists: [getExceptionListItemSchemaMock()],
         runtimeMappings: undefined,
         eventCategoryOverride: undefined,
+        listClient: getListClientMock(),
       });
       expect(request).toEqual({
         allow_no_indices: true,
@@ -893,6 +897,7 @@ describe('create_signals', () => {
         secondaryTimestamp: undefined,
         exceptionLists: [],
         runtimeMappings: undefined,
+        listClient: getListClientMock(),
       });
       expect(request).toEqual({
         allow_no_indices: true,

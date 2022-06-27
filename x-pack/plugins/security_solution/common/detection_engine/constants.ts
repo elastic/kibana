@@ -25,3 +25,5 @@ export enum RULE_PREVIEW_FROM {
   WEEK = 'now-65m',
   MONTH = 'now-25h',
 }
+
+export const MAXIMUM_VALUE_LIST_SIZE_FOR_EXCEPTIONS = 500;

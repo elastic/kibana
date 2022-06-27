@@ -77,7 +77,7 @@ export const eqlExecutor = async ({
       result.warning = true;
     }
 
-    const request = buildEqlSearchRequest({
+    const request = await buildEqlSearchRequest({
       query: ruleParams.query,
       index: inputIndex,
       from: tuple.from.toISOString(),
@@ -91,6 +91,7 @@ export const eqlExecutor = async ({
       eventCategoryOverride: ruleParams.eventCategoryOverride,
       timestampField: ruleParams.timestampField,
       tiebreakerField: ruleParams.tiebreakerField,
+      listClient,
     });
 
     ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);

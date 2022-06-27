@@ -96,7 +96,7 @@ export const createEventSignal = async ({
       },
     };
 
-    const esFilter = await getFilter({
+    const { esFilter } = await getFilter({
       type,
       filters: [...filters, indexFilter],
       language,
@@ -105,6 +105,7 @@ export const createEventSignal = async ({
       services,
       index: inputIndex,
       lists: exceptionItems,
+      listClient,
     });
 
     ruleExecutionLogger.debug(

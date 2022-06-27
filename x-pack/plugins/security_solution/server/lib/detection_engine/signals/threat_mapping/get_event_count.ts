@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EventCountOptions, EventsOptions, EventDoc } from './types';
-import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
+import { getQueryFilter } from '../get_query_filter';
 import { singleSearchAfter } from '../single_search_after';
 import { buildEventsSearchQuery } from '../build_events_query';
 
@@ -27,6 +27,7 @@ export const getEventList = async ({
   primaryTimestamp,
   secondaryTimestamp,
   runtimeMappings,
+  listClient,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -37,7 +38,14 @@ export const getEventList = async ({
     `Querying the events items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
-  const filter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
+  const { queryFilter } = await getQueryFilter({
+    query,
+    language: language ?? 'kuery',
+    filters,
+    index,
+    lists: exceptionItems,
+    listClient,
+  });
 
   const { searchResult } = await singleSearchAfter({
     searchAfterSortIds: searchAfter,
@@ -46,8 +54,13 @@ export const getEventList = async ({
     to: tuple.to.toISOString(),
     services,
     ruleExecutionLogger,
+<<<<<<< HEAD
     filter,
     pageSize: calculatedPerPage,
+=======
+    filter: queryFilter,
+    pageSize: Math.ceil(Math.min(tuple.maxSignals, calculatedPerPage)),
+>>>>>>> cfc05d0d885 (adds backend versions of existing logic)
     primaryTimestamp,
     secondaryTimestamp,
     sortOrder: 'desc',
@@ -69,13 +82,21 @@ export const getEventCount = async ({
   tuple,
   primaryTimestamp,
   secondaryTimestamp,
+  listClient,
 }: EventCountOptions): Promise<number> => {
-  const filter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
+  const { queryFilter } = await getQueryFilter({
+    query,
+    language: language ?? 'kuery',
+    filters,
+    index,
+    lists: exceptionItems,
+    listClient,
+  });
   const eventSearchQueryBodyQuery = buildEventsSearchQuery({
     index,
     from: tuple.from.toISOString(),
     to: tuple.to.toISOString(),
-    filter,
+    filter: queryFilter,
     size: 0,
     primaryTimestamp,
     secondaryTimestamp,

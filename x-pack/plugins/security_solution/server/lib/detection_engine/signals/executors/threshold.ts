@@ -15,6 +15,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
@@ -53,6 +54,7 @@ export const thresholdExecutor = async ({
   primaryTimestamp,
   secondaryTimestamp,
   aggregatableTimestampField,
+  listClient,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -70,6 +72,7 @@ export const thresholdExecutor = async ({
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   aggregatableTimestampField: string;
+  listClient: ListClient;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -113,7 +116,7 @@ export const thresholdExecutor = async ({
     });
 
     // Combine dupe filter with other filters
-    const esFilter = await getFilter({
+    const { esFilter } = await getFilter({
       type: ruleParams.type,
       filters: ruleParams.filters ? ruleParams.filters.concat(bucketFilters) : bucketFilters,
       language: ruleParams.language,
@@ -122,6 +125,7 @@ export const thresholdExecutor = async ({
       services,
       index: inputIndex,
       lists: exceptionItems,
+      listClient,
     });
 
     // Look for new events over threshold
