@@ -287,9 +287,12 @@ describe('IndexPattern', () => {
         '@tags': runtime,
         runtime_field: runtimeField.runtimeField,
       });
-      const field = indexPattern.fields.toSpec()!['@tags'];
+      const field = indexPattern.toSpec()!.fields!['@tags'];
       expect(field.runtimeField).toEqual(runtime);
       expect(field.count).toEqual(5);
+      expect(field.format).toEqual({
+        id: 'bytes',
+      });
       expect(field.customLabel).toEqual('custom name');
       expect(indexPattern.toSpec().fieldAttrs).toEqual({
         '@tags': {
@@ -302,7 +305,7 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
         runtime_field: runtimeField.runtimeField,
       });
-      expect(indexPattern.fields.toSpec()!['@tags'].runtimeField).toBeUndefined();
+      expect(indexPattern.toSpec()!.fields!['@tags'].runtimeField).toBeUndefined();
     });
 
     test('add and remove runtime field as new field', () => {
@@ -312,13 +315,13 @@ describe('IndexPattern', () => {
         new_field: runtime,
       });
       expect(indexPattern.getRuntimeField('new_field')).toMatchSnapshot();
-      expect(indexPattern.fields.toSpec().new_field.runtimeField).toEqual(runtime);
+      expect(indexPattern.toSpec()!.fields!.new_field.runtimeField).toEqual(runtime);
 
       indexPattern.removeRuntimeField('new_field');
       expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
         runtime_field: runtimeField.runtimeField,
       });
-      expect(indexPattern.fields.toSpec().new_field).toBeUndefined();
+      expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
     });
 
     test('add and remove composite runtime field as new fields', () => {
@@ -330,8 +333,8 @@ describe('IndexPattern', () => {
       });
       expect(indexPattern.fields.length - fieldCount).toEqual(2);
       expect(indexPattern.getRuntimeField('new_field')).toMatchSnapshot();
-      expect(indexPattern.fields.toSpec()['new_field.a']).toBeDefined();
-      expect(indexPattern.fields.toSpec()['new_field.b']).toBeDefined();
+      expect(indexPattern.toSpec()!.fields!['new_field.a']).toBeDefined();
+      expect(indexPattern.toSpec()!.fields!['new_field.b']).toBeDefined();
       expect(indexPattern.toSpec()!.fieldAttrs).toEqual({
         'new_field.a': {
           count: 3,
@@ -347,7 +350,7 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
         runtime_field: runtimeField.runtimeField,
       });
-      expect(indexPattern.fields.toSpec().new_field).toBeUndefined();
+      expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
     });
 
     test('should not allow runtime field with * in name', async () => {
@@ -388,6 +391,10 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec()).toMatchSnapshot();
     });
 
+    test('can optionally exclude fields', () => {
+      expect(indexPattern.toSpec(false)).toMatchSnapshot();
+    });
+
     test('can restore from spec', async () => {
       const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
@@ -403,6 +410,7 @@ describe('IndexPattern', () => {
       expect(restoredPattern.id).toEqual(indexPattern.id);
       expect(restoredPattern.title).toEqual(indexPattern.title);
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
+      expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
     });
   });
 });
