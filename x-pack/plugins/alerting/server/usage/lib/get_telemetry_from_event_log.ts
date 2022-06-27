@@ -346,8 +346,8 @@ export function parseRuleTypeBucket(
 > {
   return (buckets ?? []).reduce(
     (summary, bucket) => {
-      const ruleType: string = replaceDotSymbols(bucket.key);
-      const numExecutions: number = bucket.doc_count ?? 0;
+      const ruleType: string = replaceDotSymbols(bucket?.key) ?? '';
+      const numExecutions: number = bucket?.doc_count ?? 0;
       const avgExecutionTimeNanos = bucket?.avg_execution_time?.value ?? 0;
       const avgEsSearchTimeMillis = bucket?.avg_es_search_duration?.value ?? 0;
       const avgTotalSearchTimeMillis = bucket?.avg_total_search_duration?.value ?? 0;
