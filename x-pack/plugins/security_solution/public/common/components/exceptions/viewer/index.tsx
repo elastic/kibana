@@ -260,7 +260,6 @@ const ExceptionsViewerComponent = ({
         lists: exceptionListsMeta,
         exception,
       });
-      console.log({exception})
       setCurrentModal('editException');
     },
     [setCurrentModal, exceptionListsMeta]
