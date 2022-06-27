@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import moment from 'moment';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiSpacer } from '@elastic/eui';
 import { PageHeaderProps } from '../types';
@@ -14,12 +14,7 @@ import { getHealthColor } from '../../rules/config';
 
 export function PageTitle({ rule }: PageHeaderProps) {
   const { triggersActionsUi } = useKibana().services;
-  const [isTagsPopoverOpen, setIsTagsPopoverOpen] = useState<boolean>(false);
-  const tagsClicked = () =>
-    setIsTagsPopoverOpen(
-      (oldStateIsTagsPopoverOpen) => rule.tags.length > 0 && !oldStateIsTagsPopoverOpen
-    );
-  const closeTagsPopover = () => setIsTagsPopoverOpen(false);
+
   return (
     <>
       <EuiFlexGroup alignItems="center">
@@ -37,7 +32,7 @@ export function PageTitle({ rule }: PageHeaderProps) {
         </EuiText>
         <EuiSpacer size="s" />
       </EuiFlexItem>
-      <EuiFlexGroup alignItems="baseline">
+      <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem component="span" grow={false}>
           <EuiText color="subdued" size="xs">
             <b>{LAST_UPDATED_MESSAGE}</b> {BY_WORD} {rule.updatedBy} {ON_WORD}&nbsp;
@@ -46,15 +41,14 @@ export function PageTitle({ rule }: PageHeaderProps) {
             {moment(rule.createdAt).format('ll')}
           </EuiText>
         </EuiFlexItem>
-
-        {rule.tags.length > 0 &&
-          triggersActionsUi.getRuleTagBadge({
-            isOpen: isTagsPopoverOpen,
-            tags: rule.tags,
-            onClick: () => tagsClicked(),
-            onClose: () => closeTagsPopover(),
-          })}
+        <EuiSpacer size="xs" />
       </EuiFlexGroup>
+      {rule.tags.length > 0 &&
+        triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
+          tagsOutPopover: true,
+          tags: rule.tags,
+        })}
+      <EuiSpacer size="xs" />
     </>
   );
 }

@@ -36,15 +36,18 @@ export const getRuleList = (rule: CspFinding['rule']) => [
     title: TEXT.BENCHMARK,
     description: rule.benchmark.name,
   },
-
   {
     title: TEXT.AUDIT,
     description: <Markdown>{rule.audit}</Markdown>,
   },
-  {
-    title: TEXT.REFERENCES,
-    description: <Markdown>{rule.references}</Markdown>,
-  },
+  ...(rule.references
+    ? [
+        {
+          title: TEXT.REFERENCES,
+          description: <Markdown>{rule.references}</Markdown>,
+        },
+      ]
+    : []),
 ];
 
 export const RuleTab = ({ data }: { data: CspFinding }) => (

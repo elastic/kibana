@@ -65,6 +65,7 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
       ...agentOptions,
       revoke: request.body?.revoke,
       force: request.body?.force,
+      batchSize: request.body?.batchSize,
     });
     const body = results.items.reduce<PostBulkAgentUnenrollResponse>((acc, so) => {
       acc[so.id] = {

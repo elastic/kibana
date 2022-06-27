@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
-import { Query, generateFilters } from '@kbn/data-plugin/public';
+import { Filter, Query } from '@kbn/es-query';
+import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
@@ -398,8 +398,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             <EuiPageContentHeader className="dataVisualizerPageHeader">
               <EuiPageContentHeaderSection>
                 <div className="dataViewTitleHeader">
-                  <EuiTitle>
-                    <h1>{currentDataView.title}</h1>
+                  <EuiTitle size={'s'}>
+                    <h2>{currentDataView.title}</h2>
                   </EuiTitle>
                   <DataVisualizerDataViewManagement
                     currentDataView={currentDataView}
