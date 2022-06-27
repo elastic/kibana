@@ -53,7 +53,8 @@ export const SearchSourceExpression = ({
     const initSearchSource = async () => {
       let initialSearchConfiguration = searchConfiguration;
 
-      if (shouldResetSearchConfiguration) {
+      // Init searchConfiguration when creating rule from Stack Management page
+      if (!searchConfiguration) {
         const newSearchSource = data.search.searchSource.createEmpty();
         newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
         const defaultDataView = await data.dataViews.getDefaultDataView();

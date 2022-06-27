@@ -17,6 +17,17 @@ export const validateExpression = (ruleParams: EsQueryAlertParams): ValidationRe
   const validationResult = { errors: {} };
   const errors: ExpressionErrors = defaultsDeep({}, EXPRESSION_ERRORS);
   validationResult.errors = errors;
+
+  if (!ruleParams.searchType) {
+    errors.searchType.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchType', {
+        defaultMessage: 'Select query type',
+      })
+    );
+
+    return validationResult;
+  }
+
   if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
     errors.threshold0.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold0Text', {

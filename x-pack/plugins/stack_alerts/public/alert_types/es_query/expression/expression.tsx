@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, useCallback, useState } from 'react';
+import React, { memo, PropsWithChildren, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
 import 'brace/theme/github';
@@ -14,7 +14,7 @@ import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/p
 import { ErrorKey, EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
-import { QueryFormType, QueryFormTypeChooser } from './query_form_type_chooser';
+import { QueryFormTypeChooser } from './query_form_type_chooser';
 import { isSearchSourceAlert } from '../util';
 import { EXPRESSION_ERROR_KEYS } from '../constants';
 
@@ -35,26 +35,19 @@ const SearchSourceExpressionMemoized = memo<SearchSourceExpressionProps>(
 export const EsQueryAlertTypeExpression: React.FunctionComponent<
   RuleTypeParamsExpressionProps<EsQueryAlertParams>
 > = (props) => {
-  const { ruleParams, errors, setRuleProperty } = props;
+  const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
   const isSearchSource = isSearchSourceAlert(ruleParams);
-  const [activeQueryFormType, setActiveQueryFormType] = useState<QueryFormType | null>(null);
-
-  const resetFormType = useCallback(() => {
-    // @ts-expect-error Reset rule params regardless of their type
-    setRuleProperty('params', {});
-    setActiveQueryFormType(null);
-  }, [setActiveQueryFormType, setRuleProperty]);
 
   const formTypeSelected = useCallback(
-    (formType: QueryFormType | null) => {
-      if (!formType) {
-        resetFormType();
+    (searchType: SearchType | null) => {
+      if (!searchType) {
+        // @ts-expect-error Reset rule params regardless of their type
+        setRuleProperty('params', {});
         return;
       }
-
-      setActiveQueryFormType(formType);
+      setRuleParams('searchType', searchType);
     },
-    [setActiveQueryFormType, resetFormType]
+    [setRuleParams, setRuleProperty]
   );
 
   const hasExpressionErrors = Object.keys(errors).some((errorKey) => {
@@ -79,47 +72,30 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     </>
   );
 
-  // Creating a rule from Stack Management page
-  if ((!ruleParams || !Object.keys(ruleParams).length) && !activeQueryFormType) {
-    // Showing the type chooser
-    return (
-      <QueryFormTypeChooser
-        activeFormType={activeQueryFormType}
-        onFormTypeSelect={formTypeSelected}
-      />
-    );
-  }
-
   return (
     <>
       {expressionError}
 
-      {/* Showing the selected type */}
-      {activeQueryFormType && (
-        <QueryFormTypeChooser
-          activeFormType={activeQueryFormType}
-          onFormTypeSelect={formTypeSelected}
-        />
-      )}
-
-      {isSearchSource ? (
-        <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
-      ) : (
+      {ruleParams.searchType ? (
         <>
-          {activeQueryFormType === QueryFormType.KQL_OR_LUCENE ? (
-            <SearchSourceExpressionMemoized
-              {...props}
-              ruleParams={{
-                ...ruleParams,
-                searchType: SearchType.searchSource,
-                searchConfiguration: {},
-              }}
-              shouldResetSearchConfiguration
-            />
+          {/* Showing the selected type */}
+          <QueryFormTypeChooser
+            searchType={ruleParams.searchType as SearchType}
+            onFormTypeSelect={formTypeSelected}
+          />
+
+          {isSearchSource ? (
+            <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
           ) : (
             <EsQueryExpression {...props} ruleParams={ruleParams} />
           )}
         </>
+      ) : (
+        // Choosing a rule type from Stack Management page
+        <QueryFormTypeChooser
+          searchType={ruleParams.searchType as SearchType}
+          onFormTypeSelect={formTypeSelected}
+        />
       )}
 
       <EuiHorizontalRule />
