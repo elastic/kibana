@@ -13,6 +13,7 @@ import {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
 } from '@elastic/eui';
+import { Serializable } from '@kbn/utility-types';
 import * as TEXT from '../../translations';
 import { getExpandColumn, getFindingsColumns } from '../../layout/findings_layout';
 import type { CspFinding } from '../../types';
@@ -23,17 +24,27 @@ interface Props {
   loading: boolean;
   pagination: Pagination;
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
+  onAddFilter(field: string, value: Serializable, negate: boolean): void;
 }
 
-const ResourceFindingsTableComponent = ({ items, loading, pagination, setTableOptions }: Props) => {
+const ResourceFindingsTableComponent = ({
+  items,
+  loading,
+  pagination,
+  setTableOptions,
+  onAddFilter,
+}: Props) => {
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
   const columns: [
     EuiTableActionsColumnType<CspFinding>,
     ...Array<EuiBasicTableColumn<CspFinding>>
   ] = useMemo(
-    () => [getExpandColumn<CspFinding>({ onClick: setSelectedFinding }), ...getFindingsColumns()],
-    []
+    () => [
+      getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
+      ...getFindingsColumns({ onAddFilter }),
+    ],
+    [onAddFilter]
   );
   if (!loading && !items.length)
     return <EuiEmptyPrompt iconType="logoKibana" title={<h2>{TEXT.NO_FINDINGS}</h2>} />;
