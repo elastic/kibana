@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
+import { EuiButton, EuiPage, EuiPageSideBar, EuiSideNav, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AppMountParameters, CoreStart, ScopedHistory } from '@kbn/core/public';
 import React, { useCallback, VFC } from 'react';
 import ReactDOM from 'react-dom';
@@ -13,6 +13,7 @@ import { Redirect, Route, RouteComponentProps, Router, withRouter } from 'react-
 import { DefaultPageLayout } from './components/layout';
 import { CoreStartProvider } from './context/core_start';
 import { SourcesPage } from './modules/sources/sources_page';
+import { IndicatorsPage } from './modules/indicators/indicators_page';
 
 interface AppProps {
   history: ScopedHistory;
@@ -22,6 +23,7 @@ interface AppProps {
 const ROUTES = {
   home: '/home',
   sources: '/sources',
+  indicators: '/indicators',
 } as const;
 
 const Nav = withRouter(({ history }) => (
@@ -43,20 +45,35 @@ const Nav = withRouter(({ history }) => (
             onClick: () => history.push(ROUTES.sources),
             'data-test-subj': 'fooNavPageA',
           },
+          {
+            id: 'indicators',
+            name: 'Indicators',
+            onClick: () => history.push(ROUTES.indicators),
+            'data-test-subj': 'fooNavPageB',
+          },
         ],
       },
     ]}
   />
 ));
 
-const VIEW_INDICATORS_LABEL = 'View sources';
+const VIEW_SOURCES_LABEL = 'View sources';
+const VIEW_INDICATORS_LABEL = 'View indicators';
 
 const Home: VFC<RouteComponentProps> = ({ history }) => {
-  const handleGoToIndicators = useCallback(() => history.push(ROUTES.sources), [history]);
+  const handleGoToSources = useCallback(() => history.push(ROUTES.sources), [history]);
+  const handleGoToIndicators = useCallback(() => history.push(ROUTES.indicators), [history]);
 
   return (
     <DefaultPageLayout>
-      <EuiButton onClick={handleGoToIndicators}>{VIEW_INDICATORS_LABEL}</EuiButton>
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={handleGoToSources}>{VIEW_SOURCES_LABEL}</EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={handleGoToIndicators}>{VIEW_INDICATORS_LABEL}</EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </DefaultPageLayout>
   );
 };
@@ -72,6 +89,7 @@ export const App: VFC<AppProps> = ({ history, coreStart }) => {
           <Route path="/" exact render={() => <Redirect to={ROUTES.sources} />} />
           <Route path={ROUTES.home} exact component={Home} />
           <Route path={ROUTES.sources} exact component={SourcesPage} />
+          <Route path={ROUTES.indicators} exact component={IndicatorsPage} />
         </EuiPage>
       </Router>
     </CoreStartProvider>
