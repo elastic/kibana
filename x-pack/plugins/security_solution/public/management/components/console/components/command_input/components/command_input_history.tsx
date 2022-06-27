@@ -28,6 +28,7 @@ export const CommandInputHistory = memo(() => {
   const [priorInputText] = useState(useWithInputTextEntered());
   const optionWasSelected = useRef(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
+  const hasInputHistory = inputHistory.length > 0;
 
   const optionListRef = useRef(); // TODO:PT remove when https://github.com/elastic/eui/pull/5978 becomes available in kibana (task #4179)
 
@@ -90,6 +91,10 @@ export const CommandInputHistory = memo(() => {
 
   // TODO:PT remove when https://github.com/elastic/eui/pull/5978 becomes available in kibana (task #4179)
   useEffect(() => {
+    if (!hasInputHistory) {
+      return;
+    }
+
     let observer: MutationObserver;
 
     if (optionListRef.current) {
@@ -125,7 +130,7 @@ export const CommandInputHistory = memo(() => {
         observer.disconnect();
       }
     };
-  }, [checkObserverTrigger, dispatch, isMounted]);
+  }, [checkObserverTrigger, dispatch, hasInputHistory, isMounted]);
 
   // When first loaded, clear out the current text entered, and when this component
   // unloads, if no option from the history was selected, then set the prior text
@@ -142,19 +147,19 @@ export const CommandInputHistory = memo(() => {
   }, [dispatch, optionWasSelected, priorInputText]);
 
   return (
-    <div>
-      <EuiSelectable
-        options={selectableHistoryOptions}
-        onChange={handleSelectableOnChange}
-        renderOption={handleRenderOption}
-        listProps={selectableListProps}
-        singleSelection={true}
-        emptyMessage={NO_HISTORY_EMPTY_MESSAGE}
-        data-test-subj={getTestId('inputHistorySelector')}
-      >
-        {renderSelectionContent}
-      </EuiSelectable>
-    </div>
+    <EuiSelectable
+      options={selectableHistoryOptions}
+      onChange={handleSelectableOnChange}
+      renderOption={handleRenderOption}
+      listProps={selectableListProps}
+      singleSelection={true}
+      emptyMessage={NO_HISTORY_EMPTY_MESSAGE}
+      data-test-subj={getTestId('inputHistorySelector')}
+    >
+      {renderSelectionContent}
+    </EuiSelectable>
+    // <div>
+    // </div>
   );
 });
 CommandInputHistory.displayName = 'CommandInputHistory';
