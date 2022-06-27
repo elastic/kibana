@@ -95,7 +95,7 @@ export interface RulesListProps {
   filteredRuleTypes?: string[] | undefined;
   filteredSolutions?: string[] | undefined;
   showActionFilter?: boolean;
-  ruleDetailsLink?: string | undefined;
+  ruleDetailsRoute?: string | undefined;
   showCreateRuleButton?: boolean;
   statusFilter?: RuleStatus[];
   setStatusFilter?: (status: RuleStatus[]) => any; // TODO update any
@@ -126,7 +126,7 @@ export const RulesList = ({
   filteredRuleTypes,
   filteredSolutions,
   showActionFilter = true,
-  ruleDetailsLink,
+  ruleDetailsRoute,
   showCreateRuleButton = true,
   statusFilter,
   setStatusFilter,
@@ -741,11 +741,8 @@ export const RulesList = ({
         onPage={setPage}
         onRuleChanged={() => loadData()}
         onRuleClick={(rule) => {
-          let detailsLink = routeToRuleDetails;
-          if (ruleDetailsLink) {
-            detailsLink = ruleDetailsLink;
-          }
-          history.push(detailsLink.replace(`:ruleId`, rule.id));
+          const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : routeToRuleDetails;
+          history.push(detailsRoute.replace(`:ruleId`, rule.id));
         }}
         onRuleEditClick={(rule) => {
           if (rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)) {
