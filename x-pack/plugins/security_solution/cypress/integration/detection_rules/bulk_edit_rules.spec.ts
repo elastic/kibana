@@ -12,6 +12,7 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
   RULES_TAGS_FILTER_BTN,
+  RULE_NAME,
 } from '../../screens/alerts_detection_rules';
 
 import {
@@ -60,8 +61,7 @@ import {
 } from '../../objects/rule';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
-const RULE_NAME = 'Custom rule for bulk actions';
-
+const CUSTOM_RULE_NAME = 'Custom rule for bulk actions';
 const CUSTOM_INDEX_PATTERN_1 = 'custom-cypress-test-*';
 const DEFAULT_INDEX_PATTERNS = ['index-1-*', 'index-2-*'];
 const TAGS = ['cypress-tag-1', 'cypress-tag-2'];
@@ -70,7 +70,7 @@ const OVERWRITE_INDEX_PATTERNS = ['overwrite-index-1-*', 'overwrite-index-2-*'];
 const customRule = {
   ...getNewRule(),
   index: DEFAULT_INDEX_PATTERNS,
-  name: RULE_NAME,
+  name: CUSTOM_RULE_NAME,
 };
 
 describe('Detection rules, bulk edit', () => {
@@ -117,9 +117,12 @@ describe('Detection rules, bulk edit', () => {
     typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
     confirmBulkEditForm();
 
-    // check if rule has been updated
+    // switch to custom rules and ensure they loaded
     cy.get(CUSTOM_RULES_BTN).click();
-    goToTheRuleDetailsOf(RULE_NAME);
+    cy.get(RULE_NAME).should('have.length', 6);
+
+    // check if rule has been updated
+    goToTheRuleDetailsOf(CUSTOM_RULE_NAME);
     hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
   });
 
@@ -137,7 +140,7 @@ describe('Detection rules, bulk edit', () => {
 
     // check if rule has been updated
     changeRowsPerPageTo(20);
-    goToTheRuleDetailsOf(RULE_NAME);
+    goToTheRuleDetailsOf(CUSTOM_RULE_NAME);
     hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
     cy.go('back');
 
@@ -151,7 +154,7 @@ describe('Detection rules, bulk edit', () => {
     waitForBulkEditActionToFinish({ rulesCount: 6 });
 
     // check if rule has been updated
-    goToTheRuleDetailsOf(RULE_NAME);
+    goToTheRuleDetailsOf(CUSTOM_RULE_NAME);
     hasIndexPatterns(DEFAULT_INDEX_PATTERNS.join(''));
     cy.go('back');
 
@@ -170,7 +173,7 @@ describe('Detection rules, bulk edit', () => {
     waitForBulkEditActionToFinish({ rulesCount: 6 });
 
     // check if rule has been updated
-    goToTheRuleDetailsOf(RULE_NAME);
+    goToTheRuleDetailsOf(CUSTOM_RULE_NAME);
     hasIndexPatterns(OVERWRITE_INDEX_PATTERNS.join(''));
   });
 
