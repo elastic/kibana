@@ -221,12 +221,6 @@ Changes to agent upgrade modal to allow for rolling upgrades {kibana-pull}132421
 Lens & Visualizations::
 * Adds method to re-link visualizations with missing `SavedSearch` {kibana-pull}132729[#132729]
 * Adds support of Data View switching for Agg-Based visualizations {kibana-pull}132184[#132184]
-* Adds `showTooltip` argument {kibana-pull}130530[#130530]
-* Adds `orderBucketsBySum` {kibana-pull}130457[#130457]
-* Adds lines visibility for lines chart {kibana-pull}130452[#130452]
-* Adds `pointsRadius`, `showPoints`, and `lineWidth` {kibana-pull}130391[#130391]
-* Adds mark size configuration {kibana-pull}130361[#130361]
-* Adds `xyVis` split chart {kibana-pull}130229[#130229]
 
 Machine Learning::
 * Adds the ability to create anomaly detection jobs from Lens visualizations {kibana-pull}129762[#129762]
