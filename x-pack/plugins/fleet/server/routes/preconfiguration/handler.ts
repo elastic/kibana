@@ -15,7 +15,11 @@ import type {
   PostResetOnePreconfiguredAgentPoliciesSchema,
 } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
-import { ensurePreconfiguredPackagesAndPolicies, outputService } from '../../services';
+import {
+  ensurePreconfiguredPackagesAndPolicies,
+  outputService,
+  downloadSourceService,
+} from '../../services';
 import { resetPreconfiguredAgentPolicies } from '../../services/preconfiguration/reset_agent_policies';
 
 export const updatePreconfigurationHandler: FleetRequestHandler<
@@ -28,6 +32,7 @@ export const updatePreconfigurationHandler: FleetRequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
+  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
   const spaceId = fleetContext.spaceId;
   const { agentPolicies, packages } = request.body;
 
@@ -38,6 +43,7 @@ export const updatePreconfigurationHandler: FleetRequestHandler<
       (agentPolicies as PreconfiguredAgentPolicy[]) ?? [],
       packages ?? [],
       defaultOutput,
+      defaultDownloadSource,
       spaceId
     );
     return response.ok({ body });
