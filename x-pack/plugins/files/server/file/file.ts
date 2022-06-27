@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import mimeType from 'mime';
 import { Readable } from 'stream';
 import {
   File as IFile,
@@ -14,6 +15,7 @@ import {
   FileSavedObjectAttributes,
   FileStatus,
   UpdatableFileAttributes,
+  FileJSON,
 } from '../../common';
 import { BlobStorageService } from '../blob_storage_service';
 import {
@@ -100,6 +102,9 @@ export class File<M = unknown> implements IFile {
     if (!id) {
       throw new Error('No content to download');
     }
+    if (this.status !== 'READY') {
+      throw new Error('This file is not ready for download.');
+    }
     return this.blobStorage.download({ id, size });
   }
 
@@ -131,7 +136,8 @@ export class File<M = unknown> implements IFile {
       fileKind,
       alt,
       meta,
-    }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown },
+      mime,
+    }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown; mime?: string },
     internalFileService: InternalFileService
   ) {
     const fileSO = await internalFileService.createSO({
@@ -140,6 +146,8 @@ export class File<M = unknown> implements IFile {
       name,
       alt,
       meta,
+      mime,
+      extension: (mime && mimeType.getExtension(mime)) ?? undefined,
     });
 
     const file = internalFileService.toFile(fileSO, fileKind);
@@ -152,6 +160,13 @@ export class File<M = unknown> implements IFile {
     );
 
     return file;
+  }
+
+  public toJSON(): FileJSON {
+    return {
+      ...this.attributes,
+      id: this.id,
+    };
   }
 
   private get attributes(): FileSavedObjectAttributes {
@@ -180,5 +195,13 @@ export class File<M = unknown> implements IFile {
 
   public get alt(): undefined | string {
     return this.attributes.alt;
+  }
+
+  public get mime(): undefined | string {
+    return this.attributes.mime;
+  }
+
+  public get extension(): undefined | string {
+    return this.attributes.extension;
   }
 }
