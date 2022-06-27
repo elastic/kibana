@@ -11,7 +11,7 @@
       "path": "../../apm/tsconfig.json",
     },
     {
-      "path": "../../observability/e2/tsconfig.json"
+      "path": "../../observability/e2e/tsconfig.json"
     },
     {
       "path": "../tsconfig.json",
