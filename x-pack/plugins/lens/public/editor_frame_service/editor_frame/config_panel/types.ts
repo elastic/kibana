@@ -32,7 +32,6 @@ export interface LayerPanelProps {
 }
 
 export interface LayerDatasourceDropProps {
-  layerId: string;
   state: unknown;
   setState: (newState: unknown) => void;
 }
