@@ -40,7 +40,7 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
     return (
       <EuiFlexItem>
         <EuiText size="s">
-          {i18n.translate('xpack.triggersActionsUI.ruleDetails.noActions', {
+          {i18n.translate('xpack.observability.ruleDetails.noActions', {
             defaultMessage: 'No actions',
           })}
         </EuiText>
