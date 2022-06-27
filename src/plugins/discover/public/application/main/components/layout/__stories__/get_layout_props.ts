@@ -122,7 +122,7 @@ export function getLayoutProps(indexPattern: DataView) {
     savedSearchData$,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
-    state: { columns: [] },
+    state: { columns: ['name', 'message', 'bytes'], sort: [['date', 'desc']] },
     stateContainer: {
       setAppState: action('Set app state'),
       appStateContainer: {
