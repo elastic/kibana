@@ -340,7 +340,7 @@ export class MapEmbeddable
       }
     }
 
-    // Initialize synchroinzed view to map's view
+    // Initialize synchronized view to map's view
     const center = getMapCenter(this._savedMap.getStore().getState());
     const zoom = getMapZoom(this._savedMap.getStore().getState());
     synchronizeMovement.setLocation(this.input.id, center.lat, center.lon, zoom);
