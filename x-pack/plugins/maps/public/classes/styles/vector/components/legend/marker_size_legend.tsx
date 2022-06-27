@@ -28,7 +28,7 @@ interface State {
 
 export class MarkerSizeLegend extends Component<Props, State> {
   private _isMounted: boolean = false;
-  private _textRefs: Record<string, RefObject<TextElement>> = {};
+  private _textRefs: Record<string, RefObject<SVGTextElement>> = {};
   private _prevFieldMeta = this.props.style.getRangeFieldMeta();
 
   state: State = {
@@ -50,8 +50,8 @@ export class MarkerSizeLegend extends Component<Props, State> {
       if (!missingRefElements) {
         let maxLabelWidth = 0;
         Object.values(this._textRefs).forEach((ref) => {
-          const width = ref.current.getBBox().width;
-          if (width > maxLabelWidth) {
+          const width = ref.current?.getBBox().width;
+          if (width && width > maxLabelWidth) {
             maxLabelWidth = width;
           }
         });
@@ -108,7 +108,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
       const circleTopY = circleCenterY - radius;
       let ref = this._textRefs[formattedValue];
       if (!ref) {
-        ref = React.createRef<TextElement>();
+        ref = React.createRef<SVGTextElement>();
         this._textRefs[formattedValue] = ref;
       }
       const textOffset =
