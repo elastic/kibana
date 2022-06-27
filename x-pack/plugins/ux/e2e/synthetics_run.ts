@@ -9,7 +9,7 @@ import { argv } from '@kbn/synthetics-plugin/e2e/parse_args_params';
 import { SyntheticsRunner } from '@kbn/synthetics-plugin/e2e/synthetics_start';
 import path from 'path';
 
-const { headless, grep, pauseOnError } = argv;
+const { headless, grep, bail: pauseOnError } = argv;
 
 async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaConfig = await readConfigFile(
