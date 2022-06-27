@@ -83,7 +83,7 @@ export const postCommentActionsReq: CommentRequestActionsType = {
   owner: 'securitySolutionFixture',
 };
 
-export const postExternalReferenceNoSOReq: CommentRequestExternalReferenceNoSOType = {
+export const postExternalReferenceESReq: CommentRequestExternalReferenceNoSOType = {
   type: CommentType.externalReference,
   externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
   externalReferenceId: 'my-id',
@@ -93,17 +93,8 @@ export const postExternalReferenceNoSOReq: CommentRequestExternalReferenceNoSOTy
 };
 
 export const postExternalReferenceSOReq: CommentRequestExternalReferenceSOType = {
-  ...postExternalReferenceNoSOReq,
+  ...postExternalReferenceESReq,
   externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-type' },
-};
-
-export const postExternalReferenceReq: CommentRequestExternalReferenceSOType = {
-  type: CommentType.externalReference,
-  externalReferenceId: 'my-id',
-  externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-type' },
-  externalReferenceAttachmentTypeId: '.test',
-  externalReferenceMetadata: null,
-  owner: 'securitySolutionFixture',
 };
 
 export const postCaseResp = (
