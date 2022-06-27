@@ -203,6 +203,8 @@ export async function getAgentsByKuery(
   esClient: ElasticsearchClient,
   options: ListWithKuery & {
     showInactive: boolean;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
   }
 ): Promise<{
   agents: Agent[];
@@ -213,8 +215,8 @@ export async function getAgentsByKuery(
   const {
     page = 1,
     perPage = 20,
-    sortField = 'enrolled_at',
-    sortOrder = 'desc',
+    sortField = options.sortField ?? 'enrolled_at',
+    sortOrder = options.sortOrder ?? 'desc',
     kuery,
     showInactive = false,
     showUpgradeable,

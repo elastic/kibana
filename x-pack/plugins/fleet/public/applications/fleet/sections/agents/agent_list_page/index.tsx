@@ -83,6 +83,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
   const tableRef = useRef<EuiBasicTable<Agent>>(null);
   const { pagination, pageSizeOptions, setPagination } = usePagination();
+  const [sortField, setSortField] = useState<keyof Agent>('enrolled_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const VERSION_FIELD = 'local_metadata.elastic.agent.version';
+  const HOSTNAME_FIELD = 'local_metadata.host.hostname';
 
   const onSubmitSearch = useCallback(
     (newKuery: string) => {
@@ -199,6 +203,20 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
 
+  const getSortFieldForAPI = (field: keyof Agent): string => {
+    if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
+      return `${field}.keyword`;
+    }
+    return field;
+  };
+
+  const sorting = {
+    sort: {
+      field: sortField,
+      direction: sortOrder,
+    },
+  };
+
   // Request to fetch agents and agent status
   const currentRequestRef = useRef<number>(0);
   const fetchData = useCallback(
@@ -214,6 +232,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               page: pagination.currentPage,
               perPage: pagination.pageSize,
               kuery: kuery && kuery !== '' ? kuery : undefined,
+              sortField: getSortFieldForAPI(sortField),
+              sortOrder,
               showInactive,
               showUpgradeable,
             }),
@@ -280,6 +300,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       showUpgradeable,
       allTags,
       notifications.toasts,
+      sortField,
+      sortOrder,
     ]
   );
 
@@ -360,7 +382,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const columns = [
     {
-      field: 'local_metadata.host.hostname',
+      field: HOSTNAME_FIELD,
+      sortable: true,
       name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
       }),
@@ -373,6 +396,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'active',
+      sortable: false,
       width: '85px',
       name: i18n.translate('xpack.fleet.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
@@ -381,6 +405,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'tags',
+      sortable: false,
       width: '210px',
       name: i18n.translate('xpack.fleet.agentList.tagsColumnTitle', {
         defaultMessage: 'Tags',
@@ -389,6 +414,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'policy_id',
+      sortable: true,
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
@@ -417,7 +443,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       },
     },
     {
-      field: 'local_metadata.elastic.agent.version',
+      field: VERSION_FIELD,
+      sortable: true,
       width: '135px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
@@ -444,6 +471,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'last_checkin',
+      sortable: true,
       name: i18n.translate('xpack.fleet.agentList.lastCheckinTitle', {
         defaultMessage: 'Last activity',
       }),
@@ -657,14 +685,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             return '';
           },
         }}
-        onChange={({ page }: { page: { index: number; size: number } }) => {
+        onChange={({
+          page,
+          sort,
+        }: {
+          page?: { index: number; size: number };
+          sort?: { field: keyof Agent; direction: 'asc' | 'desc' };
+        }) => {
           const newPagination = {
             ...pagination,
-            currentPage: page.index + 1,
-            pageSize: page.size,
+            currentPage: page!.index + 1,
+            pageSize: page!.size,
           };
           setPagination(newPagination);
+          setSortField(sort!.field);
+          setSortOrder(sort!.direction);
         }}
+        sorting={sorting}
       />
     </>
   );

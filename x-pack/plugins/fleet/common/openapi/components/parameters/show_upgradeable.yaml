@@ -1,0 +1,5 @@
+name: showUpgradeable
+in: query
+required: false
+schema:
+  type: boolean
