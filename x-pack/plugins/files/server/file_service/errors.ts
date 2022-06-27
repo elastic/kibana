@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { FileServiceFactory } from './file_service_factory';
-export type { FileServiceStart } from './file_service';
-export * as errors from './errors';
+export class FileNotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    Error.captureStackTrace(this);
+  }
+}
