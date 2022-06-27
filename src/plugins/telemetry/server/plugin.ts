@@ -218,10 +218,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   private async getOptInStatus(): Promise<boolean | undefined> {
-    const internalRepositoryClient = await firstValueFrom(
-      this.savedObjectsInternalClient$,
-      { defaultValue: undefined }
-    );
+    const internalRepositoryClient = await firstValueFrom(this.savedObjectsInternalClient$, {
+      defaultValue: undefined,
+    });
     if (!internalRepositoryClient) return;
 
     let telemetrySavedObject: TelemetrySavedObject | undefined;
