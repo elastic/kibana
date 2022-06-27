@@ -39,10 +39,9 @@ export function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boole
     log[report.errorCount ? 'error' : 'warning'](cli.getFormatter()(report.results));
   }
 
-  if (!report.errorCount) {
-    log.success('[eslint] %d files linted successfully', files.length);
-    return;
+  if (report.errorCount) {
+    throw createFailError(`[eslint] errors`);
   }
 
-  throw createFailError(`[eslint] errors`);
+  log.success('[eslint] %d files linted successfully', files.length);
 }
