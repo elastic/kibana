@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'files';
-export const PLUGIN_NAME = 'files';
+export const PLUGIN_ID = 'files' as const;
+export const PLUGIN_NAME = 'files' as const;
 
 /**
  * Unique type name of the file saved object

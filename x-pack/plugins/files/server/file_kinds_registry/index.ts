@@ -35,6 +35,12 @@ class FileKindsRegistryImpl implements FileKindsRegistry {
       throw new Error(`File kind "${fileKind.id}" already registered.`);
     }
 
+    if (fileKind.id !== encodeURIComponent(fileKind.id)) {
+      throw new Error(
+        `File kind id "${fileKind.id}" is not a valid file kind ID. Choose an ID that does not need to be URI encoded.`
+      );
+    }
+
     this.fileKinds.set(fileKind.id, fileKind);
   }
 
