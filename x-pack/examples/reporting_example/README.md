@@ -3,7 +3,7 @@
 Use this example code to understand how to add a "Generate Report" button to a
 Kibana page. This simple example shows that the end-to-end functionality of
 generating a screenshot report of a page just requires you to render a React
-component that you import from the Reportinng plugin.
+component that you import from the Reporting plugin.
 
 A "reportable" Kibana page is one that has an **alternate version to show the data in a "screenshot-friendly" way**. The alternate version can be reached at a variation of the page's URL that the App team builds.
 
