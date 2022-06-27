@@ -15,7 +15,6 @@ import {
   FilterStateStore,
   compareFilters,
   COMPARE_ALL_OPTIONS,
-  AggregateQuery,
   Query,
 } from '@kbn/es-query';
 import {
@@ -186,10 +185,6 @@ export interface GetStateReturn {
   resetAppState: () => void;
 }
 const APP_STATE_URL_KEY = '_a';
-
-function isOfAggregateQueryType(query: AggregateQuery | Query): query is AggregateQuery {
-  return Boolean(query && 'sql' in query);
-}
 
 /**
  * Builds and returns appState and globalState containers and helper functions

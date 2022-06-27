@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
 import { AppState, AppStateUrl } from '../services/discover_state';
 
