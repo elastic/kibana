@@ -82,11 +82,16 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     const displayVersions = minVersion
       ? fallbackVersions.filter((v) => semverGt(v, minVersion))
       : fallbackVersions;
-    return displayVersions.map((option) => ({
+    const options = displayVersions.map((option) => ({
       label: option,
       value: option,
     }));
+    if (options.length === 0) {
+      return [{ label: '', value: '' }];
+    }
+    return options;
   }, [fallbackVersions, minVersion]);
+  const noVersions = versionOptions[0]?.value === '';
 
   const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTAINANCE_VALUES.map(
     (option) => ({
@@ -252,7 +257,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           defaultMessage="Cancel"
         />
       }
-      confirmButtonDisabled={isSubmitting}
+      confirmButtonDisabled={isSubmitting || noVersions}
       confirmButtonText={
         isSingleAgent ? (
           <FormattedMessage
@@ -274,7 +279,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       }
     >
       <p>
-        {isSingleAgent ? (
+        {noVersions ? (
+          <FormattedMessage
+            id="xpack.fleet.upgradeAgents.noVersionsText"
+            defaultMessage="No selected agents are eligible for an upgrade. Please select one or more eligible agents."
+          />
+        ) : isSingleAgent ? (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
             defaultMessage="This action will upgrade the agent running on '{hostName}' to version {version}. This action can not be undone. Are you sure you wish to continue?"
@@ -302,6 +312,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           fullWidth
           singleSelection={{ asPlainText: true }}
           options={versionOptions}
+          isDisabled={noVersions}
           isClearable={false}
           selectedOptions={selectedVersion}
           onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {

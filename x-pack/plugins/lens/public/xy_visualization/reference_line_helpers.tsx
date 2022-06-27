@@ -7,17 +7,23 @@
 
 import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { YAxisMode, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { layerTypes } from '../../common';
 import type { DatasourceLayers, FramePublicAPI, Visualization } from '../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
-import type { XYState, XYDataLayerConfig, XYReferenceLineLayerConfig } from './types';
+import type {
+  XYState,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  YAxisMode,
+  YConfig,
+} from './types';
 import {
   checkScaleOperation,
   getAxisName,
   getDataLayers,
+  getReferenceLayers,
   isNumericMetric,
   isReferenceLayer,
 } from './visualization_helpers';
@@ -34,7 +40,7 @@ export interface ReferenceLineBase {
  * * what groups are current defined in data layers
  * * what existing reference line are currently defined in reference layers
  */
-export function getGroupsToShow<T extends ReferenceLineBase & { config?: ExtendedYConfig[] }>(
+export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig[] }>(
   referenceLayers: T[],
   state: XYState | undefined,
   datasourceLayers: DatasourceLayers,
@@ -342,7 +348,10 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
   newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
   const hasYConfig = newLayer.yConfig?.some(({ forAccessor }) => forAccessor === columnId);
   const previousYConfig = previousColumn
-    ? newLayer.yConfig?.find(({ forAccessor }) => forAccessor === previousColumn)
+    ? getReferenceLayers(prevState.layers)
+        .map(({ yConfig }) => yConfig)
+        .flat()
+        ?.find((yConfig) => yConfig?.forAccessor === previousColumn)
     : false;
   if (!hasYConfig) {
     const axisMode: YAxisMode =
