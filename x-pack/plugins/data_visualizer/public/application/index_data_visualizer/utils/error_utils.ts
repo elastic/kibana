@@ -7,7 +7,7 @@
 
 import { HttpFetchError } from '@kbn/core/public';
 import Boom from '@hapi/boom';
-import { isPopulatedObject } from '../../../../common/utils/object_utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export interface WrappedError {
   body: {

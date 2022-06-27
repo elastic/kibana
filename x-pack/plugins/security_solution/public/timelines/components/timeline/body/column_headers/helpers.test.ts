@@ -11,7 +11,12 @@ import { BrowserFields } from '../../../../../../common/search_strategy';
 import { ColumnHeaderOptions } from '../../../../../../common/types';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import { defaultHeaders } from './default_headers';
-import { getColumnWidthFromType, getColumnHeaders, getRootCategory } from './helpers';
+import {
+  getColumnWidthFromType,
+  getColumnHeaders,
+  getRootCategory,
+  getColumnHeader,
+} from './helpers';
 
 describe('helpers', () => {
   describe('getColumnWidthFromType', () => {
@@ -47,6 +52,40 @@ describe('helpers', () => {
           browserFields: mockBrowserFields,
         })
       ).toEqual(field);
+    });
+  });
+
+  describe('getColumnHeader', () => {
+    test('it should return column header non existing in defaultHeaders', () => {
+      const field = 'test_field_1';
+
+      expect(getColumnHeader(field, [])).toEqual({
+        columnHeaderType: 'not-filtered',
+        id: field,
+        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+      });
+    });
+
+    test('it should return column header existing in defaultHeaders', () => {
+      const field = 'test_field_1';
+
+      expect(
+        getColumnHeader(field, [
+          {
+            columnHeaderType: 'not-filtered',
+            id: field,
+            initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+            esTypes: ['date'],
+            type: 'date',
+          },
+        ])
+      ).toEqual({
+        columnHeaderType: 'not-filtered',
+        id: field,
+        initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+        esTypes: ['date'],
+        type: 'date',
+      });
     });
   });
 

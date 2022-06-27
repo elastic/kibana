@@ -15,12 +15,12 @@ import { Legend } from '../legend';
 
 const NameContainer = euiStyled.div`
   border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
-  padding-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const TimeContainer = euiStyled.div`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
-  padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding-top: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 interface Props {

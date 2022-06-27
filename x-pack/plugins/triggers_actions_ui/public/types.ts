@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Moment } from 'moment';
 import type { ComponentType, ReactNode } from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
@@ -49,7 +50,10 @@ import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
-import type { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
+import type {
+  RuleTagBadgeProps,
+  RuleTagBadgeOptions,
+} from './application/sections/rules_list/components/rule_tag_badge';
 import type { RuleEventLogListProps } from './application/sections/rule_details/components/rule_event_log_list';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
@@ -89,6 +93,7 @@ export type {
   RuleTagFilterProps,
   RuleStatusFilterProps,
   RuleTagBadgeProps,
+  RuleTagBadgeOptions,
   RuleEventLogListProps,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
@@ -436,6 +441,32 @@ export enum AlertsTableFlyoutState {
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
+
+export enum RRuleFrequency {
+  YEARLY = 0,
+  MONTHLY = 1,
+  WEEKLY = 2,
+  DAILY = 3,
+}
+
+export interface RecurrenceSchedule {
+  freq: RRuleFrequency;
+  interval: number;
+  until?: Moment;
+  count?: number;
+  byweekday?: string[];
+  bymonthday?: number[];
+  bymonth?: number[];
+}
+
+export interface SnoozeSchedule {
+  id: string | null;
+  duration: number;
+  rRule: Partial<RecurrenceSchedule> & {
+    dtstart: string;
+    tzid: string;
+  };
+}
 
 export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
