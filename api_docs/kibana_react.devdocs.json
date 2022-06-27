@@ -4413,13 +4413,7 @@
             "text": "IUiSettingsClient"
           },
           " | undefined; fatalErrors?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.FatalErrorsSetup",
-            "text": "FatalErrorsSetup"
-          },
+          "FatalErrorsSetup",
           " | undefined; deprecations?: ",
           {
             "pluginId": "core",
