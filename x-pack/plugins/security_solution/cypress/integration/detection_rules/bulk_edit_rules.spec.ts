@@ -119,6 +119,7 @@ describe('Detection rules, bulk edit', () => {
 
     // check if rule has been updated
     cy.get(CUSTOM_RULES_BTN).click();
+    cy.wait(1000);
     goToTheRuleDetailsOf(RULE_NAME);
     hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
   });
