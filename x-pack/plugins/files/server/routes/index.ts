@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { FileServiceFactory } from './file_service_factory';
-export type { FileServiceStart } from './file_service';
-export * as errors from './errors';
+import { FilesRouter } from './types';
+import { registerFileKindRoutes } from './file_kind';
+
+export function registerRoutes(router: FilesRouter) {
+  registerFileKindRoutes(router);
+}

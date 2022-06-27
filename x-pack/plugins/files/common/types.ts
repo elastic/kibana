@@ -50,8 +50,7 @@ export type FileSavedObjectAttributes<Meta = unknown> = {
   mime?: string;
 
   /**
-   * A file extension like .png or .jpeg which can be used to filter for specific
-   * file types when uploading to this target or when filtering across all files.
+   * Extension that should match the full mime type
    */
   extension?: string;
 
@@ -66,6 +65,8 @@ export type FileSavedObjectAttributes<Meta = unknown> = {
   meta?: Meta;
 };
 
+export type FileJSON = FileSavedObjectAttributes & { id: string };
+
 export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttributes<Meta>>;
 
 export type UpdatableFileAttributes<Meta = unknown> = Pick<
@@ -73,6 +74,10 @@ export type UpdatableFileAttributes<Meta = unknown> = Pick<
   'meta' | 'alt' | 'name'
 >;
 
+/**
+ * The set of properties and behaviors of the "smart" file object. This is built
+ * directly from the set of saved object attributes
+ */
 export interface File<Meta = unknown> {
   id: string;
 
@@ -91,7 +96,15 @@ export interface File<Meta = unknown> {
    * User provided metadata
    */
   meta: Meta;
+
   alt: undefined | string;
+
+  /**
+   * MIME type of the file content, e.g.: image/png.
+   */
+  mime: undefined | string;
+
+  extension: undefined | string;
 
   update(attr: Partial<UpdatableFileAttributes<Meta>>): Promise<File<Meta>>;
 
@@ -100,6 +113,8 @@ export interface File<Meta = unknown> {
   downloadContent(): Promise<Readable>;
 
   delete(): Promise<void>;
+
+  toJSON(): FileJSON;
 }
 
 /**
@@ -145,6 +160,15 @@ export interface FileKind {
       tags: string[];
     };
     delete?: {
+      tags: string[];
+    };
+    getById?: {
+      tags: string[];
+    };
+    list?: {
+      tags: string[];
+    };
+    download?: {
       tags: string[];
     };
   };
