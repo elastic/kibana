@@ -32,8 +32,6 @@ Review important information about the {kib} 8.x releases.
 [[release-notes-8.3.0]]
 == {kib} 8.3.0
 
-coming::[8.3.0]
-
 Review the following information about the {kib} 8.3.0 release.
 
 [float]
@@ -58,7 +56,7 @@ When you use the `vis_type_timelion.graphiteUrls` kibana.yml setting, {kib} succ
 
 To leave your feedback about the removal of `.quandl` and `.graphite`, go to the link:https://discuss.elastic.co/c/elastic-stack/kibana/7[discuss forum].
 ====
-      
+
 [discrete]
 [[breaking-134855]]
 .Makes Osquery All with All base privilege
@@ -73,7 +71,7 @@ This impacts user roles that have *Privileges for all features* set to *All*. Af
 
 // end::notable-breaking-changes[]
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
@@ -94,9 +92,9 @@ you make the necessary updates after you upgrade to 8.3.0.
 Removes the `apm_user` role. For more information, check {kibana-pull}132790[#132790].
 
 *Impact* +
-In the link:https://www.elastic.co/guide/en/kibana/8.3/xpack-apm.html[APM documentation], the `apm_user`role is replaced with the `viewer` and `editor` built-in roles. 
+In the link:https://www.elastic.co/guide/en/kibana/8.3/xpack-apm.html[APM documentation], the `apm_user`role is replaced with the `viewer` and `editor` built-in roles.
 ====
-      
+
 [discrete]
 [[deprecation-132562]]
 .Deprecates input controls
@@ -108,7 +106,7 @@ The input control panels, which allow you to add interactive filters to dashboar
 *Impact* +
 To add interactive filters to your dashboards, use the link:https://www.elastic.co/guide/en/kibana/8.3/add-controls.html[new controls].
 ====
-      
+
 [discrete]
 [[deprecation-131636]]
 .Deprecates anonymous authentication credentials
@@ -120,7 +118,7 @@ The apiKey, including key and ID/key pair, and `elasticsearch_anonymous_user` cr
 *Impact* +
 If you have anonymous authentication provider configured with apiKey or `elasticsearch_anonymous_user` credential types, a deprecation warning appears, even when the provider is not enabled.
 ====
-      
+
 [discrete]
 [[deprecation-131166]]
 .Deprecates v1 and v2 security_linux and security_windows jobs
@@ -164,7 +162,7 @@ The following security_linux and security_windows job configurations are updated
 ** v3_windows_rare_user_runas_event
 ** v3_windows_rare_user_type10_remote_login
 ====
-      
+
 [discrete]
 [[deprecation-130336]]
 .Updates the default legend size
@@ -174,9 +172,9 @@ The following security_linux and security_windows job configurations are updated
 In the *Lens* visualization editor, the *Auto* default for *Legend width* has been deprecated. For more information, check {kibana-pull}130336[#130336].
 
 *Impact* +
-When you create *Lens* visualization, the default for the *Legend width* is now *Medium*. 
+When you create *Lens* visualization, the default for the *Legend width* is now *Medium*.
 ====
-      
+
 [discrete]
 [[deprecation-122075]]
 .Deprecates `xpack.data_enhanced.*`
@@ -188,7 +186,7 @@ In kibana.yml, the `xpack.data_enhanced.*` setting is deprecated. For more infor
 *Impact* +
 Use the `data.*` configuration parameters instead.
 ====
-      
+
 [float]
 [[features-8.3.0]]
 === Features
@@ -531,7 +529,7 @@ Before you upgrade, review the breaking changes, then mitigate the impact to you
 
 There are no breaking changes in {kib} 8.2.2.
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
@@ -564,7 +562,7 @@ Before you upgrade, review the breaking changes, then mitigate the impact to you
 
 There are no breaking changes in {kib} 8.2.2.
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
@@ -588,7 +586,7 @@ Before you upgrade, review the breaking changes, then mitigate the impact to you
 
 There are no breaking changes in {kib} 8.2.1.
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
@@ -641,7 +639,7 @@ Review the following information about the {kib} 8.2.0 release.
 === Known issue
 
 Lens & visualizations::
-A change in the Markdown library that {kib} uses to create *TSVB* *Markdown* visualizations and *Text* dashboard panels renders some tables differently. For more information, check out link:https://github.com/markdown-it/markdown-it/pull/767[#767]. 
+A change in the Markdown library that {kib} uses to create *TSVB* *Markdown* visualizations and *Text* dashboard panels renders some tables differently. For more information, check out link:https://github.com/markdown-it/markdown-it/pull/767[#767].
 
 [float]
 [[breaking-changes-8.2.0]]
@@ -652,10 +650,10 @@ Before you upgrade, review the breaking changes, then mitigate the impact to you
 
 There are no breaking changes in {kib} 8.2.0.
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
-      
+
 [float]
 [[features-8.2.0]]
 === Features
@@ -930,7 +928,7 @@ Before you upgrade, review the breaking changes, then mitigate the impact to you
 
 There are no breaking changes in {kib} 8.1.3.
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
@@ -949,7 +947,7 @@ Before you upgrade, review the breaking changes, then mitigate the impact to you
 
 There are no breaking changes in {kib} 8.1.2.
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
@@ -967,7 +965,7 @@ Before you upgrade, review the breaking changes, then mitigate the impact to you
 
 There are no breaking changes in {kib} 8.1.2.
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
@@ -1010,7 +1008,7 @@ Before you upgrade to 8.1.1, review the breaking changes, then mitigate the impa
 
 There are no breaking changes in {kib} 8.1.1.
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
@@ -1060,9 +1058,9 @@ Before you upgrade to 8.1.0, review the breaking changes, then mitigate the impa
 The `/api/reporting/generate/csv` endpoint has been removed. For more information, refer to {kibana-pull}121435[#121435].
 
 *Impact* +
-If you are using 7.13.0 and earlier, {kibana-ref-all}/8.1/automating-report-generation.html[regenerate the POST URLs] that you use to automatatically generate CSV reports.        
+If you are using 7.13.0 and earlier, {kibana-ref-all}/8.1/automating-report-generation.html[regenerate the POST URLs] that you use to automatatically generate CSV reports.
 ====
-      
+
 [discrete]
 [[breaking-121369]]
 .Removes legacy PDF shim
@@ -1072,13 +1070,13 @@ If you are using 7.13.0 and earlier, {kibana-ref-all}/8.1/automating-report-gene
 The POST URLs that you generated in {kib} 6.2.0 no longer work. For more information, refer to {kibana-pull}121369[#121369].
 
 *Impact* +
-{kibana-ref-all}/8.1/automating-report-generation.html[Regenerate the POST URLs] that you use to automatatically generate PDF reports. 
+{kibana-ref-all}/8.1/automating-report-generation.html[Regenerate the POST URLs] that you use to automatatically generate PDF reports.
 ====
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
-      
+
 [float]
 [[features-8.1.0]]
 === Features
@@ -1128,7 +1126,7 @@ For more information about the features introduced in 8.1.0, refer to <<whats-ne
 [[enhancements-and-bug-fixes-v8.1.0]]
 === Enhancements and bug fixes
 
-For detailed information about the 8.1.0 release, review the enhancements and bug fixes. 
+For detailed information about the 8.1.0 release, review the enhancements and bug fixes.
 
 [float]
 [[enhancement-v8.1.0]]
@@ -1432,9 +1430,9 @@ Before you upgrade to 8.0.0, remove `console.ssl` from kibana.yml.
 // end::notable-breaking-changes[]
 
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
-<<breaking-changes-8.0.0-rc2,8.0.0-rc2>> | <<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+<<breaking-changes-8.0.0-rc2,8.0.0-rc2>> | <<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> |
 <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
@@ -1497,7 +1495,7 @@ For information about the features introduced in 8.0.0, refer to <<whats-new,Wha
 Elastic Security::
 For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
-To review the features in previous versions, refer to the following: 
+To review the features in previous versions, refer to the following:
 
 <<features-8.0.0-rc2,8.0.0-rc2>> | <<features-8.0.0-rc1,8.0.0-rc1>> | <<features-8.0.0-beta1,8.0.0-beta1>> | <<features-8.0.0-alpha2,8.0.0-alpha2>>
 
@@ -1560,9 +1558,9 @@ In production, you are no longer able to use the `elastic` superuser to authenti
 When you configure `elasticsearch.username: elastic`, {kib} fails.
 ====
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
-<<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+<<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> |
 <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
@@ -1665,7 +1663,7 @@ The endpoint is now split into two separate endpoints:
  }
 --
 ====
-      
+
 [discrete]
 [[breaking-119945]]
 .Removes APM jobs from Machine Learning
@@ -1696,7 +1694,7 @@ To complete the migration, re enable plugins or delete documents from the index 
 [%collapsible]
 ====
 *Details* +
-On the Logs and Metrics UIs, references to the following API and saved object deprecated fields have been removed: 
+On the Logs and Metrics UIs, references to the following API and saved object deprecated fields have been removed:
 
 * `timestamp`
 * `tiebreaker`
@@ -1710,9 +1708,9 @@ For more information, refer to {kibana-pull}116821[#116821] and {kibana-pull}115
 When you upgrade to 8.0.0, you are unable to use references to the deprecated fields.
 ====
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
-<<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+<<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> |
 <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
@@ -1778,7 +1776,7 @@ For more information, refer to {fleet-guide}/fleet-api-docs.html[Fleet APIs].
 
 ====
 
-To review the deprecations in previous versions, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
+To review the deprecations in previous versions, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>.
 
 
 [float]
@@ -1922,14 +1920,14 @@ Review the {kib} 8.0.0-beta1 changes, then use the <<upgrade-assistant,Upgrade A
 
 Breaking changes can prevent your application from optimal operation and performance. Review the following breaking changes, then mitigate the impact to your application.
 
-To review the breaking changes in previous versions, refer to the following: 
+To review the breaking changes in previous versions, refer to the following:
 
 <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
 [[alerting-breaking-changes-8.0.0-beta1]]
-==== Alerting 
-      
+==== Alerting
+
 [discrete]
 [[breaking-114558]]
 .Removes `xpack.task_manager.index`
@@ -2024,7 +2022,7 @@ Before you upgrade, make the following changes in kibana.yml:
 The *Dimming opacity* setting in *Advanced Settings* has been removed. For more information, refer to {kibana-pull}111704[#111704].
 
 *Impact* +
-When you upgrade to 8.0.0, you are no longer able to configure the dimming opactiy for visualizations. 
+When you upgrade to 8.0.0, you are no longer able to configure the dimming opactiy for visualizations.
 ====
 
 [discrete]
@@ -2036,7 +2034,7 @@ When you upgrade to 8.0.0, you are no longer able to configure the dimming opact
 In *TSVB*, custom Less stylesheets have been removed. For more information, refer to {kibana-pull}110985[#110985].
 
 *Impact* +
-Existing less stylesheets are automatically converted to CSS stylesheets. 
+Existing less stylesheets are automatically converted to CSS stylesheets.
 ====
 
 [discrete]
@@ -2088,7 +2086,7 @@ Configure the settings in https://www.elastic.co/guide/en/ecs/current/ecs-refere
 [float]
 [[machine-learning-breaking-changes-8.0.0-beta1]]
 ==== Machine learning
-      
+
 [discrete]
 [[breaking-115444]]
 .Grants access to machine learning features when base privileges are used
@@ -2119,7 +2117,7 @@ Install the on-prem version of the <<maps-connect-to-ems,Elastic Maps Service>>,
 
 [float]
 [[operations-breaking-changes-8.0.0-beta1]]
-==== Operations 
+==== Operations
 
 [discrete]
 [[breaking-111535]]
@@ -2135,8 +2133,8 @@ Replace the `CONFIG_PATH` environment variable with `KBN_PATH_CONF`, and replace
 
 [float]
 [[platform-breaking-changes-8.0.0-beta1]]
-==== Platform 
-      
+==== Platform
+
 [discrete]
 [[breaking-114379]]
 .Removes supports for csp.rules configuration
@@ -2243,7 +2241,7 @@ The legacy `optimize.*` settings have been removed. If your configuration uses t
 For more information, refer to {kibana-pull}113296[#113296].
 
 *Impact* +
-To run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to `yarn start`. For more details, refer to {kibana-pull}73154[#73154]. 
+To run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to `yarn start`. For more details, refer to {kibana-pull}73154[#73154].
 ====
 
 [discrete]
@@ -2288,7 +2286,7 @@ The `kibana.index`, `xpack.reporting.index`, and `xpack.task_manager.index` sett
 *Impact* +
 Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<xpack-spaces,spaces>>, export your <<managing-saved-objects, saved objects>> from a tenant into the default space. For more details, refer to link:https://github.com/elastic/kibana/issues/82020[#82020].
 ====
-  
+
 [discrete]
 [[breaking-112305]]
 .Removes legacy logging
@@ -2298,20 +2296,20 @@ Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<
 The logging configuration and log output format has changed. For more information, refer to {kibana-pull}112305[#112305].
 
 *Impact* +
-Use the new <<logging-configuration, logging system configuration>>. 
+Use the new <<logging-configuration, logging system configuration>>.
 ====
 
 [float]
 [[reporting-breaking-changes-8.0.0-beta1]]
 ==== Reporting
-      
+
 [discrete]
 [[breaking-114216]]
 .Removes reporting settings
 [%collapsible]
 ====
 *Details* +
-The following settings have been removed: 
+The following settings have been removed:
 
 * `xpack.reporting.capture.concurrency`
 
@@ -2329,7 +2327,7 @@ Before you upgrade to 8.0.0, remove the settings from kibana.yml.
 
 [float]
 [[rest-api-breaking-changes-8.0.0-beta1]]
-==== REST API 
+==== REST API
 
 [discrete]
 [[breaking-114730]]
@@ -2365,8 +2363,8 @@ Audit logs will be written to the default location in the new ECS format. To cha
 
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
 
-To review the 8.0.0 depcrecations, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
-  
+To review the 8.0.0 depcrecations, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>.
+
 [float]
 [[features-8.0.0-beta1]]
 === Features
@@ -2445,7 +2443,7 @@ To review the breaking changes in the previous version, refer to <<breaking-chan
 *Impact* +
 To retrieve the {kib} status in the previous format, use `GET /api/status?v7format=true`.
 ====
-      
+
 [discrete]
 [[breaking-110738]]
 .Removes support for legacy exports
@@ -2457,7 +2455,7 @@ In {kib} 8.0.0 and later, the legacy format from {kib} 6.x is unsupported. For m
 *Impact* +
 Using the user interface to import saved objects is restricted to `.ndjson` format imports.
 ====
-      
+
 [discrete]
 [[breaking-109896]]
 .Removes `map.regionmap.*`
@@ -2471,11 +2469,11 @@ If you have maps that use `map.regionmap` layers:
 
 . Remove the `map.regionmap` layer.
 
-. To recreate the choropleth layer, use <<import-geospatial-data,GeoJSON upload>> to index your static vector data into {es}. 
+. To recreate the choropleth layer, use <<import-geospatial-data,GeoJSON upload>> to index your static vector data into {es}.
 
-. Create a choropleth layer from the indexed vector data. 
+. Create a choropleth layer from the indexed vector data.
 ====
-      
+
 [discrete]
 [[breaking-109798]]
 .Removes `kibana.defaultAppId`
@@ -2487,7 +2485,7 @@ The deprecated `kibana.defaultAppId` setting in kibana.yml, which is also availa
 *Impact* +
 When you upgrade, remove `kibana.defaultAppId` from your kibana.yml file. To configure the default route for users when they enter a space, use the <<defaultroute,`defaultRoute`>> in *Advanced Settings*.
 ====
-      
+
 [discrete]
 [[breaking-109350]]
 .Removes `courier:batchSearches`
@@ -2499,7 +2497,7 @@ The deprecated `courier:batchSearches` setting in *Advanced Settings* has been r
 *Impact* +
 When you upgrade, the `courier:batchSearches` setting will no longer be available.
 ====
-      
+
 [discrete]
 [[breaking-108111]]
 .Removes `xpack.task_manager.index`
@@ -2511,7 +2509,7 @@ The deprecated `xpack.task_manager.index` setting in kibana.yml has been removed
 *Impact* +
 When you upgrade, remove `xpack.task_manager.index` from your kibana.yml file.
 ====
-      
+
 [discrete]
 [[breaking-108103]]
 .Removes dashboard-only mode
@@ -2523,7 +2521,7 @@ The legacy dashboard-only mode has been removed. For more information, refer to 
 *Impact* +
 To grant users access to only dashboards, create a new role, then assign only the *Dashboard* feature privilege. For more information, refer to <<kibana-feature-privileges,{kib} privileges>>.
 ====
-     
+
 [discrete]
 [[breaking-105979]]
 .Removes `xpack.maps.showMapVisualizationTypes`
@@ -2542,8 +2540,8 @@ When you upgrade, remove `xpack.maps.showMapVisualizationTypes` from your kibana
 
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
 
-To review the 8.0.0 depcrecations, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
-      
+To review the 8.0.0 depcrecations, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>.
+
 [float]
 [[features-8.0.0-alpha2]]
 === Features
@@ -2551,7 +2549,7 @@ The 8.0.0-alpha2 release adds the following new and notable feature.
 
 Security::
 * Adds the interactive setup mode {kibana-pull}106881[#106881]
-      
+
 [float]
 [[enhancement-v8.0.0-alpha2]]
 === Enhancements
@@ -2571,7 +2569,7 @@ Review the {kib} 8.0.0-alpha1 changes, then use the <<upgrade-assistant,Upgrade 
 [[breaking-changes-8.0.0-alpha1]]
 === Breaking changes
 
-Breaking changes can prevent your application from optimal operation and performance. Review the breaking changes, then mitigate the impact to your application. 
+Breaking changes can prevent your application from optimal operation and performance. Review the breaking changes, then mitigate the impact to your application.
 
 [float]
 [[enterprise-search-change]]
@@ -2602,7 +2600,7 @@ Enable X-Pack Security.
 Time-based interval index patterns were deprecated in 5.x. In 6.x, you could no longer create time-based interval index patterns, but they continued to function as expected. Support for these index patterns has been removed in 8.0. For more information, refer to {kibana-pull}35173[#35173]
 
 *Impact* +
-You must migrate your time_based index patterns to a wildcard pattern. For example, logstash-*. 
+You must migrate your time_based index patterns to a wildcard pattern. For example, logstash-*.
 ====
 
 [float]
@@ -2620,7 +2618,7 @@ After you extract an archive, the output directory no longer includes the target
 *Impact* +
 To use the new folder, update the configuration management tools and automation.
 ====
-      
+
 [discrete]
 [[breaking-90511]]
 .Removed default support for TLS v1.0 and v1.1
@@ -2632,7 +2630,7 @@ The default support for TLS v1.0 and v1.1 has been removed. For more information
 *Impact* +
 To enable support, set `--tls-min-1.0` in the `node.options` configuration file. To locate the configuration file, go to the kibana/config folder or any other configuration with the `KBN_PATH_CONF` environment variable. For example, if you are using a Debian-based system, the configuration file is located in /etc/kibana.
 ====
-           
+
 [discrete]
 [[breaking-74424]]
 .Removed support for sysv init
@@ -2644,7 +2642,7 @@ All supported operating systems use systemd service files. Any system that doesn
 *Impact* +
 If your installation uses .deb or .rpm packages with SysV, migrate to systemd.
 ====
-       
+
 [discrete]
 [[breaking-42353]]
 .Disabled response logging as a default
@@ -2680,7 +2678,7 @@ logging:
 [float]
 [[reporting-changes-8.0.0-alpha1]]
 ==== Reporting changes
-      
+
 [discrete]
 [[breaking-52539]]
 .Legacy job parameters are no longer supported
@@ -2706,7 +2704,7 @@ If you use POST URL snippets to automatically generate PDF reports, regenerate t
 The `/api/security/v1/saml` route has been removed and is reflected in the kibana.yml `server.xsrf.whitelist` setting, {es}, and the Identity Provider SAML settings. For more information, refer to {kibana-pull}47929[#47929]
 
 *Impact* +
-Use the `/api/security/saml/callback` route, or wait to upgrade to 8.0.0-alpha2 when the `/api/security/saml/callback` route breaking change is reverted. 
+Use the `/api/security/saml/callback` route, or wait to upgrade to 8.0.0-alpha2 when the `/api/security/saml/callback` route breaking change is reverted.
 ====
 
 [discrete]
@@ -2724,10 +2722,10 @@ To enable support for legacy browsers, set `csp.strict: false` in kibana.yml. To
 [float]
 [[settings-changes-8.0.0-alpha1]]
 ==== Settings changes
-      
+
 [discrete]
 [[breaking-106061]]
-.Use new session timeout defaults 
+.Use new session timeout defaults
 [%collapsible]
 ====
 *Details* +
@@ -2773,8 +2771,8 @@ Use the `xpack.security.authc.saml.realm` and `xpack.security.authc.providers` s
 The `logging.useUTC` setting has been removed. For more information, refer to {kibana-pull}22696[#22696]
 
 *Impact* +
-The default timezone is UTC. To change the timezone, set `logging.timezone: false` in kibana.yml. Change the timezone when the system, such as a docker container, is configured for a nonlocal timezone.  
-====  
+The default timezone is UTC. To change the timezone, set `logging.timezone: false` in kibana.yml. Change the timezone when the system, such as a docker container, is configured for a nonlocal timezone.
+====
 
 [discrete]
 [[breaking-32049]]
@@ -2805,7 +2803,7 @@ Systems that don't have `service` aliased to use kibana.service are unable to us
 *Impact* +
 If your system doesn't have `service` aliased to use kibana.service, use `systemctl start kibana.service`.
 ====
-      
+
 [discrete]
 [[deprecation-33603]]
 .Removed `xpack:defaultAdminEmail` setting
