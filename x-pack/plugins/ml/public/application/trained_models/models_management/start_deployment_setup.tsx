@@ -81,6 +81,7 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
         }
       >
         <EuiFieldNumber
+          min={1}
           name={'numOfAllocations'}
           value={numOfAllocation}
           onChange={(event) => {
