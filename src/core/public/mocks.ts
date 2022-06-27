@@ -16,12 +16,12 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-browser
 
 // Only import types from '.' to avoid triggering default Jest mocks.
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
-import { PluginInitializerContext, AppMountParameters } from '.';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
+import type { PluginInitializerContext, AppMountParameters } from '.';
 // Import values from their individual modules instead.
 import { ScopedHistory } from './application';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
@@ -35,7 +35,7 @@ export { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 export { chromeServiceMock } from './chrome/chrome_service.mock';
 export { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
-export { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
+export { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 export { httpServiceMock } from './http/http_service.mock';
 export { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 export { notificationServiceMock } from './notifications/notifications_service.mock';

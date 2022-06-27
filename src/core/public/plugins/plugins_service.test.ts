@@ -34,7 +34,7 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { applicationServiceMock } from '../application/application_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
-import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { CoreSetup, CoreStart, PluginInitializerContext } from '..';

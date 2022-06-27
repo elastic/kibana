@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { injectedMetadataServiceMock, executionContextServiceMock } from '../public/mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { HttpService } from '../public/http';
-import { fatalErrorsServiceMock } from '../public/fatal_errors/fatal_errors_service.mock';
 
 export type SetupTap = (
   injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createSetupContract>,

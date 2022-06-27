@@ -2919,7 +2919,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-utils@link:bazel-bin/packages/kbn-aiops-utils":
+"@kbn/aiops-utils@link:bazel-bin/x-pack/packages/ml/aiops_utils":
   version "0.0.0"
   uid ""
 
@@ -3115,6 +3115,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-fatal-errors-browser-internal@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-fatal-errors-browser-mocks@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-fatal-errors-browser@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal":
   version "0.0.0"
   uid ""
@@ -3268,10 +3280,6 @@
   uid ""
 
 "@kbn/jest-serializers@link:bazel-bin/packages/kbn-jest-serializers":
-  version "0.0.0"
-  uid ""
-
-"@kbn/kbn-ci-stats-performance-metrics@link:bazel-bin/packages/kbn-kbn-ci-stats-performance-metrics":
   version "0.0.0"
   uid ""
 
@@ -6382,7 +6390,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__aiops-utils@link:bazel-bin/packages/kbn-aiops-utils/npm_module_types":
+"@types/kbn__aiops-utils@link:bazel-bin/x-pack/packages/ml/aiops_utils/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6571,6 +6579,18 @@
   uid ""
 
 "@types/kbn__core-execution-context-common@link:bazel-bin/packages/core/execution-context/core-execution-context-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-fatal-errors-browser-internal@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-fatal-errors-browser-mocks@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-fatal-errors-browser@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -24056,11 +24076,6 @@ randexp@0.4.6:
   dependencies:
     discontinuous-range "1.0.0"
     ret "~0.1.10"
-
-random-word-slugs@^0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/random-word-slugs/-/random-word-slugs-0.0.5.tgz#6ccd6c7ea320be9fbc19507f8c3a7d4a970ff61f"
-  integrity sha512-KwelmWsWHiMl3MKauB5usAIPg2FgwAku+FVYEuf32yyhZmEh3Fq4nXBxeUAgXB2F+G/HTeDsqXsmuupmOMnjRg==
 
 randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.5, randombytes@^2.1.0:
   version "2.1.0"

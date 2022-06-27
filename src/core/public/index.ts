@@ -36,6 +36,11 @@ import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-ana
 import { ExecutionContextSetup, ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 
+import type {
+  FatalErrorsSetup,
+  FatalErrorsStart,
+  FatalErrorInfo,
+} from '@kbn/core-fatal-errors-browser';
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -58,7 +63,6 @@ import {
   NavType,
   ChromeHelpMenuActions,
 } from './chrome';
-import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
