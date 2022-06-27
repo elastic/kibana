@@ -6,8 +6,13 @@
  */
 
 import uuid from 'uuid';
+import * as t from 'io-ts';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import {
@@ -19,15 +24,41 @@ import {
   RuleParams,
   TypeSpecificRuleParams,
   BaseRuleParams,
+  EqlRuleParams,
+  EqlSpecificRuleParams,
+  ThreatRuleParams,
+  ThreatSpecificRuleParams,
+  QueryRuleParams,
+  QuerySpecificRuleParams,
+  SavedQuerySpecificRuleParams,
+  SavedQueryRuleParams,
+  ThresholdRuleParams,
+  ThresholdSpecificRuleParams,
+  MachineLearningRuleParams,
+  MachineLearningSpecificRuleParams,
+  InternalRuleUpdate,
 } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
 import { RuleExecutionSummary } from '../../../../common/detection_engine/schemas/common';
 import {
   CreateRulesSchema,
   CreateTypeSpecific,
+  eqlFullPatchSchema,
+  EqlPatchParams,
   FullResponseSchema,
+  machineLearningFullPatchSchema,
+  MachineLearningPatchParams,
+  queryFullPatchSchema,
+  QueryPatchParams,
   ResponseTypeSpecific,
+  savedQueryFullPatchSchema,
+  SavedQueryPatchParams,
+  threatMatchFullPatchSchema,
+  ThreatMatchPatchParams,
+  thresholdFullPatchSchema,
+  ThresholdPatchParams,
 } from '../../../../common/detection_engine/schemas/request';
+import { PatchRulesSchema } from '../../../../common/detection_engine/schemas/request/rule_schemas';
 import { AppClient } from '../../../types';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
@@ -130,9 +161,252 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
   }
 };
 
+const validateSchema = <A>(input: unknown, schema: t.Type<A>): A | BadRequestError => {
+  const decoded = schema.decode(input);
+  const checked = exactCheck(input, decoded);
+  const onLeft = (errors: t.Errors): BadRequestError | A => {
+    return new BadRequestError(formatErrors(errors).join());
+  };
+  const onRight = (value: A): BadRequestError | A => {
+    return value;
+  };
+  return pipe(checked, fold(onLeft, onRight));
+};
+
+const patchEqlParams = (
+  params: EqlPatchParams,
+  existingRule: EqlRuleParams
+): EqlSpecificRuleParams => {
+  return {
+    type: existingRule.type,
+    language: params.language ?? existingRule.language,
+    index: params.index ?? existingRule.index,
+    dataViewId: params.data_view_id ?? existingRule.dataViewId,
+    query: params.query ?? existingRule.query,
+    filters: params.filters ?? existingRule.filters,
+    timestampField: params.timestamp_field ?? existingRule.timestampField,
+    eventCategoryOverride: params.event_category_override ?? existingRule.eventCategoryOverride,
+    tiebreakerField: params.tiebreaker_field ?? existingRule.tiebreakerField,
+  };
+};
+
+const patchThreatMatchParams = (
+  params: ThreatMatchPatchParams,
+  existingRule: ThreatRuleParams
+): ThreatSpecificRuleParams => {
+  return {
+    type: existingRule.type,
+    language: params.language ?? existingRule.language,
+    index: params.index ?? existingRule.index,
+    dataViewId: params.data_view_id ?? existingRule.dataViewId,
+    query: params.query ?? existingRule.query,
+    filters: params.filters ?? existingRule.filters,
+    savedId: params.saved_id ?? existingRule.savedId,
+    threatFilters: params.threat_filters ?? existingRule.threatFilters,
+    threatQuery: params.threat_query ?? existingRule.threatQuery,
+    threatMapping: params.threat_mapping ?? existingRule.threatMapping,
+    threatLanguage: params.threat_language ?? existingRule.threatLanguage,
+    threatIndex: params.threat_index ?? existingRule.threatIndex,
+    threatIndicatorPath: params.threat_indicator_path ?? existingRule.threatIndicatorPath,
+    concurrentSearches: params.concurrent_searches ?? existingRule.concurrentSearches,
+    itemsPerSearch: params.items_per_search ?? existingRule.itemsPerSearch,
+  };
+};
+
+const patchQueryParams = (
+  params: QueryPatchParams,
+  existingRule: QueryRuleParams
+): QuerySpecificRuleParams => {
+  return {
+    type: existingRule.type,
+    language: params.language ?? existingRule.language,
+    index: params.index ?? existingRule.index,
+    dataViewId: params.data_view_id ?? existingRule.dataViewId,
+    query: params.query ?? existingRule.query,
+    filters: params.filters ?? existingRule.filters,
+    savedId: params.saved_id ?? existingRule.savedId,
+  };
+};
+
+const patchSavedQueryParams = (
+  params: SavedQueryPatchParams,
+  existingRule: SavedQueryRuleParams
+): SavedQuerySpecificRuleParams => {
+  return {
+    type: existingRule.type,
+    language: params.language ?? existingRule.language,
+    index: params.index ?? existingRule.index,
+    dataViewId: params.data_view_id ?? existingRule.dataViewId,
+    query: params.query ?? existingRule.query,
+    filters: params.filters ?? existingRule.filters,
+    savedId: params.saved_id ?? existingRule.savedId,
+  };
+};
+
+const patchThresholdParams = (
+  params: ThresholdPatchParams,
+  existingRule: ThresholdRuleParams
+): ThresholdSpecificRuleParams => {
+  return {
+    type: existingRule.type,
+    language: params.language ?? existingRule.language,
+    index: params.index ?? existingRule.index,
+    dataViewId: params.data_view_id ?? existingRule.dataViewId,
+    query: params.query ?? existingRule.query,
+    filters: params.filters ?? existingRule.filters,
+    savedId: params.saved_id ?? existingRule.savedId,
+    threshold: params.threshold
+      ? normalizeThresholdObject(params.threshold)
+      : existingRule.threshold,
+  };
+};
+
+const patchMachineLearningParams = (
+  params: MachineLearningPatchParams,
+  existingRule: MachineLearningRuleParams
+): MachineLearningSpecificRuleParams => {
+  return {
+    type: existingRule.type,
+    anomalyThreshold: params.anomaly_threshold ?? existingRule.anomalyThreshold,
+    machineLearningJobId: params.machine_learning_job_id
+      ? normalizeMachineLearningJobIds(params.machine_learning_job_id)
+      : existingRule.machineLearningJobId,
+  };
+};
+
+// TODO: unit test this function to make sure schemas pass validation as expected
+export const patchTypeSpecificSnakeToCamel = (
+  params: PatchRulesSchema,
+  existingRule: RuleParams
+): TypeSpecificRuleParams | BadRequestError => {
+  // Each rule type validates the full patch schema for the specific type of rule to ensure that
+  // params from other rule types are not being passed in. Otherwise, since the `type` is not required
+  // on patch requests, type specific params from one rule type could be passed in when patching a
+  // different rule type and they'd be ignored without a warning or error.
+  // This validation ensures that e.g. only valid EQL rule params are passed in when patching an EQL rule.
+  switch (existingRule.type) {
+    case 'eql': {
+      const validated = validateSchema(params, eqlFullPatchSchema);
+      if (validated instanceof BadRequestError) {
+        return validated;
+      }
+      return patchEqlParams(validated, existingRule);
+    }
+    case 'threat_match': {
+      const validated = validateSchema(params, threatMatchFullPatchSchema);
+      if (validated instanceof BadRequestError) {
+        return validated;
+      }
+      return patchThreatMatchParams(validated, existingRule);
+    }
+    case 'query': {
+      const validated = validateSchema(params, queryFullPatchSchema);
+      if (validated instanceof BadRequestError) {
+        return validated;
+      }
+      return patchQueryParams(validated, existingRule);
+    }
+    case 'saved_query': {
+      const validated = validateSchema(params, savedQueryFullPatchSchema);
+      if (validated instanceof BadRequestError) {
+        return validated;
+      }
+      return patchSavedQueryParams(validated, existingRule);
+    }
+    case 'threshold': {
+      const validated = validateSchema(params, thresholdFullPatchSchema);
+      if (validated instanceof BadRequestError) {
+        return validated;
+      }
+      return patchThresholdParams(validated, existingRule);
+    }
+    case 'machine_learning': {
+      const validated = validateSchema(params, machineLearningFullPatchSchema);
+      if (validated instanceof BadRequestError) {
+        return validated;
+      }
+      return patchMachineLearningParams(validated, existingRule);
+    }
+    default: {
+      return assertUnreachable(existingRule);
+    }
+  }
+};
+const versionExcludedKeys = ['enabled', 'id', 'rule_id'];
+const shouldUpdateVersion = (params: PatchRulesSchema): boolean => {
+  for (const key in params) {
+    if (!versionExcludedKeys.includes(key)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+// TODO: tests to ensure version gets updated as expected
+// eslint-disable-next-line complexity
+export const convertPatchAPIToInternalSchema = (
+  params: PatchRulesSchema,
+  existingRule: SanitizedRule<RuleParams>
+): InternalRuleUpdate | BadRequestError => {
+  const typeSpecificParams = patchTypeSpecificSnakeToCamel(params, existingRule.params);
+  if (typeSpecificParams instanceof BadRequestError) {
+    return typeSpecificParams;
+  }
+  const existingParams = existingRule.params;
+  return {
+    name: params.name ?? existingRule.name,
+    tags: params.tags ?? existingRule.tags,
+    params: {
+      author: params.author ?? existingParams.author,
+      buildingBlockType: params.building_block_type ?? existingParams.buildingBlockType,
+      description: params.description ?? existingParams.description,
+      ruleId: existingParams.ruleId,
+      falsePositives: params.false_positives ?? existingParams.falsePositives,
+      from: params.from ?? existingParams.from,
+      immutable: existingParams.immutable,
+      license: params.license ?? existingParams.license,
+      outputIndex: params.output_index ?? existingParams.outputIndex,
+      timelineId: params.timeline_id ?? existingParams.timelineId,
+      timelineTitle: params.timeline_title ?? existingParams.timelineTitle,
+      meta: params.meta ?? existingParams.meta,
+      maxSignals: params.max_signals ?? existingParams.maxSignals,
+      relatedIntegrations: existingParams.relatedIntegrations,
+      requiredFields: existingParams.requiredFields,
+      riskScore: params.risk_score ?? existingParams.riskScore,
+      riskScoreMapping: params.risk_score_mapping ?? existingParams.riskScoreMapping,
+      ruleNameOverride: params.rule_name_override ?? existingParams.ruleNameOverride,
+      setup: existingParams.setup,
+      severity: params.severity ?? existingParams.severity,
+      severityMapping: params.severity_mapping ?? existingParams.severityMapping,
+      threat: params.threat ?? existingParams.threat,
+      timestampOverride: params.timestamp_override ?? existingParams.timestampOverride,
+      to: params.to ?? existingParams.to,
+      references: params.references ?? existingParams.references,
+      namespace: params.namespace ?? existingParams.namespace,
+      note: params.note ?? existingParams.note,
+      // Always use the version from the request if specified. If it isn't specified, leave immutable rules alone and
+      // increment the version of mutable rules by 1.
+      version:
+        params.version ?? existingParams.immutable
+          ? existingParams.version
+          : shouldUpdateVersion(params)
+          ? existingParams.version + 1
+          : existingParams.version,
+      exceptionsList: params.exceptions_list ?? existingParams.exceptionsList,
+      ...typeSpecificParams,
+    },
+    schedule: { interval: params.interval ?? existingRule.schedule.interval },
+    actions: params.actions ? params.actions.map(transformRuleToAlertAction) : existingRule.actions,
+    throttle: params.throttle ? transformToAlertThrottle(params.throttle) : existingRule.throttle,
+    notifyWhen: params.throttle ? transformToNotifyWhen(params.throttle) : existingRule.notifyWhen,
+  };
+};
+
 export const convertCreateAPIToInternalSchema = (
   input: CreateRulesSchema,
-  siemClient: AppClient
+  siemClient: AppClient,
+  immutable = false,
+  defaultEnabled = true
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuid.v4();
@@ -148,7 +422,7 @@ export const convertCreateAPIToInternalSchema = (
       ruleId: newRuleId,
       falsePositives: input.false_positives ?? [],
       from: input.from ?? 'now-6m',
-      immutable: false,
+      immutable,
       license: input.license,
       outputIndex: input.output_index ?? siemClient.getSignalsIndex(),
       timelineId: input.timeline_id,
@@ -174,7 +448,7 @@ export const convertCreateAPIToInternalSchema = (
       ...typeSpecificParams,
     },
     schedule: { interval: input.interval ?? '5m' },
-    enabled: input.enabled ?? true,
+    enabled: input.enabled ?? defaultEnabled,
     actions: input.actions?.map(transformRuleToAlertAction) ?? [],
     throttle: transformToAlertThrottle(input.throttle),
     notifyWhen: transformToNotifyWhen(input.throttle),

@@ -11,11 +11,8 @@ import { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/ser
 import type {
   MachineLearningJobIdOrUndefined,
   From,
-  FromOrUndefined,
   RiskScore,
   RiskScoreMapping,
-  RiskScoreMappingOrUndefined,
-  RiskScoreOrUndefined,
   ThreatIndexOrUndefined,
   ThreatQueryOrUndefined,
   ThreatMappingOrUndefined,
@@ -25,23 +22,17 @@ import type {
   ItemsPerSearchOrUndefined,
   ThreatIndicatorPathOrUndefined,
   Threats,
-  ThreatsOrUndefined,
-  TypeOrUndefined,
   Type,
   LanguageOrUndefined,
   SeverityMapping,
-  SeverityMappingOrUndefined,
-  SeverityOrUndefined,
   Severity,
-  MaxSignalsOrUndefined,
   MaxSignals,
-  ThrottleOrUndefinedOrNull,
   ThrottleOrNull,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
+import type { Version } from '@kbn/securitysolution-io-ts-types';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { RulesClient, PartialRule, BulkEditOperation } from '@kbn/alerting-plugin/server';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
@@ -50,7 +41,6 @@ import {
   FalsePositives,
   RuleId,
   Immutable,
-  DescriptionOrUndefined,
   Interval,
   OutputIndex,
   Name,
@@ -70,15 +60,7 @@ import {
   Id,
   IdOrUndefined,
   RuleIdOrUndefined,
-  EnabledOrUndefined,
-  FalsePositivesOrUndefined,
-  OutputIndexOrUndefined,
-  IntervalOrUndefined,
-  NameOrUndefined,
-  TagsOrUndefined,
-  ToOrUndefined,
   ThresholdOrUndefined,
-  ReferencesOrUndefined,
   PerPageOrUndefined,
   PageOrUndefined,
   SortFieldOrUndefined,
@@ -86,7 +68,6 @@ import {
   FieldsOrUndefined,
   SortOrderOrUndefined,
   Author,
-  AuthorOrUndefined,
   LicenseOrUndefined,
   TimestampOverrideOrUndefined,
   BuildingBlockTypeOrUndefined,
@@ -104,6 +85,7 @@ import {
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogForRoutes } from '../rule_execution_log';
+import { PatchRulesSchema } from '../../../../common/detection_engine/schemas/request/rule_schemas';
 
 export type RuleAlertType = SanitizedRule<RuleParams>;
 
@@ -211,66 +193,10 @@ export interface UpdateRulesOptions {
   ruleUpdate: UpdateRulesSchema;
 }
 
-export interface PatchRulesOptions extends Partial<PatchRulesFieldsOptions> {
+export interface PatchRulesOptions {
   rulesClient: RulesClient;
+  params: PatchRulesSchema;
   rule: RuleAlertType | null | undefined;
-}
-
-interface PatchRulesFieldsOptions {
-  anomalyThreshold: AnomalyThresholdOrUndefined;
-  author: AuthorOrUndefined;
-  buildingBlockType: BuildingBlockTypeOrUndefined;
-  description: DescriptionOrUndefined;
-  enabled: EnabledOrUndefined;
-  timestampField: TimestampFieldOrUndefined;
-  eventCategoryOverride: EventCategoryOverrideOrUndefined;
-  tiebreakerField: TiebreakerFieldOrUndefined;
-  falsePositives: FalsePositivesOrUndefined;
-  from: FromOrUndefined;
-  query: QueryOrUndefined;
-  language: LanguageOrUndefined;
-  savedId: SavedIdOrUndefined;
-  timelineId: TimelineIdOrUndefined;
-  timelineTitle: TimelineTitleOrUndefined;
-  meta: MetaOrUndefined;
-  machineLearningJobId: MachineLearningJobIdOrUndefined;
-  filters: PartialFilter[];
-  index: IndexOrUndefined;
-  dataViewId: DataViewIdOrUndefined;
-  interval: IntervalOrUndefined;
-  license: LicenseOrUndefined;
-  maxSignals: MaxSignalsOrUndefined;
-  relatedIntegrations: RelatedIntegrationArray | undefined;
-  requiredFields: RequiredFieldArray | undefined;
-  riskScore: RiskScoreOrUndefined;
-  riskScoreMapping: RiskScoreMappingOrUndefined;
-  ruleNameOverride: RuleNameOverrideOrUndefined;
-  outputIndex: OutputIndexOrUndefined;
-  name: NameOrUndefined;
-  setup: SetupGuide | undefined;
-  severity: SeverityOrUndefined;
-  severityMapping: SeverityMappingOrUndefined;
-  tags: TagsOrUndefined;
-  threat: ThreatsOrUndefined;
-  itemsPerSearch: ItemsPerSearchOrUndefined;
-  concurrentSearches: ConcurrentSearchesOrUndefined;
-  threshold: ThresholdOrUndefined;
-  threatFilters: ThreatFiltersOrUndefined;
-  threatIndex: ThreatIndexOrUndefined;
-  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
-  threatQuery: ThreatQueryOrUndefined;
-  threatMapping: ThreatMappingOrUndefined;
-  threatLanguage: ThreatLanguageOrUndefined;
-  throttle: ThrottleOrUndefinedOrNull;
-  timestampOverride: TimestampOverrideOrUndefined;
-  to: ToOrUndefined;
-  type: TypeOrUndefined;
-  references: ReferencesOrUndefined;
-  note: NoteOrUndefined;
-  version: VersionOrUndefined;
-  exceptionsList: ListArrayOrUndefined;
-  actions: RuleAlertAction[] | undefined;
-  namespace?: NamespaceOrUndefined;
 }
 
 export interface ReadRuleOptions {
