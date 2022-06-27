@@ -73,8 +73,6 @@ export const SearchIndices: React.FC = () => {
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.name.columnTitle', {
         defaultMessage: 'Index name',
       }),
-      sortable: true,
-      truncateText: true,
       render: (indexName: string) => (
         <EuiLinkTo
           data-test-subj="search-index-link"
@@ -85,6 +83,8 @@ export const SearchIndices: React.FC = () => {
           {indexName}
         </EuiLinkTo>
       ),
+      sortable: true,
+      truncateText: true,
     },
     {
       field: 'total.docs.count',
@@ -99,14 +99,14 @@ export const SearchIndices: React.FC = () => {
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.health.columnTitle', {
         defaultMessage: 'Index health',
       }),
-      sortable: true,
-      truncateText: true,
       render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
         <span>
           <EuiIcon type="dot" color={healthColorsMap[health] ?? ''} />
           &nbsp;{health ?? '-'}
         </span>
       ),
+      sortable: true,
+      truncateText: true,
     },
     {
       field: 'data_ingestion',
@@ -116,27 +116,24 @@ export const SearchIndices: React.FC = () => {
           defaultMessage: 'Data ingestion',
         }
       ),
-      truncateText: true,
       render: (dataIngestionStatus: string) =>
         dataIngestionStatus ? (
           <EuiBadge color={dataIngestionStatus === 'connected' ? 'success' : 'warning'}>
             {dataIngestionStatus}
           </EuiBadge>
         ) : null,
+      truncateText: true,
     },
     {
+      align: 'right' as HorizontalAlignment,
       field: 'total.store.size_in_bytes',
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.storage.columnTitle', {
         defaultMessage: 'Storage',
       }),
       sortable: true,
       truncateText: true,
-      align: 'right' as HorizontalAlignment,
     },
     {
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
-        defaultMessage: 'Actions',
-      }),
       actions: [
         {
           render: ({ name }: SearchIndex) => (
@@ -150,6 +147,9 @@ export const SearchIndices: React.FC = () => {
           ),
         },
       ],
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
+        defaultMessage: 'Actions',
+      }),
     },
   ];
 

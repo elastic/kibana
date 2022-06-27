@@ -28,13 +28,23 @@ export const createApiLogic = <Result, Args extends Record<string, unknown> | un
   apiFunction: (args: Args) => Promise<Result>
 ) =>
   kea<MakeLogicType<Values<Result>, Actions<Args, Result>>>({
-    path: ['enterprise_search', ...path],
     actions: {
       apiError: (error) => error,
       apiReset: true,
       apiSuccess: (result) => result,
       makeRequest: (args) => args,
     },
+    listeners: ({ actions }) => ({
+      makeRequest: async (args) => {
+        try {
+          const result = await apiFunction(args);
+          actions.apiSuccess(result);
+        } catch (e) {
+          actions.apiError(e);
+        }
+      },
+    }),
+    path: ['enterprise_search', ...path],
     reducers: () => ({
       apiStatus: [
         {
@@ -56,16 +66,6 @@ export const createApiLogic = <Result, Args extends Record<string, unknown> | un
           }),
         },
       ],
-    }),
-    listeners: ({ actions }) => ({
-      makeRequest: async (args) => {
-        try {
-          const result = await apiFunction(args);
-          actions.apiSuccess(result);
-        } catch (e) {
-          actions.apiError(e);
-        }
-      },
     }),
     selectors: ({ selectors }) => ({
       data: [() => [selectors.apiStatus], (apiStatus: ApiStatus<Result>) => apiStatus.data],

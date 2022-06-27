@@ -33,14 +33,16 @@ export interface IndicesValues {
 }
 
 export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
+  actions: { onPaginate: (newPageIndex) => ({ newPageIndex }) },
   connect: {
     actions: [IndicesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
     values: [IndicesAPILogic, ['data', 'status']],
   },
+  listeners: () => ({
+    apiError: (e) => flashAPIErrors(e),
+    makeRequest: () => clearFlashMessages(),
+  }),
   path: ['enterprise_search', 'content', 'indices_logic'],
-  actions: {
-    onPaginate: (newPageIndex) => ({ newPageIndex }),
-  },
   reducers: () => ({
     meta: [
       DEFAULT_META,
@@ -49,10 +51,6 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
         onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
       },
     ],
-  }),
-  listeners: () => ({
-    apiError: (e) => flashAPIErrors(e),
-    makeRequest: () => clearFlashMessages(),
   }),
   selectors: ({ selectors }) => ({
     indices: [() => [selectors.data], (data) => data?.indices || []],

@@ -23,11 +23,11 @@ export interface NewSearchIndexActions {
 }
 
 export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({
-  path: ['enterprise_search', 'content', 'new_search_index'],
   actions: {
-    setRawName: (rawName) => ({ rawName }),
     setLanguage: (language) => ({ language }),
+    setRawName: (rawName) => ({ rawName }),
   },
+  path: ['enterprise_search', 'content', 'new_search_index'],
   reducers: {
     language: [
       DEFAULT_LANGUAGE,
