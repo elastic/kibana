@@ -8,7 +8,7 @@
 
 import { DataView } from '@kbn/data-views-plugin/common';
 
-export function getIndexPatternMock() {
+export function getIndexPatternMock(isTimebased = true) {
   const fields = [
     {
       name: '_source',
@@ -65,15 +65,16 @@ export function getIndexPatternMock() {
     },
   ] as DataView['fields'];
   const indexPatternMock = {
-    isTimeBased: () => true,
+    isTimeBased: () => isTimebased,
     getName: () => 'test',
     fields,
     getFormatterForField: () => ({
       convert: () => 'test',
     }),
-    getFieldByName: (name: string) => {
+    getFieldByName: () => {
       return fields[0];
     },
+    metaFields: [],
   } as unknown as DataView;
 
   indexPatternMock.fields.getByName = () => fields[0];

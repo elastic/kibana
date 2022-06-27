@@ -124,11 +124,12 @@ export function getLayoutProps(indexPattern: DataView) {
     searchSource: searchSourceMock,
     state: { columns: [] },
     stateContainer: {
-      setAppState: () => {},
+      setAppState: action('Set app state'),
       appStateContainer: {
         getState: () => ({
           interval: 'auto',
         }),
+        setState: action('Set app state'),
       },
     } as unknown as GetStateReturn,
     setExpandedDoc: action('opening an expanded doc'),
