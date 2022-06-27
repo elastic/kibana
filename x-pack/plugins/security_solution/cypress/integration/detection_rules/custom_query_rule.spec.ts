@@ -110,11 +110,8 @@ describe('Custom query rules', () => {
   before(() => {
     cleanKibana();
     esArchiverResetKibana();
-    try {
-      postDataView('auditbeat-*');
-    } catch (exc) {
-      console.error(exc);
-    }
+    postDataView('auditbeat-*');
+
     login();
   });
   describe('Custom detection rules creation', () => {
@@ -210,7 +207,7 @@ describe('Custom query rules', () => {
       cy.get(ALERT_GRID_CELL).contains(this.rule.name);
     });
   });
-  describe('Custom detection rules creation', () => {
+  describe.skip('Custom detection rules creation with data view', () => {
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
@@ -226,7 +223,7 @@ describe('Custom query rules', () => {
       });
     });
 
-    it('Creates and enables a new rule with data view', function () {
+    it.skip('Creates and enables a new rule with data view', function () {
       visit(RULE_CREATION);
       fillDefineCustomRuleWithImportedQueryAndDataViewAndContinue(this.rule);
       fillBasicAboutRuleAndContinue(this.rule);
@@ -296,6 +293,13 @@ describe('Custom query rules', () => {
         .invoke('text')
         .should('match', /^[1-9].+$/); // Any number of alerts
       cy.get(ALERT_GRID_CELL).contains(this.rule.name);
+    });
+
+    it.skip('Can edit rule definition and switch from data view to index pattern', function () {
+      visit(RULE_CREATION);
+      fillDefineCustomRuleWithImportedQueryAndDataViewAndContinue(this.rule);
+      cy.get('[data-test-subj="edit-define-rule"]').click();
+      cy.get('[data-test-subj="rule-index-toggle-indexPatterns"]').click();
     });
   });
 
