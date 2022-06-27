@@ -37,14 +37,14 @@ export const synchronizeMovement = {
   register(embeddableId: string, mapPanel: MapPanel) {
     registry[embeddableId] = mapPanel;
   },
-  setLocation(triggeringEmbedableId: string, lat: number, lon: number, zoom: number) {
-    if (primaryPanelId && primaryPanelId !== triggeringEmbedableId) {
+  setLocation(triggeringEmbeddableId: string, lat: number, lon: number, zoom: number) {
+    if (primaryPanelId && primaryPanelId !== triggeringEmbeddableId) {
       // to avoid callstack overflow and bouncing between locations,
       // do not propagate location changes from "follower" panels
       return;
     }
 
-    primaryPanelId = triggeringEmbedableId;
+    primaryPanelId = triggeringEmbeddableId;
     if (primaryPanelTimeoutId) {
       clearTimeout(primaryPanelTimeoutId);
     }
@@ -55,7 +55,7 @@ export const synchronizeMovement = {
 
     location = { lat, lon, zoom };
     Object.keys(registry).forEach((key) => {
-      if (key === triggeringEmbedableId) {
+      if (key === triggeringEmbeddableId) {
         return;
       }
       const mapPanel = registry[key];
