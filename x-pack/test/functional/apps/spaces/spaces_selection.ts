@@ -23,18 +23,16 @@ export default function spaceSelectorFunctionalTests({
   const spacesService = getService('spaces');
 
   describe('Spaces', function () {
+    const testSpacesIds = ['another-space', ...Array.from('123456789', (idx) => `space-${idx}`)];
     before(async () => {
-      const testSpacesIds = ['another-space', ...Array.from('123456789', (idx) => `space-${idx}`)];
-      before(async () => {
-        for (const testSpaceId of testSpacesIds) {
-          await spacesService.create({ id: testSpaceId, name: `${testSpaceId} name` });
-        }
-      });
-      after(async () => {
-        for (const testSpaceId of testSpacesIds) {
-          await spacesService.delete(testSpaceId);
-        }
-      });
+      for (const testSpaceId of testSpacesIds) {
+        await spacesService.create({ id: testSpaceId, name: `${testSpaceId} name` });
+      }
+    });
+    after(async () => {
+      for (const testSpaceId of testSpacesIds) {
+        await spacesService.delete(testSpaceId);
+      }
     });
 
     this.tags('includeFirefox');
