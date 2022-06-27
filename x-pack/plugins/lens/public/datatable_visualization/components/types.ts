@@ -51,6 +51,7 @@ export type DatatableRenderProps = DatatableProps & {
   paletteService: PaletteRegistry;
   uiSettings: IUiSettingsClient;
   interactive: boolean;
+  renderComplete: () => void;
 
   /**
    * A boolean for each table row, which is true if the row active
