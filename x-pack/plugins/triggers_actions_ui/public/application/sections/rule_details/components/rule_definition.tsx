@@ -90,7 +90,11 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
           </EuiTitle>
           {hasEditButton && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType={'pencil'} onClick={() => setEditFlyoutVisible(true)} />
+              <EuiButtonEmpty
+                data-test-subj="ruleDetailsEditButton"
+                iconType={'pencil'}
+                onClick={() => setEditFlyoutVisible(true)}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -119,7 +123,10 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                   defaultMessage: 'Description',
                 })}
               </ItemTitleRuleSummary>
-              <ItemValueRuleSummary itemValue={ruleTypeRegistry.get(rule.ruleTypeId).description} />
+              <ItemValueRuleSummary
+                data-test-subj="ruleSummaryRuleDescription"
+                itemValue={ruleTypeRegistry.get(rule.ruleTypeId).description}
+              />
             </EuiFlexGroup>
 
             <EuiSpacer size="m" />
@@ -131,7 +138,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                 })}
               </ItemTitleRuleSummary>
               <EuiFlexItem grow={3}>
-                <EuiFlexGroup alignItems="center">
+                <EuiFlexGroup data-test-subj="ruleSummaryRuleConditions" alignItems="center">
                   {hasEditButton ? (
                     <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)}>
                       <EuiText size="s">{getRuleConditionsWording()}</EuiText>
@@ -151,7 +158,10 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                 })}
               </ItemTitleRuleSummary>
 
-              <ItemValueRuleSummary itemValue={formatInterval(rule.schedule.interval)} />
+              <ItemValueRuleSummary
+                data-test-subj="ruleSummaryRuleInterval"
+                itemValue={formatInterval(rule.schedule.interval)}
+              />
             </EuiFlexGroup>
 
             <EuiSpacer size="m" />
