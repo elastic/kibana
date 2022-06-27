@@ -20,16 +20,11 @@ export const GridItem: FC<Props> = ({ panel, children }) => {
   return (
     <EuiPanel
       key={panel.id}
-<<<<<<< HEAD
       id={panel.id as string}
-      ref={(element) => callbackRef(element!)}
-      className="grid-stack-item embPanel"
-=======
+      className="grid-stack-item-content embPanel"
       hasShadow
       hasBorder
-      className={'grid-stack-item-content'}
       paddingSize="m"
->>>>>>> 7881fa4dd36 (Added support for JSX wrapper for widgets with sub grids)
     >
       <span data-test-subj="dashboardPanelTitle__wrapper">
         <figcaption className="embPanel__header" data-test-subj="embeddablePanelHeading-">

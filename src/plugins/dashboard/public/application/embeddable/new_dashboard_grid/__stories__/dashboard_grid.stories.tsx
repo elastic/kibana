@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiPanel } from '@elastic/eui';
-import { renderToString } from 'react-dom/server';
 // import 'gridstack/dist/h5/gridstack-dd-native';
 import { Grid } from '../components/grid';
 import { smallGridData, mediumGridData, largeGridData } from './fixtures';
@@ -46,7 +45,7 @@ export const SubgridExample = () => {
 };
 
 export const EmptyExample = () => {
-  return <TestReactGrid columns={24} />;
+  return <Grid columns={24} />;
 };
 
 export const SmallGridExample = () => {
@@ -64,6 +63,7 @@ export const LargeGridExample = () => {
 export const NestedGridsExample = () => {
   const gridData = [
     {
+      id: 'regular',
       y: 0,
       content: 'regular item',
       x: 0,
@@ -71,6 +71,7 @@ export const NestedGridsExample = () => {
       h: 1,
     },
     {
+      id: 'sub1',
       x: 1,
       w: 4,
       h: 4,
@@ -78,11 +79,12 @@ export const NestedGridsExample = () => {
         dragOut: true,
         class: 'sub1',
         cellHeight: 50,
-        column: 'auto',
+        column: 12,
         acceptWidgets: true,
         margin: 5,
         children: [
           {
+            id: '0',
             x: 0,
             y: 0,
             content: '0',
@@ -90,6 +92,7 @@ export const NestedGridsExample = () => {
             h: 1,
           },
           {
+            id: '1',
             x: 1,
             y: 0,
             content: '1',
@@ -97,6 +100,7 @@ export const NestedGridsExample = () => {
             h: 1,
           },
           {
+            id: '2',
             x: 2,
             y: 0,
             content: '2',
@@ -104,6 +108,7 @@ export const NestedGridsExample = () => {
             h: 1,
           },
           {
+            id: '3',
             x: 3,
             y: 0,
             content: '3',
@@ -111,6 +116,7 @@ export const NestedGridsExample = () => {
             h: 1,
           },
           {
+            id: '4',
             x: 0,
             y: 1,
             content: '4',
@@ -118,6 +124,7 @@ export const NestedGridsExample = () => {
             h: 1,
           },
           {
+            id: '5',
             x: 1,
             y: 1,
             content: '5',
@@ -129,17 +136,20 @@ export const NestedGridsExample = () => {
       y: 0,
     },
     {
+      id: 'sub2',
       x: 5,
       w: 3,
       h: 4,
+      y: 0,
       subGrid: {
         class: 'sub2',
         cellHeight: 50,
-        column: 'auto',
+        column: 12,
         acceptWidgets: true,
         margin: 5,
         children: [
           {
+            id: '6',
             x: 0,
             y: 0,
             content: '6',
@@ -147,6 +157,7 @@ export const NestedGridsExample = () => {
             h: 1,
           },
           {
+            id: '7',
             x: 0,
             y: 1,
             w: 2,
@@ -155,7 +166,6 @@ export const NestedGridsExample = () => {
           },
         ],
       },
-      y: 0,
     },
   ];
   return <Grid columns={12} gridData={gridData} />;

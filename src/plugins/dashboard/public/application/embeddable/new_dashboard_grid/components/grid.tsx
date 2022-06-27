@@ -127,7 +127,7 @@ export const Grid: FC<Props> = ({
           const contentElement = node?.el?.querySelector(
             '.grid-stack-item-content'
           ) as HTMLDivElement;
-          const subGrid = GridStack.addGrid(contentElement, subGridConfig);
+          const subGrid = GridStack.addGrid(contentElement, { ...subGridConfig, children: [] });
 
           subGrid.on(
             'drag resize',
