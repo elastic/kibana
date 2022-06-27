@@ -103,26 +103,17 @@ export const fetchChangePointPValues = async (
 
     const overallResult = resp.aggregations.change_point_p_value;
 
-    // Using for of to sequentially augment the results with histogram data.
     for (const bucket of overallResult.buckets) {
-      // Scale the score into a value from 0 - 1
-      // using a concave piecewise linear function in -log(p-value)
-      const normalizedScore =
-        0.5 * Math.min(Math.max((bucket.score - 3.912) / 2.995, 0), 1) +
-        0.25 * Math.min(Math.max((bucket.score - 6.908) / 6.908, 0), 1) +
-        0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
-
       const pValue = Math.exp(-bucket.score);
 
       if (typeof pValue === 'number' && pValue < SPIKE_ANALYSIS_THRESHOLD) {
         result.push({
           fieldName,
-          fieldValue: bucket.key,
+          fieldValue: String(bucket.key),
           doc_count: bucket.doc_count,
           bg_count: bucket.doc_count,
           score: bucket.score,
           pValue,
-          normalizedScore,
         });
       }
     }

@@ -16,5 +16,4 @@ export interface ChangePoint extends FieldValuePair {
   bg_count: number;
   score: number;
   pValue: number | null;
-  normalizedScore: number;
 }
