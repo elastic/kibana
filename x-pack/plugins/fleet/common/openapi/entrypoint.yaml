@@ -108,6 +108,10 @@ paths:
     $ref: paths/outputs.yaml
   /outputs/{outputId}:
     $ref: paths/outputs@{output_id}.yaml
+  /agent_download_sources:
+    $ref: paths/agent_download_sources.yaml
+  /agent_download_sources/{sourceId}:
+    $ref: paths/agent_download_sources@{source_id}.yaml
   /logstash_api_keys:
     $ref: paths/logstash_api_keys.yaml
 components:

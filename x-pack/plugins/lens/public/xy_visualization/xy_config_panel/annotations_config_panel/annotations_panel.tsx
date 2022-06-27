@@ -27,6 +27,7 @@ import {
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-plugin/common/types';
 import { pick } from 'lodash';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import {
   defaultAnnotationColor,
@@ -56,6 +57,7 @@ export const toLineAnnotationColor = (color = defaultAnnotationRangeColor) => {
 };
 
 export const getEndTimestamp = (
+  datatableUtilities: DatatableUtilitiesService,
   startTime: string,
   { activeData, dateRange }: FramePublicAPI,
   dataLayers: XYDataLayerConfig[]
@@ -81,7 +83,7 @@ export const getEndTimestamp = (
     return fallbackValue;
   }
 
-  const dateInterval = search.aggs.getDateHistogramMetaDataByDatatableColumn(xColumn)?.interval;
+  const dateInterval = datatableUtilities.getDateHistogramMeta(xColumn)?.interval;
   if (!dateInterval) return fallbackValue;
   const intervalDuration = search.aggs.parseInterval(dateInterval);
   if (!intervalDuration) return fallbackValue;
@@ -117,6 +119,7 @@ const sanitizeProperties = (annotation: EventAnnotationConfig) => {
 
 export const AnnotationsPanel = (
   props: VisualizationDimensionEditorProps<State> & {
+    datatableUtilities: DatatableUtilitiesService;
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
   }
@@ -255,6 +258,7 @@ export const AnnotationsPanel = (
 
         <ConfigPanelApplyAsRangeSwitch
           annotation={currentAnnotation}
+          datatableUtilities={props.datatableUtilities}
           onChange={setAnnotations}
           frame={frame}
           state={state}
@@ -366,11 +370,13 @@ export const AnnotationsPanel = (
 
 const ConfigPanelApplyAsRangeSwitch = ({
   annotation,
+  datatableUtilities,
   onChange,
   frame,
   state,
 }: {
   annotation?: EventAnnotationConfig;
+  datatableUtilities: DatatableUtilitiesService;
   onChange: (annotations: Partial<EventAnnotationConfig> | undefined) => void;
   frame: FramePublicAPI;
   state: XYState;
@@ -411,7 +417,12 @@ const ConfigPanelApplyAsRangeSwitch = ({
               key: {
                 type: 'range',
                 timestamp: annotation.key.timestamp,
-                endTimestamp: getEndTimestamp(fromTimestamp.toISOString(), frame, dataLayers),
+                endTimestamp: getEndTimestamp(
+                  datatableUtilities,
+                  fromTimestamp.toISOString(),
+                  frame,
+                  dataLayers
+                ),
               },
               id: annotation.id,
               label:
