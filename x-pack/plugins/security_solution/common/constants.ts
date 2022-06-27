@@ -122,6 +122,7 @@ export enum SecurityPageName {
   kubernetes = 'kubernetes',
   exploreLanding = 'explore',
   dashboardsLanding = 'dashboards',
+  noPage = '',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
