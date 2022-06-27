@@ -8,7 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../common/types';
-import { HttpError } from '../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../common/types/api';
 import { DEFAULT_META } from '../../../shared/constants';
 import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
@@ -16,43 +16,32 @@ import { IndicesAPILogic } from '../../logic/indices_api/indices_api_logic';
 import { SearchIndex } from '../../types';
 
 export interface IndicesActions {
-  makeRequest: typeof IndicesAPILogic.actions.makeRequest;
+  apiError(error: HttpError): HttpError;
   apiSuccess({ indices, meta }: { indices: SearchIndex[]; meta: Meta }): {
     indices: SearchIndex[];
     meta: Meta;
   };
-  apiError(error: HttpError): HttpError;
+  makeRequest: typeof IndicesAPILogic.actions.makeRequest;
   onPaginate(newPageIndex: number): { newPageIndex: number };
 }
 export interface IndicesValues {
+  data: typeof IndicesAPILogic.values.data;
   indices: SearchIndex[];
-  meta: Meta;
   isLoading: boolean;
+  meta: Meta;
+  status: typeof IndicesAPILogic.values.status;
 }
 
 export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
   connect: {
     actions: [IndicesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    values: [IndicesAPILogic, ['data', 'status']],
   },
   path: ['enterprise_search', 'content', 'indices_logic'],
   actions: {
     onPaginate: (newPageIndex) => ({ newPageIndex }),
   },
   reducers: () => ({
-    isLoading: [
-      true,
-      {
-        apiSuccess: () => false,
-        apiError: () => false,
-        makeRequest: () => true,
-      },
-    ],
-    indices: [
-      [],
-      {
-        apiSuccess: (_, { indices }) => indices,
-      },
-    ],
     meta: [
       DEFAULT_META,
       {
@@ -62,7 +51,16 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
     ],
   }),
   listeners: () => ({
-    makeRequest: () => clearFlashMessages(),
     apiError: (e) => flashAPIErrors(e),
+    makeRequest: () => clearFlashMessages(),
+  }),
+  selectors: ({ selectors }) => ({
+    indices: [() => [selectors.data], (data) => data?.indices || []],
+    isLoading: [
+      () => [selectors.status],
+      (status) => {
+        return status === Status.LOADING;
+      },
+    ],
   }),
 });

@@ -39,10 +39,10 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { IndicesLogic } from './indices_logic';
 
 const healthColorsMap = {
-  red: 'danger',
   green: 'success',
-  yellow: 'warning',
+  red: 'danger',
   unavailable: '',
+  yellow: 'warning',
 };
 
 export const baseBreadcrumbs = [
@@ -207,7 +207,7 @@ export const SearchIndices: React.FC = () => {
           rightSideItems: [createNewIndexButton],
         }}
       >
-        {indices.length !== 0 ? (
+        {indices.length !== 0 || isLoading ? (
           <>
             <EuiTitle>
               <h2>
@@ -267,7 +267,7 @@ export const SearchIndices: React.FC = () => {
           <AddContentEmptyPrompt />
         )}
         <EuiSpacer size="xxl" />
-        {indices.length === 0 && engineSteps}
+        {indices.length === 0 && !isLoading && engineSteps}
       </EnterpriseSearchContentPageTemplate>
       )
     </>

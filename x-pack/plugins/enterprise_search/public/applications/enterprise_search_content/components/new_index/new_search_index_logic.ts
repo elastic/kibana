@@ -12,14 +12,14 @@ import { formatApiName } from '../../utils/format_api_name';
 import { DEFAULT_LANGUAGE } from './constants';
 
 export interface NewSearchIndexValues {
-  rawName: string;
-  name: string;
   language: string;
+  name: string;
+  rawName: string;
 }
 
 export interface NewSearchIndexActions {
-  setRawName(rawName: string): { rawName: string };
   setLanguage(language: string): { language: string };
+  setRawName(rawName: string): { rawName: string };
 }
 
 export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({
