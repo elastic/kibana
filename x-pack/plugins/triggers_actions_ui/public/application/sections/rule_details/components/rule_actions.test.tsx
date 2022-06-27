@@ -69,7 +69,7 @@ describe('Rule Actions', () => {
     return wrapper;
   }
 
-  it("renders action connector icons for user's selected rule actions", async () => {
+  it("renders rule action connector icons for user's selected rule actions", async () => {
     const wrapper = await setup();
     expect(mockedUseFetchRuleActionConnectorsHook).toHaveBeenCalledTimes(1);
     expect(wrapper.find('[data-euiicon-type]').length).toBe(2);
