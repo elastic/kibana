@@ -9,11 +9,12 @@ import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
-import { JOB_STATUSES, JobTypes } from '../../common/constants';
+import { JobTypes, JOB_STATUSES } from '../../common/constants';
 import type {
   BaseParamsV2,
   JobId,
   ReportApiJSON,
+  ReportFields,
   ReportOutput,
   ReportSource,
   TaskRunResult,
@@ -62,8 +63,8 @@ export class Job {
 
   public readonly locatorParams?: BaseParamsV2['locatorParams'];
 
-  public readonly queue_time_ms: number | undefined;
-  public readonly execution_time_ms: number | undefined;
+  public readonly queue_time_ms?: Required<ReportFields>['queue_time_ms'][number];
+  public readonly execution_time_ms?: Required<ReportFields>['execution_time_ms'][number];
 
   constructor(report: ReportApiJSON) {
     this.id = report.id;
