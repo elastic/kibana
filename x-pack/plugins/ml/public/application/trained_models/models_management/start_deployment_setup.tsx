@@ -48,10 +48,11 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
     () =>
       new Array(THREADS_MAX_EXPONENT).fill(null).map((v, i) => {
         const value = Math.pow(2, i);
+        const id = value.toString();
 
         return {
-          id: String(value),
-          label: String(value),
+          id,
+          label: id,
           value,
         };
       }),
