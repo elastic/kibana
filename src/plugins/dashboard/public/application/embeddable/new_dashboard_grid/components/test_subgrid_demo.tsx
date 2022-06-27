@@ -9,7 +9,8 @@ import 'gridstack/dist/gridstack.min.css';
 import { GridStack, GridStackOptions, GridStackWidget } from 'gridstack';
 import 'gridstack/dist/h5/gridstack-dd-native';
 import React, { createRef, MutableRefObject, useEffect, useRef, useState } from 'react';
-import { COLUMNS } from '@elastic/eui/src/components/flex/flex_grid';
+
+const COLUMN_COUNT = 12;
 
 const sub = [
   { id: '4', x: 0, y: 0, w: 2, h: 2 },
@@ -23,7 +24,7 @@ const sub = [
 
 const subOptions = {
   cellHeight: 50, // should be 50 - top/bottom
-  column: 'auto', // size to match container. make sure to include gridstack-extra.min.css
+  column: COLUMN_COUNT,
   acceptWidgets: true, // will accept .grid-stack-item by default
   minRow: 2,
   margin: 5,
@@ -42,9 +43,9 @@ const Item = ({ id }: { id: string }) => (
 
 export const SubgridDemo = () => {
   const panelRefs = useRef<{ [key: string]: MutableRefObject<HTMLDivElement> }>({});
-  const groupRefs = useRef<{ [key: string]: MutableRefObject<HTMLDivElement> }>({});
-  const groupChildrenRefs = useRef<{
-    [subgridKey: string]: { [key: string]: MutableRefObject<HTMLDivElement> };
+  const subGridRefs = useRef<{ [key: string]: MutableRefObject<HTMLDivElement> }>({});
+  const childrenRefs = useRef<{
+    [subgridKey: string]: { [childKey: string]: MutableRefObject<HTMLDivElement> };
   }>({});
   const gridRef = useRef<GridStack>();
   const [items, setItems] = useState<GridStackWidget[]>([
@@ -54,7 +55,7 @@ export const SubgridDemo = () => {
       id: 'group-1',
       x: 0,
       y: 1,
-      w: 12,
+      w: COLUMN_COUNT,
       h: 5,
       noResize: true,
       subGrid: { children: sub, ...subOptions } as GridStackOptions,
@@ -63,11 +64,11 @@ export const SubgridDemo = () => {
       id: 'group-2',
       x: 0,
       y: 6,
-      w: 12,
+      w: COLUMN_COUNT,
       h: 4,
       noResize: true,
       subGrid: {
-        children: [{ id: '11', x: 0, y: 0, w: 2, h: 2 }],
+        children: [],
         ...subOptions,
       } as GridStackOptions,
     },
@@ -77,40 +78,30 @@ export const SubgridDemo = () => {
     items.forEach((item) => {
       panelRefs.current[item.id!] = panelRefs.current[item.id!] || createRef();
       if (item.subGrid) {
-        groupRefs.current[item.id!] = groupRefs.current[item.id!] || createRef();
+        subGridRefs.current[item.id!] = subGridRefs.current[item.id!] || createRef();
 
         const children = (item.subGrid as GridStackOptions).children;
         children?.forEach((child) => {
-          if (!groupChildrenRefs.current[item.id!]) groupChildrenRefs.current[item.id!] = {};
-          groupChildrenRefs.current[item.id!][child.id!] =
-            groupChildrenRefs.current?.[item.id!]?.[child.id!] || createRef();
+          if (!childrenRefs.current[item.id!]) childrenRefs.current[item.id!] = {};
+          childrenRefs.current[item.id!][child.id!] =
+            childrenRefs.current?.[item.id!]?.[child.id!] || createRef();
         });
       }
     });
   }
 
   useEffect(() => {
-    console.log('on mount');
-    return () => {
-      console.log('on dismount');
-    };
-  }, []);
-
-  useEffect(() => {
     gridRef.current =
       gridRef.current ||
-      GridStack.init(
-        {
-          float: false,
-          column: 12,
-          cellHeight: 50,
-          margin: 5,
-          minRow: 2, // don't collapse when empty
-          acceptWidgets: true,
-          id: 'main',
-        },
-        '.controlled'
-      );
+      GridStack.init({
+        float: false,
+        column: COLUMN_COUNT,
+        cellHeight: 50,
+        margin: 5,
+        minRow: 2, // don't collapse when empty
+        acceptWidgets: true,
+        id: 'main',
+      });
     const grid = gridRef.current;
     grid.batchUpdate();
     grid.removeAll(false);
@@ -118,15 +109,23 @@ export const SubgridDemo = () => {
       const widget = grid.makeWidget(panelRefs.current[item.id!].current);
       grid.update(widget, item);
       if (item.subGrid) {
-        const newGrid = GridStack.addGrid(groupRefs.current[item.id!].current, {
-          ...item.subGrid,
-          children: [], // need to set children to empty so I can handle the render myself
-        } as GridStackOptions);
-        newGrid.column(12);
-        const children = (item.subGrid as GridStackOptions)?.children;
-        children?.forEach((child) => {
-          newGrid?.addWidget(groupChildrenRefs.current[item.id!][child.id!].current, child);
+        const newGrid = GridStack.init(
+          {
+            ...item.subGrid,
+            children: [], // need to set children to empty so I can handle the render myself
+          } as GridStackOptions,
+          subGridRefs.current[item.id!].current
+        );
+
+        newGrid.batchUpdate();
+        newGrid.column(COLUMN_COUNT); // if we want panel groups that **don't** take up an entire row, this won't work
+        newGrid.removeAll(false);
+        const children = (item.subGrid as GridStackOptions)?.children ?? [];
+        children.forEach((child) => {
+          const childWidget = newGrid.makeWidget(childrenRefs.current[item.id!][child.id!].current);
+          newGrid.update(childWidget, child);
         });
+        newGrid.commit();
       }
     });
     grid.commit();
@@ -136,22 +135,31 @@ export const SubgridDemo = () => {
     <div className={`grid-stack controlled`}>
       {items.map((item) => {
         const subgrid = item.subGrid;
-        const children = (subgrid as GridStackOptions)?.children;
+        const children = (subgrid as GridStackOptions)?.children ?? [];
 
         return (
-          <div ref={panelRefs.current[item.id!]} key={item.id} className={'grid-stack-item'}>
-            {subgrid && children ? (
+          <div
+            ref={panelRefs.current[item.id!]}
+            key={`panel-${item.id}`}
+            className={'grid-stack-item'}
+          >
+            {subgrid ? (
               <div
                 className="grid-stack-item-content"
                 style={{
                   backgroundColor: 'lightblue',
                 }}
               >
-                <div ref={groupRefs.current[item.id!]} className="grid-stack grid-stack-nested">
+                <div
+                  key={`group-${item.id}`}
+                  ref={subGridRefs.current[item.id!]}
+                  className="grid-stack grid-stack-nested"
+                >
                   {children.map((child) => {
                     return (
                       <div
-                        ref={groupChildrenRefs.current[item.id!][child.id!]}
+                        key={`group-${item.id}_child-${child.id}`}
+                        ref={childrenRefs.current[item.id!][child.id!]}
                         className="grid-stack-item"
                       >
                         <Item id={child.id as string} />
