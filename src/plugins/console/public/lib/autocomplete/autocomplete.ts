@@ -1104,6 +1104,9 @@ export default function ({
       case 'paren.rparen':
       case 'punctuation.colon':
       case 'punctuation.comma':
+      case 'comment.line':
+      case 'comment.punctuation':
+      case 'comment.block':
       case 'UNKNOWN':
         return;
     }

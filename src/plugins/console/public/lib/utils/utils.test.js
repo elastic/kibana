@@ -82,4 +82,95 @@ describe('Utils class', () => {
       'e", f"',
     ]);
   });
+
+  describe('formatRequestBodyDoc', function () {
+    const tests = [
+      {
+        source: ['{\n  "test": {}\n}'],
+        indent: false,
+        assert: ['{"test":{}}'],
+      },
+      {
+        source: ['{"test":{}}'],
+        indent: true,
+        assert: ['{\n  "test": {}\n}'],
+      },
+      {
+        source: ['{\n  "test": """a\n  b"""\n}'],
+        indent: false,
+        assert: ['{"test":"a\\n  b"}'],
+      },
+      {
+        source: ['{"test":"a\\n  b"}'],
+        indent: true,
+        assert: ['{\n  "test": """a\n  b"""\n}'],
+      },
+    ];
+
+    tests.forEach(({ source, indent, assert }, id) => {
+      test(`Test ${id}`, () => {
+        const formattedData = utils.formatRequestBodyDoc(source, indent);
+        expect(formattedData.data).toEqual(assert);
+      });
+    });
+  });
+
+  describe('hasComments', function () {
+    const runCommentTests = (tests) => {
+      tests.forEach(({ source, assert }) => {
+        test(`\n${source}`, () => {
+          const hasComments = utils.hasComments(source);
+          expect(hasComments).toEqual(assert);
+        });
+      });
+    };
+
+    describe('match single line comments', () => {
+      runCommentTests([
+        { source: '{\n  "test": {\n   // "f": {}\n   "a": "b"\n  }\n}', assert: true },
+        {
+          source: '{\n  "test": {\n   "a": "b",\n   "f": {\n     # "b": {}\n   }\n  }\n}',
+          assert: true,
+        },
+      ]);
+    });
+
+    describe('match multiline comments', () => {
+      runCommentTests([
+        { source: '{\n /* "test": {\n    "a": "b"\n  } */\n}', assert: true },
+        {
+          source:
+            '{\n  "test": {\n    "a": "b",\n   /* "f": {\n      "b": {}\n    } */\n    "c": 1\n  }\n}',
+          assert: true,
+        },
+      ]);
+    });
+
+    describe('ignore non-comment tokens', () => {
+      runCommentTests([
+        { source: '{"test":{"a":"b","f":{"b":{"c":{}}}}}', assert: false },
+        {
+          source: '{\n  "test": {\n    "a": "b",\n    "f": {\n      "b": {}\n    }\n  }\n}',
+          assert: false,
+        },
+        { source: '{\n  "test": {\n    "f": {}\n  }\n}', assert: false },
+      ]);
+    });
+
+    describe.skip('ignore comment tokens as values', () => {
+      runCommentTests([
+        { source: '{\n  "test": {\n    "f": "//"\n  }\n}', assert: false },
+        { source: '{\n  "test": {\n    "f": "/* */"\n  }\n}', assert: false },
+        { source: '{\n  "test": {\n    "f": "#"\n  }\n}', assert: false },
+      ]);
+    });
+
+    describe.skip('ignore comment tokens as field names', () => {
+      runCommentTests([
+        { source: '{\n  "#": {\n    "f": {}\n  }\n}', assert: false },
+        { source: '{\n  "//": {\n    "f": {}\n  }\n}', assert: false },
+        { source: '{\n  "/* */": {\n    "f": {}\n  }\n}', assert: false },
+      ]);
+    });
+  });
 });

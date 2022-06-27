@@ -272,4 +272,9 @@ export interface CoreEditor {
    * Release any resources in use by the editor.
    */
   destroy(): void;
+
+  /**
+   * Indent document within request range
+   */
+  autoIndent(reqRange: Range): void;
 }
