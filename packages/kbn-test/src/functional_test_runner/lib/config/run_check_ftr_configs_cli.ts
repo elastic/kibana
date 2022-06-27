@@ -23,19 +23,6 @@ const THIS_REL = Path.relative(REPO_ROOT, THIS_PATH);
 const IGNORED_PATHS = [
   THIS_PATH,
   Path.resolve(REPO_ROOT, 'packages/kbn-test/src/jest/run_check_jest_configs_cli.ts'),
-  Path.resolve(REPO_ROOT, 'packages/kbn-i18n-react/jest.config.js'),
-  Path.resolve(REPO_ROOT, 'packages/kbn-i18n/jest.config.js'),
-  Path.resolve(REPO_ROOT, 'src/core/jest.config.js'),
-  Path.resolve(REPO_ROOT, 'src/plugins/console/jest.config.js'),
-  Path.resolve(REPO_ROOT, 'src/plugins/controls/jest.config.js'),
-  Path.resolve(REPO_ROOT, 'src/plugins/custom_integrations/jest.config.js'),
-  Path.resolve(REPO_ROOT, 'src/plugins/dashboard/jest.config.js'),
-  Path.resolve(REPO_ROOT, 'src/plugins/data/jest.config.js'),
-  Path.resolve(REPO_ROOT, 'src/plugins/data_view_management/jest.config.js'),
-  Path.resolve(REPO_ROOT, 'src/plugins/discover/jest.config.js'),
-  Path.resolve(REPO_ROOT, 'src/plugins/embeddable/jest.config.js'),
-  Path.resolve(REPO_ROOT, 'src/plugins/vis_types/table/jest.config.js'),
-  Path.resolve(REPO_ROOT, 'src/plugins/vis_types/tagcloud/jest.config.js'),
 ];
 
 export async function runCheckFtrConfigsCli() {
@@ -59,7 +46,7 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
-        if (!file.match(/(test|e2e).*config[^\/]*\.(t|j)s$/)) {
+        if (!file.match(/(test|e2e|jest).*config[^\/]*\.(t|j)s$/)) {
           return false;
         }
 
