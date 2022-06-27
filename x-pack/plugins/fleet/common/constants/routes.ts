@@ -15,6 +15,7 @@ export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
 export const PACKAGE_POLICY_API_ROOT = `${API_ROOT}/package_policies`;
 export const AGENT_POLICY_API_ROOT = `${API_ROOT}/agent_policies`;
 export const K8S_API_ROOT = `${API_ROOT}/kubernetes`;
+export const DOWNLOAD_SOURCE_API_ROOT = `${API_ROOT}/agent_download_sources`;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
 
@@ -150,4 +151,13 @@ export const PRECONFIGURATION_API_ROUTES = {
   UPDATE_PATTERN: `${API_ROOT}/setup/preconfiguration`,
   RESET_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies`,
   RESET_ONE_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies/{agentPolicyId}`,
+};
+
+// Agent download source routes
+export const DOWNLOAD_SOURCE_API_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/agent_download_sources`,
+  INFO_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
+  CREATE_PATTERN: `${API_ROOT}/agent_download_sources`,
+  UPDATE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
+  DELETE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
 };
