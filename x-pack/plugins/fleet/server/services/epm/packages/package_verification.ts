@@ -84,5 +84,5 @@ export async function verifyPackageSignature({
   } catch (e) {
     logger.error(`Error verifying package signature: ${e}`);
   }
-  return { verified, keyId: signatureVerificationResult.keyID.toHex() };
+  return { verified, keyId: verificationKey.getKeyID().toHex() };
 }
