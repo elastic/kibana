@@ -50,7 +50,7 @@ export const MonitorSummaryTabs = () => {
   return (
     <EuiTabbedContent
       tabs={tabs}
-      initialSelectedTab={tabs[1]}
+      initialSelectedTab={tabs[0]}
       autoFocus="selected"
       onTabClick={(tab) => {}}
     />

@@ -30,7 +30,7 @@ import { applicationServiceMock } from '../application/application_service.mock'
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
-import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { httpServiceMock } from '../http/http_service.mock';
