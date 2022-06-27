@@ -18,7 +18,6 @@ describe('Axes Title settings', () => {
       axisTitle: 'My custom X axis title',
       axis: 'x',
       isAxisTitleVisible: true,
-      toggleAxisTitleVisibility: jest.fn(),
       updateTitleState: jest.fn(),
     };
   });
@@ -37,6 +36,15 @@ describe('Axes Title settings', () => {
   it('should set the mode to Auto if empty title is passed over', () => {
     const component = mount(<AxisTitleSettings {...props} axisTitle={''} />);
     expect(component.find('[data-test-subj="lnsxAxisTitle"]').last().prop('value')).toBe('');
+  });
+
+  it('should set the mode to None if empty title is passed over and the visibility is set to false', () => {
+    const component = mount(
+      <AxisTitleSettings {...props} axisTitle={''} isAxisTitleVisible={false} />
+    );
+    expect(component.find('[data-test-subj="lnsxAxisTitle-select"]').last().prop('value')).toBe(
+      'none'
+    );
   });
 
   it('should disable the input text if the switch is off', () => {

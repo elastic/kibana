@@ -9,7 +9,6 @@ import {
   Criteria,
   EuiButtonEmpty,
   EuiSwitch,
-  EuiToolTip,
   EuiTableFieldDataColumnType,
   EuiBasicTable,
   EuiBasicTableProps,
@@ -32,6 +31,7 @@ type RulesTableProps = Pick<
   selectedRuleId: string | null;
   // ForwardRef makes this ref not available in parent callbacks
   tableRef: React.RefObject<EuiBasicTable<RuleSavedObject>>;
+  canUpdate: boolean;
 };
 
 export const RulesTable = ({
@@ -47,11 +47,12 @@ export const RulesTable = ({
   loading,
   error,
   selectedRuleId,
+  canUpdate,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
   const columns = useMemo(
-    () => getColumns({ toggleRule, setSelectedRuleId }),
-    [setSelectedRuleId, toggleRule]
+    () => getColumns({ toggleRule, setSelectedRuleId, canUpdate }),
+    [setSelectedRuleId, toggleRule, canUpdate]
   );
 
   const euiPagination: EuiBasicTableProps<RuleSavedObject>['pagination'] = {
@@ -100,16 +101,17 @@ export const RulesTable = ({
   );
 };
 
-interface GetColumnProps extends Pick<RulesTableProps, 'setSelectedRuleId'> {
+interface GetColumnProps extends Pick<RulesTableProps, 'setSelectedRuleId' | 'canUpdate'> {
   toggleRule: (rule: RuleSavedObject) => void;
 }
 
 const getColumns = ({
   toggleRule,
   setSelectedRuleId,
+  canUpdate,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<RuleSavedObject>> => [
   {
-    field: 'attributes.name',
+    field: 'attributes.metadata.name',
     name: TEXT.RULE_NAME,
     width: '60%',
     truncateText: true,
@@ -128,7 +130,7 @@ const getColumns = ({
     ),
   },
   {
-    field: 'attributes.section',
+    field: 'attributes.metadata.section',
     name: TEXT.CIS_SECTION,
     width: '15%',
   },
@@ -142,15 +144,14 @@ const getColumns = ({
     field: 'attributes.enabled',
     name: TEXT.ENABLED,
     render: (enabled, rule) => (
-      <EuiToolTip content={enabled ? TEXT.DEACTIVATE : TEXT.ACTIVATE}>
-        <EuiSwitch
-          showLabel={false}
-          label={enabled ? TEXT.DISABLE : TEXT.ENABLE}
-          checked={enabled}
-          onChange={() => toggleRule(rule)}
-          data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
-        />
-      </EuiToolTip>
+      <EuiSwitch
+        disabled={!canUpdate}
+        showLabel={false}
+        label={enabled ? TEXT.DISABLE : TEXT.ENABLE}
+        checked={enabled}
+        onChange={() => toggleRule(rule)}
+        data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
+      />
     ),
     width: '10%',
   },

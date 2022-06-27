@@ -73,6 +73,7 @@ enabled:
   - test/functional/apps/discover/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
+  - test/functional/apps/kibana_overview/config.ts
   - test/functional/apps/management/config.ts
   - test/functional/apps/saved_objects_management/config.ts
   - test/functional/apps/status_page/config.ts
@@ -146,6 +147,7 @@ enabled:
   - x-pack/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/test/functional/apps/dashboard/group1/config.ts
   - x-pack/test/functional/apps/dashboard/group2/config.ts
+  - x-pack/test/functional/apps/dashboard/group3/config.ts
   - x-pack/test/functional/apps/data_views/config.ts
   - x-pack/test/functional/apps/dev_tools/config.ts
   - x-pack/test/functional/apps/discover/config.ts
@@ -245,3 +247,9 @@ enabled:
   - x-pack/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.js
   - x-pack/test/usage_collection/config.ts
+  - x-pack/test/performance/journeys/ecommerce_dashboard/config.ts
+  - x-pack/test/performance/journeys/flight_dashboard/config.ts
+  - x-pack/test/performance/journeys/login/config.ts
+  - x-pack/test/performance/journeys/many_fields_discover/config.ts
+  - x-pack/test/performance/journeys/promotion_tracking_dashboard/config.ts
+  - x-pack/test/performance/journeys/web_logs_dashboard/config.ts

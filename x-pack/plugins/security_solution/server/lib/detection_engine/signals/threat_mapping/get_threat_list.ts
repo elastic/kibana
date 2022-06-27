@@ -33,6 +33,7 @@ export const getThreatList = async ({
   pitId,
   reassignPitId,
   perPage,
+  runtimeMappings,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? INDICATOR_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -60,6 +61,7 @@ export const getThreatList = async ({
       ...threatListConfig,
       query: queryFilter,
       search_after: searchAfter,
+      runtime_mappings: runtimeMappings,
       sort: ['_shard_doc', { '@timestamp': 'asc' }],
     },
     track_total_hits: false,

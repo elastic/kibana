@@ -8,7 +8,6 @@ import React, { useState } from 'react';
 import {
   EuiSpacer,
   EuiFlyout,
-  EuiToolTip,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTab,
@@ -29,6 +28,7 @@ interface RuleFlyoutProps {
   onClose(): void;
   toggleRule(rule: RuleSavedObject): void;
   rule: RuleSavedObject;
+  canUpdate: boolean;
 }
 
 const tabs = [
@@ -38,19 +38,18 @@ const tabs = [
 
 type RuleTab = typeof tabs[number]['id'];
 
-export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
+export const RuleFlyout = ({ onClose, rule, toggleRule, canUpdate }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
 
   return (
     <EuiFlyout
       ownFocus={false}
       onClose={onClose}
-      outsideClickCloses
       data-test-subj={TEST_SUBJECTS.CSP_RULES_FLYOUT_CONTAINER}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="l">
-          <h2>{rule.attributes.name}</h2>
+          <h2>{rule.attributes.metadata.name}</h2>
         </EuiTitle>
         <EuiSpacer />
         <EuiTabs>
@@ -67,31 +66,43 @@ export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {tab === 'overview' && <RuleOverviewTab rule={rule} toggleRule={() => toggleRule(rule)} />}
+        {tab === 'overview' && (
+          <RuleOverviewTab rule={rule} toggleRule={() => toggleRule(rule)} canUpdate={canUpdate} />
+        )}
         {tab === 'remediation' && (
-          <EuiDescriptionList compressed={false} listItems={getRemediationList(rule.attributes)} />
+          <EuiDescriptionList
+            compressed={false}
+            listItems={getRemediationList(rule.attributes.metadata)}
+          />
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );
 };
 
-const RuleOverviewTab = ({ rule, toggleRule }: { rule: RuleSavedObject; toggleRule(): void }) => (
+const RuleOverviewTab = ({
+  rule,
+  toggleRule,
+  canUpdate,
+}: {
+  rule: RuleSavedObject;
+  toggleRule(): void;
+  canUpdate: RuleFlyoutProps['canUpdate'];
+}) => (
   <EuiFlexGroup direction="column">
     <EuiFlexItem>
       <span>
-        <EuiToolTip content={rule.attributes.enabled ? TEXT.DEACTIVATE : TEXT.ACTIVATE}>
-          <EuiSwitch
-            label={TEXT.ACTIVATED}
-            checked={rule.attributes.enabled}
-            onChange={toggleRule}
-            data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
-          />
-        </EuiToolTip>
+        <EuiSwitch
+          disabled={!canUpdate}
+          label={TEXT.ACTIVATED}
+          checked={rule.attributes.enabled}
+          onChange={toggleRule}
+          data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
+        />
       </span>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiDescriptionList listItems={getRuleList(rule.attributes)} />
+      <EuiDescriptionList listItems={getRuleList(rule.attributes.metadata)} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

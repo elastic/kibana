@@ -24,6 +24,8 @@ import {
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
+import { useLicense } from '../../../../hooks';
+import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common';
 
 import type { SelectionMode } from './types';
 
@@ -36,7 +38,7 @@ export interface Props {
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
-  refreshAgents: () => void;
+  refreshAgents: (args?: { refreshTags?: boolean }) => void;
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -47,6 +49,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   selectedAgents,
   refreshAgents,
 }) => {
+  const licenseService = useLicense();
+  const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
+
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -62,6 +67,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     selectionMode === 'manual'
       ? !!selectedAgents.find((agent) => agent.active)
       : totalAgents > totalInactiveAgents;
+  const totalActiveAgents = totalAgents - totalInactiveAgents;
+  const agentCount = selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents;
+  const agents = selectionMode === 'manual' ? selectedAgents : currentQuery;
 
   const panels = [
     {
@@ -87,7 +95,10 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             <FormattedMessage
               id="xpack.fleet.agentBulkActions.unenrollAgents"
               data-test-subj="agentBulkActionsUnenroll"
-              defaultMessage="Unenroll agents"
+              defaultMessage="Unenroll {agentCount, plural, one {# agent} other {# agents}}"
+              values={{
+                agentCount,
+              }}
             />
           ),
           icon: <EuiIcon type="trash" size="m" />,
@@ -102,7 +113,10 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             <FormattedMessage
               id="xpack.fleet.agentBulkActions.upgradeAgents"
               data-test-subj="agentBulkActionsUpgrade"
-              defaultMessage="Upgrade agents"
+              defaultMessage="Upgrade {agentCount, plural, one {# agent} other {# agents}}"
+              values={{
+                agentCount,
+              }}
             />
           ),
           icon: <EuiIcon type="refresh" size="m" />,
@@ -117,11 +131,14 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             <FormattedMessage
               id="xpack.fleet.agentBulkActions.scheduleUpgradeAgents"
               data-test-subj="agentBulkActionsScheduleUpgrade"
-              defaultMessage="Schedule upgrade for agents"
+              defaultMessage="Schedule upgrade for {agentCount, plural, one {# agent} other {# agents}}"
+              values={{
+                agentCount,
+              }}
             />
           ),
           icon: <EuiIcon type="timeRefresh" size="m" />,
-          disabled: !atLeastOneActiveAgentSelected,
+          disabled: !atLeastOneActiveAgentSelected || !isLicenceAllowingScheduleUpgrade,
           onClick: () => {
             closeMenu();
             setUpgradeModalState({ isOpen: true, isScheduled: true });
@@ -130,10 +147,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       ],
     },
   ];
-
-  const totalActiveAgents = totalAgents - totalInactiveAgents;
-  const agentCount = selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents;
-  const agents = selectionMode === 'manual' ? selectedAgents : currentQuery;
 
   return (
     <>
@@ -155,7 +168,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             agentCount={agentCount}
             onClose={() => {
               setIsUnenrollModalOpen(false);
-              refreshAgents();
+              refreshAgents({ refreshTags: true });
             }}
           />
         </EuiPortal>

@@ -52,6 +52,15 @@ export function ObservabilityAlertsCommonProvider({
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
       'observability',
       '/alerts/rules',
+      '',
+      { ensureCurrentUrl: false }
+    );
+  };
+
+  const navigateToRuleDetailsByRuleId = async (ruleId: string) => {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'observability',
+      `/alerts/rules/${ruleId}`,
       '?',
       { ensureCurrentUrl: false }
     );
@@ -90,10 +99,6 @@ export function ObservabilityAlertsCommonProvider({
 
   const getAllEnabledCheckBoxInTable = async () => {
     return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:enabled');
-  };
-
-  const getExperimentalDisclaimer = async () => {
-    return testSubjects.existOrFail('o11yExperimentalDisclaimer');
   };
 
   const getTableCellsInRows = async () => {
@@ -329,12 +334,12 @@ export function ObservabilityAlertsCommonProvider({
     openActionsMenuForRow,
     getTimeRange,
     navigateWithoutFilter,
-    getExperimentalDisclaimer,
     getActionsButtonByIndex,
     viewRuleDetailsButtonClick,
     viewRuleDetailsLinkClick,
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
     getRuleStatValue,
     navigateToRulesPage,
+    navigateToRuleDetailsByRuleId,
   };
 }

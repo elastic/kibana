@@ -15,7 +15,7 @@ import { ISearchSource } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { updateSearchSource } from '../../utils/update_search_source';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -33,12 +33,16 @@ export function AlertsPopover({
   searchSource,
   anchorElement,
   savedQueryId,
-  onClose,
+  onClose: originalOnClose,
 }: AlertsPopoverProps) {
   const dataView = searchSource.getField('index')!;
   const services = useDiscoverServices();
   const { triggersActionsUi } = services;
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState(false);
+  const onClose = useCallback(() => {
+    originalOnClose();
+    anchorElement?.focus();
+  }, [anchorElement, originalOnClose]);
 
   /**
    * Provides the default parameters used to initialize the new rule
@@ -108,12 +112,7 @@ export function AlertsPopover({
       name: 'Alerting',
       items: [
         {
-          name: (
-            <>
-              {SearchThresholdAlertFlyout}
-              {createSearchThresholdRuleLink}
-            </>
-          ),
+          name: <>{createSearchThresholdRuleLink}</>,
           icon: 'bell',
           disabled: !hasTimeFieldName,
         },

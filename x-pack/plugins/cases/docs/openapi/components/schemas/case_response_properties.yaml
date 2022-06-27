@@ -17,7 +17,9 @@ closed_by:
 comments:
   type: array
   items: 
-    type: string
+    oneOf:
+      - $ref: 'alert_comment_response_properties.yaml'
+      - $ref: 'user_comment_response_properties.yaml'
   example: []
 connector: 
   type: object
@@ -41,10 +43,14 @@ created_by:
       example: elastic
 description:
   type: string
-  example: "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active"
+  example: "A case description."
 duration:
   type: integer
-  description: The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null.
+  description: >
+    The elapsed time from the creation of the case to its closure (in seconds).
+    If the case has not been closed, the duration is set to null. If the case
+    was closed after less than half a second, the duration is rounded down to
+    zero.
   example: 120
 external_service:
   type: object
@@ -92,10 +98,10 @@ tags:
   type: array
   items:
     type: string
-  example: ["phishing","social engineering","bubblegum"]
+  example: ["tag-1"]
 title:
   type: string
-  example: This case will self-destruct in 5 seconds
+  example: Case title 1
 totalAlerts:
   type: integer
   example: 0

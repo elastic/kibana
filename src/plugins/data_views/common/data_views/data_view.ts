@@ -127,11 +127,14 @@ export class DataView implements DataViewBase {
    * Map of runtime field definitions by field name
    */
   private runtimeFieldMap: Record<string, RuntimeFieldSpec>;
-
   /**
    * Prevents errors when index pattern exists before indices
    */
   public readonly allowNoIndex: boolean = false;
+  /**
+   * Name of the data view. Human readable name used to differentiate data view.
+   */
+  public name: string = '';
 
   /**
    * constructor
@@ -167,7 +170,13 @@ export class DataView implements DataViewBase {
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
     this.namespaces = spec.namespaces || [];
+    this.name = spec.name || '';
   }
+
+  /**
+   * Get name of Data View
+   */
+  getName = () => (this.name ? this.name : this.title);
 
   /**
    * Get last saved saved object fields
@@ -256,6 +265,10 @@ export class DataView implements DataViewBase {
     };
   }
 
+  isPersisted() {
+    return typeof this.version === 'string';
+  }
+
   /**
    * Creates static representation of the data view.
    */
@@ -274,6 +287,7 @@ export class DataView implements DataViewBase {
       runtimeFieldMap: this.runtimeFieldMap,
       fieldAttrs: this.fieldAttrs,
       allowNoIndex: this.allowNoIndex,
+      name: this.name,
     };
   }
 
@@ -379,6 +393,7 @@ export class DataView implements DataViewBase {
       typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
+      name: this.name,
     };
   }
 

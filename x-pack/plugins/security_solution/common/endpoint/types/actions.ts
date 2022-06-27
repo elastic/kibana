@@ -6,9 +6,23 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { ActionStatusRequestSchema, HostIsolationRequestSchema } from '../schema/actions';
+import {
+  ActionStatusRequestSchema,
+  NoParametersRequestSchema,
+  ResponseActionBodySchema,
+} from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
+
+export const RESPONSE_ACTION_COMMANDS = [
+  'isolate',
+  'unisolate',
+  'kill-process',
+  'suspend-process',
+  'running-processes',
+] as const;
+
+export type ResponseActions = typeof RESPONSE_ACTION_COMMANDS[number];
 
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
@@ -70,9 +84,28 @@ export interface LogsEndpointActionResponse {
   error?: EcsError;
 }
 
-export interface EndpointActionData {
-  command: ISOLATION_ACTIONS;
+interface ResponseActionParametersWithPid {
+  pid: number;
+  entity_id?: never;
+}
+
+interface ResponseActionParametersWithEntityId {
+  pid?: never;
+  entity_id: string;
+}
+
+export type ResponseActionParametersWithPidOrEntityId =
+  | ResponseActionParametersWithPid
+  | ResponseActionParametersWithEntityId;
+
+export type EndpointActionDataParameterTypes =
+  | undefined
+  | ResponseActionParametersWithPidOrEntityId;
+
+export interface EndpointActionData<T extends EndpointActionDataParameterTypes = undefined> {
+  command: ResponseActions;
   comment?: string;
+  parameters?: T;
 }
 
 export interface FleetActionResponseData {
@@ -84,12 +117,9 @@ export interface FleetActionResponseData {
 /**
  * And endpoint action created in Fleet's `.fleet-actions`
  */
-export interface EndpointAction {
+export interface EndpointAction extends ActionRequestFields {
   action_id: string;
   '@timestamp': string;
-  expiration: string;
-  type: 'INPUT_ACTION';
-  input_type: 'endpoint';
   agents: string[];
   user_id: string;
   // the number of seconds Elastic Agent (on the host) should
@@ -167,10 +197,17 @@ export interface ActivityLog {
   data: ActivityLogEntry[];
 }
 
-export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
+export type HostIsolationRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
+
+export type ResponseActionRequestBody = TypeOf<typeof ResponseActionBodySchema>;
 
 export interface HostIsolationResponse {
   action: string;
+}
+
+export interface ResponseActionApiResponse {
+  action?: string; // only if command is isolate or release
+  data: ActionDetails;
 }
 
 export interface EndpointPendingActions {
@@ -199,7 +236,7 @@ export interface ActionDetails {
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
    */
-  command: string;
+  command: ResponseActions;
   /**
    * Will be set to true only if action is not yet completed and elapsed time has exceeded
    * the request's expiration date
@@ -215,12 +252,25 @@ export interface ActionDetails {
   startedAt: string;
   /** The date when the action was completed (a response by the endpoint (not fleet) was received) */
   completedAt: string | undefined;
-  /**
-   * The list of action log items (actions and responses) received thus far for the action.
-   */
-  logEntries: ActivityLogEntry[];
+  /** user that created the action */
+  createdBy: string;
+  /** comment submitted with action */
+  comment?: string;
+  /** parameters submitted with action */
+  parameters?: EndpointActionDataParameterTypes;
 }
 
 export interface ActionDetailsApiResponse {
   data: ActionDetails;
+}
+export interface ActionListApiResponse {
+  page: number | undefined;
+  pageSize: number | undefined;
+  startDate: string | undefined;
+  elasticAgentIds: string[] | undefined;
+  endDate: string | undefined;
+  userIds: string[] | undefined; // users that requested the actions
+  commands: string[] | undefined; // type of actions
+  data: ActionDetails[];
+  total: number;
 }

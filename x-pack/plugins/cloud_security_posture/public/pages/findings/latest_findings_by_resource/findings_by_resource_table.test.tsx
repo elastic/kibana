@@ -7,31 +7,29 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import * as TEST_SUBJECTS from '../test_subjects';
-import {
-  FindingsByResourceTable,
-  formatNumber,
-  getResourceId,
-  type CspFindingsByResource,
-} from './findings_by_resource_table';
+import { FindingsByResourceTable, formatNumber, getResourceId } from './findings_by_resource_table';
 import * as TEXT from '../translations';
 import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
 import numeral from '@elastic/numeral';
 import { TestProvider } from '../../../test/test_provider';
+import type { FindingsByResourcePage } from './use_findings_by_resource';
 
 const chance = new Chance();
 
-const getFakeFindingsByResource = (): CspFindingsByResource => {
+const getFakeFindingsByResource = (): FindingsByResourcePage => {
   const count = chance.integer();
   const total = chance.integer() + count + 1;
   const normalized = count / total;
 
+  const [resourceName, resourceSubtype, ...cisSections] = chance.unique(chance.word, 4);
+
   return {
     cluster_id: chance.guid(),
     resource_id: chance.guid(),
-    resource_name: chance.word(),
-    resource_subtype: chance.word(),
-    cis_sections: [chance.word(), chance.word()],
+    resource_name: resourceName,
+    resource_subtype: resourceSubtype,
+    cis_sections: cisSections,
     failed_findings: {
       count,
       normalized,
@@ -46,8 +44,7 @@ describe('<FindingsByResourceTable />', () => {
   it('renders the zero state when status success and data has a length of zero ', async () => {
     const props: TableProps = {
       loading: false,
-      data: { page: [], total: 0 },
-      error: null,
+      items: [],
       pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0 },
       setTableOptions: jest.fn(),
     };
@@ -66,8 +63,7 @@ describe('<FindingsByResourceTable />', () => {
 
     const props: TableProps = {
       loading: false,
-      data: { page: data, total: data.length },
-      error: null,
+      items: data,
       pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0 },
       setTableOptions: jest.fn(),
     };

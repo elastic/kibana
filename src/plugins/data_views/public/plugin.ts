@@ -16,7 +16,6 @@ import {
 } from './types';
 
 import { DataViewsApiClient } from '.';
-import { onRedirectNoIndexPattern } from './data_views';
 import { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
 
 import { UiSettingsPublicToCommon } from './ui_settings_wrapper';
@@ -50,7 +49,7 @@ export class DataViewsPublicPlugin
     core: CoreStart,
     { fieldFormats }: DataViewsPublicStartDependencies
   ): DataViewsPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, theme, overlays, application } = core;
+    const { uiSettings, http, notifications, savedObjects, application } = core;
 
     const onNotifDebounced = debounceByKey(
       notifications.toasts.add.bind(notifications.toasts),
@@ -73,14 +72,10 @@ export class DataViewsPublicPlugin
       onError: (error, toastInputFields, key) => {
         onErrorDebounced(key)(error, toastInputFields);
       },
-      onRedirectNoIndexPattern: onRedirectNoIndexPattern(
-        application.capabilities,
-        application.navigateToApp,
-        overlays,
-        theme
-      ),
       getCanSave: () => Promise.resolve(application.capabilities.indexPatterns.save === true),
       getCanSaveSync: () => application.capabilities.indexPatterns.save === true,
+      getCanSaveAdvancedSettings: () =>
+        Promise.resolve(application.capabilities.advancedSettings.save === true),
     });
   }
 

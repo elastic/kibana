@@ -19,9 +19,9 @@ import {
   TooltipValue,
   niceTimeFormatter,
   ElementClickListener,
-  GeometryValue,
   RectAnnotation,
   RectAnnotationDatum,
+  XYChartElementEvent,
 } from '@elastic/charts';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -138,10 +138,11 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     : { max: 0, min: 0 };
 
   const onClickPoint: ElementClickListener = useCallback(
-    ([[geometryValue]]) => {
-      if (!Array.isArray(geometryValue)) {
-        // casting to GeometryValue as we are using cartesian charts
-        const { x: timestamp } = geometryValue as GeometryValue;
+    ([elementEvent]) => {
+      // casting to GeometryValue as we are using cartesian charts
+      const [geometryValue] = elementEvent as XYChartElementEvent;
+      if (geometryValue && !Array.isArray(geometryValue)) {
+        const { x: timestamp } = geometryValue;
         jumpToTime(timestamp);
         stopAutoReload();
       }
@@ -310,8 +311,7 @@ const TimelineContainer = euiStyled.div`
   border-top: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
   height: 220px;
   width: 100%;
-  padding: ${(props) => props.theme.eui.paddingSizes.s} ${(props) =>
-  props.theme.eui.paddingSizes.m};
+  padding: ${(props) => props.theme.eui.euiSizeS} ${(props) => props.theme.eui.euiSizeM};
   display: flex;
   flex-direction: column;
 `;
@@ -319,15 +319,14 @@ const TimelineContainer = euiStyled.div`
 const TimelineHeader = euiStyled.div`
   display: flex;
   width: 100%;
-  padding: ${(props) => props.theme.eui.paddingSizes.s} ${(props) =>
-  props.theme.eui.paddingSizes.m};
+  padding: ${(props) => props.theme.eui.euiSizeS} ${(props) => props.theme.eui.euiSizeM};
   @media only screen and (max-width: 767px) {
       margin-top: 30px;
   }
 `;
 
 const TimelineChartContainer = euiStyled.div`
-  padding-left: ${(props) => props.theme.eui.paddingSizes.xs};
+  padding-left: ${(props) => props.theme.eui.euiSizeXS};
   width: 100%;
   height: 100%;
 `;

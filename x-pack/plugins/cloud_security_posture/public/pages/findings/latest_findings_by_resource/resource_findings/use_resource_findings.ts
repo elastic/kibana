@@ -10,25 +10,24 @@ import { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Pagination } from '@elastic/eui';
 import { useContext } from 'react';
+import { number } from 'io-ts';
 import { FindingsEsPitContext } from '../../es_pit/findings_es_pit_context';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../../constants';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
-import type { CspFindingsQueryData } from '../../types';
-import type { CspFinding, FindingsBaseEsQuery, FindingsQueryResult } from '../../types';
+import type { CspFinding, FindingsBaseEsQuery } from '../../types';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
   from: NonNullable<estypes.SearchRequest['from']>;
   size: NonNullable<estypes.SearchRequest['size']>;
+  enabled: boolean;
 }
 
 export interface ResourceFindingsQuery {
   pageIndex: Pagination['pageIndex'];
   pageSize: Pagination['pageSize'];
 }
-
-export type ResourceFindingsResult = FindingsQueryResult<CspFindingsQueryData | undefined, unknown>;
 
 const getResourceFindingsQuery = ({
   query,
@@ -44,7 +43,7 @@ const getResourceFindingsQuery = ({
       ...query,
       bool: {
         ...query?.bool,
-        filter: [...(query?.bool?.filter || []), { term: { 'resource_id.keyword': resourceId } }],
+        filter: [...(query?.bool?.filter || []), { term: { 'resource.id': resourceId } }],
       },
     },
     pit: { id: pitId },
@@ -52,40 +51,32 @@ const getResourceFindingsQuery = ({
   ignore_unavailable: false,
 });
 
-export const useResourceFindings = ({
-  query,
-  resourceId,
-  from,
-  size,
-}: UseResourceFindingsOptions) => {
+export const useResourceFindings = (options: UseResourceFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
   const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
-  const pitId = pitIdRef.current;
+  const params = { ...options, pitId: pitIdRef.current };
 
-  return useQuery<
-    IEsSearchResponse<CspFinding>,
-    unknown,
-    CspFindingsQueryData & { newPitId: string }
-  >(
-    ['csp_resource_findings', { query, resourceId, from, size, pitId }],
+  return useQuery(
+    ['csp_resource_findings', { params }],
     () =>
-      lastValueFrom<IEsSearchResponse<CspFinding>>(
+      lastValueFrom(
         data.search.search({
-          params: getResourceFindingsQuery({ query, resourceId, from, size, pitId }),
+          params: getResourceFindingsQuery(params),
         })
       ),
     {
+      enabled: options.enabled,
       keepPreviousData: true,
-      select: ({ rawResponse: { hits, pit_id: newPitId } }) => ({
+      select: ({ rawResponse: { hits, pit_id: newPitId } }: IEsSearchResponse<CspFinding>) => ({
         page: hits.hits.map((hit) => hit._source!),
-        total: hits.total as number,
+        total: number.is(hits.total) ? hits.total : 0,
         newPitId: newPitId!,
       }),
-      onError: (err) => showErrorToast(toasts, err),
+      onError: (err: Error) => showErrorToast(toasts, err),
       onSuccess: ({ newPitId }) => {
         setPitId(newPitId);
       },

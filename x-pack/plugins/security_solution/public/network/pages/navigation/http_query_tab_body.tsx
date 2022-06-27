@@ -10,7 +10,6 @@ import { getOr } from 'lodash/fp';
 
 import { NetworkHttpTable } from '../../components/network_http_table';
 import { ID, useNetworkHttp } from '../../containers/network_http';
-import { networkModel } from '../../store';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
 import { HttpQueryTabBodyProps } from './types';
@@ -25,8 +24,10 @@ export const HttpQueryTabBody = ({
   skip,
   startDate,
   setQuery,
+  type,
 }: HttpQueryTabBodyProps) => {
-  const { toggleStatus } = useQueryToggle(ID);
+  const queryId = `${ID}-${type}`;
+  const { toggleStatus } = useQueryToggle(queryId);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
@@ -37,10 +38,11 @@ export const HttpQueryTabBody = ({
   ] = useNetworkHttp({
     endDate,
     filterQuery,
+    id: queryId,
     indexNames,
     skip: querySkip,
     startDate,
-    type: networkModel.NetworkType.page,
+    type,
   });
 
   return (
@@ -57,7 +59,7 @@ export const HttpQueryTabBody = ({
       setQuerySkip={setQuerySkip}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
-      type={networkModel.NetworkType.page}
+      type={type}
     />
   );
 };

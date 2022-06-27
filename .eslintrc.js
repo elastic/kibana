@@ -657,6 +657,7 @@ module.exports = {
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
+        'x-pack/test/performance/**/*.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -952,6 +953,19 @@ module.exports = {
           'error',
           {
             allowTypedFunctionExpressions: false,
+          },
+        ],
+      },
+    },
+
+    {
+      // disable imports from legacy uptime plugin
+      files: ['x-pack/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: ['**/legacy_uptime/*'],
           },
         ],
       },
@@ -1428,6 +1442,8 @@ module.exports = {
         'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
         'react/jsx-boolean-value': ['error', 'never'],
+        'sort-keys': 1, // warning
+        '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
         '@typescript-eslint/no-unused-vars': [
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },

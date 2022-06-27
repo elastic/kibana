@@ -11,12 +11,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const find = getService('find');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'lens', 'header', 'timePicker']);
 
   const createDataView = async (dataViewName: string) => {
-    await testSubjects.setValue('createIndexPatternNameInput', dataViewName, {
+    await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
       clearWithKeyboard: true,
       typeCharByChar: true,
     });
@@ -25,7 +26,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens no data', () => {
     before(async function () {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      // delete all non-hidden indices to make it really "no data"
+      const indices = Object.keys(await es.indices.get({ index: '*' }));
+      await Promise.all(indices.map(async (index) => await es.indices.delete({ index })));
       await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
       await PageObjects.common.navigateToApp('lens');
     });

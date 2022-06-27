@@ -854,6 +854,19 @@ paths:
       operationId: update-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_provided_metadata:
+                  type: object
+                tags:
+                  type: array
+                  items:
+                    type: string
     delete:
       summary: Agent - Delete
       tags: []
@@ -1855,6 +1868,135 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/output'
+                required:
+                  - item
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+  /agent_download_sources:
+    get:
+      summary: Agent Download Sources
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/download_sources'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+      operationId: get-download-sources
+    post:
+      summary: Agent Download Sources
+      description: Create a new agent download source
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/download_sources'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                is_default:
+                  type: boolean
+                host:
+                  type: string
+              required:
+                - name
+                - host
+                - is_default
+      operationId: post-download-sources
+  /agent_download_sources/{sourceId}:
+    get:
+      summary: Agent Download Sources - Info
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/download_sources'
+                required:
+                  - item
+      operationId: get-one-download-source
+    parameters:
+      - schema:
+          type: string
+        name: sourceId
+        in: path
+        required: true
+    delete:
+      summary: Agent Download Sources - Delete
+      operationId: delete-download-source
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+    put:
+      summary: Agent Download Sources - Update
+      operationId: update-download-source
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                is_default:
+                  type: boolean
+                host:
+                  type: string
+              required:
+                - name
+                - is_default
+                - host
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/download_sources'
                 required:
                   - item
       parameters:
@@ -2881,5 +3023,22 @@ components:
         - is_default
         - name
         - type
+    download_sources:
+      title: Download Source
+      type: object
+      properties:
+        id:
+          type: string
+        is_default:
+          type: boolean
+        name:
+          type: string
+        host:
+          type: string
+      required:
+        - id
+        - is_default
+        - name
+        - host
 security:
   - basicAuth: []

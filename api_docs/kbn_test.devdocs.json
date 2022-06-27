@@ -960,6 +960,87 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-server.KbnClientRequesterError",
+        "type": "Class",
+        "tags": [],
+        "label": "KbnClientRequesterError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/test",
+            "scope": "server",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-server.KbnClientRequesterError",
+            "text": "KbnClientRequesterError"
+          },
+          " extends Error"
+        ],
+        "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.KbnClientRequesterError.axiosError",
+            "type": "Object",
+            "tags": [],
+            "label": "axiosError",
+            "description": [],
+            "signature": [
+              "AxiosError",
+              "<unknown, any> | undefined"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.KbnClientRequesterError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.KbnClientRequesterError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-server.KbnClientRequesterError.Unnamed.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "packages/kbn-test/src/kbn_client/kbn_client_requester_error.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-server.Lifecycle",
         "type": "Class",
         "tags": [],
@@ -1974,6 +2055,22 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-server.runCheckFtrConfigsCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runCheckFtrConfigsCli",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts",
+        "deprecated": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },

@@ -255,10 +255,10 @@ export function RuleDetailsPage() {
       disableRule: async () => await disableRule({ http, id: rule.id }),
       onRuleChanged: () => reloadRule(),
       isEditable: hasEditButton,
-      snoozeRule: async (snoozeEndTime: string | -1) => {
-        await snoozeRule({ http, id: rule.id, snoozeEndTime });
+      snoozeRule: async (snoozeSchedule) => {
+        await snoozeRule({ http, id: rule.id, snoozeSchedule });
       },
-      unsnoozeRule: async () => await unsnoozeRule({ http, id: rule.id }),
+      unsnoozeRule: async (scheduleIds) => await unsnoozeRule({ http, id: rule.id, scheduleIds }),
     });
 
   const getNotifyText = () =>
@@ -266,6 +266,7 @@ export function RuleDetailsPage() {
     rule.notifyWhen;
   return (
     <ObservabilityPageTemplate
+      data-test-subj="ruleDetails"
       pageHeader={{
         pageTitle: <PageTitle rule={rule} />,
         bottomBorder: false,
@@ -284,11 +285,17 @@ export function RuleDetailsPage() {
                         iconType="boxesHorizontal"
                         aria-label="More"
                         onClick={handleOpenPopover}
+                        data-test-subj="moreButton"
                       />
                     }
                   >
                     <EuiFlexGroup direction="column" alignItems="flexStart">
-                      <EuiButtonEmpty size="s" iconType="pencil" onClick={handleEditRule}>
+                      <EuiButtonEmpty
+                        data-test-subj="editRuleButton"
+                        size="s"
+                        iconType="pencil"
+                        onClick={handleEditRule}
+                      >
                         <EuiSpacer size="s" />
                         <EuiText size="s">
                           {i18n.translate('xpack.observability.ruleDetails.editRule', {
@@ -302,6 +309,7 @@ export function RuleDetailsPage() {
                         iconType="trash"
                         color="danger"
                         onClick={handleRemoveRule}
+                        data-test-subj="deleteRuleButton"
                       >
                         <EuiText size="s">
                           {i18n.translate('xpack.observability.ruleDetails.deleteRule', {
@@ -332,7 +340,7 @@ export function RuleDetailsPage() {
     >
       <EuiFlexGroup wrap={true} gutterSize="m">
         {/* Left side of Rule Summary */}
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem data-test-subj="ruleSummaryRuleStatus" grow={1}>
           <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexGroup>
@@ -411,7 +419,7 @@ export function RuleDetailsPage() {
 
         {/* Right side of Rule Summary */}
 
-        <EuiFlexItem grow={3}>
+        <EuiFlexItem data-test-subj="ruleSummaryRuleDefinition" grow={3}>
           <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiTitle size="s">
@@ -439,6 +447,7 @@ export function RuleDetailsPage() {
                     })}
                   </ItemTitleRuleSummary>
                   <ItemValueRuleSummary
+                    data-test-subj="ruleSummaryRuleType"
                     itemValue={ruleTypeIndex.get(rule.ruleTypeId)?.name || rule.ruleTypeId}
                   />
                 </EuiFlexGroup>

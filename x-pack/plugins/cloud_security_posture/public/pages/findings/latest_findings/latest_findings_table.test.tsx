@@ -27,21 +27,24 @@ const getFakeFindings = (name: string): CspFinding & { id: string } => ({
     },
   },
   rule: {
-    name,
-    description: chance.paragraph(),
-    impact: chance.word(),
-    remediation: chance.word(),
+    audit: chance.paragraph(),
     benchmark: {
       name: 'CIS Kubernetes',
       version: '1.6.0',
     },
-    section: chance.sentence(),
-    audit: chance.paragraph(),
-    references: chance.paragraph(),
+    default_value: chance.sentence(),
+    description: chance.paragraph(),
+    id: chance.guid(),
+    impact: chance.word(),
+    name,
     profile_applicability: chance.sentence(),
     rationale: chance.paragraph(),
-    default_value: chance.sentence(),
+    references: chance.paragraph(),
+    rego_rule_id: 'cis_X_X_X',
+    remediation: chance.word(),
+    section: chance.sentence(),
     tags: [],
+    version: '1.0',
   },
   agent: {
     id: chance.string(),
@@ -68,8 +71,7 @@ describe('<FindingsTable />', () => {
   it('renders the zero state when status success and data has a length of zero ', async () => {
     const props: TableProps = {
       loading: false,
-      data: { page: [], total: 0 },
-      error: null,
+      items: [],
       sorting: { sort: { field: '@timestamp', direction: 'desc' } },
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
       setTableOptions: jest.fn(),
@@ -90,8 +92,7 @@ describe('<FindingsTable />', () => {
 
     const props: TableProps = {
       loading: false,
-      data: { page: data, total: 10 },
-      error: null,
+      items: data,
       sorting: { sort: { field: '@timestamp', direction: 'desc' } },
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
       setTableOptions: jest.fn(),

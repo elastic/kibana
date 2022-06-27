@@ -54,7 +54,7 @@ import { DeferredSpinner } from './components';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
-import { useDiscoverServices } from './utils/use_discover_services';
+import { useDiscoverServices } from './hooks/use_discover_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 
 const DocViewerLegacyTable = React.lazy(
@@ -191,7 +191,7 @@ export class DiscoverPlugin
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
-
+    const isDev = this.initializerContext.env.mode.dev;
     if (plugins.share) {
       this.locator = plugins.share.url.locators.create(
         new DiscoverAppLocatorDefinition({
@@ -241,8 +241,8 @@ export class DiscoverPlugin
           }
         >
           <SourceViewer
-            index={hit._index}
-            id={hit._id}
+            index={hit.raw._index}
+            id={hit.raw._id}
             indexPattern={indexPattern}
             hasLineNumbers
           />
@@ -291,7 +291,7 @@ export class DiscoverPlugin
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
-        const unmount = renderApp(params.element, services);
+        const unmount = renderApp(params.element, services, isDev);
         return () => {
           unlistenParentHistory();
           unmount();
