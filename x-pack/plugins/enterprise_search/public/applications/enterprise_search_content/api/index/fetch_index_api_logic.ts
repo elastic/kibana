@@ -49,8 +49,7 @@ export interface IndexData {
 }
 
 export const fetchIndex = async ({ indexName }: { indexName: string }) => {
-  const encodedIndexName = encodeURI(indexName);
-  const route = `/internal/enterprise_search/indices/${encodedIndexName}`;
+  const route = `/internal/enterprise_search/indices/${indexName}`;
 
   return await HttpLogic.values.http.get<IndexData>(route);
 };

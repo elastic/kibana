@@ -42,8 +42,7 @@ export const SearchIndexOverview: React.FC<SearchIndexOverviewProps> = ({ navTab
   const [tabIndex, setSelectedTabIndex] = useState(navTabIndex ?? 0);
   const { makeRequest, apiReset } = useActions(FetchIndexApiLogic);
   const { data, status } = useValues(FetchIndexApiLogic);
-  const { indexSlug } = useParams<{ indexSlug: string }>();
-  const indexName = decodeURI(indexSlug);
+  const { indexSlug: indexName } = useParams<{ indexSlug: string }>();
 
   useEffect(() => {
     makeRequest({ indexName });

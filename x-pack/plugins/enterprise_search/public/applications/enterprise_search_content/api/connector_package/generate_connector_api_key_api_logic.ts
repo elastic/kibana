@@ -16,7 +16,7 @@ interface ApiKey {
 }
 
 export const generateApiKey = async ({ indexName }: { indexName: string }) => {
-  const route = `/internal/enterprise_search/indices/${encodeURI(indexName)}/api_key`;
+  const route = `/internal/enterprise_search/indices/${indexName}/api_key`;
   return await HttpLogic.values.http.post<ApiKey>(route);
 };
 
